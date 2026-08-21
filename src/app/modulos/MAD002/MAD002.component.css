@@ -1,0 +1,223 @@
+.MAD002-main-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  gap: 0;
+}
+
+/* ==========================
+   Panel izquierdo
+========================== */
+.MAD002-arbol-panel {
+    width: 450px;
+    min-width: 450px;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;    
+    min-height: 0;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+}
+
+.MAD002-arbol-panel.panel-colapsado {
+    width: 20px;
+    min-width: 20px;
+    max-width: 20px; 
+    padding: 0;
+    margin: 0;
+    border-right: none;
+    overflow: visible;
+    background: transparent;
+}
+
+/* ==========================
+   Botón hamburguesa - Tamaño exacto del icono
+========================== */
+.toggle-arbol-btn {
+    position: absolute !important;
+    right: -8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 1000 !important;
+    background: transparent !important;
+    border: none !important;
+    min-width: 30px !important;
+    width: 30px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.toggle-arbol-btn ::ng-deep .dx-button-content {
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.toggle-arbol-btn ::ng-deep .dx-icon {
+    font-size: 18px !important;
+    color: #6c757d !important;
+    margin: 0 !important;
+}
+
+.toggle-arbol-btn:hover ::ng-deep .dx-icon {
+    color: #0d6efd !important;
+}
+
+.toggle-arbol-btn:active ::ng-deep .dx-icon {
+    transform: scale(0.85) !important;
+}
+
+/* Cuando el panel está colapsado, el botón se mueve al lado izquierdo */
+.MAD002-arbol-panel.panel-colapsado .toggle-arbol-btn {
+    right: auto !important;
+    left: -8px !important;
+}
+
+/* ==========================
+   Header del árbol
+========================== */
+.arbol-header {
+  padding: 12px 15px;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.arbol-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arbol-botones {
+  display: flex;
+  gap: 5px;
+}
+
+.arbol-busqueda {
+  padding: 10px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.arbol-wrapper {
+   flex: 1;
+   min-height: 0;
+   overflow-y: auto;
+   overflow-x: hidden;
+   padding: 10px;
+   height: 100%;
+}
+
+.arbol-wrapper.arbol-oculto {
+    display: none;
+}
+
+/* ==========================
+   Panel derecho
+========================== */
+.MAD002-contenido-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: white;  
+}
+
+/* ===========================
+   Dashboard en pantalla completa
+=========================== */
+.MAD002-contenido-panel.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background: #fff;
+  overflow: auto;
+}
+
+.btn-dashboard-fullscreen {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100000;
+}
+
+.tabs-full-width ::ng-deep .dx-tabs-wrapper {
+    display: flex;
+}
+
+.tabs-full-width ::ng-deep .dx-tab {
+    flex: 1;
+    max-width: none;
+}
+
+.tabs-full-width ::ng-deep .dx-tab-content {
+    justify-content: center;
+}
+
+:host ::ng-deep .dx-gridbase-a11y-status-container {
+    display: none !important;
+}
+
+.hidden-field {
+  display: none !important;
+}
+
+/* ==========================
+   Responsive
+========================== */
+@media (max-width: 768px) {
+  .MAD002-main-container {
+    flex-direction: column;
+  }
+  
+  .MAD002-arbol-panel {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .MAD002-arbol-panel.panel-colapsado {
+    height: 0;
+    min-height: 0;
+    width: 0;
+    min-width: 0;
+    border-bottom: none;
+  }
+  
+  .toggle-arbol-btn {
+    right: 50% !important;
+    top: auto !important;
+    bottom: -10px !important;
+    transform: translateX(50%) !important;
+  }
+  
+  .toggle-arbol-btn ::ng-deep .dx-icon {
+    transform: rotate(90deg) !important;
+  }
+  
+  .MAD002-arbol-panel.panel-colapsado .toggle-arbol-btn {
+    right: 50% !important;
+    left: auto !important;
+    top: auto !important;
+    bottom: -2px !important;
+    transform: translateX(50%) !important;
+  }
+}

@@ -1,0 +1,30 @@
+<dx-popup
+    [(visible)]="popupVisible"
+    [width]="900"
+    [height]="600"
+    [showTitle]="true"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true"
+    [dragEnabled]="true"
+    [resizeEnabled]="true"
+    title="Detalle">
+
+    <div *dxTemplate="let data of 'content'">
+        <dx-data-grid
+            [dataSource]="popupData"
+            [showBorders]="true">
+        </dx-data-grid>
+    </div>
+
+</dx-popup>
+
+
+<dx-dashboard-control
+  #dashboard
+  id="dashboard"
+  style="display: block;width:100%;height:calc(100vh - 115px);"
+  [endpoint]='url'
+  workingMode="ViewerOnly"
+  (onBeforeRender)='onBeforeRender($event)'  
+  >
+</dx-dashboard-control>

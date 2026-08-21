@@ -1,0 +1,122 @@
+<dx-popup
+  width="300"
+  [height]="'auto'"
+  title="Hoy"
+  [showTitle]="true"
+  [dragEnabled]="false"
+  [hideOnOutsideClick]="true"
+  [showCloseButton]="false"
+  [(visible)]="popupVisible"
+  container=".DropdownNTF"
+  >
+  <!-- <dxi-toolbar-item
+  widget="dxButton"
+  toolbar="top"
+  locateInMenu="always"
+  [options]="{text: 'Historial'}"
+  >
+</dxi-toolbar-item> -->
+<div *dxTemplate="let data of 'content'">
+  <dx-list #listNotification id="listNotification" height="90%" width="100%" selectionMode="single" [grouped]="true"
+    [dataSource]="notifications">
+    <div *dxTemplate="let notification of 'group'">
+      <!-- <div class="content_title">
+      <h4 style="color: black">
+        <b> {{ notification.GRUPO }}: </b>
+      </h4>
+      <div class="content_btn" *ngIf="notification.DATA.length > 0">
+        <button class="btn_action" title="Marcar todas como no leidas" (click)="changeStatus('todos', 'Visto')">
+          <i class="icon-aceptar-ol icon_check_color"></i>
+        </button>
+        <a class="dropdown-toggle class-a" href="#" role="button" data-bs-toggle="dropdown" id="action_ntf">
+        </a>
+        <ul class="dropdown-menu subMenu chat" aria-labelledby="action_ntf"
+          style="width: 360px; height: 700px; max-height: 800px;">
+          <li (>
+            <i class="icon-check-ol">Marcar todas como leidas</i>
+          </li>
+        </ul>
+      </div>
+    </div> -->
+    <div style="cursor: auto;">
+      <!-- <br> -->
+      @for (data of notification.DATA; track data) {
+        <div class="ntf">
+          <div class="content_text_aplication" (click)="abrirApl(data)">
+            <div>
+              <span>
+                {{ data.NOMBRE_APLICACION }}
+              </span>
+              @if (data.ACTIVIDAD) {
+                <span>
+                  {{ data.ACTIVIDAD !== undefined ? " - " + data.ACTIVIDAD.CLASE : "" }}
+                </span>
+              }
+            </div>
+            <div class="content_detalle">
+              <div class="subMenu-a">
+                @if (data.USUARIO_ENV.FOTO !== '') {
+                  <a class="avatar-content">
+                    <img [id]="'USER-' + data.ITEM" width="20px" height="20px" [src]="data.USUARIO_ENV.FOTO"
+                      [alt]="data.USUARIO_ENV.iconNameUser" />
+                    </a>
+                  }
+                  @if (data.USUARIO_ENV.FOTO === '') {
+                    <span class="avatar-content-name">
+                      <span [id]="'USER-' + data.ITEM">{{
+                        data.USUARIO_ENV.iconNameUser
+                      }}</span>
+                    </span>
+                  }
+                </div>
+                <div>
+                  <div class="content_description">
+                    <span class="mensaje">
+                      {{ data.DESCRIPCION }}
+                    </span>
+                    <div class="content_fechas xt-textbox-notify">
+                      <dx-date-box #fechaNotificacion type="datetime" class="dateBox-fechas" [readOnly]="true"
+                      [useMaskBehavior]="true" [(value)]="data.FECHA" displayFormat="HH:mm"></dx-date-box>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="content_accion">
+              <div class="content_btn">
+                @if (data.ESTADO === 'Enviado') {
+                  <button class="btn_action" title="Marcar como leido"
+                    (click)="changeStatus(data, 'Visto')">
+                    <i class="icon-aceptar-sl icon_doublecheck_color"></i>
+                  </button>
+                }
+                @if (data.ESTADO !== 'Enviado') {
+                  <button class="btn_action" title="Marcar como no leido"
+                    (click)="changeStatus(data, 'Enviado')">
+                    <i class="icon-aceptar-ol icon_check_color"></i>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="dx-list-group-body"></div>
+          </div>
+        }
+      </div>
+    </div>
+  </dx-list>
+
+</div>
+</dx-popup>
+
+
+<GES_INFO [events]="eventsGesInfo.asObservable()"></GES_INFO>
+
+<!-- <dx-popup [width]="500" [height]="400" [showTitle]="true" [dragEnabled]="false" [closeOnOutsideClick]="true"
+[showCloseButton]="false" [(visible)]="popupVisible" (onCl)="popup_showing($event)">
+<div class="dropdown-content">
+  <dxi-item (click)="changeStatus('todos','Visto')">
+    <i class="icon-check-ol">Marcar todas como leidas</i>
+  </dxi-item>
+  <dxi-item name="insertTable"></dxi-item>
+</div>
+</dx-popup> -->

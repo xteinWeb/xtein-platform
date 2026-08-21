@@ -1,0 +1,36 @@
+.info {
+  position: relative;
+  padding-bottom: 30px;
+
+  app-estado {
+    position: absolute;
+    margin-top: 15px;
+  }
+}
+
+.info_grid {
+  position: relative;
+  padding-bottom: 30px;
+
+  app-estado {
+    position: absolute;
+    margin-top: 1px;
+  }
+}
+
+.form-custom-list-prop {
+  app-estado {
+    position: absolute;
+    padding: 15px 11px;
+  }
+}
+.grid-custom-list-prop {
+  app-estado {
+    position: absolute;
+    padding: 1px 11px;
+  }
+}
+.dx-editor-underlined:after {
+  content: none !important;
+  border-bottom: none !important;
+}  

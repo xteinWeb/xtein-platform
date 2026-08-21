@@ -1,0 +1,12 @@
+.generic-tree-list-container {
+    width: 100%;
+    height: 100%;
+}
+
+::ng-deep .dx-treelist {
+    width: 100%;
+}
+
+::ng-deep .dx-treelist-rowsview .dx-row {
+    cursor: pointer;
+}

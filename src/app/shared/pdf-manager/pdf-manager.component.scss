@@ -1,0 +1,255 @@
+/* pdf-manager.component.css */
+
+.pdf-manager {
+  width: 100%;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+/* Header */
+.pdf-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e74c3c;
+}
+
+.pdf-manager-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.pdf-count {
+  font-weight: 600;
+  color: #e74c3c;
+  font-size: 14px;
+  background-color: #ffebee;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+/* Upload Section */
+.upload-section {
+  margin-bottom: 25px;
+}
+
+.upload-info {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.upload-info small {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+:host ::ng-deep .dx-fileuploader {
+  border: 2px dashed #e74c3c;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+:host ::ng-deep .dx-fileuploader:hover {
+  border-color: #c0392b;
+  background-color: #f8f9fa;
+}
+
+/* PDF List */
+.pdf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pdf-item {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pdf-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* PDF Icon */
+.pdf-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.pdf-icon i {
+  font-size: 32px;
+  color: #e74c3c;
+}
+
+/* PDF Info */
+.pdf-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.pdf-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+
+.pdf-size {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+/* PDF Actions */
+.pdf-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 64px;
+  color: #dee2e6;
+  margin-bottom: 15px;
+}
+
+.empty-state p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 10px 0 5px;
+  color: #495057;
+}
+
+.empty-state small {
+  font-size: 13px;
+}
+
+/* Modal Preview */
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.preview-toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 4px 4px 0 0;
+}
+
+.pdf-viewer {
+  flex-grow: 1;
+  background-color: #525252;
+  position: relative;
+  min-height: 500px;
+}
+
+.pdf-viewer iframe {
+  display: block;
+  border: none;
+}
+
+.preview-info {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-row {
+  padding: 8px 0;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 14px;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row strong {
+  color: #2c3e50;
+  margin-right: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pdf-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .pdf-icon {
+    width: 50px;
+    height: 50px;
+    margin-right: 0;
+  }
+
+  .pdf-icon i {
+    font-size: 28px;
+  }
+
+  .pdf-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .pdf-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pdf-viewer {
+    min-height: 400px;
+  }
+}
+
+::ng-deep .dx-button-mode-text.dx-button-default .dx-icon {
+  color: white !important;
+}

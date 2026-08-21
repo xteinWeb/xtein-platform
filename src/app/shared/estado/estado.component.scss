@@ -1,0 +1,36 @@
+@use "sass:math";
+
+@mixin estado($estado-color) {
+  color: $estado-color;
+
+  &::before {
+    background: $estado-color;
+  }
+}
+
+span.estado {
+  font-size: 12px;
+  font-weight: 400;
+
+  &.input {
+    display: block;
+    padding: 15px 16px 14px;
+  }
+
+  &.estado-ACTIVO {
+    @include estado(#35ccac);
+  }
+
+  &.estado-INACTIVO {
+    @include estado(#df3e3e);
+  }
+}
+
+span.estado {
+  &.grid_read {
+    display: block;
+    padding: 1px 16px 14px;
+  }
+
+}
+

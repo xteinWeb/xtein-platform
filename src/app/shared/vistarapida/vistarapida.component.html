@@ -1,0 +1,101 @@
+<dx-popup
+  #popUpVisor{{aplicacion}}
+  id="popUpVisor{{aplicacion}}"
+  [maxWidth]="725"
+  [minWidth]="680"
+  [height]="450"
+  [showTitle]="true"
+  [title]="titVisor"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [showCloseButton]="false"
+  [hideOnOutsideClick]="false"
+  [(visible)]="popupVisible"
+  (onShown)="onShown($event)"
+  (onHidden)="onHidden($event)"
+  (onInitialized)="onInitializedPopUp($event)" 
+  (onResizeEnd)="onResizeEnd($event)"
+
+>
+    <div *dxTemplate="let data of 'content'">
+        <div class="flex-grow-1 min-h-0" style="height: 100%">
+
+            <dx-data-grid
+                #Visordatos{{aplicacion}}
+                id="Visordatos{{aplicacion}}" 
+                [dataSource]="DVista"
+                [keyExpr]="keyGrid"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                columnResizingMode="nextColumn"
+                [allowColumnResizing]="true"
+                [hoverStateEnabled]="true"
+                [rowAlternationEnabled]="true"
+                [focusedRowEnabled]="true"
+                [loadPanel]="{ shading: true }"
+                (onContentReady)="onContentReady($event)"
+                [customizeColumns]="customizeColumns"
+                (onRowClick)="onSelectionChanged($event)"
+                (onRowDblClick)="onSeleccRegistro($event)"
+                (onToolbarPreparing)="onToolbarPreparing($event)"
+                (onInitialized)="onInitializedGrid($event)">
+
+                <dxo-filter-row 
+                    [visible]="true"></dxo-filter-row>
+                <dxo-header-filter 
+                    [visible]="true"></dxo-header-filter>
+                <dxo-search-panel 
+                    [visible]="true" 
+                    [width]="570" 
+                    placeholder="Buscar..."></dxo-search-panel>
+
+                <dxo-paging 
+                    [pageSize]="10">
+                </dxo-paging>
+                <dxo-pager 
+                    [visible]="true" 
+                    [allowedPageSizes]="allowedPageSizes" 
+                    displayMode="full"
+                    [showPageSizeSelector]="true" 
+                    [showInfo]="true" 
+                    [showNavigationButtons]="true">
+                </dxo-pager>
+
+                <dxo-selection [mode]="modeSelection" [showCheckBoxesMode]="checkBoxesMode"></dxo-selection>
+
+                <dxo-export [enabled]="true" fileName="{{archExcelLiq}}"></dxo-export>
+
+                <div *dxTemplate="let data of 'titVisordatos'">
+                    <div class="dx-fieldset-header">{{titVisor}}</div>
+                </div>
+                
+            </dx-data-grid>
+            
+            <div style="position: absolute; bottom: 10px">
+                <dx-button
+                    id="btnAceptarPT"
+                    stylingMode="contained"
+                    text="Aceptar"
+                    type="default"
+                    [width]="100"
+                    (onClick)="aceptarCambios($event)"
+                    >
+                </dx-button>
+                <dx-button
+                    id="btnCancelarPT"
+                    stylingMode="contained"
+                    text="Cancelar"
+                    type="normal"
+                    [width]="110"
+                    [style.margin-left]="'20px'"
+                    (onClick)="cancelarCambios($event)"
+                    >
+                </dx-button>
+            </div>
+
+        </div>
+    </div>
+
+</dx-popup>
+
+

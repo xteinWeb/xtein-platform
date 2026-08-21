@@ -1,0 +1,7 @@
+::ng-deep .dx-datagrid-nowrap.dx-datagrid-headers .dx-header-row > td > .dx-datagrid-text-content {
+    white-space: normal;
+}
+::ng-deep .xs-check-grupo-grid {
+    font-weight: bold;
+    font-size: 16px;
+}

@@ -1,0 +1,77 @@
+<!-- NUEVO CONTENEDOR PRINCIPAL CON DOS PANELES -->
+<div class="MAD002-main-container">
+  
+  <!-- ========== PANEL IZQUIERDO: ÁRBOL DE APLICACIONES ========== -->
+  <div [hidden]="!mostrarArbol">
+    <div class="MAD002-arbol-panel" [class.panel-colapsado]="!arbolVisible">   
+
+      <!-- Componente Árbol Genérico -->
+      <div class="arbol-wrapper" [class.arbol-oculto]="!arbolVisible">
+        <app-generic-tree
+          [dataSource]="aplicacionesTree"
+          [fieldConfig]="{
+            idField: 'ID_APLICACION',
+            parentIdField: 'ID_APLICACION_PADRE',
+            prefix: 'ID_APLICACION',
+            displayFields: ['NOMBRE'],
+            statusField: 'ESTADO',
+            searchFields: ['NOMBRE'],
+            badgeField: 'TIPO'
+          }"
+          [searchEnabled]="true"
+          [showCheckBoxes]="false"
+          [selectionMode]="'single'"
+          [expandAllOnLoad]="true"
+          [showChildPrefix]="true"
+          [showChildBadge] = "true"                     
+          (itemClick)="onAplicacionTreeClick($event)">
+        </app-generic-tree>
+      </div>
+
+      <!-- BOTÓN DEVEXTREME FLOTANTE EN EL BORDE DERECHO -->
+      <dx-button
+        class="toggle-arbol-btn"
+        [icon]="arbolVisible ? 'chevronleft' : 'chevronright'"
+        [hint]="arbolVisible ? 'Ocultar panel' : 'Mostrar panel'"       
+        type="default"
+        stylingMode="text"
+        (onClick)="toggleArbol()">
+      </dx-button>
+    </div>
+  </div>  
+
+  <!-- ========== PANEL DERECHO ========== -->
+  <div class="MAD002-contenido-panel" [class.fullscreen]="dashboardFullscreen">
+    <dx-button
+        class="btn-fullscreen"
+        [icon]="dashboardFullscreen ? 'chevrondown' : 'fullscreen'"
+        hint="{{ dashboardFullscreen ? 'Restaurar' : 'Pantalla completa' }}"
+        stylingMode="contained"
+        type="default"
+        (onClick)="dashboardFullscreen = !dashboardFullscreen">
+    </dx-button>
+    <app-dashboard [dashboardId]="dataAppModel.ID_APLICACION"></app-dashboard>
+  </div><!-- FIN panel contenido -->
+  
+</div><!-- FIN contenedor principal -->
+
+<app-vistarapida
+  id="vistaMAD002"
+  [aplicacion]="prmUsrAplBarReg.aplicacion"
+></app-vistarapida>
+
+<app-geninformes [events]="eventsSubjectInformes.asObservable()">
+</app-geninformes>
+
+
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: 'r-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Procesando..."
+  [hideOnOutsideClick]="false">
+</dx-load-panel>

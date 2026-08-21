@@ -1,0 +1,143 @@
+body {
+		font-family: "Century Gothic", 'Lato', sans-serif;
+}
+
+a {
+	text-decoration: none;
+}
+
+.et-pasos-tabs,
+.et-slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: start ;
+    align-items: center;
+    height: 100px;
+    position: relative;
+    background: #eee;
+		text-align: center;
+		padding: 0 2em;
+    h2 {
+        font-size: 1rem;
+        margin: 0;
+        letter-spacing: 0.2rem;
+    }
+    h3 {
+        font-size: 1rem;
+        letter-spacing: 0.1rem;
+        opacity: 0.6;
+    }
+}
+
+.et-pasos-tabs-container {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    z-index: 10;
+    &--top {
+        position: fixed;
+        top: 0;
+    }
+}
+
+.et-pasos-tab {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    color: #000;
+    letter-spacing: 0.1rem;
+    transition: all 0.5s ease;
+    font-size: 0.8rem;
+    &:hover {
+        color:rgb(55, 5, 173);
+        background: rgba(166, 210, 249, 0.8);
+        transition: all 0.5s ease;
+    }
+}
+
+.et-pasos-tab-slider {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 6px;
+    background: #66B1F1;
+    transition: left 0.3s ease;
+}
+
+@media (min-width: 800px) {
+	.et-pasos-tabs,
+	.et-slide {
+    h1 {
+        font-size: 3rem;
+    }
+    h3 {
+        font-size: 1rem;
+    }
+	}
+	.et-pasos-tab {
+		font-size: 1rem;
+	}
+}
+
+.breadcrumb {
+    width: 400px;
+    position: absolute;
+    left: 5px;
+    background-color: transparent;
+}
+.breadcrumb ul {
+    display: flex;
+    list-style-type:none;
+    padding: 0px 0px 0px 15px;
+    white-space: nowrap;
+}
+    
+.breadcrumb li::before {
+    content: "";
+}
+    
+.breadcrumb li:first-child::before {
+    content: "";
+}
+.fi-br-home {
+    position: absolute;
+    left: 10px;
+    top: 7px;
+    font-size: 24px;
+    color: #7866f1;
+}
+.ruta-pasos {
+    color: #7866f1;
+}
+.gg-chevron-right {
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    transform: scale(var(--ggs,1));
+    width: 22px;
+    height: 22px;
+    border: 2px solid transparent;
+    border-radius: 100px;
+    color:#7866f1;
+    padding-left: 20px;
+}
+.gg-chevron-right::after {
+    content: "";
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+    transform: rotate(-45deg);
+    right: 6px;
+    top: 4px;
+    color:#7866f1
+}

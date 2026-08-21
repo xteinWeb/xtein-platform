@@ -1,0 +1,343 @@
+.generic-tree-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* ===== SEARCH ===== */
+.search-container {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #999;
+  font-style: normal;
+  font-size: 14px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 16px 8px 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fff;
+  color: #333;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #1991FF;
+  box-shadow: 0 0 0 2px rgba(25, 145, 255, 0.2);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.clear-icon {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  color: #999;
+  font-style: normal;
+  font-size: 14px;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.clear-icon:hover {
+  color: #333;
+}
+
+/* ===== ACTIONS ===== */
+.actions-container {
+  padding: 8px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-action {
+  padding: 4px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.btn-action:hover {
+  background: #f0f0f0;
+  border-color: #1991FF;
+  color: #1991FF;
+}
+
+/* ===== LOADING ===== */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+}
+
+.default-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #666;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #1991FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== EMPTY ===== */
+.empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+}
+
+.default-empty {
+  color: #999;
+  font-size: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+/* ===== TREE ITEMS ===== */
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0px 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 5px;
+  position: relative;
+}
+
+.tree-item:hover {
+  background: rgba(25, 145, 255, 0.05);
+}
+
+.tree-item.selected {
+  background: rgba(25, 145, 255, 0.1);
+  border: 1px solid #CCE7FF;
+}
+
+.tree-item.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tree-icon {
+  font-size: 18px;
+  width: 20px;
+  flex-shrink: 0;
+  color: #4c4c4c;
+}
+
+/* Estilo base */
+.item-label {
+  font-weight: 500;
+  flex: 1;
+  color: #333;
+  font-size: 14px;
+  display: -webkit-box;  
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Estilo para padres - negrita y azul fuerte */
+.item-label.is-parent {
+  font-weight: bold;
+  color: #0A3960;
+}
+
+/* Estilo para hijos - texto normal y azul más claro */
+.item-label.is-child {
+  font-weight: 400;
+  color: #0A3960;
+}
+
+.item-description {
+  color: #4c4c4c;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-left: 4px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== ITEM BADGE ===== */
+.item-badge {
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  line-height: 20px;
+  text-align: center;
+  min-width: 50px;
+  transition: all 0.3s ease;
+}
+
+/* Badge ACTIVO - VERDE */
+.active-badge {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+/* Badge INACTIVO - ROJO */
+.inactive-badge {
+  background: #fff2f0;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
+  font-weight: 600;
+}
+
+/* Hover effect */
+.item-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Animación sutil para inactivo */
+.inactive-badge {
+  animation: pulse-inactive 3s ease-in-out infinite;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .search-container {
+    padding: 8px 12px;
+  }
+  
+  .item-description {
+    display: none;
+  }
+  
+  .tree-item {
+    padding: 4px 8px;
+  }
+}
+
+/* ===== SCROLLBAR ===== */
+.generic-tree-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.generic-tree-container ::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.generic-tree-container ::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.generic-tree-container ::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ===== STATUS INDICATOR ===== */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Estilo específico para extra-badge con gradiente suave y claro */
+.extra-badge {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #4f46e5;
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.15);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(79, 70, 229, 0.1);
+}
+
+.tree-wrapper {
+    flex: 1 1 auto;
+    height: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+::ng-deep .dx-treeview {
+    width: 100%;
+    height: 100% !important;
+}
+
+::ng-deep .dx-scrollable {
+    height: 100%;
+}
+
+::ng-deep .dx-scrollable-wrapper {
+    height: 100% !important;
+}
+
+::ng-deep .dx-scrollable-container {
+    height: 100% !important;
+    overflow-y: auto !important;
+}
+
+:host {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* Animación para el estado activo */
+@keyframes pulse-active {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}

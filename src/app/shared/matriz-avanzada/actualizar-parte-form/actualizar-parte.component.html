@@ -1,0 +1,99 @@
+<div style="display: flex; width: 100%; height: 91%; flex-direction: column;">
+  <div
+    style="display: flex; width: 100%; height: 22%; justify-content: space-between; flex-direction: column; gap:35px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+      <div style="width: 50%;">
+        <span>Matrices existentes</span>
+        <dx-drop-down-box #dropMaterial1 id="dropMaterial1" width="100%" displayExpr="DESCRI" valueExpr="PRODUCTO"
+          columnResizingMode="widget" placeholder="Selecciones Material Anterior" [readOnly]="false"
+          [showClearButton]="true" [dataSource]="DMatrices" [(value)]="selectMatriz" [(opened)]="openedPopup"
+          [dropDownOptions]="{
+              width: 520,
+              height: 350,
+              hideOnParentScroll: true,
+              container: '#containerPopupList'
+            }">
+          <div id="containerGridProd1" *dxTemplate="let data of 'content'">
+            <dx-data-grid #GridProd1 height="100%" width="100%" keyExpr="PRODUCTO" columnResizingMode="widget"
+              [columnAutoWidth]="true" [focusedRowEnabled]="true" [hoverStateEnabled]="true"
+              [allowColumnResizing]="true" [rowAlternationEnabled]="true" [selection]="{ mode: 'single' }"
+              [dataSource]="DMatrices" [(selectedRowKeys)]="selectMatriz"
+              (onSelectionChanged)="onSelectionCambioMatriz($event)">
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="450"></dxo-search-panel>
+              <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+              <dxi-column dataField="PRODUCTO" caption="Producto" cssClass="clsEncabHis" [width]="110"></dxi-column>
+              <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="190"></dxi-column>
+              <dxi-column dataField="CLASE" caption="Clase" cssClass="clsEncabHis"></dxi-column>
+              <dxi-column dataField="ESTADO" caption="Estado" cssClass="clsEncabHis"></dxi-column>
+            </dx-data-grid>
+          </div>
+        </dx-drop-down-box>
+      </div>
+      <div style="width: 50%;">
+        <div class="content-list-titles"
+          style="display: grid; grid-template-columns: 20% 20% 20% 20% 20%; text-align: center;">
+          <span class="detalle">IVA %</span>
+          <span class="detalle">Margen de Rentabilidad %</span>
+          <span class="detalle">Total Costos Directos</span>
+          <span class="detalle">Total CIF</span>
+          <span class="detalle">Total Costos</span>
+        </div>
+        <div style="width: 100%; height: 78%">
+          <dx-list #listProducto1 id="listProducto1" width="100%" height="93%" keyExpr="PRODUCTO" selectionMode="none"
+            [searchEnabled]="false"  [dataSource]="DMatrizSelected">
+            <div *dxTemplate="let data of 'item'" class="content-list">
+              <div style="width: 20%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.IVA + ' %'}}</div>
+              </div>
+              <div style="width: 20%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.MARGEN + ' %'}}</div>
+              </div>
+              <div style="width: 20%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.TOTAL_COSTO_DIRECTO | currency }}</div>
+              </div>
+              <div style="width: 20%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.TOTAL_CIF | currency }}</div>
+              </div>
+              <div style="width: 20%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.TOTAL_COSTO | currency }}</div>
+              </div>
+            </div>
+          </dx-list>
+        </div>
+      </div>
+    </div>
+    @if (DMatrizSelected.length > 0) {
+      <div style="width: 100%; padding-right: 21px;">
+        <dx-tree-list #treeListMatrices3 id="treeListMatrices3" [dataSource]="DMatrizSelected" keyExpr="PRODUCTO"
+          parentIdExpr="PADRE" rootValue="RAIZ" [showBorders]="true" [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true" [focusedRowEnabled]="true" [allowColumnResizing]="true" [columnHidingEnabled]="true"
+          columnResizingMode="widget" height="70px">
+          <dxo-scrolling mode="virtual"></dxo-scrolling>
+          <dxi-column dataField="UTILIDAD" caption="Utilidad" [width]="150" format="$ #,##0.00"></dxi-column>
+          <dxi-column dataField="PRECIO_BASE" caption="Precio base" [width]="150" format="$ #,##0.00"></dxi-column>
+          <dxi-column dataField="AJUSTE_PRECIO" caption="Ajuste de Precio" [width]="150" format="#0.00%"></dxi-column>
+          <dxi-column dataField="PRECIO_ANTES_GRAV" caption="Precio Antes Gravamenes" [width]="200" format="$ #,##0.00"></dxi-column>
+          <dxi-column dataField="CON_OPERATIVA" caption="Contribución operativa" [width]="200" format="#0.00%"></dxi-column>
+          <dxi-column dataField="GRAVAMENES" caption="Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+          <dxi-column dataField="PRECIO_DESP_GRAV" caption="Precio Despues Gravamenes" [width]="200" format="$ #,##0.00"></dxi-column>
+          <dxi-column dataField="TOTAL" caption="Total Matriz" [width]="100" format="$ #,##0.00"></dxi-column>
+        </dx-tree-list>
+      </div>
+    }
+  </div>
+</div>
+
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#containerPopupList' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

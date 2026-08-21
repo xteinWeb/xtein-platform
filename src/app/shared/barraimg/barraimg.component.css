@@ -1,0 +1,33 @@
+
+::ng-deep .xs-bar-img {
+  position:absolute;
+  top:5px;
+  left:5px;
+  display:none;
+}
+
+::ng-deep .dx-popover-wrapper .dx-popover-arrow {
+  display: block !important;
+}
+
+::ng-deep .dx-popover-wrapper .dx-popover-arrow::after, .dx-popover-wrapper.dx-popover-without-title .dx-popover-arrow::after {
+  background: rgb(97, 97, 97); 
+}
+::ng-deep input[type="file"]{
+  color: transparent;
+}
+::ng-deep .image-upload {
+  display: inline;
+}
+::ng-deep .image-upload>input {
+  display: none;
+}
+::ng-deep .xs-icon-img-upload::-webkit-file-upload-button {
+  border: none;
+  padding: 7px 15px;
+  font-weight: 700;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 16pt;
+}

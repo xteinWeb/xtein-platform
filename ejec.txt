@@ -1,0 +1,53 @@
+ng serve --port 4700 --proxy-config proxy.conf.json
+ng test
+ng serve --ssl=true --host=0.0.0.0 --port 2350 --proxy-config proxy.conf.json
+
+node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve --port 4794 --proxy-config proxy.conf.json
+node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve --port 4794 --configuration development --proxy-config proxy.conf.json
+
+//Comandos de NodeJs para ejecución
+node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve
+node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build
+
+//HMR
+node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve --port 4795
+
+npx --max-old-space-size=12288 @angular/cli build --configuration production
+
+
+{
+    "/api/*":{
+        "target":"http://192.168.0.30:8555",
+        "secure":false,
+        "loglevel":"debug"
+    }
+}
+
+{
+    "/api/*":{
+        "target":"http://190.85.54.78:4990",
+        "secure":false,
+        "loglevel":"debug"
+    }
+
+}
+
+token: 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
+director: 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
+
+Mostrar los servicios y puertos activos linux::
+sudo netstat -tupln
+
+salida compilacion a archivo
+ng serve mfe-xtein -o > out.txt 2>&1
+
+** agregar una aplicacion al proyecto mfe
+ng generate application mfe-xtein --routing --style css --inline-style --skip-tests
+ng add @angular-architects/module-federation --project mfe-xtein
+
+** crear una app con projects
+cd frontend
+ng generate application administration --style=scss --routing=true
+ng generate application gatling --style=scss --routing=true
+
+zip -r ../bak/frontjul13.zip * -x node_modules/*\** -x dist/*\**

@@ -1,0 +1,212 @@
+<div style="padding: 10px;">
+
+  <dx-form
+    #formUbicaciones
+    id="formUbicaciones"
+    labelLocation="top"
+    [formData]="FUbicaciones"
+    [readOnly]="readOnly"
+    [colCount]="1"
+    labelLocation="left"
+    
+  >
+    <dxi-item dataField="ACTIVIDAD_ECONOMICA" editorType="dxActividad" >
+      <dxo-label text="Actividad Económica"></dxo-label>
+      <dx-drop-down-box
+        #dxActividad
+        id="dxActividad"
+        width="40%"
+        [(value)]="selectActividad"
+        valueExpr="ID_GRUPO"
+        displayExpr="ID_GRUPO"
+        [showClearButton]="true"
+        [readOnly]="readOnly"
+        [(opened)]="openActividad"
+        [dataSource]="DActividad"
+      >
+        <div *dxTemplate="let data of 'content'">
+          <dx-data-grid
+            #datagridUbicaciones
+            id="datagridUbicaciones"
+            height="100%"
+            keyExpr="ID_GRUPO"
+            
+            [dataSource]="DActividad"
+            [(selectedRowKeys)]="selectActividad"
+            [selection]="{ mode: 'single' }"
+            [columnAutoWidth]="true"
+            [allowColumnResizing]="true"
+            [rowAlternationEnabled]="true"
+            [focusedRowEnabled]="true"
+            [hoverStateEnabled]="true"
+            (onSelectionChanged)="onSelectionActividad($event)"
+          >
+            <dxo-selection mode="single"></dxo-selection> 
+            <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+            <dxo-search-panel [visible]="true" [width]="240"></dxo-search-panel>
+  
+            <dxi-column dataField="ID_GRUPO" caption="Código" width="35%" ></dxi-column>
+            <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+            <dxi-column dataField="ASIGNABLE" caption="Asignable" cellTemplate="temAsignable" editCellTemplate="temAsignable" >
+              <div *dxTemplate="let item of 'temAsignable'"  >
+                <dx-switch [(value)]="item.data.ASIGNABLE" [disabled]="!readOnly" ></dx-switch>
+              </div>
+            </dxi-column>
+          </dx-data-grid>
+        </div>
+      </dx-drop-down-box>                  
+    </dxi-item>
+
+    <dxi-item >
+      <dx-data-grid
+        height="100%"
+        keyExpr="ID_DIRECCION"
+        
+        [dataSource]="DUbicacion"
+        [(selectedRowKeys)]="selectUbicacion"
+        [selection]="{ mode: 'single' }"
+        [columnAutoWidth]="true"
+        [allowColumnResizing]="true"
+        [showBorders]="true"
+        [rowAlternationEnabled]="true"
+        [focusedRowEnabled]="true"
+        [hoverStateEnabled]="true"
+        (onSelectionChanged)="onSelectionUbicaciones1($event)"
+      >
+        <dxo-selection mode="single"></dxo-selection> 
+        <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+        <dxo-editing mode="cell" [allowAdding]="!readOnly"></dxo-editing>
+
+        <dxi-column dataField="ID_DIRECCION" caption="Id"></dxi-column>
+        <dxi-column dataField="TIPO_DIRECCION" caption="Tipo Dir." ></dxi-column>
+        <dxi-column dataField="TIPO_NOMENCLATURA" caption="Nom." ></dxi-column>
+        <dxi-column dataField="NOMENCLATURA" caption="Nomenclatura" ></dxi-column>
+        <dxi-column dataField="NUMERO1" caption="Núm 1" ></dxi-column>
+        <dxi-column caption="-"></dxi-column>
+        <dxi-column dataField="NUMERO2" caption="Núm 2" ></dxi-column>
+        <dxi-column dataField="DOMICILIO" caption="Domicilio" ></dxi-column>
+
+        <dxi-column dataField="ID_UBICACION" caption="Cuidad" width="150px" editCellTemplate="tempCiudad">
+          <dxo-label text="Ciudad"></dxo-label>
+          <div *dxTemplate="let cellInfo of 'tempCiudad'">
+            <dx-drop-down-box
+              #dxCiudad
+              id="dxCiudad"
+              width="500px"
+              [(value)]="selectCiudad"
+              valueExpr="ID_UBICACION"
+              displayExpr="ID_UBICACION"
+              [showClearButton]="true"
+              [readOnly]="readOnly"
+              [(opened)]="openCiudad"
+              [dataSource]="DCiudad"
+            >
+              <div *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  #datagridCiudad
+                  id="datagridCiudad"
+                  height="400px"
+                  keyExpr="ID_UBICACION"
+                  
+                  [dataSource]="DCiudad"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  [(selectedRowKeys)]="selectCiudad"
+                  [selection]="{ mode: 'single' }"
+                  (onSelectionChanged)="onSelectionCiudad($event)"
+                >
+                  <dxo-selection mode="single"></dxo-selection> 
+                  <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="240"></dxo-search-panel>
+        
+                  <dxi-column dataField="ID_UBICACION" caption="Ubicación" ></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                  <dxi-column dataField="ID_UBICACION_PADRE" caption="Ubic. Padre" ></dxi-column>
+                  <dxi-column dataField="TIPO_UBICACION" caption="Tipo" ></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dx-drop-down-box>    
+          </div>
+        </dxi-column>
+
+        <dxi-column dataField="NOM_CIUDAD" caption="Nombre Cuidad" ></dxi-column>
+
+        <dxi-column dataField="BARRIO" caption="Barrio/Sector" width="150px" editCellTemplate="tempBarrio" >
+          <dxo-label text="Ciudad"></dxo-label>
+          <div *dxTemplate="let cellInfo of 'tempBarrio'">
+            <dx-drop-down-box
+              #dxBarrio
+              id="dxBarrio"
+              width="500px"
+              [(value)]="selectBarrio"
+              valueExpr="CODIGO"
+              displayExpr="CODIGO"
+              [showClearButton]="true"
+              [readOnly]="readOnly"
+              [(opened)]="openBarrio"
+              [dataSource]="DBarrio"
+            >
+              <div *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  #datagridBarrio
+                  id="datagridBarrio"
+                  height="400px"
+                  keyExpr="CODIGO"
+                  
+                  [dataSource]="DBarrio"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  [(selectedRowKeys)]="selectBarrio"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  (onSelectionChanged)="onSelectionBarrio($event)"
+                >
+                  <dxo-selection mode="single"></dxo-selection> 
+                  <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="240"></dxo-search-panel>
+        
+                  <dxi-column dataField="CODIGO" caption="Código Barrio" width="35%" ></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                  <dxi-column dataField="DEPENDIENTE" caption="Dependiente" ></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dx-drop-down-box>    
+          </div>
+        </dxi-column>
+
+        <dxi-column dataField="NOM_BARRIO" caption="Nombre Barrio/Sector" ></dxi-column>
+        <dxi-column dataField="REFERENCIA" caption="Referencia" ></dxi-column>
+      </dx-data-grid>
+    </dxi-item>
+
+    <dxi-item >
+      <dx-data-grid
+        keyExpr="ID_TELEFONO"
+        
+        width="60%"
+        [dataSource]="Dtelefono"
+        [(selectedRowKeys)]="selectTelefono"
+        [selection]="{ mode: 'single' }"
+        [showBorders]="true"
+        [rowAlternationEnabled]="true"
+        [focusedRowEnabled]="true"
+        [hoverStateEnabled]="true"
+        (onSelectionChanged)="onSelectionUbicaciones2($event)"
+      >
+        <dxo-selection mode="single"></dxo-selection> 
+        <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+        <dxo-editing mode="cell" [allowAdding]="!readOnly"></dxo-editing>
+
+        <dxi-column dataField="ID_TELEFONO" caption="Id Dir." width="6%"></dxi-column>
+        <dxi-column dataField="TIPO_TELEFONO" caption="Tipo Teléfono" width="64%" ></dxi-column>
+        <dxi-column dataField="TELEFONO" caption="Teléfono" width="15%" ></dxi-column>
+        <dxi-column dataField="EXTENSION" caption="Extensión" width="15%" ></dxi-column>
+      </dx-data-grid>
+    </dxi-item>
+
+  </dx-form>
+    
+</div>

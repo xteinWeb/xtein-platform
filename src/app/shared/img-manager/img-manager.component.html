@@ -1,0 +1,132 @@
+<!-- image-manager.component.html -->
+<div class="image-manager">
+  <div class="image-manager-header">
+    <h3>Administrador de Imágenes</h3>
+    <div class="header-info">
+      <span class="image-count">{{ getImageCount() }}</span>
+      @if (images.length > 0 && !readOnly) {
+        <dx-button
+          text="Limpiar Todo"
+          type="danger"
+          stylingMode="outlined"
+          icon="trash"
+          (onClick)="clearAllImages()">
+        </dx-button>
+      }
+    </div>
+  </div>
+
+  <!-- File Uploader -->
+  @if (!readOnly && images.length < maxImages) {
+    <div class="upload-section">
+      <dx-file-uploader
+        [multiple]="true"
+        [accept]="allowedTypes.join(',')"
+        uploadMode="useForm"
+        selectButtonText="Seleccionar Imágenes"
+        labelText="o arrastre las imágenes aquí"
+        [maxFileSize]="maxFileSize"
+        (onValueChanged)="onFileSelected($event)">
+      </dx-file-uploader>
+      <div class="upload-info">
+        <small>
+          Formatos permitidos: {{ allowedFiles(allowedTypes) }} |
+          Tamaño máximo: {{ formatFileSize(maxFileSize) }}
+        </small>
+        <dx-button
+          icon="importselected"
+          type="success"
+          hint="Adicionar diagrama"
+          (onClick)="adicionarDiagrama()">
+        </dx-button>
+        <dx-button
+          icon="paste"
+          type="default"
+          hint="Pegar imagen"
+          (onClick)="pegarImagen()">
+        </dx-button>
+      </div>
+    </div>
+  }
+
+  <!-- Gallery Grid -->
+  @if (images.length > 0) {
+    <div class="images-grid">
+      @for (image of images; track image) {
+        <div class="image-card">
+          <div class="image-preview" (click)="openPreview(image)" (paste)="onPaste($event)">
+            <img [src]="image.url" [alt]="image.name" />
+            <div class="image-overlay">
+              <i class="dx-icon-search"></i>
+            </div>
+          </div>
+          <div class="image-info">
+            <div class="image-name" [title]="image.name">{{ image.name }}</div>
+            <div class="image-size">{{ formatFileSize(image.size) }}</div>
+          </div>
+          @if (!readOnly) {
+            <div class="image-actions">
+              <dx-button
+                icon="trash"
+                type="danger"
+                stylingMode="text"
+                hint="Eliminar"
+                (onClick)="removeImage(image)">
+              </dx-button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (images.length === 0) {
+    <div class="empty-state"  (paste)="onPaste($event)">
+      <i class="dx-icon-image"></i>
+      <p>No hay imágenes cargadas</p>
+      @if (!readOnly) {
+        <small>Usa el botón de arriba para agregar imágenes</small>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal Preview -->
+<dx-popup
+  [(visible)]="showPreview"
+  [width]="'90%'"
+  [height]="'90%'"
+  [showTitle]="true"
+  [title]="selectedImage?.name??''"
+  [dragEnabled]="true"
+  [[hideOnOutsideClick]="true"
+  [showCloseButton]="true">
+
+  @if (selectedImage) {
+    <div class="preview-container">
+      <img [src]="selectedImage.url" [alt]="selectedImage.name" #zoomImg class="preview-image" (wheel)="onWheel($event, zoomImg)" />
+      <div class="preview-info">
+        <div class="info-row">
+          <strong>Nombre:</strong> {{ selectedImage.name }}
+        </div>
+        <div class="info-row">
+          <strong>Tamaño:</strong> {{ formatFileSize(selectedImage.size) }}
+        </div>
+        <div class="info-row">
+          <strong>Tipo:</strong> {{ selectedImage.type }}
+        </div>
+      </div>
+      @if (!readOnly) {
+        <div class="preview-actions">
+          <dx-button
+            text="Eliminar Imagen"
+            type="danger"
+            icon="trash"
+            (onClick)="removeImage(selectedImage); closePreview()">
+          </dx-button>
+        </div>
+      }
+    </div>
+  }
+</dx-popup>

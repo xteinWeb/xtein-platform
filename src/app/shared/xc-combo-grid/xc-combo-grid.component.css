@@ -1,0 +1,20 @@
+
+.mat-tab-label, .mat-tab-link {
+    background: transparent !important;
+  }
+  
+  ::ng-deep .mat-tab-label-container {
+    flex-grow: 0 !important;
+    width: 100%;
+  }
+  
+  ::ng-deep .mat-tab-group .mat-tab-header .mat-tab-label {
+    flex-basis: content !important;
+    flex-grow: 0 !important;
+  }
+  
+  ::ng-deep app-ges001 > div > div.container-child-dos-app .mat-tab-label, .mat-tab-link {
+    background: transparent !important;
+  }
+
+  

@@ -1,0 +1,52 @@
+/*  */
+
+.card-rotating > div {
+  backface-visibility: hidden;
+  transition: transform 300ms;
+  transition-timing-function: linear;
+  /* animation: fadeInOut 3s forwards; */
+  /* width: 100%;
+  height: 100%;
+  margin: 0; */
+  /* display: flex; */
+}
+
+.face {
+  width: 100%;
+  overflow: hidden;
+}
+
+.face-front {
+  transform: rotateY(0deg);
+}
+
+.face-back {
+  transform: rotateY(180deg);
+  position: absolute;
+  top: 0;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+    transform: rotateY(90deg);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/*
+.card-rotating:hover .face-front {
+  transform: rotateY(-180deg);
+}
+  
+.card-rotating:hover .face-back {
+  transform: rotateY(0deg);
+} 
+*/
+
+/*  */

@@ -1,0 +1,145 @@
+<div class="row gx-3">
+  <div class="col-12 col-xl-12">
+    <div  #APP_Notifications id="APP_Notifications" class="card-content"
+      style="display: flex;justify-content: center;flex-direction: column;align-items: center; height: calc(100vh - 121px);">
+
+      <div style="width: 45%; height: 7%; display:none;" >
+        <dx-toolbar>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                text="No leidas"
+                [type]="mostrarNtf === 'No leidas' ? 'default' : 'normal' "
+                (onClick)="mostrarNtf='No leidas' "
+              ></dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                text="Leidas"
+                [type]="mostrarNtf === 'Leidas' ? 'default' : 'normal' "
+                (onClick)="mostrarNtf='Leidas' "
+              ></dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                text="Recordatorios"
+                [type]="mostrarNtf === 'Recordatorios' ? 'default' : 'normal' "
+                (onClick)="mostrarNtf='Recordatorios' "
+              ></dx-button>
+            </div>
+          </dxi-item>
+        </dx-toolbar>
+        <h2>{{mostrarNtf === 'Leidas' ? 'Notificaciones' :
+          mostrarNtf === 'No leidas' ? 'Notificaciones' :
+        mostrarNtf === 'Recordatorios' ? 'Recordatorios' : ''}}</h2>
+      </div>
+      <div style="width: 45%; height: 7%;">
+        <h2>Historial de notificaciones</h2>
+      </div>
+      <br>
+        <div style="width: 45%; height: 92%;">
+          @if ((notificationsTodas[0].items.length > 0 || notificationsTodas[1].items.length > 0)) {
+            <dx-list
+              #HtsNotifications
+              id="HtsNotifications"
+              width="100%"
+              height="100%"
+              selectionMode="single"
+              groupTemplate="group"
+              itemTemplate="items"
+              [grouped]="true"
+              [searchEnabled]="false"
+              [collapsibleGroups]="true"
+              [showSelectionControls]="false"
+              [selectedItemKeys]="[]"
+              [dataSource]="notificationsTodas"
+              >
+              <div *dxTemplate="let notification of 'group'" class="content_ntf">
+                <div class="content_title">
+                  <h4 style="color: black" style="width: 95%;">
+                    <b> {{ notification.key }}: </b>
+                  </h4>
+                </div>
+              </div>
+              <div *dxTemplate="let item of 'items'" style="cursor: auto; display: flex;">
+                <div class="content_text_aplication" (click)="abrirApl(item)" >
+                  <div>
+                    <span>
+                      {{ item.NOMBRE_APLICACION }}
+                    </span>
+                    @if (item.ACTIVIDAD) {
+                      <span>
+                        {{ item.ACTIVIDAD !== undefined ? " - " + item.ACTIVIDAD.CLASE : "" }}
+                      </span>
+                    }
+                  </div>
+                  <div class="content_detalle">
+                    <div class="subMenu-a">
+                      @if (item.USUARIO_ENV.FOTO !== '') {
+                        <a class="avatar-content">
+                          <img [id]="'USER-' + item.ITEM" width="20px" height="20px" [src]="item.USUARIO_ENV.FOTO"
+                            [alt]="item.USUARIO_ENV.iconNameUser" />
+                          </a>
+                        }
+                        @if (item.USUARIO_ENV.FOTO === '') {
+                          <span class="avatar-content-name">
+                            <span [id]="'USER-' + item.ITEM">{{
+                              item.USUARIO_ENV.iconNameUser
+                            }}</span>
+                          </span>
+                        }
+                      </div>
+                      <div style="width: 93%;">
+                        <div class="content_description">
+                          <span class="mensaje">
+                            {{ item.DESCRIPCION }}
+                          </span>
+                          <div class="content_fechas xt-textbox-notify">
+                            <dx-date-box #fechaNotificacion type="datetime" class="dateBox-fechas" [readOnly]="true"
+                              [useMaskBehavior]="true" [(value)]="item.FECHA"
+                        [displayFormat]="item.key === 'Hoy' ? 'HH:mm' :
+                                        item.key === 'Ayer' ? 'HH:mm' :
+                                        item.key === 'Anteriores' ? 'dd/MM/yyyy, HH:mm' : '' "
+                            ></dx-date-box>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </dx-list>
+            }
+
+            @if ((notificationsTodas[0].items.length === 0 && notificationsTodas[1].items.length === 0)) {
+              <div
+                class="ntf_content_vacio"
+                >
+                <div class="ntf_vacio">
+                  <span>No hay notificaciones</span>
+                </div>
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <GES_INFO [events]="eventsGesInfo.asObservable()"></GES_INFO>
+
+
+    <dx-load-panel
+      #loaderPanel
+      shadingColor="rgba(0,0,0,0.4)"
+      [position]="{ of: '#APP_Notifications' }"
+      [(visible)]="loadingVisible"
+      [showIndicator]="true"
+      [showPane]="true"
+      [shading]="true"
+      message="Un momento. Cargando datos..."
+      [hideOnOutsideClick]="false"
+    ></dx-load-panel>

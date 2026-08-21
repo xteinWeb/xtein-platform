@@ -1,0 +1,123 @@
+[33m❯[39m Building...
+[32m✔[39m Building...
+Application bundle generation failed. [10.691 seconds] - 2026-06-04T19:13:14.522Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. Find more at https://v21.angular.dev/extended-diagnostics/NG8107[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/containers/default-layout/Barra/BARRA.component.html:10:49:
+[37m      10 │ ...igUsr.r_modificar && cfgBarra?.[32moperacion[37m?.r_modificar !== false) {
+         ╵                                   [32m~~~~~~~~~[0m
+
+  Warning occurs in the template of component BARRAComponent.
+
+    src/app/containers/default-layout/Barra/BARRA.component.ts:19:17:
+[37m      19 │     templateUrl: [32m'./BARRA.component.html'[37m,
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CHATComponent is not used within the template of DefaultLayoutComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/containers/default-layout/default-layout.component.ts:42:79:
+[37m      42 │ ...DxScrollViewModule, DxLoadPanelModule, CommonModule, [32mCHATComponent[37m
+         ╵                                                         [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PasswordComponent is not used within the template of PasswordComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/views/password/password.component.ts:14:31:
+[37m      14 │ ...rts: [DxToolbarModule, [32mPasswordComponent[37m, DxFormModule, DxTextB...
+         ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/assets/xtein.scss:2:9:
+[37m      2 │ @import  [32m[37m'xtein-variables.scss';
+        ╵          [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/assets/xtein.scss:2:9:
+[37m      2 │ @import  [32m[37m'xtein-variables.scss';
+        ╵          [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:7:8:
+[37m      7 │ @import [32m'src/scss/style.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/scss/icons_styles.scss:1:8:
+[37m      1 │ @import [32m[37m"/src/scss/icons_variables.scss";
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:7:8:
+[37m      7 │ @import [32m'src/scss/style.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/scss/style.scss:2:8:
+[37m      2 │ @import [32m[37m"../assets/xtein.scss";
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:7:8:
+[37m      7 │ @import [32m'src/scss/style.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/scss/style.scss:3:8:
+[37m      3 │ @import [32m[37m"../scss/icons_styles.scss";
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:7:8:
+[37m      7 │ @import [32m'src/scss/style.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'HttpClientModule'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/main.ts:12:53:
+[37m      12 │ ...n(),importProvidersFrom([32mHttpClientModule[37m, BrowserAnimationsModu...
+         ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+Watch mode enabled. Watching for file changes...

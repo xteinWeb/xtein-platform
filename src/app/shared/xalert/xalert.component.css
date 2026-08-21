@@ -1,0 +1,15 @@
+.items {
+  color: #3e3d3df5;
+  font-weight: 600;
+  font-size: 16px;
+}
+::ng-deep .dx-radio-value-container {
+  /* vertical-align: top !important; */
+}
+::ng-deep .texto {
+  font-size: 16px;
+  padding-top: 5px;
+}
+::ng-deep .dx-radiogroup .dx-radiobutton {
+  /* margin: 6px 10px; */
+}

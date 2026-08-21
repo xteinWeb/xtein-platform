@@ -1,0 +1,7 @@
+.custom-image-item {
+    /* src: "C:/ProiectVisualStudio/Reporting_how-to-use-the-web-report-designer-in-javascript-with-angular-t566422-19.2.3-/JS/angular-report-designer/src/app/report-viewer/icons8-send-email-24.png" */
+    background-image: url('src/assets/img/xtein/folder.png');
+    /* background-image: url('icons8-send-email-24.png'); */
+    background-repeat: no-repeat;
+    background-size: 24px 24px;  
+  }

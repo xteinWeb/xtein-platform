@@ -1,0 +1,5 @@
+::ng-deep .hs-dx-datagrid dx-data-grid {
+    height:100%;
+    min-height:100px;
+    max-height:1000px;
+  }

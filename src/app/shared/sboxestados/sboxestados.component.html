@@ -1,0 +1,60 @@
+<!-- FORM - Modo display - Field -->
+@if (modo === 'form_read') {
+  <div class="info">
+    <label class="dx-texteditor-label">{{
+      data.editorOptions.label
+    }}</label>
+    <app-estado [value]="data.editorOptions.value"></app-estado>
+  </div>
+}
+
+
+<!-- FORM - Modo edición - select box -->
+@if (modo === 'form_edit') {
+  <div>
+    <dx-select-box
+      [(value)]="value"
+      [items]="listaEstados"
+      [stylingMode]="stylingMode"
+      [label]="data.editorOptions.label"
+      fieldTemplate="field"
+      >
+      <div *dxTemplate="let datae of 'field'">
+        <div class="form-custom-list-prop">
+          <app-estado [value]="value"></app-estado>
+          <dx-text-box [readOnly]="true"></dx-text-box>
+        </div>
+      </div>
+      <div *dxTemplate="let datae of 'item'">
+        <app-estado [value]="datae"></app-estado>
+      </div>
+    </dx-select-box>
+  </div>
+}
+
+<!-- GRID - Modo display - Field -->
+@if (modo.match('grid_') && !esEdicion) {
+  <div class="info_grid">
+    <app-estado [value]="value" [modo]="'grid_read'"></app-estado>
+  </div>
+}
+
+<!-- GRID - Modo edición - select box -->
+@if (modo === 'grid_edit' && esEdicion) {
+  <div>
+    <dx-select-box
+      [(value)]="value"
+      [items]="listaEstados"
+      (onValueChanged)="onSetValueEstado($event)"
+      >
+      <div *dxTemplate="let datae of 'field'">
+        <div class="grid-custom-list-prop">
+          <app-estado [value]="value"></app-estado>
+        </div>
+      </div>
+      <div *dxTemplate="let datae of 'item'">
+        <app-estado [value]="datae"></app-estado>
+      </div>
+    </dx-select-box>
+  </div>
+}

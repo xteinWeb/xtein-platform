@@ -1,0 +1,536 @@
+
+<!-- partial:index.partial.html -->
+<div class="ajuste-row-tables">
+  <div class="row gx-3">
+
+    <div class="col-md-6 col-xl-4 tables" draggable="true">
+      <div class="cards-home v-hidden notes">
+        <div class="cards-home-header">Notas rápidas</div>
+        <i class="icon-mover xs-menutab"></i>
+        <div class="cards-home-body">
+          <dx-html-editor height="180px" [value]="valueContent" container="#htmlEditorFooter">
+            <dxo-toolbar [multiline]="isMultiline">
+              <dxi-item name="bold"></dxi-item>
+              <dxi-item name="italic"></dxi-item>
+              <dxi-item name="strike"></dxi-item>
+              <dxi-item name="bulletList"></dxi-item>
+              <dxi-item name="orderedList"></dxi-item>
+              <dxi-item name="link"></dxi-item>
+              <dxi-item name="separator"></dxi-item>
+              <dxi-item name="codeBlock"></dxi-item>
+              <dxi-item name="blockquote"></dxi-item>
+              <dxi-item>
+                <dx-popup [width]="200" [height]="200">
+                  <div class="dropdown-content">
+                    <dxi-item name="alignCenter"></dxi-item>
+                    <dxi-item name="alignRight"></dxi-item>
+                    <dxi-item name="alignJustify"></dxi-item>
+                    <dxi-item name="separator"></dxi-item>
+                    <dxi-item name="orderedList"></dxi-item>
+                    <dxi-item name="bulletList"></dxi-item>
+                    <dxi-item name="separator"></dxi-item>
+                    <dxi-item name="bulletList"></dxi-item>
+                    <dxi-item name="orderedList"></dxi-item>
+                    <dxi-item name="link"></dxi-item>
+                    <dxi-item name="separator"></dxi-item>
+                    <dxi-item name="image"></dxi-item>
+                    <dxi-item name="separator"></dxi-item>
+                    <dxi-item name="codeBlock"></dxi-item>
+                    <dxi-item name="blockquote"></dxi-item>
+                    <dxi-item name="separator"></dxi-item>
+                    <dxi-item name="insertTable"></dxi-item>
+                  </div>
+                </dx-popup>
+              </dxi-item>
+            </dxo-toolbar>
+            <dxo-media-resizing [enabled]="true"> </dxo-media-resizing>
+            <dxo-image-upload [tabs]="currentTab" fileUploadMode="base64">
+            </dxo-image-upload>
+          </dx-html-editor>
+          <div id="htmlEditorFooter"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4 tables" draggable="true">
+      <div class="cards-home v-hidden">
+        <div class="cards-home-header">Ventas</div>
+        <i class="icon-mover xs-menutab"></i>
+        <div class="cards-home-body">
+          <div class="cards-home-content-row">
+            <div class="card-col-8">
+              <dx-pie-chart
+                class="pie"
+                [animation]="true"
+                resolveLabelOverlapping="shift"
+                type="doughnut"
+                centerTemplate="centerTemplate"
+                [innerRadius]="0.7"
+                [dataSource]="populationByRegions"
+                >
+                <dxi-series argumentField="region">
+                  <dxo-label [visible]="false" backgroundColor="none"  format="fixedPoint" [customizeText]="customizeLabel">
+                    <dxo-connector [visible]="false" [width]="0.5"></dxo-connector>
+                  </dxo-label>
+                  <dxo-small-values-grouping
+                    mode="smallValueThreshold"
+                    [threshold]="4.5"
+                  ></dxo-small-values-grouping>
+                </dxi-series>
+                <dxo-legend
+                  [margin]="0"
+                  [visible]="true"
+                  horizontalAlignment="right"
+                  verticalAlignment="bottom"
+                  [paddingTopBottom]="2"
+                  [rowItemSpacing]="2"
+                  [markerSize]="10"
+                ></dxo-legend>
+                <svg *dxTemplate="let pieChart of 'centerTemplate'">
+                  <circle
+                    cx="100"
+                    cy="100"
+                    [attr.r]="pieChart.getInnerRadius() - 0"
+                    fill="#fff"
+                  ></circle>
+                  <text
+                    text-anchor="middle"
+                    style="font-size: 16px"
+                    x="100"
+                    y="100"
+                    fill="rgba(10,57,96,.95)"
+                    >
+                    <tspan x="100" style="font-weight: 700">25,558.024</tspan>
+                    <!-- display: inline -->
+                    <tspan x="100" dy="20px" style="font-weight: 300; font-size: 12px;">Enero</tspan>
+
+                  </text>
+                </svg>
+              </dx-pie-chart>
+            </div>
+            <div class="card-col-4 cards-home-content-column text-end">
+              <span class="xt-caption-lite">Total</span>
+              <h3 m-0>243.551</h3>
+              <span class="xt-caption-lite">Productos</span>
+              <a href="" class="link-text  my-3">Ver más...</a>
+              <span class="xt-text-sm-muted">Última actualización <strong>3:14 p.m.</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4 tables" draggable="true">
+      <div class="cards-home v-hidden">
+        <div class="cards-home-header">Ingresos</div>
+        <i class="icon-mover xs-menutab"></i>
+        <div class="cards-home-body">
+          <div class="cards-home-content-row">
+            <div class="card-col-7 cards-home-content-column">
+              <span class="xt-caption-lite">Total semana</span>
+              <h3>$482,197.342</h3>
+              <a href="" class="link-text">Ver más...</a>
+              <ul class="my-3 ellipsis-text">
+                <li><span class="dot"></span>Compra de insumos</li>
+                <li><span class="dot"></span>Reporte de productividad</li>
+              </ul>
+              <span class="xt-text-sm-muted">Última actualización <strong>3:22 p.m.</strong></span>
+            </div>
+            <div class="card-col-5">
+              <dx-chart id="chart" class="table-chart" [dataSource]="populationData">
+                <dxo-legend [visible]="false"></dxo-legend>
+                <dxi-series
+                  type="bar"
+                  name="Population"
+                  argumentField="name"
+                  valueField="population"
+                  color="#2EADE5"
+                  height="200"
+                  >
+                </dxi-series>
+                <dxi-value-axis [visible]="false" [valueMarginsEnabled]="false">
+                  <dxo-grid [visible]="false"></dxo-grid>
+                  <dxo-label [visible]="false"></dxo-label>
+                  <dxo-tick [visible]="false"></dxo-tick>
+                </dxi-value-axis>
+                <dxo-argument-axis [visible]="false" [tickInterval]="1">
+                  <dxo-tick [visible]="false"></dxo-tick>
+                </dxo-argument-axis>
+                <dxo-common-annotation-settings
+                  type="custom"
+                  series="Population"
+                  template="template"
+                  [allowDragging]="true"
+                  >
+                </dxo-common-annotation-settings>
+                <!-- <dxi-annotation
+                *ngFor="let data of populationData"
+                [data]="populationData[0]"
+                [argument]="data.name"
+                >
+              </dxi-annotation> -->
+              <dxi-annotation color="#fff" [data]="populationData[2]" [argument]="populationData[2].name">
+                <dxo-border color="rgba(10,57,96,.25)" dashStyle="solid" [width]="1"></dxo-border>
+              </dxi-annotation>
+              <svg *dxTemplate="let annotation of 'template'" class="annotation">
+                <text text-anchor="middle" style="font-size: 16px" x="100" y="100" fill="rgba(10,57,96,.75)">
+                  <tspan x="100" style="font-weight: 300; font-size: 12px;">{{ annotation.argument }}</tspan>
+                </text>
+                <text text-anchor="middle" style="font-size: 16px" x="100" y="100" fill="rgba(10,57,96,.75)" stroke="none">
+                  <tspan x="100" dy="15px" style="font-weight: 700">$120,873.099</tspan>
+                </text>
+              </svg>
+            </dx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4 tables" draggable="true">
+    <div class="cards-home v-hidden">
+      <div class="cards-home-header">Entregas</div>
+      <i class="icon-mover xs-menutab"></i>
+      <div class="cards-home-body">
+        <div class="cards-home-content-row">
+          <div class="card-col-6 cards-home-content-column">
+            <h3 class="m-0">2431</h3>
+            <span class="xt-caption-lite">Productos</span>
+            <ul class="my-3 ellipsis-text">
+              <li><span class="dot"></span><a href="">Pedido de exportación en curso...</a></li>
+              <li><span class="dot"></span><a href="">Siguiente pedido en la linea de despacho...</a></li>
+              <li><span class="dot"></span><a href="" class="link-text">Ver más...</a></li>
+            </ul>
+            <span class="xt-text-sm-muted">Última actualización <strong>3:14 p.m.</strong></span>
+          </div>
+          <div class="card-col-6 gauge-center-template-container gaugeresize">
+            <dx-bar-gauge id="gauge" [startValue]="0" [redrawOnResize]="true" [endValue]="100" backgroundColor="rgba(18,94,220,.075)"
+              [values]="[67.27]" [relativeInnerRadius]="0.6" centerTemplate="centerTemplate" class="table-gauge">
+              <dxo-geometry [startAngle]="180" [endAngle]="360"> </dxo-geometry>
+              <!-- <dxo-size [width]="300"></dxo-size> -->
+              <dxo-legend [visible]="false"></dxo-legend>
+              <dxo-label [indent]="0" connectorColor="rgba(10,57,96,.75)" [visible]="true">
+                <dxo-font color="transparent" opacity="0"></dxo-font>
+                <dxo-format type="fixedPoint" [precision]="1"></dxo-format>
+              </dxo-label>
+              <dxo-animation easing="easeOutCubic" [duration]="500"></dxo-animation>
+            </dx-bar-gauge>
+            <div class="gauge-center-template">
+              <h3 class="gauge-center-text m-0">67,3</h3>
+              <span class="gauge-center-last-text">Productos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4 tables" draggable="true">
+    <div class="cards-home v-hidden">
+      <div class="cards-home-header">Mis notificaciones</div>
+      <i class="icon-mover xs-menutab"></i>
+      <div class="cards-home-body">
+        <div class="list-group list-group-flush oscroll-of">
+          <a href="" class="list-group-item list-group-item-action flex-column align-items-start active">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-0 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de CEO (ceo@xtein.com)'}}</h5>
+              <small class="col-5 col-md-6 col-xl-3 p-0 text-end">Hace 1 minuto</small>
+            </div>
+            <p class="p-0 mb-0 xt-text-m col-12 text-truncate">Informe mensual de ingresos - Por favor realizar correcciones al informe...</p>
+          </a>
+          <a href="" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de Compras (compras@...)'}}</h5>
+              <small class="col-5 col-md-6 col-xl-3 p-0 text-end text-muted">Hace 1 día</small>
+            </div>
+            <p class="p-0 mb-0 xt-text-m col-12 text-truncate">PAPELERIA MES DE AGOSTO - Buenos días. Como es habitual se envía...</p>
+          </a>
+          <a href="" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de Gestión humana (gestion@...)'}}</h5>
+              <small class="col-5 col-md-6 col-xl-3 p-0 text-end text-muted">Hace 1 día</small>
+            </div>
+            <p class="p-0 mb-0 xt-text-m col-12 text-truncate">Comunicado importante - Por favor no tocar la puerta del baño</p>
+          </a>
+          <a href="" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de Gestión humana (gestion@...)'}}</h5>
+              <small class="col-5 col-md-6 col-xl-3 p-0 text-end text-muted">Hace 1 día</small>
+            </div>
+            <p class="p-0 mb-0 xt-text-m col-12 text-truncate">Comunicado importante - Por favor no tocar la puerta del baño</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4 tables" draggable="true">
+    <div class="cards-home v-hidden">
+      <div class="cards-home-header">Agenda</div>
+      <i class="icon-mover xs-menutab"></i>
+      <div class="cards-home-body">
+        <div class="cards-home-content-row column-reverse">
+          <dx-scheduler
+            #schedulerAgenda
+            timeZone="America/Bogota"
+            [dataSource]="appointmentsData"
+            [views]="['agenda']"
+            currentView="agenda"
+            [currentDate]="currentDate"
+            [firstDayOfWeek]="1"
+            [startDayHour]="6"
+            [showAllDayPanel]="false"
+            (onContentReady)="onSchedulerContentReady($event)"
+            >
+            <dxi-resource
+              fieldExpr="assigneeId"
+              label="Assignee"
+              [allowMultiple]="true"
+              [dataSource]="assignees"
+              [useColorAsDefault]="true"
+              >
+            </dxi-resource>
+            <dxi-resource
+              fieldExpr="priorityId"
+              label="Priority"
+              [dataSource]="priorities"
+              >
+            </dxi-resource>
+          </dx-scheduler>
+        </div>
+      </div>
+    </div>
+    <!--/.card-->
+  </div>
+
+  <div class="col-12 col-xl-8 tables top-compras" draggable="true">
+    <div class="cards-home v-hidden">
+      <div class="cards-home-header">Top Compras</div>
+      <i class="icon-mover xs-menutab"></i>
+      <span class="xs-menutab" style="padding-top: 5px;"> <i class="icon-opciones"></i> </span>
+      <div class="cards-home-body">
+        <table class="table table-responsive-sm table-hover mb-0">
+          <thead class="bg-primary">
+            <tr>
+              <th class="text-center column1">Producto</th>
+              <th class="text-center column2">UM</th>
+              <th class="text-center column3">Inventario</th>
+              <th class="text-center column4">Bodegas</th>
+              <th class="text-center column5">A Comprar</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (itemCompra of DCompras; track itemCompra; let i = $index) {
+              <tr>
+                <td class="column1">
+                  <div>{{itemCompra.PRODUCTO}}</div>
+                  <div class="small text-muted">
+                    {{itemCompra.NOMBRE}}
+                  </div>
+                </td>
+                <td class="text-center column2">
+                  <div>{{itemCompra.ID_UDM}}</div>
+                </td>
+                <td class="column3">
+                  <div class="clearfix">
+                    <div class="float-left" [ngStyle]="{width: itemCompra.MARCA_MIN+'%'}">
+                      <strong>{{itemCompra.CANT_BODEGA}}</strong>
+                    </div>
+                    @if (itemCompra.CANT_BODEGA > itemCompra.PUNTO_MAXIMO && itemCompra.PUNTO_MAXIMO != 0 ) {
+                      <div>
+                        <div class="float-left" style="border-left: 1px solid rgb(238, 113, 113); padding-left: 3px;">
+                          <small class="text-muted">Min:{{itemCompra.PUNTO_MINIMO}}</small>
+                        </div>
+                        <div class="float-right" style="border-right: 1px solid rgb(32, 205, 150); padding-right: 3px; margin-right: 20px;">
+                          <small class="text-muted">Máx:{{itemCompra.PUNTO_MAXIMO}}</small>
+                        </div>
+                      </div>
+                    }
+                    @if (itemCompra.CANT_BODEGA >= itemCompra.PUNTO_MINIMO && itemCompra.CANT_BODEGA <= itemCompra.PUNTO_MAXIMO && itemCompra.PUNTO_MAXIMO != 0) {
+                      <div>
+                        <div class="float-left" style="border-left: 1px solid rgb(238, 113, 113); padding-left: 3px;">
+                          <small class="text-muted">Min:{{itemCompra.PUNTO_MINIMO}}</small>
+                        </div>
+                        <div class="float-right" style="border-right: 1px solid rgb(32, 205, 150); padding-right: 3px;">
+                          <small class="text-muted">Máx:{{itemCompra.PUNTO_MAXIMO}}</small>
+                        </div>
+                      </div>
+                    }
+                    @if (itemCompra.CANT_BODEGA < itemCompra.PUNTO_MINIMO && itemCompra.PUNTO_MAXIMO != 0) {
+                      <div>
+                        <div class="float-left" style="border-left: 1px solid rgb(238, 113, 113); padding-left: 3px;">
+                          <small class="text-muted">Min:{{itemCompra.PUNTO_MINIMO}}</small>
+                        </div>
+                        <div class="float-right" style="border-right: 1px solid rgb(32, 205, 150); padding-right: 3px;">
+                          <small class="text-muted">Máx:{{itemCompra.PUNTO_MAXIMO}}</small>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <div class="progress progress-xs">
+                    <div class="progress-bar {{itemCompra.color_ind}}" role="progressbar" [ngStyle]="{width: itemCompra.PORCENTAJE+'%'}" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </td>
+                <td class="text-center column4">
+                  <div class="small text-muted">{{itemCompra.NOMBRE_PROVEEDOR}}</div>
+                </td>
+                <td class="column5">
+                  <strong>{{itemCompra.CANT_COMPRAR}}</strong>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4 tables" draggable="true">
+    <div class="cards-home v-hidden">
+      <div class="cards-home-header">Ventas</div>
+      <i class="icon-mover xs-menutab"></i>
+      <div class="cards-home-body">
+        <div class="cards-home-content-row">
+          <div class="card-col-8">
+            <dx-chart id="chart" [dataSource]="populationData" class="dottedline-chart">
+              <dxo-legend [visible]="false"></dxo-legend>
+              <dxo-margin [top]="6"></dxo-margin>
+              <dxi-value-axis [visible]="false" [valueMarginsEnabled]="false">
+                <dxo-grid [visible]="false" color="rgba(10,57,96,.05)"></dxo-grid>
+                <dxo-label [visible]="false"></dxo-label>
+                <dxo-tick [visible]="false"></dxo-tick>
+              </dxi-value-axis>
+              <dxo-argument-axis [visible]="false" [tickInterval]="10" discreteAxisDivisionMode="crossLabels" color="rgba(10,57,96,.05)">
+                <dxo-tick [visible]="false"></dxo-tick>
+                <dxo-grid  [visible]="true" [width]="3" dashStyle="dot" color="rgba(10,57,96,.075)"></dxo-grid>
+              </dxo-argument-axis>
+              <dxi-series type="line" name="Population" argumentField="name" valueField="population" color="#2EADE5" height="200" width="5">
+                <dxo-point [size]="16"></dxo-point>
+                <dxo-hover-style [width]="6"></dxo-hover-style>
+              </dxi-series>
+              <!-- <dxo-common-annotation-settings type="custom" series="Population" template="template" [allowDragging]="true"></dxo-common-annotation-settings>
+              <dxi-annotation color="rgba(255,255,255,1)" [data]="populationData[2]"  [argument]="populationData[2].name">
+                <dxo-border color="rgba(10,57,96,.25)" dashStyle="solid" [width]="1"></dxo-border>
+              </dxi-annotation>
+              <svg *dxTemplate="let annotation of 'template'">
+                <rect x="0" y="0"/>
+                <text text-anchor="middle" style="font-size: 16px" x="100" y="100" fill="rgba(10,57,96,.75)">
+                  <tspan x="100" style="font-weight: 300; font-size: 12px;">{{ annotation.argument }}</tspan>
+                </text>
+                <text text-anchor="middle" style="font-size: 16px" x="100" y="100" fill="rgba(10,57,96,.75)">
+                  <tspan x="100" dy="15px" style="font-weight: 700">$120,873.099</tspan>
+                </text>
+              </svg> -->
+            </dx-chart>
+          </div>
+          <div class="card-col-4 cards-home-content-column text-end">
+            <span class="xt-caption-lite">Total</span>
+            <h3 m-0>243.551</h3>
+            <span class="xt-caption-lite">Productos</span>
+            <a href="" class="link-text  my-3">Ver más...</a>
+            <span class="xt-text-sm-muted">Última actualización <strong>3:14 p.m.</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4 tables top-compras" draggable="true">
+    <div class="cards-home v-hidden">
+      <div class="cards-home-header">Top Compras</div>
+      <i class="icon-mover xs-menutab"></i>
+      <span class="xs-menutab" style="padding-top: 5px;"> <i class="icon-opciones"></i> </span>
+      <div class="cards-home-body">
+        <div class="cards-home-content-wrap">
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+          <div class="monitoring">
+            <h6 class="xt-text-smx-r">Suma de...</h6>
+            <h1>9,02</h1>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+  >
+</dx-load-panel>
+
+<!-- Sub-Menú de aplicaciones favoritas -->
+<dx-popup
+  width="300"
+  [height]="'auto'"
+  [showTitle]="false"
+  [hideOnOutsideClick]="true"
+  [(visible)]="visibleListaFav">
+  <dxo-position
+    my="right top"
+    at="left bottom"
+    of="#w_addfavoritas">
+  </dxo-position>
+  <div *dxTemplate="let data of 'content'">
+    <dx-list
+      #listAplFav
+      [dataSource]="tblAplUsr"
+      [height]="400"
+      keyExpr="ID_APLICACION"
+      selectionMode="multiple"
+      selectAllMode="allPages"
+      [showSelectionControls]="true"
+      [(selectedItemKeys)]="seleccAplFavUsr"
+      >
+      <div *dxTemplate="let item of 'item'">
+        <span class="{{item.icon}}"></span> {{item.NOMBRE}}
+      </div>
+    </dx-list>
+    <dx-button
+      stylingMode="contained"
+      text="Aplicar"
+      type="success"
+      [width]="120"
+      (onClick)="clickAplFav($event)"
+      >
+    </dx-button>
+  </div>
+</dx-popup>

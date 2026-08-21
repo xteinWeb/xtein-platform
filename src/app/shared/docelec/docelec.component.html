@@ -1,0 +1,165 @@
+<dx-popup
+  #popUpDocElec
+  id="popUpDocElec"
+  [maxWidth]="725"
+  [minWidth]="680"
+  [height]="450"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="false"
+  [(visible)]="popupVisible"
+  title="Documento Electrónico - {{titDocumentoElec}}"
+  (onShown)="onShown($event)"
+  (onHidden)="onHidden($event)"
+  (onInitialized)="onInitializedPopUp($event)"
+
+  >
+  <div *dxTemplate="let data of 'content'">
+    <dx-form
+      id="form"
+      [formData]="DocElectronico"
+      labelLocation="left"
+      colCount="3"
+      >
+      <dxi-item itemType="group" colSpan="2" >
+        <dxi-item
+          itemType="group"
+          colCount="2"
+          cssClass="group-docelec"
+          >
+          <dxi-item dataField="DOCUMENTO">
+            <dxo-label text="Documento"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="FECHA" editorType="dxDateBox">
+            <dxo-label text="Fecha" ></dxo-label>
+          </dxi-item>
+          <dxi-item itemType="group" colSpan="2" cssClass="group-clielec">
+            <dxi-item dataField="CLIENTE" colSpan="2" >
+              <dxo-label text="Cliente"></dxo-label>
+            </dxi-item>
+            <dxi-item dataField="EMAIL" colSpan="2">
+              <dxo-label text="Correo"></dxo-label>
+            </dxi-item>
+          </dxi-item>
+        </dxi-item>
+      </dxi-item>
+      <dxi-item itemType="group" colSpan="1" >
+        <dxi-item>
+          @if (DocElectronico.QR != '') {
+            <div class="qr-container">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ DocElectronico.QR }}" alt="Static QR Code">
+            </div>
+          }
+          @if (DocElectronico.QR == '') {
+            <div class="qr-container">
+                    <span style="font-size: 24px; 
+                                 color:rgb(189, 189, 189); 
+                                 display: flex; 
+                                 justify-content: center; 
+                                 align-items: center; 
+                                 height: 100px; 
+                                 width: 200px; 
+                                 border: 1px solid #ccc; ">
+                NO QR
+              </span>
+            </div>
+          }
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" colSpan="3" cssClass="group-cufe">
+        <dxi-item dataField="CUFE" colSpan="3">
+          <dxo-label text="CUFE/CUDE" ></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+    </dx-form>
+    <br/>
+
+    <dx-toolbar>
+      <dxi-item
+        #dianEnviarButton
+        location="before"
+        widget="dxButton"
+        [disabled]="inactivarBotones"
+        [options]="enviarButtonOptions">
+      </dxi-item>
+      <dxi-item
+        location="before"
+        widget="dxButton"
+        locateInMenu="auto"
+        [disabled]="inactivarBotones"
+        [options]="pdfButtonOptions">
+      </dxi-item>
+      <dxi-item
+        location="before"
+        widget="dxButton"
+        locateInMenu="auto"
+        [disabled]="inactivarBotones"
+        [options]="emailButtonOptions">
+      </dxi-item>
+      <dxi-item
+        location="before"
+        >
+        <div *dxTemplate>
+          @if (showSpinner) {
+            <div #spinnerContainer >
+              <p-progressSpinner
+                #spinner
+                ariaLabel="loading"
+                animationDuration="1s"
+              ></p-progressSpinner>
+            </div>
+          }
+        </div>
+      </dxi-item>
+      <dxi-item
+        location="before"
+        >
+        <div *dxTemplate>
+          @if (showSpinner) {
+            <div #msgAccion >
+              <span style="font-style: italic;">{{msgProceso}}</span>
+            </div>
+          }
+        </div>
+      </dxi-item>
+    </dx-toolbar>
+
+    <br/>
+
+    <dx-data-grid
+      #gridEventosElec
+      id="gridEventosElec"
+      [dataSource]="DEventosElec"
+      [showBorders]="true"
+      [columnAutoWidth]="true"
+      [height]="200"
+      [noDataText]="''"
+      >
+      <dxo-paging [pageSize]="5"></dxo-paging>
+      <dxo-pager
+        [showPageSizeSelector]="true"
+        [allowedPageSizes]="[5, 10, 20]"
+        [showInfo]="true">
+      </dxo-pager>
+      <dxi-column dataField="ITEM" caption="Item" width="70" [visible]="false" ></dxi-column>
+      <dxi-column dataField="FECHA" caption="Fecha" width="100" ></dxi-column>
+      <dxi-column dataField="HORA" caption="Hora" width="100" ></dxi-column>
+      <dxi-column
+        dataField="STATUS"
+        caption="Status"
+        cellTemplate="statusTemplate"
+        >
+      </dxi-column>
+      <div *dxTemplate="let cellInfo of 'statusTemplate'">
+        <div style="white-space: normal; line-height: 1.4;">
+          {{cellInfo.data.STATUS}}
+        </div>
+      </div>
+    </dx-data-grid>
+
+  </div>
+</dx-popup>

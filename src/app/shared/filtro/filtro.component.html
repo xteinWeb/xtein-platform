@@ -1,0 +1,240 @@
+<dx-popup
+  #popUpFiltro
+  id="popUpFiltro"
+  [maxWidth]="725"
+  [minWidth]="680"
+  [height]="450"
+  [showTitle]="true"
+  [(title)]="titFiltro"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="false"
+  [(visible)]="popupVisible"
+  (onShown)="onShown($event)"
+  (onInitialized)="onInitialized($event)"
+  (onResizeEnd)="onResizeEnd($event)"
+  >
+  <div *dxTemplate="let data of 'content'">
+    <div class="flex-grow-1 min-h-0">
+
+      <dx-data-grid
+        #Visorfiltro
+        id="Visorfiltro"
+        [dataSource]="DFiltro"
+        keyExpr="ITEM"
+        [showBorders]="true"
+        [columnAutoWidth]="true"
+        [showBorders]="true"
+        columnResizingMode="nextColumn"
+        [allowColumnResizing]="true"
+        [rowAlternationEnabled]="true"
+        [focusedRowEnabled]="true"
+        [hoverStateEnabled]="true"
+        [loadPanel]="{ shading: true }"
+        [showColumnLines]="true"
+        (onContentReady)="onContentReady($event)"
+        (onRowDblClick)="onSeleccRegistro($event)"
+        (onEditorPreparing)="onEditorPreparing($event)"
+        (onEditingStart)="onEditingStart($event)"
+        (onToolbarPreparing)="onToolbarPreparing($event)"
+        (onInitialized)="onInitialized($event)">
+
+        <dxo-editing
+          mode="cell"
+          [allowUpdating]="true"
+        ></dxo-editing>
+
+        <dxo-paging
+          [pageSize]="10">
+        </dxo-paging>
+        <dxo-pager
+          [visible]="true"
+          [allowedPageSizes]="allowedPageSizes"
+          displayMode="full"
+          [showPageSizeSelector]="true"
+          [showInfo]="true"
+          [showNavigationButtons]="true">
+        </dxo-pager>
+
+        <!-- <dxo-export [enabled]="true" fileName="{{archExcelLiq}}"></dxo-export> -->
+
+        <dxi-column dataField="CAMPO" [allowEditing]="false" caption="Campo" width="35%" cellTemplate="templTitCampo">
+        </dxi-column>
+        <dxi-column dataField="VALOR" caption="Valor" editCellTemplate="edicionValores" [setCellValue]="setFiltroValor"></dxi-column>
+
+        <!-- <div *dxTemplate="let data of 'titVisordatos'">
+        <div class="dx-fieldset-header">Seleccione valores a filtrar</div>
+      </div> -->
+
+      <div *dxTemplate="let cellInfo of 'templTitCampo'">
+        {{cellInfo.data.TITULO}}
+      </div>
+
+      <div *dxTemplate="let cellInfo of 'edicionValores'">
+        @if (cellInfo.data.DATA_TYPE === 'smalldatetime') {
+          <div>
+            <div style="display: inline-block;">
+              <dx-date-box #dFechaDesde id="dFechaDesde"
+                (onValueChanged)="onValueFechaDesde($event, cellInfo.data.CAMPO, cellInfo)"
+                (onInitialized)="onIniFechaDesde($event, cellInfo.data.VALOR)">
+                [(value)]="fechaDesde"
+              </dx-date-box>
+            </div>
+            <div style="display: inline-block; padding-left: 20px;">
+              <dx-date-box #dFechaHasta id="dFechaHasta"
+                (onValueChanged)="onValueFechaHasta($event, cellInfo.data.CAMPO, cellInfo)"
+                (onInitialized)="onIniFechaHasta($event, cellInfo.data.VALOR)">
+                [(value)]="fechaHasta"
+              </dx-date-box>
+            </div>
+          </div>
+        }
+        @if (!cellInfo.data.DATA_TYPE.match('smalldatetime|lista|bit|listauni|searchbox')) {
+          <div>
+            <div>
+              <dx-text-box
+                [readOnly]="false"
+                [hoverStateEnabled]="true"
+                [(value)]="cellInfo.data.VALOR">
+              </dx-text-box>
+            </div>
+          </div>
+        }
+        @if (cellInfo.data.DATA_TYPE === 'bit') {
+          <div>
+            <div>
+              <dx-check-box
+                (onValueChanged)="onValueChangedBool($event)"
+                [value]="null">
+              </dx-check-box>
+            </div>
+          </div>
+        }
+        @if (cellInfo.data.DATA_TYPE === 'listauni') {
+          <div>
+            <div>
+              <dx-select-box
+                [dataSource]="cellInfo.data.DATA"
+                displayExpr="KEY_COL"
+                valueExpr="KEY_COL"
+                placeholder=""
+                [(value)]="cellInfo.data.VALOR" >
+              </dx-select-box>
+            </div>
+          </div>
+        }
+        @if (cellInfo.data.DATA_TYPE === 'lista') {
+          <div>
+            <div>
+              <!-- [dataSource]="cellInfo.data.DATA" -->
+              <dx-drop-down-box
+                #ddBox
+                [showClearButton]="true"
+                [dataSource]="dataSources['D_'+cellInfo.data.CAMPO]"
+                [(value)]="cellInfo.value"
+                showSelectionControls="true"
+                displayExpr="KEY_COL"
+                valueExpr="KEY_COL"
+                [acceptCustomValue]="true"
+                [dropDownOptions]="dropDownOptions"
+                (onValueChanged)="onValueChangedLista($event, cellInfo)"
+                >
+                <div *dxTemplate="let data of 'content'">
+                  <dx-data-grid
+                    #gridBoxFiltro
+                    id="gridBoxFiltro"
+                    [dataSource]="dataSources['D_'+cellInfo.data.CAMPO]"
+                    [selection]="{ mode: 'multiple' }"
+                    [hoverStateEnabled]="true"
+                    [focusedRowEnabled]="true"
+                    [rowAlternationEnabled]="true"
+                    [height]="'90%'"
+                    columnResizingMode="nextColumn"
+                    [allowColumnResizing]="true"
+                    [(selectedRowKeys)]="gridBoxValue"
+                    [remoteOperations]="true"
+                    (onSelectionChanged)="onSelectionChanged($event, ddBox.instance, cellInfo.data.CAMPO)"
+                    [customizeColumns]="customizeColumns"
+                    >
+                    <dxo-search-panel
+                      [visible]="true"
+                      [width]="500"
+                      placeholder="Buscar...">
+                    </dxo-search-panel>
+                    <dxo-paging [enabled]="true" [pageSize]="pageSize"></dxo-paging>
+                    <dxo-pager
+                      [visible]="true"
+                      [allowedPageSizes]="allowedPageSizes"
+                      displayMode="full"
+                      [showPageSizeSelector]="true"
+                      [showInfo]="true"
+                      [showNavigationButtons]="true">
+                    </dxo-pager>
+                  </dx-data-grid>
+                  <div style="position: absolute; bottom: 10px">
+                    <dx-button
+                      id="btnAceptarPT"
+                      stylingMode="contained"
+                      text="Aceptar"
+                      type="default"
+                      [width]="100"
+                      (onClick)="cerrarListaPT($event, 'aceptar', ddBox.instance, cellInfo)"
+                      >
+                    </dx-button>
+                    <dx-button
+                      id="btnCancelarPT"
+                      stylingMode="contained"
+                      text="Cancelar"
+                      type="normal"
+                      [width]="100"
+                      [style.margin-left]="'20px'"
+                      (onClick)="cerrarListaPT($event, 'cancelar', ddBox.instance, cellInfo)"
+                      >
+                    </dx-button>
+                  </div>
+                </div>
+              </dx-drop-down-box>
+            </div>
+          </div>
+        }
+        @if (cellInfo.data.DATA_TYPE === 'searchbox') {
+          <div>
+            <div>
+              <app-searchbox
+                [accion]="cellInfo.data.DATA"
+                (onRespuestaAutosearch)="onRespuestaAutosearch($event, cellInfo)"
+              ></app-searchbox>
+            </div>
+          </div>
+        }
+      </div>
+
+    </dx-data-grid>
+
+    <div style="position: absolute; bottom: 10px">
+      <dx-button
+        id="btnAceptarPT"
+        stylingMode="contained"
+        text="Buscar"
+        type="default"
+        [width]="100"
+        (onClick)="aceptarCambios($event)"
+        >
+      </dx-button>
+      <dx-button
+        id="btnCancelarPT"
+        stylingMode="contained"
+        text="Cancelar"
+        type="normal"
+        [width]="110"
+        [style.margin-left]="'20px'"
+        (onClick)="cancelarCambios($event)"
+        >
+      </dx-button>
+    </div>
+
+  </div>
+</div>
+</dx-popup>
+

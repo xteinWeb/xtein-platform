@@ -1,0 +1,50 @@
+<dx-select-box id="xs__{{nombreObj}}" [dataSource]="dataSource" [(value)]="valorDefecto" [valueExpr]="valueExpr"
+  [displayExpr]="displayExpr" [searchEnabled]="true" searchMode="contains" [acceptCustomValue]="customValue"
+  [searchExpr]="columnData" [dropDownOptions]="dropDownOptions" [inputAttr]="{ name: nombreObj }"
+  [readOnly]="readOnly" (onCustomItemCreating)="addCustomItem($event)" (onInitialized)="onInitialized($event)"
+  (onValueChanged)="onValueChanged($event)">
+  <div *dxTemplate="let data of 'item'">
+    @if (columnData.length == 0) {
+      <div [ngStyle]="style[0]">
+        {{ data }}
+      </div>
+    }
+
+    <!-- <div style="width: 40%; float:left"> -->
+    @if (columnData.length > 0) {
+      <div [ngStyle]="style[0]">
+        {{ data[columnData[0]] }}
+      </div>
+    }
+
+    <!-- <div style="width: 60%; float:right" *ngIf="columnData.length > 1"> -->
+    @if (columnData.length > 1) {
+      <div [ngStyle]="style[1]">
+        {{ data[columnData[1]] }}
+      </div>
+    }
+
+    <!-- <div style="width: 60%; float:right" *ngIf="columnData.length > 2"> -->
+    @if (columnData.length > 2) {
+      <div [ngStyle]="style[2]">
+        {{ data[columnData[2]] }}
+      </div>
+    }
+  </div>
+  <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+    <div id="btnCompoRefreshSbox">
+      <dx-button icon="refresh" (onClick)="refreshClick()"></dx-button>
+    </div>
+    <!--
+    <div [ngStyle]="style[0]" *ngIf="columnData.length > 0" class="clsTit">
+      {{ columnCaption[0] }}
+    </div>
+    <div [ngStyle]="style[1]" *ngIf="columnData.length > 1" class="clsTit">
+      {{ columnCaption[1] }}
+    </div>
+    <div [ngStyle]="style[2]" *ngIf="columnData.length > 2" class="clsTit">
+      {{ columnCaption[2] }}
+    </div>
+    -->
+  </div>
+</dx-select-box>

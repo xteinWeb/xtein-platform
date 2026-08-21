@@ -1,0 +1,62 @@
+<dx-popup #popUpEmail id="popUpEmail" [maxWidth]="725" [minWidth]="680" [height]="450" [showTitle]="true"
+  [dragEnabled]="true" [resizeEnabled]="true" [showCloseButton]="true" [hideOnOutsideClick]="false"
+  [(visible)]="popupVisible" (onShown)="onShown($event)" (onHidden)="onHidden($event)"
+  (onInitialized)="onInitializedPopUp($event)">
+  <div *dxTemplate="let data of 'content'">
+    <dx-scroll-view width="100%" height="330px" showScrollbar="always">
+      <form (submit)="handleSubmit($event)">
+        <dx-form id="form" [formData]="DEnvioCorreo" [readOnly]="isFormReadOnly" labelLocation="top"
+          [showColonAfterLabel]="false">
+          <dxi-item itemType="group" caption="Configuración del Envío" [colCount]="1">
+            <dxi-item dataField="ORIGEN">
+              <dxo-label text="Remitente"></dxo-label>
+            </dxi-item>
+            <dxi-item dataField="ORIGEN_EMAIL">
+              <dxo-label text="Correo Remitente"></dxo-label>
+              <dxi-validation-rule type="email" message="No es un correo válido"></dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="DESTINO">
+              <dxo-label text="Destinatario Principal"></dxo-label>
+            </dxi-item>
+
+            <dxi-item dataField="ASUNTO">
+              <dxo-label text="Asunto del Mensaje"></dxo-label>
+            </dxi-item>
+            <!-- Sección de Correos Separados (Dinámica) -->
+            <dxi-item [visible]="emailsArray.length > 0">
+              <div *dxTemplate>
+                <div class="emails-modal-container"
+                  style="border-top: 2px solid #3498db; padding-top: 15px; margin-top: 10px; background: #fdfdfd;">
+                  @for (item of emailsArray; track item; let i = $index) {
+                    <div
+                      style="margin-bottom: 15px; padding: 0 5px;">
+                      <label
+                        style="font-size: 11px; color: #2980b9; font-weight: 700; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Correo
+                      Destino #{{i + 1}}</label>
+                      <dx-text-box [(value)]="item.email" [readOnly]="isFormReadOnly"
+                      stylingMode="filled" placeholder="Ingrese el correo..."></dx-text-box>
+                    </div>
+                  }
+                </div>
+              </div>
+            </dxi-item>
+
+            <dxi-item dataField="DESTINO_EMAIL" [visible]="emailsArray.length === 0">
+              <dxo-label text="Correo Destino"></dxo-label>
+              <dxi-validation-rule type="email" message="No es un correo válido"></dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="NOTA" editorType="dxTextArea" [editorOptions]="{ height: 90 }">
+              <dxo-label text="Mensaje / Nota adicional"></dxo-label>
+            </dxi-item>
+
+          </dxi-item>
+
+          <dxi-item itemType="button" horizontalAlignment="center" [buttonOptions]="submitButtonOptions">
+          </dxi-item>
+        </dx-form>
+      </form>
+    </dx-scroll-view>
+  </div>
+</dx-popup>

@@ -1,0 +1,263 @@
+<div id="barraGeneral" >
+
+  @if (visibleBarraIni) {
+    <div id="barraIni" class="contenedor">
+      @if (btnConfigUsr.r_nuevo) {
+        <div id="r_nuevo" class="xt-icon" (click)="btnAccionMenuReg('r_nuevo')" (mouseenter)="toggleToolTip('r_nuevo')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-crear-ol"></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_modificar && cfgBarra?.operacion?.r_modificar !== false) {
+        <div id="r_modificar" class="xt-icon" (click)="btnAccionMenuReg('r_modificar')" (mouseenter)="toggleToolTip('r_modificar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-editar-sl"></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_nuevo) {
+        <div class="xt-separator">
+          <i class="icon-divisor-light" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_buscar) {
+        <div id="r_buscar" class="xt-icon" (click)="btnAccionMenuReg('r_buscar')" (mouseenter)="toggleToolTip('r_buscar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-buscar-documentos-ol"></i>
+        </div>
+      }
+      <div id="r_refrescar" class="xt-icon" (click)="btnAccionMenuReg('r_refrescar')" (mouseenter)="toggleToolTip('r_refrescar')" (mouseleave)="toolTipVisible = false">
+        <i class="icon-refrescar"></i>
+      </div>
+      @if (btnConfigUsr.r_configurar) {
+        <div class="xt-separator">
+          <i class="icon-divisor-light" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_configurar) {
+        <div id="r_configurar" class="xt-icon" (click)="btnAccionMenuReg('r_configurar')" (mouseenter)="toggleToolTip('r_configurar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-configurar-ol"></i>
+        </div>
+      }
+    </div>
+  }
+
+  @if (visibleBarraEdicion) {
+    <div id="barraEdicion" class="contenedor">
+      <div class="xt-icon" style="cursor: default !important; background-color: rgba(18,94,220,.075); border-radius: 6px;" >
+        @if (cfgBarra.accion === 'r_nuevo' || accion_prev  === 'r_nuevo' ) {
+          <i class="icon-crear-sl" style="cursor: default !important; color: #35ccac;"></i>
+        }
+        @if (cfgBarra.accion === 'r_modificar' || accion_prev  === 'r_modificar'  ) {
+          <i class="icon-editar-sl" style="cursor: default !important; color: #35ccac;"></i>
+        }
+        @if (cfgBarra.accion === 'r_copiar' || accion_prev  === 'r_copiar'  ) {
+          <i class="icon-copiar" style="cursor: default !important; color: #35ccac;"></i>
+        }
+      </div>
+      <div class="xt-separator" >
+        <i class="icon-divisor-light" ></i>
+      </div>
+      <div id="r_guardar" class="xt-icon" (click)="btnAccionMenuReg('r_guardar')" (mouseenter)="toggleToolTip('r_guardar')" (mouseleave)="toolTipVisible = false">
+        <i class="icon-aceptar-ol"></i>
+      </div>
+      <div id="r_cancelar" class="xt-icon" (click)="btnAccionMenuReg('r_cancelar')" (mouseenter)="toggleToolTip('r_cancelar')" (mouseleave)="toolTipVisible = false">
+        <i class="icon-cancelar-ol" ></i>
+      </div>
+      <div class="xt-separator" >
+        <i class="icon-divisor-light" ></i>
+      </div>
+      <div id="r_refrescar" class="xt-icon" (click)="btnAccionMenuReg('r_refrescar')" (mouseenter)="toggleToolTip('r_refrescar')" (mouseleave)="toolTipVisible = false">
+        <i class="icon-refrescar" ></i>
+      </div>
+      @if (btnConfigUsr.r_configurar) {
+        <div id="r_configurar" class="xt-icon" (click)="btnAccionMenuReg('r_configurar')" (mouseenter)="toggleToolTip('r_configurar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-configurar-ol"></i>
+        </div>
+      }
+    </div>
+  }
+
+  @if (visibleBarraNavegar) {
+    <div id="barraNavegar" class="contenedor">
+      @if (btnConfigUsr.r_nuevo) {
+        <div id="r_nuevo" class="xt-icon" (click)="btnAccionMenuReg('r_nuevo')" (mouseenter)="toggleToolTip('r_nuevo')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-crear-ol" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_modificar && cfgBarra.operacion.r_modificar !== false) {
+        <div id="r_modificar" class="xt-icon" (click)="btnAccionMenuReg('r_modificar')" (mouseenter)="toggleToolTip('r_modificar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-editar-ol" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_nuevo) {
+        <div id="r_copiar" class="xt-icon" (click)="btnAccionMenuReg('r_copiar')" (mouseenter)="toggleToolTip('r_copiar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-copiar" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_eliminar) {
+        <div id="r_eliminar" class="xt-icon" (click)="btnAccionMenuReg('r_eliminar')" (mouseenter)="toggleToolTip('r_eliminar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-eliminar-ol" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_nuevo || btnConfigUsr.r_modificar || btnConfigUsr.r_eliminar) {
+        <div class="xt-separator">
+          <i class="icon-divisor-light" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_buscar) {
+        <div id="r_buscar" class="xt-icon" (click)="btnAccionMenuReg('r_buscar')" (mouseenter)="toggleToolTip('r_buscar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-buscar-documentos-ol"  ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_buscar) {
+        <div id="r_vista" class="xt-icon" (click)="btnAccionMenuReg('r_vista')" (mouseenter)="toggleToolTip('r_vista')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-ver-ol" ></i>
+        </div>
+      }
+      @if (btnConfigUsr.r_buscar) {
+        <div class="xt-separator">
+          <i class="icon-divisor-light"></i>
+        </div>
+      }
+      <div id="r_primero" class="xt-icon" (click)="btnAccionMenuReg('r_primero')" (mouseenter)="toggleToolTip('r_primero')" (mouseleave)="toolTipVisible = false">
+        <i class="icon-primero"  ></i>
+      </div>
+      <div id="r_anterior" class="xt-icon" (click)="btnAccionMenuReg('r_anterior')" (mouseenter)="toggleToolTip('r_anterior')" (mouseleave)="toolTipVisible = false">
+        <i class="icon-anterior"  ></i>
+      </div>
+      <input
+        id="r_numreg"
+        type="text"
+        class="in-numreg"
+        [(ngModel)]="r_numReg"
+        (mouseenter)="toggleToolTip('r_numreg')" (mouseleave)="toolTipVisible = false"
+        style="width: 50px; border-radius:6px !important; margin-right: 5px; border: 1px solid #C7D0DB; background-color: #e6eaef;"
+        >
+        <span
+          id="r_totreg"
+          class="in-totreg"
+          (mouseenter)="toggleToolTip('r_totreg')" (mouseleave)="toolTipVisible = false"
+          >
+          {{ r_totReg }}
+        </span>
+        <div id="r_siguiente" class="xt-icon" (click)="btnAccionMenuReg('r_siguiente')" (mouseenter)="toggleToolTip('r_siguiente')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-siguiente"  ></i>
+        </div>
+        <div id="r_ultimo" class="xt-icon" (click)="btnAccionMenuReg('r_ultimo')" (mouseenter)="toggleToolTip('r_ultimo')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-ultimo" ></i>
+        </div>
+        <div class="xt-separator" >
+          <i class="icon-divisor-light" ></i>
+        </div>
+        @if (btnConfigUsr.r_imprimir) {
+          <div id="r_imprimir" class="xt-icon" (click)="btnAccionMenuReg('r_imprimir')" (mouseenter)="toggleToolTip('r_imprimir')" (mouseleave)="toolTipVisible = false">
+            <i class="icon-imprimir-ol"></i>
+          </div>
+        }
+        <div id="r_refrescar" class="xt-icon" (click)="btnAccionMenuReg('r_refrescar')" (mouseenter)="toggleToolTip('r_refrescar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-refrescar" ></i>
+        </div>
+        <div id="r_configurar" class="xt-icon" (click)="btnAccionMenuReg('r_configurar')" (mouseenter)="toggleToolTip('r_configurar')" (mouseleave)="toolTipVisible = false">
+          <i class="icon-configurar-ol"></i>
+        </div>
+        <!-- <div class="xt-icon">
+        <i class="icon-mas-opciones"></i>
+      </div> -->
+    </div>
+  }
+
+  <dx-tooltip
+    id="tooltipRegbarra"
+    class="xt-tootips"
+    position="bottom"
+    showEvent="mouseenter"
+    [target]='targetIdTooltip'
+    [wrapperAttr]="wrapperAttr"
+    [(visible)]="toolTipVisible"
+    [hideOnOutsideClick]="false"
+    >
+    <div *dxTemplate="let data = data; of: 'content'">
+      <b style="font-size: 13px;">{{tooltipTitulo}}</b>
+      <hr class="m-0">
+      <div style="font-size: 13px;">{{tooltipInfo}}</div>
+    </div>
+  </dx-tooltip>
+
+</div>
+
+
+<!-- Sub-Menú de reportes -->
+<dx-popup
+  id="imprimir"
+  width="380"
+  [height]="'auto'"
+  [showTitle]="false"
+  [hideOnOutsideClick]="true"
+  [(visible)]="visibleListaInf"
+  >
+  <dxo-position
+    my="left top"
+    at="left bottom"
+    of="#r_imprimir"
+  ></dxo-position>
+  <div *dxTemplate="let data of 'content'">
+    <dx-list
+      selectionMode="none"
+      [dataSource]="listaReportes"
+      >
+      <div *dxTemplate="let data of 'item'" class="d-flex align-items-center">
+        <span><i class="icon-imprimir-ol"></i></span>
+        <span style="padding-left: 5px; cursor: auto; width:70%">{{data.text}}</span>
+        <div class="xs-opc-imprimir">
+          <dx-button icon="icon-seleccionada-ol" (onClick)="seleccOpcionImprimir(data, 'actual')"
+            (mouseover)="toggleToolTip('btnImpActual'+data.item)" (mouseout)="toggleToolTip('btnImpActual'+data.item)">
+            <i id="btnImpActual{{data.item}}" class="icon-seleccionada-ol" style="color:rgba(10,57,96,.95); font-size: 16px;"></i>
+          </dx-button>
+          <dx-button icon="icon-seleccionar-todas-alt-sl" (onClick)="seleccOpcionImprimir(data, 'todos')"
+            (mouseover)="toggleToolTip('btnImpTodos'+data.item)" (mouseout)="toggleToolTip('btnImpTodos'+data.item)">
+            <i id="btnImpTodos{{data.item}}" class="icon-seleccionar-todas-alt-sl" style="color:rgba(10,57,96,.25); font-size: 16px;"></i>
+          </dx-button>
+          <div class="xt-separator" >
+            <i class="icon-divisor-light" ></i>
+          </div>
+          <dx-button icon="icon-imprimir-sl" (onClick)="seleccOpcionImprimir(data, 'previsualizar')"
+            (mouseover)="toggleToolTip('btnImpPrev'+data.item)" (mouseout)="toggleToolTip('btnImpPrev'+data.item)">
+            <i id="btnImpPrev{{data.item}}" class="icon-imprimir-sl" style="color:rgba(10,57,96,.75); font-size: 16px;"></i>
+          </dx-button>
+          <dx-button icon="icon-pdf-doc-sl" (onClick)="seleccOpcionImprimir(data, 'pdf')"
+            (mouseover)="toggleToolTip('btnImpPdf'+data.item)" (mouseout)="toggleToolTip('btnImpPdf'+data.item)">
+            <i id="btnImpPdf{{data.item}}" class="icon-pdf-doc-sl" style="color:rgba(10,57,96,.75); font-size: 16px;"></i>
+          </dx-button>
+          <dx-button icon="icon-correo" (onClick)="seleccOpcionImprimir(data, 'email')"
+            (mouseover)="toggleToolTip('btnImpEmail'+data.item)" (mouseout)="toggleToolTip('btnImpEmail'+data.item)">
+            <i id="btnImpEmail{{data.item}}" class="icon-correo" style="color:rgba(10,57,96,.75); font-size: 16px;"></i>
+          </dx-button>
+        </div>
+      </div>
+    </dx-list>
+  </div>
+</dx-popup>
+
+<!-- Sub-Menú de configuración -->
+<dx-popup
+  id="configurar"
+  width="300"
+  [height]="'auto'"
+  [showTitle]="false"
+  [hideOnOutsideClick]="true"
+  [(visible)]="visibleSettings"
+  >
+  <dxo-position
+    my="right top"
+    at="right bottom"
+    of="#r_configurar"
+  ></dxo-position>
+  <div *dxTemplate="let data of 'content'">
+    <dx-list
+      (onItemClick)="seleccOpcionConfig($event)"
+      [dataSource]="listaOpciones"
+      >
+      <div *dxTemplate="let data of 'item'">
+        <span><i class="{{data.icon}}"></i></span>
+        <span style="padding-left: 5px;">{{data.text}}</span>
+      </div>
+    </dx-list>
+  </div>
+</dx-popup>

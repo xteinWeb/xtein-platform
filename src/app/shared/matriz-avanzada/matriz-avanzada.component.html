@@ -1,0 +1,152 @@
+<div class="row gx-3" #containerPopupList id="containerPopupList">
+  <div class="col-12 col-xl-12">
+    <div class="card-content">
+      <label class="title">{{viewForm | uppercase}}</label>
+      <div class="flex-grow-1 min-h-0 content-form">
+        @if (viewForm === 'Cambio de Material') {
+          <div>
+            <app-cambio-materiales [events]="eventsDatos.asObservable()" (onRespuestaMatriz)="onRespuestaPerfilTrib($event)"></app-cambio-materiales>
+          </div>
+        }
+        @if (viewForm === 'Actualizar Parte') {
+          <div>
+            <app-actualizar-parte [events]="eventsDatos.asObservable()" (onRespuestaMatriz)="onRespuestaPerfilTrib($event)"></app-actualizar-parte>
+          </div>
+        }
+        @if (viewForm === 'Actualizar por Lista de Precio') {
+          <div>
+            <app-lista-precio [events]="eventsDatos.asObservable()" (onRespuestaMatriz)="onRespuestaPerfilTrib($event)"></app-lista-precio>
+          </div>
+        }
+
+        <div class="row gx-3" id="splitterMain" style="height: 58vh; width: 100%;">
+          <dx-tree-list #treeListMatrices id="treeListMatrices" [dataSource]="DataSourceMatrices" keyExpr="PRODUCTO"
+            parentIdExpr="PADRE" rootValue="RAIZ" [showBorders]="true" [rowAlternationEnabled]="true"
+            [hoverStateEnabled]="true" [focusedRowEnabled]="true" [allowColumnResizing]="true"
+            [columnHidingEnabled]="true" columnResizingMode="widget" [height]="height" [width]="width"
+            [(selectedRowKeys)]="selectMatrizList" (onSelectionChanged)="onSeleccionMatrices($event)" (onCellPrepared)="onCellPreparedLP($event)">
+            <dxo-selection selectAllMode="allPages" mode="multiple" [recursive]="false"></dxo-selection>
+            <dxo-scrolling mode="virtual"></dxo-scrolling>
+            <dxo-header-filter [visible]="true"></dxo-header-filter>
+            <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="widthSerchTreeList"></dxo-search-panel>
+
+            <dxi-column dataField="PRODUCTO" caption="Código" [width]="150"></dxi-column>
+            <dxi-column dataField="NOMBRE" caption="Nombre" [width]="200"></dxi-column>
+            <!-- <dxi-column [visible]="viewForm === 'Actualizar Parte' || viewForm === 'Inactivar Matrices'" dataField="CLASE" caption="Clase"></dxi-column> -->
+
+            <dxi-column [visible]="viewForm.match('Cambio de Material')" format="$ #,##0.00"  [width]="150" dataField="ID_UDM" caption="UM Pres."></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="BASE_COSTO" caption="Base Costo"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="#0.00%"  [width]="150" dataField="MARGEN" caption="MARGEN">
+              <dxo-format type="fixedPoint" [precision]="2"></dxo-format>
+            </dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="SUBTOTAL_MA" caption="Sub Total MA"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="PROTECCION_MA" caption="Protección MA"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_MATERIALES" caption="Total de Materiales"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_GRAVADOS" caption="Total Gravados"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_SIN_IVA" caption="Total Sin IVA"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="SUBTOTAL_MO" caption="Sub Total MO"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="PROTECCION_MO" caption="Protección MO"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_MO" caption="Total MO"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_COSTO_DIRECTO" caption="Total Costos Directos"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_CIF" caption="Total CIF"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_CIF_FIJO" caption="Total CIF Fijo"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_CIF_VARIABLE" caption="Total CIF Variable"></dxi-column>
+
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="TOTAL_COSTO" caption="Total Costos" [width]="150" format="$ #,##0.00"  ></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="UTILIDAD" caption="Utilidad" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="PRECIO_BASE" caption="Precio base" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="AJUSTE_PRECIO" caption="Ajuste de Precio"[width]="150" format="#0.00%"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="PRECIO_ANTES_GRAV" caption="Precio Antes Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="CON_OPERATIVA" caption="Contribución operativa" [width]="150" format="#0.00%"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="GRAVAMENES" caption="Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="PRECIO_DESP_GRAV" caption="Precio Despues Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="TOTAL" caption="Total Matriz" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm === 'Inactivar Matrices'" dataField="ESTADO" caption="Estado"></dxi-column>
+
+          </dx-tree-list>
+
+          <dx-tree-list #treeListMatrices2 id="treeListMatrices2" [dataSource]="DLMatricesCAL" keyExpr="PRODUCTO"
+            [showBorders]="true" [columnAutoWidth]="true" [rowAlternationEnabled]="true" [hoverStateEnabled]="true"
+            [focusedRowEnabled]="true" [allowColumnResizing]="true" [columnHidingEnabled]="true"
+            columnResizingMode="widget" [height]="height" [width]="width">
+            <dxo-scrolling mode="virtual"></dxo-scrolling>
+            <dxo-header-filter [visible]="true"></dxo-header-filter>
+            <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="widthSerchTreeList"></dxo-search-panel>
+
+            <dxi-column dataField="PRODUCTO" caption="Código" [width]="150"></dxi-column>
+            <dxi-column dataField="NOMBRE" caption="Nombre" [width]="200"></dxi-column>
+            <!-- <dxi-column [visible]="viewForm === 'Actualizar Parte' || viewForm === 'Inactivar Matrices'" dataField="CLASE" caption="Clase"></dxi-column> -->
+
+            <dxi-column [visible]="viewForm.match('Cambio de Material')" format="$ #,##0.00"  [width]="150" dataField="ID_UDM" caption="UM Pres."></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="BASE_COSTO" caption="Base Costo"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="#0.00%"  [width]="150" dataField="MARGEN" caption="MARGEN">
+              <dxo-format type="fixedPoint" [precision]="2"></dxo-format>
+            </dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="SUBTOTAL_MA" caption="Sub Total MA"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="PROTECCION_MA" caption="Protección MA"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_MATERIALES" caption="Total de Materiales"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_GRAVADOS" caption="Total Gravados"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_SIN_IVA" caption="Total Sin IVA"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="SUBTOTAL_MO" caption="Sub Total MO"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="PROTECCION_MO" caption="Protección MO"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_MO" caption="Total MO"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_COSTO_DIRECTO" caption="Total Costos Directos"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_CIF" caption="Total CIF"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_CIF_FIJO" caption="Total CIF Fijo"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Cambio de Material|Actualizar por Lista de Precio')" format="$ #,##0.00"  [width]="150" dataField="TOTAL_CIF_VARIABLE" caption="Total CIF Variable"></dxi-column>
+
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="TOTAL_COSTO" caption="Total Costos" [width]="150" format="$ #,##0.00"  ></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="UTILIDAD" caption="Utilidad" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="PRECIO_BASE" caption="Precio base" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="AJUSTE_PRECIO" caption="Ajuste de Precio"[width]="150" format="#0.00%"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="PRECIO_ANTES_GRAV" caption="Precio Antes Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="CON_OPERATIVA" caption="Contribución operativa" [width]="150" format="#0.00%"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="GRAVAMENES" caption="Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="PRECIO_DESP_GRAV" caption="Precio Despues Gravamenes" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') " dataField="TOTAL" caption="Total Matriz" [width]="150" format="$ #,##0.00"></dxi-column>
+            <dxi-column [visible]="viewForm === 'Inactivar Matrices'" dataField="ESTADO" caption="Estado"></dxi-column>
+
+          </dx-tree-list>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; width: 100%; height: 8%;">
+          <div style="display: flex; width: 50%; justify-content: flex-start;">
+            <dx-button id="btnAceptarPT" stylingMode="contained" text="Calcular" type="default" [width]="130"
+              [visible]="viewForm.match('Actualizar Parte|Cambio de Material|Actualizar por Lista de Precio') ? true : false"
+              [disabled]="(viewForm === 'Cambio de Material' && selectMatrizList.length <= 0) ? true : 
+                          (viewForm === 'Actualizar Parte' && selectMatrizList.length <= 0) ? true : 
+                          (viewForm === 'Actualizar por Lista de Precio' && DataSourceMatrices.length <= 0) ? true : false" 
+              (onClick)="onAceptarBtn($event, 'CALCULAR')"
+            ></dx-button>
+          </div>
+          <div style="display: flex; gap: 10px; width: 50%; justify-content: flex-end;">
+            <dx-button id="btnAceptarPT" stylingMode="contained"
+              type="default"
+              [width]="180"
+              [text]="viewForm.match('Actualizar') ? 'Actualizar' : viewForm | uppercase"
+              [disabled]="(viewForm.match('Cambio de Material|Actualizar Parte') && DLMatricesCAL.length <= 0) ? true : 
+                          (viewForm === 'Actualizar por Lista de Precio' && DLMatricesCAL.length <= 0) ? true : false" 
+              (onClick)="onAceptarBtn($event, 'GUARDAR')"
+            ></dx-button>
+            <dx-button id="btnCancelarPT" stylingMode="contained" text="Cancelar" type="normal" [width]="110"
+              (onClick)="onAceptarBtn($event, 'CANCELAR')"
+            ></dx-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#containerPopupList' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

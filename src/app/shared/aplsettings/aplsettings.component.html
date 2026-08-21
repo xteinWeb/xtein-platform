@@ -1,0 +1,22 @@
+
+<!-- Sub-Menú de opciones -->
+<dx-popup
+    width="300"
+    [height]="'auto'"
+    [showTitle]="false"
+    [hideOnOutsideClick]="true"
+    [(visible)]="visibleListaOpc">
+    <dxo-position
+        my="right top"
+        at="right bottom"
+        of="#aplSettings">
+    </dxo-position>
+    <div *dxTemplate="let data of 'content'">
+        <dx-list
+            (onItemClick)="seleccOpcion($event)"
+            [dataSource]="listaOpciones"
+            >
+        </dx-list>
+    </div>
+</dx-popup>
+

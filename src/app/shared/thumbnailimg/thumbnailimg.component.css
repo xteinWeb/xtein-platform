@@ -1,0 +1,61 @@
+.cover {
+  padding: 0px 30px;
+  position: relative;
+  margin-top: 0px;
+  border: 1px solid #dbd7d7;
+}
+.left {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.right {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.scroll-images {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  cursor: pointer;
+}
+.child img {
+  width: 60px;
+  object-fit: cover;
+  object-position: center;
+}
+.scroll-images::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+  background-color: #aaa;
+}
+
+.scroll-images::-webkit-scrollbar-thumb {
+  background-color: black;
+}
+
+.child {
+  min-width: 70px;
+  height: 60px;
+  margin: 1px 3px;
+  overflow: hidden;
+}
+
+button {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+.font-xtein  {
+  font-size: 28px;
+  color: #aaa;
+}

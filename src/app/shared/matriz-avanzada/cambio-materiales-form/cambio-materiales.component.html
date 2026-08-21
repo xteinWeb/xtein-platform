@@ -1,0 +1,124 @@
+<div style="display: flex; width: 100%; height: 91%; flex-direction: column;">
+  <div
+    style="display: flex; width: 100%; height: 22%; justify-content: space-between; flex-direction: column; gap:35px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+      <div style="width: 50%;">
+        <span>Material Anterior</span>
+        <dx-drop-down-box #dropMaterial1 id="dropMaterial1" width="100%" displayExpr="DESCRI" valueExpr="ITEM"
+          columnResizingMode="widget" placeholder="Selecciones Material Anterior" [readOnly]="false"
+          [showClearButton]="true" [dataSource]="DProductos" [(value)]="selectProductoOld"
+          [(opened)]="openedPopupCambioOld" [dropDownOptions]="{
+              width: 500,
+              height: 350,
+              hideOnParentScroll: true,
+              container: '#containerPopupList'
+            }">
+          <div id="containerGridProd1" *dxTemplate="let data of 'content'">
+            <dx-data-grid #GridProd1 height="100%" width="100%" keyExpr="ITEM" columnResizingMode="widget"
+              [columnAutoWidth]="true" [focusedRowEnabled]="true" [hoverStateEnabled]="true"
+              [allowColumnResizing]="true" [rowAlternationEnabled]="true" [selection]="{ mode: 'single' }"
+              [dataSource]="DProductos" [(selectedRowKeys)]="selectProductoOld" (onSelectionChanged)="
+                  onSelectionCambioProducto($event, 'ANTERIOR')
+                ">
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="450"></dxo-search-panel>
+              <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+              <dxi-column dataField="ID_COMPONENTE" caption="Producto" cssClass="clsEncabHis"
+                [width]="110"></dxi-column>
+              <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="190"></dxi-column>
+              <dxi-column dataField="ID_UDM" caption="UM Pres." cssClass="clsEncabHis"></dxi-column>
+              <dxi-column dataField="VALOR_UNITARIO" caption="Precio" cssClass="clsEncabHis"></dxi-column>
+            </dx-data-grid>
+          </div>
+        </dx-drop-down-box>
+      </div>
+      <div style="width: 50%;">
+        <div class="content-list-titles" style="display: grid; grid-template-columns: 33% 33% 33%; text-align: center;">
+          <span class="detalle">Valor</span>
+          <span class="detalle">Unidad de Medida</span>
+          <span class="detalle">Factor de Material</span>
+        </div>
+        <div style="width: 100%; height: 78%">
+          <dx-list #listProducto1 id="listProducto1" width="100%" height="93%" keyExpr="PRODUCTO" selectionMode="none"
+            [searchEnabled]="false" [dataSource]="MAnterior">
+            <div *dxTemplate="let data of 'item'" class="content-list">
+              <div style="width: 33%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.VALOR_UNITARIO | currency }}</div>
+              </div>
+              <div style="width: 33%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.ID_UDM }}</div>
+              </div>
+              <div style="width: 33%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.FACTOR_MA + '%' }}</div>
+              </div>
+            </div>
+          </dx-list>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+      <div style="width: 50%;">
+        <span>Material Nuevo</span>
+        <dx-drop-down-box #dropMaterial2 id="dropMaterial2" width="100%" displayExpr="DESCRI" valueExpr="ITEM"
+          columnResizingMode="widget" placeholder="Selecciones Material Nuevo"
+          [showClearButton]="true" [dataSource]="DProductos2" [(value)]="selectProductoNuevo"
+          [readOnly]="DProductos2.length <= 0" [(opened)]="openedPopupCambioPro" [dropDownOptions]="{
+            width: 500,
+            height: 350,
+            hideOnParentScroll: true,
+            container: '#containerPopupList'
+          }">
+          <div id="containerGridProd2" *dxTemplate="let data of 'content'">
+            <dx-data-grid #GridProd2 height="100%" width="100%" keyExpr="ITEM" columnResizingMode="widget"
+              [columnAutoWidth]="true" [focusedRowEnabled]="true" [hoverStateEnabled]="true"
+              [allowColumnResizing]="true" [rowAlternationEnabled]="true" [selection]="{ mode: 'single' }"
+              [dataSource]="DProductos2" [(selectedRowKeys)]="selectProductoNuevo"
+              (onSelectionChanged)="onSelectionCambioProducto($event, 'NUEVO')">
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="450"></dxo-search-panel>
+              <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+              <dxi-column dataField="ID_COMPONENTE" caption="Producto" cssClass="clsEncabHis"
+                [width]="110"></dxi-column>
+              <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="190"></dxi-column>
+              <dxi-column dataField="ID_UDM" caption="UM Pres." cssClass="clsEncabHis"></dxi-column>
+              <dxi-column dataField="VALOR_UNITARIO" caption="Precio" cssClass="clsEncabHis"></dxi-column>
+            </dx-data-grid>
+          </div>
+        </dx-drop-down-box>
+      </div>
+      <div style="width: 50%;">
+        <div style="width: 100%; height: 78%">
+          <dx-list #listProducto2 id="listProducto2" width="100%" height="93%" keyExpr="PRODUCTO" selectionMode="none"
+            [searchEnabled]="false" [dataSource]="MNuevo" [elementAttr]="{ style: 'cursor: pointer;' }">
+            <div *dxTemplate="let data of 'item'" class="content-list">
+              <div style="width: 33%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.VALOR_UNITARIO | currency }}</div>
+              </div>
+              <div style="width: 33%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.ID_UDM }}</div>
+              </div>
+              <div style="width: 33%; display: grid; place-content: center; gap: 10px">
+                <div style="text-align: center;">{{ data.FACTOR_MA + '%' }}</div>
+              </div>
+            </div>
+          </dx-list>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#containerPopupList' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

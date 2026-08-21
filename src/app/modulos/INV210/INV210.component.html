@@ -1,0 +1,368 @@
+<div class="row gx-3" id="INV210" #INV210>
+  <div class="col-12 ">
+    <div class="card-content">
+      <dx-form
+        #formInventario
+        id="formInventario"
+        [formData]="FInventario"
+        [readOnly]="objReadOnly.readOnly"
+        labelLocation="left"
+        >
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+
+        <dxi-item dataField="DOCUMENTO" [editorOptions]="{ readOnly: true }" >
+          <dxo-label text="Documento"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box
+              #txtIdDocumento
+              id="txtIdDocumento"
+              placeholder="Documento"
+              [readOnly]="true"
+              [value]="FInventario.DOCUMENTO"
+            ></dx-text-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ESTADO">
+          <dxo-label text="Estado"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box
+              id="select_ESTADO"
+              #select_ESTADO
+              placeholder="Seleccione Estado"
+              [dataSource]="['AUTORIZADO','ANULADO','RECONTEO','REGISTRADO']"
+              [value]="FInventario.ESTADO"
+              [readOnly]="objReadOnly.readOnlyEstado"
+              (onValueChanged)="onValueChanged($event, 'ESTADO')"
+            ></dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ID_UN_BODEGA" >
+          <dxo-label text="Bodega"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box
+              #select_bodega
+              id="select_bodega"
+              valueExpr="ID_UN_BODEGA"
+              displayExpr="DESCRIPCION"
+              stylingMode="filled"
+              placeholder="Seleccione bodega"
+              [searchEnabled]="true"
+              [readOnly]="objReadOnly.readOnly"
+              [dataSource]="DBodegas"
+              [value]="FInventario.ID_UN_BODEGA"
+              (onValueChanged)="onValueChanged($event, 'ID_UN_BODEGA')"
+            ></dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="FECHA_REGISTRO" >
+          <dxo-label text="Fecha"></dxo-label>
+          <div *dxTemplate>
+            <dx-date-box
+              type="date"
+              [readOnly]="true"
+              [value]="FInventario.FECHA"
+              (onValueChanged)="onValueChanged($event, 'FECHA_REGISTRO')"
+            ></dx-date-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="GRUPOS" >
+          <dxo-label text="Grupos"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box
+              width="100%"
+              valueExpr="ID_GRUPO"
+              displayExpr="ID_GRUPO"
+              placeholder="Seleccione Productos.."
+              [showClearButton]="true"
+              [(opened)]="openDropGrupos"
+              [readOnly]="objReadOnly.readOnly"
+              [(value)]="FInventario.GRUPOS"
+              [dataSource]="DGrupos"
+              [dropDownOptions]="{ width: 650, height: 400, hideOnParentScroll: true, container: '#router-container' }"
+              (onValueChanged)="onValueChanged($event, 'SELECT GRUPOS')"
+              >
+              <div *dxTemplate="let data of 'content'">
+                <dx-tree-list
+                  #treeLisGrupos
+                  id="treeLisGrupos"
+                  width="100%"
+                  height="88%"
+                  keyExpr="ID_GRUPO"
+                  parentIdExpr="ID_GRUPO_PADRE"
+                  [columnMinWidth]="150"
+                  [expandedRowKeys]="[1]"
+                  [showBorders]="true"
+                  [showRowLines]="true"
+                  [autoExpandAll]="true"
+                  [columnAutoWidth]="true"
+                  [hoverStateEnabled]="true"
+                  [allowColumnResizing]="true"
+                  [rowAlternationEnabled]="true"
+                  [dataSource]="DGrupos"
+                  [(selectedRowKeys)]="FInventario.GRUPOS"
+                  (onSelectionChanged)="onValueChanged($event, 'GRUPOS')"
+                  >
+                  <dxo-selection mode="multiple" [recursive]="true"></dxo-selection>
+                  <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+                  <dxo-search-panel [width]="250" [visible]="true"></dxo-search-panel>
+                  <dxi-column dataField="ID_GRUPO" caption="Código" [width]="200" ></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                  <!-- <dxi-column dataField="ID_GRUPO_PADRE" caption="Grupo Padre"></dxi-column> -->
+                </dx-tree-list>
+                <div style="display: flex; justify-content: center; width: 100%; padding: 5px;">
+                  <dx-button
+                    id="btnAceptarPT"
+                    stylingMode="contained"
+                    text="Aceptar"
+                    type="default"
+                    [width]="100"
+                    (onClick)="aceptarBottom($event)"
+                  ></dx-button>
+                  <dx-button
+                    id="btnCancelarPT"
+                    stylingMode="contained"
+                    text="Cancelar"
+                    type="normal"
+                    [width]="110"
+                    [style.margin-left]="'20px'"
+                    (onClick)="closeBottom($event)"
+                  ></dx-button>
+                </div>
+              </div>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="USUARIO" [editorOptions]="{ readOnly: true }" >
+          <dxo-label text="Usuario"></dxo-label>
+        </dxi-item>
+
+        <!-- <dxi-item dataField="N_CONTEOS" >
+        <dxo-label text="N° Conteos"></dxo-label>
+        <div *dxTemplate>
+          <dx-number-box
+            [min]="0"
+            width="auto"
+            [readOnly]="objReadOnly.readOnly"
+            [value]="FInventario.N_CONTEOS"
+            (onValueChanged)="onValueChanged($event, 'N_CONTEOS')"
+          ></dx-number-box>
+        </div>
+      </dxi-item> -->
+
+      <dxi-item dataField="OBSERVACION" [editorOptions]="{ readOnly: true }" >
+        <dxo-label text="Observación"></dxo-label>
+        <div *dxTemplate>
+          <dx-text-area
+            height="auto"
+            placeholder="Descripción de la notificación."
+            [readOnly]="objReadOnly.readOnly"
+            [(value)]="FInventario.OBSERVACION"
+            (onValueChanged)="onValueChanged($event, 'OBSERVACION')"
+          ></dx-text-area>
+        </div>
+      </dxi-item>
+
+    </dx-form>
+  </div>
+
+  @if (activeGreedProductos) {
+    <div class="card-content" >
+      <dx-data-grid
+        #GProductos
+        id="GProductos"
+        width="100%"
+        height="600px"
+        keyExpr="ITEM"
+        noDataText="No hay datos"
+        columnResizingMode="nextColumn"
+        [showBorders]="true"
+        [columnAutoWidth]="true"
+        [focusedRowEnabled]="true"
+        [hoverStateEnabled]="true"
+        [rowAlternationEnabled]="true"
+        [allowColumnResizing]="true"
+        [dataSource]="FInventario.PRODUCTOS"
+        [customizeColumns]="customizeColumns"
+        (onRowPrepared)="onRowPrepared($event)"
+        >
+        <dxo-editing
+          mode="cell"
+          [useIcons]="false"
+          [allowUpdating]="true"
+          [allowDeleting]="false"
+          [allowAdding]="false"
+          >
+          <dxo-texts
+            confirmDeleteMessage="">
+          </dxo-texts>
+        </dxo-editing>
+        <dxo-scrolling mode="virtual"></dxo-scrolling>
+        <dxo-header-filter [visible]="true" width="280" [allowSearch]="true" ></dxo-header-filter>
+        <dxo-grouping #expand [autoExpandAll]="true" ></dxo-grouping>
+        <dxo-paging [pageSize]="10"></dxo-paging>
+        <dxo-pager
+          [visible]="true"
+          [showInfo]="true"
+          [showPageSizeSelector]="true"
+          [showNavigationButtons]="true"
+          [allowedPageSizes]="[10, 20, 30, 40, 50, 'all']"
+        ></dxo-pager>
+        <div *dxTemplate="let cellInfo of 'headerTemplateCheck'" style="display: flex; align-items: center;" >
+          <span>{{ cellInfo.column.caption }}</span>
+          <dx-check-box
+            #checkAll{{cellInfo.column.dataField}}
+            [id]="'checkAll'+cellInfo.column.dataField"
+            style="margin-left: 5px;"
+            [value]="getDataValueCheckHeader(cellInfo, 'header') | async"
+            (onValueChanged)="onValueChangedCheck($event, cellInfo)"
+          ></dx-check-box>
+        </div>
+        <div *dxTemplate="let grupoObj of 'grpTemplateGrupo'" >
+          <div class="dx-datagrid-template">
+            <div class="card-col-2" style="justify-content: flex-start !important;">
+              <span> Grupo: </span>
+              <span>{{ templateHtml(grupoObj, 'ID_GRUPO') || 'Sin Grupo' }} {{ templateHtml(grupoObj, 'NOMBRE') || '' }}</span>
+            </div>
+          </div>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editCkeckBox' ">
+          <dx-check-box
+            #check{{cellInfo.column.dataField}}
+            [id]="'check'+cellInfo.column.dataField"
+            [readOnly]="getDataValue(cellInfo, 'readOnly') | async"
+            [value]="getDataValue(cellInfo, 'value') | async"
+            (onValueChanged)="onValueChangedValue($event, cellInfo)"
+          ></dx-check-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editTextBox' ">
+          <dx-text-box
+            #txt{{cellInfo.column.dataField}}
+            [id]="'txt'+cellInfo.column.dataField"
+            width="100%"
+            height="30px"
+            [readOnly]="getDataValue(cellInfo, 'readOnly') | async"
+            [value]="getDataValue(cellInfo, 'value') | async"
+          ></dx-text-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editSelectBox' ">
+          <dx-select-box
+            #select{{cellInfo.column.dataField}}
+            [id]="'select'+cellInfo.column.dataField"
+            width="100%"
+            height="30px"
+            searchMode="contains"
+            displayExpr="VALOR1"
+            valueExpr="VALOR1"
+            [searchEnabled]="true"
+            [acceptCustomValue]="true"
+            [dataSource]="DObservaciones"
+            [dropDownOptions]="{ width: 500, hideOnParentScroll: true, container: '#router-container' }"
+            [readOnly]="getDataValue(cellInfo, 'readOnly') | async"
+            [value]="getDataValue(cellInfo, 'value') | async"
+            (onValueChanged)="onValueChangedValue($event, cellInfo)"
+          ></dx-select-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editNumberBox' ">
+          <dx-number-box
+            #number{{cellInfo.column.dataField}}
+            [id]="'number'+cellInfo.column.dataField"
+            width="auto"
+            height="30px"
+            format="#,##0.00"
+            [min]="0"
+            [readOnly]="getDataValue(cellInfo, 'readOnly') | async"
+            [value]="getDataValue(cellInfo, 'value') | async"
+            (onValueChanged)="onValueChangedValue($event, cellInfo)"
+          ></dx-number-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'cellTempEstado'">
+          <div
+            class="container-estado"
+							[ngStyle]="{'background-color': (cellInfo.data.ESTADO === 'CONFIABLE' ? 'rgba(53,204,172,.2)':'') ||
+																							(cellInfo.data.ESTADO === 'SOBRANTE' ? 'rgba(164,1,0,.2)':'') ||
+																							(cellInfo.data.ESTADO === 'FALTANTE' ? 'rgba(237,29,36,.2)':''),
+														'color': (cellInfo.data.ESTADO === 'CONFIABLE' ? 'rgba(53,204,172,1)':'') ||
+																							(cellInfo.data.ESTADO === 'SOBRANTE' ? 'rgba(164,1,0,1)':'') ||
+																							(cellInfo.data.ESTADO === 'FALTANTE' ? 'rgba(237,29,36,1)':'')
+							}"
+            >
+            <span
+              class="status-badge"
+								[ngStyle]="{'background-color': (cellInfo.data.ESTADO === 'CONFIABLE' ? 'rgba(53,204,172,1)':'') ||
+																								(cellInfo.data.ESTADO === 'SOBRANTE' ? 'rgba(164,1,0,1)':'') ||
+																								(cellInfo.data.ESTADO === 'FALTANTE' ? 'rgba(237,29,36,1)':'')
+								}"
+            ></span>
+            <span>{{ cellInfo.data.ESTADO }}</span>
+          </div>
+        </div>
+        @if (!objReadOnly.readOnlyGrid) {
+          <dxo-toolbar>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button
+                  icon="insertcolumnright"
+                  (focusStateEnabledChange)="hoverStateEnabledChange($event)"
+                  (onClick)="operGrid($event,'AGREGAR COLUMNA')"
+                ></dx-button>
+              </div>
+            </dxi-item>
+            @if (FInventario.N_CONTEOS > 1) {
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button
+                    icon="deletecolumn"
+                    (hoverStateEnabledChange)="hoverStateEnabledChange($event)"
+                    (onClick)="operGrid($event,'ELIMINAR COLUMNA')"
+                  ></dx-button>
+                </div>
+              </dxi-item>
+            }
+            <!-- <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+              </dx-button>
+            </div>
+          </dxi-item> -->
+        </dxo-toolbar>
+      }
+    </dx-data-grid>
+  </div>
+}
+</div>
+</div>
+
+<app-vistarapida id="vistaInv210" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-load-panel
+  #loadPanelPro
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>
+
+
+<dx-tooltip
+  id="tooltipProgramacion"
+  position="bottom"
+  showEvent="mouseenter"
+  hideEvent="mouseleave"
+  [width]="widthTooltip"
+  [target]='targetIdTooltip'
+  [(visible)]="toolTipVisible"
+  [hideOnOutsideClick]="false"
+  >
+  <div *dxTemplate="let data = data; of: 'content'">
+    <span> {{tooltipInfo.INFO}} <br/></span>
+  </div>
+</dx-tooltip>

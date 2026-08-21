@@ -1,0 +1,23 @@
+.qr-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+::ng-deep .group-docelec .dx-layout-manager .dx-label-h-align .dx-field-item-label {
+  width: 40%;
+}
+::ng-deep .group-clielec .dx-layout-manager .dx-label-h-align .dx-field-item-label  {
+  width: 20%;
+}
+.dx-toolbar {
+    color: rgb(80, 78, 78);
+}
+::ng-deep .dx-button-has-icon.dx-button-has-text.dx-button-mode-text .dx-icon {
+  font-size: 16px !important; 
+  color: white !important;
+  margin-top: -5px !important;
+}
+::ng-deep .dx-button.dx-button-warning {
+    background-color: #ffc107;
+}

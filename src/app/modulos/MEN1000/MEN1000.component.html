@@ -1,0 +1,82 @@
+
+<div class="row gx-3" #cardgrid>
+  <div class="col-12">
+    <div class="card-content hm-dx-data" >
+      <dx-data-grid
+        id="gridConsultas"
+        #gridConsultas
+        keyExpr="ITEM"
+        height="100%"
+        noDataText="No hay datos."
+        columnResizingMode="widget"
+        [columnAutoWidth]="true"
+        [allowColumnResizing]="true"
+        [focusedRowEnabled]="true"
+        [rowAlternationEnabled]="true"
+        [hoverStateEnabled]="true"
+        [showBorders]="true"
+        [wordWrapEnabled]="true"
+        [dataSource]="DConsultas"
+        [customizeColumns]="customizeColumns"
+        [remoteOperations]="{ groupPaging: true }"
+        (onCellPrepared)="onCellPrepared($event)"
+        (onSelectionChanged)="selectionGrid($event)"
+        (onFocusedRowChanged)="onFocusedRowChanged($event)"
+        (onCellClick)="onCellClick($event)"
+        (onCellPrepared)="onCellPrepared($event)"
+        (onCellHoverChanged)="onCellHoverChanged($event)"
+        (onExporting)="onExporting($event)"
+        (onContentReady)="onContentReady($event)"
+      >
+        <dxo-group-panel [visible]="true"></dxo-group-panel>
+        <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+        <dxo-filter-row [visible]="true"></dxo-filter-row>
+        <dxo-header-filter [visible]="true"></dxo-header-filter>
+        <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+        <dxo-column-chooser [enabled]="true" [mode]="'select'" [allowSearch]="true"></dxo-column-chooser>
+
+        <dxo-search-panel 
+          [visible]="true" 
+          [width]="300" 
+          placeholder="Buscar...">
+        </dxo-search-panel>
+
+        <dxo-paging [pageSize]="20"></dxo-paging>
+        <dxo-pager 
+          [visible]="true" 
+          [allowedPageSizes]="[5, 10, 20, 50, 100, 'all']" 
+          displayMode="full"
+          [showPageSizeSelector]="true" 
+          [showInfo]="true" 
+          [showNavigationButtons]="true">
+        </dxo-pager>
+
+        <dxo-export
+          [enabled]="true"
+          [formats]="['pdf','xls']"
+          [allowExportSelectedData]="true"
+        ></dxo-export>
+
+      </dx-data-grid>
+    </div>
+  </div>
+</div>
+
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#gridConsultas' }"
+  [visible]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>
+
+<app-filtrobusq
+  [events]="eventsSubjectFiltro.asObservable()"
+  (onRespuestaSelecc)="onRespuestaFiltro($event)"
+  >
+</app-filtrobusq>
