@@ -1,14 +1,11 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, NgZone} from '@angular/core';
 import { GeneralesService } from 'src/app/services/generales/generales.service';
 import { SPasswordService } from 'src/app/views/password/-s-password.service';
 import { clsBarraRegistro } from '../../regbarra/_clsBarraReg';
 import { Router } from '@angular/router';
-import { AngularResizeEventModule, ResizedEvent } from 'angular-resize-event';
 import { MatBadgeModule } from '@angular/material/badge';
 import { SbarraService } from '../../regbarra/_sbarra.service';
 import { Subject, Subscription } from 'rxjs';
-import { RegbarraComponent } from '../../regbarra/regbarra.component';
-
 import { SocketService } from 'src/app/services/socket/socket.service';
 import { ApiRestService } from 'src/app/services/usuarios/api-rest.service';
 import Swal from 'sweetalert2';
@@ -25,12 +22,10 @@ import {
   DxToolbarModule,
 } from 'devextreme-angular';
 import { TabService } from '../../tabs/tab.service';
-import { MEN1000Component } from 'src/app/modulos/MEN1000/MEN1000.component';
 import { libtools } from 'src/app/shared/common/libtools';
 import { showToast } from 'src/app/shared/toast/toastComponent.js';
 import { UserServiceService } from '../user-profile/user-service.service';
 import notify from 'devextreme/ui/notify';
-import { NotificacionComponent } from '../../../shared/notificaciones/notificacion/notificacion.component';
 import { environment } from 'src/environments/environment';
 import { GES_INFOComponent } from 'src/app/shared/Tareas/GES_INFO/GES_INFO.component';
 import { BARRAComponent } from '../Barra/BARRA.component';
@@ -42,8 +37,7 @@ import { BUZONComponent } from 'src/app/shared/CHAT/BUZON/BUZON.component';
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
     standalone: true,
-    imports: [
-    AngularResizeEventModule,
+    imports: [    
     MatBadgeModule,
     DxDateBoxModule,
     DxListModule,
@@ -55,15 +49,15 @@ import { BUZONComponent } from 'src/app/shared/CHAT/BUZON/BUZON.component';
     GES_INFOComponent,
     BARRAComponent,
     BUZONComponent
-],
-    providers: [AngularResizeEventModule]
+]
 })
-export class HeaderComponent implements OnInit, AfterViewInit {
+export class HeaderComponent implements OnInit, AfterViewInit, OnDestroy  {
   @ViewChild('scrollViewBodyChat', { static: false })
   scrollViewBodyChat: DxScrollViewComponent;
   @ViewChild('listUsuarios', { static: false }) listUsuarios: DxListComponent;
   @ViewChild('listNotification', { static: false }) listNotification: DxListComponent;
-
+  @ViewChild('containerHeaderUno', { static: false }) containerHeaderUno!: ElementRef<HTMLElement>;
+  @ViewChild('containerHeaderDos', { static: false }) containerHeaderDos!: ElementRef<HTMLElement>;
   eventsGesInfo: Subject<any> = new Subject<any>();
 
   title = 'Dashboard';
@@ -114,18 +108,19 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   showTitlePopup: boolean = false;
   popupVisibleChat: boolean = false;
   visible_toolbar_item: boolean = false;
-deviceId: string = '';
+  deviceId: string = '';
+  private resizeObservers: ResizeObserver[] = [];
   constructor(
     private _sdatosPaswword: SPasswordService,
     private _sdatosUser: UserServiceService,
     private router: Router,
-    private _sbarreg: SbarraService,
-    // public socket: SocketService,
+    private _sbarreg: SbarraService,    
     public wsocket: SocketService,
     private sData: ApiRestService,
     private _sgenerales: GeneralesService,
     public googleService: GoogleService,
-    private tabService: TabService
+    private tabService: TabService,
+    private ngZone: NgZone
   ) {
     localStorage.removeItem('nueva_actividad');
     this.subscription = this._sbarreg.getObsMenuReg().subscribe((prmBarra) => {
@@ -271,12 +266,58 @@ deviceId: string = '';
   }
 
   ngAfterViewInit(): void {
+    this.initializeResizeObservers();
     setTimeout(() => {
       this.valoresObjetos('todos', '');
       // this.getDataGoogle();
     }, 1000);
   }
 
+  private initializeResizeObservers(): void {
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    if (this.containerHeaderUno?.nativeElement) {
+      this.observeElementResize(
+        this.containerHeaderUno.nativeElement,
+        'barra'
+      );
+    }
+
+    if (this.containerHeaderDos?.nativeElement) {
+      this.observeElementResize(
+        this.containerHeaderDos.nativeElement,
+        'header'
+      );
+    }
+  }
+
+  private observeElementResize(
+    element: HTMLElement,
+    obj: 'barra' | 'header'
+  ): void {
+
+    const observer = new ResizeObserver((entries) => {
+
+      const entry = entries[0];
+
+      if (!entry) {
+        return;
+      }
+
+      const width = entry.contentRect.width;
+      const height = entry.contentRect.height;
+
+      this.ngZone.run(() => {
+        this.onResized(width, height, obj);
+      });
+    });
+
+    observer.observe(element);
+
+    this.resizeObservers.push(observer);
+  }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
@@ -284,6 +325,10 @@ deviceId: string = '';
     this.subscriptionNotifications.unsubscribe();
     this.subscriptionBadgeNtf.unsubscribe();
     this.subscriptionBadgeMjs.unsubscribe();
+    this.resizeObservers.forEach(
+      observer => observer.disconnect()
+    );
+    this.resizeObservers = [];
   }
 
   displayUsuario() {
@@ -415,64 +460,66 @@ deviceId: string = '';
     );
   }
 
-  onResized(event: ResizedEvent, obj: string) {
-    const width: number = event.newRect.width;
-    const height: number = event.newRect.height;
+  onResized(
+    width: number,
+    height: number,
+    obj: 'barra' | 'header'
+  ): void {
+
     if (obj === 'barra') {
+
       this._sbarreg.setOnResized(0);
-      // if (width >= 652) {
-      //   //No oculta iconos
-      //   this._sbarreg.setOnResized(0);
-      // }
-      // if (width >= 590 && width < 652) {
-      //   //se oculta el grupo de iconos  # 4
-      //   this._sbarreg.setOnResized(4);
-      // }
-      // if (width >= 300 && width < 590) {
-      //   //se oculta el grupo de iconos  # 3 y 4
-      //   this._sbarreg.setOnResized(3);
-      // }
-      // if (width < 300) {
-      //   //se oculta el grupo de iconos  # 2 al 4
-      //   this._sbarreg.setOnResized(2);
-      // }
+
+      // Conservamos la lógica anterior comentada
+      // para una futura revisión responsive.
     }
+
     if (obj === 'header') {
-      // 228 - 178
-      const width: number = event.newRect.width;
-      const icon_campana: any = document.getElementById('icon-bell-ol-header');
-      const icon_inbox: any = document.getElementById('icon-inbox-ol-header');
-      const icon_buscar: any = document.getElementById('icon-buscar-ol-header');
-      const nombres_header: any = document.getElementById('nombres-header');
+
+      const icon_campana: any =
+        document.getElementById('icon-bell-ol-header');
+
+      const icon_inbox: any =
+        document.getElementById('icon-inbox-ol-header');
+
+      const icon_buscar: any =
+        document.getElementById('icon-buscar-ol-header');
+
+      const nombres_header: any =
+        document.getElementById('nombres-header');
+
+      if (!icon_inbox || !icon_campana || !icon_buscar) {
+        return;
+      }
+
       if (width <= 89) {
         icon_inbox.style.display = 'none';
         icon_campana.style.display = 'none';
         icon_buscar.style.display = 'none';
-        // nombres_header.style.display = 'none';
       }
+
       if (width >= 90 && width <= 119) {
         icon_inbox.style.display = 'none';
         icon_campana.style.display = 'none';
         icon_buscar.style.display = 'none';
-        // nombres_header.style.display = '';
       }
+
       if (width >= 120 && width <= 159) {
         icon_inbox.style.display = 'none';
         icon_campana.style.display = 'none';
         icon_buscar.style.display = '';
-        // nombres_header.style.display = '';
       }
+
       if (width >= 160 && width <= 199) {
         icon_inbox.style.display = 'none';
         icon_campana.style.display = '';
         icon_buscar.style.display = '';
-        // nombres_header.style.display = '';
       }
+
       if (width >= 200) {
         icon_inbox.style.display = '';
         icon_campana.style.display = '';
         icon_buscar.style.display = '';
-        // nombres_header.style.display = '';
       }
     }
   }

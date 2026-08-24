@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.xt-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 46px;
+
+  background: #edf4ff;
+}
+
+.xt-toolbar button {
+  width: 34px;
+  height: 34px;
+
+  margin: 0 3px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: white;
+
+  cursor: pointer;
+}

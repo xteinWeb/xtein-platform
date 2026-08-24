@@ -23,6 +23,11 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
+    "paths": {
+      "@xtein/ui": [
+        "./dist/ui"
+      ]
+    },
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {

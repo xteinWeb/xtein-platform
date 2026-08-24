@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.xt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 100%;
+  padding: 0 20px;
+
+  background: #f4f7fd;
+  border-bottom: 1px solid #dfe6ef;
+}
+
+.xt-header__brand {
+  font-size: 30px;
+  font-weight: 300;
+}
+
+.xt-header__actions {
+  font-size: 13px;
+}

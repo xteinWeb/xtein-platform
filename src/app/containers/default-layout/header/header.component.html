@@ -1,8 +1,8 @@
 <div id="header-aplicacion" class="container-header">
-  <div id="container-header-uno" class="d-none d-md-flex container-header-uno" (resized)="onResized($event, 'barra')">
+  <div #containerHeaderUno id="container-header-uno" class="d-none d-md-flex container-header-uno">
     <app-BARRA class="cls-reg-barra"></app-BARRA>
   </div>
-  <div id="container-header-dos" class="container-header-dos" (resized)="onResized($event, 'header')">
+  <div #containerHeaderDos id="container-header-dos" class="container-header-dos">
     <ul class="class-ul">
       <li id="icon-buscar-ol-header" class="class-li">
         <a class="dropdown-toggle class-a" href="#" id="buscarDropdown" role="button" data-bs-toggle="dropdown"
