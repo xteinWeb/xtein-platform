@@ -28,6 +28,7 @@ export class DashboardPageComponent implements OnInit {
   subscription: Subscription;
   dashboardFullscreen = false;
   dashboardType!: string;
+  lastUpdated: Date | null = null;
 
   constructor(      
       private _sbarreg: SbarraService,  
@@ -65,7 +66,8 @@ export class DashboardPageComponent implements OnInit {
           localStorage.setItem('token', data.token);
         }
         if (res[0]?.ErrMensaje === '') {
-          this.dashboardType = res[0]?.TIPO;    
+          this.dashboardType = res[0]?.TIPO;  
+          this.lastUpdated = res[0]?.FECHA_ACTUALIZACION;  
           this.dashboardId = JSON.stringify(request);        
         }
       }); 

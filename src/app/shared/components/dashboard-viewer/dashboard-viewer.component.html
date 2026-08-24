@@ -18,13 +18,21 @@
 
 </dx-popup>
 
+<div class="dashboard-container">
 
-<dx-dashboard-control
-  #dashboard
-  id="dashboard"
-  style="display: block;width:100%;height:calc(100vh - 115px);"
-  [endpoint]='url'
-  workingMode="ViewerOnly"
-  (onBeforeRender)='onBeforeRender($event)'  
-  >
-</dx-dashboard-control>
+    <dx-dashboard-control
+        #dashboard
+        id="dashboard"
+        style="display: block;width:100%;height:calc(100vh - 115px);"
+        [endpoint]="url"
+        workingMode="ViewerOnly"
+        (onBeforeRender)="onBeforeRender($event)">
+    </dx-dashboard-control>
+
+    @if (lastUpdated) {
+        <div class="dashboard-last-updated">
+            Última actualización: {{ lastUpdatedText }}
+        </div>
+    }
+
+</div>
