@@ -26,6 +26,12 @@
     "paths": {
       "@xtein/ui": [
         "./dist/ui"
+      ],
+      "@xtein/sdk": [
+        "./dist/sdk"
+      ],
+      "@xtein/runtime": [
+        "./dist/runtime"
       ]
     },
     "useDefineForClassFields": false

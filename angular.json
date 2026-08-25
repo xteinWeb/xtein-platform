@@ -300,6 +300,58 @@
           }
         }
       }
+    },
+    "sdk": {
+      "projectType": "library",
+      "root": "libs/sdk",
+      "sourceRoot": "libs/sdk/src",
+      "prefix": "xtein",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/sdk/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/sdk/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/sdk/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "runtime": {
+      "projectType": "library",
+      "root": "libs/runtime",
+      "sourceRoot": "libs/runtime/src",
+      "prefix": "xtein",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/runtime/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/runtime/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/runtime/tsconfig.spec.json"
+          }
+        }
+      }
     }
   },
   "cli": {
