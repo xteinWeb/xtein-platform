@@ -32,6 +32,9 @@
       ],
       "@xtein/runtime": [
         "./dist/runtime"
+      ],
+      "@xtein/api-client": [
+        "./dist/api-client"
       ]
     },
     "useDefineForClassFields": false

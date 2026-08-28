@@ -6,3 +6,7 @@ export * from './lib/contracts/application/application-request';
 export * from './lib/contracts/application/application-descriptor';
 export * from './lib/contracts/application/application-error';
 export * from './lib/contracts/workspace/workspace-tab';
+export * from './lib/contracts/toolbar/toolbar-action';
+export * from './lib/contracts/toolbar/toolbar-state';
+export * from './lib/contracts/remote/remote-descriptor';
+export * from './lib/contracts/navigation/application-tree-node';

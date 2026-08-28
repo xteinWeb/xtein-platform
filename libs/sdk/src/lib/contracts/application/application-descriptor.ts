@@ -1,36 +1,35 @@
 /**
- * Describes an application discovered and available in the XTEIN platform.
- *
- * The descriptor contains only the information required by the platform
- * runtime to locate and load the application.
+ * Describes an application that has been resolved and is ready
+ * to be loaded by the XTEIN platform runtime.
  */
 export interface ApplicationDescriptor {
 
   /**
-   * Unique application identifier registered in XTEIN.
+   * Unique XTEIN application identifier.
    *
-   * Examples:
+   * Example:
    * MAD-005
-   * INV-209
-   * ADM-015
    */
   applicationId: string;
 
   /**
-   * Name of the microfrontend that owns the application.
+   * Microfrontend identifier stored in XTEIN.
    *
-   * Examples:
+   * Example:
+   * MFE-MAD
+   */
+  microfrontendId: string;
+
+  /**
+   * Federation remote name.
+   *
+   * Example:
    * mfe-mad
-   * mfe-inv
-   * mfe-adm
    */
   remoteName: string;
 
   /**
-   * Module exposed by the microfrontend and loaded by the platform runtime.
-   *
-   * The initial XTEIN convention will use a common application host
-   * exposed by each microfrontend.
+   * Module exposed by the microfrontend.
    *
    * Example:
    * ./ApplicationHost
@@ -38,7 +37,17 @@ export interface ApplicationDescriptor {
   exposedModule: string;
 
   /**
-   * Indicates whether the application is currently available for loading.
+   * URL used to load the remote entry.
+   */
+  remoteEntryUrl: string;
+
+  /**
+   * Optional deployed microfrontend version.
+   */
+  version?: string;
+
+  /**
+   * Indicates whether the application is available for loading.
    */
   enabled: boolean;
 }

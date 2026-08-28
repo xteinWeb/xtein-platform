@@ -4,11 +4,12 @@
  */
 export type ApplicationErrorCode =
   | 'INVALID_APPLICATION_ID'
+  | 'APPLICATION_NOT_MIGRATED'
   | 'REMOTE_NOT_FOUND'
+  | 'REMOTE_DISABLED'
   | 'APPLICATION_NOT_FOUND'
   | 'APPLICATION_DISABLED'
   | 'APPLICATION_LOAD_FAILED';
-
 
 /**
  * Represents a controlled application error in the XTEIN platform.
