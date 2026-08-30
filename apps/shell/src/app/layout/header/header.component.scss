@@ -1,25 +1,333 @@
 :host {
   display: block;
+  width: 100%;
   height: 100%;
 }
 
 .xt-header {
+  position: relative;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
+  width: 100%;
   height: 100%;
-  padding: 0 20px;
+
+  padding: 0 14px 0 16px;
 
   background: #f4f7fd;
   border-bottom: 1px solid #dfe6ef;
 }
 
+
+/* ============================================================
+   COMPANY BRAND
+   ============================================================ */
+
 .xt-header__brand {
-  font-size: 30px;
-  font-weight: 300;
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+  height: 100%;
 }
 
+.xt-header__company-logo {
+  display: block;
+
+  width: auto;
+  max-width: 250px;
+  height: 46px;
+
+  object-fit: contain;
+  object-position: left center;
+}
+
+
+/* ============================================================
+   HEADER ACTIONS
+   ============================================================ */
+
 .xt-header__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  min-width: 0;
+  height: 100%;
+
+  gap: 4px;
+}
+
+.xt-header__icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: #07314d;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.xt-header__icon-button:hover {
+  background: rgba(15, 76, 129, 0.08);
+}
+
+.xt-header__icon-button:focus-visible {
+  outline: 2px solid #99badd;
+  outline-offset: 1px;
+}
+
+.xt-header__icon-button i {
+  font-size: 19px;
+}
+
+
+/* ============================================================
+   SESSION INFORMATION
+   ============================================================ */
+
+.xt-header__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+
+  min-width: 0;
+  max-width: 190px;
+
+  margin-left: 8px;
+
+  line-height: 1.05;
+}
+
+.xt-header__company-name,
+.xt-header__user-name {
+  display: block;
+
+  width: 100%;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  text-align: right;
+}
+
+.xt-header__company-name {
+  color: #07314d;
+
   font-size: 13px;
+  font-weight: 500;
+
+  text-transform: uppercase;
+}
+
+.xt-header__user-name {
+  margin-top: 2px;
+
+  color: #8a98a8;
+
+  font-size: 11px;
+  font-weight: 400;
+}
+
+
+/* ============================================================
+   USER
+   ============================================================ */
+
+.xt-header__user {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  height: 100%;
+}
+
+.xt-header__user-button {
+  display: flex;
+  align-items: center;
+
+  padding: 2px 4px;
+
+  border: 0;
+  border-radius: 20px;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.xt-header__user-button:hover {
+  background: rgba(15, 76, 129, 0.06);
+}
+
+.xt-header__avatar,
+.xt-header__avatar-initials {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+}
+
+.xt-header__avatar {
+  display: block;
+
+  object-fit: cover;
+}
+
+.xt-header__avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #b9dcea;
+
+  color: #0f4c81;
+
+  font-size: 18px;
+  font-weight: 500;
+
+  user-select: none;
+}
+
+.xt-header__user-chevron {
+  margin-left: 3px;
+
+  color: #0f4c81;
+
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   USER MENU
+   ============================================================ */
+
+.xt-header__user-menu {
+  position: absolute;
+
+  top: calc(100% - 2px);
+  right: 0;
+
+  z-index: 1000;
+
+  width: 220px;
+
+  padding: 8px;
+
+  border: 1px solid rgba(69, 119, 164, 0.14);
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 14px rgba(39, 78, 114, 0.16);
+}
+
+.xt-header__user-menu-info {
+  display: flex;
+  flex-direction: column;
+
+  padding: 7px 9px;
+}
+
+.xt-header__user-menu-name,
+.xt-header__user-menu-company {
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.xt-header__user-menu-name {
+  color: #07314d;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.xt-header__user-menu-company {
+  margin-top: 3px;
+
+  color: #7b8895;
+
+  font-size: 11px;
+}
+
+.xt-header__user-menu-separator {
+  height: 1px;
+
+  margin: 4px 0;
+
+  background: #e7edf4;
+}
+
+.xt-header__user-menu-item {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  gap: 9px;
+
+  padding: 8px 10px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: #244d73;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.xt-header__user-menu-item:hover {
+  background: #eef5fc;
+
+  color: #0f4c81;
+}
+
+.xt-header__user-menu-item i {
+  font-size: 17px;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  .xt-header__identity {
+    display: none;
+  }
+
+  .xt-header__company-logo {
+    max-width: 190px;
+  }
 }

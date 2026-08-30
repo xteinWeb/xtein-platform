@@ -1,19 +1,30 @@
 /**
- * Represents the response envelope returned by the existing
- * XTEIN Node.js backend.
+ * Base response returned by the existing XTEIN backend.
+ *
+ * Different backend endpoints can return additional properties.
  */
 export interface XteinApiResponse {
 
   /**
-   * Backend operation result.
-   *
-   * Depending on the existing endpoint, this value can be a JSON string
-   * or an already serialized value.
-   */
-  data: unknown;
-
-  /**
-   * Optional refreshed authentication token returned by the backend.
+   * Optional refreshed authentication token.
    */
   token?: string;
+
+  /**
+   * Allows endpoint-specific response properties.
+   */
+  [key: string]: unknown;
+}
+
+/**
+ * Represents the common XTEIN response shape used by endpoints
+ * that return their functional result inside the data property.
+ */
+export interface XteinDataApiResponse<TData = unknown>
+  extends XteinApiResponse {
+
+  /**
+   * Functional backend result.
+   */
+  data: TData;
 }

@@ -1,11 +1,170 @@
 <div class="xt-header">
 
+  <!-- Company brand -->
   <div class="xt-header__brand">
-    ARTDECON
+
+    <img
+      class="xt-header__company-logo"
+      src="assets/img/Artdecon---logo.png"
+      alt="Company logo">
+
   </div>
 
+
+  <!-- Right side -->
   <div class="xt-header__actions">
-    Header XTEIN
+
+    <!-- Search -->
+    <button
+      type="button"
+      class="xt-header__icon-button"
+      title="Buscar"
+      aria-label="Buscar">
+
+      <i class="icon-buscar-ol"></i>
+
+    </button>
+
+
+    <!-- Notifications -->
+    <button
+      type="button"
+      class="xt-header__icon-button"
+      title="Notificaciones"
+      aria-label="Notificaciones">
+
+      <i class="icon-bell-ol"></i>
+
+    </button>
+
+
+    <!-- Inbox -->
+    <button
+      type="button"
+      class="xt-header__icon-button"
+      title="Bandeja"
+      aria-label="Bandeja">
+
+      <i class="icon-inbox-ol"></i>
+
+    </button>
+
+
+    <!-- Session information -->
+    <div class="xt-header__identity">
+
+      <span
+        class="xt-header__company-name"
+        [title]="session()?.companyName || ''">
+
+        {{
+          session()?.companyName ||
+          session()?.companyId
+        }}
+
+      </span>
+
+      <span
+        class="xt-header__user-name"
+        [title]="session()?.userName || session()?.userId || ''">
+
+        {{
+          session()?.userName ||
+          session()?.userId
+        }}
+
+      </span>
+
+    </div>
+
+
+    <!-- User -->
+    <div class="xt-header__user">
+
+      <button
+        type="button"
+        class="xt-header__user-button"
+        [attr.aria-expanded]="userMenuOpen"
+        aria-label="Menú de usuario"
+        (click)="toggleUserMenu()">
+
+        @if (session()?.profilePhoto) {
+
+          <img
+            class="xt-header__avatar"
+            [src]="session()?.profilePhoto"
+            [alt]="session()?.userName || session()?.userId || 'Usuario'">
+
+        } @else {
+
+          <span class="xt-header__avatar-initials">
+
+            {{ userInitials() }}
+
+          </span>
+
+        }
+
+        <i
+          class="icon-chevron-down-xs xt-header__user-chevron">
+        </i>
+
+      </button>
+
+
+      @if (userMenuOpen) {
+
+        <div
+          class="xt-header__user-menu"
+          role="menu">
+
+          <div class="xt-header__user-menu-info">
+
+            <span class="xt-header__user-menu-name">
+
+              {{
+                session()?.userName ||
+                session()?.userId
+              }}
+
+            </span>
+
+            <span class="xt-header__user-menu-company">
+
+              {{
+                session()?.companyName ||
+                session()?.companyId
+              }}
+
+            </span>
+
+          </div>
+
+
+          <div class="xt-header__user-menu-separator">
+          </div>
+
+
+          <button
+            type="button"
+            class="xt-header__user-menu-item"
+            role="menuitem"
+            (click)="logout()">
+
+            <i class="icon-salir-alt-ol"></i>
+
+            <span>
+              Cerrar sesión
+            </span>
+
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
   </div>
 
 </div>

@@ -1,57 +1,200 @@
 :host {
   display: block;
+
+  width: 100%;
   height: 100%;
 }
 
 .xt-sidebar {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
 
-  padding: 18px;
+  width: 100%;
+  height: 100%;
 
   background: #ffffff;
 
-  border-right: 1px solid #e1e7ef;
+  border-right: 1px solid #dfe6ef;
+
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   XTEIN BRAND
+   ============================================================ */
+
+.xt-sidebar__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 68px;
+
+  width: 100%;
+
+  padding: 8px 20px;
 }
 
 .xt-sidebar__logo {
-  margin-bottom: 24px;
+  display: block;
 
-  text-align: center;
+  width: 125px;
+  max-width: 100%;
+  height: auto;
 
-  font-size: 42px;
-  font-weight: 700;
+  object-fit: contain;
 
-  color: #0d4b7b;
+  user-select: none;
 }
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
 
 .xt-sidebar__search {
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
 
-  border: 1px solid #d6e0eb;
+  flex: 0 0 36px;
+
+  margin: 0 16px 16px;
+  padding: 0 14px;
+
+  border: 1px solid #c9d8ea;
   border-radius: 8px;
 
-  color: #7c8794;
+  background: #ffffff;
+
+  color: #6c757d;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
+
+.xt-sidebar__search:hover {
+  border-color: #86b7fe;
+
+  box-shadow:
+    0 0 0 0.08rem rgba(13, 110, 253, 0.12);
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+.xt-sidebar__menu {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  padding: 0 18px 18px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
+/* ============================================================
+   MENU GROUP
+   ============================================================ */
 
 .xt-sidebar__group {
-  padding: 8px 12px;
+  position: relative;
 
-  font-weight: 600;
+  margin-bottom: 8px;
+  padding: 8px 12px 8px 38px;
 
-  color: #163f65;
+  color: #164b76;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: default;
 }
 
-.xt-sidebar__item {
-  padding: 9px 12px 9px 32px;
+.xt-sidebar__group::before {
+  content: '⌄';
 
-  color: #163f65;
+  position: absolute;
+
+  top: 50%;
+  left: 14px;
+
+  color: #28618c;
+
+  font-size: 16px;
+
+  transform: translateY(-55%);
+}
+
+
+/* ============================================================
+   MENU ITEMS
+   ============================================================ */
+
+.xt-sidebar__item {
+  display: flex;
+  align-items: center;
+
+  min-height: 34px;
+
+  margin: 1px 0;
+  padding: 7px 12px 7px 56px;
+
+  border-radius: 6px;
+
+  color: #174b75;
+
+  font-size: 13px;
+  font-weight: 500;
 
   cursor: pointer;
+
+  transition:
+    background-color 0.15s ease-in-out,
+    color 0.15s ease-in-out;
 }
 
 .xt-sidebar__item:hover {
-  background: #f3f7fb;
+  background: #eef5fc;
 
-  border-radius: 6px;
+  color: #0f4c81;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+.xt-sidebar__menu {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(15, 76, 129, 0.22)
+    transparent;
+}
+
+.xt-sidebar__menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.xt-sidebar__menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.xt-sidebar__menu::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+
+  background:
+    rgba(15, 76, 129, 0.22);
+}
+
+.xt-sidebar__menu::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(15, 76, 129, 0.35);
 }

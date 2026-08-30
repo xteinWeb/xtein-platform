@@ -1,0 +1,58 @@
+{
+    "/api/dashboard/*": {
+        "target": "http://190.85.54.78:8890",
+        "pathRewrite": {
+            "^/api": ""
+        }
+    },
+    "/reportes/*": {
+        "target": "https://reportes.colchonessunmoon.com",
+        "secure": true,
+        "changeOrigin": true,
+        "logLevel": "debug",
+        "pathRewrite": {
+            "^/reportes/": "/"
+        },
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        }
+    },
+    "/files/*": {
+        "target": "https://reportes.colchonessunmoon.com",
+        "pathRewrite": {
+            "^/files/": "/archivos/"
+        }
+    },
+    "/00000/*": {
+        "target": "https://api.prod.colchonessunmoon.com/api/",
+        "pathRewrite": {
+            "^/api": ""
+        }
+    },
+    "/api/dashboard-designer": {
+        "target": "https://localhost:7179",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug"
+    },
+    "/api": {
+        "target": "http://localhost:5900",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug"
+    },        
+    "/archivos*": {
+        "target": "http://181.79.25.235:8556/arch/",
+        "pathRewrite": {
+            "^/arch": ""
+        }
+    },
+    "/e/*": {
+        "target": "https://api.prod.colchonessunmoon.com/api/",
+        "pathRewrite": {
+            "^/e": ""
+        }
+    }
+}

@@ -11,24 +11,31 @@ import {
 import {
   Observable,
   catchError,
-  map,
+  tap,
   throwError
 } from 'rxjs';
+
+import {
+  SessionService
+} from '@xtein/session';
 
 import {
   XTEIN_API_CONFIG,
   XteinApiConfig
 } from '../configuration/xtein-api-config';
 
-import { XteinApiRequest } from '../contracts/xtein-api-request';
-import { XteinApiResponse } from '../contracts/xtein-api-response';
+import {
+  XteinApiAccessMode,
+  XteinApiRequest
+} from '../contracts/xtein-api-request';
 
 /**
- * Central API client used to communicate with the existing
+ * Central HTTP client used to communicate with the existing
  * XTEIN Node.js backend.
  *
- * This service preserves the backend request and response protocol
- * while exposing a cleaner API to the new XTEIN platform.
+ * The service preserves the existing backend protocol while isolating
+ * transport, session, and legacy request-envelope concerns from
+ * functional platform services.
  */
 @Injectable({
   providedIn: 'root'
@@ -36,22 +43,16 @@ import { XteinApiResponse } from '../contracts/xtein-api-response';
 export class XteinApiClientService {
 
   /**
-   * Existing local storage key used by XTEIN for the current user.
+   * Existing backend connection identifier used by public requests.
    */
-  private static readonly userStorageKey = 'usuario';
-
-  /**
-   * Existing local storage key used by XTEIN for the current company.
-   */
-  private static readonly companyStorageKey = 'empresa';
-
-  /**
-   * Existing local storage key used by XTEIN for the authentication token.
-   */
-  private static readonly tokenStorageKey = 'token';
+  private static readonly publicConnectionName =
+    'ConexionBD';
 
   constructor(
     private readonly httpClient: HttpClient,
+
+    private readonly sessionService: SessionService,
+
     @Inject(XTEIN_API_CONFIG)
     private readonly apiConfig: XteinApiConfig
   ) {
@@ -60,19 +61,16 @@ export class XteinApiClientService {
   /**
    * Executes a request against the existing XTEIN backend.
    *
-   * The method:
-   * - builds the legacy backend request envelope;
-   * - sends the HTTP POST request;
-   * - updates the authentication token when returned;
-   * - parses the backend data payload;
-   * - returns only the functional result to the caller.
+   * Public requests use the backend connection identifier directly.
+   * Authenticated requests obtain security information exclusively
+   * from SessionService.
    *
-   * @param request XTEIN API request.
-   * @returns Parsed backend operation result.
+   * @param request Request to execute.
+   * @returns Raw backend response.
    */
-  execute<T>(
+  execute<TResponse>(
     request: XteinApiRequest
-  ): Observable<T> {
+  ): Observable<TResponse> {
 
     const url =
       this.buildUrl(request.endpoint);
@@ -80,12 +78,13 @@ export class XteinApiClientService {
     const body =
       this.buildRequestBody(request);
 
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
+    const headers =
+      new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
 
     return this.httpClient
-      .post<XteinApiResponse>(
+      .post<TResponse>(
         url,
         body,
         {
@@ -93,14 +92,10 @@ export class XteinApiClientService {
         }
       )
       .pipe(
-        map(response => {
-
+        tap(response => {
           this.updateAuthenticationToken(
-            response.token
-          );
-
-          return this.parseResponseData<T>(
-            response.data
+            request.accessMode,
+            response
           );
         }),
 
@@ -111,32 +106,67 @@ export class XteinApiClientService {
   }
 
   /**
-   * Builds the request body expected by the existing Node.js backend.
+   * Builds the request body expected by the existing backend.
    *
-   * The property names used here belong to the existing backend contract
-   * and must remain unchanged for compatibility.
-   *
-   * @param request Internal XTEIN API request.
+   * @param request Internal XTEIN request.
    * @returns Serialized backend request body.
    */
   private buildRequestBody(
     request: XteinApiRequest
   ): string {
 
-    const company =
-      localStorage.getItem(
-        XteinApiClientService.companyStorageKey
-      );
+    if (request.accessMode === 'public') {
+      return this.buildPublicRequestBody(request);
+    }
 
-    const user =
-      localStorage.getItem(
-        XteinApiClientService.userStorageKey
-      );
+    return this.buildAuthenticatedRequestBody(request);
+  }
 
-    const token =
-      localStorage.getItem(
-        XteinApiClientService.tokenStorageKey
+  /**
+   * Builds a request that does not require an authenticated session.
+   *
+   * These requests are primarily used by authentication and password
+   * recovery operations.
+   *
+   * @param request Internal XTEIN request.
+   * @returns Serialized public backend request.
+   */
+  private buildPublicRequestBody(
+    request: XteinApiRequest
+  ): string {
+
+    const backendRequest = {
+      prmAccion: request.action,
+
+      prmDatos:
+        JSON.stringify(request.data),
+
+      prmConexion:
+        XteinApiClientService.publicConnectionName
+    };
+
+    return JSON.stringify(backendRequest);
+  }
+
+  /**
+   * Builds a request using the current authenticated session.
+   *
+   * @param request Internal XTEIN request.
+   * @returns Serialized authenticated backend request.
+   * @throws Error when no authenticated session exists.
+   */
+  private buildAuthenticatedRequestBody(
+    request: XteinApiRequest
+  ): string {
+
+    const session =
+      this.sessionService.current;
+
+    if (!session) {
+      throw new Error(
+        'An authenticated XTEIN session is required to execute this request.'
       );
+    }
 
     const backendRequest = {
       prmAccion: request.action,
@@ -145,13 +175,13 @@ export class XteinApiClientService {
         JSON.stringify(request.data),
 
       prmConexion: {
-        EMPRESA: company
+        EMPRESA: session.companyId
       },
 
       prmTokenDatos: {
-        USUARIO: user,
-        EMPRESA: company,
-        TOKEN: token
+        USUARIO: session.userId,
+        EMPRESA: session.companyId,
+        TOKEN: session.token
       }
     };
 
@@ -168,71 +198,88 @@ export class XteinApiClientService {
     endpoint: string
   ): string {
 
-    const baseUrl =
-      this.apiConfig.baseUrl.trim().replace(/\/+$/, '');
+    const normalizedBaseUrl =
+      this.apiConfig.baseUrl
+        .trim()
+        .replace(/\/+$/, '');
 
-    const normalizedEndpoint =
-      endpoint.trim().startsWith('/')
-        ? endpoint.trim()
-        : `/${endpoint.trim()}`;
+    const normalizedEndpointValue =
+      endpoint.trim();
 
-    if (!normalizedEndpoint || normalizedEndpoint === '/') {
+    if (!normalizedEndpointValue) {
       throw new Error(
         'The XTEIN API endpoint cannot be empty.'
       );
     }
 
-    return `${baseUrl}${normalizedEndpoint}`;
+    const normalizedEndpoint =
+      normalizedEndpointValue.startsWith('/')
+        ? normalizedEndpointValue
+        : `/${normalizedEndpointValue}`;
+
+    return `${normalizedBaseUrl}${normalizedEndpoint}`;
   }
 
   /**
-   * Updates the authentication token when the backend returns
-   * a refreshed token.
+   * Updates the current session when an authenticated backend request
+   * returns a refreshed token.
    *
-   * @param token Refreshed authentication token.
+   * Public requests do not update the session automatically because
+   * authentication has not yet been established.
+   *
+   * @param accessMode Request access mode.
+   * @param response Backend response.
    */
   private updateAuthenticationToken(
-    token?: string
+    accessMode: XteinApiAccessMode,
+    response: unknown
   ): void {
+
+    if (accessMode !== 'authenticated') {
+      return;
+    }
+
+    const token =
+      this.getResponseToken(response);
 
     if (!token) {
       return;
     }
 
-    localStorage.setItem(
-      XteinApiClientService.tokenStorageKey,
-      token
-    );
+    this.sessionService.updateToken(token);
   }
 
   /**
-   * Parses the data value returned by the existing backend.
+   * Extracts an authentication token from a backend response.
    *
-   * The existing backend commonly returns JSON serialized inside
-   * the data property. Non-string values are returned directly.
-   *
-   * @param data Backend data payload.
-   * @returns Parsed operation result.
+   * @param response Backend response.
+   * @returns Token when available.
    */
-  private parseResponseData<T>(
-    data: unknown
-  ): T {
+  private getResponseToken(
+    response: unknown
+  ): string | undefined {
 
-    if (typeof data !== 'string') {
-      return data as T;
+    if (
+      response === null ||
+      typeof response !== 'object' ||
+      Array.isArray(response)
+    ) {
+      return undefined;
     }
 
-    const normalizedData =
-      data.trim();
+    const record =
+      response as Record<string, unknown>;
 
-    if (!normalizedData) {
-      return data as T;
+    const token =
+      record['token'];
+
+    if (
+      typeof token !== 'string' ||
+      !token.trim()
+    ) {
+      return undefined;
     }
 
-    try {
-      return JSON.parse(normalizedData) as T;
-    } catch {
-      return data as T;
-    }
+    return token.trim();
   }
 }

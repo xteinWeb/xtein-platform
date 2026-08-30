@@ -1,0 +1,227 @@
+:host {
+  display: block;
+
+  width: 100%;
+  min-width: 100%;
+
+  min-height: 100vh;
+}
+
+
+/* ============================================================
+   LOGIN PAGE
+   ============================================================ */
+
+.xtein-login {
+  width: 100%;
+  min-width: 100%;
+
+  min-height: 100vh;
+}
+
+.xtein-login__content {
+  width: 100%;
+
+  height: calc(100vh - 200px);
+}
+
+.xtein-login__welcome {
+  z-index: 10;
+}
+
+
+/* ============================================================
+   LOGIN CARD
+   ============================================================ */
+
+/*
+ * The login owns its dimensions.
+ *
+ * We intentionally override generic global .card rules because
+ * the authentication card is not a standard application card.
+ */
+.xtein-login .xtein-login__card {
+  flex: 0 0 350px;
+
+  width: 350px !important;
+  min-width: 350px;
+  max-width: 350px !important;
+
+  height: 470px !important;
+  min-height: 470px;
+
+  margin-right: auto;
+  margin-left: auto;
+
+  overflow: hidden;
+}
+
+.xtein-login .xtein-login__card > .card-body {
+  width: 100%;
+}
+
+.xtein-login .xtein-login__card form {
+  width: 100%;
+
+  margin-right: 0;
+  margin-left: 0;
+}
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+.xtein-login__title {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+.xtein-login__title--strong {
+  font-weight: 500;
+}
+
+.xtein-login__recovery-copy {
+  line-height: 1.35;
+}
+
+
+/* ============================================================
+   LOGIN FIELDS
+   ============================================================ */
+
+.xtein-login .xtein-login-field {
+  position: relative;
+
+  width: 100%;
+}
+
+.xtein-login .xtein-login-field__icon {
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 3rem;
+
+  pointer-events: none;
+}
+
+.xtein-login
+.xtein-login-field
+.dx-texteditor-input {
+  padding-left: 3rem !important;
+}
+
+
+/* ============================================================
+   LOGIN PLACEHOLDERS
+   ============================================================ */
+
+/*
+ * The global XTEIN theme hides DevExtreme placeholders.
+ * Login fields explicitly restore them because this screen
+ * uses placeholders instead of visible field labels.
+ */
+.xtein-login
+.xtein-login-field
+.dx-placeholder::before {
+  display: block !important;
+
+  padding-left: 3rem !important;
+
+  color: #6c757d;
+}
+
+.xtein-login
+.dx-placeholder {
+  color: #6c757d;
+}
+
+
+/* ============================================================
+   PASSWORD RECOVERY LINK
+   ============================================================ */
+
+.xtein-login__forgot-password {
+  border: 0;
+
+  background: transparent;
+}
+
+
+/* ============================================================
+   FEEDBACK
+   ============================================================ */
+
+.xtein-login__feedback {
+  padding: .4rem .5rem;
+
+  border-radius: 6px;
+
+  font-size: .78rem;
+  line-height: 1.25;
+}
+
+.xtein-login__feedback--error {
+  color: #842029;
+
+  background-color:
+    rgba(220, 53, 69, .08);
+}
+
+.xtein-login__feedback--success {
+  color: #0f5132;
+
+  background-color:
+    rgba(25, 135, 84, .08);
+}
+
+
+/* ============================================================
+   PASSWORD POLICY
+   ============================================================ */
+
+.xtein-login__password-policy {
+  font-size: .75rem;
+  line-height: 1.2;
+}
+
+.xtein-login__password-policy ul {
+  padding-left: 1.1rem;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+
+  .xtein-login__content {
+    height: auto;
+
+    min-height:
+      calc(100vh - 100px);
+  }
+
+  .xtein-login
+  .xtein-login__card {
+    flex-basis: auto;
+
+    width:
+      calc(100vw - 32px) !important;
+
+    min-width: 0;
+
+    max-width:
+      350px !important;
+  }
+}

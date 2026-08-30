@@ -1,0 +1,28 @@
+<div
+  class="d-flex gap-2 justify-content-center">
+
+  @for (
+    digit of digits;
+    track $index
+  ) {
+
+    <input
+      #digitInput
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="1"
+      class="form-control text-center flex-fill p-0"
+      [disabled]="isDisabled"
+      [value]="digit"
+      [attr.aria-label]="
+        ariaLabel + ' ' + ($index + 1)
+      "
+      (input)="handleInput($event, $index)"
+      (keydown)="handleKeyDown($event, $index)"
+      (paste)="handlePaste($event, $index)"
+      (blur)="handleBlur()">
+
+  }
+
+</div>

@@ -1,0 +1,599 @@
+<div
+  class="bg-login bx-shadow overflow-hidden xtein-login">
+
+  <div
+    class="container px-5 py-5 px-md-0 text-start my-5">
+
+    <div
+      class="row gx-lg-5 align-items-center xtein-login__content">
+
+      <div
+        class="
+          d-none
+          d-md-block
+          col-md-7
+          col-xl-8
+          mb-lg-0
+          xxl-fontsize
+          xtein-login__welcome">
+
+        <h1
+          class="my-3 display-5 fw-bold ls-tight text-white">
+          Bienvenido
+        </h1>
+
+        <p
+          class="mb-4 opacity-70 text-white">
+          Aquí inicia tu camino al exito...
+        </p>
+
+      </div>
+
+      <div
+        class="
+          col-12
+          col-md-5
+          col-xl-4
+          mb-lg-0
+          position-relative
+          text-center">
+
+        <div
+          class="
+            card
+            card-rotating
+            bg-glass
+            xtein-login__card">
+
+          <div
+            class="card-up loading-logo mt-5">
+
+            <img
+              src="/assets/img/logo/xtein.svg"
+              width="50%"
+              alt="XTEIN">
+
+          </div>
+
+          <div
+            class="
+              card-body
+              px-4
+              py-4
+              px-md-5
+              text-center">
+
+            @if (
+              view() === 'sign-in'
+            ) {
+
+              <label
+                class="mb-2 xtein-login__title">
+                Iniciar Sesión
+              </label>
+
+              <form
+                class="from-login row"
+                [formGroup]="loginForm"
+                (ngSubmit)="submit()">
+
+                <div class="mb-2">
+
+                  <div
+                    class="xtein-login-field">
+
+                    <span
+                      class="xtein-login-field__icon"
+                      aria-hidden="true">
+
+                      <i
+                        class="icon-usuario">
+                      </i>
+
+                    </span>
+
+                    <xtein-input
+                      id="userName"
+                      name="userName"
+                      ariaLabel="Usuario"
+                      placeholder="Usuario/Nombre de usuario"
+                      autocomplete="off"
+                      [autoFocus]="true"
+                      [required]="true"
+                      [formControl]="userIdControl"
+                      (blurred)="validateUser()">
+                    </xtein-input>
+
+                  </div>
+
+                </div>
+
+                <div class="mb-2">
+
+                  <div
+                    class="xtein-login-field">
+
+                    <span
+                      class="xtein-login-field__icon"
+                      aria-hidden="true">
+
+                      <i
+                        class="icon-secure-sl">
+                      </i>
+
+                    </span>
+
+                    <xtein-password
+                      id="password"
+                      name="password"
+                      ariaLabel="Contraseña"
+                      placeholder="Contraseña"
+                      autocomplete="current-password"
+                      [required]="true"
+                      [formControl]="passwordControl">
+                    </xtein-password>
+
+                  </div>
+
+                </div>
+
+                <div class="mb-2">
+
+                  <div
+                    class="xtein-login-field">
+
+                    <span
+                      class="xtein-login-field__icon"
+                      aria-hidden="true">
+
+                      <i
+                        class="icon-building-sl">
+                      </i>
+
+                    </span>
+
+                    <xtein-select
+                      id="company"
+                      ariaLabel="Empresa"
+                      placeholder="Seleccione Empresa..."
+                      displayExpr="name"
+                      valueExpr="id"
+                      [items]="companies()"
+                      [required]="true"
+                      [formControl]="companyIdControl">
+                    </xtein-select>
+
+                  </div>
+
+                </div>
+
+                @if (
+                  errorMessage()
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--error mb-2"
+                    role="alert">
+
+                    {{ errorMessage() }}
+
+                  </div>
+
+                }
+
+                @if (
+                  successMessage()
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--success mb-2"
+                    role="status">
+
+                    {{ successMessage() }}
+
+                  </div>
+
+                }
+
+                <xtein-button
+                  text="Iniciar"
+                  variant="primary"
+                  [submit]="true"
+                  [disabled]="
+                    isSubmitting() ||
+                    isValidatingUser()
+                  ">
+                </xtein-button>
+
+                <button
+                  type="button"
+                  class="
+                    btn-link
+                    col-12
+                    text-muted
+                    xtein-login__forgot-password"
+                  (click)="openPasswordRecovery()">
+
+                  ¿Has olvidado tu contraseña?
+
+                </button>
+
+              </form>
+
+            }
+
+            @if (
+              view() === 'recovery-user'
+            ) {
+
+              <label
+                class="mb-2 xtein-login__title xtein-login__title--strong">
+
+                Has olvidado tu contraseña
+
+              </label>
+
+              <p
+                class="xtein-login__recovery-copy">
+
+                Ingrese su usuario y enviaremos un
+                <strong>código</strong>
+                de restablecimiento a su
+                <strong>correo de contacto</strong>.
+
+              </p>
+
+              <form
+                class="from-login row"
+                [formGroup]="recoveryUserForm"
+                (ngSubmit)="requestRecoveryCode()">
+
+                <div class="my-2">
+
+                  <div
+                    class="xtein-login-field">
+
+                    <span
+                      class="xtein-login-field__icon"
+                      aria-hidden="true">
+
+                      <i
+                        class="icon-usuario">
+                      </i>
+
+                    </span>
+
+                    <xtein-input
+                      id="recoveryUser"
+                      ariaLabel="Usuario"
+                      placeholder="Usuario/Nombre de usuario"
+                      autocomplete="off"
+                      [autoFocus]="true"
+                      [required]="true"
+                      [formControl]="recoveryUserControl">
+                    </xtein-input>
+
+                  </div>
+
+                </div>
+
+                @if (
+                  recoveryErrorMessage()
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--error mb-2"
+                    role="alert">
+
+                    {{ recoveryErrorMessage() }}
+
+                  </div>
+
+                }
+
+                <div class="mb-1">
+
+                  <xtein-button
+                    text="Enviar"
+                    variant="primary"
+                    [submit]="true"
+                    [disabled]="isRecoveryBusy()">
+                  </xtein-button>
+
+                </div>
+
+                <xtein-button
+                  text="Cancelar"
+                  variant="secondary"
+                  [disabled]="isRecoveryBusy()"
+                  (clicked)="cancelPasswordRecovery()">
+                </xtein-button>
+
+              </form>
+
+            }
+
+            @if (
+              view() === 'recovery-code'
+            ) {
+
+              <label
+                class="mb-2 xtein-login__title xtein-login__title--strong">
+
+                Ingrese su código
+
+              </label>
+
+              <p
+                class="xtein-login__recovery-copy">
+
+                Por favor ingrese el
+                <strong>código de 6 dígitos</strong>
+                enviado a su correo de contacto registrado.
+
+              </p>
+
+              @if (
+                recoverySuccessMessage()
+              ) {
+
+                <div
+                  class="xtein-login__feedback xtein-login__feedback--success mb-3"
+                  role="status">
+
+                  {{ recoverySuccessMessage() }}
+
+                </div>
+
+              }
+
+              <form
+                [formGroup]="recoveryCodeForm"
+                (ngSubmit)="validateRecoveryCode()">
+
+                <div class="mb-3">
+
+                  <xtein-verification-code
+                    ariaLabel="Código de verificación"
+                    [autoFocus]="true"
+                    [formControl]="recoveryCodeControl">
+                  </xtein-verification-code>
+
+                </div>
+
+                @if (
+                  recoveryErrorMessage()
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--error mb-2"
+                    role="alert">
+
+                    {{ recoveryErrorMessage() }}
+
+                  </div>
+
+                }
+
+                <p
+                  class="xt-text-sm-l-muted">
+
+                  Si no encuentra su código,
+                  comuníquese con el
+                  <strong>equipo de soporte</strong>.
+
+                </p>
+
+                <div class="mb-1">
+
+                  <xtein-button
+                    text="Validar"
+                    variant="primary"
+                    [submit]="true"
+                    [disabled]="
+                      isRecoveryBusy() ||
+                      recoveryCodeForm.invalid
+                    ">
+                  </xtein-button>
+
+                </div>
+
+                <xtein-button
+                  text="Cancelar"
+                  variant="secondary"
+                  [disabled]="isRecoveryBusy()"
+                  (clicked)="cancelPasswordRecovery()">
+                </xtein-button>
+
+              </form>
+
+            }
+
+            @if (
+              view() === 'recovery-password'
+            ) {
+
+              <label
+                class="mb-3 xtein-login__title">
+
+                Generar Contraseña
+
+              </label>
+
+              <form
+                class="from-login row"
+                [formGroup]="recoveryPasswordForm"
+                (ngSubmit)="changeRecoveredPassword()">
+
+                <div class="mb-2">
+
+                  <div
+                    class="xtein-login-field">
+
+                    <span
+                      class="xtein-login-field__icon"
+                      aria-hidden="true">
+
+                      <i
+                        class="icon-secure-sl">
+                      </i>
+
+                    </span>
+
+                    <xtein-password
+                      id="newPassword"
+                      ariaLabel="Nueva contraseña"
+                      placeholder="Nueva Contraseña"
+                      autocomplete="new-password"
+                      [required]="true"
+                      [formControl]="newPasswordControl"
+                      (blurred)="validateNewPassword()">
+                    </xtein-password>
+
+                  </div>
+
+                </div>
+
+                <div class="mb-2">
+
+                  <div
+                    class="xtein-login-field">
+
+                    <span
+                      class="xtein-login-field__icon"
+                      aria-hidden="true">
+
+                      <i
+                        class="icon-secure-sl">
+                      </i>
+
+                    </span>
+
+                    <xtein-password
+                      id="confirmationPassword"
+                      ariaLabel="Confirmar contraseña"
+                      placeholder="Confirmar Contraseña"
+                      autocomplete="new-password"
+                      [required]="true"
+                      [formControl]="confirmationPasswordControl"
+                      (blurred)="validatePasswordConfirmation()">
+                    </xtein-password>
+
+                  </div>
+
+                </div>
+
+                <div
+                  class="mb-3 text-start xtein-login__password-policy">
+
+                  <small
+                    class="text-muted">
+
+                    <strong>
+                      La contraseña debe cumplir:
+                    </strong>
+
+                    <ul
+                      class="mb-0 mt-1">
+
+                      <li>
+                        Mínimo 8 caracteres
+                      </li>
+
+                      <li>
+                        Al menos una letra mayúscula (A-Z)
+                      </li>
+
+                      <li>
+                        Al menos una letra minúscula (a-z)
+                      </li>
+
+                      <li>
+                        Al menos un número (0-9)
+                      </li>
+
+                      <li>
+                        Al menos un carácter especial (!&#64;#$%^&*-_=+)
+                      </li>
+
+                    </ul>
+
+                  </small>
+
+                </div>
+
+                @if (
+                  passwordPolicyErrors().length > 0
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--error mb-2"
+                    role="alert">
+
+                    La contraseña todavía no cumple todos los requisitos.
+
+                  </div>
+
+                }
+
+                @if (
+                  confirmationError()
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--error mb-2"
+                    role="alert">
+
+                    {{ confirmationError() }}
+
+                  </div>
+
+                }
+
+                @if (
+                  recoveryErrorMessage()
+                ) {
+
+                  <div
+                    class="xtein-login__feedback xtein-login__feedback--error mb-2"
+                    role="alert">
+
+                    {{ recoveryErrorMessage() }}
+
+                  </div>
+
+                }
+
+                <div class="mb-1">
+
+                  <xtein-button
+                    text="Guardar"
+                    variant="primary"
+                    [submit]="true"
+                    [disabled]="isRecoveryBusy()">
+                  </xtein-button>
+
+                </div>
+
+                <xtein-button
+                  text="Cancelar"
+                  variant="secondary"
+                  [disabled]="isRecoveryBusy()"
+                  (clicked)="cancelPasswordRecovery()">
+                </xtein-button>
+
+              </form>
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

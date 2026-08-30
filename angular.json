@@ -203,7 +203,6 @@
             "tsConfig": "apps/shell/tsconfig.app.json",
 
             "inlineStyleLanguage": "scss",
-
             "assets": [
               {
                 "glob": "**/*",
@@ -211,20 +210,18 @@
               },
               {
                 "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
+                "input": "libs/ui/src/assets",
+                "output": "/assets/"
               }
             ],
-
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "node_modules/devextreme/dist/css/dx.common.css",
               "node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
-              "src/scss/style.scss",
+              "libs/ui/src/styles/style.scss",
               "apps/shell/src/styles.scss"
             ],
-
             "stylePreprocessorOptions": {
               "includePaths": [
                 "./node_modules",
@@ -262,17 +259,20 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
-          "configurations": {
-            "production": {
-              "buildTarget": "shell:build:production"
-            },
-            "development": {
-              "buildTarget": "shell:build:development"
-            }
+        "builder": "@angular/build:dev-server",
+        "options": {
+          "proxyConfig": "apps/shell/proxy.conf.json"
+        },
+        "configurations": {
+          "production": {
+            "buildTarget": "shell:build:production"
           },
-          "defaultConfiguration": "development"
-        }
+          "development": {
+            "buildTarget": "shell:build:development"
+          }
+        },
+        "defaultConfiguration": "development"
+      }
       }
     },
     "ui": {
@@ -375,6 +375,58 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "libs/api-client/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "session": {
+      "projectType": "library",
+      "root": "libs/session",
+      "sourceRoot": "libs/session/src",
+      "prefix": "xtein",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/session/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/session/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/session/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "auth": {
+      "projectType": "library",
+      "root": "libs/auth",
+      "sourceRoot": "libs/auth/src",
+      "prefix": "xtein",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/auth/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/auth/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/auth/tsconfig.spec.json"
           }
         }
       }

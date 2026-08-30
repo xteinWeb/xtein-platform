@@ -35,6 +35,12 @@
       ],
       "@xtein/api-client": [
         "./dist/api-client"
+      ],
+      "@xtein/session": [
+        "./dist/session"
+      ],
+      "@xtein/auth": [
+        "./dist/auth"
       ]
     },
     "useDefineForClassFields": false

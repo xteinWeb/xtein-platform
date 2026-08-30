@@ -1,0 +1,51 @@
+@if (label) {
+
+  <label
+    class="form-label"
+    [attr.for]="id || null">
+
+    {{ label }}
+
+    @if (required) {
+
+      <span
+        class="text-danger ms-1"
+        aria-hidden="true">
+        *
+      </span>
+
+    }
+
+  </label>
+
+}
+
+<dx-select-box
+  class="w-100"
+  stylingMode="filled"
+  [items]="items"
+  [displayExpr]="displayExpr"
+  [valueExpr]="valueExpr"
+  [value]="value"
+  [placeholder]="placeholder"
+  [disabled]="isDisabled"
+  [readOnly]="readOnly"
+  [searchEnabled]="searchEnabled"
+  [showClearButton]="showClearButton"
+  [noDataText]="noDataText"
+  [inputAttr]="inputAttributes"
+  (onValueChanged)="handleValueChanged($event)"
+  (onFocusOut)="handleFocusOut()">
+</dx-select-box>
+
+@if (invalid && errorMessage) {
+
+  <div
+    class="invalid-feedback d-block"
+    role="alert">
+
+    {{ errorMessage }}
+
+  </div>
+
+}
