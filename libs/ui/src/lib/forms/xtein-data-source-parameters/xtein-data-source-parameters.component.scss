@@ -1,0 +1,165 @@
+:host {
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+
+.xt-data-source-parameters {
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   GRID
+   ============================================================ */
+
+.xt-data-source-parameters__grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      var(--xt-columns, 2),
+      minmax(0, 1fr)
+    );
+
+  gap: 16px;
+
+  width: 100%;
+}
+
+
+/* ============================================================
+   FIELD
+   ============================================================ */
+
+.xt-data-source-parameters__field {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  gap: 6px;
+}
+
+
+/* ============================================================
+   LABEL
+   ============================================================ */
+
+.xt-data-source-parameters__label {
+  display: block;
+
+  margin: 0;
+
+  color: #244d73;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.xt-data-source-parameters__required {
+  margin-left: 2px;
+
+  color: #dc3545;
+}
+
+
+/* ============================================================
+   VALIDATION
+   ============================================================ */
+
+.xt-data-source-parameters__error {
+  min-height: 16px;
+
+  margin-top: -2px;
+
+  color: #dc3545;
+
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.xt-data-source-parameters__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  width: 100%;
+
+  margin-top: 16px;
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.xt-data-source-parameters__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 54px;
+
+  padding: 12px 20px;
+
+  border: 1px dashed #c9d8ea;
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  color: #6c7f91;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+
+  text-align: center;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+
+  .xt-data-source-parameters__grid {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+  .xt-data-source-parameters__actions {
+    justify-content: stretch;
+  }
+
+  .xt-data-source-parameters__actions xtein-button {
+    width: 100%;
+  }
+
+}

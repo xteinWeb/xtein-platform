@@ -1,464 +1,585 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1,
-  "newProjectRoot": "projects",
-  "projects": {
-    "xtein-web-2.0": {
-      "projectType": "application",
-      "schematics": {},
-      "root": "",
-      "sourceRoot": "src",
-      "prefix": "app",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:application",
-          "options": {
-            "outputPath": {
-              "base": "dist/xtein-web-2.0"
-            },
-            "index": "src/index.html",
-            "polyfills": [
-              "zone.js"
-            ],
-            "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/assets"
-            ],
-            "styles": [
-               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-               "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-               "node_modules/devextreme/dist/css/dx.common.css",
-               "node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",                
-               "src/scss/style.scss"
-            ],
-            "stylePreprocessorOptions": {
-              "includePaths": [
-                "./node_modules",
-                "."
-              ]
-            },
-            "scripts": [
-              "./src/assets/js/drag.js",
-              "node_modules/bootstrap/dist/js/bootstrap.js"
-            ],
-            "browser": "src/main.ts"
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                { "type": "initial", "maximumWarning": "80mb", "maximumError": "100mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "40mb", "maximumError": "60mb" }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "aot": true,
-              "extractLicenses": true
-            },
-            "dev-server": {
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "aot": true,
-              "extractLicenses": true,
-              "fileReplacements": []
-            },
-            "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
-            },
-            "dev-memory-optimized": {
-              "optimization": {
-                "scripts": true,
-                "styles": false,
-                "fonts": false
-              },
-              "extractLicenses": false,
-              "sourceMap": false,
-              "namedChunks": false
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "serve": {
-          "builder": "@angular/build:dev-server",
-          "configurations": {
-            "production": {
-              "buildTarget": "xtein-web-2.0:build:production"
-            },
-            "development": {
-              "buildTarget": "xtein-web-2.0:build:development"
-            },
-            "dev-server": {
-              "buildTarget": "xtein-web-2.0:build:dev-server"
-            },
-            "dev-memory-optimized": {
-              "buildTarget": "xtein-web-2.0:build:dev-memory-optimized"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "extract-i18n": {
-          "builder": "@angular/build:extract-i18n",
-          "options": {
-            "buildTarget": "xtein-web-2.0:build"
-          }
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              "src/assets"
-            ],
-            "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-              "node_modules/devextreme/dist/css/dx.common.css",
-              "node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",               
-              "src/scss/style.scss"
-            ],
-            "stylePreprocessorOptions": {
-              "includePaths": [
-                "./node_modules"
-              ]
-            },
-            "scripts": [
-              "./src/assets/js/drag.js",
-              "node_modules/bootstrap/dist/js/bootstrap.js"
-            ]
-          }
-        }
-      }
-    },
-    "shell": {
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss",
-          "skipTests": true,
-          "type": "component",
-          "addTypeToClassName": false
-        },
-        "@schematics/angular:class": {
-          "skipTests": true
-        },
-        "@schematics/angular:directive": {
-          "skipTests": true,
-          "type": "directive",
-          "addTypeToClassName": false
-        },
-        "@schematics/angular:guard": {
-          "skipTests": true,
-          "typeSeparator": "."
-        },
-        "@schematics/angular:interceptor": {
-          "skipTests": true,
-          "typeSeparator": "."
-        },
-        "@schematics/angular:pipe": {
-          "skipTests": true,
-          "typeSeparator": "."
-        },
-        "@schematics/angular:resolver": {
-          "skipTests": true,
-          "typeSeparator": "."
-        },
-        "@schematics/angular:service": {
-          "skipTests": true,
-          "type": "service",
-          "addTypeToClassName": false
-        },
-        "@schematics/angular:module": {
-          "typeSeparator": "."
-        }
-      },
-      "root": "apps/shell",
-      "sourceRoot": "apps/shell/src",
-      "prefix": "app",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:application",
-          "options": {
-            "browser": "apps/shell/src/main.ts",
-
-            "polyfills": [
-              "zone.js"
-            ],
-
-            "tsConfig": "apps/shell/tsconfig.app.json",
-
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "apps/shell/public"
-              },
-              {
-                "glob": "**/*",
-                "input": "libs/ui/src/assets",
-                "output": "/assets/"
-              }
-            ],
-            "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-              "node_modules/devextreme/dist/css/dx.common.css",
-              "node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
-              "libs/ui/src/styles/style.scss",
-              "apps/shell/src/styles.scss"
-            ],
-            "stylePreprocessorOptions": {
-              "includePaths": [
-                "./node_modules",
-                "."
-              ]
-            },
-
-            "scripts": [
-              "./src/assets/js/drag.js",
-              "node_modules/bootstrap/dist/js/bootstrap.js"
-            ]
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
-              ],
-              "outputHashing": "all"
-            },
-            "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "serve": {
-        "builder": "@angular/build:dev-server",
-        "options": {
-          "proxyConfig": "apps/shell/proxy.conf.json"
-        },
-        "configurations": {
-          "production": {
-            "buildTarget": "shell:build:production"
-          },
-          "development": {
-            "buildTarget": "shell:build:development"
-          }
-        },
-        "defaultConfiguration": "development"
-      }
-      }
-    },
-    "ui": {
-      "projectType": "library",
-      "root": "libs/ui",
-      "sourceRoot": "libs/ui/src",
-      "prefix": "xtein",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/ui/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/ui/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "libs/ui/tsconfig.spec.json"
-          }
-        }
-      }
-    },
-    "sdk": {
-      "projectType": "library",
-      "root": "libs/sdk",
-      "sourceRoot": "libs/sdk/src",
-      "prefix": "xtein",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/sdk/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/sdk/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "libs/sdk/tsconfig.spec.json"
-          }
-        }
-      }
-    },
-    "runtime": {
-      "projectType": "library",
-      "root": "libs/runtime",
-      "sourceRoot": "libs/runtime/src",
-      "prefix": "xtein",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/runtime/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/runtime/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "libs/runtime/tsconfig.spec.json"
-          }
-        }
-      }
-    },
-    "api-client": {
-      "projectType": "library",
-      "root": "libs/api-client",
-      "sourceRoot": "libs/api-client/src",
-      "prefix": "xtein",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/api-client/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/api-client/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "libs/api-client/tsconfig.spec.json"
-          }
-        }
-      }
-    },
-    "session": {
-      "projectType": "library",
-      "root": "libs/session",
-      "sourceRoot": "libs/session/src",
-      "prefix": "xtein",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/session/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/session/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "libs/session/tsconfig.spec.json"
-          }
-        }
-      }
-    },
-    "auth": {
-      "projectType": "library",
-      "root": "libs/auth",
-      "sourceRoot": "libs/auth/src",
-      "prefix": "xtein",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/auth/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/auth/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "libs/auth/tsconfig.spec.json"
-          }
-        }
-      }
-    }
-  },
-  "cli": {
-    "analytics": "e4ddd7e8-a407-40bc-8d49-44eeaf915d49"
-  },
-  "schematics": {
-    "@schematics/angular:component": {
-      "type": "component"
-    },
-    "@schematics/angular:directive": {
-      "type": "directive"
-    },
-    "@schematics/angular:service": {
-      "type": "service"
-    },
-    "@schematics/angular:guard": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:interceptor": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:module": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:pipe": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:resolver": {
-      "typeSeparator": "."
-    }
-  }
+	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+	"version": 1,
+	"newProjectRoot": "projects",
+	"projects": {
+		"xtein-web-2.0": {
+			"projectType": "application",
+			"schematics": {},
+			"root": "",
+			"sourceRoot": "src",
+			"prefix": "app",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:application",
+					"options": {
+						"outputPath": {
+							"base": "dist/xtein-web-2.0"
+						},
+						"index": "src/index.html",
+						"polyfills": [
+							"zone.js"
+						],
+						"tsConfig": "tsconfig.app.json",
+						"assets": [
+							"src/assets"
+						],
+						"styles": [
+							"node_modules/bootstrap/dist/css/bootstrap.min.css",
+							"node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+							"node_modules/devextreme/dist/css/dx.common.css",
+							"node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
+							"src/scss/style.scss"
+						],
+						"stylePreprocessorOptions": {
+							"includePaths": [
+								"./node_modules",
+								"."
+							]
+						},
+						"scripts": [
+							"./src/assets/js/drag.js",
+							"node_modules/bootstrap/dist/js/bootstrap.js"
+						],
+						"browser": "src/main.ts"
+					},
+					"configurations": {
+						"production": {
+							"budgets": [
+								{
+									"type": "initial",
+									"maximumWarning": "80mb",
+									"maximumError": "100mb"
+								},
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "40mb",
+									"maximumError": "60mb"
+								}
+							],
+							"fileReplacements": [
+								{
+									"replace": "src/environments/environment.ts",
+									"with": "src/environments/environment.prod.ts"
+								}
+							],
+							"optimization": true,
+							"outputHashing": "all",
+							"sourceMap": false,
+							"namedChunks": false,
+							"aot": true,
+							"extractLicenses": true
+						},
+						"dev-server": {
+							"optimization": true,
+							"outputHashing": "all",
+							"sourceMap": false,
+							"namedChunks": false,
+							"aot": true,
+							"extractLicenses": true,
+							"fileReplacements": []
+						},
+						"development": {
+							"optimization": false,
+							"extractLicenses": false,
+							"sourceMap": true,
+							"namedChunks": true
+						},
+						"dev-memory-optimized": {
+							"optimization": {
+								"scripts": true,
+								"styles": false,
+								"fonts": false
+							},
+							"extractLicenses": false,
+							"sourceMap": false,
+							"namedChunks": false
+						}
+					},
+					"defaultConfiguration": "development"
+				},
+				"serve": {
+					"builder": "@angular/build:dev-server",
+					"configurations": {
+						"production": {
+							"buildTarget": "xtein-web-2.0:build:production"
+						},
+						"development": {
+							"buildTarget": "xtein-web-2.0:build:development"
+						},
+						"dev-server": {
+							"buildTarget": "xtein-web-2.0:build:dev-server"
+						},
+						"dev-memory-optimized": {
+							"buildTarget": "xtein-web-2.0:build:dev-memory-optimized"
+						}
+					},
+					"defaultConfiguration": "development"
+				},
+				"extract-i18n": {
+					"builder": "@angular/build:extract-i18n",
+					"options": {
+						"buildTarget": "xtein-web-2.0:build"
+					}
+				},
+				"test": {
+					"builder": "@angular/build:karma",
+					"options": {
+						"polyfills": [
+							"zone.js",
+							"zone.js/testing"
+						],
+						"tsConfig": "tsconfig.spec.json",
+						"assets": [
+							"src/assets"
+						],
+						"styles": [
+							"node_modules/bootstrap/dist/css/bootstrap.min.css",
+							"node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+							"node_modules/devextreme/dist/css/dx.common.css",
+							"node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
+							"src/scss/style.scss"
+						],
+						"stylePreprocessorOptions": {
+							"includePaths": [
+								"./node_modules"
+							]
+						},
+						"scripts": [
+							"./src/assets/js/drag.js",
+							"node_modules/bootstrap/dist/js/bootstrap.js"
+						]
+					}
+				}
+			}
+		},
+		"shell": {
+			"projectType": "application",
+			"schematics": {
+				"@schematics/angular:component": {
+					"style": "scss",
+					"skipTests": true,
+					"type": "component",
+					"addTypeToClassName": false
+				},
+				"@schematics/angular:class": {
+					"skipTests": true
+				},
+				"@schematics/angular:directive": {
+					"skipTests": true,
+					"type": "directive",
+					"addTypeToClassName": false
+				},
+				"@schematics/angular:guard": {
+					"skipTests": true,
+					"typeSeparator": "."
+				},
+				"@schematics/angular:interceptor": {
+					"skipTests": true,
+					"typeSeparator": "."
+				},
+				"@schematics/angular:pipe": {
+					"skipTests": true,
+					"typeSeparator": "."
+				},
+				"@schematics/angular:resolver": {
+					"skipTests": true,
+					"typeSeparator": "."
+				},
+				"@schematics/angular:service": {
+					"skipTests": true,
+					"type": "service",
+					"addTypeToClassName": false
+				},
+				"@schematics/angular:module": {
+					"typeSeparator": "."
+				}
+			},
+			"root": "apps/shell",
+			"sourceRoot": "apps/shell/src",
+			"prefix": "app",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:application",
+					"options": {
+						"browser": "apps/shell/src/main.ts",
+						"polyfills": [
+							"zone.js"
+						],
+						"tsConfig": "apps/shell/tsconfig.app.json",
+						"inlineStyleLanguage": "scss",
+						"assets": [
+							{
+								"glob": "**/*",
+								"input": "apps/shell/public"
+							},
+							{
+								"glob": "**/*",
+								"input": "libs/ui/src/assets",
+								"output": "/assets/"
+							}
+						],
+						"styles": [
+							"node_modules/bootstrap/dist/css/bootstrap.min.css",
+							"node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+							"node_modules/devextreme/dist/css/dx.common.css",
+							"node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
+							"libs/ui/src/styles/style.scss",
+							"apps/shell/src/styles.scss"
+						],
+						"stylePreprocessorOptions": {
+							"includePaths": [
+								"./node_modules",
+								"."
+							]
+						},
+						"scripts": [
+							"./src/assets/js/drag.js",
+							"node_modules/bootstrap/dist/js/bootstrap.js"
+						]
+					},
+					"configurations": {
+						"production": {
+							"budgets": [
+								{
+									"type": "initial",
+									"maximumWarning": "500kB",
+									"maximumError": "1MB"
+								},
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "4kB",
+									"maximumError": "8kB"
+								}
+							],
+							"outputHashing": "all"
+						},
+						"development": {
+							"optimization": false,
+							"extractLicenses": false,
+							"sourceMap": true
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"serve": {
+					"builder": "@angular/build:dev-server",
+					"options": {
+						"proxyConfig": "apps/shell/proxy.conf.json"
+					},
+					"configurations": {
+						"production": {
+							"buildTarget": "shell:build:production"
+						},
+						"development": {
+							"buildTarget": "shell:build:development"
+						}
+					},
+					"defaultConfiguration": "development"
+				}
+			}
+		},
+		"ui": {
+			"projectType": "library",
+			"root": "libs/ui",
+			"sourceRoot": "libs/ui/src",
+			"prefix": "xtein",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"configurations": {
+						"production": {
+							"tsConfig": "libs/ui/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "libs/ui/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular/build:unit-test",
+					"options": {
+						"tsConfig": "libs/ui/tsconfig.spec.json"
+					}
+				}
+			}
+		},
+		"sdk": {
+			"projectType": "library",
+			"root": "libs/sdk",
+			"sourceRoot": "libs/sdk/src",
+			"prefix": "xtein",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"configurations": {
+						"production": {
+							"tsConfig": "libs/sdk/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "libs/sdk/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular/build:unit-test",
+					"options": {
+						"tsConfig": "libs/sdk/tsconfig.spec.json"
+					}
+				}
+			}
+		},
+		"runtime": {
+			"projectType": "library",
+			"root": "libs/runtime",
+			"sourceRoot": "libs/runtime/src",
+			"prefix": "xtein",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"configurations": {
+						"production": {
+							"tsConfig": "libs/runtime/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "libs/runtime/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular/build:unit-test",
+					"options": {
+						"tsConfig": "libs/runtime/tsconfig.spec.json"
+					}
+				}
+			}
+		},
+		"api-client": {
+			"projectType": "library",
+			"root": "libs/api-client",
+			"sourceRoot": "libs/api-client/src",
+			"prefix": "xtein",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"configurations": {
+						"production": {
+							"tsConfig": "libs/api-client/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "libs/api-client/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular/build:unit-test",
+					"options": {
+						"tsConfig": "libs/api-client/tsconfig.spec.json"
+					}
+				}
+			}
+		},
+		"session": {
+			"projectType": "library",
+			"root": "libs/session",
+			"sourceRoot": "libs/session/src",
+			"prefix": "xtein",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"configurations": {
+						"production": {
+							"tsConfig": "libs/session/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "libs/session/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular/build:unit-test",
+					"options": {
+						"tsConfig": "libs/session/tsconfig.spec.json"
+					}
+				}
+			}
+		},
+		"auth": {
+			"projectType": "library",
+			"root": "libs/auth",
+			"sourceRoot": "libs/auth/src",
+			"prefix": "xtein",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"configurations": {
+						"production": {
+							"tsConfig": "libs/auth/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "libs/auth/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular/build:unit-test",
+					"options": {
+						"tsConfig": "libs/auth/tsconfig.spec.json"
+					}
+				}
+			}
+		},
+		"mfe-mad": {
+			"projectType": "application",
+			"schematics": {
+				"@schematics/angular:component": {
+					"style": "scss",
+					"skipTests": true
+				},
+				"@schematics/angular:class": {
+					"skipTests": true
+				},
+				"@schematics/angular:directive": {
+					"skipTests": true
+				},
+				"@schematics/angular:guard": {
+					"skipTests": true
+				},
+				"@schematics/angular:interceptor": {
+					"skipTests": true
+				},
+				"@schematics/angular:pipe": {
+					"skipTests": true
+				},
+				"@schematics/angular:resolver": {
+					"skipTests": true
+				},
+				"@schematics/angular:service": {
+					"skipTests": true
+				}
+			},
+			"root": "apps/mfe-mad",
+			"sourceRoot": "apps/mfe-mad/src",
+			"prefix": "mad",
+			"architect": {
+				"build": {
+					"builder": "@angular-architects/native-federation:build",
+					"options": {},
+					"configurations": {
+						"production": {
+							"target": "mfe-mad:esbuild:production"
+						},
+						"development": {
+							"target": "mfe-mad:esbuild:development",
+							"dev": true
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"serve": {
+					"builder": "@angular-architects/native-federation:build",
+					"options": {
+						"target": "mfe-mad:serve-original:development",
+						"rebuildDelay": 500,
+						"dev": true,
+						"cacheExternalArtifacts": false,
+						"port": 0
+					}
+				},
+				"esbuild": {
+					"builder": "@angular/build:application",
+					"options": {
+						"browser": "apps/mfe-mad/src/main.ts",
+						"tsConfig": "apps/mfe-mad/tsconfig.app.json",
+						"inlineStyleLanguage": "scss",
+						"assets": [
+							{
+								"glob": "**/*",
+								"input": "apps/mfe-mad/public"
+							}
+						],
+						"styles": [
+							"apps/mfe-mad/src/styles.scss"
+						],
+						"polyfills": [
+							"es-module-shims"
+						]
+					},
+					"configurations": {
+						"production": {
+							"budgets": [
+								{
+									"type": "initial",
+									"maximumWarning": "500kB",
+									"maximumError": "1MB"
+								},
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "4kB",
+									"maximumError": "8kB"
+								}
+							],
+							"outputHashing": "all"
+						},
+						"development": {
+							"optimization": false,
+							"extractLicenses": false,
+							"sourceMap": true
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"serve-original": {
+					"builder": "@angular/build:dev-server",
+					"configurations": {
+						"production": {
+							"buildTarget": "mfe-mad:esbuild:production"
+						},
+						"development": {
+							"buildTarget": "mfe-mad:esbuild:development"
+						}
+					},
+					"defaultConfiguration": "development",
+					"options": {
+						"port": 4201
+					}
+				}
+			}
+		}
+	},
+	"cli": {
+		"analytics": "e4ddd7e8-a407-40bc-8d49-44eeaf915d49"
+	},
+	"schematics": {
+		"@schematics/angular:component": {
+			"type": "component"
+		},
+		"@schematics/angular:directive": {
+			"type": "directive"
+		},
+		"@schematics/angular:service": {
+			"type": "service"
+		},
+		"@schematics/angular:guard": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:interceptor": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:module": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:pipe": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:resolver": {
+			"typeSeparator": "."
+		}
+	}
 }

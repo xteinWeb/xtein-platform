@@ -1,0 +1,18 @@
+<dx-text-area
+  [elementAttr]="{
+    id: id,
+    name: name,
+    'aria-label': ariaLabel || placeholder || name
+  }"
+  [value]="value"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [height]="height"
+  [minHeight]="minHeight"
+  [maxHeight]="maxHeight"
+  [maxLength]="$any(maxLength)"
+  [autoResizeEnabled]="autoResizeEnabled"
+  stylingMode="outlined"
+  (onValueChanged)="onValueChanged($event)"
+  (onFocusOut)="onFocusOut()">
+</dx-text-area>

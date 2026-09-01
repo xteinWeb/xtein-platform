@@ -1,0 +1,139 @@
+<div class="xt-data-source-parameters">
+
+  @if (!origin) {
+
+    <div class="xt-data-source-parameters__empty">
+      <span>
+        Seleccione un origen de datos para configurar los parámetros
+      </span>
+    </div>
+
+  } @else if (fields.length === 0) {
+
+    <div class="xt-data-source-parameters__empty">
+      <span>
+        No hay parámetros configurados para el origen:
+        {{ origin }}
+      </span>
+    </div>
+
+  } @else {
+
+    <div
+      class="xt-data-source-parameters__grid"
+      [style.--xt-columns]="colCount">
+
+      @for (field of fields; track field.name) {
+
+        <div class="xt-data-source-parameters__field">
+
+          <label
+            class="xt-data-source-parameters__label"
+            [attr.for]="field.name">
+
+            {{ field.label }}
+
+            @if (field.required) {
+              <span
+                class="xt-data-source-parameters__required"
+                aria-hidden="true">
+                *
+              </span>
+            }
+
+          </label>
+
+          @switch (field.type) {
+
+            @case ('text') {
+
+              <xtein-input
+                [id]="field.name"
+                [name]="field.name"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required || false"
+                [formControl]="getFieldControl(field.name)">
+              </xtein-input>
+
+            }
+
+            @case ('password') {
+
+              <xtein-password
+                [id]="field.name"
+                [name]="field.name"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required || false"
+                [formControl]="getFieldControl(field.name)">
+              </xtein-password>
+
+            }
+
+            @case ('number') {
+
+              <xtein-number
+                [id]="field.name"
+                [name]="field.name"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required || false"
+                [formControl]="getFieldControl(field.name)">
+              </xtein-number>
+
+            }
+
+            @case ('select') {
+
+              <xtein-select
+                [id]="field.name"
+                [items]="field.items || []"
+                valueExpr="value"
+                displayExpr="value"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required || false"
+                [formControl]="getFieldControl(field.name)">
+              </xtein-select>
+
+            }
+
+          }
+
+          @if (
+            getFieldControl(field.name).invalid &&
+            getFieldControl(field.name).touched
+          ) {
+
+            <div class="xt-data-source-parameters__error">
+
+              @if (
+                getFieldControl(field.name).errors?.['required']
+              ) {
+                {{ field.label }} es requerido
+              }
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+    @if (showTestConnectionButton()) {
+
+      <div class="xt-data-source-parameters__actions">
+
+        <xtein-button
+          text="Probar"
+          [disabled]="testingConnection"
+          (clicked)="testConnection()">
+        </xtein-button>
+
+      </div>
+
+    }
+
+  }
+
+</div>

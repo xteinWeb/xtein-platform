@@ -1,21 +1,43 @@
-<div class="xt-shell">
+<div
+  class="xt-shell"
+  [class.xt-shell--sidebar-collapsed]="sidebarCollapsed()">
 
+  <!-- Header -->
   <header class="xt-shell__header">
-    <app-header></app-header>
+
+    <app-header>
+    </app-header>
+
   </header>
 
+
+  <!-- Main navigation -->
   <aside class="xt-shell__sidebar">
-    <app-sidebar></app-sidebar>
+
+    <app-sidebar
+      [collapsed]="sidebarCollapsed()"
+      (collapsedChange)="setSidebarCollapsed($event)">
+    </app-sidebar>
+
   </aside>
 
+
+  <!-- Main workspace -->
   <main class="xt-shell__main">
 
     <div class="xt-shell__toolbar">
-      <app-platform-toolbar></app-platform-toolbar>
+
+      <app-platform-toolbar>
+      </app-platform-toolbar>
+
     </div>
 
+
     <div class="xt-shell__workspace">
-      <app-workspace></app-workspace>
+
+      <app-workspace>
+      </app-workspace>
+
     </div>
 
   </main>

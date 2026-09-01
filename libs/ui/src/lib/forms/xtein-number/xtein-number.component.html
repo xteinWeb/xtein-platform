@@ -1,0 +1,18 @@
+<dx-number-box
+  [elementAttr]="{
+    id: id,
+    name: name,
+    'aria-label': ariaLabel || placeholder || name
+  }"
+  [value]="$any(value)"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [min]="min"
+  [max]="max"
+  [step]="step"
+  [showSpinButtons]="showSpinButtons"
+  [showClearButton]="!required"
+  stylingMode="outlined"
+  (onValueChanged)="onValueChanged($event)"
+  (onFocusOut)="onFocusOut()">
+</dx-number-box>
