@@ -5,6 +5,11 @@
   height: 100%;
 }
 
+
+/* ============================================================
+   WORKSPACE
+   ============================================================ */
+
 .xt-workspace {
   display: flex;
   flex-direction: column;
@@ -12,66 +17,398 @@
   width: 100%;
   height: 100%;
 
-  background: #f3f7fd;
+  min-width: 0;
+  min-height: 0;
+
+  background:
+    #f3f7fd;
+
+  overflow: hidden;
 }
+
+
+/* ============================================================
+   TAB STRIP
+   ============================================================ */
 
 .xt-workspace__tabs {
   display: flex;
   align-items: center;
 
-  min-height: 46px;
+  flex: 0 0 46px;
+
+  width: 100%;
+  min-width: 0;
 
   padding: 4px 16px;
 
-  background: #dbe9fa;
+  background:
+    #dbe9fa;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width:
+    thin;
+
+  scrollbar-color:
+    rgba(15, 76, 129, .18)
+    transparent;
 }
 
-.xt-tab {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 
+/* ============================================================
+   TAB
+   ============================================================ */
+
+.xt-workspace-tab {
+  display: inline-flex;
+  align-items: center;
+
+  flex: 0 0 auto;
+
+  min-width: 0;
   height: 34px;
 
-  padding: 0 16px;
+  gap: 8px;
 
-  margin-right: 8px;
+  margin:
+    0 8px 0 0;
 
-  color: #67809a;
+  padding:
+    0 10px 0 16px;
 
-  border-radius: 17px;
+  border:
+    0;
 
-  cursor: pointer;
+  border-radius:
+    17px;
+
+  outline:
+    0;
+
+  background:
+    transparent;
+
+  color:
+    #67809a;
+
+  font-family:
+    inherit;
+
+  font-size:
+    13px;
+
+  cursor:
+    pointer;
+
+  box-shadow:
+    none;
+
+  transition:
+    background-color .15s ease,
+    color .15s ease,
+    box-shadow .15s ease;
 }
 
-.xt-tab--active {
-  color: #244d73;
 
-  background: white;
+.xt-workspace-tab:hover {
+  color:
+    #244d73;
+
+  background:
+    rgba(255, 255, 255, .52);
+}
+
+
+.xt-workspace-tab:focus-visible {
+  outline:
+    2px solid #86b7fe;
+
+  outline-offset:
+    -2px;
+}
+
+
+/* ============================================================
+   ACTIVE TAB
+   ============================================================ */
+
+.xt-workspace-tab--active {
+  color:
+    #244d73;
+
+  background:
+    #ffffff;
 
   box-shadow:
     0 2px 6px rgba(39, 78, 114, .18),
     0 0 0 1px rgba(74, 127, 176, .14);
 }
 
+
+/* ============================================================
+   TAB TITLE
+   ============================================================ */
+
+.xt-workspace-tab__title {
+  display: block;
+
+  max-width: 220px;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  font-weight: 500;
+}
+
+
+/* ============================================================
+   DIRTY INDICATOR
+   ============================================================ */
+
+.xt-workspace-tab__dirty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  width: 8px;
+
+  color:
+    #0f4c81;
+
+  font-size:
+    18px;
+
+  line-height:
+    1;
+}
+
+
+/* ============================================================
+   CLOSE BUTTON
+   ============================================================ */
+
+.xt-workspace-tab__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 22px;
+
+  width: 22px;
+  height: 22px;
+
+  border-radius:
+    50%;
+
+  color:
+    #7a8da0;
+
+  font-size:
+    17px;
+
+  line-height:
+    1;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color .15s ease,
+    color .15s ease;
+}
+
+
+.xt-workspace-tab__close:hover {
+  background:
+    #e5eef7;
+
+  color:
+    #244d73;
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
 .xt-workspace__content {
+  position: relative;
+
   flex: 1 1 auto;
 
+  width: 100%;
+
+  min-width: 0;
   min-height: 0;
 
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   APPLICATION PANELS
+   ============================================================ */
+
+.xt-workspace__panel {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
   padding: 10px;
+
+  visibility: hidden;
+
+  opacity: 0;
+
+  pointer-events: none;
 
   overflow: auto;
 }
 
-.xt-placeholder {
+
+.xt-workspace__panel--active {
+  visibility: visible;
+
+  opacity: 1;
+
+  pointer-events: auto;
+}
+
+
+/* ============================================================
+   EMPTY WORKSPACE
+   ============================================================ */
+
+.xt-workspace__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  flex: 1 1 auto;
+
+  width: 100%;
   height: 100%;
 
-  padding: 30px;
+  color:
+    #7b8c9d;
+}
 
-  background: white;
 
-  border-radius: 14px;
+.xt-workspace__empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+  width: 52px;
+  height: 52px;
+
+  margin-bottom: 12px;
+
+  border-radius:
+    12px;
+
+  background:
+    #e7f0fa;
+
+  color:
+    #174b75;
+
+  font-size:
+    24px;
+}
+
+
+.xt-workspace__empty-title {
+  color:
+    #244d73;
+
+  font-size:
+    16px;
+
+  font-weight:
+    600;
+}
+
+
+.xt-workspace__empty-message {
+  margin-top:
+    5px;
+
+  color:
+    #8190a0;
+
+  font-size:
+    13px;
+}
+
+
+/* ============================================================
+   TAB STRIP SCROLLBAR
+   ============================================================ */
+
+.xt-workspace__tabs::-webkit-scrollbar {
+  height:
+    4px;
+}
+
+
+.xt-workspace__tabs::-webkit-scrollbar-track {
+  background:
+    transparent;
+}
+
+
+.xt-workspace__tabs::-webkit-scrollbar-thumb {
+  border-radius:
+    10px;
+
+  background:
+    rgba(15, 76, 129, .18);
+}
+
+
+.xt-workspace__tabs::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(15, 76, 129, .30);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (
+  max-width: 767.98px
+) {
+
+  .xt-workspace__tabs {
+    padding-right:
+      8px;
+
+    padding-left:
+      8px;
+  }
+
+
+  .xt-workspace-tab__title {
+    max-width:
+      150px;
+  }
+
+
+  .xt-workspace__panel {
+    padding:
+      6px;
+  }
+
 }

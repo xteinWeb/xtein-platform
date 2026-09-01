@@ -7,16 +7,24 @@ import {
 } from 'rxjs';
 
 import {
+  XteinApiAccessMode,
   XteinApiClientService,
   XteinDataApiResponse
 } from '@xtein/api-client';
+
+import {
+  Mad005Action,
+  Mad005Application,
+  Mad005Endpoint
+} from '../constants/mad-005.constants';
 
 
 /**
  * Provides backend operations required by MAD-005.
  *
- * Transport, authentication, company context, and token refresh
- * are delegated to XteinApiClientService.
+ * Transport, authentication, company context, token handling,
+ * and legacy request-envelope construction are delegated to
+ * XteinApiClientService.
  */
 @Injectable({
   providedIn: 'root'
@@ -24,18 +32,17 @@ import {
 export class Mad005Service {
 
   /**
-   * XTEIN application identifier.
-   */
-  private static readonly applicationId =
-    'MAD-005';
-
-  /**
-   * Backend application identifier.
+   * Returns the XTEIN application identifier represented
+   * by this service.
    *
-   * The existing backend exposes MAD-005 under the MAD005 route.
+   * @returns MAD-005 application identifier.
    */
-  private static readonly backendApplicationId =
-    'MAD005';
+  getApplicationId():
+    string {
+
+    return Mad005Application.Id;
+  }
+
 
   constructor(
     private readonly apiClient:
@@ -47,18 +54,16 @@ export class Mad005Service {
   /**
    * Executes a MAD-005 query operation.
    *
-   * Existing backend actions include:
-   * - datalists
-   * - consulta
-   * - validatedefault
-   *
-   * @param action Existing backend action.
+   * @param action Existing MAD-005 backend action.
    * @param data Functional request data.
    * @returns Existing XTEIN backend response.
    */
-  consulta(
-    action: string,
-    data: unknown
+  query(
+    action:
+      Mad005Action,
+
+    data:
+      unknown
   ): Observable<
     XteinDataApiResponse<string>
   > {
@@ -68,14 +73,14 @@ export class Mad005Service {
         XteinDataApiResponse<string>
       >({
         endpoint:
-          `/${Mad005Service.backendApplicationId}/consulta`,
+          Mad005Endpoint.Query,
 
         action,
 
         data,
 
         accessMode:
-          'authenticated'
+          XteinApiAccessMode.Authenticated
       });
   }
 
@@ -83,17 +88,17 @@ export class Mad005Service {
   /**
    * Saves a MAD-005 data source configuration.
    *
-   * Existing backend actions are preserved:
-   * - new
-   * - update
-   *
-   * @param action Existing backend save action.
+   * @param action Save action.
    * @param data Functional request data.
    * @returns Existing XTEIN backend response.
    */
   save(
-    action: string,
-    data: unknown
+    action:
+      typeof Mad005Action.New |
+      typeof Mad005Action.Update,
+
+    data:
+      unknown
   ): Observable<
     XteinDataApiResponse<string>
   > {
@@ -103,14 +108,14 @@ export class Mad005Service {
         XteinDataApiResponse<string>
       >({
         endpoint:
-          `/${Mad005Service.backendApplicationId}/save`,
+          Mad005Endpoint.Save,
 
         action,
 
         data,
 
         accessMode:
-          'authenticated'
+          XteinApiAccessMode.Authenticated
       });
   }
 
@@ -122,7 +127,8 @@ export class Mad005Service {
    * @returns Existing XTEIN backend response.
    */
   delete(
-    data: unknown
+    data:
+      unknown
   ): Observable<
     XteinDataApiResponse<string>
   > {
@@ -132,49 +138,37 @@ export class Mad005Service {
         XteinDataApiResponse<string>
       >({
         endpoint:
-          `/${Mad005Service.backendApplicationId}/delete`,
+          Mad005Endpoint.Delete,
 
         action:
-          'delete',
+          Mad005Action.Delete,
 
         data,
 
         accessMode:
-          'authenticated'
+          XteinApiAccessMode.Authenticated
       });
   }
 
 
   /**
-   * Validates whether a data source key already exists.
-   *
-   * The existing backend performs this validation through
-   * the MAD005/consulta endpoint using the "existe" action.
+   * Validates whether a data source configuration key
+   * already exists.
    *
    * @param data Key values to validate.
    * @returns Existing XTEIN backend response.
    */
   validateKey(
-    data: unknown
+    data:
+      unknown
   ): Observable<
     XteinDataApiResponse<string>
   > {
 
-    return this.apiClient
-      .execute<
-        XteinDataApiResponse<string>
-      >({
-        endpoint:
-          `/${Mad005Service.backendApplicationId}/consulta`,
-
-        action:
-          'existe',
-
-        data,
-
-        accessMode:
-          'authenticated'
-      });
+    return this.query(
+      Mad005Action.Exists,
+      data
+    );
   }
 
 
@@ -188,9 +182,29 @@ export class Mad005Service {
       XteinDataApiResponse<string>
     > {
 
-    return this.consulta(
-      'datalists',
+    return this.query(
+      Mad005Action.DataLists,
       {}
+    );
+  }
+
+
+  /**
+   * Loads MAD-005 records.
+   *
+   * @param data Query parameters.
+   * @returns Existing XTEIN backend response.
+   */
+  getRecords(
+    data:
+      unknown = {}
+  ): Observable<
+    XteinDataApiResponse<string>
+  > {
+
+    return this.query(
+      Mad005Action.Query,
+      data
     );
   }
 
@@ -203,13 +217,14 @@ export class Mad005Service {
    * @returns Existing XTEIN backend response.
    */
   validateDefault(
-    dataSourceId: number
+    dataSourceId:
+      number
   ): Observable<
     XteinDataApiResponse<string>
   > {
 
-    return this.consulta(
-      'validatedefault',
+    return this.query(
+      Mad005Action.ValidateDefault,
       {
         ID_ORIGEN_DATO:
           dataSourceId
@@ -219,15 +234,41 @@ export class Mad005Service {
 
 
   /**
-   * Returns the XTEIN application identifier represented
-   * by this service.
+   * Creates a new data source configuration.
    *
-   * @returns MAD-005 application identifier.
+   * @param data Configuration data.
+   * @returns Existing XTEIN backend response.
    */
-  getApplicationId():
-    string {
+  create(
+    data:
+      unknown
+  ): Observable<
+    XteinDataApiResponse<string>
+  > {
 
-    return Mad005Service
-      .applicationId;
+    return this.save(
+      Mad005Action.New,
+      data
+    );
+  }
+
+
+  /**
+   * Updates an existing data source configuration.
+   *
+   * @param data Configuration data.
+   * @returns Existing XTEIN backend response.
+   */
+  update(
+    data:
+      unknown
+  ): Observable<
+    XteinDataApiResponse<string>
+  > {
+
+    return this.save(
+      Mad005Action.Update,
+      data
+    );
   }
 }

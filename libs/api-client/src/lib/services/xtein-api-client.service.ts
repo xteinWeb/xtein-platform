@@ -25,9 +25,13 @@ import {
 } from '../configuration/xtein-api-config';
 
 import {
-  XteinApiAccessMode,
+  XteinApiAccessMode
+} from '../contracts/xtein-api-access-mode';
+
+import {
   XteinApiRequest
 } from '../contracts/xtein-api-request';
+
 
 /**
  * Central HTTP client used to communicate with the existing
@@ -58,6 +62,7 @@ export class XteinApiClientService {
   ) {
   }
 
+
   /**
    * Executes a request against the existing XTEIN backend.
    *
@@ -73,14 +78,19 @@ export class XteinApiClientService {
   ): Observable<TResponse> {
 
     const url =
-      this.buildUrl(request.endpoint);
+      this.buildUrl(
+        request.endpoint
+      );
 
     const body =
-      this.buildRequestBody(request);
+      this.buildRequestBody(
+        request
+      );
 
     const headers =
       new HttpHeaders({
-        'Content-Type': 'application/json'
+        'Content-Type':
+          'application/json'
       });
 
     return this.httpClient
@@ -93,6 +103,7 @@ export class XteinApiClientService {
       )
       .pipe(
         tap(response => {
+
           this.updateAuthenticationToken(
             request.accessMode,
             response
@@ -100,10 +111,13 @@ export class XteinApiClientService {
         }),
 
         catchError(error =>
-          throwError(() => error)
+          throwError(
+            () => error
+          )
         )
       );
   }
+
 
   /**
    * Builds the request body expected by the existing backend.
@@ -115,12 +129,21 @@ export class XteinApiClientService {
     request: XteinApiRequest
   ): string {
 
-    if (request.accessMode === 'public') {
-      return this.buildPublicRequestBody(request);
+    if (
+      request.accessMode ===
+        XteinApiAccessMode.Public
+    ) {
+
+      return this.buildPublicRequestBody(
+        request
+      );
     }
 
-    return this.buildAuthenticatedRequestBody(request);
+    return this.buildAuthenticatedRequestBody(
+      request
+    );
   }
+
 
   /**
    * Builds a request that does not require an authenticated session.
@@ -136,17 +159,25 @@ export class XteinApiClientService {
   ): string {
 
     const backendRequest = {
-      prmAccion: request.action,
+
+      prmAccion:
+        request.action,
 
       prmDatos:
-        JSON.stringify(request.data),
+        JSON.stringify(
+          request.data
+        ),
 
       prmConexion:
-        XteinApiClientService.publicConnectionName
+        XteinApiClientService
+          .publicConnectionName
     };
 
-    return JSON.stringify(backendRequest);
+    return JSON.stringify(
+      backendRequest
+    );
   }
+
 
   /**
    * Builds a request using the current authenticated session.
@@ -163,30 +194,46 @@ export class XteinApiClientService {
       this.sessionService.current;
 
     if (!session) {
+
       throw new Error(
         'An authenticated XTEIN session is required to execute this request.'
       );
     }
 
     const backendRequest = {
-      prmAccion: request.action,
+
+      prmAccion:
+        request.action,
 
       prmDatos:
-        JSON.stringify(request.data),
+        JSON.stringify(
+          request.data
+        ),
 
       prmConexion: {
-        EMPRESA: session.companyId
+
+        EMPRESA:
+          session.companyId
       },
 
       prmTokenDatos: {
-        USUARIO: session.userId,
-        EMPRESA: session.companyId,
-        TOKEN: session.token
+
+        USUARIO:
+          session.userId,
+
+        EMPRESA:
+          session.companyId,
+
+        TOKEN:
+          session.token
       }
     };
 
-    return JSON.stringify(backendRequest);
+    return JSON.stringify(
+      backendRequest
+    );
   }
+
 
   /**
    * Builds the complete backend URL.
@@ -201,24 +248,35 @@ export class XteinApiClientService {
     const normalizedBaseUrl =
       this.apiConfig.baseUrl
         .trim()
-        .replace(/\/+$/, '');
+        .replace(
+          /\/+$/,
+          ''
+        );
 
     const normalizedEndpointValue =
       endpoint.trim();
 
-    if (!normalizedEndpointValue) {
+    if (
+      !normalizedEndpointValue
+    ) {
+
       throw new Error(
         'The XTEIN API endpoint cannot be empty.'
       );
     }
 
     const normalizedEndpoint =
-      normalizedEndpointValue.startsWith('/')
+      normalizedEndpointValue
+        .startsWith('/')
         ? normalizedEndpointValue
         : `/${normalizedEndpointValue}`;
 
-    return `${normalizedBaseUrl}${normalizedEndpoint}`;
+    return (
+      `${normalizedBaseUrl}` +
+      `${normalizedEndpoint}`
+    );
   }
+
 
   /**
    * Updates the current session when an authenticated backend request
@@ -231,23 +289,36 @@ export class XteinApiClientService {
    * @param response Backend response.
    */
   private updateAuthenticationToken(
-    accessMode: XteinApiAccessMode,
-    response: unknown
+    accessMode:
+      XteinApiAccessMode,
+
+    response:
+      unknown
   ): void {
 
-    if (accessMode !== 'authenticated') {
+    if (
+      accessMode !==
+        XteinApiAccessMode.Authenticated
+    ) {
+
       return;
     }
 
     const token =
-      this.getResponseToken(response);
+      this.getResponseToken(
+        response
+      );
 
     if (!token) {
       return;
     }
 
-    this.sessionService.updateToken(token);
+    this.sessionService
+      .updateToken(
+        token
+      );
   }
+
 
   /**
    * Extracts an authentication token from a backend response.
@@ -261,22 +332,32 @@ export class XteinApiClientService {
 
     if (
       response === null ||
-      typeof response !== 'object' ||
-      Array.isArray(response)
+      typeof response !==
+        'object' ||
+      Array.isArray(
+        response
+      )
     ) {
+
       return undefined;
     }
 
     const record =
-      response as Record<string, unknown>;
+      response as
+        Record<
+          string,
+          unknown
+        >;
 
     const token =
       record['token'];
 
     if (
-      typeof token !== 'string' ||
+      typeof token !==
+        'string' ||
       !token.trim()
     ) {
+
       return undefined;
     }
 

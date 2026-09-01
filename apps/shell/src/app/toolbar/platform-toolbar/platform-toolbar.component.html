@@ -1,15 +1,51 @@
-<div class="xt-toolbar">
+@if (visible()) {
 
-  <button type="button">
-    +
-  </button>
+  <nav
+    class="xt-platform-toolbar"
+    aria-label="Barra de operaciones">
 
-  <button type="button">
-    ✎
-  </button>
+    <div
+      class="xt-platform-toolbar__actions">
 
-  <button type="button">
-    ⟳
-  </button>
+      @for (
+        item of items();
+        track item.action
+      ) {
 
-</div>
+        @if (item.separatorBefore) {
+
+          <span
+            class="xt-platform-toolbar__separator"
+            aria-hidden="true">
+          </span>
+
+        }
+
+
+        <button
+          type="button"
+          class="xt-platform-toolbar__button"
+          [class.xt-platform-toolbar__button--disabled]="!item.enabled"
+          [disabled]="!item.enabled"
+          [attr.title]="item.label"
+          [attr.aria-label]="item.label"
+          (click)="execute(item.action)">
+
+          <i
+            class="xt-platform-toolbar__icon"
+            [class]="
+              'xt-platform-toolbar__icon ' +
+              item.iconClass
+            "
+            aria-hidden="true">
+          </i>
+
+        </button>
+
+      }
+
+    </div>
+
+  </nav>
+
+}

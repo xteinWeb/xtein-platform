@@ -1,0 +1,77 @@
+<div
+  class="xt-workspace-tab-host">
+
+  <ng-container
+    #applicationContainer>
+  </ng-container>
+
+
+  @if (loading()) {
+
+    <div
+      class="xt-workspace-tab-host__state">
+
+      <div
+        class="xt-workspace-tab-host__loading"
+        aria-hidden="true">
+      </div>
+
+      <div
+        class="xt-workspace-tab-host__state-title">
+
+        Cargando {{ tab.title }}
+
+      </div>
+
+      <div
+        class="xt-workspace-tab-host__state-message">
+
+        Preparando la aplicación...
+
+      </div>
+
+    </div>
+
+  }
+
+
+  @if (errorMessage()) {
+
+    <div
+      class="xt-workspace-tab-host__state
+             xt-workspace-tab-host__state--error">
+
+      <div
+        class="xt-workspace-tab-host__error-icon"
+        aria-hidden="true">
+
+        !
+
+      </div>
+
+      <div
+        class="xt-workspace-tab-host__state-title">
+
+        Aplicación no disponible
+
+      </div>
+
+      <div
+        class="xt-workspace-tab-host__state-message">
+
+        {{ errorMessage() }}
+
+      </div>
+
+      <div
+        class="xt-workspace-tab-host__application-id">
+
+        {{ tab.applicationId }}
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

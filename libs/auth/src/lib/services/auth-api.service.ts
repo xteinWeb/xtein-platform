@@ -8,6 +8,7 @@ import {
 } from 'rxjs';
 
 import {
+  XteinApiAccessMode,
   XteinApiClientService
 } from '@xtein/api-client';
 
@@ -22,6 +23,8 @@ import {
 import {
   UserValidationResult
 } from '../contracts/user-validation-result';
+
+
 
 /**
  * Internal authentication result returned by the existing backend.
@@ -121,7 +124,7 @@ export class AuthApiService {
         },
 
         accessMode:
-          'public'
+          XteinApiAccessMode.Public
       })
       .pipe(
         map(response =>
@@ -165,7 +168,7 @@ export class AuthApiService {
         },
 
         accessMode:
-          'public'
+          XteinApiAccessMode.Public
       })
       .pipe(
         map(response =>

@@ -1,22 +1,63 @@
-<div class="mad-application-host">
+<div
+  class="mad-application-host">
 
-  <div class="mad-application-host__content">
+  <ng-container
+    #applicationContainer>
+  </ng-container>
 
-    <h2>
-      MFE-MAD
-    </h2>
 
-    <p>
-      Application Host loaded successfully.
-    </p>
+  @if (loading()) {
 
-    <p>
-      Application:
-      <strong>
-        {{ applicationId || 'Not specified' }}
-      </strong>
-    </p>
+    <div
+      class="mad-application-host__state">
 
-  </div>
+      <div
+        class="mad-application-host__loading"
+        aria-hidden="true">
+      </div>
+
+      <div
+        class="mad-application-host__state-title">
+
+        Cargando aplicación
+
+      </div>
+
+    </div>
+
+  }
+
+
+  @if (errorMessage()) {
+
+    <div
+      class="mad-application-host__state
+             mad-application-host__state--error">
+
+      <div
+        class="mad-application-host__error-icon"
+        aria-hidden="true">
+
+        !
+
+      </div>
+
+      <div
+        class="mad-application-host__state-title">
+
+        Aplicación no disponible
+
+      </div>
+
+      <div
+        class="mad-application-host__state-message">
+
+        {{ errorMessage() }}
+
+      </div>
+
+    </div>
+
+  }
 
 </div>

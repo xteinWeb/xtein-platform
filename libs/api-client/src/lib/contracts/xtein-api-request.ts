@@ -1,15 +1,7 @@
-/**
- * Defines how a request accesses the existing XTEIN backend.
- *
- * Public requests are used before authentication and do not require
- * an authenticated session.
- *
- * Authenticated requests require the current XTEIN session and include
- * the user, company, and authentication token.
- */
-export type XteinApiAccessMode =
-  | 'public'
-  | 'authenticated';
+import {
+  XteinApiAccessMode
+} from './xtein-api-access-mode';
+
 
 /**
  * Defines a request executed against the existing XTEIN backend.
@@ -46,7 +38,8 @@ export interface XteinApiRequest<TData = unknown> {
   data: TData;
 
   /**
-   * Determines whether the request requires an authenticated session.
+   * Determines whether the request requires
+   * an authenticated XTEIN session.
    */
   accessMode: XteinApiAccessMode;
 }

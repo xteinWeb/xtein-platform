@@ -1,69 +1,127 @@
 <div class="xt-workspace">
 
-  <div class="xt-workspace__tabs">
+  @if (hasOpenTabs()) {
 
-    <div class="xt-tab xt-tab--active">
-      Orígenes de Datos
-      <span>×</span>
+    <div
+      class="xt-workspace__tabs"
+      role="tablist"
+      aria-label="Aplicaciones abiertas">
+
+      @for (
+        tab of tabs();
+        track tab.applicationId
+      ) {
+
+        <button
+          type="button"
+          class="xt-workspace-tab"
+          [class.xt-workspace-tab--active]="tab.active"
+          [class.xt-workspace-tab--dirty]="tab.dirty"
+          [attr.aria-selected]="tab.active"
+          [attr.title]="tab.title"
+          role="tab"
+          (click)="activateTab(tab)">
+
+          <span
+            class="xt-workspace-tab__title">
+
+            {{ tab.title }}
+
+          </span>
+
+
+          @if (tab.dirty) {
+
+            <span
+              class="xt-workspace-tab__dirty"
+              title="Cambios sin guardar"
+              aria-label="Cambios sin guardar">
+
+              •
+
+            </span>
+
+          }
+
+
+          @if (tab.closable) {
+
+            <span
+              class="xt-workspace-tab__close"
+              role="button"
+              tabindex="-1"
+              title="Cerrar"
+              aria-label="Cerrar aplicación"
+              (click)="closeTab($event, tab)">
+
+              ×
+
+            </span>
+
+          }
+
+        </button>
+
+      }
+
     </div>
 
-    <div class="xt-tab">
-      Tablero
+
+    <div
+      class="xt-workspace__content">
+
+      @for (
+        tab of tabs();
+        track tab.applicationId
+      ) {
+
+        <section
+          class="xt-workspace__panel"
+          [class.xt-workspace__panel--active]="tab.active"
+          [attr.aria-hidden]="!tab.active">
+
+          <app-workspace-tab-host
+            [tab]="tab">
+          </app-workspace-tab-host>
+
+        </section>
+
+      }
+
     </div>
 
-  </div>
+  }
+  @else {
 
-  <div class="xt-workspace__content">
-
-    <div class="xt-placeholder">
-
-      <h2>
-        Workspace XTEIN
-      </h2>
-
-      <p>
-        Aquí se cargarán dinámicamente los microfrontends.
-      </p>
-
-      <xtein-ui>
-      </xtein-ui>
-
-      <hr>
-
-      <h3>
-        XTEIN UI Test
-      </h3>
+    <div
+      class="xt-workspace__empty">
 
       <div
-        class="mt-3"
-        style="width: 300px;">
+        class="xt-workspace__empty-icon">
 
-        <xtein-input
-          id="testUser"
-          name="testUser"
-          appearance="login"
-          iconClass="icon-usuario"
-          ariaLabel="Usuario"
-          placeholder="Usuario/Nombre de usuario"
-          autocomplete="off"
-          [required]="true"
-          [formControl]="testUserControl">
-        </xtein-input>
+        <i
+          class="icon-aplicaciones"
+          aria-hidden="true">
+        </i>
 
       </div>
 
-      <div class="mt-3">
+      <div
+        class="xt-workspace__empty-title">
 
-        <strong>
-          FormControl value:
-        </strong>
+        Área de trabajo
 
-        {{ testUserControl.value }}
+      </div>
+
+      <div
+        class="xt-workspace__empty-message">
+
+        Seleccione una aplicación para comenzar.
 
       </div>
 
     </div>
 
-  </div>
+  }
 
 </div>

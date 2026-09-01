@@ -10,6 +10,7 @@ import {
 } from 'rxjs';
 
 import {
+  XteinApiAccessMode,
   XteinApiClientService,
   XteinDataApiResponse
 } from '@xtein/api-client';
@@ -85,7 +86,7 @@ export class ConnectionFieldsService {
         data: {},
 
         accessMode:
-          'authenticated'
+           XteinApiAccessMode.Authenticated
       })
       .pipe(
         tap(response => {
@@ -156,7 +157,7 @@ export class ConnectionFieldsService {
           prmDatos,
 
         accessMode:
-          'authenticated'
+           XteinApiAccessMode.Authenticated
       });
   }
 

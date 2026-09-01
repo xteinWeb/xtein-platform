@@ -9,6 +9,7 @@ import {
 } from 'rxjs';
 
 import {
+  XteinApiAccessMode,
   XteinApiClientService,
   XteinDataApiResponse
 } from '@xtein/api-client';
@@ -108,7 +109,7 @@ export class ApplicationTreeApiService {
         },
 
         accessMode:
-          'authenticated'
+           XteinApiAccessMode.Authenticated
       })
       .pipe(
         map(response => {

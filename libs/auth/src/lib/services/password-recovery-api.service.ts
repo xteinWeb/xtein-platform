@@ -8,6 +8,7 @@ import {
 } from 'rxjs';
 
 import {
+  XteinApiAccessMode,
   XteinApiClientService
 } from '@xtein/api-client';
 
@@ -98,7 +99,7 @@ export class PasswordRecoveryApiService {
         },
 
         accessMode:
-          'public'
+          XteinApiAccessMode.Public
       })
       .pipe(
         map(response =>
@@ -139,7 +140,7 @@ export class PasswordRecoveryApiService {
         },
 
         accessMode:
-          'public'
+          XteinApiAccessMode.Public
       })
       .pipe(
         map(response =>
@@ -180,7 +181,7 @@ export class PasswordRecoveryApiService {
         },
 
         accessMode:
-          'public'
+          XteinApiAccessMode.Public
       })
       .pipe(
         map(response =>
