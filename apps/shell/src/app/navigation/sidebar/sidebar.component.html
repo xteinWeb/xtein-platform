@@ -57,10 +57,14 @@
 
 
   <!-- ======================================================
-       ERROR
+       NAVIGATION LOAD ERROR
        ====================================================== -->
 
-  @if (!loading && error && !collapsed) {
+  @if (
+    !loading &&
+    error &&
+    !collapsed
+  ) {
 
     <div class="xt-sidebar__error">
 
@@ -72,10 +76,32 @@
 
 
   <!-- ======================================================
+       APPLICATION OPEN ERROR
+       ====================================================== -->
+
+  @if (
+    !loading &&
+    launchError &&
+    !collapsed
+  ) {
+
+    <div class="xt-sidebar__error">
+
+      {{ launchError }}
+
+    </div>
+
+  }
+
+
+  <!-- ======================================================
        NAVIGATION TREE
        ====================================================== -->
 
-  @if (!loading && !error) {
+  @if (
+    !loading &&
+    !error
+  ) {
 
     <div class="xt-sidebar__navigation">
 
@@ -110,7 +136,9 @@
 
         [focusStateEnabled]="true"
 
-        [hoverStateEnabled]="true">
+        [hoverStateEnabled]="true"
+
+        (onItemClick)="onNavigationItemClick($event)">
 
         <div
           *dxTemplate="

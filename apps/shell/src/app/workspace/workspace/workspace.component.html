@@ -1,74 +1,303 @@
 <div class="xt-workspace">
 
-  @if (hasOpenTabs()) {
+  <!-- =======================================================
+       WORKSPACE TAB BAR
+       Always visible
+       ======================================================= -->
+
+  <div
+    class="xt-workspace__tabs-shell">
+
+    <!-- =====================================================
+         OPEN APPLICATIONS MENU
+         ===================================================== -->
 
     <div
-      class="xt-workspace__tabs"
-      role="tablist"
-      aria-label="Aplicaciones abiertas">
+      class="xt-workspace-tabs-menu"
+      (click)="keepTabMenuOpen($event)">
 
-      @for (
-        tab of tabs();
-        track tab.applicationId
+      <button
+        type="button"
+        class="xt-workspace-tabs-menu__button"
+        [class.xt-workspace-tabs-menu__button--disabled]="!hasOpenTabs()"
+        [disabled]="!hasOpenTabs()"
+        title="Aplicaciones abiertas"
+        aria-label="Aplicaciones abiertas"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="tabMenuOpen"
+        (click)="toggleTabMenu($event)">
+
+        <span
+          class="xt-workspace-tabs-menu__dots"
+          aria-hidden="true">
+
+          ⋮
+
+        </span>
+
+      </button>
+
+
+      @if (
+        tabMenuOpen &&
+        hasOpenTabs()
       ) {
 
-        <button
-          type="button"
-          class="xt-workspace-tab"
-          [class.xt-workspace-tab--active]="tab.active"
-          [class.xt-workspace-tab--dirty]="tab.dirty"
-          [attr.aria-selected]="tab.active"
-          [attr.title]="tab.title"
-          role="tab"
-          (click)="activateTab(tab)">
+        <div
+          class="xt-workspace-tabs-menu__popup"
+          role="menu">
 
-          <span
-            class="xt-workspace-tab__title">
+          @for (
+            tab of displayTabs();
+            track tab.applicationId
+          ) {
 
-            {{ tab.title }}
+            <button
+              type="button"
+              class="xt-workspace-tabs-menu__item"
+              [class.xt-workspace-tabs-menu__item--active]="tab.active"
+              role="menuitem"
+              (click)="activateTabFromMenu(tab)">
 
-          </span>
+              <i
+                [class]="
+                  'xt-workspace-tabs-menu__item-icon ' +
+                  resolveTabIconClass(tab)
+                "
+                aria-hidden="true">
+              </i>
 
 
-          @if (tab.dirty) {
+              <span
+                class="xt-workspace-tabs-menu__item-title">
 
-            <span
-              class="xt-workspace-tab__dirty"
-              title="Cambios sin guardar"
-              aria-label="Cambios sin guardar">
+                {{ tab.title }}
 
-              •
+              </span>
 
-            </span>
+
+              @if (tab.dirty) {
+
+                <span
+                  class="xt-workspace-tabs-menu__dirty"
+                  title="Cambios sin guardar"
+                  aria-label="Cambios sin guardar">
+
+                  •
+
+                </span>
+
+              }
+
+
+              @if (tab.active) {
+
+                <span
+                  class="xt-workspace-tabs-menu__active"
+                  title="Pestaña activa"
+                  aria-label="Pestaña activa">
+
+                  ✓
+
+                </span>
+
+              }
+
+            </button>
 
           }
 
-
-          @if (tab.closable) {
-
-            <span
-              class="xt-workspace-tab__close"
-              role="button"
-              tabindex="-1"
-              title="Cerrar"
-              aria-label="Cerrar aplicación"
-              (click)="closeTab($event, tab)">
-
-              ×
-
-            </span>
-
-          }
-
-        </button>
+        </div>
 
       }
 
     </div>
 
 
+    <!-- =====================================================
+         PREVIOUS TABS
+         Only visible when tabs overflow
+         ===================================================== -->
+
+    @if (tabsOverflow()) {
+
+      <button
+        type="button"
+        class="xt-workspace-tabs-nav"
+        [disabled]="!canScrollBackward()"
+        title="Pestañas anteriores"
+        aria-label="Pestañas anteriores"
+        (click)="scrollTabs(-1)">
+
+        <span
+          aria-hidden="true">
+
+          ‹
+
+        </span>
+
+      </button>
+
+    }
+
+
+    <!-- =====================================================
+         TAB VIEWPORT
+         ===================================================== -->
+
     <div
-      class="xt-workspace__content">
+      #tabViewport
+      class="xt-workspace__tabs-viewport"
+      (scroll)="onTabViewportScroll()">
+
+      <div
+        class="xt-workspace__tabs-track"
+        role="tablist"
+        aria-label="Aplicaciones abiertas">
+
+        <!-- =================================================
+             SINGLE MOVING ACTIVE CAPSULE
+             ================================================= -->
+
+        <div
+          #activeIndicator
+          class="xt-workspace-tab-indicator"
+          aria-hidden="true">
+        </div>
+
+
+        <!-- =================================================
+             OPEN TABS
+             Newest first
+             ================================================= -->
+
+        @for (
+          tab of displayTabs();
+          track tab.applicationId
+        ) {
+
+          <button
+            type="button"
+            class="xt-workspace-tab"
+            [class.xt-workspace-tab--active]="tab.active"
+            [class.xt-workspace-tab--dirty]="tab.dirty"
+            [attr.data-application-id]="tab.applicationId"
+            [attr.aria-selected]="tab.active"
+            [attr.title]="tab.title"
+            role="tab"
+            (click)="activateTab(tab)">
+
+            <!-- Application icon -->
+
+            <i
+              [class]="
+                'xt-workspace-tab__icon ' +
+                resolveTabIconClass(tab)
+              "
+              aria-hidden="true">
+            </i>
+
+
+            <!-- Application title -->
+
+            <span
+              class="xt-workspace-tab__title">
+
+              {{ tab.title }}
+
+            </span>
+
+
+            <!-- Unsaved changes -->
+
+            @if (tab.dirty) {
+
+              <span
+                class="xt-workspace-tab__dirty"
+                title="Cambios sin guardar"
+                aria-label="Cambios sin guardar">
+
+                •
+
+              </span>
+
+            }
+
+
+            <!-- Close -->
+
+            @if (tab.closable) {
+
+              <span
+                class="xt-workspace-tab__close"
+                role="button"
+                tabindex="-1"
+                title="Cerrar"
+                aria-label="Cerrar aplicación"
+                (click)="closeTab($event, tab)">
+
+                ×
+
+              </span>
+
+            }
+
+          </button>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NEXT TABS
+         Only visible when tabs overflow
+         ===================================================== -->
+
+    @if (tabsOverflow()) {
+
+      <button
+        type="button"
+        class="xt-workspace-tabs-nav"
+        [disabled]="!canScrollForward()"
+        title="Pestañas siguientes"
+        aria-label="Pestañas siguientes"
+        (click)="scrollTabs(1)">
+
+        <span
+          aria-hidden="true">
+
+          ›
+
+        </span>
+
+      </button>
+
+    }
+
+  </div>
+
+
+  <!-- =======================================================
+       WORKSPACE CONTENT
+       ======================================================= -->
+
+  <div
+    class="xt-workspace__content">
+
+    @if (hasOpenTabs()) {
+
+      <!--
+        Important:
+
+        We intentionally use the runtime tab order here instead
+        of displayTabs().
+
+        Only the visual header is reordered. Application hosts keep
+        their runtime identity and state independently.
+      -->
 
       @for (
         tab of tabs();
@@ -88,40 +317,44 @@
 
       }
 
-    </div>
+    }
+    @else {
 
-  }
-  @else {
-
-    <div
-      class="xt-workspace__empty">
+      <!-- ===================================================
+           EMPTY WORKSPACE
+           =================================================== -->
 
       <div
-        class="xt-workspace__empty-icon">
+        class="xt-workspace__empty">
 
-        <i
-          class="icon-aplicaciones"
-          aria-hidden="true">
-        </i>
+        <div
+          class="xt-workspace__empty-icon">
+
+          <i
+            class="xt-icon-application"
+            aria-hidden="true">
+          </i>
+
+        </div>
+
+        <div
+          class="xt-workspace__empty-title">
+
+          Área de trabajo
+
+        </div>
+
+        <div
+          class="xt-workspace__empty-message">
+
+          Seleccione una aplicación para comenzar.
+
+        </div>
 
       </div>
 
-      <div
-        class="xt-workspace__empty-title">
+    }
 
-        Área de trabajo
-
-      </div>
-
-      <div
-        class="xt-workspace__empty-message">
-
-        Seleccione una aplicación para comenzar.
-
-      </div>
-
-    </div>
-
-  }
+  </div>
 
 </div>

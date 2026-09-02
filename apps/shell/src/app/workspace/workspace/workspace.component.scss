@@ -20,40 +20,370 @@
   min-width: 0;
   min-height: 0;
 
+  padding:
+    8px 10px 0;
+
   background:
     #f3f7fd;
 
-  overflow: hidden;
+  overflow:
+    hidden;
 }
 
 
 /* ============================================================
-   TAB STRIP
+   TAB BAR
+   Always visible
    ============================================================ */
 
-.xt-workspace__tabs {
+.xt-workspace__tabs-shell {
+  position: relative;
+
   display: flex;
   align-items: center;
 
-  flex: 0 0 46px;
+  flex: 0 0 48px;
 
   width: 100%;
   min-width: 0;
+  height: 48px;
 
-  padding: 4px 16px;
+  padding:
+    4px 8px;
+
+  gap:
+    4px;
+
+  border-radius:
+    24px;
 
   background:
-    #dbe9fa;
+    #dce9fa;
 
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow:
+    visible;
+
+  z-index:
+    20;
+}
+
+
+/* ============================================================
+   OPEN APPLICATIONS MENU
+   ============================================================ */
+
+.xt-workspace-tabs-menu {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 38px;
+
+  width: 38px;
+  height: 38px;
+
+  z-index:
+    30;
+}
+
+
+.xt-workspace-tabs-menu__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 17px;
+
+  outline: 0;
+
+  background:
+    transparent;
+
+  color:
+    #7089a2;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color .15s ease,
+    color .15s ease,
+    opacity .15s ease;
+}
+
+
+.xt-workspace-tabs-menu__button:hover:not(:disabled) {
+  background:
+    rgba(255, 255, 255, .65);
+
+  color:
+    #244d73;
+}
+
+
+.xt-workspace-tabs-menu__button:focus-visible {
+  outline:
+    2px solid #86b7fe;
+
+  outline-offset:
+    -2px;
+}
+
+
+.xt-workspace-tabs-menu__button:disabled,
+.xt-workspace-tabs-menu__button--disabled {
+  opacity:
+    .45;
+
+  cursor:
+    default;
+}
+
+
+.xt-workspace-tabs-menu__dots {
+  display: block;
+
+  transform:
+    translateY(-1px);
+
+  font-size:
+    24px;
+
+  font-weight:
+    700;
+
+  line-height:
+    1;
+}
+
+
+/* ============================================================
+   TAB NAVIGATION BUTTONS
+   ============================================================ */
+
+.xt-workspace-tabs-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex:
+    0 0 34px;
+
+  width:
+    34px;
+
+  height:
+    38px;
+
+  margin:
+    0;
+
+  padding:
+    0;
+
+  border:
+    1px solid rgba(70, 105, 136, .12);
+
+  border-radius:
+    11px;
+
+  outline:
+    0;
+
+  background:
+    rgba(255, 255, 255, .88);
+
+  color:
+    #244d73;
+
+  box-shadow:
+    0 2px 5px rgba(39, 78, 114, .13);
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color .15s ease,
+    color .15s ease,
+    opacity .15s ease,
+    transform .15s ease;
+
+  z-index:
+    5;
+}
+
+
+.xt-workspace-tabs-nav span {
+  display:
+    block;
+
+  transform:
+    translateY(-1px);
+
+  font-size:
+    28px;
+
+  font-weight:
+    300;
+
+  line-height:
+    1;
+}
+
+
+.xt-workspace-tabs-nav:hover:not(:disabled) {
+  background:
+    #ffffff;
+
+  transform:
+    translateY(-1px);
+}
+
+
+.xt-workspace-tabs-nav:active:not(:disabled) {
+  transform:
+    translateY(0);
+}
+
+
+.xt-workspace-tabs-nav:disabled {
+  opacity:
+    .28;
+
+  cursor:
+    default;
+
+  box-shadow:
+    none;
+}
+
+
+/* ============================================================
+   TAB VIEWPORT
+   ============================================================ */
+
+.xt-workspace__tabs-viewport {
+  position: relative;
+
+  flex:
+    1 1 auto;
+
+  min-width:
+    0;
+
+  height:
+    40px;
+
+  overflow-x:
+    auto;
+
+  overflow-y:
+    hidden;
+
+  scroll-behavior:
+    smooth;
 
   scrollbar-width:
-    thin;
+    none;
 
-  scrollbar-color:
-    rgba(15, 76, 129, .18)
-    transparent;
+  -ms-overflow-style:
+    none;
+}
+
+
+.xt-workspace__tabs-viewport::-webkit-scrollbar {
+  display:
+    none;
+
+  width:
+    0;
+
+  height:
+    0;
+}
+
+
+/* ============================================================
+   TAB TRACK
+   ============================================================ */
+
+.xt-workspace__tabs-track {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  width:
+    max-content;
+
+  min-width:
+    100%;
+
+  height:
+    40px;
+
+  gap:
+    4px;
+}
+
+
+/* ============================================================
+   MOVING ACTIVE CAPSULE
+
+   Movement is controlled from workspace.component.ts by
+   changing the physical left and width properties.
+   ============================================================ */
+
+.xt-workspace-tab-indicator {
+  position:
+    absolute;
+
+  top:
+    3px;
+
+  left:
+    0;
+
+  width:
+    0;
+
+  height:
+    34px;
+
+  border-radius:
+    17px;
+
+  /*
+   * Lighter active background.
+   */
+  background:
+    #eaf2fb;
+
+  box-shadow:
+    0 2px 5px rgba(39, 78, 114, .12),
+    0 0 0 1px rgba(74, 127, 176, .10);
+
+  opacity:
+    0;
+
+  pointer-events:
+    none;
+
+  will-change:
+    left,
+    width;
+
+  z-index:
+    0;
 }
 
 
@@ -62,21 +392,26 @@
    ============================================================ */
 
 .xt-workspace-tab {
+  position: relative;
+
   display: inline-flex;
   align-items: center;
 
   flex: 0 0 auto;
 
   min-width: 0;
-  height: 34px;
 
-  gap: 8px;
+  height:
+    34px;
+
+  gap:
+    7px;
 
   margin:
-    0 8px 0 0;
+    0;
 
   padding:
-    0 10px 0 16px;
+    0 8px 0 12px;
 
   border:
     0;
@@ -91,7 +426,7 @@
     transparent;
 
   color:
-    #67809a;
+    #6784a1;
 
   font-family:
     inherit;
@@ -106,18 +441,48 @@
     none;
 
   transition:
-    background-color .15s ease,
-    color .15s ease,
-    box-shadow .15s ease;
+    color .18s ease,
+    background-color .18s ease;
+
+  z-index:
+    1;
+
+  animation:
+    xt-workspace-tab-enter
+    220ms
+    ease-out;
 }
 
 
-.xt-workspace-tab:hover {
-  color:
-    #244d73;
+@keyframes xt-workspace-tab-enter {
 
+  from {
+    opacity:
+      0;
+
+    transform:
+      translateX(-10px)
+      scale(.97);
+  }
+
+  to {
+    opacity:
+      1;
+
+    transform:
+      translateX(0)
+      scale(1);
+  }
+
+}
+
+
+.xt-workspace-tab:not(.xt-workspace-tab--active):hover {
   background:
-    rgba(255, 255, 255, .52);
+    rgba(255, 255, 255, .38);
+
+  color:
+    #365f83;
 }
 
 
@@ -135,15 +500,111 @@
    ============================================================ */
 
 .xt-workspace-tab--active {
-  color:
-    #244d73;
-
   background:
-    #ffffff;
+    transparent;
 
-  box-shadow:
-    0 2px 6px rgba(39, 78, 114, .18),
-    0 0 0 1px rgba(74, 127, 176, .14);
+  color:
+    #174b75;
+}
+
+
+/* ============================================================
+   TAB ICON
+   ============================================================ */
+
+.xt-workspace-tab__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex:
+    0 0 19px;
+
+  width:
+    19px;
+
+  height:
+    19px;
+
+  color:
+    #88a2ba;
+
+  font-size:
+    17px;
+
+  line-height:
+    19px;
+
+  transition:
+    color .18s ease;
+}
+
+
+.xt-workspace-tab:hover
+.xt-workspace-tab__icon {
+  color:
+    #587d9e;
+}
+
+
+.xt-workspace-tab--active
+.xt-workspace-tab__icon {
+  color:
+    #315f87;
+}
+
+
+/* ============================================================
+   XTEIN DEFAULT APPLICATION ICON
+   ============================================================ */
+
+.xt-workspace-tab__icon.xt-icon-application,
+.xt-workspace-tabs-menu__item-icon.xt-icon-application,
+.xt-workspace__empty-icon .xt-icon-application {
+  display:
+    inline-block;
+
+  width:
+    18px;
+
+  height:
+    18px;
+
+  flex:
+    0 0 18px;
+
+  background-color:
+    currentColor;
+
+  background-repeat:
+    no-repeat;
+
+  background-position:
+    center;
+
+  mask-repeat:
+    no-repeat;
+
+  mask-position:
+    center;
+
+  mask-size:
+    contain;
+
+  -webkit-mask-repeat:
+    no-repeat;
+
+  -webkit-mask-position:
+    center;
+
+  -webkit-mask-size:
+    contain;
+
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' fill-rule='evenodd' d='M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v3h14V5H5Zm0 5v9h14v-9H5Zm2 2h4v2H7v-2Zm0 4h7v2H7v-2Zm6-4h4v2h-4v-2Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' fill-rule='evenodd' d='M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v3h14V5H5Zm0 5v9h14v-9H5Zm2 2h4v2H7v-2Zm0 4h7v2H7v-2Zm6-4h4v2h-4v-2Z' clip-rule='evenodd'/%3E%3C/svg%3E");
 }
 
 
@@ -152,16 +613,30 @@
    ============================================================ */
 
 .xt-workspace-tab__title {
-  display: block;
+  display:
+    block;
 
-  max-width: 220px;
+  max-width:
+    220px;
 
-  overflow: hidden;
+  overflow:
+    hidden;
 
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  white-space:
+    nowrap;
 
-  font-weight: 500;
+  text-overflow:
+    ellipsis;
+
+  font-weight:
+    500;
+}
+
+
+.xt-workspace-tab--active
+.xt-workspace-tab__title {
+  font-weight:
+    600;
 }
 
 
@@ -174,9 +649,11 @@
   align-items: center;
   justify-content: center;
 
-  flex: 0 0 auto;
+  flex:
+    0 0 8px;
 
-  width: 8px;
+  width:
+    8px;
 
   color:
     #0f4c81;
@@ -198,16 +675,23 @@
   align-items: center;
   justify-content: center;
 
-  flex: 0 0 22px;
+  flex:
+    0 0 22px;
 
-  width: 22px;
-  height: 22px;
+  width:
+    22px;
+
+  height:
+    22px;
+
+  margin-left:
+    1px;
 
   border-radius:
     50%;
 
   color:
-    #7a8da0;
+    #70859a;
 
   font-size:
     17px;
@@ -215,18 +699,51 @@
   line-height:
     1;
 
+  opacity:
+    0;
+
+  visibility:
+    hidden;
+
+  pointer-events:
+    none;
+
   cursor:
     pointer;
 
+  transform:
+    scale(.88);
+
   transition:
+    opacity .12s ease,
+    visibility .12s ease,
     background-color .15s ease,
-    color .15s ease;
+    color .15s ease,
+    transform .12s ease;
+}
+
+
+.xt-workspace-tab:hover
+.xt-workspace-tab__close,
+.xt-workspace-tab:focus-within
+.xt-workspace-tab__close {
+  opacity:
+    1;
+
+  visibility:
+    visible;
+
+  pointer-events:
+    auto;
+
+  transform:
+    scale(1);
 }
 
 
 .xt-workspace-tab__close:hover {
   background:
-    #e5eef7;
+    rgba(94, 122, 148, .14);
 
   color:
     #244d73;
@@ -234,20 +751,233 @@
 
 
 /* ============================================================
-   CONTENT
+   OPEN APPLICATIONS POPUP
+   ============================================================ */
+
+.xt-workspace-tabs-menu__popup {
+  position:
+    absolute;
+
+  top:
+    calc(100% + 7px);
+
+  left:
+    0;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  width:
+    270px;
+
+  max-height:
+    360px;
+
+  padding:
+    8px;
+
+  border:
+    1px solid rgba(60, 91, 120, .12);
+
+  border-radius:
+    8px;
+
+  background:
+    #ffffff;
+
+  box-shadow:
+    0 8px 22px rgba(34, 62, 88, .20),
+    0 2px 5px rgba(34, 62, 88, .10);
+
+  overflow-x:
+    hidden;
+
+  overflow-y:
+    auto;
+
+  z-index:
+    100;
+}
+
+
+.xt-workspace-tabs-menu__item {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  width:
+    100%;
+
+  min-height:
+    40px;
+
+  gap:
+    9px;
+
+  padding:
+    7px 10px;
+
+  border:
+    0;
+
+  border-radius:
+    7px;
+
+  outline:
+    0;
+
+  background:
+    transparent;
+
+  color:
+    #4f6f8c;
+
+  font-family:
+    inherit;
+
+  font-size:
+    13px;
+
+  text-align:
+    left;
+
+  cursor:
+    pointer;
+}
+
+
+.xt-workspace-tabs-menu__item:hover {
+  background:
+    #f0f5fb;
+
+  color:
+    #244d73;
+}
+
+
+.xt-workspace-tabs-menu__item--active {
+  background:
+    #edf4fb;
+
+  color:
+    #244d73;
+
+  font-weight:
+    600;
+}
+
+
+.xt-workspace-tabs-menu__item-icon {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  flex:
+    0 0 20px;
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  color:
+    #7793ad;
+
+  font-size:
+    17px;
+}
+
+
+.xt-workspace-tabs-menu__item-title {
+  flex:
+    1 1 auto;
+
+  min-width:
+    0;
+
+  overflow:
+    hidden;
+
+  white-space:
+    nowrap;
+
+  text-overflow:
+    ellipsis;
+}
+
+
+.xt-workspace-tabs-menu__dirty {
+  color:
+    #0f4c81;
+
+  font-size:
+    18px;
+}
+
+
+.xt-workspace-tabs-menu__active {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  flex:
+    0 0 18px;
+
+  width:
+    18px;
+
+  height:
+    18px;
+
+  color:
+    #244d73;
+
+  font-weight:
+    700;
+}
+
+
+/* ============================================================
+   WORKSPACE CONTENT
    ============================================================ */
 
 .xt-workspace__content {
-  position: relative;
+  position:
+    relative;
 
-  flex: 1 1 auto;
+  flex:
+    1 1 auto;
 
-  width: 100%;
+  width:
+    100%;
 
-  min-width: 0;
-  min-height: 0;
+  min-width:
+    0;
 
-  overflow: hidden;
+  min-height:
+    0;
+
+  margin-top:
+    8px;
+
+  overflow:
+    hidden;
 }
 
 
@@ -256,31 +986,41 @@
    ============================================================ */
 
 .xt-workspace__panel {
-  position: absolute;
+  position:
+    absolute;
 
-  inset: 0;
+  inset:
+    0;
 
-  width: 100%;
-  height: 100%;
+  width:
+    100%;
 
-  padding: 10px;
+  height:
+    100%;
 
-  visibility: hidden;
+  visibility:
+    hidden;
 
-  opacity: 0;
+  opacity:
+    0;
 
-  pointer-events: none;
+  pointer-events:
+    none;
 
-  overflow: auto;
+  overflow:
+    auto;
 }
 
 
 .xt-workspace__panel--active {
-  visibility: visible;
+  visibility:
+    visible;
 
-  opacity: 1;
+  opacity:
+    1;
 
-  pointer-events: auto;
+  pointer-events:
+    auto;
 }
 
 
@@ -289,15 +1029,23 @@
    ============================================================ */
 
 .xt-workspace__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display:
+    flex;
 
-  flex: 1 1 auto;
+  flex-direction:
+    column;
 
-  width: 100%;
-  height: 100%;
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    100%;
+
+  height:
+    100%;
 
   color:
     #7b8c9d;
@@ -305,14 +1053,23 @@
 
 
 .xt-workspace__empty-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display:
+    inline-flex;
 
-  width: 52px;
-  height: 52px;
+  align-items:
+    center;
 
-  margin-bottom: 12px;
+  justify-content:
+    center;
+
+  width:
+    52px;
+
+  height:
+    52px;
+
+  margin-bottom:
+    12px;
 
   border-radius:
     12px;
@@ -353,37 +1110,6 @@
 
 
 /* ============================================================
-   TAB STRIP SCROLLBAR
-   ============================================================ */
-
-.xt-workspace__tabs::-webkit-scrollbar {
-  height:
-    4px;
-}
-
-
-.xt-workspace__tabs::-webkit-scrollbar-track {
-  background:
-    transparent;
-}
-
-
-.xt-workspace__tabs::-webkit-scrollbar-thumb {
-  border-radius:
-    10px;
-
-  background:
-    rgba(15, 76, 129, .18);
-}
-
-
-.xt-workspace__tabs::-webkit-scrollbar-thumb:hover {
-  background:
-    rgba(15, 76, 129, .30);
-}
-
-
-/* ============================================================
    RESPONSIVE
    ============================================================ */
 
@@ -391,12 +1117,21 @@
   max-width: 767.98px
 ) {
 
-  .xt-workspace__tabs {
+  .xt-workspace {
     padding-right:
-      8px;
+      6px;
 
     padding-left:
-      8px;
+      6px;
+  }
+
+
+  .xt-workspace__tabs-shell {
+    padding-right:
+      5px;
+
+    padding-left:
+      5px;
   }
 
 
@@ -406,9 +1141,9 @@
   }
 
 
-  .xt-workspace__panel {
-    padding:
-      6px;
+  .xt-workspace-tabs-menu__popup {
+    width:
+      240px;
   }
 
 }

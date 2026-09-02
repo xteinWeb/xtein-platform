@@ -20,16 +20,13 @@ import {
 
 
 /**
- * Defines the standard module contract exposed by every
- * XTEIN Angular microfrontend.
- *
- * Every remote application container must expose a standalone
- * Angular component named ApplicationHostComponent.
+ * Defines the contract exposed by every XTEIN
+ * Angular microfrontend.
  */
 interface RemoteApplicationHostModule {
 
   /**
-   * Standard remote application host component.
+   * Standard component exposed by the microfrontend.
    */
   ApplicationHostComponent:
     Type<unknown>;
@@ -37,17 +34,11 @@ interface RemoteApplicationHostModule {
 
 
 /**
- * Defines the standard inputs supported by an XTEIN
- * remote ApplicationHostComponent.
- *
- * These values are platform contracts and must not be duplicated
- * as string literals throughout the workspace loader.
+ * Standard input names supported by the remote
+ * application host.
  */
 const RemoteApplicationHostInput = {
 
-  /**
-   * XTEIN application identifier requested by the Shell.
-   */
   ApplicationId:
     'applicationId'
 
@@ -55,13 +46,11 @@ const RemoteApplicationHostInput = {
 
 
 /**
- * Provides the persistent content host of one XTEIN workspace tab.
+ * Persistent host for one application opened inside
+ * the XTEIN workspace.
  *
- * One host instance exists for each opened application.
- *
- * The host remains alive while the user changes between workspace
- * tabs so the loaded microfrontend component and all of its functional
- * state remain preserved.
+ * The host remains instantiated when another tab becomes
+ * active so the complete application state is preserved.
  */
 @Component({
   selector:
@@ -82,11 +71,11 @@ const RemoteApplicationHostInput = {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
-export class WorkspaceTabHost
+export class WorkspaceTabHostComponent
   implements AfterViewInit {
 
   /**
-   * Workspace application represented by this host.
+   * Workspace tab represented by this host.
    */
   @Input({
     required:
@@ -97,8 +86,8 @@ export class WorkspaceTabHost
 
 
   /**
-   * Angular container where the remote ApplicationHostComponent
-   * is dynamically instantiated.
+   * Container where the remote ApplicationHostComponent
+   * will be dynamically instantiated.
    */
   @ViewChild(
     'applicationContainer',
@@ -115,7 +104,7 @@ export class WorkspaceTabHost
 
 
   /**
-   * Indicates that the remote application is currently loading.
+   * Indicates whether the remote application is loading.
    */
   readonly loading =
     signal(
@@ -124,10 +113,7 @@ export class WorkspaceTabHost
 
 
   /**
-   * User-facing remote loading error.
-   *
-   * Technical details are written to the browser console while
-   * the workspace remains operational.
+   * Loading error displayed inside the workspace.
    */
   readonly errorMessage =
     signal<
@@ -138,7 +124,8 @@ export class WorkspaceTabHost
 
 
   /**
-   * Dynamically created remote Angular component.
+   * Reference to the dynamically instantiated
+   * remote application.
    */
   private applicationComponentRef:
     ComponentRef<unknown> | null =
@@ -146,16 +133,16 @@ export class WorkspaceTabHost
 
 
   /**
-   * Prevents the same workspace host from loading its
-   * microfrontend more than once.
+   * Prevents loading the same remote application
+   * more than once for this workspace tab.
    */
   private applicationLoaded =
     false;
 
 
   /**
-   * Loads the remote application after the Angular view container
-   * has been initialized.
+   * Loads the remote application after the dynamic
+   * component container becomes available.
    */
   ngAfterViewInit():
     void {
@@ -165,12 +152,10 @@ export class WorkspaceTabHost
 
 
   /**
-   * Loads and instantiates the microfrontend associated with
-   * the current workspace tab.
+   * Loads the microfrontend associated with the workspace tab.
    *
-   * Remote information is obtained exclusively from WorkspaceTab.
-   * No microfrontend name, port, URL, or exposed module is
-   * hardcoded in the Shell.
+   * Remote configuration comes entirely from the XTEIN
+   * application catalog.
    */
   private async loadApplication():
     Promise<void> {
@@ -186,9 +171,11 @@ export class WorkspaceTabHost
     this.applicationLoaded =
       true;
 
+
     this.loading.set(
       true
     );
+
 
     this.errorMessage.set(
       null
@@ -262,9 +249,11 @@ export class WorkspaceTabHost
       this.applicationComponentRef =
         null;
 
+
       this.loading.set(
         false
       );
+
 
       this.errorMessage.set(
         `No fue posible cargar la aplicación ${this.tab.title}.`
@@ -294,10 +283,8 @@ export class WorkspaceTabHost
 
 
   /**
-   * Validates the dynamic microfrontend information provided
-   * by the XTEIN application catalog.
-   *
-   * @throws Error when required federation information is missing.
+   * Validates the federation information supplied
+   * by the application catalog.
    */
   private validateTabConfiguration():
     void {

@@ -7,6 +7,7 @@ import {
   RemoteDescriptor
 } from '@xtein/sdk';
 
+
 /**
  * Field names returned by the existing XTEIN backend.
  *
@@ -29,6 +30,9 @@ const APPLICATION_TREE_FIELDS = {
 
   icon:
     'ICON',
+
+  openByDefault:
+    'DEFECTO',
 
   tableApplication:
     'TABLA_APLICACION',
@@ -89,6 +93,7 @@ const APPLICATION_TREE_FIELDS = {
 
 } as const;
 
+
 /**
  * Converts the existing XTEIN backend application tree response
  * into the internal platform navigation model.
@@ -97,7 +102,8 @@ const APPLICATION_TREE_FIELDS = {
  * names returned by the existing backend JSON contract.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn:
+    'root'
 })
 export class ApplicationTreeMapperService {
 
@@ -110,7 +116,8 @@ export class ApplicationTreeMapperService {
    * @returns Application tree nodes used internally by the platform.
    */
   mapResponse(
-    response: unknown
+    response:
+      unknown
   ): readonly ApplicationTreeNode[] {
 
     const items =
@@ -118,20 +125,26 @@ export class ApplicationTreeMapperService {
         response
       );
 
+
     this.validateBackendResponse(
       items
     );
 
+
     const mappedItems =
       items.map(
         item =>
-          this.mapItem(item)
+          this.mapItem(
+            item
+          )
       );
+
 
     return this.removeDuplicateApplications(
       mappedItems
     );
   }
+
 
   /**
    * Maps one backend application tree item.
@@ -140,33 +153,42 @@ export class ApplicationTreeMapperService {
    * @returns Internal XTEIN application tree node.
    */
   mapItem(
-    item: Record<string, unknown>
+    item:
+      Record<string, unknown>
   ): ApplicationTreeNode {
 
     const applicationId =
       this.getRequiredString(
         item,
-        APPLICATION_TREE_FIELDS.applicationId
+        APPLICATION_TREE_FIELDS
+          .applicationId
       );
+
 
     const name =
       this.getRequiredString(
         item,
-        APPLICATION_TREE_FIELDS.name
+        APPLICATION_TREE_FIELDS
+          .name
       );
+
 
     const type =
       this.getRequiredString(
         item,
-        APPLICATION_TREE_FIELDS.type
+        APPLICATION_TREE_FIELDS
+          .type
       )
         .toLowerCase();
+
 
     const status =
       this.getRequiredValueAsString(
         item,
-        APPLICATION_TREE_FIELDS.status
+        APPLICATION_TREE_FIELDS
+          .status
       );
+
 
     return {
 
@@ -175,7 +197,8 @@ export class ApplicationTreeMapperService {
       parentApplicationId:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.parentApplicationId
+          APPLICATION_TREE_FIELDS
+            .parentApplicationId
         ),
 
       name,
@@ -187,67 +210,85 @@ export class ApplicationTreeMapperService {
       icon:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.icon
+          APPLICATION_TREE_FIELDS
+            .icon
+        ),
+
+      openByDefault:
+        this.getOptionalBoolean(
+          item,
+          APPLICATION_TREE_FIELDS
+            .openByDefault
         ),
 
       tableApplication:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.tableApplication
+          APPLICATION_TREE_FIELDS
+            .tableApplication
         ),
 
       program:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.program
+          APPLICATION_TREE_FIELDS
+            .program
         ),
 
       parameters:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.parameters
+          APPLICATION_TREE_FIELDS
+            .parameters
         ),
 
       comments:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.comments
+          APPLICATION_TREE_FIELDS
+            .comments
         ),
 
       action:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.action
+          APPLICATION_TREE_FIELDS
+            .action
         ),
 
       lowerTarget:
         this.getOptionalNumber(
           item,
-          APPLICATION_TREE_FIELDS.lowerTarget
+          APPLICATION_TREE_FIELDS
+            .lowerTarget
         ),
 
       upperTarget:
         this.getOptionalNumber(
           item,
-          APPLICATION_TREE_FIELDS.upperTarget
+          APPLICATION_TREE_FIELDS
+            .upperTarget
         ),
 
       systemType:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.systemType
+          APPLICATION_TREE_FIELDS
+            .systemType
         ),
 
       unitOfMeasure:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.unitOfMeasure
+          APPLICATION_TREE_FIELDS
+            .unitOfMeasure
         ),
 
       level:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.level
+          APPLICATION_TREE_FIELDS
+            .level
         ),
 
       remote:
@@ -258,6 +299,7 @@ export class ApplicationTreeMapperService {
     };
   }
 
+
   /**
    * Converts the backend response into an array of records.
    *
@@ -266,22 +308,30 @@ export class ApplicationTreeMapperService {
    * @throws Error when the response is not a valid JSON array.
    */
   private parseResponse(
-    response: unknown
+    response:
+      unknown
   ): readonly Record<string, unknown>[] {
 
     let parsedResponse =
       response;
 
+
     if (
-      typeof response === 'string'
+      typeof response ===
+        'string'
     ) {
 
       const serializedResponse =
         response.trim();
 
-      if (!serializedResponse) {
+
+      if (
+        !serializedResponse
+      ) {
+
         return [];
       }
+
 
       try {
 
@@ -301,6 +351,7 @@ export class ApplicationTreeMapperService {
       }
     }
 
+
     if (
       !Array.isArray(
         parsedResponse
@@ -312,6 +363,7 @@ export class ApplicationTreeMapperService {
       );
     }
 
+
     return parsedResponse.map(
       (
         item,
@@ -319,9 +371,13 @@ export class ApplicationTreeMapperService {
       ) => {
 
         if (
-          item === null ||
-          typeof item !== 'object' ||
-          Array.isArray(item)
+          item ===
+            null ||
+          typeof item !==
+            'object' ||
+          Array.isArray(
+            item
+          )
         ) {
 
           throw new Error(
@@ -329,15 +385,17 @@ export class ApplicationTreeMapperService {
           );
         }
 
+
         return item as
           Record<string, unknown>;
       }
     );
   }
 
+
   /**
-   * Validates functional backend errors returned inside the application
-   * tree response.
+   * Validates functional backend errors returned inside the
+   * application tree response.
    *
    * @param items Parsed backend application-tree items.
    */
@@ -347,24 +405,32 @@ export class ApplicationTreeMapperService {
   ): void {
 
     for (
-      const item of items
+      const item of
+      items
     ) {
 
       const errorMessage =
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.errorMessage
+          APPLICATION_TREE_FIELDS
+            .errorMessage
         );
 
-      if (!errorMessage) {
+
+      if (
+        !errorMessage
+      ) {
+
         continue;
       }
+
 
       throw new Error(
         errorMessage
       );
     }
   }
+
 
   /**
    * Creates the microfrontend descriptor associated with an application.
@@ -377,24 +443,33 @@ export class ApplicationTreeMapperService {
    * @returns Remote descriptor when configured; otherwise undefined.
    */
   private mapRemote(
-    item: Record<string, unknown>
+    item:
+      Record<string, unknown>
   ): RemoteDescriptor | undefined {
 
     const microfrontendId =
       this.getOptionalString(
         item,
-        APPLICATION_TREE_FIELDS.microfrontendId
+        APPLICATION_TREE_FIELDS
+          .microfrontendId
       );
 
-    if (!microfrontendId) {
+
+    if (
+      !microfrontendId
+    ) {
+
       return undefined;
     }
+
 
     const microfrontendStatus =
       this.getRequiredString(
         item,
-        APPLICATION_TREE_FIELDS.microfrontendStatus
+        APPLICATION_TREE_FIELDS
+          .microfrontendStatus
       );
+
 
     return {
 
@@ -403,31 +478,36 @@ export class ApplicationTreeMapperService {
       name:
         this.getRequiredString(
           item,
-          APPLICATION_TREE_FIELDS.microfrontendName
+          APPLICATION_TREE_FIELDS
+            .microfrontendName
         ),
 
       remoteName:
         this.getRequiredString(
           item,
-          APPLICATION_TREE_FIELDS.remoteName
+          APPLICATION_TREE_FIELDS
+            .remoteName
         ),
 
       exposedModule:
         this.getRequiredString(
           item,
-          APPLICATION_TREE_FIELDS.exposedModule
+          APPLICATION_TREE_FIELDS
+            .exposedModule
         ),
 
       remoteEntryUrl:
         this.getRequiredString(
           item,
-          APPLICATION_TREE_FIELDS.remoteEntryUrl
+          APPLICATION_TREE_FIELDS
+            .remoteEntryUrl
         ),
 
       version:
         this.getOptionalString(
           item,
-          APPLICATION_TREE_FIELDS.microfrontendVersion
+          APPLICATION_TREE_FIELDS
+            .microfrontendVersion
         ),
 
       enabled:
@@ -437,6 +517,7 @@ export class ApplicationTreeMapperService {
 
     };
   }
+
 
   /**
    * Removes duplicated application identifiers from the application tree.
@@ -457,8 +538,10 @@ export class ApplicationTreeMapperService {
         ApplicationTreeNode
       >();
 
+
     for (
-      const item of items
+      const item of
+      items
     ) {
 
       const applicationId =
@@ -466,14 +549,17 @@ export class ApplicationTreeMapperService {
           .trim()
           .toUpperCase();
 
+
       if (
         !applicationId ||
         applications.has(
           applicationId
         )
       ) {
+
         continue;
       }
+
 
       applications.set(
         applicationId,
@@ -484,10 +570,12 @@ export class ApplicationTreeMapperService {
       );
     }
 
+
     return Array.from(
       applications.values()
     );
   }
+
 
   /**
    * Determines whether a microfrontend status represents
@@ -497,7 +585,8 @@ export class ApplicationTreeMapperService {
    * @returns True when the remote is enabled.
    */
   private isEnabledStatus(
-    status: string
+    status:
+      string
   ): boolean {
 
     const normalizedStatus =
@@ -505,15 +594,23 @@ export class ApplicationTreeMapperService {
         .trim()
         .toUpperCase();
 
+
     return (
-      normalizedStatus === 'ACTIVE' ||
-      normalizedStatus === 'ACTIVO' ||
-      normalizedStatus === 'ENABLED' ||
-      normalizedStatus === 'A' ||
-      normalizedStatus === '1' ||
-      normalizedStatus === 'TRUE'
+      normalizedStatus ===
+        'ACTIVE' ||
+      normalizedStatus ===
+        'ACTIVO' ||
+      normalizedStatus ===
+        'ENABLED' ||
+      normalizedStatus ===
+        'A' ||
+      normalizedStatus ===
+        '1' ||
+      normalizedStatus ===
+        'TRUE'
     );
   }
+
 
   /**
    * Returns a required string property.
@@ -524,16 +621,24 @@ export class ApplicationTreeMapperService {
    * @throws Error when the field is missing or empty.
    */
   private getRequiredString(
-    item: Record<string, unknown>,
-    fieldName: string
+    item:
+      Record<string, unknown>,
+
+    fieldName:
+      string
   ): string {
 
     const value =
-      item[fieldName];
+      item[
+        fieldName
+      ];
+
 
     if (
-      typeof value !== 'string' ||
-      value.trim().length === 0
+      typeof value !==
+        'string' ||
+      value.trim().length ===
+        0
     ) {
 
       throw new Error(
@@ -541,8 +646,10 @@ export class ApplicationTreeMapperService {
       );
     }
 
+
     return value.trim();
   }
+
 
   /**
    * Returns a required value converted to string.
@@ -555,16 +662,24 @@ export class ApplicationTreeMapperService {
    * @returns Normalized string value.
    */
   private getRequiredValueAsString(
-    item: Record<string, unknown>,
-    fieldName: string
+    item:
+      Record<string, unknown>,
+
+    fieldName:
+      string
   ): string {
 
     const value =
-      item[fieldName];
+      item[
+        fieldName
+      ];
+
 
     if (
-      value === null ||
-      value === undefined
+      value ===
+        null ||
+      value ===
+        undefined
     ) {
 
       throw new Error(
@@ -572,19 +687,27 @@ export class ApplicationTreeMapperService {
       );
     }
 
+
     const normalizedValue =
-      String(value)
+      String(
+        value
+      )
         .trim();
 
-    if (!normalizedValue) {
+
+    if (
+      !normalizedValue
+    ) {
 
       throw new Error(
         `The XTEIN application tree field "${fieldName}" is required.`
       );
     }
 
+
     return normalizedValue;
   }
+
 
   /**
    * Returns an optional string property.
@@ -596,34 +719,174 @@ export class ApplicationTreeMapperService {
    * @returns String value or undefined.
    */
   private getOptionalString(
-    item: Record<string, unknown>,
-    fieldName: string
+    item:
+      Record<string, unknown>,
+
+    fieldName:
+      string
   ): string | undefined {
 
     const value =
-      item[fieldName];
+      item[
+        fieldName
+      ];
+
 
     if (
-      value === null ||
-      value === undefined
+      value ===
+        null ||
+      value ===
+        undefined
     ) {
+
       return undefined;
     }
 
+
     const normalizedValue =
-      String(value)
+      String(
+        value
+      )
         .trim();
+
 
     if (
       !normalizedValue ||
-      normalizedValue.toUpperCase() ===
+      normalizedValue
+        .toUpperCase() ===
         'NULL'
     ) {
+
       return undefined;
     }
 
+
     return normalizedValue;
   }
+
+
+  /**
+   * Returns an optional boolean property.
+   *
+   * SQL bit values can arrive as boolean, numeric, or textual values
+   * depending on the backend serializer.
+   *
+   * Missing values are treated as false to remain backward compatible
+   * while the DEFECTO field is deployed.
+   *
+   * @param item Source record.
+   * @param fieldName External JSON field name.
+   * @returns Normalized boolean value.
+   */
+  private getOptionalBoolean(
+    item:
+      Record<string, unknown>,
+
+    fieldName:
+      string
+  ): boolean {
+
+    const value =
+      item[
+        fieldName
+      ];
+
+
+    if (
+      value ===
+        null ||
+      value ===
+        undefined ||
+      value ===
+        ''
+    ) {
+
+      return false;
+    }
+
+
+    if (
+      typeof value ===
+        'boolean'
+    ) {
+
+      return value;
+    }
+
+
+    if (
+      typeof value ===
+        'number'
+    ) {
+
+      if (
+        value ===
+          1
+      ) {
+
+        return true;
+      }
+
+
+      if (
+        value ===
+          0
+      ) {
+
+        return false;
+      }
+    }
+
+
+    const normalizedValue =
+      String(
+        value
+      )
+        .trim()
+        .toUpperCase();
+
+
+    if (
+      normalizedValue ===
+        '1' ||
+      normalizedValue ===
+        'TRUE' ||
+      normalizedValue ===
+        'YES' ||
+      normalizedValue ===
+        'Y' ||
+      normalizedValue ===
+        'SI' ||
+      normalizedValue ===
+        'SÍ' ||
+      normalizedValue ===
+        'S'
+    ) {
+
+      return true;
+    }
+
+
+    if (
+      normalizedValue ===
+        '0' ||
+      normalizedValue ===
+        'FALSE' ||
+      normalizedValue ===
+        'NO' ||
+      normalizedValue ===
+        'N'
+    ) {
+
+      return false;
+    }
+
+
+    throw new Error(
+      `The XTEIN application tree field "${fieldName}" must contain a boolean value.`
+    );
+  }
+
 
   /**
    * Returns an optional numeric property.
@@ -634,23 +897,37 @@ export class ApplicationTreeMapperService {
    * @throws Error when a non-numeric value is received.
    */
   private getOptionalNumber(
-    item: Record<string, unknown>,
-    fieldName: string
+    item:
+      Record<string, unknown>,
+
+    fieldName:
+      string
   ): number | undefined {
 
     const value =
-      item[fieldName];
+      item[
+        fieldName
+      ];
+
 
     if (
-      value === null ||
-      value === undefined ||
-      value === ''
+      value ===
+        null ||
+      value ===
+        undefined ||
+      value ===
+        ''
     ) {
+
       return undefined;
     }
 
+
     const numericValue =
-      Number(value);
+      Number(
+        value
+      );
+
 
     if (
       !Number.isFinite(
@@ -662,6 +939,7 @@ export class ApplicationTreeMapperService {
         `The XTEIN application tree field "${fieldName}" must contain a numeric value.`
       );
     }
+
 
     return numericValue;
   }

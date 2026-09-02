@@ -2,6 +2,7 @@ import {
   RemoteDescriptor
 } from '../remote/remote-descriptor';
 
+
 /**
  * Represents an application or navigation node returned by
  * the XTEIN application tree.
@@ -18,19 +19,25 @@ export interface ApplicationTreeNode {
    * MAD
    * MAD-005
    */
-  applicationId: string;
+  applicationId:
+    string;
+
 
   /**
    * Parent application or module identifier.
    *
    * Root modules use XTEIN as their logical parent.
    */
-  parentApplicationId?: string;
+  parentApplicationId?:
+    string;
+
 
   /**
    * Display name shown in the application tree.
    */
-  name: string;
+  name:
+    string;
+
 
   /**
    * Application node type.
@@ -40,12 +47,16 @@ export interface ApplicationTreeNode {
    * aplicacion
    * dashboard
    */
-  type: string;
+  type:
+    string;
+
 
   /**
    * Current application status.
    */
-  status: string;
+  status:
+    string;
+
 
   /**
    * Optional icon configured for the application.
@@ -53,57 +64,89 @@ export interface ApplicationTreeNode {
    * The presentation layer must provide a default icon
    * when this value is empty or unavailable.
    */
-  icon?: string;
+  icon?:
+    string;
+
+
+  /**
+   * Indicates whether this application must be opened
+   * automatically when the XTEIN Shell is initialized.
+   *
+   * The value originates from APLICACIONES_ASOCIADAS.DEFECTO.
+   */
+  openByDefault:
+    boolean;
+
 
   /**
    * Optional application table configuration.
    */
-  tableApplication?: string;
+  tableApplication?:
+    string;
+
 
   /**
    * Optional program configuration associated with the application.
    */
-  program?: string;
+  program?:
+    string;
+
 
   /**
    * Optional serialized parameters associated with the application.
    */
-  parameters?: string;
+  parameters?:
+    string;
+
 
   /**
    * Optional application comments.
    */
-  comments?: string;
+  comments?:
+    string;
+
 
   /**
    * Optional action associated with the application.
    */
-  action?: string;
+  action?:
+    string;
+
 
   /**
    * Optional lower target value.
    */
-  lowerTarget?: number;
+  lowerTarget?:
+    number;
+
 
   /**
    * Optional upper target value.
    */
-  upperTarget?: number;
+  upperTarget?:
+    number;
+
 
   /**
    * Optional system type.
    */
-  systemType?: string;
+  systemType?:
+    string;
+
 
   /**
    * Optional unit of measure.
    */
-  unitOfMeasure?: string;
+  unitOfMeasure?:
+    string;
+
 
   /**
    * Optional application level.
    */
-  level?: string;
+  level?:
+    string;
+
 
   /**
    * Microfrontend configuration associated with the application.
@@ -111,5 +154,6 @@ export interface ApplicationTreeNode {
    * This value is undefined for modules and for applications
    * that have not yet been migrated to the microfrontend architecture.
    */
-  remote?: RemoteDescriptor;
+  remote?:
+    RemoteDescriptor;
 }
