@@ -1,4 +1,8 @@
 import {
+  RecordToolbarCapabilities
+} from '@xtein/sdk';
+
+import {
   Mad005DataSourceConfiguration
 } from '../models/mad-005.model';
 
@@ -97,4 +101,47 @@ export const Mad005DefaultRecord:
 
     COMENTARIOS:
       null
+  };
+
+
+/**
+ * Defines the record-toolbar capabilities currently implemented
+ * by MAD-005.
+ *
+ * Shared platform operations such as advanced filtering, quick view,
+ * reporting, and application configuration are enabled in later
+ * migration stages after their reusable platform components exist.
+ */
+export const Mad005ToolbarCapabilities:
+  Partial<RecordToolbarCapabilities> = {
+
+    create:
+      true,
+
+    edit:
+      true,
+
+    delete:
+      true,
+
+    search:
+      false,
+
+    refresh:
+      true,
+
+    copy:
+      false,
+
+    view:
+      false,
+
+    navigation:
+      true,
+
+    print:
+      false,
+
+    configure:
+      false
   };

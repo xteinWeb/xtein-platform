@@ -1,7 +1,21 @@
 :host {
-  display: block;
+  display:
+    block;
 
-  width: 100%;
+  width:
+    auto;
+
+  max-width:
+    100%;
+
+  min-width:
+    0;
+
+  position:
+    relative;
+
+  z-index:
+    40;
 }
 
 
@@ -10,21 +24,66 @@
    ============================================================ */
 
 .xt-platform-toolbar {
-  display: flex;
-  align-items: center;
+  position:
+    relative;
 
-  width: 100%;
-  min-height: 44px;
+  display:
+    inline-flex;
 
-  padding: 4px 16px;
+  align-items:
+    center;
 
-  background: #ffffff;
+  width:
+    max-content;
 
-  border-bottom:
-    1px solid #dfe6ef;
+  max-width:
+    100%;
 
-  overflow-x: auto;
-  overflow-y: hidden;
+  min-width:
+    0;
+
+  min-height:
+    40px;
+
+  padding:
+    3px 8px;
+
+  box-sizing:
+    border-box;
+
+  background:
+    #ffffff;
+
+  border:
+    1px solid
+    rgba(
+      69,
+      119,
+      164,
+      .14
+    );
+
+  border-radius:
+    10px;
+
+  box-shadow:
+    0 2px 6px
+      rgba(
+        39,
+        78,
+        114,
+        .12
+      ),
+    0 0 0 1px
+      rgba(
+        74,
+        127,
+        176,
+        .05
+      );
+
+  overflow:
+    visible;
 }
 
 
@@ -33,12 +92,26 @@
    ============================================================ */
 
 .xt-platform-toolbar__actions {
-  display: flex;
-  align-items: center;
+  display:
+    flex;
 
-  min-width: max-content;
+  align-items:
+    center;
 
-  gap: 2px;
+  width:
+    auto;
+
+  max-width:
+    100%;
+
+  min-width:
+    0;
+
+  gap:
+    2px;
+
+  white-space:
+    nowrap;
 }
 
 
@@ -47,30 +120,50 @@
    ============================================================ */
 
 .xt-platform-toolbar__button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display:
+    inline-flex;
 
-  flex: 0 0 auto;
+  align-items:
+    center;
 
-  width: 34px;
-  height: 34px;
+  justify-content:
+    center;
 
-  margin: 0;
-  padding: 0;
+  flex:
+    0 0 auto;
 
-  border: 0;
-  border-radius: 7px;
+  width:
+    32px;
 
-  outline: 0;
+  height:
+    32px;
 
-  background: transparent;
+  margin:
+    0;
 
-  color: #174b75;
+  padding:
+    0;
 
-  cursor: pointer;
+  border:
+    0;
 
-  box-shadow: none;
+  border-radius:
+    7px;
+
+  outline:
+    0;
+
+  background:
+    transparent;
+
+  color:
+    #174b75;
+
+  cursor:
+    pointer;
+
+  box-shadow:
+    none;
 
   transition:
     background-color .15s ease,
@@ -91,7 +184,9 @@
 
 .xt-platform-toolbar__button:active:not(:disabled) {
   transform:
-    translateY(1px);
+    translateY(
+      1px
+    );
 }
 
 
@@ -109,17 +204,29 @@
    ============================================================ */
 
 .xt-platform-toolbar__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display:
+    inline-flex;
 
-  width: 20px;
-  height: 20px;
+  align-items:
+    center;
 
-  font-size: 18px;
-  line-height: 20px;
+  justify-content:
+    center;
 
-  pointer-events: none;
+  width:
+    19px;
+
+  height:
+    19px;
+
+  font-size:
+    17px;
+
+  line-height:
+    19px;
+
+  pointer-events:
+    none;
 }
 
 
@@ -148,15 +255,20 @@
    ============================================================ */
 
 .xt-platform-toolbar__separator {
-  display: block;
+  display:
+    block;
 
-  flex: 0 0 1px;
+  flex:
+    0 0 1px;
 
-  width: 1px;
-  height: 22px;
+  width:
+    1px;
+
+  height:
+    20px;
 
   margin:
-    0 6px;
+    0 5px;
 
   background:
     #dce5ee;
@@ -164,59 +276,378 @@
 
 
 /* ============================================================
-   SCROLLBAR
+   EDITION MODE
    ============================================================ */
 
-.xt-platform-toolbar {
-  scrollbar-width:
-    thin;
+.xt-platform-toolbar__mode {
+  display:
+    inline-flex;
 
-  scrollbar-color:
-    rgba(15, 76, 129, .18)
-    transparent;
-}
+  align-items:
+    center;
 
+  justify-content:
+    center;
 
-.xt-platform-toolbar::-webkit-scrollbar {
-  height: 4px;
-}
+  flex:
+    0 0 auto;
 
+  width:
+    32px;
 
-.xt-platform-toolbar::-webkit-scrollbar-track {
-  background:
-    transparent;
-}
+  height:
+    32px;
 
-
-.xt-platform-toolbar::-webkit-scrollbar-thumb {
   border-radius:
-    10px;
+    7px;
 
   background:
-    rgba(15, 76, 129, .18);
+    rgba(
+      18,
+      94,
+      220,
+      .075
+    );
+
+  color:
+    #35ccac;
 }
 
 
-.xt-platform-toolbar::-webkit-scrollbar-thumb:hover {
-  background:
-    rgba(15, 76, 129, .30);
+.xt-platform-toolbar__mode-icon {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    19px;
+
+  height:
+    19px;
+
+  color:
+    inherit;
+
+  font-size:
+    17px;
+
+  line-height:
+    19px;
 }
 
 
 /* ============================================================
-   RESPONSIVE
+   RECORD POSITION
+   ============================================================ */
+
+.xt-platform-toolbar__position {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  flex:
+    0 0 auto;
+
+  height:
+    32px;
+
+  gap:
+    6px;
+
+  margin:
+    0 2px;
+
+  color:
+    #244d73;
+
+  font-size:
+    13px;
+
+  line-height:
+    1;
+}
+
+
+.xt-platform-toolbar__position-current {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  min-width:
+    48px;
+
+  height:
+    28px;
+
+  padding:
+    0 9px;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid
+    #c7d0db;
+
+  border-radius:
+    6px;
+
+  background:
+    #e6eaef;
+
+  color:
+    #183f62;
+
+  font-weight:
+    500;
+}
+
+
+.xt-platform-toolbar__position-total {
+  color:
+    #183f62;
+
+  font-weight:
+    500;
+}
+
+
+/* ============================================================
+   RESPONSIVE OVERFLOW
+   ============================================================ */
+
+.xt-platform-toolbar__overflow {
+  position:
+    relative;
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  flex:
+    0 0 auto;
+}
+
+
+.xt-platform-toolbar__more-button {
+  color:
+    #365f82;
+}
+
+
+.xt-platform-toolbar__overflow-menu {
+  position:
+    absolute;
+
+  top:
+    calc(100% + 7px);
+
+  right:
+    0;
+
+  z-index:
+    1000;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  min-width:
+    190px;
+
+  max-width:
+    min(
+      300px,
+      calc(100vw - 16px)
+    );
+
+  padding:
+    6px;
+
+  border:
+    1px solid
+    rgba(
+      44,
+      79,
+      111,
+      .14
+    );
+
+  border-radius:
+    10px;
+
+  background:
+    #ffffff;
+
+  box-shadow:
+    0 10px 28px
+      rgba(
+        39,
+        78,
+        114,
+        .18
+      ),
+    0 2px 8px
+      rgba(
+        39,
+        78,
+        114,
+        .10
+      );
+}
+
+
+.xt-platform-toolbar__overflow-item {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  width:
+    100%;
+
+  min-height:
+    36px;
+
+  gap:
+    10px;
+
+  padding:
+    6px 10px;
+
+  border:
+    0;
+
+  border-radius:
+    7px;
+
+  background:
+    transparent;
+
+  color:
+    #244d73;
+
+  text-align:
+    left;
+
+  cursor:
+    pointer;
+}
+
+
+.xt-platform-toolbar__overflow-item:hover:not(:disabled) {
+  background:
+    #eef5fc;
+}
+
+
+.xt-platform-toolbar__overflow-item:focus-visible {
+  outline:
+    2px solid #86b7fe;
+
+  outline-offset:
+    -2px;
+}
+
+
+.xt-platform-toolbar__overflow-item:disabled {
+  color:
+    #a9b6c3;
+
+  opacity:
+    .52;
+
+  cursor:
+    default;
+}
+
+
+.xt-platform-toolbar__overflow-icon {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  flex:
+    0 0 22px;
+
+  width:
+    22px;
+
+  height:
+    22px;
+
+  font-size:
+    17px;
+}
+
+
+.xt-platform-toolbar__overflow-label {
+  overflow:
+    hidden;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+
+  font-size:
+    13px;
+
+  font-weight:
+    500;
+}
+
+
+.xt-platform-toolbar__overflow-separator {
+  width:
+    calc(100% - 12px);
+
+  height:
+    1px;
+
+  margin:
+    5px 6px;
+
+  background:
+    #e2e9f0;
+}
+
+
+/* ============================================================
+   TABLET
    ============================================================ */
 
 @media (
-  max-width: 767.98px
+  max-width:
+    767.98px
 ) {
 
   .xt-platform-toolbar {
-    padding-right:
-      8px;
-
-    padding-left:
-      8px;
+    padding:
+      3px 6px;
   }
 
 
@@ -228,4 +659,117 @@
       4px;
   }
 
+
+  .xt-platform-toolbar__position {
+    gap:
+      5px;
+
+    margin-right:
+      1px;
+
+    margin-left:
+      1px;
+  }
+
+
+  .xt-platform-toolbar__position-current {
+    min-width:
+      44px;
+
+    padding-right:
+      7px;
+
+    padding-left:
+      7px;
+  }
+}
+
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (
+  max-width:
+    479.98px
+) {
+
+  .xt-platform-toolbar {
+    min-height:
+      38px;
+
+    padding:
+      2px 5px;
+
+    border-radius:
+      9px;
+  }
+
+
+  .xt-platform-toolbar__button,
+  .xt-platform-toolbar__mode {
+    width:
+      30px;
+
+    height:
+      30px;
+  }
+
+
+  .xt-platform-toolbar__icon,
+  .xt-platform-toolbar__mode-icon {
+    width:
+      18px;
+
+    height:
+      18px;
+
+    font-size:
+      16px;
+  }
+
+
+  .xt-platform-toolbar__separator {
+    height:
+      19px;
+
+    margin-right:
+      3px;
+
+    margin-left:
+      3px;
+  }
+
+
+  .xt-platform-toolbar__position {
+    height:
+      30px;
+
+    gap:
+      4px;
+
+    font-size:
+      12px;
+  }
+
+
+  .xt-platform-toolbar__position-current {
+    min-width:
+      38px;
+
+    height:
+      26px;
+
+    padding-right:
+      5px;
+
+    padding-left:
+      5px;
+  }
+
+
+  .xt-platform-toolbar__overflow-menu {
+    min-width:
+      176px;
+  }
 }

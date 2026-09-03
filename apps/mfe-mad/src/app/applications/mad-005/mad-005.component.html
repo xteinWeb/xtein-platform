@@ -1,30 +1,159 @@
-<div
+<section
   class="mad-005">
 
   <div
-    class="mad-005__test">
+    class="mad-005__card">
 
     <div
-      class="mad-005__title">
+      class="mad-005__form"
+      [formGroup]="form">
 
-      Orígenes de Datos
+      <div
+        class="mad-005__grid">
 
-    </div>
+        <!-- Name -->
+        <div
+          class="mad-005__field">
 
-    <div
-      class="mad-005__application-id">
+          <xtein-input
+            id="mad-005-name"
+            name="NOMBRE"
+            label="Nombre"
+            placeholder="Ingrese el nombre del origen de datos"
+            [maxLength]="30"
+            [required]="true"
+            [invalid]="isNameInvalid()"
+            errorMessage="Nombre de origen de datos es requerido"
+            formControlName="NOMBRE"
+            (blurred)="validateNameOnBlur()">
+          </xtein-input>
 
-      {{ applicationId }}
+        </div>
 
-    </div>
 
-    <div
-      class="mad-005__message">
+        <!-- Data source type -->
+        <div
+          class="mad-005__field">
 
-      Aplicación cargada correctamente desde mfe-mad.
+          <xtein-select
+            id="mad-005-origin"
+            label="Tipo origen de datos"
+            placeholder="Seleccione tipo de origen de datos"
+            [items]="dataSourceTypes()"
+            displayExpr="Origen"
+            valueExpr="IdOrigen"
+            [searchEnabled]="true"
+            [showClearButton]="!readOnly()"
+            [required]="true"
+            [invalid]="isOriginInvalid()"
+            errorMessage="Tipo de origen de datos es requerido"
+            formControlName="ORIGEN_DATO">
+          </xtein-select>
+
+        </div>
+
+        <legend
+            class="mad-005__section-title">
+
+            Parámetros de Conexión
+
+          </legend>
+
+        <!-- Dynamic connection parameters -->
+        <fieldset
+          class="mad-005__connection mad-005__span-2">
+
+          
+
+
+          <xtein-data-source-parameters
+            [origin]="form.controls.ORIGEN_DATO.value"
+            [value]="form.controls.PARAMETROS.value"
+            [readonly]="readOnly()"
+            [colCount]="2"
+            (valueChange)="updateConnectionParameters($event)"
+            (loadingChange)="loading.set($event)"
+            (connectionTest)="handleConnectionTest($event)">
+          </xtein-data-source-parameters>
+
+        </fieldset>
+
+
+        <!-- Active -->
+        <div
+          class="mad-005__field">
+
+          <xtein-select
+            id="mad-005-active"
+            label="Estado"
+            [items]="statusOptions"
+            displayExpr="text"
+            valueExpr="value"
+            placeholder="Seleccione estado"
+            formControlName="ACTIVO">
+          </xtein-select>
+
+        </div>
+
+
+        <!-- Default -->
+        <div
+          class="mad-005__field">
+
+          <xtein-select
+            id="mad-005-default"
+            label="Por defecto"
+            [items]="defaultOptions"
+            displayExpr="text"
+            valueExpr="value"
+            placeholder="Seleccione una opción"
+            formControlName="DEFECTO">
+          </xtein-select>
+
+        </div>
+
+
+        <!-- Comments -->
+        <div
+          class="mad-005__field mad-005__span-2">
+
+          <label
+            class="mad-005__label"
+            for="mad-005-comments">
+
+            Comentarios
+
+          </label>
+
+
+          <xtein-textarea
+            id="mad-005-comments"
+            name="COMENTARIOS"
+            ariaLabel="Comentarios"
+            placeholder="Ingrese comentarios"
+            [height]="120"
+            [minHeight]="96"
+            [autoResizeEnabled]="false"
+            formControlName="COMENTARIOS">
+          </xtein-textarea>
+
+        </div>
+
+      </div>
 
     </div>
 
   </div>
 
-</div>
+
+  <xtein-loading
+    [visible]="loading()"
+    message="Un momento. Procesando..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false">
+  </xtein-loading>
+
+</section>

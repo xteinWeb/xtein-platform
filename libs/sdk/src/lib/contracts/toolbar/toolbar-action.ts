@@ -49,6 +49,12 @@ export const ToolbarAction = {
     'search',
 
   /**
+   * Orders the current loaded record collection.
+   */
+  Sort:
+    'sort',
+
+  /**
    * Refreshes application data.
    */
   Refresh:
@@ -61,10 +67,16 @@ export const ToolbarAction = {
     'copy',
 
   /**
-   * Opens the current record in view mode.
+   * Opens the current loaded records in quick-view mode.
    */
   View:
     'view',
+
+  /**
+   * Downloads the current loaded data.
+   */
+  Download:
+    'download',
 
   /**
    * Opens application configuration.

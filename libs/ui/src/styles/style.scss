@@ -13,6 +13,7 @@
 = 6. Utilidades globales
 ======================================================================*/
 
+
 /*======================================================================
 = 1. TEMA CORPORATIVO
 ======================================================================*/
@@ -20,12 +21,15 @@
 @import "xtein.scss";
 @import "icons_styles.scss";
 @import "xtein-theme.scss";
+@import "xtein-controls.scss";
+
 
 /*======================================================================
 = 2. TEMAS DE TERCEROS
 ======================================================================*/
 
 @import "../../../../node_modules/@angular/material/prebuilt-themes/indigo-pink.css";
+
 
 /*======================================================================
 = 3. ACE EDITOR
@@ -35,6 +39,7 @@
 @import url("../../../../node_modules/ace-builds/css/theme/dreamweaver.css");
 @import url("../../../../node_modules/ace-builds/css/theme/ambiance.css");
 
+
 /*======================================================================
 = 4. DEVEXPRESS ANALYTICS
 ======================================================================*/
@@ -43,38 +48,49 @@
 @import url("../../../../node_modules/@devexpress/analytics-core/dist/css/dx-analytics.light.css");
 @import url("../../../../node_modules/@devexpress/analytics-core/dist/css/dx-querybuilder.css");
 
+
 /*======================================================================
 = 5. DEVEXPRESS DASHBOARD
 ======================================================================*/
 
 @import url("../../../../node_modules/devexpress-dashboard/dist/css/dx-dashboard.light.css");
 
+
 /*======================================================================
 = 6. DASHBOARD - PERSONALIZACIONES
 ======================================================================*/
 
-/* Permite que el texto de las tarjetas ocupe varias líneas
-   evitando que sea recortado por DevExpress. */
+/*
+ * Allows card text to use multiple lines without being clipped
+ * by DevExpress.
+ */
 .dx-flex-card-layout-row-element {
-    font-size: 24px !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
-    line-height: 1.2 !important;
-    height: auto !important;
+  height:
+    auto !important;
+
+  overflow:
+    visible !important;
+
+  font-size:
+    24px !important;
+
+  line-height:
+    1.2 !important;
+
+  white-space:
+    normal !important;
+
+  text-overflow:
+    clip !important;
+
+  word-break:
+    break-word !important;
+
+  overflow-wrap:
+    break-word !important;
 }
+
 
 /*======================================================================
 = 7. ESTILOS GLOBALES DE LA APLICACIÓN
-=
-= Agregar aquí:
-= - Layout
-= - Botones
-= - Formularios
-= - DataGrid
-= - Tabs
-= - Popup
-= - Dashboard
 ======================================================================*/

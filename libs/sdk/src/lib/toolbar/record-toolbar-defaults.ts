@@ -11,8 +11,9 @@ import {
  * Defines the capabilities supported by the standard
  * XTEIN record toolbar.
  *
- * Individual applications can disable capabilities that
- * they do not implement.
+ * Capabilities that require an application-specific implementation,
+ * such as ordering and downloading, remain disabled by default and
+ * must be enabled explicitly by each application.
  */
 export const DefaultRecordToolbarCapabilities:
   Readonly<RecordToolbarCapabilities> = {
@@ -38,8 +39,14 @@ export const DefaultRecordToolbarCapabilities:
     view:
       true,
 
+    sort:
+      false,
+
     navigation:
       true,
+
+    download:
+      false,
 
     print:
       true,

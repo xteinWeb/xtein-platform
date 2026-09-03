@@ -1,8 +1,12 @@
 :host {
-  display: block;
+  display:
+    block;
 
-  width: 100%;
-  height: 100vh;
+  width:
+    100%;
+
+  height:
+    100vh;
 }
 
 
@@ -11,10 +15,14 @@
    ============================================================ */
 
 .xt-shell {
-  --xt-sidebar-width: 326px;
-  --xt-header-height: 64px;
+  --xt-sidebar-width:
+    326px;
 
-  display: grid;
+  --xt-header-height:
+    64px;
+
+  display:
+    grid;
 
   grid-template-columns:
     var(--xt-sidebar-width)
@@ -28,10 +36,14 @@
     "sidebar header"
     "sidebar main";
 
-  width: 100%;
-  height: 100vh;
+  width:
+    100%;
 
-  overflow: hidden;
+  height:
+    100vh;
+
+  overflow:
+    hidden;
 
   transition:
     grid-template-columns .2s ease;
@@ -43,7 +55,8 @@
    ============================================================ */
 
 .xt-shell--sidebar-collapsed {
-  --xt-sidebar-width: 72px;
+  --xt-sidebar-width:
+    72px;
 }
 
 
@@ -52,12 +65,23 @@
    ============================================================ */
 
 .xt-shell__header {
-  grid-area: header;
+  grid-area:
+    header;
 
-  min-width: 0;
-  min-height: 0;
+  min-width:
+    0;
 
-  overflow: visible;
+  min-height:
+    0;
+
+  overflow:
+    visible;
+
+  position:
+    relative;
+
+  z-index:
+    100;
 }
 
 
@@ -66,12 +90,17 @@
    ============================================================ */
 
 .xt-shell__sidebar {
-  grid-area: sidebar;
+  grid-area:
+    sidebar;
 
-  min-width: 0;
-  min-height: 0;
+  min-width:
+    0;
 
-  overflow: hidden;
+  min-height:
+    0;
+
+  overflow:
+    hidden;
 }
 
 
@@ -80,26 +109,23 @@
    ============================================================ */
 
 .xt-shell__main {
-  grid-area: main;
+  grid-area:
+    main;
 
-  display: flex;
-  flex-direction: column;
+  display:
+    flex;
 
-  min-width: 0;
-  min-height: 0;
+  flex-direction:
+    column;
 
-  overflow: hidden;
-}
+  min-width:
+    0;
 
+  min-height:
+    0;
 
-/* ============================================================
-   TOOLBAR
-   ============================================================ */
-
-.xt-shell__toolbar {
-  flex: 0 0 auto;
-
-  min-width: 0;
+  overflow:
+    hidden;
 }
 
 
@@ -108,12 +134,17 @@
    ============================================================ */
 
 .xt-shell__workspace {
-  flex: 1 1 auto;
+  flex:
+    1 1 auto;
 
-  min-width: 0;
-  min-height: 0;
+  min-width:
+    0;
 
-  overflow: hidden;
+  min-height:
+    0;
+
+  overflow:
+    hidden;
 }
 
 
@@ -121,13 +152,36 @@
    RESPONSIVE
    ============================================================ */
 
-@media (max-width: 1199.98px) {
+@media (
+  max-width:
+    1199.98px
+) {
 
   .xt-shell {
-    --xt-sidebar-width: 280px;
+    --xt-sidebar-width:
+      280px;
   }
 
+
   .xt-shell--sidebar-collapsed {
-    --xt-sidebar-width: 72px;
+    --xt-sidebar-width:
+      72px;
+  }
+}
+
+
+/*
+ * On narrow screens the toolbar moves to a second
+ * header row to avoid collisions with the company
+ * identity and user controls.
+ */
+@media (
+  max-width:
+    700px
+) {
+
+  .xt-shell {
+    --xt-header-height:
+      104px;
   }
 }

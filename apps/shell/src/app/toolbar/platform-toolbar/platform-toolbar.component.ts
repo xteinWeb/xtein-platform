@@ -1,9 +1,17 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
-  computed
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild,
+  computed,
+  signal
 } from '@angular/core';
 
 import {
+  RecordToolbarMode,
   ToolbarAction
 } from '@xtein/sdk';
 
@@ -14,45 +22,32 @@ import {
 import {
   PlatformToolbarGroup,
   PlatformToolbarItem,
-  PlatformToolbarItems
+  PlatformToolbarItems,
+  PlatformToolbarResponsivePriority
 } from './platform-toolbar.constants';
 
 
-/**
- * Represents one toolbar item after combining the
- * Shell presentation definition with the active ToolbarState.
- */
 interface RenderedPlatformToolbarItem
   extends PlatformToolbarItem {
 
-  /**
-   * Indicates whether the action can currently execute.
-   */
   enabled:
     boolean;
 
-  /**
-   * Indicates whether a visual separator must be rendered
-   * before this item.
-   */
   separatorBefore:
     boolean;
 }
 
 
-/**
- * Displays the standard XTEIN platform toolbar.
- *
- * The toolbar does not contain application-specific logic.
- *
- * Its responsibilities are exclusively:
- *
- * - render the ToolbarState of the active application;
- * - preserve the standard XTEIN action order;
- * - display only permitted/supported actions;
- * - reflect enabled and disabled states;
- * - dispatch actions through ToolbarRuntimeService.
- */
+interface PlatformToolbarModeIndicator {
+
+  label:
+    string;
+
+  iconClass:
+    string;
+}
+
+
 @Component({
   selector:
     'app-platform-toolbar',
@@ -67,21 +62,38 @@ interface RenderedPlatformToolbarItem
     './platform-toolbar.component.html',
 
   styleUrl:
-    './platform-toolbar.component.scss'
-})
-export class PlatformToolbar {
+    './platform-toolbar.component.scss',
 
-  /**
-   * Toolbar items currently visible for the active
-   * workspace application.
-   *
-   * This value automatically changes when:
-   *
-   * - the active workspace tab changes;
-   * - an application publishes a new ToolbarState;
-   * - the application changes operation mode.
-   */
-  readonly items =
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
+})
+export class PlatformToolbar
+  implements AfterViewInit, OnDestroy {
+
+  @ViewChild(
+    'toolbarContainer'
+  )
+  private toolbarContainer?:
+    ElementRef<HTMLElement>;
+
+
+  private readonly toolbarWidth =
+    signal(
+      0
+    );
+
+
+  readonly overflowMenuOpen =
+    signal(
+      false
+    );
+
+
+  private resizeObserver?:
+    ResizeObserver;
+
+
+  private readonly availableItems =
     computed<
       readonly RenderedPlatformToolbarItem[]
     >(
@@ -96,14 +108,9 @@ export class PlatformToolbar {
           return [];
         }
 
-
         const renderedItems:
           RenderedPlatformToolbarItem[] =
             [];
-
-        let previousGroup:
-          PlatformToolbarGroup | undefined;
-
 
         for (
           const definition
@@ -123,49 +130,105 @@ export class PlatformToolbar {
             continue;
           }
 
-
-          const separatorBefore =
-            previousGroup !==
-              undefined &&
-            previousGroup !==
-              definition.group;
-
-
           renderedItems.push({
+
             ...definition,
 
             enabled:
               actionState.enabled,
 
-            separatorBefore
+            separatorBefore:
+              false
           });
-
-
-          previousGroup =
-            definition.group;
         }
-
 
         return renderedItems;
       }
     );
 
 
-  /**
-   * Indicates whether the active application currently
-   * exposes at least one toolbar action.
-   */
-  readonly visible =
+  private readonly visiblePriority =
     computed(
-      () =>
-        this.items().length > 0
+      () => {
+
+        const width =
+          this.toolbarWidth();
+
+        const mode =
+          this.toolbarRuntime
+            .activeToolbarState()
+            ?.record
+            ?.mode;
+
+        if (
+          mode === RecordToolbarMode.Creating ||
+          mode === RecordToolbarMode.Editing ||
+          mode === RecordToolbarMode.Copying
+        ) {
+
+          return PlatformToolbarResponsivePriority.Extended;
+        }
+
+        if (width <= 0) {
+
+          return PlatformToolbarResponsivePriority.Extended;
+        }
+
+        if (width >= 900) {
+
+          return PlatformToolbarResponsivePriority.Extended;
+        }
+
+        if (width >= 620) {
+
+          return PlatformToolbarResponsivePriority.Standard;
+        }
+
+        return PlatformToolbarResponsivePriority.Essential;
+      }
     );
 
 
-  /**
-   * Identifier of the application whose toolbar is
-   * currently displayed.
-   */
+  readonly mainItems =
+    computed<
+      readonly RenderedPlatformToolbarItem[]
+    >(
+      () =>
+        this.withSeparators(
+          this.availableItems()
+            .filter(
+              item =>
+                item.responsivePriority <=
+                this.visiblePriority()
+            )
+        )
+    );
+
+
+  readonly overflowItems =
+    computed<
+      readonly RenderedPlatformToolbarItem[]
+    >(
+      () =>
+        this.withSeparators(
+          this.availableItems()
+            .filter(
+              item =>
+                item.responsivePriority >
+                this.visiblePriority()
+            )
+        )
+    );
+
+
+  readonly visible =
+    computed(
+      () =>
+        this.availableItems().length > 0 ||
+        this.modeIndicator() !== null
+    );
+
+
   readonly applicationId =
     computed<
       string | null
@@ -178,6 +241,118 @@ export class PlatformToolbar {
     );
 
 
+  readonly modeIndicator =
+    computed<
+      PlatformToolbarModeIndicator | null
+    >(
+      () => {
+
+        const mode =
+          this.toolbarRuntime
+            .activeToolbarState()
+            ?.record
+            ?.mode;
+
+        switch (mode) {
+
+          case RecordToolbarMode.Creating:
+
+            return {
+              label:
+                'Nuevo registro [EDICIÓN]',
+
+              iconClass:
+                'icon-crear-sl'
+            };
+
+          case RecordToolbarMode.Editing:
+
+            return {
+              label:
+                'Modificar registro [EDICIÓN]',
+
+              iconClass:
+                'icon-editar-sl'
+            };
+
+          case RecordToolbarMode.Copying:
+
+            return {
+              label:
+                'Copiar registro [EDICIÓN]',
+
+              iconClass:
+                'icon-copiar'
+            };
+
+          default:
+
+            return null;
+        }
+      }
+    );
+
+
+  readonly recordPositionVisible =
+    computed(
+      () => {
+
+        const recordState =
+          this.toolbarRuntime
+            .activeToolbarState()
+            ?.record;
+
+        return Boolean(
+          recordState &&
+          recordState.totalRecords > 0 &&
+          this.mainItems()
+            .some(
+              item =>
+                item.action ===
+                ToolbarAction.Previous
+            )
+        );
+      }
+    );
+
+
+  readonly currentRecord =
+    computed(
+      () => {
+
+        const recordState =
+          this.toolbarRuntime
+            .activeToolbarState()
+            ?.record;
+
+        if (
+          !recordState ||
+          recordState.totalRecords <= 0
+        ) {
+
+          return 0;
+        }
+
+        return recordState.currentIndex + 1;
+      }
+    );
+
+
+  readonly totalRecords =
+    computed(
+      () =>
+        this.toolbarRuntime
+          .activeToolbarState()
+          ?.record
+          ?.totalRecords ??
+        0
+    );
+
+
+  readonly previousAction =
+    ToolbarAction.Previous;
+
+
   constructor(
     private readonly toolbarRuntime:
       ToolbarRuntimeService
@@ -185,22 +360,154 @@ export class PlatformToolbar {
   }
 
 
-  /**
-   * Dispatches a toolbar action to the active application.
-   *
-   * ToolbarRuntimeService performs the final validation and
-   * refuses to dispatch invisible or disabled actions.
-   *
-   * @param action Requested toolbar action.
-   */
+  ngAfterViewInit():
+    void {
+
+    const element =
+      this.toolbarContainer
+        ?.nativeElement;
+
+    if (!element) {
+
+      return;
+    }
+
+    this.toolbarWidth.set(
+      Math.round(
+        element.getBoundingClientRect().width
+      )
+    );
+
+    if (
+      typeof ResizeObserver ===
+        'undefined'
+    ) {
+
+      return;
+    }
+
+    this.resizeObserver =
+      new ResizeObserver(
+        entries => {
+
+          const entry =
+            entries[0];
+
+          if (!entry) {
+
+            return;
+          }
+
+          this.toolbarWidth.set(
+            Math.round(
+              entry.contentRect.width
+            )
+          );
+        }
+      );
+
+    this.resizeObserver.observe(
+      element
+    );
+  }
+
+
+  ngOnDestroy():
+    void {
+
+    this.resizeObserver
+      ?.disconnect();
+  }
+
+
+  @HostListener(
+    'document:click'
+  )
+  closeOverflowMenu():
+    void {
+
+    if (
+      this.overflowMenuOpen()
+    ) {
+
+      this.overflowMenuOpen.set(
+        false
+      );
+    }
+  }
+
+
   execute(
     action:
       ToolbarAction
   ): void {
 
+    this.overflowMenuOpen.set(
+      false
+    );
+
     this.toolbarRuntime
       .dispatchAction(
         action
       );
+  }
+
+
+  toggleOverflowMenu(
+    event:
+      MouseEvent
+  ): void {
+
+    event.stopPropagation();
+
+    this.overflowMenuOpen.update(
+      current =>
+        !current
+    );
+  }
+
+
+  keepOverflowMenuOpen(
+    event:
+      MouseEvent
+  ): void {
+
+    event.stopPropagation();
+  }
+
+
+  private withSeparators(
+    items:
+      readonly RenderedPlatformToolbarItem[]
+  ): readonly RenderedPlatformToolbarItem[] {
+
+    const result:
+      RenderedPlatformToolbarItem[] =
+        [];
+
+    let previousGroup:
+      PlatformToolbarGroup | undefined;
+
+    for (
+      const item
+      of items
+    ) {
+
+      result.push({
+
+        ...item,
+
+        separatorBefore:
+          previousGroup !==
+            undefined &&
+          previousGroup !==
+            item.group
+      });
+
+      previousGroup =
+        item.group;
+    }
+
+    return result;
   }
 }

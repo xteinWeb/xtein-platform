@@ -1,14 +1,50 @@
 @if (visible()) {
 
   <nav
+    #toolbarContainer
     class="xt-platform-toolbar"
     aria-label="Barra de operaciones">
 
     <div
       class="xt-platform-toolbar__actions">
 
+      @if (
+        modeIndicator();
+        as indicator
+      ) {
+
+        <div
+          class="xt-platform-toolbar__mode"
+          [attr.title]="indicator.label"
+          [attr.aria-label]="indicator.label"
+          role="status">
+
+          <i
+            [class]="
+              'xt-platform-toolbar__mode-icon ' +
+              indicator.iconClass
+            "
+            aria-hidden="true">
+          </i>
+
+        </div>
+
+        @if (
+          mainItems().length > 0
+        ) {
+
+          <span
+            class="xt-platform-toolbar__separator"
+            aria-hidden="true">
+          </span>
+
+        }
+
+      }
+
+
       @for (
-        item of items();
+        item of mainItems();
         track item.action
       ) {
 
@@ -32,7 +68,6 @@
           (click)="execute(item.action)">
 
           <i
-            class="xt-platform-toolbar__icon"
             [class]="
               'xt-platform-toolbar__icon ' +
               item.iconClass
@@ -41,6 +76,123 @@
           </i>
 
         </button>
+
+
+        @if (
+          item.action === previousAction &&
+          recordPositionVisible()
+        ) {
+
+          <div
+            class="xt-platform-toolbar__position"
+            title="Registro actual / total de registros"
+            aria-label="Registro {{ currentRecord() }} de {{ totalRecords() }}">
+
+            <span
+              class="xt-platform-toolbar__position-current">
+
+              {{ currentRecord() }}
+
+            </span>
+
+            <span
+              class="xt-platform-toolbar__position-total">
+
+              de {{ totalRecords() }}
+
+            </span>
+
+          </div>
+
+        }
+
+      }
+
+
+      @if (
+        overflowItems().length > 0
+      ) {
+
+        <span
+          class="xt-platform-toolbar__separator xt-platform-toolbar__separator--overflow"
+          aria-hidden="true">
+        </span>
+
+
+        <div
+          class="xt-platform-toolbar__overflow"
+          (click)="keepOverflowMenuOpen($event)">
+
+          <button
+            type="button"
+            class="xt-platform-toolbar__button xt-platform-toolbar__more-button"
+            title="Más opciones"
+            aria-label="Más opciones"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="overflowMenuOpen()"
+            (click)="toggleOverflowMenu($event)">
+
+            <i
+              class="xt-platform-toolbar__icon icon-mas-opciones"
+              aria-hidden="true">
+            </i>
+
+          </button>
+
+
+          @if (overflowMenuOpen()) {
+
+            <div
+              class="xt-platform-toolbar__overflow-menu"
+              role="menu"
+              aria-label="Más operaciones">
+
+              @for (
+                item of overflowItems();
+                track item.action
+              ) {
+
+                @if (item.separatorBefore) {
+
+                  <div
+                    class="xt-platform-toolbar__overflow-separator"
+                    aria-hidden="true">
+                  </div>
+
+                }
+
+
+                <button
+                  type="button"
+                  class="xt-platform-toolbar__overflow-item"
+                  [disabled]="!item.enabled"
+                  role="menuitem"
+                  (click)="execute(item.action)">
+
+                  <i
+                    [class]="
+                      'xt-platform-toolbar__overflow-icon ' +
+                      item.iconClass
+                    "
+                    aria-hidden="true">
+                  </i>
+
+                  <span
+                    class="xt-platform-toolbar__overflow-label">
+
+                    {{ item.label }}
+
+                  </span>
+
+                </button>
+
+              }
+
+            </div>
+
+          }
+
+        </div>
 
       }
 

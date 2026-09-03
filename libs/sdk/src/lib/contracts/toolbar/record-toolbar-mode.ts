@@ -23,6 +23,12 @@ export const RecordToolbarMode = {
     'editing',
 
   /**
+   * The current record is being copied into a new record.
+   */
+  Copying:
+    'copying',
+
+  /**
    * Existing records are being browsed.
    */
   Browsing:

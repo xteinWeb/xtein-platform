@@ -6,19 +6,24 @@ const {
 );
 
 
+/**
+ * Native Federation configuration for the MAD microfrontend.
+ *
+ * The MAD microfrontend contains multiple XTEIN applications
+ * resolved dynamically through MadApplicationRegistry.
+ */
 module.exports =
   withNativeFederation({
 
     /**
-     * Native Federation identifier of the MAD microfrontend.
+     * Native Federation identifier.
      */
     name:
       'mfe-mad',
 
 
     /**
-     * Public entry point consumed dynamically by the
-     * XTEIN Shell.
+     * Entry point consumed by the XTEIN Shell.
      */
     exposes: {
 
@@ -29,6 +34,9 @@ module.exports =
 
     /**
      * Shared npm dependencies.
+     *
+     * Only dependencies effectively used by the microfrontend
+     * are included because ignoreUnusedDeps is enabled below.
      */
     shared: {
 
@@ -47,10 +55,8 @@ module.exports =
 
 
     /**
-     * Shared XTEIN workspace libraries.
-     *
-     * These mappings must resolve to the same runtime instances
-     * used by the Shell.
+     * XTEIN workspace libraries that must use the same runtime
+     * instances in the Shell and the MAD microfrontend.
      */
     sharedMappings: [
 
@@ -66,6 +72,9 @@ module.exports =
     ],
 
 
+    /**
+     * RxJS entry points not required by the browser runtime.
+     */
     skip: [
 
       'rxjs/ajax',
@@ -80,9 +89,20 @@ module.exports =
 
     features: {
 
+      /**
+       * Keeps Native Federation from attempting to bundle every
+       * dependency declared in the workspace package.json.
+       *
+       * XTEIN shared mappings are explicitly made visible to the
+       * dependency analyzer from bootstrap.ts.
+       */
       ignoreUnusedDeps:
         true,
 
+
+      /**
+       * Publishes version information for workspace mappings.
+       */
       mappingVersion:
         true
     }

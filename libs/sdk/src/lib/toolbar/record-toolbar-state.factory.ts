@@ -45,18 +45,12 @@ export interface RecordToolbarStateOptions {
   /**
    * Permissions granted to the current user for
    * the application.
-   *
-   * Permissions are mandatory and must originate from
-   * the XTEIN application permission service.
    */
   permissions:
     Readonly<RecordToolbarPermissions>;
 
   /**
    * Optional application capability overrides.
-   *
-   * Unspecified capabilities use the standard
-   * XTEIN record-toolbar capabilities.
    */
   capabilities?:
     Partial<RecordToolbarCapabilities>;
@@ -78,16 +72,6 @@ export interface RecordToolbarStateOptions {
 /**
  * Creates the standard toolbar state for a record-based
  * XTEIN application.
- *
- * The final state combines:
- *
- * - user permissions;
- * - application capabilities;
- * - current application mode;
- * - current record position.
- *
- * @param options Current application toolbar context.
- * @returns Toolbar state consumed by the XTEIN platform.
  */
 export function createRecordToolbarState(
   options:
@@ -109,17 +93,25 @@ export function createRecordToolbarState(
   const permissions =
     options.permissions;
 
-  const currentIndex =
-    Math.max(
-      options.currentIndex ?? 0,
-      0
-    );
-
   const totalRecords =
     Math.max(
       options.totalRecords ?? 0,
       0
     );
+
+  const requestedCurrentIndex =
+    Math.max(
+      options.currentIndex ?? 0,
+      0
+    );
+
+  const currentIndex =
+    totalRecords > 0
+      ? Math.min(
+          requestedCurrentIndex,
+          totalRecords - 1
+        )
+      : 0;
 
   const hasRecords =
     totalRecords > 0;
@@ -141,10 +133,14 @@ export function createRecordToolbarState(
     options.mode ===
       RecordToolbarMode.Editing;
 
+  const isCopying =
+    options.mode ===
+      RecordToolbarMode.Copying;
+
   const isChanging =
     isCreating ||
-    isEditing;
-
+    isEditing ||
+    isCopying;
 
   const actions:
     Partial<
@@ -157,50 +153,61 @@ export function createRecordToolbarState(
 
   /*
    * NEW
-   *
-   * Requires:
-   * - application create capability;
-   * - user CREATE permission.
    */
   addAction(
     actions,
-
     ToolbarAction.New,
-
     capabilities.create &&
-      permissions.create,
-
-    !isChanging
+      permissions.create &&
+      !isChanging,
+    true
   );
 
 
   /*
    * EDIT
-   *
-   * Requires:
-   * - application edit capability;
-   * - user MODIFY permission.
    */
   addAction(
     actions,
-
     ToolbarAction.Edit,
-
     capabilities.edit &&
-      permissions.edit,
+      permissions.edit &&
+      hasRecords &&
+      !isChanging,
+    true
+  );
 
-    !isChanging &&
-      hasRecords
+
+  /*
+   * COPY
+   */
+  addAction(
+    actions,
+    ToolbarAction.Copy,
+    capabilities.copy &&
+      permissions.create &&
+      hasRecords &&
+      !isChanging,
+    true
+  );
+
+
+  /*
+   * DELETE
+   */
+  addAction(
+    actions,
+    ToolbarAction.Delete,
+    capabilities.delete &&
+      permissions.delete &&
+      hasRecords &&
+      !isChanging,
+    true
   );
 
 
   /*
    * SAVE
-   *
-   * Save is not a direct database permission.
-   *
-   * It becomes available only after the user has entered
-   * a permitted Creating or Editing operation.
    */
   const canSaveCreating =
     isCreating &&
@@ -212,217 +219,166 @@ export function createRecordToolbarState(
     capabilities.edit &&
     permissions.edit;
 
+  const canSaveCopying =
+    isCopying &&
+    capabilities.copy &&
+    capabilities.create &&
+    permissions.create;
+
   const canSave =
     canSaveCreating ||
-    canSaveEditing;
+    canSaveEditing ||
+    canSaveCopying;
 
   addAction(
     actions,
-
     ToolbarAction.Save,
-
     canSave,
-
     canSave
   );
 
 
   /*
    * CANCEL
-   *
-   * Cancel follows the current create/edit operation and
-   * therefore uses the same permission context as Save.
    */
   addAction(
     actions,
-
     ToolbarAction.Cancel,
-
     canSave,
-
     canSave
   );
 
 
   /*
-   * DELETE
-   *
-   * Requires:
-   * - application delete capability;
-   * - user DELETE permission.
+   * SEARCH
    */
   addAction(
     actions,
-
-    ToolbarAction.Delete,
-
-    capabilities.delete &&
-      permissions.delete,
-
-    !isChanging &&
-      hasRecords
+    ToolbarAction.Search,
+    capabilities.search &&
+      permissions.search &&
+      !isChanging,
+    true
   );
 
 
   /*
-   * SEARCH
-   *
-   * Requires BUSCAR permission.
+   * SORT
    */
   addAction(
     actions,
+    ToolbarAction.Sort,
+    capabilities.sort &&
+      hasRecords &&
+      !isChanging,
+    true
+  );
 
-    ToolbarAction.Search,
 
-    capabilities.search &&
-      permissions.search,
+  /*
+   * VIEW
+   */
+  addAction(
+    actions,
+    ToolbarAction.View,
+    capabilities.view &&
+      permissions.search &&
+      hasRecords &&
+      !isChanging,
+    true
+  );
 
-    !isChanging
+
+  /*
+   * RECORD NAVIGATION
+   */
+  const navigationVisible =
+    capabilities.navigation &&
+    hasRecords &&
+    !isChanging;
+
+  addAction(
+    actions,
+    ToolbarAction.First,
+    navigationVisible,
+    hasPrevious
+  );
+
+  addAction(
+    actions,
+    ToolbarAction.Previous,
+    navigationVisible,
+    hasPrevious
+  );
+
+  addAction(
+    actions,
+    ToolbarAction.Next,
+    navigationVisible,
+    hasNext
+  );
+
+  addAction(
+    actions,
+    ToolbarAction.Last,
+    navigationVisible,
+    hasNext
+  );
+
+
+  /*
+   * DOWNLOAD
+   */
+  addAction(
+    actions,
+    ToolbarAction.Download,
+    capabilities.download &&
+      hasRecords &&
+      !isChanging,
+    true
+  );
+
+
+  /*
+   * PRINT
+   */
+  addAction(
+    actions,
+    ToolbarAction.Print,
+    capabilities.print &&
+      permissions.print &&
+      hasRecords &&
+      !isChanging,
+    true
   );
 
 
   /*
    * REFRESH
    *
-   * Refresh is a platform operation and does not have
-   * a dedicated USUARIOS_APL_ASO permission.
+   * Legacy behavior keeps Refresh available
+   * while editing.
    */
   addAction(
     actions,
-
     ToolbarAction.Refresh,
-
     capabilities.refresh,
-
-    !isChanging
-  );
-
-
-  /*
-   * COPY
-   *
-   * The existing XTEIN toolbar associates Copy with
-   * the CREATE permission.
-   */
-  addAction(
-    actions,
-
-    ToolbarAction.Copy,
-
-    capabilities.copy &&
-      permissions.create,
-
-    !isChanging &&
-      hasRecords
-  );
-
-
-  /*
-   * VIEW
-   *
-   * The existing XTEIN toolbar associates View with
-   * the SEARCH permission.
-   */
-  addAction(
-    actions,
-
-    ToolbarAction.View,
-
-    capabilities.view &&
-      permissions.search,
-
-    !isChanging &&
-      hasRecords
+    true
   );
 
 
   /*
    * CONFIGURE
    *
-   * Requires CONFIGURAR permission.
+   * Legacy behavior also keeps Configure available
+   * while editing.
    */
   addAction(
     actions,
-
     ToolbarAction.Configure,
-
     capabilities.configure &&
       permissions.configure,
-
-    !isChanging
-  );
-
-
-  /*
-   * PRINT
-   *
-   * Existing LISTAR permission maps to the platform
-   * Print action.
-   */
-  addAction(
-    actions,
-
-    ToolbarAction.Print,
-
-    capabilities.print &&
-      permissions.print,
-
-    !isChanging
-  );
-
-
-  /*
-   * RECORD NAVIGATION
-   *
-   * Navigation is not controlled by a dedicated permission.
-   * It depends on application capability and loaded records.
-   */
-  const navigationVisible =
-    capabilities.navigation &&
-    hasRecords;
-
-  addAction(
-    actions,
-
-    ToolbarAction.First,
-
-    navigationVisible,
-
-    !isChanging &&
-      hasPrevious
-  );
-
-  addAction(
-    actions,
-
-    ToolbarAction.Previous,
-
-    navigationVisible,
-
-    !isChanging &&
-      hasPrevious
-  );
-
-  addAction(
-    actions,
-
-    ToolbarAction.Next,
-
-    navigationVisible,
-
-    !isChanging &&
-      hasNext
-  );
-
-  addAction(
-    actions,
-
-    ToolbarAction.Last,
-
-    navigationVisible,
-
-    !isChanging &&
-      hasNext
+    true
   );
 
 
@@ -430,7 +386,17 @@ export function createRecordToolbarState(
 
     applicationId,
 
-    actions
+    actions,
+
+    record: {
+
+      mode:
+        options.mode,
+
+      currentIndex,
+
+      totalRecords
+    }
   };
 }
 
@@ -438,13 +404,6 @@ export function createRecordToolbarState(
 /**
  * Adds an action to the toolbar state when it should
  * be visible.
- *
- * Actions that are not visible are omitted from ToolbarState.
- *
- * @param actions Current toolbar action state collection.
- * @param action Toolbar action.
- * @param visible Indicates whether the action should be rendered.
- * @param enabled Indicates whether the action can currently execute.
  */
 function addAction(
   actions:
@@ -466,6 +425,7 @@ function addAction(
 ): void {
 
   if (!visible) {
+
     return;
   }
 
@@ -481,9 +441,6 @@ function addAction(
 
 /**
  * Normalizes the application identifier used by ToolbarState.
- *
- * @param applicationId Application identifier.
- * @returns Normalized identifier.
  */
 function normalizeApplicationId(
   applicationId:

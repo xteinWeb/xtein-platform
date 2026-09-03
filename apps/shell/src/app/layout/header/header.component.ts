@@ -17,107 +17,177 @@ import {
   SessionService
 } from '@xtein/session';
 
+import {
+  PlatformToolbar
+} from '../../toolbar/platform-toolbar/platform-toolbar.component';
+
+
 @Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  selector:
+    'app-header',
+
+  standalone:
+    true,
+
+  imports: [
+    PlatformToolbar
+  ],
+
+  templateUrl:
+    './header.component.html',
+
+  styleUrl:
+    './header.component.scss'
 })
 export class Header {
 
   private readonly authService =
-    inject(AuthService);
+    inject(
+      AuthService
+    );
+
 
   private readonly sessionService =
-    inject(SessionService);
+    inject(
+      SessionService
+    );
+
 
   private readonly router =
-    inject(Router);
+    inject(
+      Router
+    );
+
 
   /**
    * Current authenticated XTEIN session.
    */
   readonly session =
-    this.sessionService.session;
+    this.sessionService
+      .session;
+
 
   /**
    * User initials displayed when no profile photo is available.
    */
   readonly userInitials =
-    computed(() => {
+    computed(
+      () => {
 
-      const currentSession =
-        this.session();
+        const currentSession =
+          this.session();
 
-      const displayName =
-        currentSession?.userName?.trim() ||
-        currentSession?.userId?.trim() ||
-        'XT';
 
-      const parts =
-        displayName
-          .split(/\s+/)
-          .filter(Boolean)
-          .slice(0, 2);
+        const displayName =
+          currentSession
+            ?.userName
+            ?.trim() ||
+          currentSession
+            ?.userId
+            ?.trim() ||
+          'XT';
 
-      return parts
-        .map(part =>
-          part
-            .charAt(0)
-            .toUpperCase()
-        )
-        .join('');
-    });
+
+        const parts =
+          displayName
+            .split(
+              /\s+/
+            )
+            .filter(
+              Boolean
+            )
+            .slice(
+              0,
+              2
+            );
+
+
+        return parts
+          .map(
+            part =>
+              part
+                .charAt(
+                  0
+                )
+                .toUpperCase()
+          )
+          .join(
+            ''
+          );
+      }
+    );
+
 
   /**
    * Indicates whether the user menu is visible.
    */
-  userMenuOpen = false;
+  userMenuOpen =
+    false;
+
 
   /**
    * Opens or closes the user menu.
    */
-  toggleUserMenu(): void {
+  toggleUserMenu():
+    void {
+
     this.userMenuOpen =
       !this.userMenuOpen;
   }
+
 
   /**
    * Closes the user menu when the user clicks outside it.
    */
   @HostListener(
     'document:click',
-    ['$event']
+    [
+      '$event'
+    ]
   )
   onDocumentClick(
-    event: MouseEvent
+    event:
+      MouseEvent
   ): void {
 
     const target =
-      event.target as HTMLElement | null;
+      event.target as
+        HTMLElement | null;
+
 
     if (
       target?.closest(
         '.xt-header__user'
       )
     ) {
+
       return;
     }
 
-    this.userMenuOpen = false;
+
+    this.userMenuOpen =
+      false;
   }
+
 
   /**
    * Ends the authenticated XTEIN session
    * and returns to the login page.
    */
-  async logout(): Promise<void> {
+  async logout():
+    Promise<void> {
 
-    this.userMenuOpen = false;
+    this.userMenuOpen =
+      false;
 
-    this.authService.logout();
 
-    await this.router.navigateByUrl('/');
+    this.authService
+      .logout();
+
+
+    await this.router
+      .navigateByUrl(
+        '/'
+      );
   }
 }

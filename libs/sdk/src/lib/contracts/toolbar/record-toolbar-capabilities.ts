@@ -44,15 +44,27 @@ export interface RecordToolbarCapabilities {
     boolean;
 
   /**
-   * Application supports opening a record in view mode.
+   * Application supports opening a quick view of loaded records.
    */
   view:
+    boolean;
+
+  /**
+   * Application supports ordering loaded records.
+   */
+  sort:
     boolean;
 
   /**
    * Application supports record navigation.
    */
   navigation:
+    boolean;
+
+  /**
+   * Application supports downloading loaded data.
+   */
+  download:
     boolean;
 
   /**

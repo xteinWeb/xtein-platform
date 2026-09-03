@@ -1,7 +1,9 @@
-<div class="xt-header">
+<div
+  class="xt-header">
 
   <!-- Company brand -->
-  <div class="xt-header__brand">
+  <div
+    class="xt-header__brand">
 
     <img
       class="xt-header__company-logo"
@@ -11,8 +13,19 @@
   </div>
 
 
+  <!-- Platform record toolbar -->
+  <div
+    class="xt-header__toolbar">
+
+    <app-platform-toolbar>
+    </app-platform-toolbar>
+
+  </div>
+
+
   <!-- Right side -->
-  <div class="xt-header__actions">
+  <div
+    class="xt-header__actions">
 
     <!-- Search -->
     <button
@@ -21,7 +34,9 @@
       title="Buscar"
       aria-label="Buscar">
 
-      <i class="icon-buscar-ol"></i>
+      <i
+        class="icon-buscar-ol">
+      </i>
 
     </button>
 
@@ -33,7 +48,9 @@
       title="Notificaciones"
       aria-label="Notificaciones">
 
-      <i class="icon-bell-ol"></i>
+      <i
+        class="icon-bell-ol">
+      </i>
 
     </button>
 
@@ -45,13 +62,16 @@
       title="Bandeja"
       aria-label="Bandeja">
 
-      <i class="icon-inbox-ol"></i>
+      <i
+        class="icon-inbox-ol">
+      </i>
 
     </button>
 
 
     <!-- Session information -->
-    <div class="xt-header__identity">
+    <div
+      class="xt-header__identity">
 
       <span
         class="xt-header__company-name"
@@ -63,6 +83,7 @@
         }}
 
       </span>
+
 
       <span
         class="xt-header__user-name"
@@ -79,7 +100,8 @@
 
 
     <!-- User -->
-    <div class="xt-header__user">
+    <div
+      class="xt-header__user">
 
       <button
         type="button"
@@ -88,7 +110,9 @@
         aria-label="Menú de usuario"
         (click)="toggleUserMenu()">
 
-        @if (session()?.profilePhoto) {
+        @if (
+          session()?.profilePhoto
+        ) {
 
           <img
             class="xt-header__avatar"
@@ -97,13 +121,15 @@
 
         } @else {
 
-          <span class="xt-header__avatar-initials">
+          <span
+            class="xt-header__avatar-initials">
 
             {{ userInitials() }}
 
           </span>
 
         }
+
 
         <i
           class="icon-chevron-down-xs xt-header__user-chevron">
@@ -112,15 +138,19 @@
       </button>
 
 
-      @if (userMenuOpen) {
+      @if (
+        userMenuOpen
+      ) {
 
         <div
           class="xt-header__user-menu"
           role="menu">
 
-          <div class="xt-header__user-menu-info">
+          <div
+            class="xt-header__user-menu-info">
 
-            <span class="xt-header__user-menu-name">
+            <span
+              class="xt-header__user-menu-name">
 
               {{
                 session()?.userName ||
@@ -129,7 +159,9 @@
 
             </span>
 
-            <span class="xt-header__user-menu-company">
+
+            <span
+              class="xt-header__user-menu-company">
 
               {{
                 session()?.companyName ||
@@ -141,7 +173,8 @@
           </div>
 
 
-          <div class="xt-header__user-menu-separator">
+          <div
+            class="xt-header__user-menu-separator">
           </div>
 
 
@@ -151,7 +184,9 @@
             role="menuitem"
             (click)="logout()">
 
-            <i class="icon-salir-alt-ol"></i>
+            <i
+              class="icon-salir-alt-ol">
+            </i>
 
             <span>
               Cerrar sesión

@@ -13,27 +13,26 @@ import {
 } from '../../navigation/sidebar/sidebar.component';
 
 import {
-  PlatformToolbar
-} from '../../toolbar/platform-toolbar/platform-toolbar.component';
-
-import {
   Workspace
 } from '../../workspace/workspace/workspace.component';
+
 
 /**
  * Main authenticated layout of the XTEIN Shell.
  *
  * The Shell owns global layout state because sidebar changes
- * affect the header, toolbar and workspace dimensions.
+ * affect the header and workspace dimensions.
  */
 @Component({
-  selector: 'app-shell-layout',
-  standalone: true,
+  selector:
+    'app-shell-layout',
+
+  standalone:
+    true,
 
   imports: [
     Header,
     Sidebar,
-    PlatformToolbar,
     Workspace
   ],
 
@@ -53,7 +52,10 @@ export class ShellLayout {
    * is collapsed.
    */
   readonly sidebarCollapsed =
-    signal(false);
+    signal(
+      false
+    );
+
 
   /**
    * Updates the sidebar layout state.
@@ -61,7 +63,8 @@ export class ShellLayout {
    * @param collapsed New collapsed state.
    */
   setSidebarCollapsed(
-    collapsed: boolean
+    collapsed:
+      boolean
   ): void {
 
     this.sidebarCollapsed.set(

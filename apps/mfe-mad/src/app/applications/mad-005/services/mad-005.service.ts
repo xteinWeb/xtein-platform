@@ -25,11 +25,19 @@ import {
  * Transport, authentication, company context, token handling,
  * and legacy request-envelope construction are delegated to
  * XteinApiClientService.
+ *
+ * This service belongs exclusively to MAD-005 and is therefore
+ * provided by Mad005Component instead of the platform root injector.
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class Mad005Service {
+
+  constructor(
+    private readonly apiClient:
+      XteinApiClientService
+  ) {
+  }
+
 
   /**
    * Returns the XTEIN application identifier represented
@@ -41,13 +49,6 @@ export class Mad005Service {
     string {
 
     return Mad005Application.Id;
-  }
-
-
-  constructor(
-    private readonly apiClient:
-      XteinApiClientService
-  ) {
   }
 
 
@@ -72,6 +73,7 @@ export class Mad005Service {
       .execute<
         XteinDataApiResponse<string>
       >({
+
         endpoint:
           Mad005Endpoint.Query,
 
@@ -107,6 +109,7 @@ export class Mad005Service {
       .execute<
         XteinDataApiResponse<string>
       >({
+
         endpoint:
           Mad005Endpoint.Save,
 
@@ -137,6 +140,7 @@ export class Mad005Service {
       .execute<
         XteinDataApiResponse<string>
       >({
+
         endpoint:
           Mad005Endpoint.Delete,
 

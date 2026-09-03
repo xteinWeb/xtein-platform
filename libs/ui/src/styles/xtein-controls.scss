@@ -1,0 +1,309 @@
+/*======================================================================
+= XTEIN - SHARED CONTROL STYLES
+=
+= Global visual rules for XTEIN controls.
+=
+= Application-specific styles must not redefine the visual appearance
+= of common control states such as enabled, readonly, or disabled.
+======================================================================*/
+
+
+/*======================================================================
+= 1. SHARED CONTROL VARIABLES
+======================================================================*/
+
+:root {
+  --xt-control-background: #ffffff;
+
+  --xt-control-border: #c9d8ea;
+
+  --xt-control-text: #33587b;
+
+  --xt-control-placeholder: #7a8ea4;
+
+  --xt-control-readonly-background: #f4f7fb;
+
+  --xt-control-readonly-border: #d7e4f2;
+
+  --xt-control-readonly-text: #5e748c;
+
+  --xt-control-disabled-background: #f4f7fb;
+
+  --xt-control-disabled-border: #d7e4f2;
+
+  --xt-control-disabled-text: #5e748c;
+
+  --xt-control-disabled-icon: #6f879d;
+
+  --xt-control-focus-border: #86b7fe;
+
+  --xt-control-focus-shadow:
+    0 0 0 .25rem rgba(13, 110, 253, .25);
+}
+
+
+/*======================================================================
+= 2. COMMON EDITORS
+======================================================================*/
+
+.dx-texteditor,
+.dx-dropdowneditor,
+.dx-numberbox,
+.dx-datebox,
+.dx-tagbox,
+.dx-textarea {
+  border:
+    1px solid
+    var(--xt-control-border) !important;
+
+  border-radius:
+    8px !important;
+
+  background:
+    var(--xt-control-background);
+
+  transition:
+    border-color .15s ease-in-out,
+    box-shadow .15s ease-in-out,
+    background-color .15s ease-in-out;
+}
+
+
+.dx-texteditor-container {
+  border-radius:
+    8px;
+
+  background:
+    inherit;
+}
+
+
+.dx-texteditor-input {
+  background:
+    transparent !important;
+
+  color:
+    var(--xt-control-text);
+}
+
+
+/*======================================================================
+= 3. READONLY EDITORS
+======================================================================*/
+
+.dx-texteditor.dx-state-readonly,
+.dx-dropdowneditor.dx-state-readonly,
+.dx-numberbox.dx-state-readonly,
+.dx-datebox.dx-state-readonly,
+.dx-tagbox.dx-state-readonly,
+.dx-textarea.dx-state-readonly {
+  border-color:
+    var(--xt-control-readonly-border) !important;
+
+  background:
+    var(--xt-control-readonly-background) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-state-readonly .dx-texteditor-input,
+.dx-state-readonly textarea {
+  color:
+    var(--xt-control-readonly-text) !important;
+
+  -webkit-text-fill-color:
+    var(--xt-control-readonly-text) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-state-readonly .dx-placeholder,
+.dx-state-readonly .dx-placeholder::before {
+  color:
+    var(--xt-control-placeholder) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/*======================================================================
+= 4. DISABLED EDITORS
+======================================================================*/
+
+.dx-texteditor.dx-state-disabled,
+.dx-dropdowneditor.dx-state-disabled,
+.dx-numberbox.dx-state-disabled,
+.dx-datebox.dx-state-disabled,
+.dx-tagbox.dx-state-disabled,
+.dx-textarea.dx-state-disabled {
+  border-color:
+    var(--xt-control-disabled-border) !important;
+
+  background:
+    var(--xt-control-disabled-background) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-texteditor.dx-state-disabled .dx-texteditor-container,
+.dx-dropdowneditor.dx-state-disabled .dx-texteditor-container,
+.dx-numberbox.dx-state-disabled .dx-texteditor-container,
+.dx-datebox.dx-state-disabled .dx-texteditor-container,
+.dx-tagbox.dx-state-disabled .dx-texteditor-container,
+.dx-textarea.dx-state-disabled .dx-texteditor-container {
+  background:
+    var(--xt-control-disabled-background) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-state-disabled .dx-texteditor-input,
+.dx-state-disabled input,
+.dx-state-disabled textarea {
+  color:
+    var(--xt-control-disabled-text) !important;
+
+  -webkit-text-fill-color:
+    var(--xt-control-disabled-text) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-state-disabled .dx-placeholder,
+.dx-state-disabled .dx-placeholder::before {
+  color:
+    var(--xt-control-placeholder) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-state-disabled .dx-dropdowneditor-icon,
+.dx-state-disabled .dx-icon {
+  color:
+    var(--xt-control-disabled-icon) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.dx-state-disabled .dx-texteditor-buttons-container,
+.dx-state-disabled .dx-dropdowneditor-button {
+  opacity:
+    1 !important;
+}
+
+
+/*======================================================================
+= 5. EDITABLE EDITORS
+======================================================================*/
+
+.dx-texteditor:not(.dx-state-readonly):not(.dx-state-disabled),
+.dx-dropdowneditor:not(.dx-state-readonly):not(.dx-state-disabled),
+.dx-numberbox:not(.dx-state-readonly):not(.dx-state-disabled),
+.dx-datebox:not(.dx-state-readonly):not(.dx-state-disabled),
+.dx-tagbox:not(.dx-state-readonly):not(.dx-state-disabled),
+.dx-textarea:not(.dx-state-readonly):not(.dx-state-disabled) {
+  background:
+    var(--xt-control-background) !important;
+}
+
+
+/*======================================================================
+= 6. HOVER
+======================================================================*/
+
+.dx-texteditor.dx-state-hover:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-dropdowneditor.dx-state-hover:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-numberbox.dx-state-hover:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-datebox.dx-state-hover:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-tagbox.dx-state-hover:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-textarea.dx-state-hover:not(.dx-state-disabled):not(.dx-state-readonly) {
+  border-color:
+    var(--xt-control-focus-border) !important;
+
+  box-shadow:
+    0 0 0 .08rem rgba(13, 110, 253, .12);
+}
+
+
+/*======================================================================
+= 7. FOCUS
+======================================================================*/
+
+.dx-texteditor.dx-state-focused:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-dropdowneditor.dx-state-focused:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-numberbox.dx-state-focused:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-datebox.dx-state-focused:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-tagbox.dx-state-focused:not(.dx-state-disabled):not(.dx-state-readonly),
+.dx-textarea.dx-state-focused:not(.dx-state-disabled):not(.dx-state-readonly) {
+  border-color:
+    var(--xt-control-focus-border) !important;
+
+  box-shadow:
+    var(--xt-control-focus-shadow);
+}
+
+
+/*======================================================================
+= 8. DISABLED BUTTONS
+======================================================================*/
+
+.dx-button.dx-state-disabled {
+  cursor:
+    default;
+
+  opacity:
+    .65 !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.dx-button.dx-state-disabled .dx-button-content,
+.dx-button.dx-state-disabled .dx-button-text,
+.dx-button.dx-state-disabled .dx-icon {
+  opacity:
+    1 !important;
+}
+
+
+/*======================================================================
+= 9. SWITCHES
+======================================================================*/
+
+.dx-switch.dx-state-disabled {
+  opacity:
+    .7 !important;
+}
+
+
+.dx-switch.dx-state-disabled .dx-switch-handle::before {
+  opacity:
+    1 !important;
+}
+
+
+/*======================================================================
+= 10. TEXTAREA
+======================================================================*/
+
+.dx-textarea.dx-state-disabled textarea,
+.dx-textarea.dx-state-readonly textarea {
+  resize:
+    none;
+}
