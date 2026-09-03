@@ -1,0 +1,294 @@
+<section
+  class="mad-001">
+
+  <div
+    class="mad-001__layout"
+    [class.mad-001__layout--without-tree]="!showTree()">
+
+    @if (showTree()) {
+
+      <aside
+        class="mad-001__tree-panel"
+        [class.mad-001__tree-panel--collapsed]="treePanelCollapsed()">
+
+        @if (!treePanelCollapsed()) {
+
+          <xtein-tree
+            [items]="applications()"
+            idField="ID_APLICACION"
+            parentIdField="ID_APLICACION_PADRE"
+            displayField="NOMBRE"
+            prefixField="ID_APLICACION"
+            statusField="ESTADO"
+            [searchFields]="treeSearchFields"
+            [searchEnabled]="true"
+            searchPlaceholder="Buscar aplicación..."
+            [showPrefix]="true"
+            [showStatus]="true"
+            [expandAllOnLoad]="true"
+            (itemClick)="selectTreeItem($event)">
+          </xtein-tree>
+
+        }
+
+
+        <button
+          type="button"
+          class="mad-001__tree-toggle"
+          [attr.title]="
+            treePanelCollapsed()
+              ? 'Mostrar árbol'
+              : 'Ocultar árbol'
+          "
+          [attr.aria-label]="
+            treePanelCollapsed()
+              ? 'Mostrar árbol'
+              : 'Ocultar árbol'
+          "
+          (click)="toggleTreePanel()">
+
+          {{
+            treePanelCollapsed()
+              ? '›'
+              : '‹'
+          }}
+
+        </button>
+
+      </aside>
+
+    }
+
+
+    <main
+      class="mad-001__content">
+
+      <div
+        class="mad-001__form"
+        [formGroup]="form">
+
+        <!-- General information -->
+        <fieldset
+          class="mad-001__group">
+
+          <legend
+            class="mad-001__group-title">
+
+            Información General
+
+          </legend>
+
+
+          <div
+            class="mad-001__grid mad-001__grid--general">
+
+            <xtein-input
+              id="mad-001-application-id"
+              label="ID Aplicación"
+              placeholder="Ingrese ID de aplicación"
+              [required]="true"
+              [maxLength]="30"
+              [invalid]="isInvalid('ID_APLICACION')"
+              errorMessage="ID de aplicación es requerido"
+              formControlName="ID_APLICACION"
+              (blurred)="validateApplicationIdOnBlur()">
+            </xtein-input>
+
+
+            <xtein-select
+              id="mad-001-parent"
+              label="ID Aplicación Padre"
+              placeholder="Seleccione ID Aplicación Padre"
+              [items]="$any(parentApplications())"
+              displayExpr="APLICACION"
+              valueExpr="ID_APLICACION"
+              [searchEnabled]="true"
+              [showClearButton]="true"
+              formControlName="ID_APLICACION_PADRE">
+            </xtein-select>
+
+
+            <xtein-input
+              id="mad-001-name"
+              label="Nombre"
+              placeholder="Ingrese nombre de aplicación"
+              [required]="true"
+              [maxLength]="60"
+              [invalid]="isInvalid('NOMBRE')"
+              errorMessage="Nombre es requerido"
+              formControlName="NOMBRE">
+            </xtein-input>
+
+
+            <xtein-select
+              id="mad-001-type"
+              label="Tipo"
+              placeholder="Seleccione tipo"
+              [items]="$any(typeOptions())"
+              [searchEnabled]="true"
+              [required]="true"
+              [invalid]="isInvalid('TIPO')"
+              errorMessage="Tipo es requerido"
+              formControlName="TIPO">
+            </xtein-select>
+
+
+            <xtein-select
+              id="mad-001-action"
+              label="Acción"
+              placeholder="Seleccione acción"
+              [items]="$any(actionOptions())"
+              [searchEnabled]="true"
+              [required]="true"
+              [invalid]="isInvalid('ACCION')"
+              errorMessage="Acción es requerida"
+              formControlName="ACCION">
+            </xtein-select>
+
+
+            <xtein-select
+              id="mad-001-status"
+              label="Estado"
+              placeholder="Seleccione estado"
+              [items]="$any(statusOptions())"
+              [searchEnabled]="true"
+              formControlName="ESTADO">
+            </xtein-select>
+
+
+            <xtein-select
+              id="mad-001-level"
+              label="Nivel"
+              placeholder="Seleccione nivel"
+              [items]="$any(levelOptions())"
+              [searchEnabled]="true"
+              [showClearButton]="true"
+              formControlName="NIVEL">
+            </xtein-select>
+
+          </div>
+
+        </fieldset>
+
+
+        <!-- Metrics -->
+        <fieldset
+          class="mad-001__group">
+
+          <legend
+            class="mad-001__group-title">
+
+            Métricas
+
+          </legend>
+
+
+          <div
+            class="mad-001__grid mad-001__grid--metrics">
+
+            <div
+              class="mad-001__field">
+
+              <label
+                class="form-label"
+                for="mad-001-min-target">
+
+                Meta Inferior
+
+              </label>
+
+              <xtein-number
+                id="mad-001-min-target"
+                name="META_INFERIOR"
+                placeholder="Ingrese meta inferior"
+                [step]="0.01"
+                [showSpinButtons]="true"
+                formControlName="META_INFERIOR">
+              </xtein-number>
+
+            </div>
+
+
+            <div
+              class="mad-001__field">
+
+              <label
+                class="form-label"
+                for="mad-001-max-target">
+
+                Meta Superior
+
+              </label>
+
+              <xtein-number
+                id="mad-001-max-target"
+                name="META_SUPERIOR"
+                placeholder="Ingrese meta superior"
+                [step]="0.01"
+                [showSpinButtons]="false"
+                formControlName="META_SUPERIOR">
+              </xtein-number>
+
+            </div>
+
+
+            <xtein-select
+              id="mad-001-uom"
+              label="Unidad Medida"
+              placeholder="Seleccione unidad de medida"
+              [items]="$any(unitOfMeasures())"
+              displayExpr="NOMBRE"
+              valueExpr="ID_UDM"
+              [searchEnabled]="true"
+              [showClearButton]="true"
+              formControlName="UDM">
+            </xtein-select>
+
+          </div>
+
+        </fieldset>
+
+
+        <!-- Comments -->
+        <fieldset
+          class="mad-001__group">
+
+          <legend
+            class="mad-001__group-title">
+
+            Comentarios
+
+          </legend>
+
+
+          <xtein-textarea
+            id="mad-001-comments"
+            name="COMENTARIOS"
+            ariaLabel="Comentarios"
+            placeholder="Ingrese comentarios"
+            [height]="150"
+            [minHeight]="100"
+            [autoResizeEnabled]="false"
+            formControlName="COMENTARIOS">
+          </xtein-textarea>
+
+        </fieldset>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <xtein-loading
+    [visible]="loading()"
+    message="Un momento. Procesando..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false">
+  </xtein-loading>
+
+</section>

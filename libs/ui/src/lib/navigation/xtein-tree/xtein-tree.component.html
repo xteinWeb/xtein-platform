@@ -1,0 +1,107 @@
+<div
+  class="xt-tree">
+
+  @if (searchEnabled) {
+
+    <div
+      class="xt-tree__search">
+
+      <dx-text-box
+        stylingMode="filled"
+        mode="search"
+        [value]="searchText()"
+        [placeholder]="searchPlaceholder"
+        [showClearButton]="true"
+        (onValueChanged)="updateSearch($event.value)">
+      </dx-text-box>
+
+    </div>
+
+  }
+
+
+  <div
+    class="xt-tree__content">
+
+    @if (hasItems()) {
+
+      <dx-tree-view
+        class="xt-tree__view"
+        [items]="visibleNodes()"
+        displayExpr="text"
+        itemsExpr="children"
+        keyExpr="key"
+        expandedExpr="expanded"
+        selectionMode="single"
+        [selectByClick]="true"
+        [focusStateEnabled]="true"
+        [hoverStateEnabled]="true"
+        [animationEnabled]="true"
+        [height]="'100%'"
+        (onItemClick)="handleItemClick($event)">
+
+        <div
+          *dxTemplate="
+            let node of 'item'
+          "
+          class="xt-tree__item">
+
+          <span
+            class="xt-tree__item-text">
+
+            @if (
+              showPrefix &&
+              node.prefix
+            ) {
+
+              <span
+                class="xt-tree__item-prefix">
+
+                {{ node.prefix }} -
+
+              </span>
+
+            }
+
+            {{ node.text }}
+
+          </span>
+
+
+          @if (
+            showStatus
+          ) {
+
+            <span
+              class="xt-tree__status"
+              [class.xt-tree__status--active]="node.active"
+              [class.xt-tree__status--inactive]="!node.active">
+
+              {{
+                node.active
+                  ? 'Activo'
+                  : 'Inactivo'
+              }}
+
+            </span>
+
+          }
+
+        </div>
+
+      </dx-tree-view>
+
+    } @else {
+
+      <div
+        class="xt-tree__empty">
+
+        No hay datos disponibles.
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

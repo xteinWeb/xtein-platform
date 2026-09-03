@@ -14,3 +14,4 @@ export * from './lib/forms/xtein-verification-code/xtein-verification-code.compo
 export * from './lib/forms/xtein-data-source-parameters/xtein-data-source-parameters.component';
 export * from './lib/forms/xtein-data-source-parameters/models/connection-field.model';
 export * from './lib/forms/xtein-data-source-parameters/services/connection-fields.service';
+export * from './lib/navigation/xtein-tree/xtein-tree.component';

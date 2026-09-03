@@ -3,6 +3,10 @@ import {
 } from '@angular/core';
 
 import {
+  Mad001Application
+} from './mad-001/constants/mad-001.constants';
+
+import {
   Mad005Application
 } from './mad-005/constants/mad-005.constants';
 
@@ -41,12 +45,29 @@ export interface MadApplicationRegistration {
 /**
  * Contains all applications currently implemented by
  * the MAD microfrontend.
- *
- * ApplicationHostComponent uses this registry instead
- * of hardcoded switch or if statements.
  */
 export const MadApplicationRegistry:
   readonly MadApplicationRegistration[] = [
+
+    {
+      applicationId:
+        Mad001Application.Id,
+
+      load:
+        async (): Promise<
+          Type<unknown>
+        > => {
+
+          const applicationModule =
+            await import(
+              './mad-001/mad-001.component'
+            );
+
+          return applicationModule
+            .Mad001Component;
+        }
+    },
+
 
     {
       applicationId:
@@ -73,9 +94,6 @@ export const MadApplicationRegistry:
 /**
  * Resolves an application registered inside the MAD
  * microfrontend.
- *
- * @param applicationId XTEIN application identifier.
- * @returns Registered application or undefined.
  */
 export function findMadApplication(
   applicationId:
@@ -88,7 +106,9 @@ export function findMadApplication(
       .toUpperCase();
 
 
-  if (!normalizedApplicationId) {
+  if (
+    !normalizedApplicationId
+  ) {
 
     return undefined;
   }

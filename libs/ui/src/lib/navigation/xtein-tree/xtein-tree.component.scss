@@ -1,0 +1,242 @@
+:host {
+  display:
+    block;
+
+  width:
+    100%;
+
+  height:
+    100%;
+
+  min-width:
+    0;
+
+  min-height:
+    0;
+}
+
+
+.xt-tree {
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  width:
+    100%;
+
+  height:
+    100%;
+
+  min-width:
+    0;
+
+  min-height:
+    0;
+
+  background:
+    #ffffff;
+}
+
+
+.xt-tree__search {
+  flex:
+    0 0 auto;
+
+  padding:
+    10px;
+
+  border-bottom:
+    1px solid #e4ebf3;
+
+  background:
+    #fbfdff;
+}
+
+
+.xt-tree__content {
+  flex:
+    1 1 auto;
+
+  min-width:
+    0;
+
+  min-height:
+    0;
+
+  overflow:
+    hidden;
+}
+
+
+.xt-tree__view {
+  width:
+    100%;
+
+  height:
+    100%;
+}
+
+
+.xt-tree__item {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  min-width:
+    0;
+
+  gap:
+    8px;
+
+  padding:
+    2px 4px;
+}
+
+
+.xt-tree__item-text {
+  flex:
+    1 1 auto;
+
+  min-width:
+    0;
+
+  overflow:
+    hidden;
+
+  color:
+    #244d73;
+
+  font-size:
+    13px;
+
+  line-height:
+    1.35;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+
+.xt-tree__item-prefix {
+  font-weight:
+    600;
+}
+
+
+.xt-tree__status {
+  flex:
+    0 0 auto;
+
+  padding:
+    2px 8px;
+
+  border-radius:
+    10px;
+
+  font-size:
+    10px;
+
+  font-weight:
+    600;
+}
+
+
+.xt-tree__status--active {
+  border:
+    1px solid #b7ebc6;
+
+  background:
+    #f2fff6;
+
+  color:
+    #2e8b57;
+}
+
+
+.xt-tree__status--inactive {
+  border:
+    1px solid #f0c3c3;
+
+  background:
+    #fff6f6;
+
+  color:
+    #bd4b4b;
+}
+
+
+.xt-tree__empty {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    100%;
+
+  height:
+    100%;
+
+  min-height:
+    120px;
+
+  padding:
+    20px;
+
+  box-sizing:
+    border-box;
+
+  color:
+    #7a8ea4;
+
+  font-size:
+    13px;
+
+  text-align:
+    center;
+}
+
+
+:host ::ng-deep .dx-treeview {
+  height:
+    100%;
+}
+
+
+:host ::ng-deep .dx-scrollable-wrapper,
+:host ::ng-deep .dx-scrollable-container {
+  height:
+    100%;
+}
+
+
+@media (
+  max-width:
+    767.98px
+) {
+
+  .xt-tree__search {
+    padding:
+      8px;
+  }
+
+
+  .xt-tree__status {
+    padding:
+      2px 6px;
+
+    font-size:
+      9px;
+  }
+}
