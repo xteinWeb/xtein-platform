@@ -7,6 +7,10 @@ import {
 } from './mad-001/constants/mad-001.constants';
 
 import {
+  Mad002Application
+} from './mad-002/constants/mad-002.constants';
+
+import {
   Mad005Application
 } from './mad-005/constants/mad-005.constants';
 
@@ -34,8 +38,9 @@ export interface MadApplicationRegistration {
   applicationId:
     string;
 
+
   /**
-   * Lazy component loader.
+   * Lazy application component loader.
    */
   load:
     MadApplicationLoader;
@@ -63,8 +68,30 @@ export const MadApplicationRegistry:
               './mad-001/mad-001.component'
             );
 
+
           return applicationModule
             .Mad001Component;
+        }
+    },
+
+
+    {
+      applicationId:
+        Mad002Application.Id,
+
+      load:
+        async (): Promise<
+          Type<unknown>
+        > => {
+
+          const applicationModule =
+            await import(
+              './mad-002/mad-002.component'
+            );
+
+
+          return applicationModule
+            .Mad002Component;
         }
     },
 
@@ -83,6 +110,7 @@ export const MadApplicationRegistry:
               './mad-005/mad-005.component'
             );
 
+
           return applicationModule
             .Mad005Component;
         }
@@ -94,6 +122,9 @@ export const MadApplicationRegistry:
 /**
  * Resolves an application registered inside the MAD
  * microfrontend.
+ *
+ * @param applicationId Requested application identifier.
+ * @returns Matching application registration.
  */
 export function findMadApplication(
   applicationId:

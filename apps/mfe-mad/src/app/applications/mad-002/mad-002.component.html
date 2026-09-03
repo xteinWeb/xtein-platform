@@ -1,0 +1,86 @@
+<section
+  class="mad-002">
+
+  <div
+    class="mad-002__layout"
+    [class.mad-002__layout--tree-collapsed]="treePanelCollapsed()">
+
+    <!-- Application tree -->
+    <aside
+      class="mad-002__tree-panel"
+      [class.mad-002__tree-panel--collapsed]="treePanelCollapsed()">
+
+      @if (
+        !treePanelCollapsed()
+      ) {
+
+        <xtein-tree
+          [items]="applications()"
+          idField="ID_APLICACION"
+          parentIdField="ID_APLICACION_PADRE"
+          displayField="NOMBRE"
+          prefixField="ID_APLICACION"
+          statusField="ESTADO"
+          [searchFields]="treeSearchFields"
+          [searchEnabled]="true"
+          searchPlaceholder="Buscar Dashboard o KPI..."
+          [showPrefix]="true"
+          [showStatus]="true"
+          [expandAllOnLoad]="false"
+          (itemClick)="selectTreeItem($event)">
+        </xtein-tree>
+
+      }
+
+
+      <button
+        type="button"
+        class="mad-002__tree-toggle"
+        [attr.title]="
+          treePanelCollapsed()
+            ? 'Mostrar árbol'
+            : 'Ocultar árbol'
+        "
+        [attr.aria-label]="
+          treePanelCollapsed()
+            ? 'Mostrar árbol'
+            : 'Ocultar árbol'
+        "
+        (click)="toggleTreePanel()">
+
+        {{
+          treePanelCollapsed()
+            ? '›'
+            : '‹'
+        }}
+
+      </button>
+
+    </aside>
+
+
+    <!-- Dashboard designer -->
+    <main
+      class="mad-002__designer">
+
+      <xtein-dashboard
+        [dashboardId]="selectedDashboardId()"
+        workingMode="Designer">
+      </xtein-dashboard>
+
+    </main>
+
+  </div>
+
+
+  <xtein-loading
+    [visible]="loading()"
+    message="Un momento. Procesando..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false">
+  </xtein-loading>
+
+</section>

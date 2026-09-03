@@ -41,6 +41,9 @@
       ],
       "@xtein/auth": [
         "./dist/auth"
+      ],
+      "@xtein/dashboard-runtime": [
+        "./dist/dashboard-runtime"
       ]
     },
     "useDefineForClassFields": false

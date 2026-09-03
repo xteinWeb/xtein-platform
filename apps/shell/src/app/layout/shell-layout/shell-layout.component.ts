@@ -5,6 +5,14 @@ import {
 } from '@angular/core';
 
 import {
+  XteinDashboardRuntimeService
+} from '@xtein/dashboard-runtime';
+
+import {
+  environment
+} from '../../../environments/environment';
+
+import {
   Header
 } from '../header/header.component';
 
@@ -22,6 +30,9 @@ import {
  *
  * The Shell owns global layout state because sidebar changes
  * affect the header and workspace dimensions.
+ *
+ * The Shell is also responsible for initializing global runtime
+ * configuration consumed by shared platform libraries.
  */
 @Component({
   selector:
@@ -57,6 +68,15 @@ export class ShellLayout {
     );
 
 
+  constructor(
+    private readonly dashboardRuntime:
+      XteinDashboardRuntimeService
+  ) {
+
+    this.initializeDashboardRuntime();
+  }
+
+
   /**
    * Updates the sidebar layout state.
    *
@@ -70,5 +90,36 @@ export class ShellLayout {
     this.sidebarCollapsed.set(
       collapsed
     );
+  }
+
+
+  /**
+   * Initializes the shared XTEIN Dashboard runtime.
+   *
+   * The Dashboard Designer endpoint is obtained directly from
+   * the Shell environment.
+   *
+   * A relative endpoint is intentionally used because the
+   * existing XTEIN proxy routes Dashboard requests to the
+   * Dashboard backend.
+   */
+  private initializeDashboardRuntime():
+    void {
+
+    if (
+      this.dashboardRuntime
+        .isConfigured()
+    ) {
+
+      return;
+    }
+
+
+    this.dashboardRuntime
+      .configure({
+
+        designerEndpoint:
+          environment.dashboardDesigner
+      });
   }
 }

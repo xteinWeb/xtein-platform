@@ -19,9 +19,14 @@ module.exports =
     /**
      * Shared npm dependencies.
      *
-     * Angular and the other platform dependencies must use
-     * the same runtime instances across the Shell and the
-     * loaded microfrontends.
+     * Angular, RxJS and the other platform dependencies must use
+     * the same runtime instances across the Shell and the loaded
+     * microfrontends.
+     *
+     * DevExtreme and DevExpress packages are excluded below because
+     * they use secondary and deep package entry points that must
+     * remain bundled locally instead of being resolved through the
+     * Native Federation import map.
      */
     shared: {
 
@@ -43,13 +48,16 @@ module.exports =
      * XTEIN workspace libraries that must be shared between
      * the Shell and the microfrontends.
      *
-     * Sharing these mappings is especially important for
-     * runtime services such as ToolbarRuntimeService and
-     * Workspace-related platform contracts.
+     * Runtime-oriented libraries must use the same instance so
+     * application state, toolbar commands, session state and
+     * Dashboard runtime configuration remain synchronized between
+     * the Shell and the loaded microfrontends.
      */
     sharedMappings: [
 
       '@xtein/api-client',
+
+      '@xtein/dashboard-runtime',
 
       '@xtein/runtime',
 
@@ -62,7 +70,22 @@ module.exports =
 
 
     /**
-     * Packages that are not required by the browser runtime.
+     * Packages excluded from Native Federation sharing.
+     *
+     * RxJS secondary entry points listed here are not required by
+     * the XTEIN browser runtime.
+     *
+     * DevExtreme and DevExpress packages must not be shared through
+     * Native Federation because their internal dependency graph uses
+     * secondary and deep imports such as:
+     *
+     * devextreme/common/core/events/utils
+     * devextreme/core/dom_adapter
+     * devextreme-angular/ui/...
+     * devexpress-dashboard-angular/...
+     *
+     * These dependencies remain bundled locally by the consuming
+     * application/library.
      */
     skip: [
 
@@ -72,7 +95,16 @@ module.exports =
 
       'rxjs/testing',
 
-      'rxjs/webSocket'
+      'rxjs/webSocket',
+
+
+      /^devextreme($|\/)/,
+
+      /^devextreme-angular($|\/)/,
+
+      /^devexpress-/,
+
+      /^@devexpress\//
     ],
 
 
@@ -85,11 +117,12 @@ module.exports =
       ignoreUnusedDeps:
         true,
 
+
       /**
        * Adds versions to shared workspace mappings.
        *
        * This allows the Native Federation runtime to reuse the
-       * same XTEIN library instance between Shell and remotes.
+       * same XTEIN library instance between the Shell and remotes.
        */
       mappingVersion:
         true

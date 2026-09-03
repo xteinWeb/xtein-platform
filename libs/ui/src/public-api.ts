@@ -16,3 +16,4 @@ export * from './lib/forms/xtein-data-source-parameters/xtein-data-source-parame
 export * from './lib/forms/xtein-data-source-parameters/models/connection-field.model';
 export * from './lib/forms/xtein-data-source-parameters/services/connection-fields.service';
 export * from './lib/navigation/xtein-tree/xtein-tree.component';
+export * from './lib/components/xtein-dashboard/xtein-dashboard.component';

@@ -426,6 +426,32 @@
           }
         }
       }
+    },
+    "dashboard-runtime": {
+      "projectType": "library",
+      "root": "libs/dashboard-runtime",
+      "sourceRoot": "libs/dashboard-runtime/src",
+      "prefix": "xtein",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/dashboard-runtime/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/dashboard-runtime/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/dashboard-runtime/tsconfig.spec.json"
+          }
+        }
+      }
     }
   },
   "cli": {

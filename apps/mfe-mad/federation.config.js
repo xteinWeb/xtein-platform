@@ -6,24 +6,22 @@ const {
 );
 
 
-/**
- * Native Federation configuration for the MAD microfrontend.
- *
- * The MAD microfrontend contains multiple XTEIN applications
- * resolved dynamically through MadApplicationRegistry.
- */
 module.exports =
   withNativeFederation({
 
     /**
-     * Native Federation identifier.
+     * Native Federation identifier of the MAD microfrontend.
      */
     name:
       'mfe-mad',
 
 
     /**
-     * Entry point consumed by the XTEIN Shell.
+     * Components exposed by the MAD microfrontend.
+     *
+     * The Shell loads ApplicationHost and passes the requested
+     * XTEIN application identifier so the MAD registry can resolve
+     * the corresponding functional application dynamically.
      */
     exposes: {
 
@@ -35,8 +33,14 @@ module.exports =
     /**
      * Shared npm dependencies.
      *
-     * Only dependencies effectively used by the microfrontend
-     * are included because ignoreUnusedDeps is enabled below.
+     * Angular, RxJS and the shared XTEIN platform libraries must use
+     * compatible singleton runtime instances across the Shell and
+     * the loaded microfrontend.
+     *
+     * DevExtreme and DevExpress packages are excluded below because
+     * they make extensive use of secondary and deep entry points that
+     * should remain bundled locally rather than being resolved through
+     * the Native Federation import map.
      */
     shared: {
 
@@ -55,12 +59,18 @@ module.exports =
 
 
     /**
-     * XTEIN workspace libraries that must use the same runtime
-     * instances in the Shell and the MAD microfrontend.
+     * XTEIN workspace libraries that must be shared with the Shell.
+     *
+     * Sharing these mappings is required so stateful singleton
+     * services such as ToolbarRuntimeService,
+     * WorkspaceRuntimeService, SessionService and
+     * XteinDashboardRuntimeService use the same runtime instance.
      */
     sharedMappings: [
 
       '@xtein/api-client',
+
+      '@xtein/dashboard-runtime',
 
       '@xtein/runtime',
 
@@ -73,7 +83,18 @@ module.exports =
 
 
     /**
-     * RxJS entry points not required by the browser runtime.
+     * Packages excluded from Native Federation sharing.
+     *
+     * DevExtreme and DevExpress dependencies use secondary and deep
+     * imports such as:
+     *
+     * devextreme/common/core/events/utils
+     * devextreme/core/dom_adapter
+     * devextreme-angular/ui/...
+     * devexpress-dashboard-angular/...
+     *
+     * These packages remain bundled locally by the MAD
+     * microfrontend and the libraries it consumes.
      */
     skip: [
 
@@ -83,25 +104,33 @@ module.exports =
 
       'rxjs/testing',
 
-      'rxjs/webSocket'
+      'rxjs/webSocket',
+
+
+      /^devextreme($|\/)/,
+
+      /^devextreme-angular($|\/)/,
+
+      /^devexpress-/,
+
+      /^@devexpress\//
     ],
 
 
     features: {
 
       /**
-       * Keeps Native Federation from attempting to bundle every
-       * dependency declared in the workspace package.json.
-       *
-       * XTEIN shared mappings are explicitly made visible to the
-       * dependency analyzer from bootstrap.ts.
+       * Generates federation bundles only for dependencies
+       * actually used by the MAD microfrontend.
        */
       ignoreUnusedDeps:
         true,
 
 
       /**
-       * Publishes version information for workspace mappings.
+       * Adds version metadata to mapped workspace libraries so
+       * the Shell and the MAD microfrontend can reuse the same
+       * XTEIN singleton instances.
        */
       mappingVersion:
         true

@@ -1,0 +1,50 @@
+<div
+  class="xt-dashboard">
+
+  @if (
+    dashboardId &&
+    endpoint()
+  ) {
+
+    <dx-dashboard-control
+      class="xt-dashboard__control"
+      [endpoint]="endpoint()"
+      [dashboardId]="dashboardId"
+      [workingMode]="workingMode">
+    </dx-dashboard-control>
+
+  } @else {
+
+    <div
+      class="xt-dashboard__empty">
+
+      <div
+        class="xt-dashboard__empty-icon">
+
+        <i
+          class="icon-dashboard-ol">
+        </i>
+
+      </div>
+
+
+      <span
+        class="xt-dashboard__empty-title">
+
+        Diseñador de Dashboard
+
+      </span>
+
+
+      <span
+        class="xt-dashboard__empty-message">
+
+        Seleccione un Dashboard o KPI para comenzar.
+
+      </span>
+
+    </div>
+
+  }
+
+</div>
