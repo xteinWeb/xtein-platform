@@ -43,6 +43,7 @@ import {
   XteinDataSourceParametersComponent,
   XteinInputComponent,
   XteinLoadingComponent,
+  XteinNotificationService,
   XteinSelectComponent,
   XteinTextareaComponent
 } from '@xtein/ui';
@@ -72,10 +73,6 @@ import {
 
 /**
  * MAD-005 - Data Sources.
- *
- * The application owns its record state and publishes its toolbar state
- * through the shared XTEIN runtime. The Shell remains responsible only
- * for rendering the platform toolbar and dispatching commands.
  */
 @Component({
   selector:
@@ -93,13 +90,6 @@ import {
     XteinLoadingComponent
   ],
 
-  /**
-   * Application-specific services remain scoped to MAD-005.
-   *
-   * Platform services such as ToolbarRuntimeService,
-   * WorkspaceRuntimeService and XteinApiClientService continue
-   * to come from the shared platform injector.
-   */
   providers: [
     Mad005Service
   ],
@@ -116,9 +106,6 @@ import {
 export class Mad005Component
   implements OnInit, OnDestroy {
 
-  /**
-   * Dynamic connection-parameter editor.
-   */
   @ViewChild(
     XteinDataSourceParametersComponent
   )
@@ -126,32 +113,20 @@ export class Mad005Component
     XteinDataSourceParametersComponent;
 
 
-  /**
-   * XTEIN application identifier.
-   */
   readonly applicationId =
     Mad005Application.Id;
 
 
-  /**
-   * Available active-state options.
-   */
   readonly statusOptions = [
     ...Mad005StatusOptions
   ];
 
 
-  /**
-   * Available default-connection options.
-   */
   readonly defaultOptions = [
     ...Mad005DefaultOptions
   ];
 
 
-  /**
-   * MAD-005 reactive record form.
-   */
   readonly form =
     new FormGroup({
 
@@ -226,36 +201,24 @@ export class Mad005Component
     });
 
 
-  /**
-   * Current application operation mode.
-   */
   readonly mode =
     signal<RecordToolbarMode>(
       RecordToolbarMode.Initial
     );
 
 
-  /**
-   * Indicates whether MAD-005 is processing a backend operation.
-   */
   readonly loading =
     signal(
       false
     );
 
 
-  /**
-   * Indicates whether the form is currently editable.
-   */
   readonly readOnly =
     signal(
       true
     );
 
 
-  /**
-   * Available data source types returned by the existing backend.
-   */
   readonly dataSourceTypes =
     signal<
       Mad005DataSourceType[]
@@ -264,9 +227,6 @@ export class Mad005Component
     );
 
 
-  /**
-   * Loaded data source records.
-   */
   readonly records =
     signal<
       readonly Mad005DataSourceConfigurationRecord[]
@@ -275,50 +235,32 @@ export class Mad005Component
     );
 
 
-  /**
-   * Zero-based index of the current loaded record.
-   */
   readonly currentIndex =
     signal(
       0
     );
 
 
-  /**
-   * Indicates whether validation feedback should be displayed.
-   */
   readonly validationRequested =
     signal(
       false
     );
 
 
-  /**
-   * User permissions loaded through the shared runtime.
-   */
   private permissions:
     Readonly<RecordToolbarPermissions> =
       DeniedRecordToolbarPermissions;
 
 
-  /**
-   * Record snapshot restored when edition is cancelled.
-   */
   private previousRecord:
     Mad005DataSourceConfiguration | null =
       null;
 
 
-  /**
-   * Prevents programmatic synchronization from setting dirty state.
-   */
   private synchronizingForm =
     false;
 
 
-  /**
-   * Component-owned subscriptions.
-   */
   private readonly subscriptions =
     new Subscription();
 
@@ -334,7 +276,10 @@ export class Mad005Component
       ToolbarRuntimeService,
 
     private readonly workspaceRuntime:
-      WorkspaceRuntimeService
+      WorkspaceRuntimeService,
+
+    private readonly notification:
+      XteinNotificationService
   ) {
 
     this.form.disable({
@@ -344,9 +289,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Initializes MAD-005.
-   */
   ngOnInit():
     void {
 
@@ -362,9 +304,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Releases application subscriptions.
-   */
   ngOnDestroy():
     void {
 
@@ -372,11 +311,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Updates serialized connection parameters.
-   *
-   * @param value Serialized connection parameters.
-   */
   updateConnectionParameters(
     value:
       string
@@ -389,33 +323,31 @@ export class Mad005Component
   }
 
 
-  /**
-   * Displays the result of a connection test.
-   *
-   * @param result Connection-test result.
-   */
   handleConnectionTest(
     result:
       DataSourceConnectionTestResult
   ): void {
 
-    void this.showMessage(
-      result.message,
-
+    if (
       result.success
-        ? 'Conexión exitosa'
-        : 'Validación de conexión',
+    ) {
 
-      result.success
-        ? 'success'
-        : 'warning'
-    );
+      this.notification
+        .success(
+          result.message
+        );
+
+      return;
+    }
+
+
+    this.notification
+      .warning(
+        result.message
+      );
   }
 
 
-  /**
-   * Validates the data source name when focus leaves the field.
-   */
   validateNameOnBlur():
     void {
 
@@ -427,19 +359,18 @@ export class Mad005Component
       return;
     }
 
+
     void this.validateNameAvailability();
   }
 
 
-  /**
-   * Returns whether the name field is invalid.
-   */
   isNameInvalid():
     boolean {
 
     const control =
       this.form.controls.NOMBRE;
 
+
     return (
       control.invalid &&
       (
@@ -450,15 +381,13 @@ export class Mad005Component
   }
 
 
-  /**
-   * Returns whether the origin field is invalid.
-   */
   isOriginInvalid():
     boolean {
 
     const control =
       this.form.controls.ORIGEN_DATO;
 
+
     return (
       control.invalid &&
       (
@@ -469,9 +398,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Subscribes MAD-005 to its own toolbar command stream.
-   */
   private subscribeToToolbarCommands():
     void {
 
@@ -490,9 +416,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Tracks form changes and updates workspace dirty state.
-   */
   private subscribeToFormChanges():
     void {
 
@@ -508,6 +431,7 @@ export class Mad005Component
             return;
           }
 
+
           this.workspaceRuntime
             .setDirty(
               this.applicationId,
@@ -518,9 +442,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Applies MAD-005 business rules.
-   */
   private subscribeToBusinessRules():
     void {
 
@@ -539,6 +460,7 @@ export class Mad005Component
               return;
             }
 
+
             this.form.controls.ACTIVO
               .setValue(
                 true,
@@ -548,11 +470,11 @@ export class Mad005Component
                 }
               );
 
-            void this.showMessage(
-              'No se puede desactivar la conexión por defecto.',
-              'Validación',
-              'warning'
-            );
+
+            this.notification
+              .warning(
+                'No se puede desactivar la conexión por defecto.'
+              );
           }
         )
     );
@@ -573,6 +495,7 @@ export class Mad005Component
               return;
             }
 
+
             void this.validateDefaultSelection();
           }
         )
@@ -580,15 +503,13 @@ export class Mad005Component
   }
 
 
-  /**
-   * Loads user permissions and MAD-005 lists.
-   */
   private loadInitializationData():
     void {
 
     this.loading.set(
       true
     );
+
 
     this.subscriptions.add(
       forkJoin({
@@ -604,10 +525,11 @@ export class Mad005Component
             .getDataLists()
       })
         .pipe(
-          finalize(() =>
-            this.loading.set(
-              false
-            )
+          finalize(
+            () =>
+              this.loading.set(
+                false
+              )
           )
         )
         .subscribe({
@@ -618,12 +540,14 @@ export class Mad005Component
               this.permissions =
                 result.permissions;
 
+
               try {
 
                 const dataLists =
                   this.parseDataLists(
                     result.dataLists.data
                   );
+
 
                 this.dataSourceTypes.set(
                   [
@@ -633,14 +557,16 @@ export class Mad005Component
 
               } catch (error) {
 
-                void this.showUnknownError(
+                this.showUnknownError(
                   error,
                   'No fue posible cargar los tipos de origen de datos.'
                 );
               }
 
+
               this.publishToolbarState();
             },
+
 
           error:
             error => {
@@ -648,11 +574,13 @@ export class Mad005Component
               this.permissions =
                 DeniedRecordToolbarPermissions;
 
+
               this.publishToolbarState();
 
-              void this.showUnknownError(
+
+              this.showUnknownError(
                 error,
-                'No fue posible inicializar Orígenes de Datos.'
+                'No fue posible inicializar la aplicación.'
               );
             }
         })
@@ -660,11 +588,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Routes platform toolbar commands to MAD-005.
-   *
-   * @param command Toolbar command.
-   */
   private handleToolbarCommand(
     command:
       ToolbarCommand
@@ -759,9 +682,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Starts creation mode.
-   */
   private startCreating():
     void {
 
@@ -772,22 +692,27 @@ export class Mad005Component
           )
         : null;
 
+
     this.mode.set(
       RecordToolbarMode.Creating
     );
+
 
     this.readOnly.set(
       false
     );
 
+
     this.validationRequested.set(
       false
     );
+
 
     this.setFormRecord(
       Mad005DefaultRecord,
       false
     );
+
 
     this.workspaceRuntime
       .setDirty(
@@ -795,18 +720,17 @@ export class Mad005Component
         false
       );
 
+
     this.publishToolbarState();
   }
 
 
-  /**
-   * Starts edition mode.
-   */
   private startEditing():
     void {
 
     const currentRecord =
       this.getCurrentRecord();
+
 
     if (
       !currentRecord
@@ -815,26 +739,32 @@ export class Mad005Component
       return;
     }
 
+
     this.previousRecord =
       this.cloneRecord(
         currentRecord
       );
 
+
     this.mode.set(
       RecordToolbarMode.Editing
     );
+
 
     this.readOnly.set(
       false
     );
 
+
     this.validationRequested.set(
       false
     );
 
+
     this.setFormEditable(
       true
     );
+
 
     this.workspaceRuntime
       .setDirty(
@@ -842,13 +772,11 @@ export class Mad005Component
         false
       );
 
+
     this.publishToolbarState();
   }
 
 
-  /**
-   * Saves the current record.
-   */
   private async saveCurrentRecord():
     Promise<void> {
 
@@ -860,12 +788,14 @@ export class Mad005Component
       return;
     }
 
+
     if (
       !this.validateForm()
     ) {
 
       return;
     }
+
 
     if (
       !await this.validateNameAvailability()
@@ -874,8 +804,10 @@ export class Mad005Component
       return;
     }
 
+
     const record =
       this.getFormRecord();
+
 
     if (
       record.DEFECTO &&
@@ -885,9 +817,11 @@ export class Mad005Component
       return;
     }
 
+
     this.loading.set(
       true
     );
+
 
     try {
 
@@ -927,15 +861,18 @@ export class Mad005Component
             ...this.records()
           ];
 
+
         updatedRecords[
           this.currentIndex()
         ] = {
           ...record
         };
 
+
         this.records.set(
           updatedRecords
         );
+
 
         this.mode.set(
           RecordToolbarMode.Browsing
@@ -947,9 +884,11 @@ export class Mad005Component
           []
         );
 
+
         this.currentIndex.set(
           0
         );
+
 
         this.mode.set(
           RecordToolbarMode.Initial
@@ -962,17 +901,21 @@ export class Mad005Component
           record
         );
 
+
       this.readOnly.set(
         true
       );
+
 
       this.validationRequested.set(
         false
       );
 
+
       this.setFormEditable(
         false
       );
+
 
       this.workspaceRuntime
         .setDirty(
@@ -980,20 +923,20 @@ export class Mad005Component
           false
         );
 
+
       this.publishToolbarState();
 
 
-      await this.showMessage(
-        'Registro actualizado.',
-        'Orígenes de Datos',
-        'success'
-      );
+      this.notification
+        .success(
+          'Registro actualizado.'
+        );
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
-        'No fue posible guardar el origen de datos.'
+        'No fue posible guardar el registro.'
       );
 
     } finally {
@@ -1005,9 +948,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Cancels the current operation.
-   */
   private async cancelCurrentOperation():
     Promise<void> {
 
@@ -1017,6 +957,7 @@ export class Mad005Component
 
       return;
     }
+
 
     const dirty =
       this.workspaceRuntime
@@ -1031,7 +972,10 @@ export class Mad005Component
       await Swal.fire({
 
         title:
-          '',
+          this.workspaceRuntime
+            .getApplicationTitle(
+              this.applicationId
+            ),
 
         text:
           dirty
@@ -1090,13 +1034,16 @@ export class Mad005Component
         : RecordToolbarMode.Initial
     );
 
+
     this.readOnly.set(
       true
     );
 
+
     this.validationRequested.set(
       false
     );
+
 
     this.workspaceRuntime
       .setDirty(
@@ -1104,18 +1051,17 @@ export class Mad005Component
         false
       );
 
+
     this.publishToolbarState();
   }
 
 
-  /**
-   * Deletes the current record.
-   */
   private async deleteCurrentRecord():
     Promise<void> {
 
     const currentRecord =
       this.getCurrentRecord();
+
 
     if (
       !currentRecord ||
@@ -1130,7 +1076,10 @@ export class Mad005Component
       await Swal.fire({
 
         title:
-          '',
+          this.workspaceRuntime
+            .getApplicationTitle(
+              this.applicationId
+            ),
 
         html:
           `¿Desea eliminar el origen de datos <i>${this.escapeHtml(
@@ -1190,7 +1139,10 @@ export class Mad005Component
       const remainingRecords =
         this.records()
           .filter(
-            (_, index) =>
+            (
+              _,
+              index
+            ) =>
               index !==
               this.currentIndex()
           );
@@ -1218,14 +1170,17 @@ export class Mad005Component
           0
         );
 
+
         this.mode.set(
           RecordToolbarMode.Initial
         );
+
 
         this.setFormRecord(
           Mad005DefaultRecord,
           true
         );
+
 
         this.publishToolbarState();
       }
@@ -1238,17 +1193,16 @@ export class Mad005Component
         );
 
 
-      await this.showMessage(
-        'Origen de datos eliminado.',
-        'Orígenes de Datos',
-        'success'
-      );
+      this.notification
+        .success(
+          'Registro eliminado.'
+        );
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
-        'No fue posible eliminar el origen de datos.'
+        'No fue posible eliminar el registro.'
       );
 
     } finally {
@@ -1260,9 +1214,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Reloads lookup values.
-   */
   private refreshDataLists():
     void {
 
@@ -1273,18 +1224,21 @@ export class Mad005Component
       return;
     }
 
+
     this.loading.set(
       true
     );
+
 
     this.subscriptions.add(
       this.mad005Service
         .getDataLists()
         .pipe(
-          finalize(() =>
-            this.loading.set(
-              false
-            )
+          finalize(
+            () =>
+              this.loading.set(
+                false
+              )
           )
         )
         .subscribe({
@@ -1299,6 +1253,7 @@ export class Mad005Component
                     response.data
                   );
 
+
                 this.dataSourceTypes.set(
                   [
                     ...dataLists.origenDatos
@@ -1307,16 +1262,17 @@ export class Mad005Component
 
               } catch (error) {
 
-                void this.showUnknownError(
+                this.showUnknownError(
                   error,
                   'No fue posible refrescar los tipos de origen de datos.'
                 );
               }
             },
 
+
           error:
             error =>
-              void this.showUnknownError(
+              this.showUnknownError(
                 error,
                 'No fue posible refrescar los tipos de origen de datos.'
               )
@@ -1325,11 +1281,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Navigates through the current result set.
-   *
-   * @param requestedIndex Zero-based record index.
-   */
   private navigateTo(
     requestedIndex:
       number
@@ -1338,12 +1289,14 @@ export class Mad005Component
     const records =
       this.records();
 
+
     if (
       records.length === 0
     ) {
 
       return;
     }
+
 
     const index =
       Math.max(
@@ -1354,27 +1307,37 @@ export class Mad005Component
         )
       );
 
+
     this.currentIndex.set(
       index
     );
+
 
     this.mode.set(
       RecordToolbarMode.Browsing
     );
 
+
     this.readOnly.set(
       true
     );
 
+
     this.previousRecord =
       this.cloneRecord(
-        records[index]
+        records[
+          index
+        ]
       );
 
+
     this.setFormRecord(
-      records[index],
+      records[
+        index
+      ],
       true
     );
+
 
     this.workspaceRuntime
       .setDirty(
@@ -1382,19 +1345,18 @@ export class Mad005Component
         false
       );
 
+
     this.publishToolbarState();
   }
 
 
-  /**
-   * Validates the complete MAD-005 form.
-   */
   private validateForm():
     boolean {
 
     this.validationRequested.set(
       true
     );
+
 
     this.form.markAllAsTouched();
 
@@ -1405,11 +1367,10 @@ export class Mad005Component
       this.form.invalid
     ) {
 
-      void this.showMessage(
-        'Hay datos incompletos. Complete todos los campos obligatorios.',
-        'Faltan datos',
-        'warning'
-      );
+      this.notification
+        .warning(
+          'Hay datos incompletos. Complete todos los campos obligatorios.'
+        );
 
       return false;
     }
@@ -1424,13 +1385,14 @@ export class Mad005Component
         this.dataSourceParameters
           .getValidationErrors();
 
-      void this.showMessage(
-        errors.length > 0
-          ? errors.join('\n')
-          : 'Complete todos los parámetros de conexión obligatorios.',
-        'Faltan parámetros de conexión',
-        'warning'
-      );
+
+      this.notification
+        .warning(
+          errors.length > 0
+            ? errors.join('\n')
+            : 'Complete todos los parámetros de conexión obligatorios.'
+        );
+
 
       return false;
     }
@@ -1440,9 +1402,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Validates whether the current data source name already exists.
-   */
   private async validateNameAvailability():
     Promise<boolean> {
 
@@ -1494,7 +1453,9 @@ export class Mad005Component
 
       const errorMessage =
         this.getBackendErrorMessage(
-          records[0]
+          records[
+            0
+          ]
         );
 
 
@@ -1508,11 +1469,10 @@ export class Mad005Component
         !available
       ) {
 
-        await this.showMessage(
-          `El origen de datos ${name} ya existe.`,
-          'Validación',
-          'warning'
-        );
+        this.notification
+          .warning(
+            `El origen de datos ${name} ya existe.`
+          );
       }
 
 
@@ -1520,19 +1480,17 @@ export class Mad005Component
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
         'No fue posible validar el nombre del origen de datos.'
       );
+
 
       return false;
     }
   }
 
 
-  /**
-   * Validates a default-selection change.
-   */
   private async validateDefaultSelection():
     Promise<void> {
 
@@ -1552,9 +1510,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Validates whether another default connection already exists.
-   */
   private async validateDefaultAvailability():
     Promise<boolean> {
 
@@ -1579,7 +1534,9 @@ export class Mad005Component
 
       const errorMessage =
         this.getBackendErrorMessage(
-          records[0]
+          records[
+            0
+          ]
         );
 
 
@@ -1588,11 +1545,11 @@ export class Mad005Component
           'exists'
       ) {
 
-        await this.showMessage(
-          'Ya existe una conexión configurada como defecto.',
-          'Validación',
-          'warning'
-        );
+        this.notification
+          .warning(
+            'Ya existe una conexión configurada como defecto.'
+          );
+
 
         return false;
       }
@@ -1612,19 +1569,17 @@ export class Mad005Component
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
         'No fue posible validar la conexión por defecto.'
       );
+
 
       return false;
     }
   }
 
 
-  /**
-   * Publishes the current toolbar state.
-   */
   private publishToolbarState():
     void {
 
@@ -1654,9 +1609,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Applies a record to the reactive form.
-   */
   private setFormRecord(
     record:
       Readonly<Mad005DataSourceConfiguration>,
@@ -1720,9 +1672,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Changes form editability.
-   */
   private setFormEditable(
     editable:
       boolean
@@ -1736,6 +1685,7 @@ export class Mad005Component
         emitEvent:
           false
       });
+
 
       this.form.controls.ID_ORIGEN_DATO
         .disable({
@@ -1753,9 +1703,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Returns the complete current form record.
-   */
   private getFormRecord():
     Mad005DataSourceConfiguration {
 
@@ -1790,9 +1737,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Returns the current record.
-   */
   private getCurrentRecord():
     Mad005DataSourceConfigurationRecord | null {
 
@@ -1805,9 +1749,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Indicates whether the application is changing a record.
-   */
   private isChanging():
     boolean {
 
@@ -1820,9 +1761,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Parses the datalist response.
-   */
   private parseDataLists(
     data:
       unknown
@@ -1837,7 +1775,9 @@ export class Mad005Component
 
 
     const result =
-      records[0];
+      records[
+        0
+      ];
 
 
     if (
@@ -1879,9 +1819,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Validates a backend mutation response.
-   */
   private ensureSuccessfulMutation(
     data:
       unknown
@@ -1897,7 +1834,9 @@ export class Mad005Component
 
     const errorMessage =
       this.getBackendErrorMessage(
-        records[0]
+        records[
+          0
+        ]
       );
 
 
@@ -1912,9 +1851,6 @@ export class Mad005Component
   }
 
 
-  /**
-   * Parses the serialized array returned by the legacy backend.
-   */
   private parseBackendArray<T>(
     data:
       unknown
@@ -1932,12 +1868,14 @@ export class Mad005Component
       const value =
         parsed.trim();
 
+
       if (
         !value
       ) {
 
         return [];
       }
+
 
       parsed =
         JSON.parse(
@@ -1962,12 +1900,10 @@ export class Mad005Component
   }
 
 
-  /**
-   * Reads ErrMensaje from an existing backend response.
-   */
   private getBackendErrorMessage(
     record:
-      Record<string, unknown> | undefined
+      Record<string, unknown> |
+      undefined
   ): string {
 
     if (
@@ -2001,12 +1937,10 @@ export class Mad005Component
   }
 
 
-  /**
-   * Creates an independent record snapshot.
-   */
   private cloneRecord(
     record:
-      Readonly<Mad005DataSourceConfiguration> | null
+      Readonly<Mad005DataSourceConfiguration> |
+      null
   ): Mad005DataSourceConfiguration | null {
 
     if (
@@ -2023,48 +1957,13 @@ export class Mad005Component
   }
 
 
-  /**
-   * Displays a user-facing message.
-   */
-  private async showMessage(
-    message:
-      string,
-
-    title:
-      string,
-
-    icon:
-      'error' |
-      'warning' |
-      'success' |
-      'info'
-  ): Promise<void> {
-
-    await Swal.fire({
-
-      title,
-
-      text:
-        message,
-
-      icon,
-
-      confirmButtonColor:
-        '#0F4C81'
-    });
-  }
-
-
-  /**
-   * Converts unknown errors into a user-facing error.
-   */
-  private async showUnknownError(
+  private showUnknownError(
     error:
       unknown,
 
     fallbackMessage:
       string
-  ): Promise<void> {
+  ): void {
 
     console.error(
       'MAD-005 operation failed.',
@@ -2081,17 +1980,13 @@ export class Mad005Component
         : fallbackMessage;
 
 
-    await this.showMessage(
-      message,
-      'Error',
-      'error'
-    );
+    this.notification
+      .error(
+        message
+      );
   }
 
 
-  /**
-   * Escapes HTML before using record text inside SweetAlert markup.
-   */
   private escapeHtml(
     value:
       string

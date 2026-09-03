@@ -1,31 +1,23 @@
 /*======================================================================
 = XTEIN - GLOBAL STYLES
 =
-= Archivo principal de estilos globales de la aplicación.
-=
-= Contenido
-= ----------------------------------------------------------------------
-= 1. Temas
-= 2. Librerías externas
-= 3. Dashboard
-= 4. Angular Material
-= 5. DevExtreme
-= 6. Utilidades globales
+= Main shared stylesheet used by the XTEIN platform and applications.
 ======================================================================*/
 
 
 /*======================================================================
-= 1. TEMA CORPORATIVO
+= 1. XTEIN CORPORATE THEME
 ======================================================================*/
 
 @import "xtein.scss";
 @import "icons_styles.scss";
 @import "xtein-theme.scss";
 @import "xtein-controls.scss";
+@import "xtein-notifications.scss";
 
 
 /*======================================================================
-= 2. TEMAS DE TERCEROS
+= 2. THIRD-PARTY THEMES
 ======================================================================*/
 
 @import "../../../../node_modules/@angular/material/prebuilt-themes/indigo-pink.css";
@@ -57,7 +49,7 @@
 
 
 /*======================================================================
-= 6. DASHBOARD - PERSONALIZACIONES
+= 6. DASHBOARD CUSTOMIZATIONS
 ======================================================================*/
 
 /*
@@ -92,5 +84,5 @@
 
 
 /*======================================================================
-= 7. ESTILOS GLOBALES DE LA APLICACIÓN
+= 7. GLOBAL APPLICATION STYLES
 ======================================================================*/

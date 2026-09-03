@@ -1,0 +1,505 @@
+/*======================================================================
+= XTEIN - SHARED NOTIFICATION STYLES
+=
+= Global toast presentation used by the Shell and every microfrontend.
+=
+= Applications must never define their own toast position, colors,
+= dimensions or semantic icons.
+======================================================================*/
+
+
+/*======================================================================
+= 1. TOAST STACK POSITION
+=
+= Desktop Shell:
+=   Header     : 64px
+=   Tabs start : 64px
+=
+= The toast starts slightly inside the tab-bar area and remains aligned
+= to the right side of the workspace, reproducing the legacy behavior.
+======================================================================*/
+
+.dx-toast-stack {
+  top:
+    70px !important;
+
+  right:
+    14px !important;
+
+  bottom:
+    auto !important;
+
+  left:
+    auto !important;
+
+  align-items:
+    flex-end !important;
+
+  overflow:
+    visible !important;
+
+  z-index:
+    9500 !important;
+}
+
+
+/*======================================================================
+= 2. TOAST SIZE
+======================================================================*/
+
+.dx-toast-stack .dx-toast-wrapper {
+  width:
+    auto !important;
+
+  max-width:
+    calc(
+      100vw - 28px
+    ) !important;
+}
+
+
+.dx-toast-stack .dx-toast-content {
+  position:
+    relative;
+
+  width:
+    min(
+      450px,
+      calc(
+        100vw - 28px
+      )
+    ) !important;
+
+  min-width:
+    280px;
+
+  min-height:
+    52px;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    10px
+    44px
+    10px
+    14px;
+
+  border:
+    0;
+
+  border-radius:
+    9px;
+
+  color:
+    #ffffff;
+
+  box-shadow:
+    0 5px 16px
+      rgba(
+        32,
+        55,
+        78,
+        .22
+      );
+
+  font-family:
+    Roboto,
+    Arial,
+    sans-serif;
+
+  font-size:
+    13px;
+
+  font-weight:
+    400;
+
+  line-height:
+    1.35;
+}
+
+
+/*======================================================================
+= 3. MESSAGE
+======================================================================*/
+
+.dx-toast-message {
+  flex:
+    1 1 auto;
+
+  min-width:
+    0;
+
+  padding:
+    0 !important;
+
+  color:
+    #ffffff !important;
+
+  white-space:
+    normal;
+
+  overflow-wrap:
+    anywhere;
+}
+
+
+/*======================================================================
+= 4. SEMANTIC ICON
+=
+= DevExtreme creates .dx-toast-icon according to the semantic toast
+= type. XTEIN controls its final presentation.
+======================================================================*/
+
+.dx-toast-icon {
+  display:
+    inline-flex !important;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  flex:
+    0 0 24px;
+
+  width:
+    24px !important;
+
+  height:
+    24px !important;
+
+  margin:
+    0 14px 0 0 !important;
+
+  box-sizing:
+    border-box;
+
+  border:
+    2px solid
+    rgba(
+      255,
+      255,
+      255,
+      .95
+    );
+
+  border-radius:
+    50%;
+
+  background-image:
+    none !important;
+
+  background-color:
+    transparent !important;
+
+  background-size:
+    auto !important;
+
+  color:
+    #ffffff;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-style:
+    normal;
+
+  font-weight:
+    700;
+
+  line-height:
+    1;
+
+  text-align:
+    center;
+}
+
+
+/*
+ * Success.
+ */
+.dx-toast-success .dx-toast-icon::before {
+  content:
+    "✓";
+
+  font-size:
+    16px;
+
+  transform:
+    translateY(
+      -1px
+    );
+}
+
+
+/*
+ * Warning.
+ */
+.dx-toast-warning .dx-toast-icon::before {
+  content:
+    "!";
+
+  font-size:
+    16px;
+}
+
+
+/*
+ * Error.
+ */
+.dx-toast-error .dx-toast-icon::before {
+  content:
+    "×";
+
+  font-size:
+    19px;
+
+  font-weight:
+    500;
+
+  transform:
+    translateY(
+      -1px
+    );
+}
+
+
+/*
+ * Information.
+ */
+.dx-toast-info .dx-toast-icon::before {
+  content:
+    "i";
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:
+    16px;
+
+  font-weight:
+    700;
+
+  transform:
+    translateY(
+      -1px
+    );
+}
+
+
+/*======================================================================
+= 5. SEMANTIC COLORS
+======================================================================*/
+
+.dx-toast-success {
+  background-color:
+    #35ccac !important;
+}
+
+
+.dx-toast-info {
+  background-color:
+    #125edc !important;
+}
+
+
+.dx-toast-warning {
+  background-color:
+    #f0ba36 !important;
+}
+
+
+.dx-toast-error {
+  background-color:
+    #d9534f !important;
+}
+
+
+/*======================================================================
+= 6. VISUAL CLOSE INDICATOR
+=
+= DevExtreme is configured with closeOnClick. The indicator reproduces
+= the close affordance used by the legacy toast while the complete toast
+= remains clickable.
+======================================================================*/
+
+.dx-toast-content::after {
+  content:
+    "×";
+
+  position:
+    absolute;
+
+  top:
+    50%;
+
+  right:
+    15px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  transform:
+    translateY(
+      -50%
+    );
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .92
+    );
+
+  font-size:
+    22px;
+
+  font-weight:
+    300;
+
+  line-height:
+    20px;
+
+  pointer-events:
+    none;
+}
+
+
+/*======================================================================
+= 7. STACK SPACING
+======================================================================*/
+
+.dx-toast-stack {
+  gap:
+    8px !important;
+}
+
+
+/*======================================================================
+= 8. TABLET / MOBILE
+=
+= The responsive Shell uses a taller header. The workspace tabs start
+= below that header, therefore the toast position must move as well.
+======================================================================*/
+
+@media (
+  max-width:
+    700px
+) {
+
+  .dx-toast-stack {
+    top:
+      110px !important;
+
+    right:
+      8px !important;
+
+    left:
+      auto !important;
+  }
+
+
+  .dx-toast-stack .dx-toast-wrapper {
+    max-width:
+      calc(
+        100vw - 16px
+      ) !important;
+  }
+
+
+  .dx-toast-stack .dx-toast-content {
+    width:
+      min(
+        450px,
+        calc(
+          100vw - 16px
+        )
+      ) !important;
+
+    min-width:
+      0;
+  }
+}
+
+
+/*======================================================================
+= 9. SMALL MOBILE
+======================================================================*/
+
+@media (
+  max-width:
+    479.98px
+) {
+
+  .dx-toast-stack .dx-toast-content {
+    min-height:
+      48px;
+
+    padding:
+      9px
+      38px
+      9px
+      12px;
+
+    border-radius:
+      8px;
+
+    font-size:
+      12px;
+  }
+
+
+  .dx-toast-icon {
+    flex-basis:
+      22px;
+
+    width:
+      22px !important;
+
+    height:
+      22px !important;
+
+    margin-right:
+      10px !important;
+  }
+
+
+  .dx-toast-success .dx-toast-icon::before,
+  .dx-toast-warning .dx-toast-icon::before,
+  .dx-toast-info .dx-toast-icon::before {
+    font-size:
+      14px;
+  }
+
+
+  .dx-toast-error .dx-toast-icon::before {
+    font-size:
+      17px;
+  }
+
+
+  .dx-toast-content::after {
+    right:
+      11px;
+
+    font-size:
+      20px;
+  }
+}

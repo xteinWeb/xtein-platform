@@ -40,6 +40,7 @@ import {
 import {
   XteinInputComponent,
   XteinLoadingComponent,
+  XteinNotificationService,
   XteinNumberComponent,
   XteinSelectComponent,
   XteinTextareaComponent,
@@ -336,7 +337,10 @@ export class Mad001Component
       ToolbarRuntimeService,
 
     private readonly workspaceRuntime:
-      WorkspaceRuntimeService
+      WorkspaceRuntimeService,
+
+    private readonly notification:
+      XteinNotificationService
   ) {
 
     this.form.disable({
@@ -367,9 +371,6 @@ export class Mad001Component
   }
 
 
-  /**
-   * Indicates whether the application tree must be displayed.
-   */
   showTree():
     boolean {
 
@@ -377,9 +378,6 @@ export class Mad001Component
   }
 
 
-  /**
-   * Handles selection from the shared application tree.
-   */
   selectTreeItem(
     item:
       XteinTreeDataItem
@@ -424,9 +422,6 @@ export class Mad001Component
   }
 
 
-  /**
-   * Collapses or expands the application-tree panel.
-   */
   toggleTreePanel():
     void {
 
@@ -458,9 +453,6 @@ export class Mad001Component
   }
 
 
-  /**
-   * Validates the application identifier when focus leaves the field.
-   */
   validateApplicationIdOnBlur():
     void {
 
@@ -609,9 +601,9 @@ export class Mad001Component
 
               } catch (error) {
 
-                void this.showUnknownError(
+                this.showUnknownError(
                   error,
-                  'No fue posible inicializar MAD-001.'
+                  'No fue posible inicializar la aplicación.'
                 );
               }
             },
@@ -627,9 +619,9 @@ export class Mad001Component
               this.publishToolbarState();
 
 
-              void this.showUnknownError(
+              this.showUnknownError(
                 error,
-                'No fue posible inicializar MAD-001.'
+                'No fue posible inicializar la aplicación.'
               );
             }
         })
@@ -888,17 +880,16 @@ export class Mad001Component
       );
 
 
-      await this.showMessage(
-        'Registro actualizado.',
-        'MAD-001',
-        'success'
-      );
+      this.notification
+        .success(
+          'Registro actualizado.'
+        );
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
-        'No fue posible guardar la aplicación.'
+        'No fue posible guardar el registro.'
       );
 
     } finally {
@@ -934,7 +925,10 @@ export class Mad001Component
       await Swal.fire({
 
         title:
-          '',
+          this.workspaceRuntime
+            .getApplicationTitle(
+              this.applicationId
+            ),
 
         text:
           dirty
@@ -1051,7 +1045,10 @@ export class Mad001Component
       await Swal.fire({
 
         title:
-          '',
+          this.workspaceRuntime
+            .getApplicationTitle(
+              this.applicationId
+            ),
 
         html:
           `¿Desea eliminar la aplicación <i>${this.escapeHtml(
@@ -1137,17 +1134,16 @@ export class Mad001Component
       this.publishToolbarState();
 
 
-      await this.showMessage(
-        'Aplicación eliminada.',
-        'MAD-001',
-        'success'
-      );
+      this.notification
+        .success(
+          'Registro eliminado.'
+        );
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
-        'No fue posible eliminar la aplicación.'
+        'No fue posible eliminar el registro.'
       );
 
     } finally {
@@ -1225,9 +1221,9 @@ export class Mad001Component
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
-        'No fue posible refrescar MAD-001.'
+        'No fue posible refrescar la aplicación.'
       );
 
     } finally {
@@ -1348,7 +1344,8 @@ export class Mad001Component
 
 
     if (
-      applications.length === 0
+      applications.length ===
+        0
     ) {
 
       return;
@@ -1420,11 +1417,11 @@ export class Mad001Component
       this.form.invalid
     ) {
 
-      void this.showMessage(
-        'Hay datos incompletos. Complete todos los campos obligatorios.',
-        'Faltan datos',
-        'warning'
-      );
+      this.notification
+        .warning(
+          'Hay datos incompletos. Complete todos los campos obligatorios.'
+        );
+
 
       return false;
     }
@@ -1440,11 +1437,11 @@ export class Mad001Component
         .value
     ) {
 
-      void this.showMessage(
-        'Nivel es requerido cuando el tipo es KPI.',
-        'Faltan datos',
-        'warning'
-      );
+      this.notification
+        .warning(
+          'Nivel es requerido cuando el tipo es KPI.'
+        );
+
 
       return false;
     }
@@ -1506,7 +1503,9 @@ export class Mad001Component
 
       const errorMessage =
         this.getBackendErrorMessage(
-          rows[0]
+          rows[
+            0
+          ]
         );
 
 
@@ -1520,11 +1519,10 @@ export class Mad001Component
         !available
       ) {
 
-        await this.showMessage(
-          `La aplicación ${applicationId} ya existe.`,
-          'Validación',
-          'warning'
-        );
+        this.notification
+          .warning(
+            `La aplicación ${applicationId} ya existe.`
+          );
       }
 
 
@@ -1532,10 +1530,11 @@ export class Mad001Component
 
     } catch (error) {
 
-      await this.showUnknownError(
+      this.showUnknownError(
         error,
         'No fue posible validar el ID de aplicación.'
       );
+
 
       return false;
     }
@@ -1817,7 +1816,9 @@ export class Mad001Component
 
 
     const result =
-      rows[0];
+      rows[
+        0
+      ];
 
 
     if (
@@ -1897,8 +1898,7 @@ export class Mad001Component
 
     const rows =
       this.parseArray<
-        Mad001ParentApplication &
-        {
+        Mad001ParentApplication & {
           ErrMensaje?:
             string;
         }
@@ -1908,7 +1908,9 @@ export class Mad001Component
 
 
     const errorMessage =
-      rows[0]
+      rows[
+        0
+      ]
         ?.ErrMensaje
         ?.trim();
 
@@ -1941,7 +1943,9 @@ export class Mad001Component
 
 
     const errorMessage =
-      rows[0]
+      rows[
+        0
+      ]
         ?.ErrMensaje
         ?.trim();
 
@@ -1975,7 +1979,9 @@ export class Mad001Component
 
     const errorMessage =
       this.getBackendErrorMessage(
-        rows[0]
+        rows[
+          0
+        ]
       );
 
 
@@ -2062,42 +2068,13 @@ export class Mad001Component
   }
 
 
-  private async showMessage(
-    message:
-      string,
-
-    title:
-      string,
-
-    icon:
-      'error' |
-      'warning' |
-      'success' |
-      'info'
-  ): Promise<void> {
-
-    await Swal.fire({
-
-      title,
-
-      text:
-        message,
-
-      icon,
-
-      confirmButtonColor:
-        '#0F4C81'
-    });
-  }
-
-
-  private async showUnknownError(
+  private showUnknownError(
     error:
       unknown,
 
     fallbackMessage:
       string
-  ): Promise<void> {
+  ): void {
 
     console.error(
       'MAD-001 operation failed.',
@@ -2114,11 +2091,10 @@ export class Mad001Component
         : fallbackMessage;
 
 
-    await this.showMessage(
-      message,
-      'Error',
-      'error'
-    );
+    this.notification
+      .error(
+        message
+      );
   }
 
 

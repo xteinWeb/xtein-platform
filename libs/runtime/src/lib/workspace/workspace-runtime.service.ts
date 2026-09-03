@@ -27,7 +27,8 @@ import {
  * existing tab instead of creating a second instance.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn:
+    'root'
 })
 export class WorkspaceRuntimeService {
 
@@ -84,10 +85,14 @@ export class WorkspaceRuntimeService {
         const applicationId =
           this.activeApplicationIdState();
 
-        if (!applicationId) {
+
+        if (
+          !applicationId
+        ) {
 
           return null;
         }
+
 
         return (
           this.tabsState()
@@ -108,7 +113,8 @@ export class WorkspaceRuntimeService {
   readonly hasOpenTabs =
     computed(
       () =>
-        this.tabsState().length > 0
+        this.tabsState()
+          .length > 0
     );
 
 
@@ -151,11 +157,14 @@ export class WorkspaceRuntimeService {
         );
 
 
-    if (existingTab) {
+    if (
+      existingTab
+    ) {
 
       this.activateApplication(
         applicationId
       );
+
 
       return (
         this.getTab(
@@ -178,6 +187,12 @@ export class WorkspaceRuntimeService {
 
         applicationId,
 
+        /*
+         * The display title comes from the application tree.
+         *
+         * Functional microfrontends must reuse this value instead
+         * of hardcoding their visible application name.
+         */
         title:
           request.title,
 
@@ -216,6 +231,7 @@ export class WorkspaceRuntimeService {
         ...tabs.map(
           tab => ({
             ...tab,
+
             active:
               false
           })
@@ -260,8 +276,10 @@ export class WorkspaceRuntimeService {
         applicationId
       );
 
+
     const tabs =
       this.tabsState();
+
 
     const exists =
       tabs.some(
@@ -271,7 +289,9 @@ export class WorkspaceRuntimeService {
       );
 
 
-    if (!exists) {
+    if (
+      !exists
+    ) {
 
       return false;
     }
@@ -281,6 +301,7 @@ export class WorkspaceRuntimeService {
       tabs.map(
         tab => ({
           ...tab,
+
           active:
             tab.applicationId ===
             normalizedApplicationId
@@ -320,12 +341,48 @@ export class WorkspaceRuntimeService {
         applicationId
       );
 
+
     return this.tabsState()
       .find(
         tab =>
           tab.applicationId ===
           normalizedApplicationId
       );
+  }
+
+
+  /**
+   * Returns the display title associated with an opened application.
+   *
+   * The title originates from the application tree when the tab is opened,
+   * so functional applications do not need to hardcode their visible name.
+   *
+   * @param applicationId Application identifier.
+   * @returns Application display title or the normalized identifier as fallback.
+   */
+  getApplicationTitle(
+    applicationId:
+      string
+  ): string {
+
+    const normalizedApplicationId =
+      this.normalizeApplicationId(
+        applicationId
+      );
+
+
+    const title =
+      this.getTab(
+        normalizedApplicationId
+      )
+        ?.title
+        ?.trim();
+
+
+    return (
+      title ||
+      normalizedApplicationId
+    );
   }
 
 
@@ -384,6 +441,7 @@ export class WorkspaceRuntimeService {
 
             return {
               ...tab,
+
               dirty
             };
           }
@@ -414,8 +472,10 @@ export class WorkspaceRuntimeService {
         applicationId
       );
 
+
     const tabs =
       this.tabsState();
+
 
     const closingIndex =
       tabs.findIndex(
@@ -460,16 +520,20 @@ export class WorkspaceRuntimeService {
       );
 
 
-    if (!wasActive) {
+    if (
+      !wasActive
+    ) {
 
       this.tabsState.set(
         remainingTabs
       );
 
+
       this.toolbarRuntime
         .removeApplication(
           normalizedApplicationId
         );
+
 
       return true;
     }
@@ -484,14 +548,17 @@ export class WorkspaceRuntimeService {
         []
       );
 
+
       this.activeApplicationIdState.set(
         null
       );
+
 
       this.toolbarRuntime
         .removeApplication(
           normalizedApplicationId
         );
+
 
       return true;
     }
@@ -503,6 +570,7 @@ export class WorkspaceRuntimeService {
         remainingTabs.length - 1
       );
 
+
     const nextActiveApplicationId =
       remainingTabs[
         nextActiveIndex
@@ -513,6 +581,7 @@ export class WorkspaceRuntimeService {
       remainingTabs.map(
         tab => ({
           ...tab,
+
           active:
             tab.applicationId ===
             nextActiveApplicationId
@@ -547,15 +616,18 @@ export class WorkspaceRuntimeService {
    *
    * Intended for logout or full workspace reset.
    */
-  clear(): void {
+  clear():
+    void {
 
     this.tabsState.set(
       []
     );
 
+
     this.activeApplicationIdState.set(
       null
     );
+
 
     this.toolbarRuntime
       .clear();
@@ -579,7 +651,9 @@ export class WorkspaceRuntimeService {
         .toUpperCase();
 
 
-    if (!normalizedApplicationId) {
+    if (
+      !normalizedApplicationId
+    ) {
 
       throw new Error(
         'The XTEIN application identifier cannot be empty.'
