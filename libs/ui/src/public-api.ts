@@ -17,3 +17,6 @@ export * from './lib/forms/xtein-data-source-parameters/models/connection-field.
 export * from './lib/forms/xtein-data-source-parameters/services/connection-fields.service';
 export * from './lib/navigation/xtein-tree/xtein-tree.component';
 export * from './lib/components/xtein-dashboard/xtein-dashboard.component';
+export * from './lib/record-tools/xtein-record-filter/models/xtein-record-filter.model';
+export * from './lib/record-tools/xtein-record-filter/services/xtein-record-filter.service';
+export * from './lib/record-tools/xtein-record-filter/xtein-record-filter.component';

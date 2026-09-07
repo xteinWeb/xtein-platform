@@ -1,14 +1,23 @@
 /**
- * Defines the standard operating modes of an
- * XTEIN record-based application.
+ * Defines the functional modes supported by the
+ * XTEIN record toolbar.
+ *
+ * Every opened application maintains its own mode.
  */
 export const RecordToolbarMode = {
 
   /**
-   * Initial application state.
+   * Application has been initialized but does not yet
+   * expose a browsable record collection.
    */
   Initial:
     'initial',
+
+  /**
+   * Existing records are available for browsing.
+   */
+  Browsing:
+    'browsing',
 
   /**
    * A new record is being created.
@@ -23,22 +32,17 @@ export const RecordToolbarMode = {
     'editing',
 
   /**
-   * The current record is being copied into a new record.
+   * A new record is being created by copying the
+   * current record.
    */
   Copying:
-    'copying',
-
-  /**
-   * Existing records are being browsed.
-   */
-  Browsing:
-    'browsing'
+    'copying'
 
 } as const;
 
 
 /**
- * Represents a valid record toolbar mode.
+ * Represents a valid record-toolbar mode.
  */
 export type RecordToolbarMode =
   typeof RecordToolbarMode[

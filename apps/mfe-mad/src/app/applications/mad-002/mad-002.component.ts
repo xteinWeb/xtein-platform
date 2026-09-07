@@ -56,11 +56,16 @@ import {
 /**
  * MAD-002 - Dashboard and KPI Designer.
  *
- * MAD-002 owns the application-tree selection.
+ * Responsibilities:
  *
- * The visual Dashboard implementation belongs to @xtein/ui,
- * while Dashboard infrastructure and configuration belong to
- * @xtein/dashboard-runtime.
+ * - Load the application hierarchy.
+ * - Reload the hierarchy from the global record toolbar.
+ * - Select Dashboard and KPI applications.
+ * - Send the selected Dashboard identifier to the shared
+ *   XTEIN Dashboard control.
+ *
+ * DevExpress Dashboard implementation details remain
+ * encapsulated inside the shared platform libraries.
  */
 @Component({
   selector:
@@ -99,14 +104,14 @@ export class Mad002Component
 
 
   /**
-   * Fields included in the local tree search.
+   * Fields included in the application-tree search.
    */
   readonly treeSearchFields =
     Mad002TreeSearchFields;
 
 
   /**
-   * Complete application hierarchy returned by MAD-002.
+   * Complete application hierarchy.
    */
   readonly applications =
     signal<
@@ -117,17 +122,7 @@ export class Mad002Component
 
 
   /**
-   * Identifier of the Dashboard or KPI currently loaded
-   * inside the designer.
-   */
-  readonly selectedDashboardId =
-    signal(
-      ''
-    );
-
-
-  /**
-   * Currently selected application metadata.
+   * Application currently selected in the tree.
    */
   readonly selectedApplication =
     signal<
@@ -138,7 +133,17 @@ export class Mad002Component
 
 
   /**
-   * Indicates whether the application tree is collapsed.
+   * Dashboard identifier currently loaded in the
+   * shared Dashboard control.
+   */
+  readonly selectedDashboardId =
+    signal(
+      ''
+    );
+
+
+  /**
+   * Indicates whether the tree panel is collapsed.
    */
   readonly treePanelCollapsed =
     signal(
@@ -147,7 +152,7 @@ export class Mad002Component
 
 
   /**
-   * Indicates whether MAD-002 is processing an operation.
+   * Indicates whether MAD-002 is executing an operation.
    */
   readonly loading =
     signal(
@@ -156,7 +161,7 @@ export class Mad002Component
 
 
   /**
-   * Current toolbar permissions.
+   * Current record-toolbar permissions.
    */
   private permissions:
     Readonly<RecordToolbarPermissions> =
@@ -187,7 +192,7 @@ export class Mad002Component
 
 
   /**
-   * Initializes MAD-002.
+   * Initializes the application.
    */
   ngOnInit():
     void {
@@ -212,15 +217,14 @@ export class Mad002Component
 
 
   /**
-   * Handles selection from the shared XTEIN tree.
+   * Handles an item selected from the XTEIN tree.
    *
-   * Module nodes are navigation containers and do not open
-   * the Dashboard Designer.
+   * Dashboard and KPI records load the Dashboard whose
+   * identifier corresponds to ID_APLICACION.
    *
-   * Dashboard and KPI nodes load their corresponding
-   * Dashboard identifier.
+   * Container/module records only update tree selection.
    *
-   * @param item Selected application-tree item.
+   * @param item Selected tree item.
    */
   selectTreeItem(
     item:
@@ -232,14 +236,6 @@ export class Mad002Component
         item,
         'ID_APLICACION'
       );
-
-
-    const applicationType =
-      this.readString(
-        item,
-        'TIPO'
-      )
-        .toUpperCase();
 
 
     if (
@@ -274,22 +270,24 @@ export class Mad002Component
 
 
     if (
-      !Mad002DesignableApplicationTypes
-        .has(
-          applicationType
-        )
+      !this.isDesignableApplication(
+        application
+      )
     ) {
-
-      this.selectedDashboardId.set(
-        ''
-      );
 
       return;
     }
 
 
+    /*
+     * Do not rely only on Angular input binding.
+     *
+     * XteinDashboardComponent explicitly calls
+     * DashboardControl.loadDashboard when this value changes,
+     * reproducing the behavior of the legacy Dashboard wrapper.
+     */
     this.selectedDashboardId.set(
-      applicationId
+      application.ID_APLICACION
     );
   }
 
@@ -309,8 +307,8 @@ export class Mad002Component
 
 
   /**
-   * Subscribes the application to commands emitted by the
-   * shared XTEIN record toolbar.
+   * Subscribes MAD-002 to commands emitted by
+   * the global XTEIN record toolbar.
    */
   private subscribeToToolbar():
     void {
@@ -333,7 +331,10 @@ export class Mad002Component
 
 
   /**
-   * Handles MAD-002 toolbar commands.
+   * Handles commands from the global XTEIN record toolbar.
+   *
+   * Refresh reproduces the legacy r_refrescar operation:
+   * the complete application tree is requested again.
    *
    * @param command Toolbar command.
    */
@@ -348,7 +349,9 @@ export class Mad002Component
 
       case ToolbarAction.Refresh:
 
-        this.refresh();
+        this.reloadApplicationTree(
+          true
+        );
 
         break;
 
@@ -361,10 +364,18 @@ export class Mad002Component
 
 
   /**
-   * Loads permissions and the initial application hierarchy.
+   * Loads permissions and the application tree.
    */
   private loadInitialData():
     void {
+
+    if (
+      this.loading()
+    ) {
+
+      return;
+    }
+
 
     this.loading.set(
       true
@@ -411,13 +422,9 @@ export class Mad002Component
                   );
 
 
-                this.applications.set(
-                  applications
-                );
-
-
-                this.restoreSelection(
-                  applications
+                this.applyApplicationTree(
+                  applications,
+                  ''
                 );
 
 
@@ -462,13 +469,21 @@ export class Mad002Component
 
 
   /**
-   * Reloads the application hierarchy.
+   * Reloads the complete application hierarchy.
    *
-   * The currently opened Dashboard is preserved when it still
-   * exists after the refresh.
+   * This method intentionally executes ARBOL_APLICACIONES again.
+   * It does not only repaint the existing tree.
+   *
+   * The currently loaded Dashboard remains selected when the
+   * corresponding application still exists.
+   *
+   * @param notifyUser Indicates whether a successful refresh
+   * should display a notification.
    */
-  private refresh():
-    void {
+  private reloadApplicationTree(
+    notifyUser:
+      boolean
+  ): void {
 
     if (
       this.loading()
@@ -482,6 +497,10 @@ export class Mad002Component
       this.selectedApplication()
         ?.ID_APLICACION ??
       '';
+
+
+    const selectedDashboardId =
+      this.selectedDashboardId();
 
 
     this.loading.set(
@@ -514,34 +533,34 @@ export class Mad002Component
                   );
 
 
-                this.applications.set(
-                  applications
+                this.applyApplicationTree(
+                  applications,
+                  selectedApplicationId
                 );
 
 
+                /*
+                 * Preserve the currently displayed Dashboard only when
+                 * the corresponding application continues to exist.
+                 */
                 if (
-                  selectedApplicationId
+                  selectedDashboardId
                 ) {
 
-                  const selectedApplication =
+                  const dashboardApplication =
                     applications
                       .find(
                         application =>
                           application.ID_APLICACION ===
-                          selectedApplicationId
+                          selectedDashboardId
                       ) ??
                     null;
 
 
-                  this.selectedApplication.set(
-                    selectedApplication
-                  );
-
-
                   if (
-                    !selectedApplication ||
+                    !dashboardApplication ||
                     !this.isDesignableApplication(
-                      selectedApplication
+                      dashboardApplication
                     )
                   ) {
 
@@ -549,24 +568,18 @@ export class Mad002Component
                       ''
                     );
                   }
-
-                } else {
-
-                  this.selectedApplication.set(
-                    null
-                  );
-
-
-                  this.selectedDashboardId.set(
-                    ''
-                  );
                 }
 
 
-                this.notification
-                  .info(
-                    'Información actualizada.'
-                  );
+                if (
+                  notifyUser
+                ) {
+
+                  this.notification
+                    .success(
+                      'Árbol de aplicaciones actualizado.'
+                    );
+                }
 
               } catch (error) {
 
@@ -591,60 +604,53 @@ export class Mad002Component
 
 
   /**
-   * Restores a valid Dashboard selection after loading data.
+   * Applies a newly retrieved application hierarchy.
    *
-   * @param applications Loaded applications.
+   * A new array reference is always assigned so the shared
+   * tree rebuilds its internal hierarchy.
+   *
+   * @param applications New application hierarchy.
+   * @param selectedApplicationId Previous selection.
    */
-  private restoreSelection(
+  private applyApplicationTree(
     applications:
-      readonly Mad002ApplicationNode[]
+      readonly Mad002ApplicationNode[],
+
+    selectedApplicationId:
+      string
   ): void {
 
-    const dashboardId =
-      this.selectedDashboardId();
+    this.applications.set(
+      [
+        ...applications
+      ]
+    );
 
 
     if (
-      !dashboardId
-    ) {
-
-      return;
-    }
-
-
-    const application =
-      applications
-        .find(
-          current =>
-            current.ID_APLICACION ===
-            dashboardId
-        ) ??
-      null;
-
-
-    if (
-      !application ||
-      !this.isDesignableApplication(
-        application
-      )
+      !selectedApplicationId
     ) {
 
       this.selectedApplication.set(
         null
       );
 
-
-      this.selectedDashboardId.set(
-        ''
-      );
-
-
       return;
     }
 
 
+    const selectedApplication =
+      applications
+        .find(
+          application =>
+            application.ID_APLICACION ===
+            selectedApplicationId
+        ) ??
+      null;
+
+
     this.selectedApplication.set(
-      application
+      selectedApplication
     );
   }
 
@@ -682,18 +688,18 @@ export class Mad002Component
 
 
   /**
-   * Determines whether an application can be opened inside
-   * the Dashboard Designer.
+   * Determines whether an application represents a Dashboard
+   * that can be loaded by the Dashboard Designer.
    *
    * @param application Application record.
-   * @returns True for Dashboard and KPI applications.
+   * @returns True when the application is designable.
    */
   private isDesignableApplication(
     application:
       Mad002ApplicationNode
   ): boolean {
 
-    const type =
+    const applicationType =
       application.TIPO
         ?.trim()
         .toUpperCase() ??
@@ -702,7 +708,7 @@ export class Mad002Component
 
     return Mad002DesignableApplicationTypes
       .has(
-        type
+        applicationType
       );
   }
 
@@ -786,7 +792,7 @@ export class Mad002Component
 
 
   /**
-   * Reads one string property from a generic XTEIN tree item.
+   * Reads one string property from a generic tree item.
    *
    * @param item Tree item.
    * @param propertyName Property name.
@@ -810,11 +816,10 @@ export class Mad002Component
 
 
   /**
-   * Displays an unexpected application error using the
-   * shared XTEIN notification service.
+   * Displays an unexpected application error.
    *
    * @param error Unknown error.
-   * @param fallbackMessage Default message.
+   * @param fallbackMessage Default user-facing message.
    */
   private showUnknownError(
     error:

@@ -4,13 +4,15 @@ import {
 
 
 /**
- * Represents a toolbar action dispatched to one specific
- * XTEIN workspace application.
+ * Represents a command emitted by the global XTEIN
+ * record toolbar.
  *
- * Because each application can only have one open workspace tab,
- * applicationId uniquely identifies the command destination.
+ * Commands are routed to the application that owns the
+ * active workspace tab.
  */
-export interface ToolbarCommand<TPayload = unknown> {
+export interface ToolbarCommand<
+  TPayload = unknown
+> {
 
   /**
    * Application that must receive the command.
@@ -21,18 +23,19 @@ export interface ToolbarCommand<TPayload = unknown> {
   applicationId:
     string;
 
+
   /**
-   * Toolbar action requested by the user.
+   * Requested toolbar action.
    */
   action:
     ToolbarAction;
 
+
   /**
    * Optional action-specific information.
    *
-   * Most standard record-toolbar actions do not require a payload,
-   * but the contract allows future actions to provide additional data
-   * without changing the command infrastructure.
+   * Example:
+   * GoTo can provide the requested record index.
    */
   payload?:
     TPayload;

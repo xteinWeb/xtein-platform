@@ -2,7 +2,6 @@
   class="xt-dashboard">
 
   @if (
-    dashboardId &&
     endpoint()
   ) {
 
@@ -10,8 +9,46 @@
       class="xt-dashboard__control"
       [endpoint]="endpoint()"
       [dashboardId]="dashboardId"
-      [workingMode]="workingMode">
+      [workingMode]="workingMode"
+      (onBeforeRender)="handleBeforeRender($event)">
     </dx-dashboard-control>
+
+
+    @if (
+      !dashboardId
+    ) {
+
+      <div
+        class="xt-dashboard__empty">
+
+        <div
+          class="xt-dashboard__empty-icon">
+
+          <i
+            class="icon-dashboard-ol">
+          </i>
+
+        </div>
+
+
+        <span
+          class="xt-dashboard__empty-title">
+
+          Diseñador de Dashboard
+
+        </span>
+
+
+        <span
+          class="xt-dashboard__empty-message">
+
+          Seleccione un Dashboard o KPI para comenzar.
+
+        </span>
+
+      </div>
+
+    }
 
   } @else {
 
@@ -31,7 +68,7 @@
       <span
         class="xt-dashboard__empty-title">
 
-        Diseñador de Dashboard
+        Dashboard no disponible
 
       </span>
 
@@ -39,7 +76,7 @@
       <span
         class="xt-dashboard__empty-message">
 
-        Seleccione un Dashboard o KPI para comenzar.
+        La plataforma no ha inicializado el servicio de Dashboard.
 
       </span>
 

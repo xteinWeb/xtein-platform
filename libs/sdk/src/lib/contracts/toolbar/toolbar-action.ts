@@ -1,13 +1,17 @@
 /**
- * Defines the standard actions available in the XTEIN platform toolbar.
+ * Defines all standard actions supported by the
+ * XTEIN platform record toolbar.
  *
- * Applications receive these actions through the platform SDK without
- * depending on the Shell toolbar implementation.
+ * Applications communicate with the toolbar through
+ * these actions without depending on the Shell UI.
  */
 export const ToolbarAction = {
 
   /**
-   * Initializes the toolbar for the active application.
+   * Initializes the toolbar.
+   *
+   * This is an internal platform action and is not
+   * rendered as a visual toolbar button.
    */
   Initialize:
     'initialize',
@@ -25,13 +29,19 @@ export const ToolbarAction = {
     'edit',
 
   /**
-   * Saves the current changes.
+   * Creates a new record based on the current record.
+   */
+  Copy:
+    'copy',
+
+  /**
+   * Saves the current create/edit/copy operation.
    */
   Save:
     'save',
 
   /**
-   * Cancels the current changes.
+   * Cancels the current create/edit/copy operation.
    */
   Cancel:
     'cancel',
@@ -43,46 +53,22 @@ export const ToolbarAction = {
     'delete',
 
   /**
-   * Searches existing records.
+   * Opens or executes application search.
    */
   Search:
     'search',
 
   /**
-   * Orders the current loaded record collection.
-   */
-  Sort:
-    'sort',
-
-  /**
-   * Refreshes application data.
-   */
-  Refresh:
-    'refresh',
-
-  /**
-   * Copies the current record.
-   */
-  Copy:
-    'copy',
-
-  /**
-   * Opens the current loaded records in quick-view mode.
+   * Opens the quick record view.
    */
   View:
     'view',
 
   /**
-   * Downloads the current loaded data.
+   * Executes application sorting.
    */
-  Download:
-    'download',
-
-  /**
-   * Opens application configuration.
-   */
-  Configure:
-    'configure',
+  Sort:
+    'sort',
 
   /**
    * Navigates to the first record.
@@ -97,6 +83,12 @@ export const ToolbarAction = {
     'previous',
 
   /**
+   * Navigates directly to a record number.
+   */
+  GoTo:
+    'go-to',
+
+  /**
    * Navigates to the next record.
    */
   Next:
@@ -109,10 +101,28 @@ export const ToolbarAction = {
     'last',
 
   /**
-   * Executes the application print or list operation.
+   * Opens print/reporting options.
    */
   Print:
-    'print'
+    'print',
+
+  /**
+   * Downloads information exposed by the application.
+   */
+  Download:
+    'download',
+
+  /**
+   * Reloads application information.
+   */
+  Refresh:
+    'refresh',
+
+  /**
+   * Opens application configuration options.
+   */
+  Configure:
+    'configure'
 
 } as const;
 

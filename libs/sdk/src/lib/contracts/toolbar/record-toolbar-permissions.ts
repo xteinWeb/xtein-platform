@@ -1,56 +1,98 @@
 /**
- * Defines the record toolbar permissions granted to the
- * current user for a specific XTEIN application.
+ * Defines the record-toolbar permissions returned by
+ * the existing XTEIN authorization infrastructure.
  *
- * These permissions originate from USUARIOS_APL_ASO.
+ * These properties correspond to the user operations
+ * configured for one application.
  */
 export interface RecordToolbarPermissions {
 
   /**
-   * Permission to create records.
+   * User can create records.
    *
-   * Database field:
-   * CREAR
+   * Legacy operation:
+   * r_nuevo
    */
-  create: boolean;
+  create:
+    boolean;
+
 
   /**
-   * Permission to modify existing records.
+   * User can modify records.
    *
-   * Database field:
-   * MODIFICAR
+   * Legacy operation:
+   * r_modificar
    */
-  edit: boolean;
+  edit:
+    boolean;
+
 
   /**
-   * Permission to delete records.
+   * User can delete records.
    *
-   * Database field:
-   * ELIMINAR
+   * Legacy operation:
+   * r_eliminar
    */
-  delete: boolean;
+  delete:
+    boolean;
+
 
   /**
-   * Permission to search records.
+   * User can search records.
    *
-   * Database field:
-   * BUSCAR
+   * Legacy operation:
+   * r_buscar
    */
-  search: boolean;
+  search:
+    boolean;
+
 
   /**
-   * Permission to list or print information.
+   * User can print/report information.
    *
-   * Database field:
-   * LISTAR
+   * Legacy operation:
+   * r_imprimir
    */
-  print: boolean;
+  print:
+    boolean;
+
 
   /**
-   * Permission to configure the application.
+   * User can configure the application.
    *
-   * Database field:
-   * CONFIGURAR
+   * Legacy operation:
+   * r_configurar
    */
-  configure: boolean;
+  configure:
+    boolean;
 }
+
+
+/**
+ * Safe default permissions used until the application's
+ * real permissions have been loaded.
+ *
+ * Deny-by-default prevents the toolbar from temporarily
+ * exposing unauthorized operations.
+ */
+export const DeniedRecordToolbarPermissions:
+  Readonly<RecordToolbarPermissions> = {
+
+    create:
+      false,
+
+    edit:
+      false,
+
+    delete:
+      false,
+
+    search:
+      false,
+
+    print:
+      false,
+
+    configure:
+      false
+  };

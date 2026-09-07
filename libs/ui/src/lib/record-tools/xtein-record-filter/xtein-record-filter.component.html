@@ -1,0 +1,229 @@
+<dx-popup
+  [visible]="visible"
+  [showTitle]="true"
+  [title]="title"
+  [width]="'min(760px, 94vw)'"
+  [height]="'min(560px, 88vh)'"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="false"
+  (onHiding)="handleVisibleChange(false)">
+
+  <div
+    *dxTemplate="let data of 'content'"
+    class="xtein-record-filter">
+
+    @if (loading) {
+
+      <div class="xtein-record-filter__status">
+        Cargando campos de búsqueda...
+      </div>
+
+    } @else if (errorMessage) {
+
+      <div class="xtein-record-filter__error">
+        {{ errorMessage }}
+      </div>
+
+    } @else {
+
+      <dx-data-grid
+        class="xtein-record-filter__grid"
+        [dataSource]="fields"
+        keyExpr="CAMPO"
+        [showBorders]="true"
+        [columnAutoWidth]="true"
+        [allowColumnResizing]="true"
+        columnResizingMode="nextColumn"
+        [rowAlternationEnabled]="true"
+        [hoverStateEnabled]="true">
+
+        <dxo-paging
+          [pageSize]="10">
+        </dxo-paging>
+
+        <dxo-pager
+          [visible]="true"
+          [allowedPageSizes]="allowedPageSizes"
+          displayMode="full"
+          [showPageSizeSelector]="true"
+          [showInfo]="true"
+          [showNavigationButtons]="true">
+        </dxo-pager>
+
+        <dxi-column
+          dataField="TITULO"
+          caption="Campo"
+          [allowSorting]="false"
+          [allowFiltering]="false"
+          width="35%">
+        </dxi-column>
+
+        <dxi-column
+          caption="Valor"
+          [allowSorting]="false"
+          [allowFiltering]="false"
+          cellTemplate="valueTemplate">
+        </dxi-column>
+
+        <div
+          *dxTemplate="let cell of 'valueTemplate'">
+
+          @if (
+            cell.data.DATA_TYPE ===
+            'smalldatetime'
+          ) {
+
+            <div class="xtein-record-filter__date-range">
+
+              <dx-date-box
+                type="date"
+                [value]="getDateFrom(cell.data)"
+                placeholder="Desde"
+                (onValueChanged)="
+                  setDateFrom(
+                    cell.data,
+                    $event.value
+                  )
+                ">
+              </dx-date-box>
+
+              <dx-date-box
+                type="date"
+                [value]="getDateTo(cell.data)"
+                placeholder="Hasta"
+                (onValueChanged)="
+                  setDateTo(
+                    cell.data,
+                    $event.value
+                  )
+                ">
+              </dx-date-box>
+
+            </div>
+
+          } @else if (
+            cell.data.DATA_TYPE ===
+            'bit'
+          ) {
+
+            <dx-check-box
+              [value]="
+                cell.data.VALOR === ''
+                  ? null
+                  : cell.data.VALOR
+              "
+              [enableThreeStateBehavior]="true"
+              (onValueChanged)="
+                setValue(
+                  cell.data,
+                  $event.value
+                )
+              ">
+            </dx-check-box>
+
+          } @else if (
+            cell.data.DATA_TYPE ===
+            'listauni'
+          ) {
+
+            <dx-select-box
+              [items]="getInlineItems(cell.data)"
+              displayExpr="KEY_COL"
+              valueExpr="KEY_COL"
+              [showClearButton]="true"
+              [searchEnabled]="true"
+              [value]="cell.data.VALOR || null"
+              (onValueChanged)="
+                setValue(
+                  cell.data,
+                  $event.value
+                )
+              ">
+            </dx-select-box>
+
+          } @else if (
+            cell.data.DATA_TYPE ===
+            'lista'
+          ) {
+
+            <dx-tag-box
+              [dataSource]="getListDataSource(cell.data)"
+              displayExpr="KEY_COL"
+              valueExpr="KEY_COL"
+              [searchEnabled]="true"
+              [showSelectionControls]="true"
+              applyValueMode="useButtons"
+              [showClearButton]="true"
+              [value]="cell.data.VALOR || []"
+              (onValueChanged)="
+                setValue(
+                  cell.data,
+                  $event.value
+                )
+              ">
+            </dx-tag-box>
+
+          } @else if (
+            cell.data.DATA_TYPE ===
+            'searchbox'
+          ) {
+
+            <xtein-record-autosearch
+              [specification]="cell.data.DATA || ''"
+              [value]="cell.data.VALOR || ''"
+              (valueChange)="
+                setValue(
+                  cell.data,
+                  $event
+                )
+              ">
+            </xtein-record-autosearch>
+
+          } @else {
+
+            <dx-text-box
+              [value]="cell.data.VALOR || ''"
+              [showClearButton]="true"
+              (onValueChanged)="
+                setValue(
+                  cell.data,
+                  $event.value
+                )
+              ">
+            </dx-text-box>
+          }
+
+        </div>
+
+      </dx-data-grid>
+    }
+
+    <div class="xtein-record-filter__actions">
+
+      <dx-button
+        text="Buscar"
+        type="default"
+        stylingMode="contained"
+        [width]="100"
+        [disabled]="
+          loading ||
+          !!errorMessage
+        "
+        (onClick)="executeSearch()">
+      </dx-button>
+
+      <dx-button
+        text="Cancelar"
+        type="normal"
+        stylingMode="outlined"
+        [width]="110"
+        (onClick)="cancel()">
+      </dx-button>
+
+    </div>
+
+  </div>
+
+</dx-popup>

@@ -1,25 +1,28 @@
 import {
-  RecordToolbarMode
-} from './record-toolbar-mode';
-
-import {
   ToolbarAction
 } from './toolbar-action';
 
+import {
+  RecordToolbarMode
+} from './record-toolbar-mode';
+
 
 /**
- * Defines the visual and interaction state of a toolbar action.
+ * Defines the visual and interaction state of one
+ * toolbar action.
  */
 export interface ToolbarActionState {
 
   /**
-   * Indicates whether the toolbar action is visible.
+   * Indicates whether the action is rendered.
    */
   visible:
     boolean;
 
+
   /**
-   * Indicates whether the toolbar action can currently be executed.
+   * Indicates whether the action can currently
+   * be executed.
    */
   enabled:
     boolean;
@@ -27,25 +30,30 @@ export interface ToolbarActionState {
 
 
 /**
- * Defines the record-specific information displayed by the
- * standard XTEIN platform toolbar.
+ * Defines the record information associated with
+ * one application's toolbar state.
  */
-export interface ToolbarRecordState {
+export interface RecordToolbarState {
 
   /**
-   * Current functional record operation mode.
+   * Current functional mode.
    */
   mode:
     RecordToolbarMode;
 
+
   /**
    * Zero-based index of the current record.
+   *
+   * Zero is also used when the application does not
+   * currently expose records.
    */
   currentIndex:
     number;
 
+
   /**
-   * Total number of loaded records.
+   * Total number of available records.
    */
   totalRecords:
     number;
@@ -53,15 +61,16 @@ export interface ToolbarRecordState {
 
 
 /**
- * Represents the toolbar state published by an application.
+ * Represents the complete toolbar state published by
+ * one XTEIN application.
  *
- * The Shell uses this contract to configure the platform toolbar according
- * to the requirements and current state of the active application.
+ * ToolbarRuntimeService stores this state independently
+ * for every opened application.
  */
 export interface ToolbarState {
 
   /**
-   * Identifier of the application that owns this toolbar state.
+   * Application that owns this state.
    *
    * Example:
    * MAD-005
@@ -69,11 +78,9 @@ export interface ToolbarState {
   applicationId:
     string;
 
+
   /**
-   * Defines the state of each toolbar action supported by the application.
-   *
-   * Actions not included in this collection are considered unavailable
-   * for the current application.
+   * Current state of all toolbar actions.
    */
   actions:
     Partial<
@@ -83,11 +90,18 @@ export interface ToolbarState {
       >
     >;
 
+
   /**
-   * Optional record navigation and operation state.
-   *
-   * Non-record applications can omit this value completely.
+   * Current application record/mode state.
    */
-  record?:
-    ToolbarRecordState;
+  record:
+    RecordToolbarState;
+
+
+  /**
+   * Indicates whether the application currently contains
+   * unsaved modifications.
+   */
+  dirty?:
+    boolean;
 }

@@ -105,15 +105,15 @@ export const Mad005DefaultRecord:
 
 
 /**
- * Defines the record-toolbar capabilities currently implemented
+ * Defines the record-toolbar capabilities implemented
  * by MAD-005.
  *
- * Shared platform operations such as advanced filtering, quick view,
- * reporting, and application configuration are enabled in later
- * migration stages after their reusable platform components exist.
+ * Every capability is declared explicitly so newly added
+ * platform capabilities cannot become enabled accidentally
+ * through shared defaults.
  */
 export const Mad005ToolbarCapabilities:
-  Partial<RecordToolbarCapabilities> = {
+  Readonly<RecordToolbarCapabilities> = {
 
     create:
       true,
@@ -136,8 +136,14 @@ export const Mad005ToolbarCapabilities:
     view:
       false,
 
+    sort:
+      false,
+
     navigation:
       true,
+
+    download:
+      false,
 
     print:
       false,

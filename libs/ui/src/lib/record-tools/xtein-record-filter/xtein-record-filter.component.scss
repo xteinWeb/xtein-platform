@@ -1,0 +1,95 @@
+:host {
+  display: contents;
+}
+
+
+.xtein-record-filter {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  min-height: 0;
+}
+
+
+.xtein-record-filter__grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+
+.xtein-record-filter__status,
+.xtein-record-filter__error {
+  padding: 1rem;
+
+  border-radius: 8px;
+}
+
+
+.xtein-record-filter__status {
+  background:
+    rgba(
+      36,
+      77,
+      115,
+      0.06
+    );
+}
+
+
+.xtein-record-filter__error {
+  background:
+    rgba(
+      190,
+      45,
+      45,
+      0.08
+    );
+
+  color:
+    #8b1e1e;
+}
+
+
+.xtein-record-filter__date-range {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap:
+    0.75rem;
+}
+
+
+.xtein-record-filter__actions {
+  display: flex;
+
+  gap:
+    0.75rem;
+
+  flex:
+    0 0 auto;
+
+  padding-top:
+    0.9rem;
+}
+
+
+@media (
+  max-width:
+    640px
+) {
+
+  .xtein-record-filter__date-range {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .xtein-record-filter__actions {
+    flex-direction:
+      column;
+  }
+}
