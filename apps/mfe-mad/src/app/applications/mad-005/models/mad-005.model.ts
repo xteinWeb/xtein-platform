@@ -95,3 +95,8 @@ export interface Mad005DataSourceConfigurationRecord
    */
   QFILTRO?: string;
 }
+/** Boolean option displayed by MAD-005 controls. */
+export interface Mad005BooleanOption {
+  text: string;
+  value: boolean;
+}

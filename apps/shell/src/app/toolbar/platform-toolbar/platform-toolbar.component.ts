@@ -1,11 +1,11 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
   OnDestroy,
   ViewChild,
+  afterEveryRender,
   computed,
   signal
 } from '@angular/core';
@@ -22,8 +22,7 @@ import {
 import {
   PlatformToolbarGroup,
   PlatformToolbarItem,
-  PlatformToolbarItems,
-  PlatformToolbarResponsivePriority
+  PlatformToolbarItems
 } from './platform-toolbar.constants';
 
 
@@ -68,20 +67,21 @@ interface PlatformToolbarModeIndicator {
     ChangeDetectionStrategy.OnPush
 })
 export class PlatformToolbar
-  implements AfterViewInit, OnDestroy {
+  implements OnDestroy {
 
   @ViewChild(
     'toolbarContainer'
   )
-  private toolbarContainer?:
-    ElementRef<HTMLElement>;
+  private set toolbarContainer(value: ElementRef<HTMLElement> | undefined) {
+    this.resizeObserver?.disconnect();
+    this.toolbarElement = value;
+    this.observeToolbar();
+  }
+
+  private toolbarElement?: ElementRef<HTMLElement>;
 
 
-  private readonly toolbarWidth =
-    signal(
-      0
-    );
-
+  private readonly hiddenActions = signal<readonly ToolbarAction[]>([]);
 
   readonly overflowMenuOpen =
     signal(
@@ -147,48 +147,6 @@ export class PlatformToolbar
     );
 
 
-  private readonly visiblePriority =
-    computed(
-      () => {
-
-        const width =
-          this.toolbarWidth();
-
-        const mode =
-          this.toolbarRuntime
-            .activeToolbarState()
-            ?.record
-            ?.mode;
-
-        if (
-          mode === RecordToolbarMode.Creating ||
-          mode === RecordToolbarMode.Editing ||
-          mode === RecordToolbarMode.Copying
-        ) {
-
-          return PlatformToolbarResponsivePriority.Extended;
-        }
-
-        if (width <= 0) {
-
-          return PlatformToolbarResponsivePriority.Extended;
-        }
-
-        if (width >= 900) {
-
-          return PlatformToolbarResponsivePriority.Extended;
-        }
-
-        if (width >= 620) {
-
-          return PlatformToolbarResponsivePriority.Standard;
-        }
-
-        return PlatformToolbarResponsivePriority.Essential;
-      }
-    );
-
-
   readonly mainItems =
     computed<
       readonly RenderedPlatformToolbarItem[]
@@ -198,8 +156,7 @@ export class PlatformToolbar
           this.availableItems()
             .filter(
               item =>
-                item.responsivePriority <=
-                this.visiblePriority()
+                !this.hiddenActions().includes(item.action)
             )
         )
     );
@@ -214,8 +171,7 @@ export class PlatformToolbar
           this.availableItems()
             .filter(
               item =>
-                item.responsivePriority >
-                this.visiblePriority()
+                this.hiddenActions().includes(item.action)
             )
         )
     );
@@ -357,60 +313,79 @@ export class PlatformToolbar
     private readonly toolbarRuntime:
       ToolbarRuntimeService
   ) {
+    afterEveryRender(() => this.updateLayout());
+  }
+
+  readonly goToEnabled = computed(() =>
+    this.toolbarRuntime.activeToolbarState()?.actions[ToolbarAction.GoTo]?.enabled === true);
+
+  goToRecord(input: HTMLInputElement): void {
+    const value = input.valueAsNumber;
+    if (Number.isInteger(value) && value >= 1 && value <= this.totalRecords()) {
+      this.toolbarRuntime.dispatchAction(ToolbarAction.GoTo, value);
+    }
+    input.value = String(this.currentRecord());
   }
 
 
-  ngAfterViewInit():
-    void {
-
-    const element =
-      this.toolbarContainer
-        ?.nativeElement;
-
-    if (!element) {
-
-      return;
-    }
-
-    this.toolbarWidth.set(
-      Math.round(
-        element.getBoundingClientRect().width
-      )
-    );
-
-    if (
-      typeof ResizeObserver ===
-        'undefined'
-    ) {
-
-      return;
-    }
-
-    this.resizeObserver =
-      new ResizeObserver(
-        entries => {
-
-          const entry =
-            entries[0];
-
-          if (!entry) {
-
-            return;
-          }
-
-          this.toolbarWidth.set(
-            Math.round(
-              entry.contentRect.width
-            )
-          );
-        }
-      );
-
-    this.resizeObserver.observe(
-      element
-    );
+  private observeToolbar(): void {
+    const host = this.toolbarElement?.nativeElement.parentElement;
+    if (!host || typeof ResizeObserver === 'undefined') return;
+    this.resizeObserver = new ResizeObserver(() => this.updateLayout());
+    this.resizeObserver.observe(host);
+    const measurement = host.querySelector<HTMLElement>('[data-measurement]');
+    if (measurement) this.resizeObserver.observe(measurement);
   }
 
+  private updateLayout(): void {
+    const nav = this.toolbarElement?.nativeElement;
+    const host = nav?.parentElement;
+    const measurement = host?.querySelector<HTMLElement>('[data-measurement]');
+    if (!nav || !host || !measurement) return;
+    const outerWidth = (selector: string): number => {
+      const element = measurement.querySelector<HTMLElement>(selector)!;
+      const style = getComputedStyle(element);
+      return element.getBoundingClientRect().width +
+        parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+    };
+    const style = getComputedStyle(nav);
+    const gap = parseFloat(getComputedStyle(measurement).columnGap) || 0;
+    const chrome = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
+      parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+    const button = outerWidth('.xt-platform-toolbar__button');
+    const separator = outerWidth('.xt-platform-toolbar__separator');
+    const position = outerWidth('.xt-platform-toolbar__position');
+    const mode = this.modeIndicator() !== null;
+    const available = host.clientWidth;
+    if (available <= 0) return;
+    const items = this.availableItems();
+    let main = [...items];
+    const width = (): number => {
+      const widths: number[] = mode ? [button] : [];
+      for (const item of this.withSeparators(main)) {
+        if (item.separatorBefore || (mode && widths.length === 1)) widths.push(separator);
+        widths.push(button);
+        if (item.action === ToolbarAction.Previous && this.totalRecords() > 0) widths.push(position);
+      }
+      if (main.length < items.length) {
+        if (widths.length) widths.push(separator);
+        widths.push(button);
+      }
+      return chrome + widths.reduce((sum, value) => sum + value, 0) +
+        Math.max(0, widths.length - 1) * gap;
+    };
+    // Use priorities only when the controls exceed the available space.
+    const removalOrder = [...items].reverse().sort((a, b) => b.responsivePriority - a.responsivePriority);
+    for (const item of removalOrder) {
+      if (width() <= available || items.length === 1) break;
+      main = main.filter(candidate => candidate.action !== item.action);
+    }
+    const hidden = items.filter(item => !main.includes(item)).map(item => item.action);
+    if (hidden.join('|') !== this.hiddenActions().join('|')) {
+      this.hiddenActions.set(hidden);
+      this.overflowMenuOpen.set(false);
+    }
+  }
 
   ngOnDestroy():
     void {

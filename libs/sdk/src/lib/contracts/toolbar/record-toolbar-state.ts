@@ -27,6 +27,9 @@ import {
  */
 export interface CreateRecordToolbarStateOptions {
 
+  /** Prevent commands while the application is awaiting backend work. */
+  busy?: boolean;
+
   /**
    * Application that owns the state.
    */
@@ -458,6 +461,12 @@ export function createRecordToolbarState(
       break;
   }
 
+
+  if (options.busy) {
+    for (const action of Object.values(actions)) {
+      action.enabled = false;
+    }
+  }
 
   return {
 

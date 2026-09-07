@@ -1,0 +1,47 @@
+<dx-popup
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  [title]="title"
+  [showCloseButton]="true"
+  [width]="'min(1100px, 96vw)'"
+  [height]="'min(760px, 90dvh)'">
+
+  <div *dxTemplate="let content of 'content'" class="xtein-record-view">
+    <p class="xtein-record-view__hint">
+      Seleccione un registro y pulse Abrir seleccionado, o haga doble clic en la fila.
+    </p>
+
+    <dx-data-grid
+      class="xtein-record-view__grid"
+      [dataSource]="data"
+      [columns]="columns"
+      [keyExpr]="keyField"
+      [showBorders]="true"
+      [columnAutoWidth]="true"
+      [columnHidingEnabled]="true"
+      [wordWrapEnabled]="true"
+      [width]="'100%'"
+      height="100%"
+      (onRowDblClick)="select($event.data)"
+      (onSelectionChanged)="selectedRecord = $event.selectedRowsData[0]">
+      <dxo-search-panel [visible]="true" [width]="180"></dxo-search-panel>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-paging [pageSize]="20"></dxo-paging>
+      <dxo-pager displayMode="adaptive" [showNavigationButtons]="true"></dxo-pager>
+      <dxo-selection mode="single"></dxo-selection>
+    </dx-data-grid>
+
+    <div class="xtein-record-view__actions">
+      <xtein-button
+        text="Abrir seleccionado"
+        [disabled]="!selectedRecord"
+        (clicked)="select(selectedRecord)">
+      </xtein-button>
+      <xtein-button
+        text="Cerrar"
+        variant="secondary"
+        (clicked)="visibleChange.emit(false)">
+      </xtein-button>
+    </div>
+  </div>
+</dx-popup>

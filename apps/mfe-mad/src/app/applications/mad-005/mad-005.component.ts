@@ -1,4 +1,7 @@
 import {
+  untracked,
+  computed,
+  effect,
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
@@ -41,6 +44,10 @@ import {
 import {
   DataSourceConnectionTestResult,
   XteinDataSourceParametersComponent,
+  XteinRecordFilterComponent,
+  XteinRecordFilterResult,
+  XteinRecordViewComponent,
+  XteinRecordReportsComponent,
   XteinInputComponent,
   XteinLoadingComponent,
   XteinNotificationService,
@@ -49,12 +56,14 @@ import {
 } from '@xtein/ui';
 
 import {
+  Mad005Action,
   Mad005Application
 } from './constants/mad-005.constants';
 
 import {
   Mad005DefaultOptions,
   Mad005DefaultRecord,
+  Mad005RecordViewColumns,
   Mad005StatusOptions,
   Mad005ToolbarCapabilities
 } from './constants/mad-005-ui.constants';
@@ -83,6 +92,9 @@ import {
 
   imports: [
     ReactiveFormsModule,
+    XteinRecordFilterComponent,
+    XteinRecordViewComponent,
+    XteinRecordReportsComponent,
     XteinInputComponent,
     XteinSelectComponent,
     XteinTextareaComponent,
@@ -113,6 +125,60 @@ export class Mad005Component
     XteinDataSourceParametersComponent;
 
 
+  readonly filterVisible = signal(false);
+  readonly viewVisible = signal(false);
+  readonly reportsVisible = signal(false);
+  readonly queryFilter = computed(() => this.records()[0]?.QFILTRO ?? '');
+  readonly viewColumns = Mad005RecordViewColumns;
+
+  currentReportFilter(): string {
+    const record = this.records()[this.currentIndex()];
+    return record ? " CONFIG_ORIGEN_DATO.ID_ORIGEN_DATO = '" + String(record.ID_ORIGEN_DATO).replace(/'/g, "''") + "'" : '';
+  }
+
+  selectViewedRecord(record: object): void {
+    if (this.loading() || this.isChanging()) return;
+    const index = this.records().findIndex(item => item.ID_ORIGEN_DATO === (record as Mad005DataSourceConfigurationRecord).ID_ORIGEN_DATO);
+    if (index >= 0) this.navigateTo(index);
+  }
+
+  searchRecords(filter: XteinRecordFilterResult): void {
+    if (this.loading() || this.isChanging() || !this.permissions.search) return;
+    this.filterVisible.set(false);
+    this.loading.set(true);
+    this.subscriptions.add(this.mad005Service.query(Mad005Action.Query, { CONFIG_ORIGEN_DATO: filter.ESTRUCTURA })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: response => {
+          try {
+            const result = this.parseBackendArray<Mad005DataSourceConfigurationRecord>(response.data);
+            const message = result[0]?.ErrMensaje;
+            const rows = message ? [] : result;
+            this.records.set(rows);
+            if (rows.length) this.navigateTo(0);
+            else {
+              this.currentIndex.set(0);
+              this.mode.set(RecordToolbarMode.Initial);
+              this.setFormRecord(Mad005DefaultRecord, true);
+              this.notification.warning(message || 'No se encontraron datos.');
+            }
+          } catch (error) { this.showUnknownError(error, 'No fue posible consultar los registros.'); }
+        },
+        error: error => this.showUnknownError(error, 'No fue posible consultar los registros.')
+      }));
+  }
+
+  private readonly synchronizeBusyToolbar = effect(() => {
+    this.loading();
+    untracked(() => this.publishToolbarState());
+  });
+  private readonly closeInactiveDialogs = effect(() => {
+    if (this.toolbarRuntime.activeApplicationId() !== this.applicationId) {
+      this.filterVisible.set(false);
+      this.viewVisible.set(false);
+      this.reportsVisible.set(false);
+    }
+  });
   readonly applicationId =
     Mad005Application.Id;
 
@@ -593,10 +659,27 @@ export class Mad005Component
       ToolbarCommand
   ): void {
 
+    if (this.loading()) return;
+
     switch (
       command.action
     ) {
 
+      case ToolbarAction.Search:
+        this.filterVisible.set(true);
+        break;
+      case ToolbarAction.View:
+        this.viewVisible.set(true);
+        break;
+      case ToolbarAction.Print:
+        this.reportsVisible.set(true);
+        break;
+      case ToolbarAction.GoTo:
+        if (typeof command.payload === 'number' && Number.isInteger(command.payload) &&
+            command.payload >= 1 && command.payload <= this.records().length) {
+          this.navigateTo(command.payload - 1);
+        }
+        break;
       case ToolbarAction.New:
 
         this.startCreating();
@@ -1586,6 +1669,7 @@ export class Mad005Component
     this.toolbarRuntime
       .setState(
         createRecordToolbarState({
+          busy: this.loading(),
 
           applicationId:
             this.applicationId,

@@ -292,3 +292,13 @@
   </xtein-loading>
 
 </section>
+<xtein-record-filter [visible]="filterVisible()" (visibleChange)="filterVisible.set($event)"
+  tableBase="APLICACIONES_ASOCIADAS" (search)="searchRecords($event)"></xtein-record-filter>
+<xtein-record-view [visible]="viewVisible()" (visibleChange)="viewVisible.set($event)"
+  [records]="applications()" [columns]="viewColumns" keyField="ID_APLICACION"
+  (selected)="selectViewedRecord($event)"></xtein-record-view>
+@if (reportsVisible()) {
+  <xtein-record-reports [visible]="reportsVisible()" (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId" table="APLICACIONES_ASOCIADAS"
+    [currentFilter]="currentReportFilter()" [allFilter]="queryFilter()"></xtein-record-reports>
+}

@@ -418,9 +418,12 @@ export class XteinRecordFilterComponent
       unknown
   ): void {
 
-    field.VALOR =
-      value ??
-      '';
+    const normalizedValue = value ?? '';
+    field.VALOR = normalizedValue;
+    // Editors may receive a row object distinct from the original data source.
+    const sourceField = this.fields.find(candidate =>
+      candidate.CAMPO === field.CAMPO && candidate.TABLA === field.TABLA);
+    if (sourceField) sourceField.VALOR = normalizedValue;
   }
 
 
@@ -618,8 +621,8 @@ export class XteinRecordFilterComponent
 
 
     const table =
-      field.TABLA ??
-      '';
+      field.TABLA?.trim() ||
+      this.tableBase.trim();
 
 
     if (
@@ -806,15 +809,9 @@ export class XteinRecordFilterComponent
       );
 
 
-    field.VALOR =
-      fromText &&
-      toText
-        ? `${fromText} - ${toText}`
-        : (
-            fromText ||
-            toText ||
-            ''
-          );
+    this.setValue(field, fromText && toText
+      ? `${fromText} - ${toText}`
+      : fromText || toText || '');
   }
 
 

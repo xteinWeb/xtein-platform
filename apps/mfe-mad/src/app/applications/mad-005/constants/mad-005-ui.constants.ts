@@ -1,28 +1,18 @@
 import {
   RecordToolbarCapabilities
 } from '@xtein/sdk';
-
+import { XteinRecordViewColumn } from '@xtein/ui';
 import {
+  Mad005BooleanOption,
   Mad005DataSourceConfiguration
 } from '../models/mad-005.model';
 
-
-/**
- * Defines a boolean option displayed by MAD-005.
- */
-export interface Mad005BooleanOption {
-
-  /**
-   * User-facing option text.
-   */
-  text: string;
-
-  /**
-   * Backend boolean value.
-   */
-  value: boolean;
-}
-
+export const Mad005RecordViewColumns: XteinRecordViewColumn[] = [
+  { dataField: 'ID_ORIGEN_DATO', caption: 'Origen' },
+  { dataField: 'NOMBRE', caption: 'Nombre' },
+  { dataField: 'ORIGEN_DATO', caption: 'Origen de dato' },
+  { dataField: 'ACTIVO', caption: 'Activo' }
+];
 
 /**
  * Defines the available active-state options.
@@ -125,7 +115,7 @@ export const Mad005ToolbarCapabilities:
       true,
 
     search:
-      false,
+      true,
 
     refresh:
       true,
@@ -134,7 +124,7 @@ export const Mad005ToolbarCapabilities:
       false,
 
     view:
-      false,
+      true,
 
     sort:
       false,
@@ -146,7 +136,7 @@ export const Mad005ToolbarCapabilities:
       false,
 
     print:
-      false,
+      true,
 
     configure:
       false

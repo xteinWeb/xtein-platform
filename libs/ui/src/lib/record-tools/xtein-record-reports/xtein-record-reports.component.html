@@ -1,0 +1,69 @@
+<dx-popup
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  title="Generación de informes"
+  [showCloseButton]="true"
+  [width]="'min(1200px, 96vw)'"
+  [height]="'min(900px, 92dvh)'">
+
+  <div *dxTemplate="let content of 'content'" class="xtein-record-reports">
+    @if (error()) {
+      <p class="xtein-record-reports__error" role="alert">{{ error() }}</p>
+    }
+    @if (loading()) {
+      <p class="xtein-record-reports__status" role="status">Procesando informes…</p>
+    }
+
+    @if (!reportUrl()) {
+      <xtein-select
+        class="xtein-record-reports__scope"
+        [id]="'xtein-report-scope-' + applicationId"
+        label="Aplicar a"
+        ariaLabel="Registros incluidos en el informe"
+        [items]="scopeOptions"
+        displayExpr="label"
+        valueExpr="value"
+        [(ngModel)]="scope"
+        [disabled]="loading()">
+      </xtein-select>
+
+      <div class="xtein-record-reports__list">
+        @for (report of reports(); track report.ID_REPORTE) {
+          <article class="xtein-record-reports__item" [attr.aria-label]="report.NOMBRE">
+            <h3 class="xtein-record-reports__name">{{ report.NOMBRE }}</h3>
+            <div class="xtein-record-reports__actions">
+              <xtein-button
+                text="Previsualizar"
+                [disabled]="loading()"
+                (clicked)="open(report, false)">
+              </xtein-button>
+              <xtein-button
+                text="Generar PDF"
+                variant="secondary"
+                [disabled]="loading()"
+                (clicked)="open(report, true)">
+              </xtein-button>
+            </div>
+          </article>
+        } @empty {
+          @if (!loading() && !error()) {
+            <p class="xtein-record-reports__status">No hay informes disponibles.</p>
+          }
+        }
+      </div>
+    } @else {
+      <div class="xtein-record-reports__navigation">
+        <xtein-button
+          text="Volver a los informes"
+          variant="secondary"
+          (clicked)="reportUrl.set('')">
+        </xtein-button>
+      </div>
+      <div class="xtein-record-reports__viewer">
+        <dx-report-viewer [reportUrl]="reportUrl()" [isMobile]="isMobile()" height="100%" width="100%">
+          <dxrv-request-options [invokeAction]="viewerAction" [host]="service.host"></dxrv-request-options>
+        </dx-report-viewer>
+      </div>
+    }
+  </div>
+</dx-popup>

@@ -1,10 +1,17 @@
 import {
   RecordToolbarCapabilities
 } from '@xtein/sdk';
-
+import { XteinRecordViewColumn } from '@xtein/ui';
 import {
   Mad001ApplicationRecord
 } from '../models/mad-001.model';
+
+export const Mad001RecordViewColumns: XteinRecordViewColumn[] = [
+  { dataField: 'ID_APLICACION', caption: 'Aplicación' },
+  { dataField: 'NOMBRE', caption: 'Nombre' },
+  { dataField: 'TIPO', caption: 'Tipo' },
+  { dataField: 'ESTADO', caption: 'Estado' }
+];
 
 
 /**
@@ -52,9 +59,8 @@ export const Mad001DefaultRecord:
  * Toolbar capabilities implemented by MAD-001
  * in the current migration stage.
  *
- * Search, quick view, print and configuration remain disabled
- * until their corresponding shared platform functionality is
- * migrated.
+ * Search, quick view and reports use shared UI components.
+ * Configuration remains disabled: the legacy form has no handler.
  *
  * Copy remains disabled because the legacy MAD-001 copy action
  * does not contain a functional implementation.
@@ -72,7 +78,7 @@ export const Mad001ToolbarCapabilities:
       true,
 
     search:
-      false,
+      true,
 
     refresh:
       true,
@@ -81,7 +87,7 @@ export const Mad001ToolbarCapabilities:
       false,
 
     view:
-      false,
+      true,
 
     sort:
       false,
@@ -93,7 +99,7 @@ export const Mad001ToolbarCapabilities:
       false,
 
     print:
-      false,
+      true,
 
     configure:
       false

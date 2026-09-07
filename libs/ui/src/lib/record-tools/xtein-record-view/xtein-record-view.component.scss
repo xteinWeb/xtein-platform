@@ -1,0 +1,52 @@
+:host {
+  display: contents;
+}
+
+.xtein-record-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.xtein-record-view__hint {
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--xt-control-text);
+  overflow-wrap: anywhere;
+}
+
+.xtein-record-view__grid {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+}
+
+.xtein-record-view__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+
+  xtein-button {
+    min-width: 10rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .xtein-record-view__hint {
+    font-size: 0.875rem;
+  }
+
+  .xtein-record-view__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+
+    xtein-button {
+      min-width: 0;
+    }
+  }
+}

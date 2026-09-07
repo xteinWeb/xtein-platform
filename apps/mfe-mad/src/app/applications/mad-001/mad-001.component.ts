@@ -1,4 +1,7 @@
 import {
+  untracked,
+  computed,
+  effect,
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
@@ -38,6 +41,10 @@ import {
 } from '@xtein/runtime';
 
 import {
+  XteinRecordFilterComponent,
+  XteinRecordFilterResult,
+  XteinRecordViewComponent,
+  XteinRecordReportsComponent,
   XteinInputComponent,
   XteinLoadingComponent,
   XteinNotificationService,
@@ -49,11 +56,13 @@ import {
 } from '@xtein/ui';
 
 import {
+  Mad001Action,
   Mad001Application
 } from './constants/mad-001.constants';
 
 import {
   Mad001DefaultRecord,
+  Mad001RecordViewColumns,
   Mad001ToolbarCapabilities,
   Mad001TreeSearchFields
 } from './constants/mad-001-ui.constants';
@@ -82,6 +91,9 @@ import {
 
   imports: [
     ReactiveFormsModule,
+    XteinRecordFilterComponent,
+    XteinRecordViewComponent,
+    XteinRecordReportsComponent,
     XteinInputComponent,
     XteinSelectComponent,
     XteinNumberComponent,
@@ -106,6 +118,60 @@ import {
 export class Mad001Component
   implements OnInit, OnDestroy {
 
+  readonly filterVisible = signal(false);
+  readonly viewVisible = signal(false);
+  readonly reportsVisible = signal(false);
+  readonly queryFilter = computed(() => this.applications()[0]?.QFILTRO ?? '');
+  readonly viewColumns = Mad001RecordViewColumns;
+
+  currentReportFilter(): string {
+    const record = this.applications()[this.currentIndex()];
+    return record ? " APLICACIONES_ASOCIADAS.ID_APLICACION = '" + String(record.ID_APLICACION).replace(/'/g, "''") + "'" : '';
+  }
+
+  selectViewedRecord(record: object): void {
+    if (this.loading() || this.isChanging()) return;
+    const index = this.applications().findIndex(item => item.ID_APLICACION === (record as Mad001ApplicationRecord).ID_APLICACION);
+    if (index >= 0) this.navigateTo(index);
+  }
+
+  searchRecords(filter: XteinRecordFilterResult): void {
+    if (this.loading() || this.isChanging() || !this.permissions.search) return;
+    this.filterVisible.set(false);
+    this.loading.set(true);
+    this.subscriptions.add(this.mad001Service.query(Mad001Action.Query, { APLICACIONES_ASOCIADAS: filter.ESTRUCTURA })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: response => {
+          try {
+            const result = this.parseArray<Mad001ApplicationRecord>(response.data);
+            const message = result[0]?.ErrMensaje;
+            const rows = message ? [] : result;
+            this.applications.set(rows);
+            if (rows.length) this.navigateTo(0);
+            else {
+              this.currentIndex.set(0);
+              this.mode.set(RecordToolbarMode.Initial);
+              this.setFormRecord(Mad001DefaultRecord, false);
+              this.notification.warning(message || 'No se encontraron datos.');
+            }
+          } catch (error) { this.showUnknownError(error, 'No fue posible consultar los registros.'); }
+        },
+        error: error => this.showUnknownError(error, 'No fue posible consultar los registros.')
+      }));
+  }
+
+  private readonly synchronizeBusyToolbar = effect(() => {
+    this.loading();
+    untracked(() => this.publishToolbarState());
+  });
+  private readonly closeInactiveDialogs = effect(() => {
+    if (this.toolbarRuntime.activeApplicationId() !== this.applicationId) {
+      this.filterVisible.set(false);
+      this.viewVisible.set(false);
+      this.reportsVisible.set(false);
+    }
+  });
   readonly applicationId =
     Mad001Application.Id;
 
@@ -634,10 +700,27 @@ export class Mad001Component
       ToolbarCommand
   ): void {
 
+    if (this.loading()) return;
+
     switch (
       command.action
     ) {
 
+      case ToolbarAction.Search:
+        this.filterVisible.set(true);
+        break;
+      case ToolbarAction.View:
+        this.viewVisible.set(true);
+        break;
+      case ToolbarAction.Print:
+        this.reportsVisible.set(true);
+        break;
+      case ToolbarAction.GoTo:
+        if (typeof command.payload === 'number' && Number.isInteger(command.payload) &&
+            command.payload >= 1 && command.payload <= this.applications().length) {
+          this.navigateTo(command.payload - 1);
+        }
+        break;
       case ToolbarAction.New:
 
         this.startCreating();
@@ -1552,6 +1635,7 @@ export class Mad001Component
     this.toolbarRuntime
       .setState(
         createRecordToolbarState({
+          busy: this.loading(),
 
           applicationId:
             this.applicationId,

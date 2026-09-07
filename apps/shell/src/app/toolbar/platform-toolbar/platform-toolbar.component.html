@@ -88,12 +88,12 @@
             title="Registro actual / total de registros"
             aria-label="Registro {{ currentRecord() }} de {{ totalRecords() }}">
 
-            <span
-              class="xt-platform-toolbar__position-current">
-
-              {{ currentRecord() }}
-
-            </span>
+            <input #recordNumber type="number" min="1" [max]="totalRecords()"
+              [value]="currentRecord()" [disabled]="!goToEnabled()"
+              class="xt-platform-toolbar__position-current"
+              aria-label="Ir al número de registro"
+              (change)="goToRecord(recordNumber)"
+              (keydown.enter)="goToRecord(recordNumber)">
 
             <span
               class="xt-platform-toolbar__position-total">
@@ -113,10 +113,10 @@
         overflowItems().length > 0
       ) {
 
-        <span
-          class="xt-platform-toolbar__separator xt-platform-toolbar__separator--overflow"
-          aria-hidden="true">
-        </span>
+        @if (mainItems().length > 0 || modeIndicator()) {
+          <span class="xt-platform-toolbar__separator xt-platform-toolbar__separator--overflow"
+            aria-hidden="true"></span>
+        }
 
 
         <div
@@ -199,5 +199,14 @@
     </div>
 
   </nav>
+  <div class="xt-platform-toolbar__actions xt-platform-toolbar__measurement"
+    data-measurement aria-hidden="true" inert>
+    <button type="button" tabindex="-1" class="xt-platform-toolbar__button"></button>
+    <span class="xt-platform-toolbar__separator"></span>
+    <div class="xt-platform-toolbar__position">
+      <input type="number" tabindex="-1" class="xt-platform-toolbar__position-current">
+      <span class="xt-platform-toolbar__position-total">de {{ totalRecords() }}</span>
+    </div>
+  </div>
 
 }

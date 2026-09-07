@@ -2,8 +2,7 @@
   display:
     block;
 
-  width:
-    auto;
+  width: 100%;
 
   max-width:
     100%;
@@ -773,3 +772,10 @@
       176px;
   }
 }
+:host input.xt-platform-toolbar__position-current {
+  width: 5em;
+  max-width: 100%;
+}
+
+:host { display: flex; justify-content: center; }
+.xt-platform-toolbar__measurement { position: absolute; top: 0; left: 0; width: max-content; max-width: none; visibility: hidden; pointer-events: none; }

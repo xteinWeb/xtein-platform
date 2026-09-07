@@ -28,9 +28,11 @@
 
     } @else {
 
+      <div class="xtein-record-filter__fields">
       <dx-data-grid
         class="xtein-record-filter__grid"
         [dataSource]="fields"
+        [height]="'100%'"
         keyExpr="CAMPO"
         [showBorders]="true"
         [columnAutoWidth]="true"
@@ -185,6 +187,7 @@
 
             <dx-text-box
               [value]="cell.data.VALOR || ''"
+              valueChangeEvent="input"
               [showClearButton]="true"
               (onValueChanged)="
                 setValue(
@@ -198,6 +201,7 @@
         </div>
 
       </dx-data-grid>
+      </div>
     }
 
     <div class="xtein-record-filter__actions">

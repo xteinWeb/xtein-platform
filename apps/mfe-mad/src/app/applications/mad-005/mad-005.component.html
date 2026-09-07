@@ -157,3 +157,13 @@
   </xtein-loading>
 
 </section>
+<xtein-record-filter [visible]="filterVisible()" (visibleChange)="filterVisible.set($event)"
+  tableBase="CONFIG_ORIGEN_DATO" (search)="searchRecords($event)"></xtein-record-filter>
+<xtein-record-view [visible]="viewVisible()" (visibleChange)="viewVisible.set($event)"
+  [records]="records()" [columns]="viewColumns" keyField="ID_ORIGEN_DATO"
+  (selected)="selectViewedRecord($event)"></xtein-record-view>
+@if (reportsVisible()) {
+  <xtein-record-reports [visible]="reportsVisible()" (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId" table="CONFIG_ORIGEN_DATO"
+    [currentFilter]="currentReportFilter()" [allFilter]="queryFilter()"></xtein-record-reports>
+}
