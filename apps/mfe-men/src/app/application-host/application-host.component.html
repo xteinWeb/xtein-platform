@@ -1,0 +1,10 @@
+<section class="xtein-men-application-host" [attr.aria-busy]="loading()">
+  <ng-container #applicationContainer></ng-container>
+  @if (loading()) {
+    <div class="xtein-men-application-host__state" role="status">Cargando aplicación…</div>
+  } @else if (errorMessage()) {
+    <div class="xtein-men-application-host__state" role="alert">{{ errorMessage() }}</div>
+  } @else if (!applicationId.trim()) {
+    <div class="xtein-men-application-host__state">Seleccione una aplicación desde el menú.</div>
+  }
+</section>
