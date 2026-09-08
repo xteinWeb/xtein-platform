@@ -3,16 +3,19 @@
   [showTitle]="true"
   [title]="title"
   [width]="'min(760px, 94vw)'"
-  [height]="'min(560px, 88vh)'"
+  [height]="'min(560px, 88dvh)'"
   [dragEnabled]="true"
   [resizeEnabled]="true"
   [hideOnOutsideClick]="false"
   [showCloseButton]="false"
+  (onShown)="handleShown()"
+  (onHidden)="handleHidden()"
   (onHiding)="handleVisibleChange(false)">
 
   <div
     *dxTemplate="let data of 'content'"
-    class="xtein-record-filter">
+    class="xtein-record-filter"
+    [style.height.px]="contentHeight()">
 
     @if (loading) {
 
@@ -32,7 +35,8 @@
       <dx-data-grid
         class="xtein-record-filter__grid"
         [dataSource]="fields"
-        [height]="'100%'"
+        [height]="gridHeight()"
+        [scrolling]="scrolling"
         keyExpr="CAMPO"
         [showBorders]="true"
         [columnAutoWidth]="true"
@@ -48,7 +52,7 @@
         <dxo-pager
           [visible]="true"
           [allowedPageSizes]="allowedPageSizes"
-          displayMode="full"
+          displayMode="adaptive"
           [showPageSizeSelector]="true"
           [showInfo]="true"
           [showNavigationButtons]="true">

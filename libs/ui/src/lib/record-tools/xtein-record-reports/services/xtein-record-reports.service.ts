@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { XteinApiAccessMode, XteinApiClientService, XteinDataApiResponse } from '@xtein/api-client';
 import { SessionService } from '@xtein/session';
 
 import { XTEIN_REPORTS_URL } from '../configuration/xtein-record-reports.config';
-import { XteinReportDefinition, XteinReportParameters } from '../models/xtein-record-reports.model';
+import { XteinReportDefinition, XteinReportParameters, XteinReportEmail, XteinReportEmailContext, XteinReportEmailRequest } from '../models/xtein-record-reports.model';
 import { XteinRecordReportsBackend } from '../constants/xtein-record-reports.constants';
 
 @Injectable({ providedIn: 'root' })
@@ -45,4 +45,39 @@ export class XteinRecordReportsService {
       ...parameters, archivo: parameters.idrpt + '_' + crypto.randomUUID() + '.pdf'
     }, { responseType: 'blob' });
   }
+
+  sendEmail(parameters: XteinReportParameters, email: XteinReportEmail,
+    context: XteinReportEmailContext = {}): Observable<void> {
+    const request: XteinReportEmailRequest = {
+      ...parameters,
+      archivo: parameters.idrpt + '_' + crypto.randomUUID() + '.pdf',
+      prm_email: email,
+      template: context.template ?? '',
+      replacements: context.replacements ?? {}
+    };
+    // The PDF must be generated before the legacy mailer can attach that exact file.
+    return this.http.post(this.host + XteinRecordReportsBackend.PdfEndpoint, request,
+      { responseType: 'blob' }).pipe(
+      switchMap(() => this.api.execute<XteinDataApiResponse<unknown>>({
+        endpoint: XteinRecordReportsBackend.EmailEndpoint,
+        action: XteinRecordReportsBackend.EmailAction,
+        data: { datos: request }, accessMode: XteinApiAccessMode.Authenticated
+      })),
+      map(response => {
+        const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (result?.ErrMensaje) throw new Error(String(result.ErrMensaje));
+      })
+    );
+  }
+}
+
+/** Restricts a report to the exact records currently loaded by its application. */
+export function buildReportRecordFilter(table: string, key: string, ids: readonly (string | number)[]): string {
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(table) || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+    throw new Error('Tabla o clave de informe inválida.');
+  }
+  const values = [...new Set(ids.map(id => String(id)))];
+  if (!values.length) return '';
+  return `${table}.${key} IN (${values.map(value => "'" + value.replace(/'/g, "''") + "'").join(',')})`;
 }

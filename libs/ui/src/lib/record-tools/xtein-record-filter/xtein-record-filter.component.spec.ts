@@ -81,3 +81,39 @@ describe('Filter editor row synchronization', () => {
     expect(result?.ESTRUCTURA).toEqual([]);
   });
 });
+
+describe('Search popup available height', () => {
+  it('reserves the footer space and updates the grid when the popup shrinks', () => {
+    const component = new XteinRecordFilterComponent({} as never, {} as never);
+    const content = document.createElement('div');
+    content.style.padding = '20px';
+    const actions = document.createElement('div');
+    actions.className = 'xtein-record-filter__actions';
+    content.appendChild(actions);
+    let height = 560;
+    Object.defineProperty(content, 'clientHeight', { get: () => height });
+    vi.spyOn(actions, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 200, 60));
+    let resize = () => {};
+    const disconnect = vi.fn();
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resize = callback; }
+      observe() {}
+      disconnect = disconnect;
+    });
+    Object.assign(component, { popup: { instance: { content: () => content } } });
+    try {
+      component.handleShown();
+      expect(component.contentHeight()).toBe(520);
+      expect(component.gridHeight()).toBe(460);
+      height = 300;
+      resize();
+      expect(component.contentHeight()).toBe(260);
+      expect(component.gridHeight()).toBe(200);
+      component.handleHidden();
+      expect(disconnect).toHaveBeenCalled();
+    } finally {
+      component.ngOnDestroy();
+      vi.unstubAllGlobals();
+    }
+  });
+});

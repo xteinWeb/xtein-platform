@@ -54,6 +54,22 @@ export class XteinButtonComponent {
   text = '';
 
   @Input()
+  icon = '';
+
+  @Input()
+  ariaLabel = '';
+
+  @Input()
+  pressed: boolean | null = null;
+
+  get elementAttributes(): Record<string, string> {
+    const attributes: Record<string, string> = {};
+    if (this.ariaLabel) attributes['aria-label'] = this.ariaLabel;
+    if (this.pressed !== null) attributes['aria-pressed'] = String(this.pressed);
+    return attributes;
+  }
+
+  @Input()
   variant:
     XteinButtonVariant =
       'primary';

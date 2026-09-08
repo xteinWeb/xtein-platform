@@ -6,6 +6,31 @@ export interface XteinReportDefinition {
 
 export type XteinReportScope = 'actual' | 'todos';
 
+export type XteinReportPanel = 'list' | 'preview' | 'email';
+
+export interface XteinReportEmail {
+  ORIGEN: string;
+  ORIGEN_EMAIL: string;
+  DESTINO: string;
+  DESTINO_EMAIL: string;
+  ASUNTO: string;
+  NOTA: string;
+}
+
+/** Optional application-specific values used by the existing email templates. */
+export interface XteinReportEmailContext {
+  defaults?: Partial<XteinReportEmail>;
+  template?: string;
+  replacements?: Record<string, unknown>;
+}
+
+export interface XteinReportEmailRequest extends XteinReportParameters {
+  archivo: string;
+  prm_email: XteinReportEmail;
+  template: string;
+  replacements: Record<string, unknown>;
+}
+
 export interface XteinReportScopeOption {
   value: XteinReportScope;
   label: string;

@@ -1,0 +1,23 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="xtein-report-email">
+  <div class="xtein-report-email__fields">
+    @if (defaults.ORIGEN || defaults.ORIGEN_EMAIL) {
+      <xtein-input id="xtein-report-sender" label="Remitente" formControlName="ORIGEN" [readOnly]="true" />
+      <xtein-input id="xtein-report-sender-email" label="Correo del remitente" formControlName="ORIGEN_EMAIL" [readOnly]="true" />
+    }
+    <xtein-input id="xtein-report-recipient" label="Destinatario" formControlName="DESTINO" />
+    <xtein-input id="xtein-report-recipient-email" label="Correos de destino" formControlName="DESTINO_EMAIL"
+      placeholder="Separa los correos con coma" [required]="true"
+      [invalid]="form.controls.DESTINO_EMAIL.touched && form.controls.DESTINO_EMAIL.invalid"
+      errorMessage="Escribe uno o varios correos válidos." />
+    <xtein-input id="xtein-report-subject" label="Asunto" formControlName="ASUNTO" [required]="true"
+      [invalid]="form.controls.ASUNTO.touched && form.controls.ASUNTO.invalid" errorMessage="Escribe el asunto." />
+    <div>
+      <span class="form-label" id="xtein-report-note-label">Mensaje / nota adicional</span>
+      <xtein-textarea id="xtein-report-note" ariaLabel="Mensaje / nota adicional" formControlName="NOTA" />
+    </div>
+  </div>
+  <div class="xtein-report-email__actions">
+    <xtein-button text="Enviar" [submit]="true" [disabled]="busy" />
+    <xtein-button text="Cancelar" variant="secondary" [disabled]="busy" (clicked)="cancelled.emit()" />
+  </div>
+</form>

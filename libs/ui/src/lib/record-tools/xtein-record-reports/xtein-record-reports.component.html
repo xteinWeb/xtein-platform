@@ -1,69 +1,56 @@
 <dx-popup
-  [visible]="visible"
-  (visibleChange)="visibleChange.emit($event)"
-  title="Generación de informes"
-  [showCloseButton]="true"
-  [width]="'min(1200px, 96vw)'"
-  [height]="'min(900px, 92dvh)'">
-
-  <div *dxTemplate="let content of 'content'" class="xtein-record-reports">
-    @if (error()) {
-      <p class="xtein-record-reports__error" role="alert">{{ error() }}</p>
-    }
-    @if (loading()) {
-      <p class="xtein-record-reports__status" role="status">Procesando informes…</p>
-    }
-
-    @if (!reportUrl()) {
-      <xtein-select
-        class="xtein-record-reports__scope"
-        [id]="'xtein-report-scope-' + applicationId"
-        label="Aplicar a"
-        ariaLabel="Registros incluidos en el informe"
-        [items]="scopeOptions"
-        displayExpr="label"
-        valueExpr="value"
-        [(ngModel)]="scope"
-        [disabled]="loading()">
-      </xtein-select>
-
-      <div class="xtein-record-reports__list">
+  [visible]="visible" (visibleChange)="!$event && close()"
+  (onHiding)="handleHiding($event)"
+  [title]="panel() === 'email' ? 'Enviar informe por correo' : 'Generación de informes'"
+  [showTitle]="panel() !== 'list' || isMobile()" [showCloseButton]="!loading()"
+  [shading]="panel() !== 'list' || isMobile()"
+  [hideOnOutsideClick]="panel() === 'list' && !loading()"
+  [position]="panel() === 'list' ? dropdownPosition() : centerPosition"
+  [width]="panel() === 'list' ? 'min(560px, 96vw)' : panel() === 'email' ? 'min(720px, 96vw)' : 'min(1200px, 96vw)'"
+  [height]="panel() === 'list' ? 'auto' : panel() === 'email' ? 'min(700px, 90dvh)' : 'min(900px, 92dvh)'"
+  [maxHeight]="'92dvh'">
+  <div *dxTemplate="let content of 'content'" class="xtein-record-reports" [class.xtein-record-reports--list]="panel() === 'list'">
+    @if (error()) { <p class="xtein-record-reports__error" role="alert">{{ error() }}</p> }
+    @if (loading()) { <p class="xtein-record-reports__status" role="status">Procesando informe…</p> }
+    @if (status()) { <p class="xtein-record-reports__status" role="status">{{ status() }}</p> }
+    @if (panel() === 'list') {
+      <div class="xtein-record-reports__list" aria-label="Informes disponibles">
         @for (report of reports(); track report.ID_REPORTE) {
           <article class="xtein-record-reports__item" [attr.aria-label]="report.NOMBRE">
+            <i class="icon-imprimir-ol" aria-hidden="true"></i>
             <h3 class="xtein-record-reports__name">{{ report.NOMBRE }}</h3>
             <div class="xtein-record-reports__actions">
-              <xtein-button
-                text="Previsualizar"
-                [disabled]="loading()"
-                (clicked)="open(report, false)">
-              </xtein-button>
-              <xtein-button
-                text="Generar PDF"
-                variant="secondary"
-                [disabled]="loading()"
-                (clicked)="open(report, true)">
-              </xtein-button>
+              <xtein-button icon="icon-seleccionada-ol" ariaLabel="Solo registro actual" [width]="32"
+                [variant]="scope(report) === 'actual' ? 'primary' : 'link'" [pressed]="scope(report) === 'actual'"
+                [disabled]="loading() || !currentFilter.trim()" (clicked)="selectScope(report, 'actual')" />
+              <xtein-button icon="icon-seleccionar-todas-alt-sl" ariaLabel="Todos los registros consultados" [width]="32"
+                [variant]="scope(report) === 'todos' ? 'primary' : 'link'" [pressed]="scope(report) === 'todos'"
+                [disabled]="loading() || !allFilter.trim()" (clicked)="selectScope(report, 'todos')" />
+              <span class="xtein-record-reports__separator" aria-hidden="true"></span>
+              <xtein-button icon="icon-imprimir-sl" ariaLabel="Previsualizar e imprimir" [width]="32" variant="link"
+                [disabled]="loading()" (clicked)="open(report, false)" />
+              <xtein-button icon="icon-pdf-doc-sl" ariaLabel="Generar PDF" [width]="32" variant="link"
+                [disabled]="loading()" (clicked)="open(report, true)" />
+              <xtein-button icon="icon-correo" ariaLabel="Enviar por correo" [width]="32" variant="link"
+                [disabled]="loading()" (clicked)="composeEmail(report)" />
             </div>
           </article>
         } @empty {
-          @if (!loading() && !error()) {
-            <p class="xtein-record-reports__status">No hay informes disponibles.</p>
-          }
+          @if (!loading() && !error()) { <p class="xtein-record-reports__status">No hay informes disponibles.</p> }
         }
       </div>
-    } @else {
+    } @else if (panel() === 'preview') {
       <div class="xtein-record-reports__navigation">
-        <xtein-button
-          text="Volver a los informes"
-          variant="secondary"
-          (clicked)="reportUrl.set('')">
-        </xtein-button>
+        <xtein-button text="Volver a los informes" variant="secondary" (clicked)="back()" />
       </div>
       <div class="xtein-record-reports__viewer">
         <dx-report-viewer [reportUrl]="reportUrl()" [isMobile]="isMobile()" height="100%" width="100%">
           <dxrv-request-options [invokeAction]="viewerAction" [host]="service.host"></dxrv-request-options>
         </dx-report-viewer>
       </div>
+    } @else {
+      <xtein-report-email class="xtein-record-reports__email" [defaults]="emailDefaults" [busy]="loading()"
+        (send)="sendEmail($event)" (cancelled)="back()" />
     }
   </div>
 </dx-popup>

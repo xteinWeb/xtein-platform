@@ -10,6 +10,7 @@
   height: 100%;
   overflow: hidden;
   min-height: 0;
+  box-sizing: border-box;
 }
 
 
@@ -17,6 +18,13 @@
   flex: 1 1 0;
   overflow: hidden;
   min-height: 0;
+  min-width: 0;
+}
+
+.xtein-record-filter__grid {
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
 

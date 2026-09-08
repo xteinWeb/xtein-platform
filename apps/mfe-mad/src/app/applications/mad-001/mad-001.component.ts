@@ -41,6 +41,7 @@ import {
 } from '@xtein/runtime';
 
 import {
+  buildReportRecordFilter,
   XteinRecordFilterComponent,
   XteinRecordFilterResult,
   XteinRecordViewComponent,
@@ -121,7 +122,8 @@ export class Mad001Component
   readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
-  readonly queryFilter = computed(() => this.applications()[0]?.QFILTRO ?? '');
+  readonly queryFilter = computed(() => buildReportRecordFilter(
+    'APLICACIONES_ASOCIADAS', 'ID_APLICACION', this.applications().map(record => record.ID_APLICACION)));
   readonly viewColumns = Mad001RecordViewColumns;
 
   currentReportFilter(): string {

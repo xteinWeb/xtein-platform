@@ -5,8 +5,11 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnDestroy,
   Output,
-  SimpleChanges
+  SimpleChanges,
+  ViewChild,
+  signal
 } from '@angular/core';
 
 import {
@@ -15,6 +18,7 @@ import {
   DxDataGridModule,
   DxDateBoxModule,
   DxPopupModule,
+  DxPopupComponent,
   DxSelectBoxModule,
   DxTagBoxModule,
   DxTextBoxModule
@@ -83,7 +87,45 @@ import {
     ChangeDetectionStrategy.OnPush
 })
 export class XteinRecordFilterComponent
-  implements OnChanges {
+  implements OnChanges, OnDestroy {
+
+  @ViewChild(DxPopupComponent) private popup?: DxPopupComponent;
+  readonly contentHeight = signal<number | null>(null);
+  readonly gridHeight = signal(200);
+  readonly scrolling = { mode: 'standard', useNative: false, showScrollbar: 'always' } as const;
+  private layoutObserver?: ResizeObserver;
+
+  handleShown(): void {
+    this.layoutObserver?.disconnect();
+    const content = this.popup?.instance.content() as HTMLElement | undefined;
+    if (!content) return;
+    const update = (): void => {
+      const styles = getComputedStyle(content);
+      const height = Math.max(0, content.clientHeight -
+        (parseFloat(styles.paddingTop) || 0) - (parseFloat(styles.paddingBottom) || 0));
+      if (!height) return;
+      const actions = content.querySelector<HTMLElement>('.xtein-record-filter__actions');
+      this.contentHeight.set(height);
+      this.gridHeight.set(Math.max(0, Math.floor(height - (actions?.getBoundingClientRect().height ?? 0))));
+    };
+    update();
+    if (typeof ResizeObserver !== 'undefined') {
+      this.layoutObserver = new ResizeObserver(update);
+      this.layoutObserver.observe(content);
+      const actions = content.querySelector<HTMLElement>('.xtein-record-filter__actions');
+      if (actions) this.layoutObserver.observe(actions);
+    }
+  }
+
+  handleHidden(): void {
+    this.layoutObserver?.disconnect();
+    this.contentHeight.set(null);
+  }
+
+  ngOnDestroy(): void {
+    this.layoutObserver?.disconnect();
+    this.listSources.forEach(source => source.dispose());
+  }
 
   /**
    * Estado visible del popup.

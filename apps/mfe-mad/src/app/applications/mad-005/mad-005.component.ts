@@ -44,6 +44,7 @@ import {
 import {
   DataSourceConnectionTestResult,
   XteinDataSourceParametersComponent,
+  buildReportRecordFilter,
   XteinRecordFilterComponent,
   XteinRecordFilterResult,
   XteinRecordViewComponent,
@@ -128,7 +129,8 @@ export class Mad005Component
   readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
-  readonly queryFilter = computed(() => this.records()[0]?.QFILTRO ?? '');
+  readonly queryFilter = computed(() => buildReportRecordFilter(
+    'CONFIG_ORIGEN_DATO', 'ID_ORIGEN_DATO', this.records().map(record => record.ID_ORIGEN_DATO)));
   readonly viewColumns = Mad005RecordViewColumns;
 
   currentReportFilter(): string {
