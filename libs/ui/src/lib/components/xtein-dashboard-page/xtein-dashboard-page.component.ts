@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, Input, OnChanges, OnDestroy, inject
 import { Subscription, defer } from 'rxjs';
 import { XteinDashboardDataService, XteinDashboardDefinition } from '@xtein/dashboard-runtime';
 import { XteinDashboardViewerComponent } from '../xtein-dashboard-viewer/xtein-dashboard-viewer.component';
-import { XteinButtonComponent } from '../../forms/xtein-button/xtein-button.component';
+import { XteinDashboardFrameComponent } from '../xtein-dashboard-frame/xtein-dashboard-frame.component';
 
 @Component({
   selector: 'xtein-dashboard-page', standalone: true,
-  imports: [XteinDashboardViewerComponent, XteinButtonComponent],
+  imports: [XteinDashboardViewerComponent, XteinDashboardFrameComponent],
   templateUrl: './xtein-dashboard-page.component.html',
   styleUrl: './xtein-dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -18,7 +18,6 @@ export class XteinDashboardPageComponent implements OnChanges, OnDestroy {
   readonly definition = signal<XteinDashboardDefinition | null>(null);
   readonly error = signal('');
   readonly loading = signal(false);
-  readonly fullscreen = signal(false);
 
   ngOnChanges(): void { this.load(); }
   ngOnDestroy(): void { this.request?.unsubscribe(); }

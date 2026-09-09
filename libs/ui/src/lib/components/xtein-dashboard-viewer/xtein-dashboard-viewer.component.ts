@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, ViewChild, signal } from '@angular/core';
 import { DxPopupModule, DxDataGridModule } from 'devextreme-angular';
-import { DashboardControl, DashboardPanelExtension } from 'devexpress-dashboard';
+import { DashboardControl } from 'devexpress-dashboard';
 import { XteinDashboardCardInteractionExtension } from '@xtein/dashboard-runtime';
 import { XteinDashboardComponent } from '../xtein-dashboard/xtein-dashboard.component';
 
@@ -20,7 +20,9 @@ export class XteinDashboardViewerComponent {
   readonly error = signal('');
 
   ready(control: DashboardControl): void {
-    (control.findExtension('dashboard-panel') as DashboardPanelExtension | undefined)?.visible(false);
+    // Hiding this panel leaves its reserved surface width. Removing it releases
+    // that space; dashboard selection is already handled by the workspace tabs.
+    control.unregisterExtension('dashboard-panel');
     if (this.dashboardType.trim().toUpperCase() !== 'KPIPANEL') return;
     control.registerExtension(new XteinDashboardCardInteractionExtension(control, (rows, error) => {
       this.rows.set(rows); this.error.set(error); this.detailsVisible.set(true);

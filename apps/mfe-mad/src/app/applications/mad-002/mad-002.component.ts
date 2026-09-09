@@ -28,6 +28,7 @@ import {
 
 import {
   XteinDashboardComponent,
+  XteinDashboardFrameComponent,
   XteinLoadingComponent,
   XteinNotificationService,
   XteinTreeComponent,
@@ -77,6 +78,7 @@ import {
   imports: [
     XteinTreeComponent,
     XteinDashboardComponent,
+    XteinDashboardFrameComponent,
     XteinLoadingComponent
   ],
 

@@ -1,0 +1,10 @@
+<section class="dashboard-frame" [class.dashboard-frame--fullscreen]="fullscreen()"
+  (keydown.escape)="fullscreen.set(false)">
+  <header class="dashboard-frame__toolbar">
+    <xtein-button class="dashboard-frame__toggle" [width]="24" variant="primary"
+      [icon]="fullscreen() ? 'chevrondown' : 'fullscreen'"
+      [ariaLabel]="fullscreen() ? 'Restaurar' : 'Pantalla completa'"
+      [pressed]="fullscreen()" (clicked)="toggleFullscreen()" />
+  </header>
+  <div class="dashboard-frame__content"><ng-content /></div>
+</section>

@@ -50,6 +50,7 @@ Abrir otra vez un código activa su pestaña; abrir otro código crea otra insta
 - `apps/mfe-mad/federation.config.js`: retirada de la exposición adicional del visor; conserva su entrada habitual.
 - `libs/ui/src/lib/components/xtein-dashboard/`: componente existente, conservado para MAD002 e integrado con las extensiones y editores.
 - `libs/ui/src/lib/components/xtein-dashboard-page/`: carga de configuración, estados de carga/error y pantalla completa.
+- `libs/ui/src/lib/components/xtein-dashboard-frame/`: contenedor compartido de pantalla completa para visor y MAD002. Botón circular azul a la izquierda, icono `fullscreen` para expandir y `chevrondown` para restaurar, como en el Legacy. El cambio de tamaño conserva la instancia del dashboard.
 - `libs/ui/src/lib/components/xtein-dashboard-viewer/`: modo `ViewerOnly`, comportamiento KPI y ventana de detalles.
 - `libs/ui/src/lib/components/xtein-dashboard-editor/`: ventanas de líneas constantes y asociación KPI, con contenido desplazable y acciones visibles.
 - `libs/dashboard-runtime/src/lib/services/xtein-dashboard-data.service.ts`: consultas `DashboardType` y `KpiList`, mediante API y sesión centralizadas.

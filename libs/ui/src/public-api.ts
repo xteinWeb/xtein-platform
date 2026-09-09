@@ -29,3 +29,4 @@ export * from './lib/record-tools/xtein-record-reports/xtein-record-reports.comp
 
 export * from './lib/components/xtein-dashboard-viewer/xtein-dashboard-viewer.component';
 export * from './lib/components/xtein-dashboard-page/xtein-dashboard-page.component';
+export * from './lib/components/xtein-dashboard-frame/xtein-dashboard-frame.component';

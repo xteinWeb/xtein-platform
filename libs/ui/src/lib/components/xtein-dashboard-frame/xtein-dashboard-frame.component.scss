@@ -1,0 +1,10 @@
+:host { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; }
+.dashboard-frame { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; background: var(--xt-surface, #fff); }
+.dashboard-frame--fullscreen { position: fixed; inset: 0; height: 100dvh; z-index: 1100; }
+.dashboard-frame__toolbar { display: flex; align-items: center; justify-content: flex-start; flex: 0 0 28px; padding: 2px; box-sizing: border-box; }
+.dashboard-frame__content { flex: 1 1 0; min-width: 0; min-height: 0; overflow: hidden; }
+:host ::ng-deep .dashboard-frame__toggle .dx-button { width: 24px; height: 24px; min-width: 24px; border: 0; border-radius: 50%; background: #0b5de8; color: #fff; box-shadow: none; }
+:host ::ng-deep .dashboard-frame__toggle .dx-button-content { padding: 4px; display: flex; align-items: center; justify-content: center; }
+:host ::ng-deep .dashboard-frame__toggle .dx-icon { width: 16px; height: 16px; font-size: 16px; line-height: 16px; margin: 0; color: #fff; }
+:host ::ng-deep .dashboard-frame__toggle .dx-button.dx-state-hover { background: #084bbd; }
+:host ::ng-deep .dashboard-frame__toggle .dx-button.dx-state-focused { outline: 2px solid #86b7fe; outline-offset: 2px; }
