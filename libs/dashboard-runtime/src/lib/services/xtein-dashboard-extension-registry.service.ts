@@ -7,6 +7,16 @@ import {
   DashboardPanelExtension,
   IExtension
 } from 'devexpress-dashboard';
+import { ChartScaleBreaksExtension } from '../extensions/chart-scale-breaks-extension';
+import { ChartAxisMaxValueExtension } from '../extensions/chart-axis-max-value-extension';
+import { ChartLineOptionsExtension } from '../extensions/chart-line-options-extension';
+import { GridHeaderFilterExtension } from '../extensions/grid-header-filter-extension';
+import { ItemDescriptionExtension } from '../extensions/item-description-extension';
+import { DashboardDescriptionExtension } from '../extensions/dashboard-description-extension';
+import { ChartConstantLinesExtension } from '../extensions/chart-constant-lines-extension';
+import { CardSetKpiExtension } from '../extensions/card-setkpi-extension';
+import { XteinDashboardEditorRequest } from '../models/xtein-dashboard-editor.model';
+import { XteinDashboardDesignerPolicyExtension } from '../extensions/xtein-dashboard-designer-policy.extension';
 
 
 /**
@@ -124,8 +134,13 @@ export class XteinDashboardExtensionRegistryService {
    */
   registerExtensions(
     dashboardControl:
-      DashboardControl
+      DashboardControl,
+    edit: (request: XteinDashboardEditorRequest) => void = () => {}
   ): void {
+
+    for (const extension of [new ChartConstantLinesExtension(dashboardControl, edit), new CardSetKpiExtension(dashboardControl, edit)]) {
+      if (!dashboardControl.findExtension(extension.name)) dashboardControl.registerExtension(extension);
+    }
 
     for (
       const registration
@@ -178,6 +193,13 @@ export class XteinDashboardExtensionRegistryService {
   private registerBuiltInExtensions():
     void {
 
+    this.register('scale-breaks', control => new ChartScaleBreaksExtension(control));
+    this.register('axis-max', control => new ChartAxisMaxValueExtension(control));
+    this.register('line-options', control => new ChartLineOptionsExtension(control));
+    this.register('grid-header', control => new GridHeaderFilterExtension(control));
+    this.register('item-description', control => new ItemDescriptionExtension(control));
+    this.register('dashboard-description', control => new DashboardDescriptionExtension(control));
+
     this.register(
       'dashboard-panel',
       dashboardControl =>
@@ -185,5 +207,6 @@ export class XteinDashboardExtensionRegistryService {
           dashboardControl
         )
     );
+    this.register('designer-policy', control => new XteinDashboardDesignerPolicyExtension(control));
   }
 }

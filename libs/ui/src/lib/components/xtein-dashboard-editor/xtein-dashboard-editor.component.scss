@@ -1,0 +1,7 @@
+:host { display: contents; }
+.editor { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: .75rem; }
+.editor__content { flex: 1 1 0; min-height: 0; overflow: auto; }
+footer { display: flex; justify-content: flex-end; gap: .5rem; flex: 0 0 auto; }
+label { display: block; margin-bottom: .5rem; }
+dx-select-box { margin-bottom: .75rem; }
+p { margin: 0; }

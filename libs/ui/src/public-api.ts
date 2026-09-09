@@ -26,3 +26,6 @@ export * from './lib/record-tools/xtein-record-reports/models/xtein-record-repor
 export * from './lib/record-tools/xtein-record-reports/configuration/xtein-record-reports.config';
 export * from './lib/record-tools/xtein-record-reports/services/xtein-record-reports.service';
 export * from './lib/record-tools/xtein-record-reports/xtein-record-reports.component';
+
+export * from './lib/components/xtein-dashboard-viewer/xtein-dashboard-viewer.component';
+export * from './lib/components/xtein-dashboard-page/xtein-dashboard-page.component';

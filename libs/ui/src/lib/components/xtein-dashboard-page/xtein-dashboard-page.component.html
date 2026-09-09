@@ -1,0 +1,12 @@
+<section class="dashboard-page" [class.dashboard-page--fullscreen]="fullscreen()" (keydown.escape)="fullscreen.set(false)">
+  <header>
+    <xtein-button variant="secondary" width="auto" [pressed]="fullscreen()"
+      [text]="fullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'"
+      (clicked)="fullscreen.set(!fullscreen())" />
+  </header>
+  @if (loading()) { <p role="status">Cargando dashboard…</p> }
+  @if (error()) { <p role="alert">{{ error() }}</p> }
+  @if (definition(); as dashboard) {
+    <xtein-dashboard-viewer [dashboardId]="dashboard.dashboardId" [dashboardType]="dashboard.dashboardType" />
+  }
+</section>

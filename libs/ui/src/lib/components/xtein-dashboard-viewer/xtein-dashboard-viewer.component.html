@@ -1,0 +1,12 @@
+<xtein-dashboard [dashboardId]="dashboardId" workingMode="ViewerOnly" (controlReady)="ready($event)" />
+<dx-popup [visible]="detailsVisible()" (onHidden)="detailsVisible.set(false)" title="Detalles del KPI"
+  width="min(900px, 96vw)" height="min(600px, 90dvh)" [showCloseButton]="true" [dragEnabled]="false">
+  <div *dxTemplate="let data of 'content'" class="details">
+  @if (error()) { <p role="alert">{{ error() }}</p> }
+  <dx-data-grid [dataSource]="rows()" height="100%" [columnAutoWidth]="true" [showBorders]="true">
+    <dxo-scrolling mode="standard" />
+    <dxo-paging [pageSize]="20" />
+    <dxo-pager [visible]="true" [showInfo]="true" />
+  </dx-data-grid>
+  </div>
+</dx-popup>

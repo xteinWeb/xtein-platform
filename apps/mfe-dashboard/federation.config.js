@@ -10,23 +10,23 @@ module.exports =
   withNativeFederation({
 
     /**
-     * Native Federation identifier of the MAD microfrontend.
+     * Native Federation identifier of the Dashboard microfrontend.
      */
     name:
-      'mfe-mad',
+      'mfe-dashboard',
 
 
     /**
-     * Components exposed by the MAD microfrontend.
+     * Components exposed by the Dashboard microfrontend.
      *
      * The Shell loads ApplicationHost and passes the requested
-     * XTEIN application identifier so the MAD registry can resolve
-     * the corresponding functional application dynamically.
+     * XTEIN application identifier to the generic viewer. The database
+     * selects this microfrontend; no local application-code registry is needed.
      */
     exposes: {
 
       './ApplicationHost':
-        './apps/mfe-mad/src/app/application-host/application-host.component.ts'
+        './apps/mfe-dashboard/src/app/application-host/application-host.component.ts'
     },
 
 
@@ -93,7 +93,7 @@ module.exports =
      * devextreme-angular/ui/...
      * devexpress-dashboard-angular/...
      *
-     * These packages remain bundled locally by the MAD
+     * These packages remain bundled locally by the Dashboard
      * microfrontend and the libraries it consumes.
      */
     skip: [
@@ -121,7 +121,7 @@ module.exports =
 
       /**
        * Generates federation bundles only for dependencies
-       * actually used by the MAD microfrontend.
+       * actually used by the Dashboard microfrontend.
        */
       ignoreUnusedDeps:
         true,
@@ -129,7 +129,7 @@ module.exports =
 
       /**
        * Adds version metadata to mapped workspace libraries so
-       * the Shell and the MAD microfrontend can reuse the same
+       * the Shell and the Dashboard microfrontend can reuse the same
        * XTEIN singleton instances.
        */
       mappingVersion:

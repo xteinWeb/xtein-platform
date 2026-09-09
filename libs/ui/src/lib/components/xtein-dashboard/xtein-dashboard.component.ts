@@ -8,6 +8,10 @@ import {
   ViewChild,
   computed
 } from '@angular/core';
+import { EventEmitter, Output } from '@angular/core';
+import { DashboardControl } from 'devexpress-dashboard';
+import { XteinDashboardEditorComponent } from '../xtein-dashboard-editor/xtein-dashboard-editor.component';
+import { XteinDashboardCardInteractionExtension } from '@xtein/dashboard-runtime';
 
 import {
   DxDashboardControlComponent,
@@ -54,6 +58,7 @@ export type XteinDashboardWorkingMode =
     true,
 
   imports: [
+    XteinDashboardEditorComponent,
     DxDashboardControlModule
   ],
 
@@ -68,6 +73,13 @@ export type XteinDashboardWorkingMode =
 })
 export class XteinDashboardComponent
   implements OnChanges, AfterViewInit {
+
+  @Output() readonly controlReady = new EventEmitter<DashboardControl>();
+  @ViewChild(XteinDashboardEditorComponent) private editor?: XteinDashboardEditorComponent;
+
+  refresh(): void {
+    this.dashboardComponent?.instance.reloadData();
+  }
 
   /**
    * DevExpress Angular Dashboard component.
@@ -234,8 +246,13 @@ export class XteinDashboardComponent
 
     this.extensionRegistry
       .registerExtensions(
-        dashboardArgs.component
+        dashboardArgs.component,
+        request => this.editor?.open(request)
       );
+    if (this.workingMode !== 'ViewerOnly') {
+      dashboardArgs.component.registerExtension(new XteinDashboardCardInteractionExtension(dashboardArgs.component));
+    }
+    this.controlReady.emit(dashboardArgs.component);
   }
 
 
@@ -249,6 +266,8 @@ export class XteinDashboardComponent
    */
   private synchronizeDashboard():
     void {
+
+    this.editor?.close();
 
     const dashboardControl =
       this.dashboardComponent

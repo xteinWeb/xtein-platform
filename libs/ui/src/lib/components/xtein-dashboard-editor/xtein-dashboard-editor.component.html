@@ -1,0 +1,31 @@
+<dx-popup [visible]="!!request()" (onHidden)="close()" [showCloseButton]="!busy()" [dragEnabled]="false"
+  [hideOnOutsideClick]="false" width="min(1000px, 96vw)" height="min(650px, 90dvh)"
+  [title]="request()?.kind === 'kpi' ? 'Configurar KPI asociado' : 'Líneas constantes'">
+  <div *dxTemplate="let data of 'content'" class="editor">
+    <div class="editor__content">
+      @if (request()?.kind === 'constant-lines') {
+        <dx-data-grid [dataSource]="lines" keyExpr="key" height="100%" [showBorders]="true"
+          [columnAutoWidth]="true" (onInitNewRow)="initializeLine($event)">
+          <dxo-editing mode="row" [allowAdding]="true" [allowDeleting]="true" [allowUpdating]="true" />
+          <dxo-paging [enabled]="false" />
+          <dxi-column dataField="name" caption="Nombre"><dxi-validation-rule type="required" /></dxi-column>
+          <dxi-column dataField="isBound" caption="Vincular medida" dataType="boolean" />
+          <dxi-column dataField="value" caption="Valor" dataType="number" />
+          <dxi-column dataField="measureId" caption="Medida oculta"><dxo-lookup [dataSource]="measures" valueExpr="value" displayExpr="text" /></dxi-column>
+          <dxi-column dataField="color" caption="Color" />
+          <dxi-column dataField="labelText" caption="Etiqueta" />
+        </dx-data-grid>
+      } @else {
+        <label>KPI asociado</label>
+        <dx-select-box [items]="options()" valueExpr="value" displayExpr="text" [searchEnabled]="true"
+          [disabled]="busy()" [(value)]="selectedKpi" [inputAttr]="{ 'aria-label': 'KPI asociado' }" />
+        <xtein-button text="Refrescar KPI" variant="secondary" [disabled]="busy()" (clicked)="reloadKpis()" />
+      }
+    </div>
+    @if (error()) { <p role="alert">{{ error() }}</p> }
+    <footer>
+      <xtein-button text="Cancelar" variant="secondary" [disabled]="busy()" (clicked)="close()" />
+      <xtein-button text="Guardar" [disabled]="busy()" (clicked)="save()" />
+    </footer>
+  </div>
+</dx-popup>
