@@ -55,7 +55,7 @@ export class XteinDashboardCardInteractionExtension implements IExtension {
   private readonly caption = (args: ItemCaptionToolbarUpdatedEventArgs): void => {
     if (!this.details || this.selected?.itemName !== args.itemName) return;
     const selected = this.selected;
-    args.options.actionItems.push({ type: 'button', text: 'Ver detalles', hint: 'Ver detalles', click: () => {
+    args.options.actionItems.push({ type: 'button', icon: 'iconInfo', hint: 'Ver detalles', click: () => {
       selected.requestUnderlyingData(data => {
         if (!this.active || this.selected !== selected) return;
         const error = data.getRequestDataError();

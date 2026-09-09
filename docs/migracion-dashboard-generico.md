@@ -57,6 +57,8 @@ Abrir otra vez un código activa su pestaña; abrir otro código crea otra insta
 - `libs/dashboard-runtime/src/lib/services/xtein-dashboard-extension-registry.service.ts`: registro compartido; trasladado desde `extensions` para mantener los servicios en `services`. Su exportación pública se conserva.
 - `libs/dashboard-runtime/src/lib/models/xtein-dashboard-definition.model.ts`: contrato de configuración.
 - `libs/dashboard-runtime/src/lib/models/xtein-dashboard-editor.model.ts`: contratos de los editores, líneas y opciones KPI.
+- `libs/dashboard-runtime/src/lib/constants/xtein-dashboard-icons.constants.ts`: siete SVG originales del Legacy (`iconInfo`, `iconRoles`, `iconSettings`, `iconKpiSettings`, `dashboard-designer`, `administracion`, `iconDescription`).
+- `libs/dashboard-runtime/src/lib/services/xtein-dashboard-icons.service.ts`: registro de SVG antes de las extensiones, usando `DashboardControl.registerIcon`, que delega en el `ResourceManager` del control. Evita registros repetidos sobre una misma instancia.
 - `libs/dashboard-runtime/src/lib/extensions/`: ocho extensiones del Legacy y adaptaciones de interacción KPI y opciones del diseñador.
 - `libs/ui/src/public-api.ts` y `libs/dashboard-runtime/src/public-api.ts`: exportaciones públicas.
 
@@ -89,9 +91,13 @@ Las líneas se aplican al modelo mediante Guardar en su ventana; la persistencia
 
 El endpoint del control de dashboards lo configura el shell mediante `XteinDashboardRuntimeService`. No hay URLs de backend en la aplicación genérica.
 
+Los recursos gráficos provienen de `Legacy/xtein-dashboard/src/app/shared/components/dashboard/dashboard-icons.ts`, de los SVG de `dashboard.component.html` y de `extensions/item-description-extension.ts`. Las acciones Ver detalles, Configurar KPI y Diseño / visor utilizan los mismos identificadores de icono del Legacy; sus textos se conservan como ayuda al pasar el cursor.
+
 El botón Actualizar de la barra vuelve a consultar `DashboardType` para el código de la pestaña y recrea el visor. Esto recarga la definición y vuelve a dibujar el dashboard, reiniciando su selección KPI y filtros temporales. Durante la consulta se muestra el estado de carga; si falla, se permite volver a intentar con Actualizar.
 
 ## Verificación funcional en el entorno
+
+Validación de la migración de iconos (2026-09-09): compilaron `dashboard-runtime` y `ui` en configuración `development`, y pasaron las seis pruebas existentes de `dashboard-runtime` (`ng test dashboard-runtime --watch=false`). Se comprobó que los siete SVG son XML válido, tienen identificadores únicos y conservan el contenido del Legacy, salvo comentarios y finales de línea. El registro compartido se ejecuta antes de las extensiones y del evento `controlReady`, tanto para el visor como para el diseñador. Queda por comprobar su presentación visual con dashboards reales en el entorno.
 
 Las pruebas de contrato, interacción KPI y pestañas cubren siete casos. La prueba de pestañas se ejecutó nuevamente usando `mfe-dashboard` y `./ApplicationHost`, y pasó. Las librerías y el shell conservan la compilación validada de la migración; la separación del visor requiere artefactos independientes de `mfe-dashboard` y `mfe-mad`.
 

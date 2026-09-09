@@ -10,7 +10,7 @@ export class DashboardDescriptionExtension {
     const description = args.dashboard.customProperties.getValue('DashboardDescription');
     if (description) args.options.actionItems.push({ type: 'button', icon: 'iconDescription', tooltip: String(description) });
     if (this.control.option('workingMode') === 'ViewerOnly') return;
-    args.options.actionItems.push({ type: 'button', text: 'Diseño / visor', click: () => {
+    args.options.actionItems.push({ type: 'button', icon: 'dashboard-designer', hint: 'Diseño / visor', click: () => {
       if (this.control.isDesignMode()) this.control.switchToViewer();
       else this.control.switchToDesigner();
     } });

@@ -12,7 +12,7 @@ export class CardSetKpiExtension {
   private readonly caption = (args: ItemCaptionToolbarUpdatedEventArgs): void => {
     const item = args.dashboardItem;
     if (!(item instanceof CardItem) || this.control.option('workingMode') === 'ViewerOnly') return;
-    args.options.actionItems.push({ type: 'button', text: 'Configurar KPI', hint: 'Configurar KPI asociado',
+    args.options.actionItems.push({ type: 'button', icon: 'iconKpiSettings', hint: 'Configurar KPI asociado',
       click: () => this.edit({ kind: 'kpi', item, save: async () => {
         const extension = this.control.findExtension('saveDashboard') as SaveDashboardExtension | undefined;
         if (!extension) throw new Error('El guardado de dashboards no está disponible.');

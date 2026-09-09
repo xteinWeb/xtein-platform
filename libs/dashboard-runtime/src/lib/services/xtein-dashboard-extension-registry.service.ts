@@ -17,6 +17,7 @@ import { ChartConstantLinesExtension } from '../extensions/chart-constant-lines-
 import { CardSetKpiExtension } from '../extensions/card-setkpi-extension';
 import { XteinDashboardEditorRequest } from '../models/xtein-dashboard-editor.model';
 import { XteinDashboardDesignerPolicyExtension } from '../extensions/xtein-dashboard-designer-policy.extension';
+import { XteinDashboardIconsService } from './xtein-dashboard-icons.service';
 
 
 /**
@@ -76,7 +77,7 @@ export class XteinDashboardExtensionRegistryService {
     >();
 
 
-  constructor() {
+  constructor(private readonly icons: XteinDashboardIconsService) {
 
     this.registerBuiltInExtensions();
   }
@@ -137,6 +138,7 @@ export class XteinDashboardExtensionRegistryService {
       DashboardControl,
     edit: (request: XteinDashboardEditorRequest) => void = () => {}
   ): void {
+    this.icons.register(dashboardControl);
 
     for (const extension of [new ChartConstantLinesExtension(dashboardControl, edit), new CardSetKpiExtension(dashboardControl, edit)]) {
       if (!dashboardControl.findExtension(extension.name)) dashboardControl.registerExtension(extension);
