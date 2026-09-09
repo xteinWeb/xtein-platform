@@ -571,6 +571,13 @@
           "options": {
             "port": 4202
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "apps/mfe-adm/tsconfig.spec.json",
+            "buildTarget": "mfe-adm:esbuild:development"
+          }
         }
       }
     },
