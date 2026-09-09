@@ -91,7 +91,9 @@ Las líneas se aplican al modelo mediante Guardar en su ventana; la persistencia
 
 El endpoint del control de dashboards lo configura el shell mediante `XteinDashboardRuntimeService`. No hay URLs de backend en la aplicación genérica.
 
-Los recursos gráficos provienen de `Legacy/xtein-dashboard/src/app/shared/components/dashboard/dashboard-icons.ts`, de los SVG de `dashboard.component.html` y de `extensions/item-description-extension.ts`. Las acciones Ver detalles, Configurar KPI y Diseño / visor utilizan los mismos identificadores de icono del Legacy; sus textos se conservan como ayuda al pasar el cursor.
+Los siete recursos gráficos originales provienen de `Legacy/xtein-dashboard/src/app/shared/components/dashboard/dashboard-icons.ts`, de los SVG de `dashboard.component.html` y de `extensions/item-description-extension.ts`. Se añade un octavo SVG, `xtein-dashboard-viewer`, con forma de ojo. En modo vista, el lápiz ofrece «Editar»; en modo diseño, el ojo ofrece «Ver». La acción se actualiza al completar el cambio de modo y no aparece en `ViewerOnly`. Ver detalles y Configurar KPI conservan los iconos del Legacy y sus ayudas.
+
+No se registra `DashboardPanelExtension`: la aplicación MAD gestiona la selección de dashboards. Esto elimina los botones azules inferiores de cambio de modo y el panel vacío en modo vista, conservando las herramientas laterales del diseñador.
 
 El botón Actualizar de la barra vuelve a consultar `DashboardType` para el código de la pestaña y recrea el visor. Esto recarga la definición y vuelve a dibujar el dashboard, reiniciando su selección KPI y filtros temporales. Durante la consulta se muestra el estado de carga; si falla, se permite volver a intentar con Actualizar.
 

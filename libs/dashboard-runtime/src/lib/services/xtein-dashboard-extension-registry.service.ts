@@ -4,7 +4,6 @@ import {
 
 import {
   DashboardControl,
-  DashboardPanelExtension,
   IExtension
 } from 'devexpress-dashboard';
 import { ChartScaleBreaksExtension } from '../extensions/chart-scale-breaks-extension';
@@ -202,13 +201,6 @@ export class XteinDashboardExtensionRegistryService {
     this.register('item-description', control => new ItemDescriptionExtension(control));
     this.register('dashboard-description', control => new DashboardDescriptionExtension(control));
 
-    this.register(
-      'dashboard-panel',
-      dashboardControl =>
-        new DashboardPanelExtension(
-          dashboardControl
-        )
-    );
     this.register('designer-policy', control => new XteinDashboardDesignerPolicyExtension(control));
   }
 }
