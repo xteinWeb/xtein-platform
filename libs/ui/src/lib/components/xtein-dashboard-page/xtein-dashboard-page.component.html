@@ -2,6 +2,6 @@
   @if (loading()) { <p role="status">Cargando dashboard…</p> }
   @if (error()) { <p role="alert">{{ error() }}</p> }
   @if (definition(); as dashboard) {
-    <xtein-dashboard-viewer [dashboardId]="dashboard.dashboardId" [dashboardType]="dashboard.dashboardType" />
+    <xtein-dashboard-viewer [dashboardId]="dashboard.dashboardId" [dashboardType]="dashboard.dashboardType" [lastUpdated]="dashboard.lastUpdated" />
   }
 </xtein-dashboard-frame>

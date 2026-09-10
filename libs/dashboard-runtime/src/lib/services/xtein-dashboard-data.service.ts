@@ -4,6 +4,7 @@ import { XteinApiClientService, XteinApiAccessMode } from '@xtein/api-client';
 import { SessionService } from '@xtein/session';
 import { XteinDashboardDefinition, XteinDashboardTypeRow } from '../models/xtein-dashboard-definition.model';
 import { XteinDashboardKpiOption } from '../models/xtein-dashboard-editor.model';
+import { formatDashboardUpdateDate } from '../utils/dashboard-update-date';
 
 @Injectable({ providedIn: 'root' })
 export class XteinDashboardDataService {
@@ -38,6 +39,7 @@ export class XteinDashboardDataService {
       }
       return {
         dashboardType: row.TIPO,
+        lastUpdated: formatDashboardUpdateDate(row.FECHA_ACTUALIZACION),
         dashboardId: JSON.stringify({ dashboardId: applicationId, user: user.toUpperCase(),
           type: 'view', filter: [{ Field: '', Value: '' }] })
       };

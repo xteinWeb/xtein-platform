@@ -1,4 +1,5 @@
 import * as ko from 'knockout';
+import { describe, expect, it, vi } from 'vitest';
 import { DashboardControl, DashboardTitleToolbarUpdatedEventArgs } from 'devexpress-dashboard';
 import { DashboardDescriptionExtension } from './dashboard-description-extension';
 

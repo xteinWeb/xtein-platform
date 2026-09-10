@@ -1,4 +1,5 @@
 import { DashboardControl, ItemClickEventArgs } from 'devexpress-dashboard';
+import { describe, expect, it, vi } from 'vitest';
 import { XteinDashboardCardInteractionExtension } from './xtein-dashboard-card-interaction.extension';
 
 function setup() {

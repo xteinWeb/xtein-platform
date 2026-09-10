@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { firstValueFrom, of } from 'rxjs';
 import { XteinApiAccessMode, XteinApiClientService } from '@xtein/api-client';
 import { SessionService } from '@xtein/session';
@@ -30,5 +31,14 @@ describe('Dashboard backend contract', () => {
   it('loads KPI choices from the backend', async () => {
     execute.mockReturnValue(of({ data: [{ ID_APLICACION: 'TEST-KPI', NOMBRE: ' KPI ' }] }));
     expect(await firstValueFrom(TestBed.inject(XteinDashboardDataService).loadKpis())).toEqual([{ value: 'TEST-KPI', text: 'KPI' }]);
+  });
+  it('accepts an optional data update timestamp without preventing dashboard loading', async () => {
+    const service = TestBed.inject(XteinDashboardDataService);
+    for (const value of [undefined, null, 'not a date', '2026-09-09T14:05:07']) {
+      execute.mockReturnValue(of({ data: JSON.stringify([{ ErrMensaje: '', TIPO: 'KPIPANEL', FECHA_ACTUALIZACION: value }]) }));
+      const definition = await firstValueFrom(service.load('TEST-DASH-A'));
+      expect(definition.dashboardType).toBe('KPIPANEL');
+      expect(definition.lastUpdated).toBe(value === '2026-09-09T14:05:07' ? '09/09/2026 14:05:07' : undefined);
+    }
   });
 });
