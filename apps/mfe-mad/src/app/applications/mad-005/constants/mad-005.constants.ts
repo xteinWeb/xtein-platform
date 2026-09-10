@@ -3,17 +3,14 @@
  */
 export const Mad005Application = {
 
-  /**
-   * XTEIN platform application identifier.
-   */
   Id:
     'MAD-005',
-
-  /**
-   * Existing backend application identifier.
-   */
+  
   BackendId:
-    'MAD005'
+    'MAD005',
+
+ Table:
+    'CONFIG_ORIGEN_DATO'
 
 } as const;
 

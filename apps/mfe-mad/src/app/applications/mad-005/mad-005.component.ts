@@ -130,12 +130,12 @@ export class Mad005Component
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
   readonly queryFilter = computed(() => buildReportRecordFilter(
-    'CONFIG_ORIGEN_DATO', 'ID_ORIGEN_DATO', this.records().map(record => record.ID_ORIGEN_DATO)));
+    Mad005Application.Table, 'ID_ORIGEN_DATO', this.records().map(record => record.ID_ORIGEN_DATO)));
   readonly viewColumns = Mad005RecordViewColumns;
 
   currentReportFilter(): string {
     const record = this.records()[this.currentIndex()];
-    return record ? " CONFIG_ORIGEN_DATO.ID_ORIGEN_DATO = '" + String(record.ID_ORIGEN_DATO).replace(/'/g, "''") + "'" : '';
+    return record ? ` ${Mad005Application.Table}.ID_ORIGEN_DATO = '${String(record.ID_ORIGEN_DATO).replace(/'/g, "''")}'` : '';
   }
 
   selectViewedRecord(record: object): void {
@@ -148,7 +148,7 @@ export class Mad005Component
     if (this.loading() || this.isChanging() || !this.permissions.search) return;
     this.filterVisible.set(false);
     this.loading.set(true);
-    this.subscriptions.add(this.mad005Service.query(Mad005Action.Query, { CONFIG_ORIGEN_DATO: filter.ESTRUCTURA })
+    this.subscriptions.add(this.mad005Service.query(Mad005Action.Query, { [Mad005Application.Table]: filter.ESTRUCTURA })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: response => {
@@ -917,7 +917,7 @@ export class Mad005Component
           ? await firstValueFrom(
               this.mad005Service
                 .create({
-                  CONFIG_ORIGEN_DATO:
+                  [Mad005Application.Table]:
                     record
                 })
             )
@@ -925,7 +925,7 @@ export class Mad005Component
           : await firstValueFrom(
               this.mad005Service
                 .update({
-                  CONFIG_ORIGEN_DATO:
+                  [Mad005Application.Table]:
                     record
                 })
             );
