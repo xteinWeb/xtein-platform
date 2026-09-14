@@ -1,0 +1,137 @@
+<div class="div-item-data-span">
+	<span> Layouts </span>
+</div>
+<div class="div-item-data-item xt-texteditor-clear-x">
+	<dx-drop-down-box
+		#ddBoxLay
+		id="ddBoxLay"
+		width="450px"
+		valueExpr="ID_RUTA"
+		displayExpr="ID_RUTA"
+		showSelectionControls="true"
+		placeholder="Seleccione layout de ruta..."
+		[readOnly]="false"
+		[showClearButton]="true"
+		[(value)]="GValorLayout"
+		[(opened)]="opendDrop.LAYOUT"
+		[dataSource]="GDatosLayoutDP"
+		[dropDownOptions]="{width:'450px', height:'400px', hideOnParentScroll: true,  closeOnOutsideClick: false, container:'#PRO029'}"
+		(onValueChanged)="onValueChangedLayout($event)"
+	>
+		<div *dxTemplate="let data of 'content'">
+			<dx-data-grid
+				#GDatosDP
+				id="GDatosDP"
+				width="100%"
+				height="95%"
+				keyExpr="ID_RUTA"
+				[dataSource]="GDatosLayoutDP"
+				[selection]="{ mode: 'single' }"
+				[focusedRowEnabled]="true"
+				[hoverStateEnabled]="true"
+				[paging]="{ enabled: true, pageSize: 10 }"
+				[scrolling]="{ mode: 'infinite' }"
+				[filterRow]="{ visible: false }"
+				[showBorders]="true"
+				[rowAlternationEnabled]="true"
+				[hoverStateEnabled]="true"
+				[(selectedRowKeys)]="GValorLayout"
+			>
+				<dxo-search-panel [visible]="true" [width]="400" placeholder="Buscar...">
+				</dxo-search-panel>
+				<dxi-column dataField="ID_RUTA" caption="Código" [width]="130" ></dxi-column>
+				<dxi-column dataField="DESCRIPCION" caption="Nombre"></dxi-column>
+			</dx-data-grid>
+			<div style="display: flex; justify-content: center; width: 100%; padding: 5px;">
+				<dx-button
+					id="btnAceptarPT"
+					stylingMode="contained"
+					text="Aceptar"
+					type="default"
+					[width]="100"
+					(onClick)="cerrarListaDP()"
+				></dx-button>
+				<dx-button
+					id="btnCancelarPT"
+					stylingMode="contained"
+					text="Cancelar"
+					type="normal"
+					[width]="110"
+					[style.margin-left]="'20px'"
+					(onClick)="cerrarListaDP()"
+				></dx-button>
+			</div>
+		</div>
+	</dx-drop-down-box>
+</div>
+<br>
+<dx-diagram
+	#diagAgenda
+	id="diagAgenda"
+	units="px"
+	viewunits="px"
+	autoZoomMode="fitWidth"
+	pageOrientation="landscape"
+	class="dx-diagram-background"
+	[readOnly]="true"
+	[simpleView]="true"
+	(onContentReady)="onContentReady($event)"
+	(onItemDblClick)="onItemDblClick($event)"
+	(onCustomCommand)="onCustomMenuDiag($event)"
+	(onSelectionChanged)="selectionChangedHandler($event)"
+>
+	<dxo-default-item-properties style="stroke-width: 1px"></dxo-default-item-properties>
+	<dxo-main-toolbar [visible]="true">
+		<dxi-command name="zoomLevel" text="Zoom"></dxi-command>
+		<dxi-command  name="clear" icon="clearsquare" text="Borrar Diagrama"></dxi-command>
+	</dxo-main-toolbar>
+
+	<dxi-custom-shape
+		*ngFor="let svgId of NodosSvg; let i = index"
+		category="produccion"
+		[type]="svgId.id"
+		title="proceso"
+		[backgroundImageUrl]="svgId.svg"
+		[backgroundImageToolboxUrl]="svgId.svg"
+		[defaultWidth]="100"
+		[defaultHeight]="60"
+		defaultText=""
+		[allowEditText]="false"
+		[allowEditImage]="false"
+		[textWidth]=".55"
+		[textLeft]="(1 - 0.55) / 2"
+	></dxi-custom-shape>
+
+	<dxo-nodes
+		[dataSource]="seccNodosDataSource"
+		keyExpr="id"
+		textExpr="text"
+		containerKeyExpr="contenedor"
+		typeExpr="type"
+		leftExpr="x"
+		topExpr="y"
+		widthExpr="width"
+		heightExpr="height"
+		textStyleExpr="textStyle"
+		lockedExpr="bloqSeccion"
+		styleExpr="itemStyleExpr"
+	>
+		<dxo-auto-layout type="off"></dxo-auto-layout>
+	</dxo-nodes>
+	<dxo-edges
+		[dataSource]="seccConecDataSource"
+		keyExpr="id"
+		fromExpr="fromId"
+		toExpr="toId"
+		textExpr="text"
+		fromPointIndexExpr="fromPoint"
+		toPointIndexExpr="toPoint"
+		pointsExpr="pointsConec"
+		styleExpr="conecStyle"
+		lockedExpr="bloqConn"
+	></dxo-edges>
+
+	<dxo-context-menu [enabled]="true" >
+		<dxi-command name="PROGRAMACION" text="Ver programación" ></dxi-command>
+	</dxo-context-menu>
+</dx-diagram>

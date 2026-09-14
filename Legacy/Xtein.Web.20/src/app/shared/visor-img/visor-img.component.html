@@ -1,0 +1,20 @@
+<dx-popup
+  #popupVisorImg
+  id="popupVisorImg"
+  [title]="titulo"
+  [width]="800"
+  height="85%"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="true"
+  [(visible)]="visibleVisorImg"
+  (onShown)="onShown($event)"
+> 
+  <dxo-position at="center" > </dxo-position>
+  <div *dxTemplate="let data of 'content'" id="imagen">
+    <img [src]="imgBase64" alt="#imgBase64" width="100%" id="imgVisor">
+  </div>
+  <br/>
+</dx-popup>

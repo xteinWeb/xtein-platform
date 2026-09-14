@@ -1,0 +1,41 @@
+.container-form {
+    display: flex;
+}
+
+:ng-deep .dx-layout-manager .dx-field-item:not(.dx-last-col) {
+    padding-right: 0 !important;
+}
+.main-field{
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/*---------------------------------------------------------------------*/
+
+.container-flex {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.container-flex > div {
+    display: flex;
+    flex-direction: column;
+    width: 49%;
+}
+
+.div-totales {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.container-uno {
+    padding: 0.75rem 1rem;
+    margin-left: 1rem;
+    width: auto;
+    background: #fff;
+    max-width: 73%;
+    min-width: 69%;
+}

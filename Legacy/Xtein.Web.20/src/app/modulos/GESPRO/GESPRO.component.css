@@ -1,0 +1,72 @@
+.container-child-uno-app {
+  display: flex;
+  width: 50%;
+  height: 50px;
+  align-items: center;
+  position: absolute;
+  z-index: 100;
+}
+
+.container-child-uno-app div {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  height: 95%;
+}
+
+.container-child-dos-app {
+  width: 100%;
+  min-height: 400px;
+}
+
+.selectProyect {
+  background-color: blue;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.mat-tab-label,
+.mat-tab-link {
+  background: transparent !important;
+}
+
+.container-filtros {
+  display: flex;
+  align-items: center;
+  /* margin-bottom: .25rem;
+    margin-top: .25rem; */
+  position: absolute;
+  margin: 0 1rem;
+  /* top: -44px; */
+}
+
+.container-filtros .f-caption {
+  color: rgba(10, 66, 119, 0.55);
+  font-size: 0.755rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.check-filtro {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(10, 66, 119, 0.55);
+  border-radius: 1rem;
+  outline: 1px solid;
+  outline-offset: -1px;
+  outline-color: rgba(10, 66, 119, 0.12);
+  padding: 0.25rem 0.75rem;
+  margin: 0 0.35rem 0 0;
+}
+
+.container-filtros .dx-checkbox-checked {
+  color: rgba(18, 94, 220, 1);
+  background: rgba(18, 94, 220, 0.075);
+  outline-color: rgba(18, 94, 220, 0.55);
+}
+
+.container-filtros .dx-state-hover {
+  color: rgba(10, 66, 119, 0.75);
+  outline-color: rgba(10, 66, 119, 0.25);
+  /* background: rgba(18,94,220,.025); */
+}

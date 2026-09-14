@@ -1,0 +1,222 @@
+<dx-popup
+  [(visible)]="popupVisible"
+  [width]="'75%'"
+  [height]="'80vh'"
+  [showTitle]="true"
+  title="Medios de pago"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="true"
+  (onHidden)="cancelarPago()"
+>
+
+  <div *dxTemplate="let data of 'content'" class="popup-content">
+
+    <!-- ── Panel de totales ────────────────────────────────────────── -->
+    <div class="panel-totales" [class.panel-excedido]="totalExcedido">
+
+      <div class="total-item">
+        <label>Total Permitido</label>
+        <dx-number-box
+          [(value)]="totalPermitido"
+          [format]="currencyFormat"
+          [min]="0"
+          stylingMode="outlined"
+          class="numberbox-total"
+        ></dx-number-box>
+      </div>
+
+      <div class="total-item">
+        <label>Total Asignado</label>
+        <dx-number-box
+          [value]="totalValorPagado"
+          [format]="currencyFormat"
+          [readOnly]="true"
+          stylingMode="outlined"
+          [class.numberbox-ok]="!totalExcedido && totalValorPagado > 0"
+          [class.numberbox-error]="totalExcedido"
+          class="numberbox-total"
+        ></dx-number-box>
+      </div>
+
+      <div class="total-item">
+        <label>Diferencia</label>
+        <dx-number-box
+          [value]="diferencia"
+          [format]="currencyFormat"
+          [readOnly]="true"
+          stylingMode="outlined"
+          [class.numberbox-ok]="diferencia >= 0"
+          [class.numberbox-error]="diferencia < 0"
+          class="numberbox-total"
+        ></dx-number-box>
+      </div>
+
+      <!-- Alerta de exceso -->
+      <div *ngIf="totalExcedido" class="alerta-excedido">
+        <i class="dx-icon-warning"></i>
+        El total asignado supera el valor máximo permitido.
+      </div>
+
+    </div>
+
+    <!-- ── DataGrid ───────────────────────────────────────────────── -->
+    <dx-data-grid
+      #gridPagos
+      id="gridPagos"
+      [dataSource]="DPagos"
+      keyExpr="ITEM"
+      [showBorders]="true"
+      [showRowLines]="true"
+      [showColumnLines]="true"
+      [rowAlternationEnabled]="true"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      [(selectedRowKeys)]="selectedRowKeys"
+      (onSelectionChanged)="onSelectionChanged($event)"
+      (onCellClick)="onCellClick($event)"
+      (onEditorPreparing)="onEditorPreparing($event)"
+      (onRowValidating)="onRowValidating($event)"
+      (onRowUpdated)="onRowUpdated($event)"
+      [height]="'80%'"
+    >
+
+      <!-- ── Edición modo celda ──────────────────────────────────── -->
+      <dxo-editing
+        mode="cell"
+        [allowUpdating]="true"
+        [allowAdding]="false"
+        [allowDeleting]="false"
+        [selectTextOnEditStart]="true"
+        [startEditAction]="'click'"
+      ></dxo-editing>
+
+
+      <!-- ── Agrupación por TIPO_PAGO ───────────────────────────── -->
+      <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+      <dxo-group-panel [visible]="false"></dxo-group-panel>
+
+      <!-- ── Scrolling / Paginación ─────────────────────────────── -->
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-paging [enabled]="false"></dxo-paging>
+
+      <!-- Columna auxiliar de orden: oculta pero usada para sorting -->
+      <dxi-column
+        dataField="TIPO_PAGO_ORDEN"
+        [visible]="false"
+        [allowEditing]="false"
+        [showInColumnChooser]="false"
+        [sortIndex]="0"
+        sortOrder="asc"
+      ></dxi-column>
+
+      <!-- ── Columnas ───────────────────────────────────────────── -->
+      <dxi-column
+        dataField="TIPO_PAGO"
+        caption="Tipo de Pago"
+        dataType="string"
+        [groupIndex]="0"
+        [allowEditing]="false"
+        [allowSorting]="false"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="BANCO"
+        caption="Banco"
+        dataType="string"
+        [allowEditing]="false"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="ID_BANCO"
+        [visible]="false"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="CUENTA_BANCARIA"
+        caption="Cuenta"
+        dataType="string"
+        [allowEditing]="false"
+      ></dxi-column>
+
+      <!-- ── Columna editable VALOR_PAGO ──────────────────────── -->
+      <dxi-column
+        dataField="VALOR_PAGO"
+        caption="Valor Pagado"
+        dataType="number"
+        [format]="currencyFormat"
+        alignment="right"
+        [allowEditing]="true"
+        cssClass="col-editable"
+        cellTemplate="valorPagoTemplate"
+      >
+        <dxi-validation-rule
+          type="custom"
+          message="El valor debe ser mayor a 0."
+          [validationCallback]="validarMayorCero"
+        ></dxi-validation-rule>
+
+        <dxi-validation-rule
+          type="numeric"
+          message="Solo se permiten valores numéricos."
+        ></dxi-validation-rule>
+
+        <dxi-validation-rule
+          type="custom"
+          message="El total asignado supera el máximo permitido."
+          [validationCallback]="validarContraTotal.bind(this)"
+        ></dxi-validation-rule>
+      </dxi-column>
+
+      <!-- ── Template celda VALOR_PAGO ───────────────────────── -->
+      <div *dxTemplate="let cell of 'valorPagoTemplate'">
+        <span
+          class="valor-cell"
+          [class.valor-activo]="cell.value > 0 && selectedRowKeys.includes(cell.data.ID)"
+          [class.valor-cero]="!selectedRowKeys.includes(cell.data.ID)"
+          [class.valor-error]="cell.value > totalPermitido"
+        >
+          {{ cell.value | number:'1.2-2' }}
+        </span>
+      </div>
+
+      <!-- ── Subtotal por grupo + Total general ─────────────────── -->
+      <dxo-summary>
+        <dxi-group-item
+          column="VALOR_PAGO"
+          summaryType="sum"
+          [valueFormat]="currencyFormat"
+          displayFormat="Subtotal: {0}"
+          [alignByColumn]="true"
+          [showInGroupFooter]="false"
+        ></dxi-group-item>
+
+        <dxi-total-item
+          column="VALOR_PAGO"
+          summaryType="sum"
+          [valueFormat]="currencyFormat"
+          displayFormat="Total General: {0}"
+        ></dxi-total-item>
+      </dxo-summary>
+
+    </dx-data-grid>
+  </div>
+
+  <dxi-toolbar-item location="after" toolbar="bottom">
+    <dx-button
+      text="Aceptar"
+      type="success"
+      (onClick)="aceptarPago()"
+      icon="check"
+    ></dx-button>
+    <dx-button
+      text="Cancelar"
+      type="danger"
+      (onClick)="cancelarPago()"
+      [style]="{ marginLeft: '10px' }"
+      icon="close"
+    ></dx-button>
+  </dxi-toolbar-item>
+
+</dx-popup>

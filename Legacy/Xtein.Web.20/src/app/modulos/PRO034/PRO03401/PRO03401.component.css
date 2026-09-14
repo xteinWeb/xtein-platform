@@ -1,0 +1,189 @@
+.percentage-card {
+    padding: 2px 12px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.percentage-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #666;
+}
+
+.percentage-card .value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Color schemes for percentages */
+.sobredimensionado {
+    /* background-color: rgba(223, 62, 62, 0.1); */
+    border-color: #df3e3e;
+}
+
+.sobredimensionado .value {
+    color: #df3e3e;
+}
+
+.comprometido {
+    /* background-color: rgba(255, 152, 0, 0.1); */
+    border-color: #ff9800;
+}
+
+.comprometido .value {
+    color: #ff9800;
+}
+
+.programado {
+    /* background-color: rgba(18, 94, 220, 0.1); */
+    border-color: #125edc;
+}
+
+.programado .value {
+    color: #125edc;
+}
+
+.en-proceso {
+    /* background-color: rgba(53, 204, 172, 0.1); */
+    border-color: #35ccac;
+}
+
+.en-proceso .value {
+    color: #35ccac;
+}
+
+.finalizado {
+    /* background-color: rgba(46, 125, 50, 0.1); */
+    border-color: #2e7d32;
+}
+
+.finalizado .value {
+    color: #2e7d32;
+}
+
+/* Summary Cards (Totals) */
+.summary-card {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 12px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.main-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.stat .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.stat .stat-unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: #777;
+    text-transform: lowercase;
+}
+
+.stat.money .stat-value {
+    color: #2e7d32;
+    font-size: 18px;
+}
+
+.total-programado {
+    border-left: 4px solid #125edc;
+}
+
+.total-pendiente {
+    border-left: 4px solid #fbc02d;
+}
+
+/* White Tooltip Customization (Modern Design) */
+::ng-deep .white-tooltip.dx-tooltip-wrapper .dx-overlay-content {
+    background-color: #ffffff !important;
+    color: #2D3748 !important;
+    border: none !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 24px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Remove default padding from DevExtreme's internal content container */
+::ng-deep .white-tooltip.dx-tooltip-wrapper .dx-tooltip-content {
+    padding: 0 !important;
+}
+
+::ng-deep .white-tooltip.dx-tooltip-wrapper .dx-popover-arrow::after {
+    background-color: #ffffff !important;
+    border: none !important;
+}
+
+/* Tooltip Interior Styles */
+.tooltip-header {
+    padding: 20px 24px 10px 24px;
+}
+
+.tooltip-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1A202C;
+}
+
+.tooltip-body {
+    padding: 0 24px 10px 24px;
+    color: #4A5568;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Layout Helpers */
+.d-flex {
+    display: flex;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.gap-1 {
+    gap: 4px;
+}
+
+.gap-2 {
+    gap: 8px;
+}

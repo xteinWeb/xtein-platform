@@ -1,0 +1,355 @@
+<div class="card-content">
+    <cdk-accordion class="accordion-container" [multi]="true">
+        <cdk-accordion-item #accordionItem="cdkAccordionItem" class="accordion-item" role="button" tabindex="0"
+            [expanded]="accordionExpand[0]" [attr.id]="'accordion-header-0'"
+            [attr.aria-expanded]="accordionItem.expanded" [attr.aria-controls]="'accordion-body-0'">
+            <div class="accordion-item-header" (click)="accordionItem.toggle()">
+                <div class="header-actions">
+                    <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+                        <i class="icon-chevron-up-xs"></i>
+                    </span>
+                    <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+                        <i class="icon-chevron-down-xs"></i>
+                    </span>
+                </div>
+                <span class="accordion-caption" style="width: max-content !important;">Productos Proyectados</span>
+            </div>
+
+            <div class="accordion-item-body" role="region" [style.display]="accordionItem.expanded ? '' : 'none'"
+                [attr.id]="'accordion-body-0'" [attr.aria-labelledby]="'accordion-header-0'">
+                <div class="grid-container" [style.height]="gridHeight === 'auto' ? 'auto' : gridHeight + 'px'">
+                    <dx-data-grid #gridProductos id="gridProductos" keyExpr="ITEM" [dataSource]="DGproductos"
+                        [showBorders]="true" [columnAutoWidth]="true" [hoverStateEnabled]="true"
+                        [focusedRowEnabled]="true" [allowColumnResizing]="true" [rowAlternationEnabled]="true"
+                        [columns]="gridColumns" [summary]="gridSummaryConfig" (onRowUpdated)="onRowUpdated($event)"
+                        (onContextMenuPreparing)="onContextMenuPreparing($event)"
+                        (onRowUpdating)="onRowUpdating($event)" (onContentReady)="onContentReady($event)"
+                        (onRowValidating)="onRowValidating($event)" (onSelectionChanged)="selectionGrid($event)"
+                        (onCellPrepared)="onCellPrepared($event)" [height]="gridHeight">
+
+                        <dxo-selection mode="single"></dxo-selection>
+
+                        <dxo-toolbar>
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <dx-button icon="expand" hint="Expandir todos los grupos" (onClick)="expandAll()">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <dx-button icon="collapse" hint="Contraer todos los grupos"
+                                        (onClick)="collapseAll()">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <dx-button icon="edit" hint="Editar" (onClick)="operGrid($event,'edit')"
+                                        *ngIf="rowEdit && !readOnly">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <dx-button icon="trash" hint="Eliminar" (onClick)="operGrid($event,'delete')"
+                                        *ngIf="rowEdit && !readOnly">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+                            <dxi-item location="before" [visible]="rowApplyChanges && !modoComprometerActivo">
+                                <div *dxTemplate>
+                                    <dx-button icon="todo" hint="Guardar" (onClick)="operGrid($event,'save')">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+                            <dxi-item location="before" [visible]="rowApplyChanges && !modoComprometerActivo">
+                                <div *dxTemplate>
+                                    <dx-button icon="undo" hint="Cancelar" (onClick)="operGrid($event,'cancel')">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+
+                            <!-- Botones para Selección OC -->
+                            <dxi-item location="before" [visible]="modoComprometerActivo">
+                                <div *dxTemplate>
+                                    <dx-button icon="check" hint="Confirmar Selección" text="Confirmar" type="success"
+                                        (onClick)="abrirPopupOC()">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+                            <dxi-item location="before" [visible]="modoComprometerActivo">
+                                <div *dxTemplate>
+                                    <dx-button icon="close" hint="Cancelar Selección" text="Cancelar" type="danger"
+                                        (onClick)="cancelarSeleccionOC()">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <dx-button icon="email" hint="Enviar notificación por correo"
+                                        (onClick)="activarModoEnvioCorreo()" *ngIf="DGproductos.length > 0">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <dx-button icon="exportxlsx" hint="Exportar a Excel" (onClick)="exportToExcel()"
+                                        *ngIf="DGproductos.length > 0">
+                                    </dx-button>
+                                </div>
+                            </dxi-item>
+
+                        </dxo-toolbar>
+
+                        <dxo-scrolling mode="virtual"></dxo-scrolling>
+                        <dxo-paging [enabled]="false"></dxo-paging>
+                        <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+                        <dxo-group-panel [visible]="true"
+                            placeholder="Arrastre una columna aquí para agrupar"></dxo-group-panel>
+                        <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
+
+                        <dxo-editing mode="row" [useIcons]="true" [allowUpdating]="!readOnly" [allowDeleting]="false"
+                            [allowAdding]="false"></dxo-editing>
+                    </dx-data-grid>
+                </div>
+            </div>
+        </cdk-accordion-item>
+    </cdk-accordion>
+</div>
+
+<!-- Popup Orden de Compra / Comprometer -->
+<dx-popup [width]="400" [height]="'auto'" [showTitle]="true"
+    [title]="modoOperacionOC === 'AGREGAR_OC' ? 'Agregar Orden de Compra' : 'Comprometer Producción'"
+    [dragEnabled]="false" [hideOnOutsideClick]="true" [(visible)]="popupComprometerOC">
+    <div *dxTemplate="let data of 'content'">
+        <div class="p-3">
+            <p *ngIf="modoOperacionOC === 'COMPROMETER'">Se comprometerán <b>{{ filasSelecc.length }}</b> productos
+                proyectados para la fecha: <b>{{ fechaSeleccionadaComprometer | date:'dd/MM/yyyy' }}</b></p>
+            <p *ngIf="modoOperacionOC === 'AGREGAR_OC'">Se actualizará la OC general para <b>{{ filasSelecc.length
+                    }}</b> productos de la fecha: <b>{{ fechaSeleccionadaComprometer | date:'dd/MM/yyyy' }}</b></p>
+
+            <div class="form-item-label-data mt-3">Orden de Compra</div>
+            <div class="form-input-box-data" style="margin-top: 10px;">
+                <dx-text-box [(value)]="ordenCompra" placeholder="Ingrese OC si aplica..."></dx-text-box>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2" style="margin-top: 30px;">
+                <dx-button text="Cancelar" (onClick)="popupComprometerOC = false">
+                </dx-button>
+                <dx-button text="Confirmar y Guardar" type="success" icon="save" (onClick)="enviarCompromiso()">
+                </dx-button>
+            </div>
+        </div>
+    </div>
+</dx-popup>
+
+<!-- Popup Export Excel -->
+<dx-popup [width]="400" [height]="'auto'" [showTitle]="true" title="Exportar Excel por Estado" [dragEnabled]="false"
+    [hideOnOutsideClick]="true" [(visible)]="popupExportarExcel">
+    <div *dxTemplate="let data of 'content'">
+        <div class="p-3">
+            <p>Seleccione el estado de los productos que desea exportar:</p>
+
+            <div class="form-item-label-data mt-3">Estado a Exportar</div>
+            <div class="form-input-box-data" style="margin-top: 10px;">
+                <dx-select-box [items]="estadosExportar" [(value)]="estadoSeleccionadoExportar"
+                    placeholder="Seleccione un estado...">
+                </dx-select-box>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2" style="margin-top: 30px;">
+                <dx-button text="Cancelar" (onClick)="popupExportarExcel = false">
+                </dx-button>
+                <dx-button text="Exportar a Excel" type="success" icon="exportxlsx"
+                    (onClick)="confirmarExportacionExcel()">
+                </dx-button>
+            </div>
+        </div>
+    </div>
+</dx-popup>
+
+
+
+<dx-load-panel #loaderPanel [position]="{ of: '#gridProductos' }"
+    [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true" [shading]="false"
+    message="Cargando productos..." [hideOnOutsideClick]="false"></dx-load-panel>
+
+<dx-popup #popupReprogramar id="popupReprogramar" [width]="500"
+    [height]="popupAccion === 'reprogramar' ? 480 : popupAccion === 'cancelar' ? 200 : 250" [showTitle]="true"
+    [dragEnabled]="true" [hideOnOutsideClick]="true" [title]="popupTitulo" [(visible)]="popupVisible">
+    <div style="padding: 1rem;">
+        <ng-container>
+            <div *ngIf="popupAccion === 'reprogramar' || popupAccion === 'cancelar' "
+                style="width: 100%; display: flex; align-items: flex-start; flex-direction: column; box-sizing: border-box; justify-content: space-between;">
+                <!-- Datos Actuales -->
+                <div class="form-item-column-data"
+                    style="display: flex; align-items: flex-end; justify-content: space-between; width: 100%;">
+                    <div style="display: flex;">
+                        <div style="flex: 1 1 0; padding: 0px 5px;">
+                            <div class="form-item-label-data">Pedido:</div>
+                            <div class="form-input-box-data">
+                                <span>{{ popupData.DOCUMENTO_PEDIDO }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="flex: 1 1 0;">
+                            <div class="form-item-label-data">Requerida:</div>
+                            <div class="form-input-box-data">
+                                <span>{{ popupData.CANTIDAD }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="flex: 1 1 0;">
+                            <div class="form-item-label-data">Pendiente:</div>
+                            <div class="form-input-box-data">
+                                <span>{{ popupData.REAL_PENDIENTE || popupData.CANTIDAD_PENDIENTE || popupData.CANTIDAD
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="flex: 1 1 0; padding: 0px 5px;">
+                            <div class="form-item-label-data">Programada:</div>
+                            <div class="form-input-box-data">
+                                <span>{{ popupData.FECHA_PROGRAMADA ? templateHtml(popupData.FECHA_PROGRAMADA,
+                                    'POPUP_FECHA_PROGRAMADA', 'SPAN') : '--' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <mat-divider *ngIf="popupAccion === 'reprogramar'" [vertical]="false"
+                    style="width: 100%;"></mat-divider>
+                <br *ngIf="popupAccion === 'reprogramar'" />
+
+                <!-- Nuevo a Programar -->
+                <div *ngIf="popupAccion === 'reprogramar'" class="form-item-column-data"
+                    style="display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-end; justify-content: flex-start; width: 100%;">
+                    <div style="flex: 1 1 100%; padding: 0px 5px;">
+                        <div class="form-item-label-data">Plan</div>
+                        <div class="form-input-box-data">
+                            <dx-drop-down-box #dropDownPlanes width="100%" valueExpr="CONSECUTIVO" displayExpr="NOMBRE"
+                                placeholder="Seleccione Plan" [showClearButton]="true" [readOnly]="false"
+                                [dataSource]="DGplanes" [(value)]="selectPlanPopup" [(opened)]="openPlanPopup"
+                                [dropDownOptions]="{ width: 500, height: 300, hideOnParentScroll: true, container: '#router-container'}">
+                                <div *dxTemplate="let data of 'content'">
+                                    <dx-data-grid width="100%" height="100%" keyExpr="CONSECUTIVO"
+                                        columnResizingMode="nextColumn" [selection]="{ mode: 'single' }"
+                                        [focusedRowEnabled]="true" [hoverStateEnabled]="true"
+                                        [allowColumnResizing]="true" [rowAlternationEnabled]="true"
+                                        [dataSource]="DGplanes" [(selectedRowKeys)]="selectPlanPopup"
+                                        (onSelectionChanged)="onSelectionChangedPlanPopup($event, 'GRID_POPUP')">
+                                        <dxi-column dataField="CONSECUTIVO" caption="Consecutivo"
+                                            width="100"></dxi-column>
+                                        <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                                        <dxi-column dataField="FECHA_INICIO" caption="Fecha Inicio" dataType="date"
+                                            [width]="110" alignment="right"></dxi-column>
+                                        <dxi-column dataField="FECHA_FINAL" caption="Fecha Final" dataType="date"
+                                            [width]="110" alignment="right"></dxi-column>
+                                    </dx-data-grid>
+                                </div>
+                            </dx-drop-down-box>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 24px; width: 100%;">
+                        <div style="flex: 1 1 45%; padding: 0px 5px;">
+                            <div class="form-item-label-data">Fecha Inicio</div>
+                            <div class="form-input-box-data">
+                                <span>{{ FECHA_INICIO_POPUP ? templateHtml(FECHA_INICIO_POPUP, 'FECHA_INICIO_POPUP',
+                                    'SPAN') : '--' }}</span>
+                            </div>
+                        </div>
+                        <div style="flex: 1 1 45%; padding: 0px 5px;">
+                            <div class="form-item-label-data">Fecha Final</div>
+                            <div class="form-input-box-data">
+                                <span>{{ FECHA_FIN_POPUP ? templateHtml(FECHA_FIN_POPUP, 'FECHA_FIN_POPUP', 'SPAN') :
+                                    '--' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        style="flex: 1 1 100%; padding: 0px 5px; border-radius: 5px; background: rgba(18, 94, 220, .1);">
+                        <div class="form-item-label-data">Fecha Programada</div>
+                        <div class="form-input-box-data">
+                            <dx-date-box #DxtFechaFinal type="date" width="100%" pickerType="calendar"
+                                [min]="NOW < FECHA_INICIO_POPUP ? FECHA_INICIO_POPUP : NOW" [max]="FECHA_FIN_POPUP"
+                                [(value)]="FECHA_DIA_POPUP" [readOnly]="false"
+                                (onValueChanged)="onValueChangedFechaPopup($event)"></dx-date-box>
+                        </div>
+                    </div>
+
+                    <div
+                        style="flex: 1 1 100%; padding: 0px 5px; margin-top: 12px; border-radius: 5px; background: rgba(18, 94, 220, .05);">
+                        <div class="form-item-label-data">Cantidad a Reprogramar</div>
+                        <div class="form-input-box-data">
+                            <dx-number-box format="#0.##" [min]="1" [max]="popupData.CANTIDAD_PROGRAMADA"
+                                [(value)]="popupData.CANTIDAD_REPROG"></dx-number-box>
+                        </div>
+                    </div>
+
+                    <div
+                        style="flex: 1 1 100%; padding: 0px 5px; margin-top: 12px; border-radius: 5px; background: rgba(18, 94, 220, .05);">
+                        <div class="form-item-label-data">Orden de Compra (Opcional)</div>
+                        <div class="form-input-box-data">
+                            <dx-text-box [(value)]="popupData.ORDEN_COMPRA"
+                                placeholder="Ingrese OC si aplica..."></dx-text-box>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+            <dx-button text="Salir" (onClick)="onConfirmarAccionPopup('salir', popupData)"></dx-button>
+            <dx-button *ngIf="popupAccion === 'reprogramar'" text="Reprogramar" type="success"
+                [disabled]="!(selectPlanPopup && selectPlanPopup.length > 0 && FECHA_DIA_POPUP)"
+                (onClick)="onConfirmarAccionPopup('reprogramar', popupData)"></dx-button>
+        </div>
+    </div>
+</dx-popup>
+
+<!-- Popup Envío de Notificaciones por Correo -->
+<dx-popup #popupEnvioCorreo [width]="800" [height]="'auto'" [maxHeight]="600" [showTitle]="true" title="Enviar Notificación de Producción"
+    [dragEnabled]="false" [hideOnOutsideClick]="false" [(visible)]="popupEnvioCorreoVisible"
+    [shading]="true" [position]="{ my: 'center', at: 'center', of: 'window' }">
+    <div *dxTemplate="let data of 'content'">
+        <div class="p-3">
+            <p>Seleccione un cliente para ver sus productos proyectados y enviar la notificación.</p>
+
+            <div class="form-item-label-data mt-3">Cliente</div>
+            <div class="form-input-box-data" style="margin-top: 10px;">
+                <dx-select-box [dataSource]="listaClientesEnvio" [(value)]="clienteSeleccionadoEnvio"
+                    placeholder="Seleccione un cliente..." (onValueChanged)="onClienteChanged($event)"
+                    [searchEnabled]="true">
+                </dx-select-box>
+            </div>
+
+            <div class="mt-4" *ngIf="clienteSeleccionadoEnvio">
+                <div class="form-item-label-data mb-2">Productos a Notificar</div>
+                <dx-data-grid [dataSource]="productosFiltradosEnvio" [showBorders]="true" [columnAutoWidth]="true"
+                    [height]="300">
+                    <dxo-scrolling mode="virtual"></dxo-scrolling>
+                    <dxi-column dataField="FECHA_PROGRAMADA" caption="Fecha" dataType="date" format="dd/MM/yyyy"
+                        [width]="100"></dxi-column>
+                    <dxi-column dataField="PRODUCTO" caption="Código" [width]="120"></dxi-column>
+                    <dxi-column dataField="NOMBRE_PRODUCTO" caption="Producto"></dxi-column>
+                    <dxi-column dataField="CANTIDAD_PROGRAMADA" caption="Cant." [width]="80"></dxi-column>
+                    <dxi-column dataField="ESTADO" caption="Estado" [width]="100"></dxi-column>
+                </dx-data-grid>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2" style="margin-top: 30px;">
+                <dx-button text="Cerrar" (onClick)="cancelarModoEnvioCorreo()">
+                </dx-button>
+                <dx-button text="Enviar Notificación" type="success" icon="email"
+                    [disabled]="!clienteSeleccionadoEnvio || productosFiltradosEnvio.length === 0"
+                    (onClick)="confirmarEnvioCorreo()">
+                </dx-button>
+            </div>
+        </div>
+    </div>
+</dx-popup>

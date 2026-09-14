@@ -1,0 +1,71 @@
+<dx-diagram
+	#diagSimulador
+	id="diagSimulador"
+	units="px"
+	viewunits="px"
+	autoZoomMode="fitWidth"
+	pageOrientation="landscape"
+	class="dx-diagram-background"
+	[readOnly]="true"
+	[simpleView]="true"
+	(onContentReady)="onContentReady($event)"
+	(onItemDblClick)="onItemDblClick($event)"
+	(onCustomCommand)="onCustomMenuDiag($event)"
+	(onSelectionChanged)="selectionChangedHandler($event)"
+>
+	<dxo-default-item-properties style="stroke-width: 1px"></dxo-default-item-properties>
+	<dxo-main-toolbar [visible]="false">
+		<dxi-command name="zoomLevel" text="Zoom"></dxi-command>
+		<dxi-command  name="clear" icon="clearsquare" text="Borrar Diagrama"></dxi-command>
+	</dxo-main-toolbar>
+
+	<dxi-custom-shape
+		*ngFor="let svgId of NodosSvg; let i = index"
+		category="produccion"
+		[type]="svgId.id"
+		title="proceso"
+		[backgroundImageUrl]="svgId.svg"
+		[backgroundImageToolboxUrl]="svgId.svg"
+		[defaultWidth]="100"
+		[defaultHeight]="60"
+		defaultText=""
+		[allowEditText]="false"
+		[allowEditImage]="false"
+		[textWidth]=".55"
+		[textLeft]="(1 - 0.55) / 2"
+	></dxi-custom-shape>
+
+	<dxo-nodes
+		[dataSource]="seccNodosDataSource"
+		keyExpr="id"
+		textExpr="text"
+		containerKeyExpr="contenedor"
+		typeExpr="type"
+		leftExpr="x"
+		topExpr="y"
+		widthExpr="width"
+		heightExpr="height"
+		textStyleExpr="textStyle"
+		lockedExpr="bloqSeccion"
+		styleExpr="itemStyleExpr"
+	>
+		<dxo-auto-layout type="off"></dxo-auto-layout>
+	</dxo-nodes>
+	<dxo-edges
+		[dataSource]="seccConecDataSource"
+		keyExpr="id"
+		fromExpr="fromId"
+		toExpr="toId"
+		textExpr="text"
+		fromPointIndexExpr="fromPoint"
+		toPointIndexExpr="toPoint"
+		pointsExpr="pointsConec"
+		styleExpr="conecStyle"
+		lockedExpr="bloqConn"
+	></dxo-edges>
+
+	<dxo-context-menu [enabled]="true" >
+		<dxi-command name="PROGRAMACION" text="Ver programación" ></dxi-command>
+	</dxo-context-menu>
+</dx-diagram>
+

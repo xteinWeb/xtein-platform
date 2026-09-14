@@ -1,0 +1,79 @@
+<div class="solicitud-credito-container">
+
+    <dx-data-grid
+        #gridConsultaSol
+        id="gridConsultaSol"
+        [dataSource]="DSolicitudCredito"
+        [showBorders]="true"
+        [remoteOperations]="true"
+        [paging]="{ pageSize: pageSize }"
+        [pager]="{ showPageSizeSelector: true, allowedPageSizes: [10,50,100], showInfo: true }"
+        [rowAlternationEnabled]="true"
+        (onCellClick)="onCellClick($event)"
+        >
+
+    <!-- Search Panel -->
+    <dxo-search-panel
+        [visible]="true"
+        [highlightCaseSensitive]="false"
+        [width]="500"
+        >
+    </dxo-search-panel>
+
+    <!-- Filtro por columnas -->
+    <dxo-filter-row
+        [visible]="true"
+        applyFilter="auto">
+    </dxo-filter-row>
+
+    <!-- Columnas -->
+    <dxi-column
+        dataField="DOCUMENTO"
+        caption="Documento"
+        cellTemplate="documentoTemplate">
+    </dxi-column>
+
+    <dxi-column
+        dataField="FECHA"
+        caption="Fecha"
+        dataType="date"
+        format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column
+        dataField="ID_CLIENTE"
+        caption="Código Cliente">
+    </dxi-column>
+
+    <dxi-column
+        dataField="NOMBRE"
+        caption="Nombre Cliente">
+    </dxi-column>
+
+    <dxi-column
+        dataField="ESTADO"
+        caption="Estado">
+    </dxi-column>
+
+    <!-- Estilo de hyperlink para la columna DOCUMENTO + hover -->
+    <div *dxTemplate="let cellInfo of 'documentoTemplate'">
+        <span class="dx-link-click" >
+            {{ cellInfo.data.DOCUMENTO }}
+        </span>
+    </div>
+
+    </dx-data-grid>
+
+</div>
+
+<!-- Loading Panel -->
+<dx-load-panel
+    shadingColor="rgba(0,0,0,0.4)"
+    [position]="{ of: '#gridConsultaSol' }"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    [visible]="loadingVisible"
+    shadingColor="rgba(0,0,0,0.4)"
+    message="Cargando...">
+</dx-load-panel>

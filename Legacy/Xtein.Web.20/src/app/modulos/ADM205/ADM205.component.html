@@ -1,0 +1,125 @@
+<div class="row gx-3" id="splitterMain">
+  <div id="form-container" class="card-content-secondary-alt">
+    <dx-form #formIDLegales id="formIDLegales" [(formData)]="FIDLegales" [readOnly]="readOnly" labelLocation="left"
+      colCount="1" [screenByWidth]="getSizeQualifier">
+      <dxi-item itemType="group" cssClass="first-group" [colCount]="2" [colSpan]="2">
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="2"></dxo-col-count-by-screen>
+
+        <dxi-item dataField="TIPO_ID" editorType="dxSelectBox">
+          <dxo-label text="Tipo"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box
+              [dataSource]="['CEDULA', 'NIT', 'PASAPORTE', 'REGISTRO CIVIL', 'TARJETA DE IDENTIDAD', 'TARJETA DE EXTRANJERIA', 'CEDULA DE EXTRANJERIA']"
+              [value]="FIDLegales.TIPO_ID" [readOnly]="readOnly" placeholder="Seleccione Tipo"
+              (onValueChanged)="onValueChangedForm($event, 'TIPO_ID')">
+            </dx-select-box>
+          </div>
+        </dxi-item>
+
+        <ng-container *ngIf="FIDLegales.TIPO_ID === 'NIT'">
+          <dxi-item dataField="PERSONA" editorType="dxSelectBox">
+            <dxo-label text="Persona"></dxo-label>
+            <div *dxTemplate>
+              <dx-select-box [dataSource]="['NATURAL', 'JURIDICA']" [value]="FIDLegales.PERSONA" [readOnly]="readOnly"
+                placeholder="Seleccione Persona" (onValueChanged)="onValueChangedForm($event, 'PERSONA')">
+              </dx-select-box>
+            </div>
+          </dxi-item>
+        </ng-container>
+
+        <dxi-item dataField="ID_LEGAL" editorType="dxSelectBox">
+          <dxo-label text="ID Legal"></dxo-label>
+          <div *dxTemplate>
+            <dx-number-box [readOnly]="readOnly" [value]="FIDLegales.ID_LEGAL" [min]="0" placeholder="100"
+              (onValueChanged)="onValueChangedForm($event, 'ID_LEGAL')"></dx-number-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ESTADO" editorType="dxSelectBox">
+          <dxo-label text="Estado"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box [dataSource]="['ACTIVO', 'INACTIVO']" [value]="FIDLegales.ESTADO" [readOnly]="readOnly"
+              placeholder="Seleccione Estado" (onValueChanged)="onValueChangedForm($event, 'ESTADO')">
+            </dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="FECHA_EXPEDICION" editorType="dxSelectBox">
+          <dxo-label text="Fecha de expedición"></dxo-label>
+          <div *dxTemplate>
+            <dx-date-box type="date" [readOnly]="readOnly" [value]="FIDLegales.FECHA_EXPEDICION"
+              (onValueChanged)="onValueChangedForm($event, 'FECHA_EXPEDICION')">
+            </dx-date-box>
+          </div>
+        </dxi-item>
+
+
+        <dxi-item dataField="LUGAR_EXPEDICION" editorType="dxSelectBox">
+          <dxo-label text="Lugar de expedición"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box valueExpr="ID_UBICACION" displayExpr="NOMBRE" [dataSource]="DUbicacionesList"
+              [value]="FIDLegales.LUGAR_EXPEDICION" [readOnly]="readOnly" placeholder="Seleccione Lugar"
+              (onValueChanged)="onValueChangedForm($event, 'LUGAR_EXPEDICION')">
+            </dx-select-box>
+          </div>
+        </dxi-item>
+
+
+
+        <dxi-item dataField="NOMBRE" placeholder="Nombre">
+          <dxo-label text="Nombre"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box placeholder="Nombre" [readOnly]="readOnly" [(value)]="FIDLegales.NOMBRE"
+              (onValueChanged)="onValueChangedForm($event, 'NOMBRE')">
+              <dx-validator>
+                <dxi-validation-rule type="required" message="El Nombre es requerido"></dxi-validation-rule>
+              </dx-validator>
+            </dx-text-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="SEGUNDO NOMBRE" placeholder="Segundo NOMBRE">
+          <dxo-label text="Segundo Nombre"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box placeholder="Segundo Nombre" [readOnly]="readOnly" [(value)]="FIDLegales.NOMBRE2"
+              (onValueChanged)="onValueChangedForm($event, 'NOMBRE2')">
+            </dx-text-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="APELLIDO" placeholder="Apellido">
+          <dxo-label text="Apellido"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box placeholder="Apellido" [readOnly]="readOnly" [(value)]="FIDLegales.APELLIDO"
+              (onValueChanged)="onValueChangedForm($event, 'APELLIDO')">
+              <dx-validator>
+                <dxi-validation-rule type="required" message="El Apellido es requerido"></dxi-validation-rule>
+              </dx-validator>
+            </dx-text-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="SEGUNDO APELLIDO" placeholder="Segundo Apellido">
+          <dxo-label text="Segundo Apellido"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box placeholder="Segundo Apellido" [readOnly]="readOnly" [(value)]="FIDLegales.APELLIDO2"
+              (onValueChanged)="onValueChangedForm($event, 'APELLIDO2')">
+            </dx-text-box>
+          </div>
+        </dxi-item>
+      </dxi-item>
+    </dx-form>
+
+    <app-dirtelinfo [events]="eventsSubjectDirTelInfo.asObservable()" [(dataDirecciones)]="DDirecciones"
+      [(dataEmail)]="DEmail" (onRespuestaSelecc)="onRespuestaDirTelInfo($event)" [(dataTelefonos)]="DTelefonos">
+    </app-dirtelinfo>
+    <br />
+  </div>
+</div>
+
+<app-vistarapida id="vistaadm205" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-load-panel #loadPanelPro shadingColor="rgba(0,0,0,0.4)" [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true" [shading]="true"
+  message="Un momento. Cargando consulta..." [hideOnOutsideClick]="false"></dx-load-panel>
+<app-geninformes [events]="eventsSubjectInformes.asObservable()">
+</app-geninformes>

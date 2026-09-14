@@ -1,0 +1,9 @@
+::ng-deep .dx-list-item-before-bag.dx-list-select-checkbox-container, .dx-list-item-before-bag.dx-list-select-radiobutton-container {
+  width: 30px !important;
+}
+
+.select-content {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgba(191, 191, 191, 0.15);
+}

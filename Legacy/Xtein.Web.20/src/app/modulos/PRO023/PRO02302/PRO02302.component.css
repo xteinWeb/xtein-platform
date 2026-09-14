@@ -1,0 +1,11 @@
+::ng-deep .dx-tab {
+  background-color: transparent;
+}
+
+::ng-deep .accordion-item-body {
+  padding: .75rem 0rem;
+}
+
+::ng-deep .dx-list-item-content {
+  padding: 10px 0px;
+}

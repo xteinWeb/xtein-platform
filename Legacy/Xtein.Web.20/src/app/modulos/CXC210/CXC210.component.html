@@ -1,0 +1,78 @@
+<div class="row gx-3">
+    <div class="col-12">
+       <div class="card-content">
+        <div>
+            <dx-form
+                class="dx-form-group"
+                id="formEntrada"
+                [formData]="DCuentasXCobrar"
+                labelLocation="left"
+                [colCount]="2"
+            > 
+                <dxi-item caption="Filtro de generación" itemType="group">
+
+                    <dxi-item dataField="ID_CLIENTE" >
+                        <dxo-label text="Cliente"></dxo-label>
+
+                        <div *dxTemplate>
+                            <dx-select-box 
+                                #xs_ID_CLIENTE
+                                id="xs_ID_CLIENTE"
+                                [dataSource]="DClientes" 
+                                [(value)]="DCuentasXCobrar.ID_CLIENTE" 
+                                valueExpr="ID_CLIENTE"
+                                displayExpr="NOMBRE_COMPLETO"
+                                [searchEnabled]="true"
+                                searchMode="contains"
+                                [searchExpr]="['ID_CLIENTE', 'NOMBRE_COMPLETO']"
+                                [dropDownOptions]="dropDownOptions"
+                                (onValueChanged)="onSeleccRowCliente($event)">
+
+                                <div *dxTemplate="let data of 'item'">
+                                    <div style="width: 20%; float:left">
+                                        {{ data.ID_CLIENTE }}
+                                    </div>
+                                    
+                                    <div style="width: 80%; float:right; text-align: left;">
+                                        {{ data.NOMBRE_COMPLETO }}
+                                    </div>
+                                    
+                                </div>
+                                <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                                    <div id="btnCompoRefreshSbox">
+                                        <dx-button icon="refresh" (onClick)="refreshClick('ID_CLIENTE')"></dx-button>
+                                    </div>
+                                </div>
+                            </dx-select-box>
+                        </div>
+                    </dxi-item>
+
+                    <dxi-item>
+                        <dx-button icon="todo" text="Generar" (onClick)="generaInforme()"></dx-button>
+                    </dxi-item>
+
+                </dxi-item>
+
+            </dx-form>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+<dx-load-panel
+    #loadPanel
+    shadingColor="rgba(0,0,0,0.4)"
+    [position]="{ of: '#router-container' }"
+    [(visible)]="loadingVisible"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    message="Un momento. Cargando consulta..."
+    [hideOnOutsideClick]="false">
+</dx-load-panel>
+
+<app-geninformes
+  [events]="eventsSubjectInformes.asObservable()" 
+  >
+</app-geninformes>

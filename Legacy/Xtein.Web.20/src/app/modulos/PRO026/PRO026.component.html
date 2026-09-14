@@ -1,0 +1,215 @@
+<div class="xt-gesptreelist xt-gespdatagrid" id="allInfo">
+
+  <!-- Toolbar superior -->
+  <dx-toolbar style="position: absolute; z-index: 1000; width:max-content; margin-left: 10px;">
+    <dxi-item location="before">
+      <div *dxTemplate style="margin-left: 10px; display: flex; gap: 15px; align-items: center; width:max-content">
+        <!-- Selector de tipo de vista -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-weight: 500; color: #333;">Tipo de Vista:</span>
+          <dx-select-box [dataSource]="opcionesTipoVista" displayExpr="texto" valueExpr="valor"
+            [(value)]="tipoVistaSeleccionado" [width]="150" [showClearButton]="false"
+            (onValueChanged)="onTipoVistaChanged($event)">
+          </dx-select-box>
+        </div>
+
+        <!-- Selector de Plan -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-weight: 500; color: #333;">Plan:</span>
+          <dx-select-box [dataSource]="listaPlanes" [(value)]="planSeleccionado" [width]="200" [showClearButton]="false"
+            (onValueChanged)="onPlanFilterChanged($event)">
+          </dx-select-box>
+        </div>
+
+        <!-- Botón Generar OP -->
+        <dx-button text="Generar OP" icon="plus" type="success" stylingMode="contained" class="align-self-end"
+          [width]="'auto'" [disabled]="selectedRowKeys.length > 0 ? false : true" (onClick)="generarOrdenOP($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+
+  <!-- Tree List Principal -->
+  <dx-tree-list #treeListProduccion id="treeListProduccion" width="100%" height="calc(100vh - 140px)"
+    style="padding: 20px 10px;" columnResizingMode="widget" rootValue="-1" keyExpr="id" parentIdExpr="parent"
+    [dataSource]="datosProduccionTree" [(selectedRowKeys)]="selectedRowKeys" [showBorders]="true"
+    [autoExpandAll]="false" [columnAutoWidth]="false" [hoverStateEnabled]="true" [focusedRowEnabled]="false"
+    [allowColumnResizing]="true" [columnHidingEnabled]="true" [rowAlternationEnabled]="false"
+    [allowColumnReordering]="false" [showRowLines]="true" [wordWrapEnabled]="false" [repaintChangesOnly]="true"
+    [renderAsync]="true" (onCellPrepared)="onCellPrepared($event)" (onSelectionChanged)="onSelectionChanged($event)"
+    (onRowPrepared)="onRowPrepared($event)">
+
+    <dxo-scrolling mode="standard" [useNative]="false"></dxo-scrolling>
+    <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-pager [visible]="false"></dxo-pager>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+    <dxo-column-chooser [enabled]="true" mode="select" [allowSearch]="true"></dxo-column-chooser>
+
+    <dxo-selection [mode]="tipoVistaSeleccionado === 'Ruta' ? 'none' : 'multiple'" [recursive]="false"
+      selectAllMode="allPages" showCheckBoxesMode="always">
+    </dxo-selection>
+
+    <dxi-column dataField="nombreProducto" caption="Nombre del Producto / Parte" [width]="320"
+      [minWidth]="250"></dxi-column>
+
+    <dxi-column dataField="pedidoClienteOp" caption="Pedido - Cliente" [width]="200" [minWidth]="220"></dxi-column>
+    <dxi-column dataField="op" caption="OP" [width]="150" [minWidth]="100"></dxi-column>
+
+    <dxi-column dataField="producto" caption="Código" [width]="120" [minWidth]="100"></dxi-column>
+
+    <dxi-column dataField="fechaEntrega" caption="Fecha de entrega" dataType="datetime" [width]="130" [minWidth]="110"
+      format="dd/MM/yyyy" [sortIndex]="0" sortOrder="asc"></dxi-column>
+
+    <dxi-column dataField="cantidad" caption="Cant. Prog." [width]="100" [minWidth]="80" dataType="number"
+      format="#,##0"></dxi-column>
+
+    <dxi-column dataField="fechaHoraProduccion" caption="Fecha/Hora producción" dataType="datetime" [width]="160"
+      [minWidth]="140" format="dd/MM/yyyy HH:mm"></dxi-column>
+
+    <dxi-column dataField="estado" caption="Estado" [width]="120" [minWidth]="100"
+      cellTemplate="estadoTemplate"></dxi-column>
+
+    <dxi-column dataField="seccion"
+      caption="{{ tipoVistaSeleccionado === 'Básica' ? 'Sección' : 'Flujo de Producción' }}" [minWidth]="220"
+      alignment="left" [allowGrouping]="false" [allowFiltering]="false" cellTemplate="flujoTemplate"></dxi-column>
+
+    <div *dxTemplate="let cell of 'estadoTemplate'">
+      <span *ngIf="cell.data.estado" class="state-badge"
+        [class.state-badge-programado]="cell.data.estado === 'PROGRAMADO'"
+        [class.state-badge-proceso]="cell.data.estado === 'EN PROCESO'"
+        [class.state-badge-terminado]="cell.data.estado === 'FINALIZADO' || cell.data.estado === 'TERMINADO' || cell.data.estado === 'STOCK'"
+        [class.state-badge-anulado]="cell.data.estado === 'ANULADO'">
+        {{ cell.data.estado }}
+      </span>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'flujoTemplate'">
+      <ng-container *ngIf="tipoVistaSeleccionado === 'Básica'">
+        <div class="section-container">
+          <ng-container *ngFor="let seccion of obtenerSeccionesProducto(cellInfo.data); let i = index">
+            <div *ngIf="seccion.esTextoPlano || (!seccion.tiempoProduccion && !seccion.cantidad)" class="section-chip">
+              {{ seccion.nombre }}
+            </div>
+
+            <div *ngIf="!seccion.esTextoPlano && (seccion.tiempoProduccion || seccion.cantidad)" class="section-chip">
+              <div class="">
+                <span class="section-card-title">{{ seccion.nombre }}</span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <div *ngIf="obtenerSeccionesProducto(cellInfo.data).length === 0 && cellInfo.data.seccion"
+          style="background-color: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 12px; border: 1px solid #bbdefb; display: inline-flex; align-items: center; font-weight: 700; font-size: 11px;">
+          {{ cellInfo.data.seccion }}
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tipoVistaSeleccionado === 'Estandar'">
+        <div class="section-container">
+          <ng-container *ngFor="let seccion of obtenerSeccionesProducto(cellInfo.data); let i = index">
+            <div *ngIf="seccion.esTextoPlano || (!seccion.tiempoProduccion && !seccion.cantidad)" class="section-chip">
+              {{ seccion.nombre }}
+            </div>
+
+            <div *ngIf="!seccion.esTextoPlano && (seccion.tiempoProduccion || seccion.cantidad)" class="section-card">
+              <div class="section-card-header">
+                <span class="section-card-title">{{ seccion.nombre }}</span>
+              </div>
+              <div class="section-card-metrics">
+                <div class="section-card-metric-row">
+                  <span class="section-card-metric-icon">⏱️</span>
+                  <span><strong>{{ seccion.tiempoProduccion }}h</strong> prod.</span>
+                </div>
+                <div class="section-card-metric-row">
+                  <span class="section-card-metric-icon">📦</span>
+                  <span><strong>{{ seccion.cantidad }}</strong> prog.</span>
+                </div>
+                <div class="section-card-metric-row">
+                  <span class="section-card-metric-icon">📊</span>
+                  <span><strong>{{ seccion.cantidadProducida }}</strong> / <strong>{{ seccion.cantidadPendiente
+                      }}</strong> cant.</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tipoVistaSeleccionado === 'Ruta'">
+        <div style="display: flex; align-items: center; justify-content: center; padding: 5px; width: 100%;">
+          <dx-button text="Ver ruta" icon="map" type="default" stylingMode="outlined" [width]="120"
+            (onClick)="abrirModalSecciones(cellInfo.data)">
+          </dx-button>
+        </div>
+      </ng-container>
+    </div>
+
+  </dx-tree-list>
+
+  <!-- Panel de carga -->
+  <dx-load-panel #loaderPanel shadingColor="rgba(0,0,0,0.6)" [position]="{ of: '#allInfo' }" [visible]="loadingVisible"
+    [showIndicator]="true" [showPane]="true" [shading]="true" message="Un momento. Cargando datos..."
+    [hideOnOutsideClick]="false" [height]="90" [width]="300"></dx-load-panel>
+
+  <!-- Modal de Ruta de Producción -->
+  <dx-popup [width]="'90%'" [height]="'90vh'" [showTitle]="true" title="Diagrama de Ruta de Producción"
+    [dragEnabled]="false" [hideOnOutsideClick]="true" [(visible)]="modalSeccionesVisible" [showCloseButton]="true"
+    [position]="{ my: 'center', at: 'center', of: 'window' }">
+    <div *dxTemplate="let data of 'content'">
+      <div *ngIf="seccionSeleccionada" style="padding: 10px; height: 100%; display: flex; flex-direction: column;">
+        <!-- Cabecera del modal -->
+        <div style="margin-bottom: 10px; border-bottom: 2px solid #3498db; padding-bottom: 5px; flex-shrink: 0;">
+          <h4 style="margin: 0; color: #2c3e50; font-size: 16px;">{{ seccionSeleccionada.nombreProducto }}</h4>
+          <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+            <span style="color: #666; font-size: 13px;">{{ seccionSeleccionada.pedidoClienteOp }}</span>
+            <span style="font-weight: bold; color: #3498db; font-size: 13px;">Cant: {{ seccionSeleccionada.cantidad
+              }}</span>
+          </div>
+        </div>
+
+        <!-- Área de Diagrama -->
+        <div
+          style="flex-grow: 1; position: relative; display: flex; flex-direction: column; min-height: 0; border: 1px solid #ddd; border-radius: 4px;">
+          <div *ngIf="loadingDiagrama"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
+            <dx-load-indicator></dx-load-indicator>
+            <div style="margin-top: 10px; color: #666;">Cargando diagrama...</div>
+          </div>
+
+          <div *ngIf="!loadingDiagrama && !seccNodosDataSource" style="padding: 40px; text-align: center; color: #999;">
+            <i class="dx-icon-info" style="font-size: 48px; display: block; margin-bottom: 10px;"></i>
+            No hay un diagrama configurado para esta ruta.
+          </div>
+
+          <dx-diagram #diagProduccion *ngIf="seccNodosDataSource" id="diagProduccion" units="px" viewunits="px"
+            [readOnly]="true" autoZoomMode="fitWidth" [simpleView]="true" style="flex-grow: 1;">
+            <dxi-custom-shape *ngFor="let svgId of NodosSvg; let i = index" category="produccion" [type]="svgId.id"
+              title="proceso" [backgroundImageUrl]="svgId.svg" [defaultWidth]="100" [defaultHeight]="60"
+              [allowEditText]="false">
+            </dxi-custom-shape>
+
+            <dxo-nodes [dataSource]="seccNodosDataSource" keyExpr="id" textExpr="text" typeExpr="type" leftExpr="x"
+              topExpr="y" widthExpr="width" heightExpr="height" textStyleExpr="textStyle" containerKeyExpr="contenedor">
+              <dxo-auto-layout type="off"></dxo-auto-layout>
+            </dxo-nodes>
+
+            <dxo-edges [dataSource]="seccConecDataSource" keyExpr="id" fromExpr="fromId" toExpr="toId" textExpr="text"
+              styleExpr="lineStyle" fromPointIndexExpr="fromPoint" toPointIndexExpr="toPoint"
+              pointsExpr="pointsConec"></dxo-edges>
+
+            <dxo-toolbox visibility="hidden"></dxo-toolbox>
+          </dx-diagram>
+        </div>
+
+        <div style="text-align: right; padding-top: 10px; border-top: 1px solid #eee; flex-shrink: 0;">
+          <dx-button text="Cerrar" icon="close" type="danger" stylingMode="outlined"
+            (onClick)="modalSeccionesVisible = false">
+          </dx-button>
+        </div>
+      </div>
+    </div>
+  </dx-popup>
+
+</div>

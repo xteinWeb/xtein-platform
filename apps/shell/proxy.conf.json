@@ -32,17 +32,17 @@
         }
     },
     "/api/dashboard-designer": {
-        "target": "https://localhost:7179",
+        "target": "http://192.168.11.153:7179",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
     },
     "/api": {
-        "target": "http://localhost:5900",
+        "target": "http://192.168.11.151:5779",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
-    },        
+    },
     "/archivos*": {
         "target": "http://181.79.25.235:8556/arch/",
         "pathRewrite": {

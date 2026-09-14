@@ -1,0 +1,126 @@
+<!-- Sub-Menú de opciones -->
+<dx-popup
+    #popGenElec
+    id="popGenElec"
+    width="1000"
+    [height]="'90%'"
+    [showTitle]="true"
+    [title]="titEgresos"
+    [hideOnOutsideClick]="false"
+    [showCloseButton]="true"
+    (onShown)="onShown($event)"
+    (onHidden)="onHidden($event)"
+    (onInitialized)="onInitializedPopUp($event)" 
+    (onResizeEnd)="onResizeEnd($event)"
+    [(visible)]="visiblePopup">
+
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonAceptar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonCancelar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      toolbar="bottom"
+      location="before"
+      text="Total pago electrónico:"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxTextBox"
+      toolbar="bottom"
+      location="before"
+      [options]="configSeleccFacturas"
+    >
+    </dxi-toolbar-item>
+
+    <div *dxTemplate="let data of 'content'">
+        <dx-data-grid
+            #gridGenElec
+            id="gridGenElec"
+            class="xt-datagrid"
+            height="78%"
+            noDataText="" 
+            [dataSource]="DPreEgresos"
+            keyExpr="ITEM"
+            [selection]="{ mode: 'multiple' }"
+            [selectedRowKeys]="seleccPreEgresos"
+            [allowColumnResizing]="true"
+            columnResizingMode="nextColumn"
+            [showBorders]="true"
+            [focusedRowEnabled]="true"
+            (onCellPrepared)="onCellPrepared($event)"
+            (onEditingStart)="onEditingStart($event)"
+            (onSelectionChanged)="onSelectionFact($event)"
+        >   
+            <dxi-column 
+                dataField="BANCO"
+                caption="Banco" 
+                [groupIndex]="0"
+                groupCellTemplate="grupoBanco"
+                >
+            </dxi-column>
+            <dxi-column 
+                dataField="ID_ACREEDOR"
+                caption="Id Acreedor" 
+                >
+            </dxi-column>
+            <dxi-column 
+                dataField="NOMBRE"
+                caption="Nombre" 
+                >
+            </dxi-column>
+            <dxi-column 
+                dataField="FECHA"
+                caption="Fecha" 
+                dataType="date" 
+                [allowEditing]="false"
+                format="yyyy/MM/dd">
+            </dxi-column>
+            <dxi-column 
+                dataField="VALOR" 
+                caption="Valor a pagar" 
+                alignment="right"
+                dataType="number"
+                format="#,###"
+                [allowEditing]="false"
+            >
+            </dxi-column>
+            <dxi-column 
+                dataField="BANCO_PROV"
+                caption="Banco/Cuenta Prov" 
+                >
+            </dxi-column>
+            <dxi-column 
+                dataField="ESTADO"
+                caption="Estado" 
+                >
+            </dxi-column>
+
+            <div *dxTemplate="let grupoObj of 'grupoBanco'" class="tem-grupo">
+                <div style="font-weight: bold;">{{ templateHtml(grupoObj) }}</div>
+            </div>
+
+            <dxo-summary>
+                <dxi-total-item
+                    column="VALOR"
+                    summaryType="sum"
+                    displayFormat="{0}"
+                    valueFormat="#,###">
+                </dxi-total-item>
+            </dxo-summary>
+
+        </dx-data-grid>
+
+    </div>
+
+</dx-popup>
+

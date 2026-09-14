@@ -1,0 +1,49 @@
+<!-- Barra de navegación -->
+<section class="et-pasos-tabs">
+
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    <ul>
+        <li>
+          <!-- Principal paso 0 -->
+          <a href="javascript:void(0)" (click)="homeInformes()">
+            <i class="fi fi-br-home" 
+                id="home-pasos" 
+                (mouseover)="toggleHome()"
+                (mouseout)="toggleHome()">
+            </i>
+          </a>
+        </li>
+
+        <!-- Pasos de la ruta de navegación -->
+        <li *ngFor="let item of itemsPasosRuta" class="gg-chevron-right">
+          <a href="javascript:void(0)" (click)="clickPasoRuta(item)" class="ruta-pasos">
+            {{ item.text }}
+          </a>
+        </li>
+
+    </ul>
+  </nav>
+
+
+  <!-- Paso -->
+  <h2>{{titPasos}}</h2>
+  <h3>{{subtitPasos}}</h3>
+  <div class="et-pasos-tabs-container">
+    <a class="et-pasos-tab" href="javascript:void(0)" 
+       *ngFor="let item of itemsPasos"
+       (click)="seleccTabPaso(item)">
+      {{item.titulo}}
+    </a>
+    <span class="et-pasos-tab-slider"></span>
+  </div>
+</section>
+
+
+<dx-tooltip
+  target="#home-pasos"
+  [(visible)]="visibleTooltip"
+  showEvent="mouseenter"
+  hideEvent="mouseleave"
+>
+  <div *dxTemplate="let data = data; of: 'content'"> Ir a principal de Informes </div>
+</dx-tooltip>

@@ -1,0 +1,57 @@
+
+::ng-deep app-ges001 .dx-treelist-form-buttons-container {
+    display: none;
+  }
+  
+  .container-child-uno-app {
+    display: flex;
+    width: 50%;
+    height: 50px;
+    align-items: center;
+    position: absolute;
+    z-index: 100;
+  }
+  
+  .container-child-uno-app div {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    height: 95%;
+  }
+  
+  .container-child-dos-app {
+    width: 100%;
+    min-height: 400px;
+  }
+  
+  .selectProyect {
+    background-color: blue;
+    border-radius: 6px;
+    color: #fff;
+  }
+  
+  ::ng-deep #formIdentificacion {
+    margin-top: 10px;
+  }
+  
+  
+  .mat-tab-label, .mat-tab-link {
+    background: transparent !important;
+  }
+  
+  ::ng-deep .mat-tab-label-container {
+    flex-grow: 0 !important;
+    width: 100%;
+  }
+  
+  ::ng-deep .mat-tab-group .mat-tab-header .mat-tab-label {
+    flex-basis: content !important;
+    flex-grow: 0 !important;
+  }
+  
+  ::ng-deep app-ges001 > div > div.container-child-dos-app .mat-tab-label, .mat-tab-link {
+    background: transparent !important;
+  }
+  ::ng-deep #repTrib > div.dx-scrollable-wrapper > div > div.dx-scrollable-content {
+    padding-right: 10px;
+  }

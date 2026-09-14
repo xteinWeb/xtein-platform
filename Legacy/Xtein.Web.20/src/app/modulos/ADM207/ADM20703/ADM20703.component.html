@@ -1,0 +1,119 @@
+<div class="autorizaciones-container">
+  <div style="margin-top: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h4 style="margin: 0;">Autorizaciones Legales</h4>
+    </div>
+
+    <dx-data-grid 
+      #gridRefAU
+      id="" 
+      [dataSource]="dataSource"
+      [showBorders]="true" 
+      [columnAutoWidth]="true" 
+      [showRowLines]="true"
+      (onSelectionChanged)="selectionGrid($event)"
+      (onRowInserting)="onRowInserting($event)">
+        
+      <dxo-editing 
+        mode="row"
+        [allowUpdating]="false"
+        [allowAdding]="false"   
+        [allowDeleting]="false"
+        [useIcons]="false">
+        
+        <dxo-texts 
+          confirmDeleteMessage=""
+          cancelRowChanges=""
+          saveRowChanges=""
+          deleteRow=""
+          editRow=""
+          saveAllChanges=""
+          cancelAllChanges="">
+        </dxo-texts>
+      </dxo-editing>
+      
+      <dxo-selection
+        selectAllMode="allPages"
+        [showCheckBoxesMode]="!readOnly ? 'always' : 'none'"
+        mode="multiple">
+      </dxo-selection>
+      
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-search-panel [visible]="true" [width]="380"></dxo-search-panel>
+      <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+      <dxi-column dataField="RESOLUCION" caption="RESOLUCIÓN" alignment="left" dataType="number">
+        <dxi-validation-rule type="required" message="La resolución es requerida"></dxi-validation-rule>
+      </dxi-column>
+      
+      <dxi-column dataField="FECHA_EXPEDICION" caption="EXPEDICIÓN" alignment="left" dataType="date">
+        <dxi-validation-rule type="required" message="Expedición es requerida"></dxi-validation-rule>
+        <dxi-validation-rule 
+          type="custom" 
+          [validationCallback]="validarFechaExpedicionGrid" 
+          message="La fecha de expedición no puede ser futura.">
+        </dxi-validation-rule>
+      </dxi-column>
+      
+      <dxi-column dataField="FECHA_VENCIMIENTO" caption="VENCIMIENTO" alignment="left" dataType="date">
+        <dxi-validation-rule type="required" message="Vencimiento es requerido"></dxi-validation-rule>
+        <dxi-validation-rule 
+          type="custom" 
+          [validationCallback]="validarFechaVencimientoGrid" 
+          message="La fecha de vencimiento debe ser posterior a la de expedición.">
+        </dxi-validation-rule>
+      </dxi-column>
+
+      <dxi-column dataField="RANGO_INICIO" caption="RANGO INICIAL" alignment="left" dataType="number">
+        <dxi-validation-rule type="required" message="Rango Inicio es requerido"></dxi-validation-rule>
+        <dxi-validation-rule 
+          type="custom" 
+          [validationCallback]="validarRangoInicioGrid" 
+          message="El rango inicial debe ser mayor a cero.">
+        </dxi-validation-rule>
+      </dxi-column>
+      
+      <dxi-column dataField="RANGO_FINAL" caption="RANGO FINAL" alignment="left" dataType="number">
+        <dxi-validation-rule type="required" message="Rango Final es requerido"></dxi-validation-rule>
+        <dxi-validation-rule 
+          type="custom" 
+          [validationCallback]="validarRangoFinalGrid" 
+          message="El rango final debe ser mayor que el rango inicial.">
+        </dxi-validation-rule>
+      </dxi-column>
+                          
+      <dxo-toolbar *ngIf="!readOnly">
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNewAU">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'edit')" *ngIf="rowEditAU"></dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDeleteAU">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChangesAU">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChangesAU"></dx-button>
+          </div>
+        </dxi-item>
+      </dxo-toolbar>
+
+    </dx-data-grid>              
+  </div>
+</div>

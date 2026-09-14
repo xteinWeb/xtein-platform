@@ -1,0 +1,39 @@
+::ng-deep .email-list-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+::ng-deep .email-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+::ng-deep .email-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+::ng-deep .email-text {
+    font-size: 14px;
+    color: #333;
+    word-break: break-all;
+}
+
+::ng-deep .add-email-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}

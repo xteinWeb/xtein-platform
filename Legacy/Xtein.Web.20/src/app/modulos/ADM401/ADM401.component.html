@@ -1,0 +1,372 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content">
+      <dx-form
+        #fromConfigurador
+        id="fromConfigurador"
+        [formData]="FConfigurador"
+        [colCount]="1"
+        [readOnly]="readOnly"
+        labelLocation="left"
+      >
+      <dxi-item itemType="group" caption="Información General">
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+
+        <dxi-item dataField="CLASE" editorType="dxSelectBox">
+          <dxo-label text="Clase de filtro"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box
+              [dataSource]="['APLICACION','MULTIFUNCIONAL']"
+              [value]="FConfigurador.CLASE"
+              [readOnly]="readOnly"
+              placeholder="Seleccione la Clase"
+              (onValueChanged)="onSeleccClase($event)"
+            ></dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ESTADO" editorType="dxSelectBox">
+          <dxo-label text="Estado"></dxo-label>
+            <div *dxTemplate>
+              <dx-select-box
+                [dataSource]="['ACTIVO','INACTIVO']"
+                [value]="FConfigurador.ESTADO"
+                [readOnly]="readOnly"
+                placeholder="Seleccion Estado"
+                (onValueChanged)="onSeleccEstado($event)"
+              ></dx-select-box>
+            </div>
+        </dxi-item>
+
+        <dxi-item dataField="ID_APLICACION" editorType="dxDropDownBox">
+          <dxo-label *ngIf="!activeAplicacion" text="Código de Consulta"></dxo-label>
+          <dxo-label *ngIf="activeAplicacion" text="Aplicación"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box
+              *ngIf="!activeAplicacion"
+              placeholder="Código de consulta"
+              [readOnly]="true"
+              [value]="FConfigurador.ID_APLICACION"
+              (onValueChanged)="onValueChangedCodigo($event)"
+            ></dx-text-box>
+
+            <dx-drop-down-box 
+              *ngIf="activeAplicacion"
+              #dropSelectAplicacion
+              id="dropSelectAplicacion"
+              [(value)]="selectAplicacion"
+              valueExpr="ID_APLICACION"
+              displayExpr="ID_APLICACION"
+              placeholder="Seleccione Aplicación"
+              [readOnly]="readOnly"
+              [showClearButton]="true"
+              [(opened)]="openAplicacion"
+              [dataSource]="DGAplicacion"
+              [dropDownOptions]="{width:'500px', height:350, hideOnParentScroll: true, container:'#fromConfigurador'}"
+              columnResizingMode="widget"
+            >
+              <div id="containerAplicacion" *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  #aplicaciones
+                  height="100%"
+                  width="100%"
+                  keyExpr="ID_APLICACION"
+                  [dataSource]="DGAplicacion"
+                  [(selectedRowKeys)]="selectAplicacion"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  [columnMinWidth]="120"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  (onSelectionChanged)="onSelectionAplicacion($event)"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+  
+                  <dxi-column dataField="ID_APLICACION"  caption="Cod. Aplicación" class="clsEncabHis" [width]="130"></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="180"></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="NOMBRE" >
+          <dxo-label text="Nombre"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box
+              placeholder="Nombre"
+              [readOnly]="readOnlyAplicacionPadre"
+              [value]="FConfigurador.NOMBRE"
+              (onValueChanged)="onValueChangedNombre($event)"
+            ></dx-text-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ID_APLICACION_PADRE" editorType="dxDropDownBox">
+          <dxo-label text="Aplicación Padre"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box 
+              #dropSelectAplicacionPadre
+              id="dropSelectAplicacionPadre"
+              [(value)]="selectAplicacionPadre"
+              valueExpr="ID_APLICACION"
+              displayExpr="NOMBRE"
+              placeholder="Seleccione Aplicación"
+              [readOnly]="readOnlyAplicacionPadre"
+              [showClearButton]="true"
+              [(opened)]="openAplicacionPadre"
+              [dataSource]="DGAplicacion"
+              [dropDownOptions]="{width:'500px', height:350, hideOnParentScroll: true, container:'#fromConfigurador'}"
+              columnResizingMode="widget"
+            >
+              <div id="containerFMAplicacion" *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  #FMaplicaciones
+                  height="100%"
+                  width="100%"
+                  keyExpr="ID_APLICACION"
+                  [dataSource]="DGAplicacion"
+                  [(selectedRowKeys)]="selectAplicacionPadre"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  [columnMinWidth]="120"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  (onSelectionChanged)="onSelectionAplicacionPadre($event)"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+
+                  <dxi-column dataField="ID_APLICACION"  caption="Cod. Aplicación" class="clsEncabHis" [width]="130"></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="180"></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="USUARIOS" >
+          <dxo-label text="Usuarios"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box 
+              #dropselectUsuarios
+              id="dropselectUsuarios"
+              [(value)]="selectUsuarios"
+              valueExpr="ID_EMPLEADO"
+              displayExpr="PRIMER_NOMBRE"
+              placeholder="Seleccione Usuario"
+              [readOnly]="readOnly"
+              [showClearButton]="true"
+              [(opened)]="openUsuarios"
+              [dataSource]="DGUsuarios"
+              [dropDownOptions]="{width:'500px', height:350, hideOnParentScroll: true, container:'#fromConfigurador'}"
+              columnResizingMode="widget"
+            >
+              <div id="containerFMUsuarioRec" *dxTemplate="let data of 'content'">
+                <dx-list
+                  #listUsuarios
+                  id="listUsuarios"
+                  [dataSource]="DGUsuarios"
+                  keyExpr="ID_EMPLEADO"
+                  width="100%"
+                  height="90%"
+                  [searchEnabled]="true"
+                  searchExpr="NOMBRE_COMPLETO"
+                  searchMode="contains"
+                  selectionMode="all"
+                  selectAllMode="allPages"
+                  [showSelectionControls]="true"
+                  [(selectedItemKeys)]="selectUsuarios"
+                >
+                  <div *dxTemplate="let data of 'item'">
+                    <div>{{ data.ID_EMPLEADO +' -- '+ data.NOMBRE_COMPLETO }}</div>
+                  </div>
+                </dx-list>
+                <div style="position: absolute; bottom: 10px">
+                  <dx-button
+                    id="btnAceptarPT"
+                    stylingMode="contained"
+                    text="Aceptar"
+                    type="default"
+                    [width]="100"
+                    (onClick)="aceptarCambios($event, 'USUARIOS ACCESO', '')"
+                  ></dx-button>
+                  <dx-button
+                    id="btnCancelarPT"
+                    stylingMode="contained"
+                    text="Cancelar"
+                    type="normal"
+                    [width]="110"
+                    [style.margin-left]="'20px'"
+                    (onClick)="cancelarCambios($event, 'USUARIOS ACCESO')"
+                  ></dx-button>
+                </div>
+              </div>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+
+      </dxi-item>
+      </dx-form>
+
+      <div>
+        <dx-data-grid
+          #gridFiltros
+          id="gridFiltros"
+          width="100%"
+          max-height="600px"
+          keyExpr="ITEM"
+          [dataSource]="FConfigurador.FILTROS"
+          [showBorders]="true"
+          [focusedRowEnabled]="true"
+          [columnAutoWidth]="true"
+          [allowColumnResizing]="true"
+          columnResizingMode="nextColumn"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          [columnMinWidth]="120"
+          (onContentReady)="onContentReady($event)"
+          (onInitNewRow)="onInitNewRowPro($event)"
+          (onRowInserting)="onRowInserting($event)"
+          (onRowUpdating)="onRowUpdating($event)"
+          (onRowValidating)="onRowValidating($event)"
+          (onSelectionChanged)="selectionGrid($event)"
+        >
+          <dxo-editing
+            mode="row"
+            [useIcons]="false"
+            [allowUpdating]="!readOnly"
+            [allowDeleting]="false"
+            [allowAdding]="!readOnly"
+          >
+            <dxo-texts
+              confirmDeleteMessage="">
+            </dxo-texts>
+          </dxo-editing>
+
+          <dxo-selection
+            selectAllMode="allPages"
+            [showCheckBoxesMode]="esVisibleSelecc" 
+            mode="multiple">
+          </dxo-selection>
+
+          <dxo-scrolling mode="virtual"></dxo-scrolling>
+          <dxo-search-panel [visible]="true" [width]="380" ></dxo-search-panel>
+          <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+          <dxi-column dataField="NOMBRE" caption="Nombre Filtro" width="20%" dataType="text" alignment="left"></dxi-column>
+          <dxi-column dataField="DESCRIPCION" caption="Descripción" width="25%" dataType="text" alignment="left"></dxi-column>
+          <dxi-column dataField="CONDICION" caption="Condición" width="35%" dataType="text" alignment="left"></dxi-column>
+          <dxi-column dataField="USUARIOS" caption="Usuarios" width="20%" dataType="text" alignment="left" editCellTemplate="editTemplateUsuarios"></dxi-column>
+
+          <div *dxTemplate="let cellInfo of 'editTemplateUsuarios'">
+            <dx-drop-down-box 
+              #dropUsuariosFiltro
+              id="dropUsuariosFiltro"
+              [(value)]="cellInfo.data.USUARIOS"
+              valueExpr="ID_EMPLEADO"
+              displayExpr="PRIMER_NOMBRE"
+              placeholder="Seleccione Usuario"
+              [readOnly]="readOnly"
+              [showClearButton]="true"
+              [(opened)]="openUsuariosFiltro"
+              [dataSource]="DGUsuarios"
+              [dropDownOptions]="{width:'500px', height:350, hideOnParentScroll: true, container:'#fromConfigurador'}"
+              columnResizingMode="widget"
+            >
+              <div id="containerFMUsuarioRec" *dxTemplate="let data of 'content'">
+                <dx-list
+                  #listUsuarios
+                  id="listUsuarios"
+                  [dataSource]="DGUsuarios"
+                  keyExpr="ID_EMPLEADO"
+                  width="100%"
+                  height="90%"
+                  [searchEnabled]="true"
+                  searchExpr="NOMBRE_COMPLETO"
+                  searchMode="contains"
+                  selectionMode="all"
+                  selectAllMode="allPages"
+                  [showSelectionControls]="true"
+                  [(selectedItemKeys)]="cellInfo.data.USUARIOS"
+                >
+                  <div *dxTemplate="let data of 'item'">
+                    <div>{{ data.ID_EMPLEADO +' -- '+ data.NOMBRE_COMPLETO }}</div>
+                  </div>
+                </dx-list>
+                <div style="position: absolute; bottom: 10px">
+                  <dx-button
+                    id="btnAceptarPT"
+                    stylingMode="contained"
+                    text="Aceptar"
+                    type="default"
+                    [width]="100"
+                    (onClick)="aceptarCambios($event, 'USUARIOS FILTRO', cellInfo)"
+                  ></dx-button>
+                  <dx-button
+                    id="btnCancelarPT"
+                    stylingMode="contained"
+                    text="Cancelar"
+                    type="normal"
+                    [width]="110"
+                    [style.margin-left]="'20px'"
+                    (onClick)="cancelarCambios($event, 'USUARIOS FILTRO')"
+                  ></dx-button>
+                </div>
+              </div>
+            </dx-drop-down-box>
+          </div>
+
+          <dxo-toolbar *ngIf="!readOnly">
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew"></dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'edit')" *ngIf="rowEdit"></dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete"></dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges"></dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges"></dx-button>
+              </div>
+            </dxi-item>
+          </dxo-toolbar>
+
+        </dx-data-grid>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

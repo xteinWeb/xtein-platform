@@ -1,0 +1,60 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content-secondary">
+      <div style="width: 100%; margin-bottom: 20px">
+        <dx-tag-box
+          id="tbControlCalendar"
+          [items]="DCalendarios"
+          width="100%"
+          placeholder="Seleccione el Grupo de Eventos"
+          [stylingMode]="stylingMode"
+          [showMultiTagOnly]="false"
+          [showSelectionControls]="true"
+          [maxDisplayedTags]="2"
+          applyValueMode="useButtons"
+          itemTemplate="customItem"
+          displayExpr="NOMBRE"
+          valueExpr="ID_ACTIVIDAD"
+          [(value)]="selectedCalendars"
+          (onValueChanged)="onValueChangedCalendario($event)"
+        >
+          <div *dxTemplate="let calendario of 'customItem'">
+            <div class="custom-item">
+              <div class="calendario-nombre">
+                {{ calendario.NOMBRE }}
+              </div>
+            </div>
+          </div>
+        </dx-tag-box>
+      </div>
+      <dx-scheduler
+        #calendarioGespro
+        id="calendarioGespro"
+        timeZone="America/Bogota"
+        currentView="month"
+        currentView="Mes"
+        allDayPanelMode="all"
+        [height]="600"
+        [firstDayOfWeek]="0"
+        [startDayHour]="00"
+        [endDayHour]="23"
+        [dataSource]="DEventosCalendario"
+        [currentDate]="currentDate"
+        (onAppointmentAdded)="onAppointmentAdded($event)"
+        (onAppointmentUpdated)="onAppointmentUpdated($event)"
+        (onAppointmentDeleted)="onAppointmentDeleted($event)"
+        (onAppointmentDblClick)="onAppointmentDblClick($event)"
+      >
+        <dxo-editing
+          #editingOptions
+          [allowAdding]="readOnly"
+          [allowDeleting]="readOnly"
+          [allowUpdating]="readOnly"
+          [allowResizing]="readOnly"
+          [allowDragging]="readOnly"
+        >
+        </dxo-editing>
+      </dx-scheduler>
+    </div>
+  </div>
+</div>

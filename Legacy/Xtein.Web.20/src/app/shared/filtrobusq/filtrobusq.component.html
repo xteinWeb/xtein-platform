@@ -1,0 +1,139 @@
+<dx-popup
+  #popUpFiltro
+  id="popUpFiltro"
+  [maxWidth]="725"
+  [minWidth]="680"
+  [height]="110"
+  [showTitle]="false"
+  title=""
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="true"
+  [showCloseButton]="false"
+  [(visible)]="popupVisible"
+  (onShown)="onShown($event)"
+  (onInitialized)="onInitialized($event)" 
+  (onResizeEnd)="onResizeEnd($event)"
+>
+    <dxo-position
+        my="center top"
+        at="center bottom"
+        of="#r_buscar">
+    </dxo-position>
+
+    <div *dxTemplate="let data of 'content'">
+
+        <div class="flex-grow-1 min-h-0" *ngIf="modo == 'rapida'">
+
+            <dx-text-box
+                id="txtBusquedaFiltro"
+                #txtBusquedaFiltro
+                [(value)]="filtroBusqueda"
+                placeholder="Búsqueda rápida"
+                valueChangeEvent="keyup"
+                (onKeyUp)="onKeyDownBusq($event)"
+                >
+                <dxi-button
+                    name="btnBuscar"
+                    location="after"
+                    [options]="busqButton"
+                ></dxi-button>
+            </dx-text-box>
+
+            <div id="resultBusqueda">
+                <!-- <table id="resB">
+                    <tr *ngFor="let itemCon of dataResConsulta; let i = index">
+                        <td>{{ itemCon["ID_PROVEEDOR"] }}</td>
+                        <td>{{ itemCon["NOMBRE"] }}</td>
+                    </tr>
+                </table> -->
+                <dx-data-grid
+                    #gridDatosCon
+                    id="gridDatosCon"
+                    [dataSource]="dataResConsulta"
+                    [columnAutoWidth]="true"
+                    columnResizingMode="widget"
+                    [allowColumnResizing]="true"
+                    [focusedRowEnabled]="true"
+                    [rowAlternationEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    keyExpr="ITEM"
+                    noDataText=""
+                    [showBorders]="false"
+                    [showColumnLines]="false"
+                    [customizeColumns]="customizeColumns"
+                    (onSelectionChanged)="selectionGrid($event)"
+                    (onToolbarPreparing)="onToolbarPreparing($event)"
+                    (onInitialized)="onInitialized($event)"
+                    (onRowClick)="onRowClick($event)"
+                    >
+                    <dxo-selection
+                        selectAllMode="allPages"
+                        showCheckBoxesMode="onClick"
+                        mode="multiple"
+                    ></dxo-selection>
+                    <dxo-toolbar>
+                        <dxi-item name="searchPanel"></dxi-item>
+                        <dxi-item location="before">
+                            <div *dxTemplate >
+                                <span class="total-header"> Total coincidencias: {{ totalNumDatos }} </span>
+                            </div>
+                        </dxi-item>
+                    </dxo-toolbar>
+            
+                </dx-data-grid>
+
+            </div>
+        </div>
+
+        <div class="flex-grow-1 min-h-0" id="grid-filtro-apl" *ngIf="modo == 'avanzada'">
+            <app-filtroapl  
+                [events]="eventsSubjectFiltroApl.asObservable()"
+                (onRespuestaSelecc)="onRespuestaFiltro($event)"
+              >
+            </app-filtroapl>
+        </div>
+
+        <div style="position: absolute; bottom: 10px; right: 10px">
+            <dx-button
+                stylingMode="contained"
+                [text]="filtroModo"
+                type="default"
+                [width]="220"
+                (onClick)="clickModo($event)"
+            >
+            </dx-button>
+        </div>
+
+    </div>
+</dx-popup>
+
+<dx-popover
+    target="#txtBusquedaFiltro"
+    showEvent="mouseenter"
+    hideEvent="mouseleave"
+    [width]="500"
+    >
+    <dxo-position
+        my="bottom"
+        at="right"
+        of="#txtBusquedaFiltro">
+    </dxo-position>
+    <div *dxTemplate="let data = model; of: 'content'">
+        <div *ngIf="patrones.length != 0">
+            <span><strong>Patrones de consulta:</strong></span>
+            <div *ngFor="let item of patrones; let i = index">
+                <span><b>{{ item.CLAVE }}:</b></span>
+                <span style="padding-left: 10px;"><i>{{ item.DESCRIPCION }}</i></span>
+            </div>
+        </div>
+        <div *ngIf="patrones.length == 0">
+            <!-- <hr> -->
+            <span><strong>Filtros generales:</strong></span><br />
+            <span>Codigo en general: <i>juan</i></span><br />
+            <span>Documento o consecutivo: <i>NOC20 (documento y numero seguidos)</i></span><br />
+            <span>Fechas: <i>20231101</i> Rango: <i>20230101..20231130</i></span><br />
+            <span>Valores: <i>>=20000</i></span>
+        </div>
+    </div>
+</dx-popover>

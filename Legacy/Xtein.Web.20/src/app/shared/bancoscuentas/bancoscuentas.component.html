@@ -1,0 +1,240 @@
+<dx-data-grid
+    #gridBancos
+    id="gridBancos"
+    class="xt-datagrid"
+    noDataText="" 
+    [dataSource]="DBancos"
+    keyExpr="ITEM"
+    [showBorders]="true"
+    [focusedRowEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [hoverStateEnabled]="true"
+    [allowColumnResizing]="true"
+    [columnAutoWidth]="true"
+    columnResizingMode="widget"
+    (onInitNewRow)="onInitNewRow($event)"
+    (onRowInserting)="insertingRow($event)"
+    (onRowInserted)="insertedRow($event)"
+    (onRowUpdating)="updatingRow($event)"
+    (onRowUpdated)="updatedRow($event)"
+    (onRowRemoved)="removedRow($event)"
+    (onEditingStart)="onEditingStart($event)"
+    (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onSelectionChanged)="selectionGrid($event)"
+>
+
+    <dxo-editing 
+        mode="cell"
+        [useIcons]="false" 
+        [allowUpdating]="esEdicion" 
+        [allowDeleting]="false" 
+        [allowAdding]="esEdicion">
+        <dxo-texts
+            confirmDeleteMessage="">
+        </dxo-texts>
+    </dxo-editing>
+
+    <dxo-selection 
+        selectAllMode="allPages"     
+        [showCheckBoxesMode]="esVisibleSelecc" 
+        mode="multiple">
+    </dxo-selection>
+
+    <dxi-column 
+        minWidth="100"
+        dataField="ID_BANCO"
+        caption="Banco"
+        editCellTemplate="listaBancos"
+        calculateDisplayValue="ID_BANCO"
+    ></dxi-column>
+    <dxi-column
+        minWidth="150"
+        dataField="NOMBRE"
+        caption="Nombre"
+        [allowEditing]="false"
+    ></dxi-column>
+    <dxi-column 
+        dataField="CUENTA_BANCARIA" 
+        caption="Nro. Cuenta"
+        editCellTemplate="tempCuenta"
+        >
+    </dxi-column>
+    <dxi-column 
+        dataField="TIPO_CUENTA" 
+        caption="Tipo cuenta">
+        <dxo-lookup
+          [dataSource]="['AHORROS','CORRIENTE']" >
+        </dxo-lookup>
+    </dxi-column>
+    <dxi-column 
+        dataField="TIPO_ASIGNACION" 
+        caption="Asignación">
+        <dxo-lookup
+            [dataSource]="DEtiquetaBancos"
+            valueExpr="ID_BANCO"
+            displayExpr="ID_BANCO"
+           >
+        </dxo-lookup>
+    </dxi-column>
+    <dxi-column 
+        dataField="SALDO" 
+        caption="Saldo"
+        dataType="number"
+        minWidth="120"
+        [editorOptions]="{format: '#,##0.00'}" 
+        >
+        <dxo-format
+            type="fixedPoint"
+            [precision]="2">
+        </dxo-format>
+    </dxi-column>
+    <dxi-column 
+        dataField="FECHA_CREACION" 
+        dataType="date" 
+        caption="Fecha registro"
+        editCellTemplate="fechaCreacion" >
+    </dxi-column>
+    <dxi-column dataField="ID_UBICACION"
+        caption="Ciudad/Municipio"
+        calculateDisplayValue="ID_UBICACION"
+        cellTemplate="cellUbicaciones"
+        editCellTemplate="tempUbicaciones" >
+    </dxi-column>
+    <dxi-column dataField="ESTADO"
+        caption="Estado"
+        calculateDisplayValue="ESTADO">
+        <dxo-lookup
+            [dataSource]="['ACTIVO','INACTIVO']"
+           >
+        </dxo-lookup>
+    </dxi-column>
+
+    <div *dxTemplate="let cellInfo of 'listaBancos'">
+        <dx-select-box 
+          #xs_ID_BANCO
+          id="xs_ID_BANCO"
+          [dataSource]="DListaBancos" 
+          [(value)]="cellInfo.data.ID_BANCO" 
+          valueExpr="ID_BANCO"
+          displayExpr="ID_BANCO"
+          [searchEnabled]="true"
+          searchMode="contains"
+          [searchExpr]="['ID_BANCO', 'NOMBRE']"
+          [dropDownOptions]="dropDownOptions"
+          (onValueChanged)="onSeleccRowBanco($event, cellInfo)">
+
+          <div *dxTemplate="let data of 'item'">
+            <div style="width: 20%; float:left">
+              {{ data.ID_BANCO }}
+            </div>
+            
+            <div style="width: 60%; float:right; text-align: left;">
+              {{ data.NOMBRE }}
+            </div>
+          
+          </div>
+          <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+            <div id="btnCompoRefreshSbox">
+              <dx-button icon="refresh" (onClick)="refreshClick('bancos')"></dx-button>
+            </div>
+          </div>
+      
+        </dx-select-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'cellUbicaciones'">
+        <span *ngIf="cellInfo.data.NOMBRE_UBICACION !== ''">{{ cellInfo.data.ID_UBICACION+'; '+cellInfo.data.NOMBRE_UBICACION }}</span> 
+        <span *ngIf="cellInfo.data.NOMBRE_UBICACION == ''"></span> 
+    </div>
+    <div *dxTemplate="let cellInfo of 'tempUbicaciones'">
+        <dx-select-box 
+            #xs_ID_UBICACION
+            id="xs_ID_UBICACION"
+            [dataSource]="DUbicaciones" 
+            [(value)]="cellInfo.data.ID_UBICACION" 
+            valueExpr="ID_UBICACION"
+            displayExpr="ID_UBICACION"
+            [searchEnabled]="true"
+            searchMode="contains"
+            [searchExpr]="['ID_UBICACION', 'NOMBRE']"
+            [dropDownOptions]="dropDownOptions"
+            (onValueChanged)="onSeleccRowUbic($event, cellInfo)">
+
+            <div *dxTemplate="let data of 'item'">
+                <div style="width: 20%; float:left">
+                    {{ data.ID_UBICACION }}
+                </div>
+
+                <div style="width: 60%; float:right; 
+                            white-space: nowrap; 
+                            overflow: hidden;
+                            text-overflow: ellipsis; "
+                >
+                    {{ data.NOMBRE }}
+                </div>
+            </div>
+            <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                <div id="btnCompoRefreshSbox">
+                    <dx-button icon="refresh" (onClick)="refreshClickUbic('Ciudad')"></dx-button>
+                </div>
+            </div>
+
+        </dx-select-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'fechaCreacion'">
+        <dx-date-box
+            #fechaCreacion
+            [(value)]="cellInfo.value"
+            (onValueChanged)="onFechaCreacion($event, cellInfo)"
+        ></dx-date-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'tempCuenta'">
+        <dx-text-box
+            [value]="cellInfo.value"
+            placeholder="Cuenta..."
+            mask="999999999999999"
+            valueChangeEvent="input"
+            [inputAttr]='{ id: "inputId" }'
+            (onValueChanged)="onValueChangedCuenta($event, cellInfo)"
+        >
+        </dx-text-box>
+    </div>
+
+    <dxo-toolbar *ngIf="esEdicion">
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+            </dx-button>
+            </div>
+        </dxi-item>
+    </dxo-toolbar>
+    
+</dx-data-grid>

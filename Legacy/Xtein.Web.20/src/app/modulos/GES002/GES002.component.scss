@@ -1,0 +1,18 @@
+// ::ng-deep #organigrama {
+//     height: 750px !important;
+//   }
+  
+//   ::ng-deep svg.dxdi-canvas.dxdi-touch-action {
+//     height: 750px !important;
+//   }
+::ng-deep .dx-loadpanel-message {
+    display: unset !important;
+  }
+  ::ng-deep .dx-loadpanel-content {
+    width: 300px !important;
+    height: 70px !important;
+    max-width: 300px !important;
+    max-height: 70px !important;
+    border-radius: 10px !important;
+  }
+  

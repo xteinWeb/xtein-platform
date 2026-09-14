@@ -1,0 +1,297 @@
+<div class="row gx-3">
+  <div class="col-12">
+     <div class="card-content" id="PRO025" #PRO025>
+        <div>
+          <dx-form
+            class="dx-form-group"
+            id="formOrdenProduccion"
+            [formData]="DOrdenProduccion"
+            [readOnly]="readOnly"
+            labelLocation="left"
+            [colCount]="1"
+          > 
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item caption="Datos Principales" itemType="group">
+  
+              <dxi-item dataField="DOCUMENTO" editorType="dxSelectBox" [editorOptions]="{placeholder:'Documento'}" >
+                <dxo-label text="Documento"></dxo-label>
+                <div *dxTemplate>
+                  <dx-text-box
+                    #txtDocumentoOrden
+                    id="txtDocumentoOrden"
+                    placeholder="Documento"
+                    [readOnly]="true"
+                    [(value)]="DOrdenProduccion.DOCUMENTO"
+                  ></dx-text-box>
+                  <!-- <app-xc-selectbox
+                    nombreObj="DOCUMENTO"
+                    [readOnly]="readOnly"
+                    [valorDefecto]="DOrdenProduccion.DOCUMENTO"
+                    [customValue]="customValueSbox"
+                    [events]="eventsSubjectSboxDoc.asObservable()"
+                    (onRespuestaSelecc)="onSeleccDocumento($event)"
+                  >
+                  </app-xc-selectbox> -->
+                </div>
+              </dxi-item>
+  
+              <dxi-item dataField="FECHA" editorType="dxDateBox" >
+                <dxo-label text="Fecha"></dxo-label>
+                <div *dxTemplate>
+                  <dx-date-box 
+                    type="date" 
+                    [readOnly]="true" 
+                    [value]="DOrdenProduccion.FECHA" 
+                  ></dx-date-box>
+                </div>
+              </dxi-item>
+
+              <dxi-item dataField="HORA" [editorOptions]="{ readOnly: true }" >
+                <dxo-label text="Hora"></dxo-label>
+                <div *dxTemplate>
+                  <dx-date-box 
+                    type="datetime" 
+                    [readOnly]="true" 
+                    displayFormat="hh:mm:ss" 
+                    [value]="DOrdenProduccion.HORA" 
+                  ></dx-date-box>
+                </div>
+              </dxi-item>
+
+            </dxi-item>
+  
+            <dxi-item caption="Estado y Usuario" itemType="group" >
+
+              <dxi-item dataField="ESTADO" >
+                <dxo-label text="Estado"></dxo-label>
+                <div *dxTemplate>
+                  <dx-select-box
+                    #selectEstado
+                    id='selectEstado'
+                    width="100%"
+                    height="100%"
+                    stylingMode="filled"
+                    placeholder="Seleccione Estado..."
+                    [readOnly]="readOnly"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    [dataSource]="dSBEstados"
+                    [(value)]="DOrdenProduccion.ESTADO"
+                    [dropDownOptions]="{width:'500px', height:'auto', hideOnParentScroll: true,  closeOnOutsideClick: false, container:'#PRO025'}"
+                  ></dx-select-box>
+                </div>
+              </dxi-item>
+
+              <dxi-item dataField="USUARIO" [editorOptions]="{ readOnly: true }" >
+                <dxo-label text="Usuario"></dxo-label>
+              </dxi-item>
+
+            </dxi-item>
+
+            <dxi-item caption="Datos Orden de Producción" itemType="group" [colSpan]="2">
+              <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+
+              <!-- <dxi-item dataField="ID_UN_ITEM" editorType="dxSelectBox">
+                <dxo-label text="UN Item"></dxo-label>
+                <div *dxTemplate>
+                  <dx-select-box
+                    #selectUn
+                    id='selectUn'
+                    width="100%"
+                    height="100%"
+                    valueExpr="ID_UN"
+                    displayExpr="NOMBRE"
+                    stylingMode="filled"
+                    placeholder="Seleccione UN..."
+                    [readOnly]="readOnly"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    [dataSource]="DUNItem"
+                    [(value)]="DOrdenProduccion.ID_UN_ITEM"
+                    [dropDownOptions]="{width:'500px', height:'auto', hideOnParentScroll: true,  closeOnOutsideClick: false, container:'#PRO025'}"
+                  ></dx-select-box>
+                </div>
+              </dxi-item> -->
+
+              <dxi-item dataField="PEDIDO" >
+                <dxo-label text="Pedidos"></dxo-label>
+                <div *dxTemplate>
+                  <dx-drop-down-box
+                    #dropDownPedido
+                    id='dropDownPedido'
+                    width="100%"
+                    height="100%"
+                    stylingMode="filled"
+                    displayExpr="DOCUMENTO_PEDIDO"
+                    valueExpr="DOCUMENTO_PEDIDO"
+                    placeholder="Seleccione pedido..."
+                    [readOnly]="readOnly"
+                    [showClearButton]="true"
+                    [dataSource]="DPidos"
+                    [(value)]="DOrdenProduccion.PEDIDO"
+                    [(opened)]="opendDrop.PEDIDO"
+                    [dropDownOptions]="{width:'500px', height:'400px', hideOnParentScroll: true,  closeOnOutsideClick: false, container:'#PRO025'}"
+                    (onValueChanged)="onValueChangedPedido($event)"
+                  >
+                    <div *dxTemplate="let data of 'content'">
+                      <dx-list
+                        #listPedido
+                        id="listPedido"
+                        width="100%"
+                        height="90%"
+                        selectionMode="all"
+                        searchMode="contains"
+                        selectAllMode="allPages"
+                        keyExpr="DOCUMENTO_PEDIDO"
+                        searchExpr="DOCUMENTO_PEDIDO"
+                        [dataSource]="DPidos"
+                        [searchEnabled]="true"
+                        [showSelectionControls]="true"
+                        [(selectedItemKeys)]="DOrdenProduccion.PEDIDO"
+                      >
+                        <div *dxTemplate="let data of 'item'">
+                          <div>{{ data.DOCUMENTO_PEDIDO }}</div>
+                        </div>
+                      </dx-list>
+                      <div style="display: flex; justify-content: center; width: 100%; padding: 5px;">
+                        <dx-button
+                          id="btnAceptarPT"
+                          stylingMode="contained"
+                          text="Aceptar"
+                          type="default"
+                          [width]="100"
+                          (onClick)="aceptarBottom($event)"
+                        ></dx-button>
+                        <dx-button
+                          id="btnCancelarPT"
+                          stylingMode="contained"
+                          text="Cancelar"
+                          type="normal"
+                          [width]="110"
+                          [style.margin-left]="'20px'"
+                          (onClick)="aceptarBottom($event)"
+                        ></dx-button>
+                      </div>
+                    </div>
+                  </dx-drop-down-box>
+                </div>
+              </dxi-item>
+
+              <dxi-item dataField="DESCRIPCION" editorType="dxDateBox" >
+                <dxo-label text="Descripción"></dxo-label>
+                <dx-text-box
+                  placeholder="Descripción / Observación"
+                  [readOnly]="readOnly"
+                  [value]="DOrdenProduccion.DESCRIPCION"
+                  (onValueChanged)="onValueChangedDes($event)"
+                ></dx-text-box>
+              </dxi-item>
+
+            </dxi-item>
+          
+          </dx-form>
+        </div>
+   
+        <br>
+          
+        <div>
+          <!--Grid Items-->
+          <div class="hm-dx-data">
+            <dx-data-grid
+              #gridOPItems
+              id="gridOPItems"
+              keyExpr="ITEM"
+              noDataText="No hay datos"
+              columnResizingMode="nextColumn"
+              [showBorders]="true"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              [allowColumnResizing]="true"
+              [rowAlternationEnabled]="true"
+              [dataSource]="DOrdenProduccionItems"
+              (onContentReady)="onContentReady($event)"
+              (onSelectionChanged)="selectionGrid($event)"
+              >
+              <!-- (onInitNewRow)="initNewRow($event)"
+              (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+              (onRowInserting)="insertingRow($event)"
+              (onRowInserted)="insertedRow($event)"
+              (onRowUpdating)="updatingRow($event)"
+              (onRowUpdated)="updatedRow($event)"
+              (onRowRemoved)="removedRow($event)"
+              (onEditingStart)="onEditingStart($event)"
+              (onEditorPreparing)="onEditorPreparing($event)"
+              (onRowPrepared)="onRowPrepared($event)"
+              (onRowValidating)="onRowValidating($event)"
+              (onFocusedRowChanged)="onFocusedRowChanged($event)"
+              (onEditCanceled)="onEditCanceled($event)"
+              (onCellClick)="onCellClick($event)"
+              (onCellPrepared)="onCellPrepared($event)" -->
+          
+              <dxo-editing
+                mode="row"
+                [useIcons]="false" 
+                [allowUpdating]="!readOnly"
+                [allowDeleting]="false"
+                [allowAdding]="!readOnly"
+              >
+                <dxo-texts confirmDeleteMessage=""></dxo-texts>
+              </dxo-editing>
+
+              <dxo-selection
+                selectAllMode="allPages"
+                [showCheckBoxesMode]="esVisibleSelecc"
+                mode="multiple"
+              ></dxo-selection>
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+          
+              <dxi-column dataField="PRODUCTO" caption="Producto" [width]="120" ></dxi-column>
+              <dxi-column dataField="NOMBRE" caption="Nombre Producto" ></dxi-column>
+              <dxi-column dataField="PEDIDO" caption="Pedido" [width]="120" ></dxi-column>
+              <dxi-column dataField="NOMBRE_CLIENTE" caption="Cliente" ></dxi-column>
+              <dxi-column dataField="FECHA" caption="Fecha pedido" dataType="date" format="yyyy-MM-dd" [width]="130" ></dxi-column>
+              <dxi-column dataField="CANTIDAD" caption="Cantidad" alignment="right" dataType="number" format="#,##0.00" [width]="100" ></dxi-column>
+              <dxi-column dataField="FECHA_AGENDA" caption="Fecha agenda" dataType="date" format="yyyy-MM-dd" [width]="130" ></dxi-column>
+          
+              <dxo-toolbar *ngIf="!readOnly">
+                <dxi-item location="before">
+                  <div *dxTemplate>
+                    <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete" ></dx-button>
+                  </div>
+                </dxi-item>
+              </dxo-toolbar>
+
+            </dx-data-grid>
+          </div>
+        </div>
+       </div> 
+      
+      
+    </div>
+
+
+<app-vistarapida id="vistaCom200" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<app-femail
+  [events]="eventsSubjectEnvioCorreo.asObservable()"
+  (onRespuestaSelecc)="onRespuestaEnvioCorreo($event)"
+  >
+</app-femail>
+
+<!-- <app-filtrobusq
+  [events]="eventsSubjectFiltro.asObservable()"
+  (onRespuestaSelecc)="onRespuestaFiltro($event)"
+  >
+</app-filtrobusq> -->
+
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false">
+</dx-load-panel>

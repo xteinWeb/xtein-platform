@@ -1,0 +1,106 @@
+
+<div [ngClass]="collapsed ? 'sidebarToggle':'sidebar-wrapper' " (window:resize)="onResized($event)">
+    <div class="drawerToggle">
+        <div class="drawerToggle-uno">
+            <div>
+                <button mat-icon-button class="btn xt-text-x-xs" (click)="drawerToggle(); dimensBarra();">
+                    <i class="icon-menu"></i>
+                </button>
+            </div>
+            <div  [ngClass]="collapsed ? 'displayNone':'container-logo' " >
+                <img src="assets/img/logo/xtein.svg" width="60%" alt="Xtein Logo">
+            </div>
+        </div>
+    </div>
+    
+    <div  [ngClass]="collapsed ? 'displayNone':'container-listApl' " >
+        <!-- <ul class="sidebar-nav"> -->
+            <div class="xt-treeview" style="width: 82%; height: 90%; padding-bottom: 2rem; box-shadow: rgba(0, 0, 0, 0.3) 0px -22px 28px -40px inset;">
+                
+                <div class="dropdown-expand">
+                    <dx-toolbar>
+                        <dxi-item location="before" (click)="onExpandirMenu($event)">
+                            <div class="accordion-item-group" >
+                                <div>
+                                <span class="accordion-item-description" *ngIf="expandtreeviewMenu">
+                                    <i class="icon-chevron-right-xs"></i>
+                                </span>
+                                <span class="accordion-item-description" *ngIf="!expandtreeviewMenu">
+                                    <i class="icon-chevron-down-xs"></i>
+                                </span>
+                                </div>
+                                <span class="xt-dropdown-caption" >{{ btnContraer }}</span>
+                            </div>
+                        </dxi-item>
+                    </dx-toolbar>
+                </div>
+
+                <dx-tree-view
+                    #treeviewMenu
+                    id="treeviewMenu"
+                    width="100%"
+                    height="100%"
+                    [dataSource]="menuItems"
+                    [searchEnabled]="true"
+                    [(expandAllEnabled)]="expandtreeviewMenu"
+                    searchMode="contains"
+                    keyExpr="ID_APLICACION"
+                    parentIdExpr="ID_APLICACION_PADRE"
+                    displayExpr="NOMBRE"
+                    rootValue="XTEIN"
+                    (onItemClick)="onItemClickTreeMenu($event)"
+                >
+                    <div *dxTemplate="let data of 'item'" class="align-center" (click)="abrirApl(data)">
+                        <i *ngIf="data.icon !== ''" class="{{ data.icon }} leftbar-icon" aria-hidden="true"></i>
+                        <span class="ellipsis" [ngStyle]="{'margin-left': (data.icon!=='' ? '4px' : '0px'), 'font-weight': (data.icon!=='' ? '400' : '500'), 'font-size': (data.icon!=='' ? '.875rem' : '.875rem')}" >
+                            {{data.NOMBRE}}
+                        </span>
+                    </div>
+                </dx-tree-view>
+            </div>
+
+        <!-- </ul> -->
+        <ul class="side-bar-brand">
+            <li class="xt-text-brand">
+                <span class="primary-color">
+                    <b class="xt-text-xs">Powered By</b>
+                    <br>
+                    <a href="https://www.xtein.com">  XTEIN</a> &copy; 2022
+                </span>
+            </li>
+        </ul>
+    </div>
+    <div  [ngClass]="!collapsed ? 'displayNone':'container-listIconApl' " >
+        <div id="carousel-icons" class="carousel-icons">
+            <div *ngFor="let tblMasUsada of tblMasUsadas" id="{{tblMasUsada.icon+'-'+tblMasUsada.item}}" class="container-iconApl" >
+                <a 
+                    id="{{tblMasUsada.icon+'-'+tblMasUsada.item}}"
+                    style="margin: 0 !important; transition: all .5s ease;"
+                    (click)="abrirApl(tblMasUsada)"
+                    (mouseover)="toggleToolTip(tblMasUsada)"
+                    (mouseout)="toggleToolTip(tblMasUsada)"
+                >
+                    <i class="{{ tblMasUsada.icon }}" ></i>
+                </a>
+            </div>
+        </div>
+        <div>
+            <dx-button class="xt-chevron-btn" id="btnDown" (onClick)="carouselDown()" > <i class="icon-chevron-down" ></i> </dx-button>
+        </div>
+    </div>
+    
+</div>
+
+<dx-tooltip
+    id="tooltipLeftvar"
+    [target]='targetIdTooltip'
+    position="right"
+    [(visible)]="toolTipVisible"
+    showEvent="mouseenter"
+    hideEvent="mouseleave"
+    [hideOnOutsideClick]="false"
+    >
+    <div *dxTemplate="let data = data; of: 'content'">
+        <b style="font-size: 13px;">{{tooltipTitulo}}</b>
+    </div>
+</dx-tooltip>

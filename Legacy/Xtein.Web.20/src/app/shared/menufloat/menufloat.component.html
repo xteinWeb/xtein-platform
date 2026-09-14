@@ -1,0 +1,30 @@
+<dx-popup
+  #popUpMenuFloat
+  id="popUpMenuFloat"
+  [width]="'300px'"
+  [height]="'auto'"
+  [(title)]="titMenu"
+  [showTitle]="false"
+  [dragEnabled]="false"
+  [resizeEnabled]="false"
+  [hideOnOutsideClick]="true"
+  [hideOnParentScroll]="true"
+  [(visible)]="esVisible"
+  (onShown)="onShown($event)"
+  (onHidden)="onHidden($event)"
+  [shading]="false"
+  (onInitialized)="onInitialized($event)" 
+  (onResizeEnd)="onResizeEnd($event)"
+  [deferRendering]="false"
+>
+  <dxo-position
+    my="left top"
+    at="left bottom"
+    [of]="target">
+  </dxo-position>
+
+  <div *dxTemplate="let data of 'content'">
+    <div cms-links [innerHTML]="contenidoTool"></div>
+  </div>
+
+</dx-popup>

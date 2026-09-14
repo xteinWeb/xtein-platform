@@ -1,0 +1,126 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content" id="GES007" #GES007>
+      <div class="container-child-dos-app xt-gesptabs">
+        <div
+          class="container-filtros"
+          *ngIf="!mnuAccion.match('new|update') && selectedIndex === 0"
+        >
+          <dx-toolbar>
+            <dxi-item location="before">
+              <dx-drop-down-button
+                #dropDownFiltroProyectos
+                id="dropDownFiltroProyectos"
+                width="60px"
+                icon="filter"
+                keyExpr="ID"
+                displayExpr="DESCRIPCION"
+                [splitButton]="true"
+                [useSelectMode]="false"
+                [items]="filtroMaestro"
+                [(opened)]="openDropFiltroMaestro"
+                [dropDownOptions]="{
+                  width: 150,
+                  hideOnParentScroll: true,
+                  container: '#GES007'
+                }"
+                dropDownContentTemplate="contentTemplateFiltroMaestro"
+              >
+                <div *dxTemplate="let data of 'contentTemplateFiltroMaestro'">
+                  <div class="d-none d-xl-block custom-color-picker">
+                    <dx-list
+                      #lstfilterMaestro
+                      id="lstfilterMaestro"
+                      class="xt-gescheckbox-m"
+                      keyExpr="ID"
+                      displayExpr="DESCRIPCION"
+                      selectByClick="true"
+                      selectionMode="single"
+                      [dataSource]="filtroMaestro"
+                      [selectedItemKeys]="selectFiltroMaestro"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onValueChangedFiltro($event)"
+                      [showSelectionControls]="true"
+                    ></dx-list>
+                  </div>
+                </div>
+              </dx-drop-down-button>
+            </dxi-item>
+            <dxi-item location="before">
+              <dxo-label text="Buscar"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  #textDocumento
+                  placeholder="Busqueda"
+                  [readOnly]="false"
+                  [showClearButton]="true"
+                  (onValueChanged)="onValueChangedFilter($event)"
+                ></dx-text-box>
+              </div>
+            </dxi-item>
+          </dx-toolbar>
+        </div>
+
+        <div
+          class="d-flex justify-content-end overflow-hidden xt-tabs-container"
+        >
+          <dx-tabs
+            class="xt-tabs-gespro"
+            [scrollByContent]="true"
+            [showNavButtons]="true"
+            [disabled]="mnuAccion.match('new|update') ? true : false"
+            [selectedIndex]="selectedIndex"
+            (onItemClick)="changeTabs($event)"
+          >
+            <dxi-item>
+              <div *dxTemplate style="display: flex">
+                <i class="icon inicio-apps"></i>
+                <span style="margin-left: 5px"> Kanban </span>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-tarea-sl"></i>
+                <span style="margin-left: 5px"> Formulario </span>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-grafico-mnl-ol subMenu-i" aria-hidden="true"></i>
+                <span style="margin-left: 5px"> Gantt </span>
+              </div>
+            </dxi-item>
+          </dx-tabs>
+        </div>
+        <div id="tabsProyectos" class="content dx-fieldset">
+          <div *ngIf="tabsProyectos[0].content">
+            <div id="kanban">
+              <div style="width: 100%">
+                <app-GES00702
+                  [eventsDatos]="eventsDatosList.asObservable()"
+                  (onRespuestaDatos)="onRespuestaComponent($event, 'CANVAS')"
+                ></app-GES00702>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="tabsProyectos[1].content">
+            <div style="margin-top: 20px">
+              <app-GES00701
+                [eventsDatos]="eventsDatosForm.asObservable()"
+                (onRespuestaDatos)="onRespuestaComponent($event, 'FORM')"
+              ></app-GES00701>
+            </div>
+          </div>
+          <div *ngIf="tabsProyectos[2].content">
+            <div style="margin-top: 20px">
+              <app-GES00703
+                (onRespuestaDatos)="onRespuestaComponent($event, 'GANTT')"
+                [events]="eventsDatosGantt.asObservable()"
+              ></app-GES00703>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

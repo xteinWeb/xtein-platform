@@ -1,0 +1,14 @@
+::ng-deep .highlight {
+    background-color: #EEF43B;
+  }
+::ng-deep  #gridDatosCon .dx-group-row td {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    font-size: 12px;
+  }
+  
+::ng-deep #gridDatosCon .dx-data-row td {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    font-size: 12px;
+  }

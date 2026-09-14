@@ -1,0 +1,249 @@
+<dx-popup
+  [(visible)]="popupVisible"
+  [width]="'90%'"
+  [height]="'85vh'"
+  [showTitle]="true"
+  title="Selección de Cuotas para Pago"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="true"
+  (onHidden)="cancelarPago()"
+>
+  <div *dxTemplate="let data of 'content'" class="popup-content">
+
+    <dx-data-grid
+      #gridCuotas
+      id="gridCuotas"
+      [dataSource]="DAbonosCartera"
+      keyExpr="ITEM"
+      [showBorders]="true"
+      [showRowLines]="true"
+      [showColumnLines]="true"
+      [rowAlternationEnabled]="true"
+      [allowColumnReordering]="false"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      [wordWrapEnabled]="false"
+      [(selectedRowKeys)]="selectedRowKeys"
+      (onSelectionChanged)="onSelectionChanged($event)"
+      (onEditorPreparing)="onEditorPreparing($event)"
+      (onRowValidating)="onRowValidating($event)"
+      (onRowUpdated)="onRowUpdated($event)"      
+      (onCellClick)="onCellClick($event)"
+      height="100%"
+    >
+      <!-- ── Modo edición: celda por celda ──────────────────────── -->
+      <dxo-editing
+        mode="cell"
+        [allowUpdating]="true"
+        [allowAdding]="false"
+        [allowDeleting]="false"
+        [selectTextOnEditStart]="true"
+        [startEditAction]="'click'"
+      ></dxo-editing>
+
+      <!-- ── Selección múltiple ─────────────────────────────────── -->
+      <dxo-selection
+        mode="multiple"
+        [showCheckBoxesMode]="'always'"
+        [allowSelectAll]="true"
+      ></dxo-selection>
+
+      <!-- ── Agrupación ─────────────────────────────────────────── -->
+      <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+      <dxo-group-panel [visible]="false"></dxo-group-panel>
+
+      <!-- ── Scrolling ──────────────────────────────────────────── -->
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+      <!-- ── Paginación ─────────────────────────────────────────── -->
+      <dxo-paging [enabled]="false"></dxo-paging>
+
+      <!-- ── Columnas ───────────────────────────────────────────── -->
+      <dxi-column
+        dataField="FACTURA"
+        caption="Factura"
+        dataType="string"
+        [groupIndex]="0"
+        [groupCellTemplate]="'groupRowTemplate'"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="CUOTA"
+        caption="Cuota"
+        dataType="number"
+        alignment="center"
+        [width]="70"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="FECHA"
+        caption="Fecha"
+        dataType="date"
+        format="dd/MM/yyyy"
+        alignment="center"
+        [width]="110"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="FECHA_VENCIMIENTO"
+        caption="Fecha Vencimiento"
+        dataType="date"
+        format="dd/MM/yyyy"
+        alignment="center"
+        [width]="140"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="SALDO"
+        caption="Saldo"
+        dataType="number"
+        format="fixedPoint"
+        alignment="right"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="VALOR_INTERESES"
+        caption="Int. x Mora"
+        dataType="number"
+        format="fixedPoint"
+        alignment="right"
+      ></dxi-column>
+
+      <!-- ── Columna EDITABLE con validación ────────────────────── -->
+      <dxi-column
+        dataField="VALOR_PAGADO"
+        caption="Valor Pagado"
+        dataType="number"
+        [format]="currencyFormat"
+        alignment="right"
+        [allowEditing]="true"
+        cellTemplate="valorPagadoTemplate"
+        cssClass="col-editable"
+      >
+        <dxi-validation-rule
+          type="custom"
+          message="El Valor Pagado no puede ser negativo."
+          [validationCallback]="validarNoNegativo"
+        ></dxi-validation-rule>
+
+        <dxi-validation-rule
+          type="custom"
+          [message]="'El Valor Pagado no puede superar el Saldo.'"
+          [validationCallback]="validarContraSaldo.bind(this)"
+        ></dxi-validation-rule>
+      </dxi-column>
+
+      <dxi-column
+        dataField="CAPITAL"
+        caption="Capital"
+        dataType="number"
+        format="fixedPoint"
+        alignment="right"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="INTERESES"
+        caption="Intereses"
+        dataType="number"
+        format="fixedPoint"
+        alignment="right"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="VALOR_DESCUENTO"
+        caption="Descuento"
+        dataType="number"
+        format="fixedPoint"
+        alignment="right"
+      ></dxi-column>
+
+      <!-- ── Template: celda VALOR_PAGADO ──────────────────────── -->
+      <div *dxTemplate="let cell of 'valorPagadoTemplate'">
+        <span
+          class="valor-pagado-cell"
+          [class.valor-pagado-activo]="cell.value > 0"
+          [class.valor-pagado-alerta]="cell.value > cell.data.SALDO"
+        >
+          {{ cell.value | number:'1.2-2' }}
+          <i *ngIf="cell.value > 0 && cell.value <= cell.data.SALDO"
+             class="dx-icon-check icono-ok"></i>
+          <i *ngIf="cell.value > cell.data.SALDO"
+             class="dx-icon-warning icono-error"></i>
+        </span>
+      </div>
+
+      <!-- ── Template: fila de grupo con botón Pago Anticipado ─── -->
+      <div *dxTemplate="let group of 'groupRowTemplate'" class="group-row-container">
+        <span class="group-row-title">
+          <i class="dx-icon-doc"></i>
+          Factura: <strong>{{ group.value }}</strong>
+          <span class="group-row-count">({{ group.data?.items?.length || 0 }} cuotas)</span>
+        </span>
+
+        <dx-button
+          text="Pago Anticipado"
+          type="default"
+          stylingMode="contained"
+          icon="money"
+          class="btn-pago-anticipado"
+          (onClick)="onPagoAnticipado(group.value)"
+        ></dx-button>
+      </div>
+
+      <!-- ── Summary ────────────────────────────────────────────── -->
+      <dxo-summary>
+        <dxi-group-item
+          column="SALDO"
+          summaryType="sum"
+          valueFormat="fixedPoint"
+          displayFormat="Total: {0}"
+        ></dxi-group-item>
+        <dxi-group-item
+          column="VALOR_PAGADO"
+          summaryType="sum"
+          valueFormat="fixedPoint"
+          displayFormat="Total: {0}"
+        ></dxi-group-item>
+        <dxi-group-item
+          column="CAPITAL"
+          summaryType="sum"
+          valueFormat="fixedPoint"
+          displayFormat="Total: {0}"
+        ></dxi-group-item>
+        <dxi-total-item
+          column="SALDO"
+          summaryType="sum"
+          valueFormat="fixedPoint"
+          displayFormat="Saldo Total: {0}"
+        ></dxi-total-item>
+        <dxi-total-item
+          column="VALOR_PAGADO"
+          summaryType="sum"
+          valueFormat="fixedPoint"
+          displayFormat="Pagado: {0}"
+        ></dxi-total-item>
+      </dxo-summary>
+
+    </dx-data-grid>
+
+  </div>
+
+  <dxi-toolbar-item location="after" toolbar="bottom">
+    <dx-button
+      text="Aceptar"
+      type="success"
+      (onClick)="aceptarPago()"
+      icon="check"
+    ></dx-button>
+    <dx-button
+      text="Cancelar"
+      type="danger"
+      (onClick)="cancelarPago()"
+      [style]="{ marginLeft: '10px' }"
+      icon="close"
+    ></dx-button>
+  </dxi-toolbar-item>
+
+</dx-popup>

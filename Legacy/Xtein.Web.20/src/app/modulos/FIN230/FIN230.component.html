@@ -1,0 +1,228 @@
+<div class="container">
+  <h2>Condiciones Planes</h2>
+  
+  <dx-data-grid
+    #gridCondiciones
+    id="gridCondiciones"
+    [dataSource]="condiciones"
+    [showBorders]="true"
+    [showRowLines]="true"
+    [showColumnLines]="true"
+    [rowAlternationEnabled]="true"
+    [hoverStateEnabled]="true"
+    [allowColumnReordering]="true"
+    [allowColumnResizing]="true"
+    [keyExpr]="['ID_CONDICION','ID_CONCEPTO']"
+    (onInitNewRow)="onInitNewRow($event)"
+    (onRowInserting)="onRowInserting($event)"
+    (onRowInserted)="onRowInserted($event)"
+    (onRowUpdating)="onRowUpdating($event)"
+    (onRowUpdated)="onRowUpdated($event)"
+    (onRowRemoving)="onRowRemoving($event)"
+    (onEditorPreparing)="onEditorPreparing($event)"
+    (onEditingStart)="onEditingStart($event)"
+    >
+
+    <!-- Configuración de edición -->
+    <dxo-editing
+      mode="cell"
+      [allowAdding]="false"
+      [allowUpdating]="true"
+      [allowDeleting]="true"
+      [useIcons]="true">
+      <!-- <dxo-popup
+        title="Información del Empleado"
+        [showTitle]="true"
+        [width]="700"
+        [height]="450">
+      </dxo-popup>
+      <dxo-form>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="ID_CONDICION"></dxi-item>
+          <dxi-item dataField="NOMBRE"></dxi-item>
+          <dxi-item dataField="EMPRESA"></dxi-item>
+          <dxi-item dataField="FECHA"></dxi-item>
+          <dxi-item dataField="SALARIO"></dxi-item>
+          <dxi-item dataField="VALOR"></dxi-item>
+        </dxi-item>
+      </dxo-form> -->
+    </dxo-editing>
+
+    <!-- Configuración de filtros -->
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-search-panel [visible]="true" [width]="240" placeholder="Buscar..."></dxo-search-panel>
+    <!-- <dxo-group-panel [visible]="false"></dxo-group-panel>
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping> -->
+
+    <!-- Configuración de paginación -->
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-pager
+      [showPageSizeSelector]="true"
+      [allowedPageSizes]="[5, 10, 20, 50]"
+      [showInfo]="true">
+    </dxo-pager>
+
+    <!-- Configuración de columnas -->
+    <dxi-column
+      dataField="ID_CONDICION"
+      caption="ID Condición"
+      [allowEditing]="false"
+      [width]="150"
+      [allowEditing]="true"
+      [groupIndex]="0">
+      <!-- <dxi-validation-rule type="required" message="El ID es requerido"></dxi-validation-rule> -->
+    </dxi-column>
+
+    <!-- <dxi-column
+      dataField="NOMBRE"
+      caption="Nombre Condición"
+      [allowEditing]="false"
+      [width]="200"
+      [groupIndex]="0">
+      <dxi-validation-rule type="required" message="El nombre es requerido"></dxi-validation-rule>
+      <dxi-validation-rule type="stringLength" [min]="3" message="El nombre debe tener al menos 3 caracteres"></dxi-validation-rule>
+    </dxi-column> -->
+
+    <dxi-column
+      dataField="ID_CONCEPTO"
+      caption="Concepto"
+      [width]="180">
+      <!-- <dxi-validation-rule type="required" message="El concepto es requerido"></dxi-validation-rule> -->
+    </dxi-column>
+
+    <dxi-column
+      dataField="VALOR"
+      caption="Valor"
+      dataType="number"
+      format="#,##0.00"
+      [width]="120">
+    </dxi-column>
+
+    <dxi-column
+      dataField="PORCENTAJE"
+      caption="Porcentaje"
+      dataType="number"
+      format="#,##0.00"
+      [width]="140">
+    </dxi-column>
+
+    <dxi-column
+      dataField="FORMULA"
+      caption="Fórmula"
+      [width]="140">
+    </dxi-column>
+
+    <dxi-column
+      dataField="DESCONTAR_INI"
+      caption="Descontar Ini"
+      dataType="boolean">
+    </dxi-column>
+
+    <dxi-column
+      dataField="CARGO_CUOTA"
+      caption="Cargo Cuota"
+      dataType="boolean">
+    </dxi-column>
+
+    <dxi-column
+      dataField="IVA"
+      caption="Iva"
+      dataType="number"
+      format="#,##0.00"
+      [width]="100">
+    </dxi-column>
+
+    <dxi-column 
+        dataField="CLIENTE_PADRE"
+        caption="Tercero a pagar"
+        editCellTemplate="listaPadre">
+    </dxi-column>
+
+    <div *dxTemplate="let cellInfo of 'listaPadre'">
+        <dx-select-box
+            [(value)]="cellInfo.value"
+            [stylingMode]="'filled'" 
+            [dataSource]="clientes"
+            displayExpr="CLIENTE"
+            valueExpr="ID_CLIENTE"
+            [searchEnabled]="true"
+            searchMode="contains"
+            [dropDownOptions]="dropDownOptions"
+            (onSelectionChanged)="onClienteSelecc($event, cellInfo)">
+            >
+        </dx-select-box>
+    </div>
+
+    <!-- Exportación -->
+    <dxo-export [enabled]="true" [allowExportSelectedData]="true"></dxo-export>
+
+    <!-- Selección de filas -->
+    <!-- <dxo-selection mode="single"></dxo-selection> -->
+
+    <!-- barra de herramientas personalizada -->
+    <dxo-toolbar>
+        <dxi-item name="searchPanel"></dxi-item>
+        <dxi-item name="exportButton"></dxi-item>
+        <dxi-item location="before">
+            <dx-button
+                text="Agregar Condición"
+                icon="plus"
+                type="success"
+                (onClick)="visiblePopupNuevaCondicion = true">
+            </dx-button>
+      </dxi-item>
+    </dxo-toolbar>  
+
+  </dx-data-grid>
+</div>
+
+
+<!-- Popup Nueva condicion -->
+<dx-popup
+  #popupNuevaCondicion
+  id="popupNuevaCondicion"
+  [width]="'600'"
+  [height]="'auto'"
+  [showTitle]="true"
+  title="Nueva condicion"
+  [dragEnabled]="false"
+  [closeOnOutsideClick]="false"
+  [showCloseButton]="true"
+  [(visible)]="visiblePopupNuevaCondicion"
+  >
+
+  <div *dxTemplate="let data of 'content'">
+    <div class="popup-content">
+        <div class="popup-field">
+            <dx-text-box
+                label="ID Condición"
+                [(value)]="nuevaCondicion"
+                >
+            </dx-text-box>
+        </div>
+      
+      <br><br>
+      
+      <div class="popup-buttons">
+        <dx-button 
+          text="Aceptar" 
+          type="success"
+          [width]="123"
+          (onClick)="aceptar()"
+          icon="check">
+        </dx-button>
+        <dx-button 
+          text="Cancelar" 
+          type="danger"
+          [width]="123"
+          (onClick)="cancelar()"
+          [style]="{ marginLeft: '10px' }"
+          icon="close">
+        </dx-button>
+      </div>
+    </div>
+  </div>
+
+</dx-popup>
+

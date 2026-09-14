@@ -1,0 +1,65 @@
+
+.estado {
+  border-radius: 20px;
+  min-width: 97px;
+  height: 2.5vh;
+  display: flex;
+  place-content: center;
+  align-items: center;
+}
+
+::ng-deep #gridTablaAgenda>.dx-datagrid .dx-row>td {
+  padding: 0px 10px !important;
+}
+
+:host ::ng-deep .dx-treelist-headers table td div.dx-treelist-text-content {
+  white-space: normal;
+}
+
+::ng-deep .xt-gesptreelist .dx-treelist .dx-row>td {
+  padding: 3px 3px !important;
+}
+
+::ng-deep .dx-treelist-cell-expandable {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.tabIvas {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+
+.dx-tree-list .dx-datagrid-rowsview .dx-datagrid-group-row.custom-group-row {
+  background-color: rgba(230, 230, 250, 0.9) !important;
+  font-weight: bold !important;
+}
+
+.dx-tree-list .dx-datagrid-rowsview .custom-group-row td {
+  background-color: rgba(230, 230, 250, 0.9) !important;
+  color: #333 !important;
+}
+
+.dx-tree-list .custom-group-row .dx-group-text {
+  color: #333 !important;
+}
+
+.dx-texteditor-input {
+  font-size: 1.5em;
+  min-height: 45px;
+  /* height: 45px;      */
+  padding: 10px 14px;
+}
+
+.dx-field-item-label-text {
+  font-size: 1.5em;
+}

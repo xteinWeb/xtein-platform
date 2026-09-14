@@ -1,0 +1,58 @@
+  <div class="row gx-3">
+    <div class="col-6 col-xl-4">
+      <div class="card-content">
+        <span class="xt-caption-lite">Seleccione el parametro para definir Bases del Costo</span>
+          <dx-radio-group
+            id="radioBasesCosto"
+            [items]="itemList"
+            [(value)]="valorDef"
+            [ngClass]="valorDef"
+            (onValueChanged)="onValueChanged($event)"
+            [readOnly]="readOnly"
+          >
+            <div *dxTemplate="let ite of 'item'">
+              <div class="items"><span>{{ ite }}</span></div>
+              <div><span>{{ descItems(ite) }}</span></div>
+            </div>
+          </dx-radio-group>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-4">
+      <div class="card-content-secondary">
+        <span class="xt-caption-lite">Seleccione el parametro para Layout de planta</span>
+          <dx-radio-group 
+            id="radioParametro"
+            [items]="itemTipoSeccion"
+            [(value)]="valorTipoSeccion"
+            [ngClass]="valorTipoSeccion"
+            (onValueChanged)="onValueChangedTipoSeccion($event)"
+            [readOnly]="readOnly"
+          >
+            <div *dxTemplate="let ite of 'item'">
+              <div class="items"><span>{{ ite }}</span></div>
+              <div><span>{{ descCostos(ite) }}</span></div>
+            </div>
+          </dx-radio-group>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-4">
+      <div class="card-content-secondary">
+        <span class="xt-caption-lite">Seleccione Factor de protección Mano de Obra</span>
+          <dx-radio-group 
+            id="radioFactorProteccion"
+            [items]="itemFactor"
+            [(value)]="valorFactor"
+            [ngClass]="valorFactor"
+            (onValueChanged)="onValueChangedFactor($event)"
+            [readOnly]="readOnly"
+          >
+            <div *dxTemplate="let ite of 'item'">
+              <div class="items"><span>{{ ite }}</span></div>
+              <div><span>{{ descFactor(ite) }}</span></div>
+            </div>
+          </dx-radio-group>
+      </div>
+    </div>
+  </div>

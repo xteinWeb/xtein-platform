@@ -1,0 +1,35 @@
+.fecha-vencida {
+  color: #000;
+  /* Rojo intenso */
+  font-weight: normal;
+}
+
+.badge-vencido {
+  background-color: #000;
+  /* box-shadow: 0 0 5px rgba(211, 47, 47, 0.5); */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  display: none;
+}
+
+/* Icono de header-filter sin filtro activo */
+::ng-deep .dx-datagrid .dx-header-filter.dx-header-filter-empty {
+  color: #b0bec5;
+}
+
+/* Celda de encabezado: overflow visible para que el recuadro no se recorte */
+::ng-deep .dx-datagrid .dx-header-row td {
+  overflow: visible !important;
+}
+
+/* Icono de header-filter con filtro activo: recuadro alrededor como Google Sheets */
+::ng-deep .dx-datagrid .dx-header-filter:not(.dx-header-filter-empty) {
+  color: #0033cc !important;
+  position: relative;
+  background-color: #C9E2F2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: 1px solid #C9E2F2;
+  /* outline-offset: 3px; */
+  border-radius: 2px;
+}

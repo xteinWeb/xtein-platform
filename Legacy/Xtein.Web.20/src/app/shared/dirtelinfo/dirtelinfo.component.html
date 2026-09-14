@@ -1,0 +1,113 @@
+<cdk-accordion class="accordion-container" [multi]="true">
+    <cdk-accordion-item
+        *ngFor="let item of itemsAco; let index = index;"
+        #accordionItem="cdkAccordionItem"
+        class="accordion-item"
+        role="button"
+        tabindex="0"
+        [expanded]="accordionExpand[index]"
+        [attr.id]="'accordion-header-' + index"
+        [attr.aria-expanded]="accordionItem.expanded"
+        [attr.aria-controls]="'accordion-body-' + index"
+    >
+    <!-- PESTAÑAS -->
+    <div
+        class="accordion-item-header"
+        (click)="accordionItem.toggle()"
+    >
+        <div>
+            <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+                <i class="icon-chevron-up-xs"></i>
+            </span>
+            <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+                <i class="icon-chevron-down-xs"></i>
+            </span>
+        </div>
+        <span class="accordion-caption"> {{ item }} </span>
+        <!-- <div class="border-dotted"></div> -->
+    </div>
+
+    <!-- GRUPO DE DATOS -->
+    <div
+        class="accordion-item-body"
+        role="region"
+        [style.display]="accordionItem.expanded ? '' : 'none'"
+        [attr.id]="'accordion-body-' + index"
+        [attr.aria-labelledby]="'accordion-header-' + index"
+    >
+        <div *ngIf="item === 'Contacto'">
+            <div>
+                <dx-form
+                    #formIdentificacion
+                    id="formIdentificacion"
+                    labelLocation="top"
+                    [formData]="FContactos"
+                    [readOnly]="readOnly"
+                    [colCount]="2"
+                    labelLocation="left"
+                >
+
+                    <dxi-item itemType="group" cssClass="first-group" [colCount]="1" [editorOptions]="{ width: '70%' }">
+                        <dxi-item dataField="URL" >
+                            <dxo-label text="Url/Website"></dxo-label>
+                            <dx-text-box
+                                [value]="FContactos.URL"
+                                [readOnly]="readOnly"
+                                (onValueChanged)="onValueChanged($event, 'URL')"
+                            >
+                            </dx-text-box>
+                        </dxi-item>
+                        <dxi-item dataField="CIIU" >
+                            <dxo-label text="Actividad económica"></dxo-label>
+                            <dx-text-box
+                                [value]="FContactos.CIIU"
+                                [readOnly]="readOnly"
+                                (onValueChanged)="onValueChanged($event, 'CIIU')"
+                            >
+                            </dx-text-box>
+                        </dxi-item>
+                    </dxi-item>
+
+                </dx-form>
+            </div>
+        </div>
+
+        <div *ngIf="item === 'Correos'">
+            <div style="max-width: 50%;">
+                <app-correos
+                    [events]="eventsSubjectCorreos.asObservable()" 
+                    (onGuardarCambios)="guardarCambiosCorreo($event)" >
+                </app-correos>
+            </div>
+        </div>
+
+        <div *ngIf="item === 'Direcciones'">
+            <div>
+                <!--Grid Direcciones-->
+                <div class="hm-dx-data">
+                    <app-direcciones
+                        [events]="eventsSubjectDir.asObservable()" 
+                        (onGuardarCambios)="guardarCambiosDir($event)" >
+                    </app-direcciones>
+                </div>
+            </div>
+            
+        </div>
+
+        <div *ngIf="item === 'Teléfonos'">
+            <div>
+                <!--Grid Teléfonos-->
+                <div class="hm-dx-data">
+                    <app-telefonos
+                        [events]="eventsSubjectTel.asObservable()" 
+                        (onGuardarCambios)="guardarCambiosTel($event)" >
+                    </app-telefonos>
+                </div>
+            </div>
+        </div>
+            
+    </div>
+    </cdk-accordion-item>
+</cdk-accordion>
+
+

@@ -1,0 +1,177 @@
+<!-- Sub-Menú de opciones -->
+<dx-popup
+    #popGenEgreso
+    id="popGenEgreso"
+    width="1000"
+    [height]="'90%'"
+    [showTitle]="true"
+    [title]="titEgresos"
+    [hideOnOutsideClick]="false"
+    [showCloseButton]="true"
+    (onShown)="onShown($event)"
+    (onHidden)="onHidden($event)"
+    (onInitialized)="onInitializedPopUp($event)" 
+    (onResizeEnd)="onResizeEnd($event)"
+    [(visible)]="visiblePopup">
+
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonAceptar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonCancelar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      toolbar="bottom"
+      location="before"
+      text="Total Egreso:"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxTextBox"
+      toolbar="bottom"
+      location="before"
+      [options]="configSeleccFacturas"
+    >
+    </dxi-toolbar-item>
+
+    <div *dxTemplate="let data of 'content'">
+        <dx-data-grid
+            #gridGenEgreso
+            id="gridGenEgreso"
+            class="xt-datagrid"
+            height="78%"
+            noDataText="" 
+            [dataSource]="DPreEgresos"
+            keyExpr="ITEM"
+            [selection]="{ mode: 'multiple' }"
+            [selectedRowKeys]="seleccPreEgresos"
+            [allowColumnResizing]="true"
+            columnResizingMode="nextColumn"
+            [showBorders]="true"
+            [focusedRowEnabled]="true"
+            (onRowUpdated)="updatedRow($event)"
+            (onCellPrepared)="onCellPrepared($event)"
+            (onEditingStart)="onEditingStart($event)"
+            (onRowValidating)="onRowValidating($event)"
+            (onSelectionChanged)="onSelectionFact($event)"
+        >   
+            <dxi-column 
+                dataField="ID_ACREEDOR"
+                caption="Id Acreedor" 
+                >
+            </dxi-column>
+            <dxi-column 
+                dataField="NOMBRE"
+                caption="Nombre" 
+                >
+            </dxi-column>
+            <dxi-column 
+                dataField="ANTICIPOS" 
+                caption="Anticipos" 
+                alignment="right"
+                dataType="number"
+                format="#,###"
+                [allowEditing]="false"
+            >
+            </dxi-column>
+            <dxi-column 
+                dataField="FACTURAS" 
+                caption="Facturas" 
+                alignment="right"
+                dataType="number"
+                format="#,###"
+                [allowEditing]="false"
+            >
+            </dxi-column>
+            <dxi-column 
+                dataField="VALOR" 
+                caption="Valor a pagar" 
+                alignment="right"
+                dataType="number"
+                format="#,###"
+                [allowEditing]="false"
+            >
+            </dxi-column>
+
+            <dxo-summary>
+                <dxi-total-item
+                    column="VALOR"
+                    summaryType="sum"
+                    displayFormat="{0}"
+                    valueFormat="#,###">
+                </dxi-total-item>
+            </dxo-summary>
+
+        </dx-data-grid>
+    
+        <dx-form
+            class="dx-form-group"
+            id="formEgreso"
+            [formData]="DEgresos"
+            labelLocation="left"
+            [colCount]="2"
+        > 
+
+            <dxi-item caption="Generación del egreso" itemType="group" >
+                <dxi-item dataField="DOCUMENTO"
+                    editorType="dxSelectBox"
+                    [editorOptions]="{placeholder:'Documento'}"
+                >
+                    <dxo-label text="Documento"></dxo-label>
+                    <div *dxTemplate>
+                        <dx-select-box
+                            #dxDocEg
+                            id="dxDocEg"
+                            [dataSource]="DDocumentos"
+                            [(value)]="DEgresos.DOCUMENTO"
+                            valueExpr="ID_DOCUMENTO"
+                            displayExpr="ID_DOCUMENTO"
+                            (onValueChanged)="onSeleccDocumento($event)"
+                        >
+                        </dx-select-box>
+                    </div>
+                </dxi-item>
+
+                <dxi-item dataField="BANCO"
+                    editorType="dxSelectBox"
+                    [editorOptions]="{placeholder:'Banco / Cuenta'}"
+                >
+                    <dxo-label text="Banco/Cuenta"></dxo-label>
+                    <div *dxTemplate>
+                        <dx-select-box
+                            #dxBanco
+                            id="dxBanco"
+                            [dataSource]="DBancos"
+                            [(value)]="DEgresos.BANCO"
+                            valueExpr="BANCO"
+                            displayExpr="BANCO"
+                            (onValueChanged)="onSeleccBanco($event)"
+                        >
+                        </dx-select-box>
+                    </div>
+                </dxi-item>
+            </dxi-item>
+
+            <dxi-item caption="Generación electrónica" itemType="group" >
+                <dxi-item
+                    dataField="GENERA_ELEC"
+                    editorType="dxSwitch"
+                >
+                    <dxo-label text="Generar archivo para pago electrónico"></dxo-label>
+                </dxi-item>
+            </dxi-item>
+
+        </dx-form>
+
+    </div>
+
+</dx-popup>
+

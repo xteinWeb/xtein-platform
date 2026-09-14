@@ -1,0 +1,84 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div
+      #contentComponente
+      id="contentComponente"
+      class="xt-gespCalendar xt-gespdataCalendar"
+      style="background-color: #fff"
+    >
+      <div style="width: 100%; margin-bottom: 20px">
+        <dx-tag-box
+          id="tbControlCalendar"
+          [items]="DNDCalendarios"
+          width="30%"
+          placeholder="Seleccione el Grupo de Eventos"
+          [stylingMode]="stylingMode"
+          [showMultiTagOnly]="false"
+          [showSelectionControls]="true"
+          [maxDisplayedTags]="5"
+          applyValueMode="useButtons"
+          itemTemplate="customItem"
+          displayExpr="text"
+          valueExpr="ID_ACTIVIDAD"
+          [(value)]="selectedNDCalendars"
+          (onValueChanged)="onValueChangedCalendario($event)"
+        >
+          <div *dxTemplate="let calendario of 'customItem'">
+            <div class="custom-item">
+              <div class="calendario-nombre">
+                {{ calendario.text }}
+              </div>
+            </div>
+          </div>
+        </dx-tag-box>
+      </div>
+
+      <dx-scheduler
+        #calendarioGespro
+        id="calendarioGespro"
+        timeZone="America/Bogota"
+        currentView="month"
+        [height]="680"
+        [firstDayOfWeek]="0"
+        [startDayHour]="00"
+        [endDayHour]="24"
+        [views]="[
+          'day',
+          'week',
+          'workWeek',
+          'month',
+          'agenda',
+          'timelineDay',
+          'timelineWeek',
+          'timelineWorkWeek',
+          'timelineMonth'
+        ]"
+        [dataSource]="DEventosCalendario"
+        [currentDate]="currentDate"
+        (onAppointmentAdded)="onAppointmentAdded($event)"
+        (onAppointmentUpdated)="onAppointmentUpdated($event)"
+        (onAppointmentDeleted)="onAppointmentDeleted($event)"
+        (onAppointmentDblClick)="onAppointmentDblClick($event)"
+        (onAppointmentFormOpening)="onAppointmentFormOpening($event)"
+      >
+        <dxo-editing
+          #editingOptions
+          [allowAdding]="readOnly"
+          [allowDeleting]="readOnly"
+          [allowUpdating]="readOnly"
+          [allowResizing]="readOnly"
+          [allowDragging]="readOnly"
+        >
+        </dxo-editing>
+
+        <dxi-resource
+          fieldExpr="COLABORADORES"
+          valueExpr="ID_RESPONSABLE"
+          label="Colaboradores"
+          [allowMultiple]="true"
+          [dataSource]="colaboradoresData"          
+        ></dxi-resource>
+      </dx-scheduler>
+    </div>
+  </div>
+</div>

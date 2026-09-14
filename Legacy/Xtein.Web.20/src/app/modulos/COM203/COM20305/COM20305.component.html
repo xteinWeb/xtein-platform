@@ -1,0 +1,30 @@
+<dx-data-grid
+    id="gridTotales"
+    [dataSource]="DTotales"
+    keyExpr="ITEM"
+    [showBorders]="true"
+    [showColumnHeaders]="false"
+    (onCellPrepared)="onCellPrepared($event)"
+    >
+    <dxi-column></dxi-column>
+    <dxi-column dataField="DESCRIPCION" [width]="400"></dxi-column>
+    <dxi-column 
+        dataField="VALOR" 
+        alignment="right"
+        dataType="number"
+        [width]="200"
+        [format]="especMonedaFormato.split(';')[0]"
+    >
+    </dxi-column>
+    <dxo-summary>
+        <dxi-total-item
+            name="SelectedRowsSummary"
+            summaryType="sum"
+            column="VALOR"
+            showInColumn="FRM_VALOR"
+            displayFormat="TOTAL: {0}"
+            valueFormat="#,##0"
+        >
+        </dxi-total-item>
+    </dxo-summary>
+</dx-data-grid>

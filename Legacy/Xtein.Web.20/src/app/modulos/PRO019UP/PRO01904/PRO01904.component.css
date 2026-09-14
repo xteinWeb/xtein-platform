@@ -1,0 +1,22 @@
+
+#gridCifMatriz {
+  width: 100%;
+  height: auto;
+  min-height: 100px;
+  max-height: 420px;
+}
+
+.tem-grpTotalesCif {
+  display: flex;
+  width: 100%;
+}
+
+.tem-grpTotalesCif > span {
+  display: flex;
+  width: 50%;
+  align-items: center;
+}
+
+.tem-grpTotalesCif > span > span {
+  margin-left: 10px;
+}

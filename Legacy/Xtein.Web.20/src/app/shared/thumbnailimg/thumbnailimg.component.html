@@ -1,0 +1,20 @@
+<div class="cover">
+  <button class="left" (click)="rightScroll()">
+    <i class="font-xtein xtein-anterior"></i>
+  </button>
+  <div class="scroll-images" 
+       (mousedown)="mousedown($event)"    
+       (mouseleave)="mouseleave()"
+       (mouseup)="mouseup($event)"
+       (mousemove)="mousemove($event)">
+    <div class="child" *ngFor="let item of listaImg" (ondragstart)="ondragstart()">
+      <img class="child-img" src="{{item}}" 
+           alt="image" height="60px" width="60px" 
+           (click)="ir_a_img(item)" />
+    </div>
+  </div>
+  <button class="right" (click)="leftScroll()">
+    <i class="font-xtein xtein-siguiente"></i>
+  </button>
+</div>
+

@@ -1,0 +1,793 @@
+<div class="row gx-3">
+
+  <div id="contentCalidad" class="col-12">
+    <div  class="card-content">
+      <div>
+        <div class="form-content-alt">
+          <div class="form-item-column">
+            <div class="form-item-data">
+              <div class="form-item-label">
+                Tipo
+              </div>
+              <div class="form-input-box">
+                <dx-select-box
+                  #dropSelectNoConformidad
+                  id="dropSelectNoConformidad"
+                  [(value)]="selectNoConformidad"
+                  valueExpr="VALOR1"
+                  displayExpr="VALOR1"
+                  placeholder="Seleccione Tipo de Formulario..."
+                  [readOnly]="false"
+                  [showClearButton]="true"
+                  [(opened)]="openDropNoConformidad"
+                  [dataSource]="tiposNoConformidades"
+                  [dropDownOptions]="{hideOnParentScroll: true, container:'#contentCalidad'}"
+                  (onValueChanged)="onSelectionChangedTipoNoConformidad($event)"
+                ></dx-select-box>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <dx-form
+          #formNoConformidad
+          id="formNoConformidad"
+          [formData]="FNoConformidad"
+          colCount="1"
+          [readOnly]="readOnly"
+          [labelLocation]="labelLocation"
+          [screenByWidth]="getSizeQualifier"
+          *ngIf="activeFormNormativa"
+        >
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="FECHA" >
+              <dxo-label text="Fecha"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box
+                  [readOnly]="true"
+                  [value]="FNoConformidad.FECHA"
+                  placeholder="Fecha"
+                  type="date"
+                ></dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ID_CAUSANTE" >
+              <dxo-label text="Causante"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectCausante
+                  id="dropSelectCausante"
+                  [(value)]="selectCausante"
+                  valueExpr="ID_EMPLEADO"
+                  displayExpr="ID_EMPLEADO"
+                  placeholder="Selecciones Causante"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropCausante"
+                  [dataSource]="DGEmpleados"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formNoConformidad'}"
+                  [inputAttr]="{name: 'ID_EMPLEADO', style: 'font-size: 18px; font-weight: 700; text-transform: uppercase; padding: 4px 11px 1px;'}"
+                >
+                  <div id="containerDgCausante" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #dataGridEmpleados
+                      height="100%"
+                      width="100%"
+                      keyExpr="ID_EMPLEADO"
+                      [dataSource]="DGEmpleados"
+                      [(selectedRowKeys)]="selectCausante"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionCausante($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="ID_EMPLEADO" caption="Cédula" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                      <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre" cssClass="clsEncabHis" [width]="225"></dxi-column>
+                      <dxi-column dataField="NOMBRE_SECCION" caption="Sección" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="NOMBRE_CAUSANTE" >
+              <dxo-label text="Nombre causante"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre"
+                  [readOnly]="true"
+                  [value]="FNoConformidad.NOMBRE_CAUSANTE">
+                </dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="NOMBRE_AREA_ASOCIADA" >
+              <dxo-label text="Área asocidada"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Área asociada al Empleado"
+                  [readOnly]="true"
+                  [value]="FNoConformidad.NOMBRE_AREA_ASOCIADA">
+                </dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="ID_CAUSA" >
+              <dxo-label text="Causa"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectCausa
+                  id="dropSelectCausa"
+                  [(value)]="selectCausa"
+                  valueExpr="ID_CAUSA"
+                  displayExpr="NOMBRE_COMPLETO"
+                  placeholder="Selecciones causa"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropCausa"
+                  [dataSource]="DGCausasNormativa"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formNoConformidad'}"
+                >
+                  <div id="containerCausa" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #FMCusas
+                      height="100%"
+                      width="100%"
+                      keyExpr="ID_CAUSA"
+                      [dataSource]="DGCausasNormativa"
+                      [(selectedRowKeys)]="selectCausa"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionCausa($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="ID_CAUSA" caption="Id Causa" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                      <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="150"></dxi-column>
+                      <dxi-column dataField="DESCRIPCION" caption="Descripción" cssClass="clsEncabHis"></dxi-column>
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="DESCRIPCION" >
+              <dxo-label text="Observación"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-area
+                  [height]="90"
+                  [readOnly]="readOnly"
+                  [(value)]="FNoConformidad.DESCRIPCION"
+                  (onValueChanged)="onValueChangedDescripcion($event)"
+                  placeholder="Describa detalladamente la afección de la pieza o producto"
+                ></dx-text-area>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+
+        <dx-form
+          #formCalidad
+          id="formCalidad"
+          [formData]="FCalidad"
+          colCount="1"
+          [readOnly]="readOnly"
+          [labelLocation]="labelLocation"
+          [screenByWidth]="getSizeQualifier"
+          *ngIf="activeFormCalidad"
+        >
+          <dxi-item itemType="group" >
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="TIPO_FROM" >
+              <dxo-label text="Origen"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dropSelectTipoForm
+                  id="dropSelectTipoForm"
+                  [(value)]="selectTipoForm"
+                  valueExpr="VALOR1"
+                  displayExpr="VALOR1"
+                  width="100%"
+                  placeholder="Seleccione Tipo de Formulario..."
+                  [readOnly]="readOnlyTipoForm"
+                  [showClearButton]="true"
+                  [(opened)]="openDropTipoForm"
+                  [dataSource]="tipoForm"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onSelectionChangedTipoForm($event)"
+                ></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="FECHA" >
+              <dxo-label text="Fecha"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box
+                  [readOnly]="readOnly"
+                  [value]="FCalidad.FECHA"
+                  placeholder="Fecha"
+                  type="date"
+                  (onValueChanged)="onValueChangedFecha($event)"
+                ></dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ID_CLIENTE" *ngIf="datosDeGestor">
+              <dxo-label text="Cliente"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectCliente
+                  id="dropSelectCliente"
+                  [(value)]="selectCliente"
+                  valueExpr="ID_CLIENTE"
+                  displayExpr="NOMBRE_CLIENTE"
+                  placeholder="Seleccione Cliente"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropCliente"
+                  [dataSource]="DGClientes"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                >
+                  <div id="containerDgCliente" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #dataGridClientes
+                      height="100%"
+                      width="100%"
+                      keyExpr="ID_CLIENTE"
+                      [dataSource]="DGClientes"
+                      [(selectedRowKeys)]="selectCliente"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionCliente($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="ID_CLIENTE" caption="Cédula" cssClass="clsEncabHis" [width]="120"></dxi-column>
+                      <dxi-column dataField="NOMBRE_CLIENTE" caption="Nombre" cssClass="clsEncabHis" [width]="125"></dxi-column>
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          
+          <dxi-item itemType="group" *ngIf="datosDeGestor">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <!-- <dxi-item dataField="ID_GESTOR" >
+              <dxo-label text="Gestor"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dropSelectIdGestor
+                  id="dropSelectIdGestor"
+                  [(value)]="FCalidad.ID_GESTOR"
+                  valueExpr="VALOR1"
+                  displayExpr="VALOR1"
+                  placeholder="Seleccione Gestor"
+                  [readOnly]="readOnlyIdGestor"
+                  [showClearButton]="true"
+                  [(opened)]="openDropIdGestor"
+                  [dataSource]="DidGestores"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onSelectionChangedIdGestor($event)"
+                ></dx-select-box>
+              </div>
+            </dxi-item> -->
+            <dxi-item dataField="N_SERVICIO" >
+              <dxo-label text="N° Servicio"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Número de Servicio"
+                  [readOnly]="readOnly"
+                  [value]="FCalidad.N_SERVICIO"
+                  (onValueChanged)="onSelectionChangedNservicio($event)"
+                ></dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="AREA_DETECCION" >
+              <dxo-label text="Área de detección"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dropSelectAreaDeteccion
+                  id="dropSelectAreaDeteccion"
+                  [(value)]="FCalidad.AREA_DETECCION"
+                  valueExpr="VALOR1"
+                  displayExpr="VALOR1"
+                  placeholder="Seleccione Área de detección"
+                  [readOnly]="readOnlyAreaDeteccion"
+                  [showClearButton]="true"
+                  [(opened)]="openDropAreaDeteccion"
+                  [dataSource]="tipoDatosAreas"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onSelectionChangedAreaDeteccion($event)"
+                ></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="FUENTE" >
+              <dxo-label text="Fuente"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dropSelectFuente
+                  id="dropSelectFuente"
+                  [(value)]="FCalidad.FUENTE"
+                  valueExpr="VALOR1"
+                  displayExpr="VALOR1"
+                  placeholder="Seleccione fuente"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropFuente"
+                  [dataSource]="tipoDatosFuente"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onSelectionChangedFuente($event)"
+                ></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="FECHA_RECLAMO" *ngIf="FCalidad.AREA_DETECCION === 'CONSUMIDOR' " >
+              <dxo-label text="Fecha de reclamo"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box
+                  [readOnly]="readOnly"
+                  [value]="FCalidad.FECHA_RECLAMO"
+                  placeholder="Fecha de reclamo"
+                  type="date"
+                  (onValueChanged)="onValueChangedFechaReclamo($event)"
+                ></dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ID_CAUSA_CLIENTE" *ngIf="FCalidad.AREA_DETECCION === 'CONSUMIDOR' " >
+              <dxo-label text="Causa Cliente"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectCausaCliente
+                  id="dropSelectCausaCliente"
+                  [(value)]="selectCausaCliente"
+                  valueExpr="ID_CAUSA"
+                  displayExpr="NOMBRE_COMPLETO"
+                  placeholder="Seleccione causa cliente"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropCausaCliente"
+                  [dataSource]="DGCausasClientes"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{hideOnParentScroll: true, container:'#formCalidad'}"
+                >
+                  <div id="containerCausaCliente" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #FMCusasCliente
+                      height="100%"
+                      width="100%"
+                      keyExpr="ID_CAUSA"
+                      [dataSource]="DGCausasClientes"
+                      [(selectedRowKeys)]="selectCausaCliente"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionCausaCliente($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="ID_CAUSA" caption="Id Causa" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                      <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis"></dxi-column>
+                      <!-- <dxi-column dataField="DESCRIPCION" caption="Descripción" cssClass="clsEncabHis"></dxi-column> -->
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <!-- <dxi-item dataField="FECHA" >
+              <dxo-label text="Fecha"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box
+                  [readOnly]="true"
+                  [value]="FCalidad.FECHA"
+                  placeholder="Fecha"
+                  type="date"
+                ></dx-date-box>
+              </div>
+            </dxi-item> -->
+            <dxi-item dataField="ID_CAUSANTE" >
+              <dxo-label text="Causante"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectCausante
+                  id="dropSelectCausante"
+                  [(value)]="selectCausante"
+                  valueExpr="ID_EMPLEADO"
+                  displayExpr="DESC"
+                  placeholder="Selecciones Causante"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropCausante"
+                  [dataSource]="DGEmpleados"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  [inputAttr]="{name: 'ID_EMPLEADO', style: 'font-size: 18px; font-weight: 700; text-transform: uppercase; padding: 4px 11px 1px;'}"
+                  (onValueChanged)="onValueChangedCausante($event)"
+                >
+                  <div id="containerDgCausante" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #dataGridEmpleados
+                      width="100%"
+                      height="100%"
+                      keyExpr="ID_EMPLEADO"
+                      [dataSource]="DGEmpleados"
+                      [(selectedRowKeys)]="selectCausante"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionCausante($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="ID_EMPLEADO" caption="Cédula" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                      <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre" cssClass="clsEncabHis" [width]="225"></dxi-column>
+                      <!-- <dxi-column dataField="NOMBRE_SECCION" caption="Sección" cssClass="clsEncabHis" [width]="100"></dxi-column> -->
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <!-- <dxi-item dataField="NOMBRE_CAUSANTE" >
+              <dxo-label text="Nombre causante"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre"
+                  [readOnly]="true"
+                  [value]="FCalidad.NOMBRE_CAUSANTE">
+                </dx-text-box>
+              </div>
+            </dxi-item> -->
+            <dxi-item dataField="AREA_ASOCIADA" >
+              <dxo-label text="Área asocidada"></dxo-label>
+              <div *dxTemplate>
+                <!-- 
+                <dx-select-box
+                  *ngIf="FCalidad.AREA_DETECCION !== 'CONSUMIDOR' "
+                  #selectSeccion
+                  id="selectSeccion"
+                  valueExpr="ID_SECCION"
+                  displayExpr="NOMBRE_SECCION"
+                  placeholder="Seleccione sección"
+                  [searchEnabled]="true"
+                  [showClearButton]="true"
+                  [readOnly]="readOnly"
+                  [dataSource]="DGseccion"
+                  [(opened)]="openSelectSeccion"
+                  [(value)]="FCalidad.AREA_ASOCIADA"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onValueSeleccionSeccion($event)"
+                ></dx-select-box>  -->
+
+                <!-- *ngIf="FCalidad.AREA_DETECCION === 'CONSUMIDOR' " -->
+                <dx-drop-down-box 
+                  #dropSelectAreaAsociada
+                  id="dropSelectAreaAsociada"
+                  keyExpr="ITEM"
+                  columnResizingMode="widget"
+                  valueExpr="ID_SECCION"
+                  displayExpr="DESCRIPCION"
+                  placeholder="Seleccione..."
+                  [showClearButton]="true"
+                  [readOnly]="readOnly"
+                  [(value)]="selectArea"
+                  [dataSource]="DGseccion"
+                  [(opened)]="openSelectSeccion"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onValueChangedSeccion($event)"
+                >
+                  <div id="containerDgCausante" *dxTemplate="let data of 'content'">
+                    <dx-tree-list
+                      #treeListSeccionesCalidad
+                      id="treeListSeccionesCalidad"
+                      width="auto"
+                      height="100%"
+                      keyExpr="ITEM"
+                      parentIdExpr="ANTERIOR"
+                      columnResizingMode="widget"
+                      [showBorders]="true"
+                      [autoExpandAll]="true"
+                      [columnAutoWidth]="true"
+                      [hoverStateEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [allowColumnResizing]="true"
+                      [columnHidingEnabled]="true"
+                      [rowAlternationEnabled]="true"
+                      [(selectedRowKeys)]="selectArea"
+                      [dataSource]="DGseccion"
+                      (onRowClick)="onValueSeleccionSeccion($event)"
+                    >
+                      <dxo-scrolling mode="standard"></dxo-scrolling>
+                      <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="200"></dxo-search-panel>
+                      
+                      <dxi-column dataField="ID_SECCION" caption="Id Sección" [width]="180" ></dxi-column>
+                      <dxi-column dataField="DESCRIPCION" caption="Descripción" ></dxi-column>
+                    </dx-tree-list> 
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="PRODUCTO" editorType="dxDropDownBox">
+              <dxo-label text="Producto"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectProducto
+                  id="dropSelectProducto"
+                  [(value)]="selectProducto"
+                  valueExpr="PRODUCTO"
+                  displayExpr="DESC"
+                  placeholder="Selecciones Producto"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openProductos"
+                  [dataSource]="DGProductos"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  [inputAttr]="{name: 'PRODUCTO', style: 'font-size: 18px; font-weight: 700; text-transform: uppercase; padding: 4px 11px 1px;'}"
+                >
+                  <div id="containerProductos" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #FMProductos
+                      height="100%"
+                      width="100%"
+                      keyExpr="PRODUCTO"
+                      [dataSource]="DGProductos"
+                      [(selectedRowKeys)]="selectProducto"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionProducto($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="PRODUCTO"  caption="Producto" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                      <dxi-column dataField="NOMBRE"  caption="Nombre" cssClass="clsEncabHis" [width]="220"></dxi-column>
+                      <dxi-column dataField="COD_ASOCIADO"  caption="Cod. Asociado" cssClass="clsEncabHis" [width]="120"></dxi-column>
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <!-- <dxi-item dataField="NOMBRE_PRODUCTO" >
+              <dxo-label text="Nombre producto"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre producto"
+                  [readOnly]="true"
+                  [value]="FCalidad.NOMBRE_PRODUCTO">
+                </dx-text-box>
+              </div>
+            </dxi-item> -->
+            <dxi-item dataField="ID_CAUSA_INTERNA" >
+              <dxo-label text="Causa interna"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box 
+                  #dropSelectCausa
+                  id="dropSelectCausa"
+                  [(value)]="selectCausa"
+                  valueExpr="ID_CAUSA"
+                  displayExpr="NOMBRE_COMPLETO"
+                  placeholder="Selecciones causa"
+                  [readOnly]="readOnly"
+                  [showClearButton]="true"
+                  [(opened)]="openDropCausa"
+                  [dataSource]="DGCausas"
+                  columnResizingMode="widget"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                >
+                  <div id="containerCausa" *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #FMCusas
+                      height="100%"
+                      width="100%"
+                      keyExpr="ID_CAUSA"
+                      [dataSource]="DGCausas"
+                      [(selectedRowKeys)]="selectCausa"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="100"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionCausa($event)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+  
+                      <dxi-column dataField="ID_CAUSA" caption="Id Causa" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                      <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="150"></dxi-column>
+                      <dxi-column dataField="DESCRIPCION" caption="Descripción" cssClass="clsEncabHis"></dxi-column>
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="PIEZA_AFECTADA" editorType="dxDropDownBox">
+              <dxo-label text="Pieza afectada"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dropSelectPieza
+                  id="dropSelectPieza"
+                  [(value)]="FCalidad.PIEZA_AFECTADA"
+                  valueExpr="VALOR1"
+                  displayExpr="VALOR1"
+                  placeholder="Seleccione Pieza afectada"
+                  [readOnly]="readOnly"
+                  [searchEnabled]="true"
+                  [showClearButton]="true"
+                  [(opened)]="openDropPieza"
+                  [dataSource]="piezas"
+                  [dropDownOptions]="{ hideOnParentScroll: true, container:'#formCalidad'}"
+                  (onValueChanged)="onValueChangedPieza($event)"
+                ></dx-select-box>
+
+                <!-- <dx-text-box
+                  placeholder="Pieza afectada"
+                  [readOnly]="readOnly"
+                  [value]="FCalidad.PIEZA_AFECTADA"
+                  (onValueChanged)="onValueChangedPieza($event)"
+                ></dx-text-box> -->
+              </div>
+            </dxi-item>
+            <dxi-item dataField="CANT_DETALLES" >
+              <dxo-label text="Cantidad detalles"></dxo-label>
+              <div *dxTemplate>
+                <dx-number-box
+                  [min]="0"
+                  [readOnly]="readOnly"
+                  [value]="FCalidad.CANT_DETALLES"
+                  [showSpinButtons]="true"
+                  [showClearButton]="true"
+                  (onValueChanged)="onValueChangedCantidadDetalle($event)"
+                  placeholder="N&uacute;mero de detalles encontrados"
+                ></dx-number-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="DESCRIPCION" >
+              <dxo-label text="Observación"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-area
+                  [height]="90"
+                  [readOnly]="readOnly"
+                  [(value)]="FCalidad.DESCRIPCION"
+                  (onValueChanged)="onValueChangedDescripcion($event)"
+                  placeholder="Describa detalladamente la afección de la pieza o producto"
+                ></dx-text-area>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <dx-data-grid
+          #GConformidades
+          id="GConformidades"
+          height="500px"
+          width="100%"
+          keyExpr="INDEX"
+          [dataSource]="DGConformidades"
+          [selection]="{ mode: 'single' }"
+          [showRowLines]="true"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [hoverStateEnabled]="true"
+          [focusedRowEnabled]="true"
+          [allowColumnResizing]="true"
+          [allowColumnReordering]="true"
+          columnResizingMode="widget"
+          (onCellHoverChanged)="onCellHoverChangedCelda($event)"
+          (onSelectionChanged)="onSelectionChangedGrid($event)"
+          (onExporting)="onExporting($event)"
+        >
+          <dxo-scrolling mode="virtual" ></dxo-scrolling>
+          <dxo-search-panel [visible]="true" [width]="500" placeholder="Buscar..."></dxo-search-panel>
+          <dxo-header-filter [visible]="true" width="280" [allowSearch]="true" ></dxo-header-filter>
+          <dxo-paging [pageSize]="20" ></dxo-paging>
+          <dxo-pager 
+            [visible]="true" 
+            [allowedPageSizes]="[5, 10, 20, 50, 100, 'all']" 
+            displayMode="full"
+            [showPageSizeSelector]="true" 
+            [showInfo]="true" 
+            [showNavigationButtons]="true"
+          ></dxo-pager>
+          <dxo-export
+            [enabled]="true"
+            [formats]="['pdf','xls']"
+            [allowExportSelectedData]="true"
+          ></dxo-export>
+
+          <dxi-column dataField="FECHA_REGISTRO" caption="Fecha registro" dataType="date" format="yyyy-MM-dd" [allowEditing]="false" cssClass="clsEncabHis" alignment="right" width="120" [visible]="activeFormCalidad"></dxi-column>
+          <dxi-column dataField="FECHA" caption="Fecha evento" dataType="date" format="yyyy-MM-dd" [allowEditing]="false" cssClass="clsEncabHis" alignment="right" width="120" ></dxi-column>
+          <dxi-column dataField="ID_RESPONSABLE" caption="Id. Causante" cssClass="clsEncabHis" alignment="right" width="120"></dxi-column>
+          <dxi-column dataField="NOMBRE_CAUSANTE" caption="Nombre Causante" cssClass="clsEncabHis" width="180"></dxi-column>
+          <dxi-column dataField="ID_AREA_CAUSANTE" caption="&Aacute;rea Asociada" cssClass="clsEncabHis" width="110" [visible]="activeFormCalidad"></dxi-column>
+          <dxi-column dataField="ID_SECCION" caption="Id Secc&oacute;n" cssClass="clsEncabHis" width="100" ></dxi-column> <!-- [visible]="activeFormCalidad" -->
+          <dxi-column dataField="PRODUCTO"  caption="Producto" cssClass="clsEncabHis" width="100" [visible]="activeFormCalidad"></dxi-column>
+          <dxi-column dataField="NOMBRE_PRODUCTO"  caption="Nombre Producto" cssClass="clsEncabHis" width="150" [visible]="activeFormCalidad"></dxi-column>
+          <dxi-column dataField="FECHA_RECLAMO" caption="Fecha reclamo" dataType="date" format="yyyy-MM-dd" [allowEditing]="false" cssClass="clsEncabHis" alignment="right" width="120" [visible]="activeFormCalidad" ></dxi-column>
+          <dxi-column dataField="N_SERVICIO" caption="N° Servicio" cssClass="clsEncabHis" alignment="right" width="120" [visible]="activeFormCalidad" ></dxi-column>
+          <dxi-column dataField="ID_CAUSA_CLIENTE"  caption="Causa cliente" cssClass="clsEncabHis" width="90" [visible]="activeFormCalidad" ></dxi-column>
+          <dxi-column dataField="ID_CAUSA_INTERNA"  caption="Causa interna" cssClass="clsEncabHis" width="90" [visible]="activeFormCalidad" ></dxi-column>
+          <dxi-column dataField="ID_CAUSA"  caption="Causa" cssClass="clsEncabHis" width="90" [visible]="!activeFormCalidad" ></dxi-column>
+          <dxi-column dataField="PARTE"  caption="Pieza" cssClass="clsEncabHis" width="90" [visible]="activeFormCalidad"></dxi-column>
+          <dxi-column dataField="CANT_DETALLES"  caption="N° detalles" cssClass="clsEncabHis" alignment="right" width="100" [visible]="activeFormCalidad"></dxi-column>
+          <dxi-column dataField="DESCRIPCION"  caption="Observaci&oacute;n" cssClass="clsEncabHis" width="150"></dxi-column>
+          <dxi-column dataField="USUARIO_REGISTRA"  caption="Registrado por" cssClass="clsEncabHis" width="150"></dxi-column> <!-- [visible]="activeFormCalidad && userAdmin" -->
+        </dx-data-grid>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<dx-tooltip
+  id="tooltipCalidad"
+  [target]='targetIdTooltip'
+  position="bottom"
+  [(visible)]="toolTipVisible"
+  showEvent="mouseenter"
+  hideEvent="mouseleave"
+  [hideOnOutsideClick]="false"
+>
+  <div *dxTemplate="let data = data; of: 'content'">
+    <b style="font-size: 13px;">{{tooltipInfo}}</b>
+  </div>
+</dx-tooltip>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#contentCalidad' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

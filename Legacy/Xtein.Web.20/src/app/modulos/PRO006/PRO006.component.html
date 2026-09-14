@@ -1,0 +1,56 @@
+<div class="row gx-3">
+    <div class="col-12">
+        <div class="card-content unbg-input">
+            <dx-data-grid
+                #gridManoObra
+                id="gridManoObra"
+                keyExpr="ITEM"
+                [dataSource]="tipoMO"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                [showColumnHeaders]="false"
+                [allowColumnResizing]="true"
+                [rowAlternationEnabled]="true"
+                [focusedRowEnabled]="true"
+                [hoverStateEnabled]="true"
+                [columnMinWidth]="720"
+                (onSelectionChanged)="selectionGrid($event)"
+                (onRowExpanding)="onRowExpandingDetalles($event)"
+            >
+                <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+                <dxi-column
+                    dataField="TIPO"
+                    caption=""
+                    dataType="text"
+                    alignment="left"
+                ></dxi-column>
+
+                <dxo-master-detail
+                    [enabled]="true"
+                    template="detail"
+                ></dxo-master-detail>
+                <div *dxTemplate="let manoObra of 'detail'" >
+                    <app-PRO00601
+                        [dataMO]="send_dataMO"
+                        [dataFila]="manoObra.data"
+                        (send_MO)="updateDadaInfo($event)"
+                    ></app-PRO00601>
+                </div>
+
+            </dx-data-grid>
+        </div>
+    </div>
+</div>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

@@ -1,0 +1,169 @@
+::ng-deep .primary {
+  background: #2959a4 !important;
+  color: #fff !important;
+}
+
+.tile {
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 1rem;
+  height: 150px;
+  border-radius: 10px;
+}
+.tile .title {
+  margin-top: 0px;
+}
+.tile.purple, .tile.blue, .tile.red, .tile.orange, .tile.green {
+  color: #fff;
+}
+.tile.purple {
+  background: linear-gradient(60deg,#3c98fa,#2959a4);
+  border-radius: 5px;
+  /*background: rgb(2,0,36);
+  background: linear-gradient(90deg, rgb(95, 93, 141) 0%, rgb(153, 153, 205) 35%, rgb(205, 214, 216) 100%);
+  */
+}
+.tile.nuevo {
+  border: 0;
+  background: #eee;
+  border-radius: 0;
+  text-align: center;
+  padding-top: 1.85rem;
+  border-radius: 10px;
+}
+.fi-br-plus {
+  font-size: 3rem;
+  background: #2959a4;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.card-title1 {
+  position: absolute;
+  bottom: 20px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 400px;
+}
+.card-title2 {
+  position: absolute;
+  bottom: 6px;
+  font-size: 12px;
+  color: #707070;
+}
+
+.img-informe-prev {
+  max-width: 100%;
+  max-height: 100%;
+  display: block; /* remove extra space below image */
+}
+.img-card{
+  height: 85px;
+}
+.img-card img {
+  display:block;
+  margin:auto;
+}
+
+.tile-modulo {
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 10px;
+  height: 70px;
+  border-radius: 10px;
+}
+.tit-tile-modulo {
+  position: absolute;
+  bottom: 4px;
+  font-size: 14px;
+  color: white;
+}
+.tile-modulo.purple {
+  background: linear-gradient(60deg,#3c98fa,#007bff);
+  border-radius: 5px;
+  /*background: rgb(2,0,36);
+  background: linear-gradient(90deg, rgb(95, 93, 141) 0%, rgb(153, 153, 205) 35%, rgb(205, 214, 216) 100%);
+  */
+}
+.img-modulo {
+  color: white; 
+  font-size: 24px; 
+  position: absolute; 
+  right: 20px;
+}
+.dx-fieldset {
+  margin: 3px 20px;
+}
+.tile.info-modulo {
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  /*text-align: center;*/
+  padding: 5px;
+  margin-top: 10px;
+}
+.info-desc tr {
+  overflow: hidden;
+  height: 14px;
+}
+.tit-title-infmod {
+  line-height: 1.2;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 0px;
+}
+.tit-title-infdesc {
+  line-height: 1;
+  font-size: 10px;
+  margin: 0px 30px 0px 0px;
+  text-align: left;
+}
+.ver-ultimo {
+  font-size: 12px;
+  position: absolute;
+  right: 20px;
+  bottom: 15px;
+  text-transform: uppercase;
+}
+
+/*** Paginas de generacion de reportes ***/
+.tabpanel-item {
+  height: 200px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  padding-left: 25px;
+  padding-top: 55px;
+}
+.mobile .tabpanel-item {
+  padding-top: 10px;
+}
+.tabpanel-item  > div {
+  float: left;
+  padding: 0 85px 10px 10px
+}
+.tabpanel-item  p {
+  font-size: 16px;
+  margin: 0;    
+}
+.item-box {
+  font-size: 16px;
+  margin: 15px 0 45px 10px;
+}
+.options {
+  padding: 20px;
+  background-color: rgba(191, 191, 191, 0.15);
+  margin-top: 20px;
+}
+.caption {
+  font-size: 18px;
+  font-weight: 500;
+}
+.option {
+  margin-top: 10px;
+}

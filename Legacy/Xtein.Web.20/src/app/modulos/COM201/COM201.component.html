@@ -1,0 +1,680 @@
+<div class="row gx-3">
+    <div class="col-12">
+      <div class="card-content">
+        <div class="container-child-dos-app xt-gesptabs" >
+          <div>
+            <dx-form
+                #formListas
+                id="formListas"
+                [formData]="FListas"
+                colCount="1"
+                labelLocation="left"
+                [screenByWidth]="getSizeQualifier"
+            >
+                <dxi-item itemType="group">
+                    <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+                    <dxi-item dataField="ID_LISTA">
+                        <dxo-label text="Id Lista"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-text-box
+                                placeholder="Id Lista"
+                                [readOnly]="readOnly"
+                                [value]="FListas.ID_LISTA"
+                                (onValueChanged)="onValueChangedValores($event, 'ID_LISTA')"
+                            ></dx-text-box>
+                        </div>
+                        <dxi-validation-rule
+                            type="async"
+                            message="existencia"
+                            [validationCallback]="ValideExistencia"
+                        ></dxi-validation-rule>
+                    </dxi-item>
+
+                    <dxi-item dataField="ESTADO"
+                              editorType="dxSelectBox"
+                              [editorOptions]="{ items: DlEstados, value: FListas.ESTADO, placeholder:'Estado', readOnly: readOnlyEdicion }"
+                              (onValueChanged)="onValueChangedValores($event, 'ESTADO')">
+                        <dxo-label text="Estado"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item dataField="DESCRIPCION" >
+                        <dxo-label text="Descripción"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-text-box
+                            placeholder="Descripción"
+                            [readOnly]="readOnlyEdicion"
+                            [value]="FListas.DESCRIPCION"
+                            (onValueChanged)="onValueChangedValores($event, 'DESCRIPCION')"
+                            ></dx-text-box>
+                        </div>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="TIPO"
+                        editorType="dxSelectBox"
+                        [editorOptions]="{ items: DlTipo, value: FListas.TIPO, placeholder:'Tipo', readOnly: readOnly }"
+                        >
+                        <div *dxTemplate>
+                            <dx-select-box
+                                [dataSource]="DlTipo"
+                                [readOnly]="readOnly"
+                                [(value)]="FListas.TIPO"
+                                (onValueChanged)="onValueChangedValores($event, 'TIPO')">
+                            </dx-select-box>
+                        </div>
+                        <dxo-label text="Tipo"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="ACTUALIZACION"
+                        editorType="dxSelectBox"
+                        [editorOptions]="{ value: FListas.ACTUALIZACION, readOnly: readOnly }"
+                        >
+                        <div *dxTemplate>
+                            <dx-select-box [dataSource]="DlActualizacion" [readOnly]="readOnly" [(value)]="FListas.ACTUALIZACION" (onValueChanged)="onValueChangedValores($event, 'ACTUALIZACION')"></dx-select-box>
+                        </div>
+                        <dxo-label text="Actualización"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item *ngIf="FListas.ACTUALIZACION !== 'Manual' && FListas.TIPO !== 'PROVEEDOR'"
+                        dataField="BASE_PRECIO"
+                        editorType="dxSelectBox"
+                        [editorOptions]="{ items: DlBasePrecio, value: FListas.BASE_PRECIO, placeholder:'Base precio', readOnly: readOnly }"
+                        >
+                        <dxo-label text="Base precio"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-select-box
+                                [dataSource]="DlBasePrecio"
+                                [readOnly]="readOnly"
+                                [(value)]="FListas.BASE_PRECIO"
+                                (onValueChanged)="onValueChangedValores($event, 'BASE_PRECIO')">
+                            </dx-select-box>
+                        </div>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="LISTA_BASE"
+                        editorType="dxSelectBox"
+                        [editorOptions]="{ items: DlListaBase, value: FListas.LISTA_BASE, placeholder:'Lista Base precio', readOnly: readOnly }"
+                        *ngIf="FListas.TIPO !== 'PROVEEDOR' && FListas.BASE_PRECIO !== 'Ultima Compra' && FListas.BASE_PRECIO !== 'Ultimo Costo C/P' && FListas.ACTUALIZACION !== 'Manual'"
+                        >
+                        <dxo-label text="Lista base"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-select-box
+                                [dataSource]="DlListaBase"
+                                [readOnly]="readOnly"
+                                valueExpr="ID_LISTA"
+                                displayExpr="LISTA"
+                                [(value)]="FListas.LISTA_BASE"
+                                (onValueChanged)="onValueChangedValores($event, 'LISTA_BASE')">
+                            </dx-select-box>
+                        </div>
+                    </dxi-item>
+
+                </dxi-item>
+
+                <dxi-item itemType="group">
+                    <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+
+                    <dxi-item *ngIf="FListas.TIPO === 'PROVEEDOR' && FListas.ACTUALIZACION === 'Manual'"
+                        dataField="ID_PROVEEDOR"
+                        editorType="dxSelectBox"
+                        >
+                        <dxo-label text="Proveedor"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-select-box [dataSource]="DListaProv"
+                                        [(value)]="FListas.ID_PROVEEDOR"
+                                        [readOnly]="readOnly"
+                                        valueExpr="ID_PROVEEDOR"
+                                        displayExpr="ID_PROVEEDOR"
+                                        [searchEnabled]="true"
+                                        searchMode="contains"
+                                        [searchExpr]="['ID_PROVEEDOR', 'NOMBRE']"
+                                        [dropDownOptions]="dropDownOptions"
+                                        (onValueChanged)="onValueChangedValores($event, 'ID_PROVEEDOR')">
+                                <div *dxTemplate="let data of 'item'">
+                                    <div style="width: 40%; float:left">
+                                        {{ data.ID_PROVEEDOR }}
+                                    </div>
+
+                                    <div style="width: 60%; float:right">
+                                        {{ data.NOMBRE }}
+                                    </div>
+                                </div>
+                            </dx-select-box>
+                        </div>
+                    </dxi-item>
+
+                    <dxi-item dataField="NOMBRE_PROVEEDOR" [editorOptions]="{ readOnly: true } " *ngIf="FListas.TIPO === 'PROVEEDOR' && FListas.ACTUALIZACION === 'Manual'" >
+                        <dxo-label [visible]="false" ></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="APLICACION_PRECIO"
+                        editorType="dxSelectBox"
+                        >
+                        <div *dxTemplate>
+                            <dx-select-box
+                                [dataSource]="DlAplPrecio"
+                                [readOnly]="readOnly"
+                                [(value)]="FListas.APLICACION_PRECIO"
+                                (onValueChanged)="onValueChangedValores($event, 'APLICACION_PRECIO')">
+                            </dx-select-box>
+                        </div>
+                        <dxo-label text="Aplicación precio"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="MARGEN"
+                        >
+                        <dxo-label text="Margen"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-number-box format="#,#0.00" [(value)]="FListas.MARGEN" [readOnly]="readOnlyEdicion" ></dx-number-box>
+                        </div>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="FECHA_INICIO"
+                        [editorOptions]="{ readOnly: readOnly }"
+                        editorType="dxDateBox"
+                        >
+                        <div *dxTemplate>
+                            <dx-date-box
+                                type="date"
+                                [readOnly]="readOnly"
+                                [value]="FListas.FECHA_INICIO"
+                                (onValueChanged)="onValueChangedValores($event, 'FECHA_INICIO')">
+                            </dx-date-box>
+                        </div>
+                        <dxo-label text="Fecha Inicio"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="FECHA_FINAL"
+                        [editorOptions]="{ readOnly: readOnly }"
+                        editorType="dxDateBox" >
+                        <div *dxTemplate>
+                            <dx-date-box
+                                #xs_FECHA_FINAL
+                                id="xs_FECHA_FINAL"
+                                [value]="FListas.FECHA_FINAL"
+                                [readOnly]="readOnlyEdicion"
+                                [disabledDates]="disableDates"
+                                (onValueChanged)="onValueChangedValores($event, 'FECHA_FINAL')">
+                            </dx-date-box>
+                        </div>
+                        <dxo-label text="Fecha Final"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="INCLUYE_IVA"
+                        editorType="dxSwitch"
+                        [editorOptions]="{ onValueChanged: switchIva, disabled: readOnly }"
+                    >
+                        <dxo-label text="Incluye Iva"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="PRINCIPAL"
+                        editorType="dxSwitch"
+                        [editorOptions]="{ onValueChanged: switchPrincipal, disabled: readOnly }"
+                    >
+                        <dxo-label text="Principal"></dxo-label>
+                    </dxi-item>
+
+                    <dxi-item
+                        dataField="APROXIMACION"
+                        editorType="dxSelectBox"
+                        [editorOptions]="{ items: DlAprox, value: FListas.APROXIMACION, placeholder:'Aproximación', readOnly: readOnlyEdicion }"
+                        >
+                        <dxo-label text="Aproximación"></dxo-label>
+                    </dxi-item>
+                </dxi-item>
+
+
+
+            </dx-form>
+
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+</div>
+
+  <div class="row gx-3" id="splitterMain">
+    <as-split
+        direction="horizontal"
+        (dragEnd)="dragEnd('percent', $event)"
+        #split="asSplit"
+        class="col-12"
+    >
+    <as-split-area class="col-4" [size]="25" #area1="asSplitArea" (resized)="onResized($event)">
+        <div class="card-content-clean-alt">
+
+            <div id="constainer-expandir" class="dropdown-expand dpdown-p-absolute">
+                <dx-toolbar>
+                    <dxi-item location="before" (click)="onExpanding($event)">
+                    <div class="accordion-item-group">
+                        <div>
+                        <span class="accordion-item-description" *ngIf="expandGrupos">
+                            <i class="icon-chevron-right-xs"></i>
+                        </span>
+                        <span class="accordion-item-description" *ngIf="!expandGrupos">
+                            <i class="icon-chevron-down-xs"></i>
+                        </span>
+                        </div>
+                        <span class="xt-dropdown-caption" >{{ btnContraer }}</span>
+                    </div>
+                    </dxi-item>
+                </dx-toolbar>
+            </div>
+
+            <dx-tree-list
+                #treeListGrupos
+                id="treeListGrupos"
+                [dataSource]="DListaGrupos"
+                keyExpr="ID_GRUPO"
+                parentIdExpr="ID_GRUPO_PADRE"
+                rootValue="INVENTARIOS"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                [(autoExpandAll)]="autoExpandAll"
+                [rowAlternationEnabled]="true"
+                [hoverStateEnabled]="true"
+                [focusedRowEnabled]="true"
+                [allowColumnResizing]="true"
+                [columnHidingEnabled]="true"
+                columnResizingMode="nextColumn"
+                [(focusedRowKey)]="focusedGrupo"
+                (onToolbarPreparing)="onToolbarPreparing($event)"
+                (onFocusedRowChanged)="selectGrupo($event)"
+                (onRowClick)="onRowClickGrupo($event)"
+                (onInitialized)="onInitialized($event)"
+                height="100%"
+            >
+                <dxo-scrolling mode="standard"></dxo-scrolling>
+                <dxo-header-filter [visible]="true"></dxo-header-filter>
+                <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="200"></dxo-search-panel>
+
+                <dxi-column
+                    dataField="ID_GRUPO"
+                    caption="Id Grupo"
+                    [width]="200"
+                ></dxi-column>
+                <dxi-column
+                    dataField="NOMBRE"
+                    caption="Nombre"
+                ></dxi-column>
+                <dxi-column dataField="IsActive" [visible]="false"></dxi-column>
+
+                <div *dxTemplate="let info of 'cfgEncabezado'">
+                    <p style="font-size: 16px">{{ info.column.caption }}</p>
+                </div>
+
+                <dxo-export [enabled]="true"></dxo-export>
+
+            </dx-tree-list>
+        </div>
+    </as-split-area>
+
+    <as-split-area class="col-8 ml-0" [size]="75" #area2="asSplitArea">
+        <div class="card-content-secondary-alt" id="grid-items" >
+
+            <dx-data-grid
+                #gridItemLista
+                id="gridItemLista"
+                class="xt-datagrid"
+                noDataText=""
+                [height]="600"
+                [dataSource]="DItemsLista"
+                keyExpr="ITEM"
+                [showBorders]="true"
+                [focusedRowEnabled]="true"
+                [rowAlternationEnabled]="true"
+                [hoverStateEnabled]="true"
+                [allowColumnResizing]="true"
+                [columnAutoWidth]="true"
+                columnResizingMode="widget"
+                (onInitNewRow)="onInitNewRow($event)"
+                (onRowInserting)="insertingRow($event)"
+                (onRowInserted)="insertedRow($event)"
+                (onRowUpdating)="updatingRow($event)"
+                (onRowUpdated)="updatedRow($event)"
+                (onRowRemoved)="removedRow($event)"
+                (onEditingStart)="onEditingStart($event)"
+                (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+                (onRowPrepared)="onRowPrepared($event)"
+                (onRowValidating)="onRowValidating($event)"
+                (onSelectionChanged)="selectionGrid($event)"
+                (onContentReady)="onContentReady($event)"
+                (onRowClick)="startEdit($event)"
+                (onFocusedRowChanged)="onFocusedRowChanged($event)"
+            >
+
+                <dxo-editing
+                    mode="row"
+                    [useIcons]="false"
+                    [allowUpdating]="esEdicion || esEdicionGenerada"
+                    [allowDeleting]="false"
+                    [allowAdding]="esEdicion">
+                    <dxo-texts
+                        confirmDeleteMessage="">
+                    </dxo-texts>
+                </dxo-editing>
+
+                <dxo-search-panel
+                    [visible]="true"
+                    [width]="240"
+                    placeholder="Buscar..."
+                ></dxo-search-panel>
+                <dxo-selection
+                    selectAllMode="allPages"
+                    [showCheckBoxesMode]="esVisibleSelecc"
+                    mode="multiple">
+                </dxo-selection>
+
+                <dxo-paging
+                    [pageSize]="100">
+                </dxo-paging>
+                <dxo-pager
+                    [visible]="true"
+                    [allowedPageSizes]="allowedPageSizes"
+                    displayMode="full"
+                    [showPageSizeSelector]="true"
+                    [showInfo]="true"
+                    [showNavigationButtons]="true">
+                </dxo-pager>
+
+                <dxi-column
+                    dataField="ITEM"
+                    [visible]="false"
+                    [sortIndex]="0" sortOrder="desc"
+                ></dxi-column>
+                <dxi-column
+                    dataField="ID_GRUPO"
+                    [visible]="false"
+                ></dxi-column>
+                <dxi-column
+                    minWidth="100"
+                    dataField="PRODUCTO"
+                    caption="Producto"
+                    cellTemplate="cellProductos"
+                    editCellTemplate="tempProductos"
+                    calculateDisplayValue="PRODUCTO"
+                    width="25%"
+                    [allowEditing]="editarItems['PRODUCTO']"
+                ></dxi-column>
+                <dxi-column
+                    minWidth="150"
+                    dataField="NOMBRE"
+                    caption="Nombre"
+                    width="30%"
+                    [allowEditing]="false"
+                ></dxi-column>
+                <dxi-column
+                    minWidth="100"
+                    dataField="ATRIBUTO"
+                    caption="Atributo"
+                    editCellTemplate="tempAtributos"
+                    calculateDisplayValue="ATRIBUTO"
+                    width="10%"
+                    [allowEditing]="editarItems['ATRIBUTO']"
+                ></dxi-column>
+                <dxi-column
+                    minWidth="100"
+                    dataField="UDM_PRES"
+                    [caption]="captionUDM"
+                    editCellTemplate="tempUDM_PRES"
+                    calculateDisplayValue="UDM_PRES"
+                    width="10%"
+                    [allowEditing]="editarItems['UDM_PRES']"
+                ></dxi-column>
+                <dxi-column
+                    dataField="PRECIO_BASE"
+                    caption="Precio Base"
+                    dataType="number"
+                    width="15%"
+                    [allowEditing]="editarItems['PRECIO_BASE']"
+                    [setCellValue]="setCellPrecioBase"
+                    [editorOptions]="{format: '#,##0.00'}"
+                    >
+                    <dxo-format
+                        type="fixedPoint"
+                        [precision]="2">
+                    </dxo-format>
+                </dxi-column>
+                <dxi-column
+                    dataField="PRECIO"
+                    caption="Precio lista"
+                    dataType="number"
+                    width="15%"
+                    [allowEditing]="editarItems['PRECIO']"
+                    [setCellValue]="setCellPrecio"
+                    [editorOptions]="{format: '#,##0.00'}"
+                    >
+                    <dxo-format
+                        type="fixedPoint"
+                        [precision]="2">
+                    </dxo-format>
+                </dxi-column>
+                <dxi-column
+                    dataField="PRECIO_IVA"
+                    caption="Precio Iva"
+                    dataType="number"
+                    width="15%"
+                    [allowEditing]="false"
+                    [editorOptions]="{format: '#,##0.00'}"
+                    >
+                    <dxo-format
+                        type="fixedPoint"
+                        [precision]="2">
+                    </dxo-format>
+                </dxi-column>
+
+                <div *dxTemplate="let data of 'titItems'">
+                    <div class="dx-fieldset-header" *ngIf="grupoSelecc !== ''">Grupo: <b>[{{ grupoSelecc }}] {{ " "+grupoNomSelecc }}</b></div>
+                </div>
+
+                <div *dxTemplate="let cellInfo of 'cellProductos'">
+                    <div id="PRODUCTO__{{cellInfo.data.ITEM}}">{{ cellInfo.data.PRODUCTO }}</div>
+                </div>
+                <div *dxTemplate="let cellInfo of 'tempProductos'">
+                    <!-- <dx-select-box
+                                #xs__PRODUCTO
+                                id="xs__PRODUCTO"
+                                [inputAttr]="{ name: 'PRODUCTO' }"
+                                [dataSource]="DListaProductos"
+                                [(value)]="cellInfo.data.PRODUCTO"
+                                valueExpr="PRODUCTO"
+                                displayExpr="PRODUCTO"
+                                [searchEnabled]="true"
+                                searchMode="contains"
+                                [searchExpr]="['PRODUCTO', 'NOMBRE']"
+                                [dropDownOptions]="dropDownOptions"
+                                (onValueChanged)="onValueChangedValores($event, 'PRODUCTO', cellInfo)">
+                        <div *dxTemplate="let data of 'item'">
+                            <div style="width: 40%; float:left">
+                                {{ data.PRODUCTO }}
+                            </div>
+
+                            <div style="width: 60%; float:right">
+                                {{ data.NOMBRE }}
+                            </div>
+                        </div>
+                    </dx-select-box> -->
+                    <dx-drop-down-box
+                    #xs__PRODUCTO
+                    id="xs__PRODUCTO"
+                    [(value)]="cellInfo.data.PRODUCTO"
+                    valueExpr="PRODUCTO"
+                    displayExpr="PRODUCTO"
+                    placeholder="Producto"
+                    [showClearButton]="true"
+                    [dataSource]="DListaProductos"
+                    [acceptCustomValue]="true"
+                    [dropDownOptions]="dropDownOptions"
+                    [inputAttr]="{style: 'text-transform: uppercase'}"
+                    contentTemplate="contentTemplate"
+                  >
+                    <div *dxTemplate="let data of 'contentTemplate'">
+                        <dx-data-grid
+                          #gridProLista
+                          id="gridProLista"
+                          keyExpr="PRODUCTO"
+                          [dataSource]="DListaProductos"
+                          [focusedRowEnabled]="true"
+                          [hoverStateEnabled]="true"
+                          [rowAlternationEnabled]="true"
+                          [hoverStateEnabled]="true"
+                          [autoNavigateToFocusedRow]="true"
+                          height="100%"
+                          (onSelectionChanged)="onValueChangedValores($event, 'PRODUCTO', cellInfo)"
+                          >
+                          <dxo-paging [pageSize]="200"> </dxo-paging>
+                          <dxo-pager
+                            [visible]="true"
+                            allowedPageSizes="[50, 100, 'all']"
+                            [showPageSizeSelector]="true"
+                            [showInfo]="true"
+                            [showNavigationButtons]="true">
+                          </dxo-pager>
+                          <dxo-selection mode="single"></dxo-selection>
+                          <dxo-filter-row [visible]="true"></dxo-filter-row>
+                          <dxo-header-filter [visible]="true"></dxo-header-filter>
+                          <dxo-search-panel [visible]="true" [width]="440" placeholder="Search"></dxo-search-panel>
+                          <dxi-column
+                            dataField="PRODUCTO"
+                            caption="Producto"
+                            width="30%"
+                            >
+                          </dxi-column>
+                          <dxi-column
+                            dataField="NOMBRE"
+                            caption="Nombre"
+                            >
+                          </dxi-column>
+                        </dx-data-grid>
+                    </div>
+                  </dx-drop-down-box>
+
+                </div>
+
+                <div *dxTemplate="let cellInfo of 'tempAtributos'">
+                    <dx-select-box [dataSource]="DAtributos"
+                                [(value)]="cellInfo.data.ATRIBUTO"
+                                valueExpr="VALOR"
+                                displayExpr="VALOR"
+                                [searchEnabled]="true"
+                                searchMode="contains"
+                                [searchExpr]="['VALOR']"
+                                (onValueChanged)="onValueChangedValores($event, 'ATRIBUTO', cellInfo)">
+                    </dx-select-box>
+                </div>
+
+                <div *dxTemplate="let cellInfo of 'tempUDM_PRES'">
+                    <dx-select-box *ngIf="FListas.TIPO === 'COSTOS' "
+                                [dataSource]="DUDM_PRES"
+                                searchMode="contains"
+                                [searchEnabled]="true"
+                                valueExpr="UDM_EQUIV"
+                                displayExpr="UDM_EQUIV"
+                                [searchExpr]="['UDM_EQUIV']"
+                                [(value)]="cellInfo.data.UDM_PRES"
+                                (onValueChanged)="onValueChangedUdmPres($event, 'UDM_PRES', cellInfo)">
+                    </dx-select-box>
+
+                    <dx-select-box *ngIf="FListas.TIPO !== 'COSTOS' "
+                                [dataSource]="DUDM_PRES"
+                                searchMode="contains"
+                                [searchEnabled]="true"
+                                valueExpr="UDM_PRES"
+                                displayExpr="UDM_PRES"
+                                [searchExpr]="['UDM_PRES']"
+                                [(value)]="cellInfo.data.UDM_PRES"
+                                (onValueChanged)="onValueChangedUdmPres($event, 'UDM_PRES', cellInfo)">
+                    </dx-select-box>
+                </div>
+
+                <dxo-toolbar *ngIf="esEdicion && FListas.ACTUALIZACION.match('Manual|Generada')">
+                    <dxi-item name="searchPanel"></dxi-item>
+                    <dxi-item location="before">
+                        <div *dxTemplate>
+                            <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                        </dx-button>
+                        </div>
+                    </dxi-item>
+                    <dxi-item location="before">
+                        <div *dxTemplate>
+                            <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                        </dx-button>
+                        </div>
+                    </dxi-item>
+                    <dxi-item location="before">
+                        <div *dxTemplate>
+                            <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                        </dx-button>
+                        </div>
+                    </dxi-item>
+                    <dxi-item location="before">
+                        <div *dxTemplate>
+                            <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                        </dx-button>
+                        </div>
+                    </dxi-item>
+                    <dxi-item location="before">
+                        <div *dxTemplate>
+                            <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+                        </dx-button>
+                        </div>
+                    </dxi-item>
+                </dxo-toolbar>
+
+            </dx-data-grid>
+
+        </div>
+
+    </as-split-area>
+    </as-split>
+</div>
+
+<app-menufloat
+    [popupVisible]="activaMenuFloat"
+    [popupVisible]="activaMenuFloat"
+    [targetElem]="targetMenuFloat"
+    [data]="dataMenuFloat"
+    (cerrarMenu)="activaMenuFloat = false"
+    *ngIf="activaMenuFloat"
+    [events]="eventsSubjectFloat.asObservable()"
+    >
+</app-menufloat>
+
+
+<app-vistarapida id="vistapro008" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-load-panel
+    #loaderPanel
+    shadingColor="rgba(0,0,0,0.4)"
+    [position]="{ of: '#form-container' }"
+    [(visible)]="loadingVisible"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    message="Un momento. Cargando datos..."
+    [hideOnOutsideClick]="false"
+></dx-load-panel>
+
+<app-menufloat
+    [popupVisible]="activaMenuFloat"
+    [targetElem]="targetMenuFloat"
+    [data]="dataMenuFloat"
+    (cerrarMenu)="activaMenuFloat = false"
+    *ngIf="activaMenuFloat"
+    [events]="eventsSubjectFloat.asObservable()"
+></app-menufloat>
+
+<app-geninformes
+  [events]="eventsSubjectInformes.asObservable()"
+  >
+</app-geninformes>

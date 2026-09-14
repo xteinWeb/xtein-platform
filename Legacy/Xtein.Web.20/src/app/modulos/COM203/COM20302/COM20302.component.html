@@ -1,0 +1,174 @@
+<dx-form
+    class="dx-form-group"
+    id="formEntrada"
+    [formData]="DMovimientos"
+    [readOnly]="readOnly"
+    labelLocation="left"
+    [colCount]="2"
+    (onFieldDataChanged)="fieldDataChanged($event)"
+>
+    <dxi-item caption="Origen / Destino" itemType="group">
+
+        <dxi-item dataField="ID_PROVEEDOR" >
+            <dxo-label text="Origen/Proveedor"></dxo-label>
+            <div *dxTemplate>
+                <app-xc-selectbox
+                    nombreObj="ID_PROVEEDOR"
+                    [readOnly]="readOnly"
+                    [valorDefecto]="DMovimientos.ID_PROVEEDOR"
+                    [customValue]="customValueSbox"
+                    [events]="eventsSubjectSboxProv.asObservable()"
+                    (onRespuestaSelecc)="onSelectionProveedor($event)"
+                    >
+                </app-xc-selectbox>
+            </div>
+        </dxi-item>
+
+        <dxi-item dataField="ID_UN_DESTINO" editorType="dxSelectBox">
+            <dxo-label text="Destino/Bodega"></dxo-label>
+            <div *dxTemplate>
+                <app-xc-selectbox
+                    nombreObj="ID_UN_DESTINO"
+                    [readOnly]="readOnly"
+                    [valorDefecto]="DMovimientos.ID_UN_DESTINO"
+                    [customValue]="customValueSbox"
+                    [events]="eventsSubjectSboxBodega.asObservable()"
+                    (onRespuestaSelecc)="onSelectionUN($event)"
+                ></app-xc-selectbox>
+            </div>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="2" >
+
+            <dxi-item dataField="ID_SOPORTE" >
+                <dxo-label text="Id. Soporte"></dxo-label>
+                <div *dxTemplate>
+                    <dx-text-box
+                        [value]="DMovimientos.ID_SOPORTE"
+                        placeholder="Id soporte"
+                        [readOnly]="readOnly"
+                        (onValueChanged)="onValueChangedIdSop($event)">
+                    </dx-text-box>
+                </div>
+            </dxi-item>
+
+            <dxi-item dataField="NC_SOPORTE" [isRequired]="DMovimientos.MOVIMIENTO === 'ENTRADA' && DMovimientos.TIPO === 'ORDEN DE COMPRA'">
+                <dxo-label text="#Soporte/Fac"></dxo-label>
+                <div *dxTemplate>
+                    <dx-number-box
+                        [value]="DMovimientos.NC_SOPORTE"
+                        format="#"
+                        [readOnly]="readOnly"
+                        (onValueChanged)="onValueChangedNumSopRequired($event)"
+                    ></dx-number-box>
+                </div>
+            </dxi-item>
+
+        </dxi-item>
+
+    </dxi-item>
+
+    <dxi-item caption="Datos Entrada" itemType="group" [colCount]="2">
+
+        <dxi-item dataField="ID_CONDICION" >
+            <dxo-label text="Condición/Lista"></dxo-label>
+            <div *dxTemplate>
+                <app-xc-selectbox
+                    nombreObj="ID_CONDICION"
+                    [readOnly]="readOnly"
+                    [valorDefecto]="DMovimientos.ID_CONDICION"
+                    [customValue]="customValueSbox"
+                    [events]="eventsSubjectSboxCond.asObservable()"
+                    (onRespuestaSelecc)="onSelectionCondicion($event)"
+                >
+                </app-xc-selectbox>
+            </div>
+
+        </dxi-item>
+
+        <dxi-item dataField="PLAZO"
+            class="dx-number-align"
+            alignment="right"
+            dataType="number">
+            <dxo-label text="Plazo"></dxo-label>
+            <div *dxTemplate>
+                <app-xc-selectbox
+                    nombreObj="PLAZO"
+                    [readOnly]="readOnly"
+                    [valorDefecto]="DMovimientos.PLAZO"
+                    [customValue]="customValueSbox"
+                    [events]="eventsSubjectSboxPlazo.asObservable()"
+                    (onRespuestaSelecc)="onSeleccPlazo($event)"
+                >
+                </app-xc-selectbox>
+            </div>
+
+        </dxi-item>
+
+        <dxi-item dataField="ID_MONEDA" >
+            <dxo-label text="Moneda"></dxo-label>
+            <div *dxTemplate>
+                <app-xc-selectbox
+                    nombreObj="ID_MONEDA"
+                    [readOnly]="readOnly"
+                    [valorDefecto]="DMovimientos.ID_MONEDA"
+                    [customValue]="customValueSbox"
+                    [events]="eventsSubjectSboxMoneda.asObservable()"
+                    (onRespuestaSelecc)="onSelectionMoneda($event)"
+                    >
+                </app-xc-selectbox>
+            </div>
+        </dxi-item>
+
+        <dxi-item dataField="TASA_CAMBIO"
+            class="dx-number-align"
+            alignment="right"
+            dataType="number"
+            format="fixedPoint"
+            [editorOptions]="{format: especMonedaFormato, inputAttr: {'style': 'text-align: right;'}}">
+            <dxo-label text="Tasa de Cambio"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="FECHA_VENCIMIENTO"
+            editorType="dxDateBox"
+            >
+            <div *dxTemplate>
+                <dx-date-box
+                    type="date"
+                    [readOnly]="readOnly"
+                    [value]="DMovimientos.FECHA_VENCIMIENTO"
+                    [disabledDates]="disableDates"
+                    (onValueChanged)="onChangeFecha($event)">
+                </dx-date-box>
+            </div>
+            <dxo-label text="Vencimiento"></dxo-label>
+        </dxi-item>
+
+    </dxi-item>
+
+    <dxi-item dataField="DETALLE" [colSpan]="2" >
+        <dxo-label text="Descripción / Observación"></dxo-label>
+        <div *dxTemplate>
+            <dx-text-box
+                [value]="DMovimientos.DETALLE"
+                placeholder="Descripción / Observación"
+                (onValueChanged)="onValueChangedDes($event)"
+                [readOnly]="readOnly">
+            </dx-text-box>
+        </div>
+    </dxi-item>
+
+</dx-form>
+
+<dx-load-panel
+    #loadPanel
+    shadingColor="rgba(0,0,0,0.4)"
+    [position]="{ of: '#router-container' }"
+    [(visible)]="loadingVisible"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    message="Un momento. Cargando consulta..."
+    [hideOnOutsideClick]="false">
+</dx-load-panel>
+

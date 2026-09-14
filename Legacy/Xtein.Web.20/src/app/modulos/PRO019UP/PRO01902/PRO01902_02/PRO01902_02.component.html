@@ -1,0 +1,252 @@
+<div id="containerProMateriales" style="margin-top: 10px;">
+  <dx-data-grid
+    #gridMaterialesDetalles
+    id="gridMaterialesDetalles"
+    class="xt-subgrid"
+    keyExpr="ID_COMPONENTE"
+    [dataSource]="DGDetalleMateriales"
+    [columnAutoWidth]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onContentReady)="onContentReady($event)"
+    (onInitNewRow)="onInitNewRowPro($event)"
+    (onSelectionChanged)="selectionGrid($event)"
+    (onRowInserting)="onRowInserting($event)"
+    (onRowUpdating)="onRowUpdating($event)"
+    (onRowInserted)="onCalculateTotalSeccion($event)"
+    (onRowUpdated)="onCalculateTotalSeccion($event)"
+    (onRowRemoved)="onCalculateTotalSeccion($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onRowClick)="startEdit($event)"
+    (onEditCanceled)="onEditCanceled($event)"
+  >
+    <dxo-editing
+      mode="row"
+      [useIcons]="false"
+      [allowUpdating]="!readOnly"
+      [allowDeleting]="false"
+      [allowAdding]="!readOnly"
+    >
+      <dxo-texts
+        confirmDeleteMessage="">
+      </dxo-texts>
+    </dxo-editing>
+  
+    <dxo-selection 
+      selectAllMode="allPages"     
+      [showCheckBoxesMode]="esVisibleSelecc" 
+      mode="multiple">
+    </dxo-selection>
+
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+  
+    <dxi-column
+      dataField="ID_COMPONENTE"
+      caption="Cod. Producto"
+      cssClass="clsEncabHis"
+      alignment="left"
+      width="20%"
+      editCellTemplate="temProductos"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="NOMBRE"
+      width="25%"
+      caption="Nombre Producto"
+      alignment="left"
+      cssClass="clsEncabHis"
+      [editorOptions]="{readOnly: true}"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="ID_UDM"
+      caption="Uni. Equiv"
+      width="10%"
+      alignment="left"
+      [width]="100"
+      [editorOptions]="{readOnly: true}"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="CANTIDAD"
+      caption="Cantidad"
+      dataType="number"
+      alignment="right"
+      width="10%"
+      [editorOptions]="{format: '#,##0.0000', min:0}"
+      [setCellValue]="onCalculateSubTotal"
+    >
+      <dxo-format
+        type="fixedPoint"
+        [precision]="2">
+      </dxo-format>
+    </dxi-column>
+
+    <dxi-column
+      dataField="VALOR_UNITARIO"
+      caption="Valor Uni."
+      format="#,##0.00"
+      alignment="right"
+      width="15%"
+      editCellTemplate="temValor"
+    ></dxi-column>
+
+    <dxi-column
+    dataField="SUB_TOTAL"
+    caption="Sub-Total"
+    alignment="right"
+    dataType="number"
+    format="#,##0.00"
+    [editorOptions]="{format: '#,##0.00', min:0, readOnly:true}"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="FACTOR_MA"
+      caption="Factor"
+      alignment="right"
+      dataType="number"
+      format="##0,00%"
+      [editorOptions]="{format: '##0,00%', readOnly:true}"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="PROTECCION"
+      caption="Protección"
+      alignment="right"
+      dataType="number"
+      format="#,##0.00"
+      [editorOptions]="{format: '#,##0.00', min:0, readOnly:true}"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="TOTAL"
+      caption="Total"
+      alignment="right"
+      dataType="number"
+      format="#,##0.00"
+      width="20%"
+      [editorOptions]="{format: '#,##0.00', min:0, readOnly:true}"
+    ></dxi-column>
+  
+    <div *dxTemplate="let cellInfo of 'temProductos'">
+      <dx-drop-down-box
+        #Materiales
+        id="Materiales"
+        [(value)]="selectMaterial"
+        valueExpr="ID_COMPONENTE"
+        displayExpr="ID_COMPONENTE"
+        [showClearButton]="false"
+        [dropDownOptions]="dropDownMateriales"
+        [(opened)]="openMateriales"
+        [dataSource]="DGMateriales"
+        (onOpened)="onOpenedProductos($event)"
+        (onClosed)="onClosedProductos($event)"
+      >
+        <div *dxTemplate="let data of 'content'">
+          <div id="xt-title" class="xt-title">
+            <span class="xt-caption"> Productos con Base: {{ BASE_COSTO }} </span>
+          </div>
+          <dx-data-grid
+            id="GMateriales"
+            #GMateriales
+            height="100%"
+            width="100%"
+            keyExpr="ID_COMPONENTE"
+            [dataSource]="DGMateriales"
+            [(selectedRowKeys)]="selectMaterial"
+            [selection]="{ mode: 'single' }"
+            [columnAutoWidth]="true"
+            [allowColumnResizing]="true"
+            [columnMinWidth]="100"
+            [rowAlternationEnabled]="true"
+            [focusedRowEnabled]="true"
+            [hoverStateEnabled]="true"
+            (onSelectionChanged)="onSelectionMaterial($event, cellInfo)" 
+          >
+            <dxo-scrolling mode="virtual"></dxo-scrolling>
+            <dxo-search-panel [visible]="true" [width]="widthSerchMateriales" ></dxo-search-panel>
+            <!-- <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging> -->
+  
+            <dxi-column dataField="ID_COMPONENTE" caption="Producto" cssClass="clsEncabHis" [width]="150"></dxi-column>
+            <dxi-column dataField="NOMBRE"  caption="Nombre" cssClass="clsEncabHis" [width]="200"></dxi-column>
+          </dx-data-grid>
+        </div>       
+      </dx-drop-down-box>
+    </div>
+    
+    <div *dxTemplate="let cellInfo of 'temValor'">
+      <dx-number-box
+        [min]="0"
+        format="#,##0.00"
+        [readOnly]="true"
+        [value]="cellInfo.value"
+        [showSpinButtons]="true"
+        [showClearButton]="true"
+      ></dx-number-box>
+    </div>
+  
+    <div *dxTemplate="let cellInfo of 'temUniMedi'">
+      <dx-text-box
+        [readOnly]="true"
+        [value]="cellInfo.data.ID_UDM">
+      </dx-text-box>
+    </div>
+  
+    <dxo-toolbar *ngIf="!readOnly">
+      <dxi-item location="before">
+        <div *dxTemplate>
+          <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+          </dx-button>
+        </div>
+      </dxi-item>
+      <dxi-item location="before">
+        <div *dxTemplate>
+          <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+          </dx-button>
+        </div>
+      </dxi-item>
+      <dxi-item location="before">
+        <div *dxTemplate>
+          <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+          </dx-button>
+        </div>
+      </dxi-item>
+      <dxi-item location="before">
+        <div *dxTemplate>
+          <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+          </dx-button>
+        </div>
+      </dxi-item>
+      <dxi-item location="before">
+        <div *dxTemplate>
+          <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+          </dx-button>
+        </div>
+      </dxi-item>
+      <dxi-item location="before">
+        <div *dxTemplate>
+          <dx-button icon="pulldown" matTooltip="Refrescar" (onClick)="operGrid($event,'refrescar')" >
+          </dx-button>
+        </div>
+      </dxi-item>
+    </dxo-toolbar>
+  
+  </dx-data-grid>
+</div>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#GMateriales' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

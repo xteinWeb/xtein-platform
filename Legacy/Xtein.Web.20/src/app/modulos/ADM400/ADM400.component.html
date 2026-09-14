@@ -1,0 +1,258 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content">
+      <dx-form
+        class="dx-form-group"
+        id="formConfigCodigos"
+        [formData]="DConfigCodigos"
+        [readOnly]="readOnly"
+        labelLocation="left"
+        [colCount]="1"
+        (onEditorEnterKey)="onEditorEnterKey($event)"
+      >
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+
+        <dxi-item dataField="ID_APLICACION">
+          <dxo-label text="Aplicación Asociada"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box
+              #ddProducto
+              [(value)]="gridBoxAplicacion"
+              valueExpr="ID_APLICACION"
+              displayExpr="NOMBRE"
+              placeholder="Aplicación"
+              [readOnly]="readOnly"
+              [(opened)]="isGridBoxAplicacionOpened"
+              [dataSource]="DAplicaciones"
+              [dropDownOptions]="{width:400, height: 400, hideOnParentScroll: true, container: '#router-container'}"
+              columnResizingMode="widget"
+            >
+              <div id="containerAplicaciones" *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  #GClientes
+                  height="100%"
+                  width="100%"
+                  keyExpr="ID_APLICACION"
+                  [dataSource]="DAplicaciones"
+                  [(selectedRowKeys)]="gridBoxAplicacion"
+                  [selection]="{ mode: 'single' }"
+                  (onSelectionChanged)="onSelectionAplicacion($event)" 
+                  [columnAutoWidth]="true"
+                  [focusedRowEnabled]="true"
+                  [allowColumnResizing]="true"
+                  [columnMinWidth]="100"
+                  [rowAlternationEnabled]="true"
+                  [hoverStateEnabled]="true"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+                  <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+                  <dxi-column dataField="ID_APLICACION" caption="Cod. Aplicación" cssClass="clsEncabHis" [width]="150"></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre de la Aplicación" cssClass="clsEncabHis"></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ESTADO" editorType="dxSelectBox" [editorOptions]="{ items: dSBEstados, value: 'ACTIVO', placeholder:'Estado'}" >
+          <dxo-label text="Estado"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="MODO" editorType="dxSelectBox" [editorOptions]="{ items: dSBModos, placeholder:'Modo'}">
+          <dxo-label text="Modo de Codificación"></dxo-label>
+        </dxi-item>
+      </dx-form>
+
+      <br>
+
+      <dx-data-grid
+        #gridConfigCodigosItems
+        id="gridConfigCodigosItems"
+        [columnAutoWidth]="true"
+        [dataSource]="DConfigCodigosItems"
+        [allowColumnResizing]="true"
+        columnResizingMode="widget"
+        [focusedRowEnabled]="true"
+        [rowAlternationEnabled]="true"
+        [hoverStateEnabled]="true"
+        keyExpr="ITEM"
+        noDataText=""
+        [showBorders]="true"
+        [columnMinWidth]="100"
+        [elementAttr]="{ style: 'min-height: 200px !important; width: 100%;' }"
+        (onInitNewRow)="initNewRow($event)"
+        (onRowInserting)="insertingRow($event)"
+        (onRowInserted)="insertedRow($event)"
+        (onRowUpdating)="updatingRow($event)"
+        (onRowUpdated)="updatedRow($event)"
+        (onRowRemoved)="removedRow($event)"
+        (onEditingStart)="onEditingStart($event)"
+        (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+        (onRowPrepared)="onRowPrepared($event)"
+        (onRowValidating)="onRowValidating($event)"
+        (onSelectionChanged)="selectionGrid($event)"
+        (onFocusedRowChanged)="onFocusedRowChanged($event)"
+      >
+
+        <dxo-editing
+          mode="cell"
+          [useIcons]="false" 
+          [allowUpdating]="esEdicion"
+          [allowDeleting]="false"
+          [allowAdding]="esEdicion">
+          <dxo-texts
+            confirmDeleteMessage="">
+          </dxo-texts>
+        </dxo-editing>
+    
+        <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+    
+        <dxo-selection
+          selectAllMode="allPages"
+          [showCheckBoxesMode]="esVisibleSelecc"
+          mode="multiple">
+        </dxo-selection>
+
+        <dxi-column dataField="MODO" caption="Modo" width="12%" alignment="left" editCellTemplate="editTempModo" >
+        </dxi-column>
+
+        <dxi-column dataField="TIPO" caption="Tipo" width="12%" alignment="left"  editCellTemplate="editTempTipo" >
+        </dxi-column>
+
+        <dxi-column dataField="CONDICION" caption="Condición" width="20%" alignment="left"   editCellTemplate="editTempCondicion" >
+        </dxi-column>
+
+        <dxi-column dataField="PREFIJO" caption="Prefijo" width="15%" alignment="left" editCellTemplate="editTempPrefijo" >
+        </dxi-column>
+
+        <dxi-column dataField="CANTIDAD_CONSECUTIVO" caption="C. Digitos" width="10%" alignment="right" editCellTemplate="editTempCantidadCon" >
+        </dxi-column>
+
+        <dxi-column dataField="INICIO_CONSECUTIVO" caption="Consecutivo Inicial" width="10%" alignment="right" editCellTemplate="editTempInicioCon" >
+        </dxi-column>
+
+        <dxi-column dataField="INCREMENTO_CONSECUTIVO" caption="N. de Incrementos" width="10%" alignment="right" editCellTemplate="editTempIncrementoCon" >
+        </dxi-column>
+
+        <dxi-column dataField="ESTADO" caption="Estado" width="8%" alignment="left" editCellTemplate="editTempEstado" >
+        </dxi-column>
+
+        <!-- templates -->
+        <div *dxTemplate="let cellInfo of 'editTempModo'">
+          <dx-select-box
+            [dataSource]="['MANUAL','AUTOMATICO']"
+            [value]="cellInfo.data.MODO"
+            [readOnly]="readOnly"
+            placeholder="Seleccione modo..."
+            (onValueChanged)="onValueChangedModo($event, cellInfo)"
+          ></dx-select-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempTipo'">
+          <dx-select-box
+            [dataSource]="['SIMPLE','COMPUESTO']"
+            [value]="cellInfo.data.TIPO"
+            [(readOnly)]="objReadOnlyGrid.TIPO"
+            placeholder="Seleccione tipo..."
+            (onValueChanged)="onValueChangedTipo($event, cellInfo)"
+          ></dx-select-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempCondicion'">
+          <dx-text-box
+            [value]="cellInfo.data.CONDICION"
+            [(readOnly)]="objReadOnlyGrid.CONDICION"
+            placeholder="Condición..."
+            (onValueChanged)="onValueChangedCondicion($event, cellInfo)"
+          ></dx-text-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempPrefijo'">
+          <dx-text-box
+            [value]="cellInfo.data.PREFIJO"
+            [(readOnly)]="objReadOnlyGrid.PREFIJO"
+            placeholder="Prefijo..."
+            (onValueChanged)="onValueChangedPrefijo($event, cellInfo)"
+          ></dx-text-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempCantidadCon'">
+          <dx-number-box
+            [value]="cellInfo.data.CANTIDAD_CONSECUTIVO"
+            [(readOnly)]="objReadOnlyGrid.CANTIDAD_CONSECUTIVO"
+            [min]="0"
+            alignment="left"
+            (onValueChanged)="onValueChangedCanidadCon($event, cellInfo)"
+          ></dx-number-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempInicioCon'">
+          <dx-number-box
+            [value]="cellInfo.data.INICIO_CONSECUTIVO"
+            [(readOnly)]="objReadOnlyGrid.INICIO_CONSECUTIVO"
+            [min]="0"
+            alignment="left"
+            (onValueChanged)="onValueChangedInicioCon($event, cellInfo)"
+          ></dx-number-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempIncrementoCon'">
+          <dx-number-box
+            [value]="cellInfo.data.INCREMENTO_CONSECUTIVO"
+            [(readOnly)]="objReadOnlyGrid.INCREMENTO_CONSECUTIVO"
+            [min]="0"
+            alignment="left"
+            (onValueChanged)="onValueChangedIncrementoCon($event, cellInfo)"
+          ></dx-number-box>
+        </div>
+
+        <div *dxTemplate="let cellInfo of 'editTempEstado'">
+          <dx-select-box
+            [dataSource]="['ACTIVO','INACTIVO']"
+            [value]="cellInfo.data.ESTADO"
+            [readOnly]="readOnly"
+            placeholder="Seleccione Estado..."
+            (onValueChanged)="onValueChangedEstado($event, cellInfo)"
+          ></dx-select-box>
+        </div>
+
+        <dxo-toolbar *ngIf="esEdicion">
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+              </dx-button>
+            </div>
+          </dxi-item>
+        </dxo-toolbar>
+      </dx-data-grid>
+
+    </div>
+  </div>
+</div>
+<app-vistarapida id="vistaadm400" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>

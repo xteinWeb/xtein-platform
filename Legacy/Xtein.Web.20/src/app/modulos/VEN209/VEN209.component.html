@@ -1,0 +1,550 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content">
+      <div>
+        <dx-form
+          #formAcreedores
+          id="formAcreedores"
+          labelLocation="top"
+          [formData]="FAcreedores"
+          [readOnly]="readOnlyForm"
+          [colCount]="2"
+          labelLocation="left"
+        >
+          <dxi-item caption="Identificación" itemType="group">
+            <dxi-item
+              dataField="ID_CLIENTE"
+              [editorOptions]="{ readOnly: readOnlyLlave }"
+            >
+              <dxo-label text="Código"></dxo-label>
+              <dxi-validation-rule
+                type="async"
+                message="Este cliente ya existe!"
+                [validationCallback]="ValideExistencia"
+              >
+              </dxi-validation-rule>
+              <dxi-validation-rule
+                type="required"
+                message="Un código es requerido"
+              >
+              </dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ID_LEGAL" [style.border]="borderStyle">
+              <dxo-label text="Id Legal"></dxo-label>
+              <!-- <dx-validator #validIdLegal id="validIdLegal" [adapter]="adapterConfig">
+                        <dxi-validation-rule type="required" message="Un código es requerido">
+                        </dxi-validation-rule>
+                      </dx-validator> -->
+              <app-xc-selectbox
+                #xs_ID_LEGAL
+                id="xs_ID_LEGAL"
+                nombreObj="ID_LEGAL"
+                [readOnly]="readOnly"
+                [valorDefecto]="FAcreedores.ID_LEGAL"
+                [customValue]="customValueSboxIdLegal"
+                [events]="eventsSubjectSboxIdLegal.asObservable()"
+                (onRespuestaSelecc)="onSeleccIdLegal($event)"
+              >
+              </app-xc-selectbox>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item caption="Fecha de registro y estado" itemType="group">
+            <dxi-item
+              editorType="dxSelectBox"
+              [editorOptions]="{ readOnly: true }"
+            >
+              <dxo-label text="Estado"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dxEstado
+                  id="dxEstado"
+                  [dataSource]="['ACTIVO', 'INACTIVO']"
+                  [readOnly]="true"
+                  [(value)]="FAcreedores.ESTADO"
+                  (onValueChanged)="onSeleccEstado($event)"
+                >
+                </dx-select-box>
+              </div>
+            </dxi-item>
+
+            <dxi-item
+              dataField="FECHA_REGISTRO"
+              editorType="dxDateBox"
+              [editorOptions]="{ readOnly: true }"
+            >
+              <dxo-label text="Fecha de Registro"></dxo-label>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item
+            caption="Detalle Cliente"
+            itemType="group"
+            colSpan="2"
+            colCount="2"
+          >
+            <dxi-item dataField="NOMBRE" [editorOptions]="{ readOnly }">
+              <dxo-label text="Primer Nombre"></dxo-label>
+              <dxi-validation-rule
+                type="required"
+                message="El primer nombre es requerido"
+              >
+              </dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="NOMBRE2" [editorOptions]="{ readOnly }">
+              <dxo-label text="Segundo Nombre"></dxo-label>
+            </dxi-item>
+
+            <dxi-item dataField="APELLIDO" [editorOptions]="{ readOnly }">
+              <dxo-label text="Primer Apellido"></dxo-label>
+              <dxi-validation-rule
+                type="required"
+                message="El primer apellido es requerido"
+              >
+              </dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="APELLIDO2" [editorOptions]="{ readOnly }">
+              <dxo-label text="Segundo Apellido"></dxo-label>
+              <dxi-validation-rule
+                type="required"
+                message="El segundo apellido es requerido"
+              >
+              </dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="TIPO_ID">
+              <dxo-label text="Tipo Identificación"></dxo-label>
+              <dxi-validation-rule
+                type="required"
+                message="El tipo de identificación es requerido"
+              >
+              </dxi-validation-rule>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dxTipo
+                  id="dxTipo"
+                  [dataSource]="DTipoIdLegal"
+                  [readOnly]="readOnly"
+                  [(value)]="FAcreedores.TIPO_ID"
+                  valueExpr="TIPO"
+                  displayExpr="TIPO"
+                  (onValueChanged)="onSeleccTipoIdLegal($event)"
+                >
+                </dx-select-box>
+              </div>
+            </dxi-item>
+
+            <dxi-item dataField="PERSONA">
+              <dxo-label text="Nat/Jur"></dxo-label>
+              <dxi-validation-rule
+                type="required"
+                message="El tipo de persona (Nat/Jur) es requerido"
+              >
+              </dxi-validation-rule>
+              <div *dxTemplate>
+                <dx-select-box
+                  #dxPersona
+                  id="dxPersona"
+                  [dataSource]="DPersona"
+                  [readOnly]="readOnly"
+                  [(value)]="FAcreedores.PERSONA"
+                  valueExpr="PERSONA"
+                  displayExpr="PERSONA"
+                  (onValueChanged)="onSeleccPersona($event)"
+                >
+                </dx-select-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+      <br />
+    </div>
+  </div>
+
+  <div class="row gx-3">
+    <div class="col-12">
+      <div class="card-content" id="CXP200" #CXP200>
+        <div class="container-child-dos-app xt-gesptabs">
+          <dx-tabs
+            class="xt-tabs-gespro"
+            [scrollByContent]="true"
+            [showNavButtons]="true"
+            [selectedIndex]="0"
+            (onItemClick)="onTabChanged($event)"
+          >
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-tarea-sl"></i>
+                <span style="margin-left: 5px"> General </span>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-tarea-sl"></i>
+                <span style="margin-left: 5px"> Ubicaciones </span>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-tarea-sl"></i>
+                <span style="margin-left: 5px"> Financieros </span>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-tarea-sl"></i>
+                <span style="margin-left: 5px"> Datos Ventas </span>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <div *dxTemplate>
+                <i class="icon-tarea-sl"></i>
+                <span style="margin-left: 5px"> Histórico </span>
+              </div>
+            </dxi-item>
+          </dx-tabs>
+
+          <div id="tabsContentGespro" class="content dx-fieldset">
+            <div [style.display]="tabVisible[0]">
+              <dx-form
+                #formIdentificacion
+                id="formIdentificacion"
+                labelLocation="top"
+                [formData]="FAcreedores"
+                [readOnly]="readOnly"
+                [colCount]="2"
+                labelLocation="left"
+              >
+                <dxi-item
+                  itemType="group"
+                  cssClass="first-group"
+                  [colCount]="2"
+                  [colSpan]="2"
+                >
+                  <dxi-item dataField="ID_GRUPO" editorType="dxGrupo">
+                    <dxo-label text="Grupo"></dxo-label>
+                    <div *dxTemplate>
+                      <dx-drop-down-box
+                        id="xs__ID_GRUPO"
+                        [(value)]="treeBoxGrupo"
+                        [(opened)]="isTreeBoxOpened"
+                        valueExpr="ID_GRUPO"
+                        displayExpr="NOMBRE"
+                        placeholder="Seleccione Grupo"
+                        [showClearButton]="true"
+                        [dataSource]="DGrupos"
+                        [readOnly]="readOnly"
+                        [inputAttr]="{ name: 'ID_GRUPO' }"
+                        [dropDownOptions]="dropDownOptions"
+                        (onKeyDown)="onKeyDownGrupo($event)"
+                      >
+                        <dxi-validation-rule
+                          type="required"
+                          message="Grupo de producto requerido"
+                        ></dxi-validation-rule>
+                        <div *dxTemplate="let data of 'content'">
+                          <dx-tree-list
+                            height="100%"
+                            [focusedRowIndex]="focusedRowIndex"
+                            keyExpr="ID_GRUPO"
+                            parentIdExpr="ID_GRUPO_PADRE"
+                            rootValue="CLIENTES"
+                            [dataSource]="DGrupos"
+                            [focusedRowEnabled]="true"
+                            [hoverStateEnabled]="true"
+                            [allowColumnResizing]="true"
+                            columnResizingMode="nextColumn"
+                            [(focusedRowKey)]="focusedRowKey"
+                            [autoNavigateToFocusedRow]="true"
+                            [autoExpandAll]="true"
+                            [(selectedRowKeys)]="treeBoxGrupo"
+                            (onCellPrepared)="onContentReadyGrupo($event)"
+                            (onSelectionChanged)="onSelectionGrupo($event)"
+                          >
+                            <dxo-selection mode="single"></dxo-selection>
+                            <dxo-scrolling
+                              showScrollbar="onScroll"
+                            ></dxo-scrolling>
+                            <dxo-search-panel
+                              [visible]="true"
+                              [width]="250"
+                            ></dxo-search-panel>
+                            <dxi-column
+                              dataField="ID_GRUPO"
+                              caption="Grupo"
+                              width="35%"
+                            ></dxi-column>
+                            <dxi-column
+                              dataField="NOMBRE"
+                              caption="Nombre"
+                            ></dxi-column>
+                          </dx-tree-list>
+                        </div>
+                      </dx-drop-down-box>
+                    </div>
+                  </dxi-item>
+
+                  <dxi-item dataField="CLASE" editorType="dxSelectBox">
+                    <dxo-label text="Clase"></dxo-label>
+                    <dxi-validation-rule
+                      type="required"
+                      message="La clase de cliente es requerida"
+                    >
+                    </dxi-validation-rule>
+                    <div *dxTemplate>
+                      <dx-select-box
+                        #dxClase
+                        id="dxClase"
+                        [(value)]="FAcreedores.CLASE"
+                        [dataSource]="[
+                          'SOCIOS',
+                          'EMPLEADOS',
+                          'CLIENTES',
+                          'CREDITO',
+                          'CONTADO',
+                          'FINANCIERO',
+                          'VINCULADOS ECONOMICOS',
+                          'GASTOS',
+                          'OTROS',
+                          'SERVICIOS TECNICOS',
+                          'LEASING',
+                          'HONORARIOS'
+                        ]"
+                        [readOnly]="readOnly"
+                        (onValueChanged)="onSeleccClase($event)"
+                      >
+                      </dx-select-box>
+                    </div>
+                  </dxi-item>
+
+                  <dxi-item dataField="PERFIL_TRIBUTARIO">
+                    <dxo-label text="Perfil Tributario"></dxo-label>
+                    <dxi-validation-rule
+                      type="required"
+                      message="El perfil tributario es requerido"
+                    >
+                    </dxi-validation-rule>
+                    <div *dxTemplate>
+                      <dx-text-box
+                        [value]="FAcreedores.PERFIL_TRIBUTARIO"
+                        placeholder="Perfil tributario"
+                        stylingMode="filled"
+                        [readOnly]="readOnly"
+                        (onKeyDown)="onKeyDownPerfil($event)"
+                      >
+                        <dxi-button
+                          name="btnPerfil"
+                          location="after"
+                          [options]="perfilButton"
+                        ></dxi-button>
+                      </dx-text-box>
+                    </div>
+                  </dxi-item>
+
+                  <dxi-item dataField="RT">
+                    <dxo-label text="Rep.Tributaria"></dxo-label>
+                    <dxi-validation-rule
+                      type="required"
+                      message="La representación tributaria es requerida"
+                    >
+                    </dxi-validation-rule>
+                    <div *dxTemplate>
+                      <dx-tag-box
+                        #repTrib
+                        id="repTrib"
+                        [dataSource]="DRT"
+                        placeholder="Seleccione RT"
+                        [dropDownOptions]="{
+                          width: 460,
+                          height: 'auto',
+                          hideOnParentScroll: true,
+                          container: '#router-container'
+                        }"
+                        [showMultiTagOnly]="false"
+                        [showSelectionControls]="true"
+                        [maxDisplayedTags]="5"
+                        applyValueMode="useButtons"
+                        [readOnly]="readOnly"
+                        [(value)]="FAcreedores.RT"
+                        [searchEnabled]="true"
+                        searchMode="contains"
+                        displayExpr="ID_RT"
+                        valueExpr="ID_RT"
+                        (onValueChanged)="onValueRT($event)"
+                        itemTemplate="customItem"
+                      >
+                        <div *dxTemplate="let data of 'customItem'">
+                          <div class="rep-trib" style="padding-right: 10px">
+                            <div style="width: 30%; float: left">
+                              {{ data.ID_RT }}
+                            </div>
+                            <div style="width: 70%; float: right">
+                              {{ data.DESCRIPCION }}
+                            </div>
+                          </div>
+                        </div>
+                      </dx-tag-box>
+                    </div>
+                  </dxi-item>
+
+                  <dxi-item dataField="CONTACTO">
+                    <dxo-label text="Contacto"></dxo-label>
+                    <app-xc-selectbox
+                      nombreObj="CONTACTO"
+                      [readOnly]="readOnly"
+                      [valorDefecto]="FAcreedores.CONTACTO"
+                      [customValue]="customValueSboxContacto"
+                      [events]="eventsSubjectSboxContacto.asObservable()"
+                      (onRespuestaSelecc)="onSeleccContacto($event)"
+                    >
+                    </app-xc-selectbox>
+                  </dxi-item>
+                </dxi-item>
+
+                <dxi-item itemType="group" cssClass="first-group" [colSpan]="2">
+                  <dxi-item
+                    dataField="COMENTARIOS"
+                    editorType="dxTextArea"
+                    [editorOptions]="{ height: 90, width: '100%' }"
+                  >
+                    <dxo-label text="Comentarios"></dxo-label>
+                  </dxi-item>
+                </dxi-item>
+              </dx-form>
+            </div>
+
+            <div [style.display]="tabVisible[1]">
+              <app-dirtelinfo
+                [events]="eventsSubjectDirTelInfo.asObservable()"
+                (onRespuestaSelecc)="onRespuestaDirTelInfo($event)"
+                [(dataEmail)]="DEmail"
+                [(dataDirecciones)]="DDirecciones"
+                [(dataTelefonos)]="DTelefonos"
+                [(dataContacto)]="DContactoAdic"
+              >
+              </app-dirtelinfo>
+            </div>
+
+            <div [style.display]="tabVisible[2]">
+              <VEN20901
+                [events]="eventsSubjectCondProv.asObservable()"
+                (onRespuestaSelecc)="onRespuestaCondProv($event)"
+                [(dataCondiciones)]="DCondiciones"
+                [(dataProveedoresPro)]="DClientesPro"
+                [(dataBancos)]="DBancos"
+              >
+              </VEN20901>
+            </div>
+
+            <div [style.display]="tabVisible[3]">
+              <dx-form
+                #formIdentificacion
+                id="formIdentificacion"
+                labelLocation="top"
+                [formData]="FAcreedores"
+                [readOnly]="readOnly"
+                [colCount]="2"
+                labelLocation="left"
+              >
+                <dxi-item
+                  itemType="group"
+                  cssClass="first-group"
+                  [colCount]="2"
+                  [colSpan]="2"
+                >
+                  <dxi-item dataField="ZONA" editorType="dxSelectBox">
+                    <dxo-label text="Zona"></dxo-label>
+                    <div *dxTemplate>
+                      <dx-select-box
+                        #dxClase
+                        id="dxClase"
+                        [(value)]="FAcreedores.ZONA"
+                        [dataSource]="DZona"
+                        displayExpr="NOMBRE"
+                        valueExpr="ID_UBICACION"
+                        [readOnly]="readOnly"
+                        (onValueChanged)="onSeleccClase($event)"
+                      >
+                      </dx-select-box>
+                    </div>
+                  </dxi-item>
+
+                  <dxi-item dataField="ID_ADC" editorType="dxSelectBox">
+                    <dxo-label text="ADC"></dxo-label>
+                    <div *dxTemplate>
+                      <dx-select-box
+                        #dxClase
+                        id="dxClase"
+                        [(value)]="FAcreedores.ID_ADC"
+                        [dataSource]="DADC"
+                        displayExpr="NOMBRE_COMPLETO"
+                        valueExpr="ID_ADC"
+                        [readOnly]="readOnly"
+                        (onValueChanged)="onSeleccClase($event)"
+                      >
+                      </dx-select-box>
+                    </div>
+                  </dxi-item>
+
+                  <dxi-item dataField="STATUS" editorType="dxSelectBox">
+                    <dxo-label text="Status"></dxo-label>
+                    <div *dxTemplate>
+                      <dx-select-box
+                        #dxClase
+                        id="dxClase"
+                        [(value)]="FAcreedores.STATUS"
+                        [dataSource]="DStatus"
+                        displayExpr="STATUS"
+                        valueExpr="STATUS"
+                        [readOnly]="readOnly"
+                        (onValueChanged)="onSeleccClase($event)"
+                      >
+                      </dx-select-box>
+                    </div>
+                  </dxi-item>
+                </dxi-item>
+              </dx-form>
+            </div>
+
+            <div [style.display]="tabVisible[4]"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <dx-load-panel
+      #loaderPanel
+      shadingColor="rgba(0,0,0,0.4)"
+      [position]="{ of: '#router-container' }"
+      [(visible)]="loadingVisible"
+      [showIndicator]="true"
+      [showPane]="true"
+      [shading]="true"
+      message="Un momento. Cargando datos..."
+      [hideOnOutsideClick]="false"
+    ></dx-load-panel>
+
+    <app-xc-combo-grid
+      [events]="eventsSubjectPerfilTrib.asObservable()"
+      (onRespuestaSelecc)="onRespuestaPerfilTrib($event)"
+    >
+    </app-xc-combo-grid>
+
+    <app-filtrobusq
+      [events]="eventsSubjectFiltro.asObservable()"
+      (onRespuestaSelecc)="onRespuestaFiltro($event)"
+    >
+    </app-filtrobusq>
+
+    <app-geninformes [events]="eventsSubjectInformes.asObservable()">
+    </app-geninformes>
+
+    <app-vistarapida
+      id="vistaven209"
+      [aplicacion]="prmUsrAplBarReg.aplicacion"
+    ></app-vistarapida>
+  </div>
+</div>

@@ -1,0 +1,112 @@
+<dx-data-grid
+    #gridDoc
+    id="gridDoc"
+    class="xt-datagrid"
+    noDataText="" 
+    [dataSource]="DDocumentacion"
+    keyExpr="ITEM"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    [showBorders]="true"
+    [focusedRowEnabled]="true"
+    (onContentReady)="onContentReady($event)"
+    (onInitNewRow)="onInitNewRow($event)"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onRowInserting)="insertingRow($event)"
+    (onRowInserted)="insertedRow($event)"
+    (onRowUpdating)="updatingRow($event)"
+    (onRowUpdated)="updatedRow($event)"
+    (onRowRemoved)="removedRow($event)"
+    (onEditingStart)="onEditingStart($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onSelectionChanged)="selectionGrid($event)"
+    >
+    <dxo-editing 
+        mode="cell"
+        [useIcons]="false" 
+        [allowUpdating]="esEdicion" 
+        [allowDeleting]="esEdicion" 
+        [allowAdding]="esEdicion">
+        <dxo-texts
+            confirmDeleteMessage="">
+        </dxo-texts>
+    </dxo-editing>
+
+    <dxo-selection 
+        selectAllMode="allPages"     
+        [showCheckBoxesMode]="esVisibleSelecc" 
+        mode="multiple">
+    </dxo-selection>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+    <dxi-column dataField="DOCUMENTO" caption="Documento" >
+        <dxo-lookup
+            [dataSource]="DListaTipoDoc"
+            displayExpr="DOCUMENTO"
+            valueExpr="DOCUMENTO"
+            placeholder="Tipo"
+        >
+        </dxo-lookup>
+    </dxi-column>
+    
+    <dxi-column dataField="ARCHIVO" 
+                caption="Archivo" 
+                width="40%"
+                calculateDisplayValue="ARCHIVO"
+                cellTemplate="celltempArchivo"
+                editCellTemplate="tempArchivo"
+    ></dxi-column>
+    <dxi-column dataField="FECHA" 
+                calculateDisplayValue="FECHA" 
+                caption="Fecha" 
+                dataType="date" 
+    ></dxi-column>
+
+    <div *dxTemplate="let cellInfo of 'celltempArchivo'" >
+        <div id="idArchivo">
+            <a [routerLink]="[]" (click)="onClickAbrir(archivoDoc, cellInfo)">{{ cellInfo.data.ARCHIVO }}</a>
+        </div>
+    </div>
+    <div *dxTemplate="let cellInfo of 'tempArchivo'" >
+        <div id="idArchivo">
+            <a [routerLink]="[]" (click)="onClickAbrir(archivoDoc, undefined)">{{ archivoDoc === '' ? '' : archivoDoc }}</a>
+            <dx-button icon="folder" style="margin-left: 10px;" (onClick)="onClickCargar(cellInfo)"> </dx-button>
+        </div>
+    </div>
+
+    <dxo-toolbar *ngIf="esEdicion">
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+            </dx-button>
+            </div>
+        </dxi-item>
+    </dxo-toolbar>
+    
+</dx-data-grid>
+

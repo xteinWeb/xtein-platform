@@ -1,0 +1,115 @@
+<div class="container-fluid">
+  <div class="row">
+   
+    <div class="d-none d-md-block col-md-7 col-l-8 col-xl-9 p-0 img-container">
+      <img class="img" src="assets/img/background/background-login.jpg" />
+    </div>
+
+    <div class="-col-12 col-md-5 col-l-4 col-xl-3 align-self-center">
+      <div id="container-from-login" class="text-center align-middle">
+        <div class="loading-logo my-3">
+          <img src="assets/img/logo/xtein.svg" width="50%" alt="Logo" />
+        </div>
+        
+        <br>
+
+        <label class="mb-2" style="font-size:20px; font-weight:300;">Iniciar Sesión</label>
+        <dx-form
+          #formLogin
+          id="formLogin"
+          width="100%"
+          [formData]="FLogin"
+          colCount="1"
+          labelMode="hidden"
+        >
+          <dxi-item dataField="USUARIO">
+            <div *dxTemplate>
+              <div class="input-group mb-4">
+                <div class="icon-size">
+                  <span class="input-group-text"><i class="icon-usuario"></i></span>
+                </div>
+                <dx-text-box
+                  class="xt-text-input-login"
+                  width="85%"
+                  placeholder="Usuario"
+                  [value]="FLogin.USUARIO"
+                  autocomplete="off"
+                  (onValueChanged)="focusOutFunction($event)"
+                >
+                  <dxi-validation-rule type="required" message="Usuario es requerido"></dxi-validation-rule>
+                </dx-text-box>
+              </div>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="PASSWORD">
+            <div *dxTemplate>
+              <div class="input-group mb-4">
+                <div class="icon-size">
+                  <span class="input-group-text"><i class="icon-secure-sl"></i></span>
+                </div>
+                <dx-text-box
+                  class="xt-text-input-login"
+                  width="85%"
+                  mode="password"
+                  [showClearButton]="true"
+                  placeholder="Contraseña"
+                  [value]="FLogin.PASSWORD"
+                  [(mode)]="passwordMode"
+                  (onFocusIn)="onFocusInButtonPassword($event)"
+                  (onFocusOut)="onFocusOutButtonPassword($event)"
+                  (onValueChanged)="onValueChangedPassword($event)"
+                >
+                  <dxi-button
+                    name="today"
+                    location="after"
+                    *ngIf="visiblePasswordIconVer"
+                    [options]="buttonOptionsVer"
+                  ></dxi-button>
+                  <dxi-button
+                    name="today"
+                    location="after"
+                    *ngIf="visiblePasswordIconOcultar"
+                    [options]="buttonOptionsOcultar"
+                  ></dxi-button>
+                </dx-text-box>
+                <dxi-validation-rule type="required" message="Digite contraseña"></dxi-validation-rule>
+              </div>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="EMPRESA" >
+            <div *dxTemplate>
+              <div class="input-group mb-4 nombres">
+                <div class="icon-size">
+                  <span class="input-group-text"><i class="icon-building-sl"></i></span>
+                </div>
+                <dx-select-box
+                  class="xt-text-input-login"
+                  width="85%"
+                  placeholder="Seleccione Empresa..."
+                  [dataSource]="empresas"
+                  valueExpr="ID_UN"
+                  displayExpr="NOMBRE"
+                  [value]="FLogin.EMPRESA"
+                  (onValueChanged)="onValueChangedEmpresa($event)"
+                ></dx-select-box>
+                <dxi-validation-rule type="required" message="Seleccione una empresa"></dxi-validation-rule>
+              </div>
+            </div>
+          </dxi-item>
+        </dx-form>
+
+        <br>
+
+        <div class="row justify-content-center">
+          <button (click)="login(FLogin)" class="btn btn-primary col-10">INICIAR</button>
+          <a class="btn btn-link px-0 text-muted">¿Has olvidado tu contrasena?</a>
+        </div>
+
+      </div>
+    </div>
+
+    <app-password></app-password>
+  </div>
+</div>

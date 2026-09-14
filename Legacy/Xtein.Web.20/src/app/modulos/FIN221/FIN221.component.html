@@ -1,0 +1,520 @@
+<div class="row gx-3" id="PRO033" #PRO033>
+  <div class="col-12">
+    <div class="card-content">
+
+      <dx-form #formPlanesFin id="formPlanesFin" [formData]="FPlanes" [colCount]="1" [readOnly]="readOnly"
+        labelLocation="top" (onFieldDataChanged)="onFormDefFieldDataChanged($event)">
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+        <dxi-item itemType="group" [colSpan]="1" [colCount]="2">
+
+          <dxi-item dataField="ID_PLAN"
+            editorType="dxTextBox"
+            [editorOptions]="{
+              placeholder: 'ID_PLAN',
+            }"
+          >
+            <dxo-label text="Id Plan"></dxo-label>
+            <dxi-validation-rule type="required" message="Id Plan es requerido">
+            </dxi-validation-rule>
+            <dxi-validation-rule
+              type="async"
+              message="Este plan ya existe!"
+              [validationCallback]="ValideExistenciaPlan"
+            >
+            </dxi-validation-rule>
+            <!-- <div *dxTemplate>
+              <dx-text-box placeholder="Id Plan" [(value)]="FPlanes.ID_PLAN" [readOnly]="readOnly"
+                (onValueChanged)="onValueChanged($event, 'ID_PLAN')">
+              </dx-text-box>
+            </div> -->
+          </dxi-item>
+          <dxi-item dataField="ESTADO">
+            <dxo-label text="Estado"></dxo-label>
+            <div *dxTemplate>
+              <dx-select-box
+                placeholder="Seleccione el estado"
+                [readOnly]="readOnly"
+                [(value)]="FPlanes.ESTADO"
+                [dataSource]="['ACTIVO', 'INACTIVO']"
+                (onValueChanged)="onValueChanged($event, 'ESTADO')"
+              ></dx-select-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item dataField="DESCRIPCION">
+          <dxo-label text="Descripción"></dxo-label>
+          <dxi-validation-rule type="required" message="La descripción es requerida"></dxi-validation-rule>
+          <div *dxTemplate>
+            <dx-text-box
+              placeholder="Descripción"
+              [readOnly]="readOnly"
+              [(value)]="FPlanes.DESCRIPCION"
+              (onValueChanged)="onValueChanged($event, 'DESCRIPCION')"
+            ></dx-text-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="TIPO_FRECUENCIA">
+          <dxo-label text="Frecuencia"></dxo-label>
+          <dxi-validation-rule type="required" message="Debe seleccionar la frecuencia"></dxi-validation-rule>
+          <div *dxTemplate>
+            <dx-select-box
+              placeholder="Seleccione la frecuencia"
+              [readOnly]="readOnly"
+              [(value)]="FPlanes.TIPO_FRECUENCIA"
+              [dataSource]="['Variable', 'Constante']"
+              (onValueChanged)="onValueChanged($event, 'TIPO_FRECUENCIA')"
+            ></dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colSpan]="1" [colCount]="2">
+          <dxi-item
+            dataField="FRECUENCIA"
+            *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+          >
+            <dxo-label text="N° Dias"></dxo-label>
+            <dxi-validation-rule type="required" message="Debe ingresar el número de días"></dxi-validation-rule>
+            <div *dxTemplate>
+              <dx-number-box
+                placeholder="N° Dias"
+                [readOnly]="readOnly"
+                [(value)]="FPlanes.FRECUENCIA"
+                (onValueChanged)="onValueChanged($event, 'FRECUENCIA')"
+              ></dx-number-box>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="DIAS_PRIMERA_CUOTA">
+            <dxo-label text="Dias 1ra Cuota"></dxo-label>
+            <div *dxTemplate>
+              <dx-number-box
+                placeholder="Dias 1ra Cuota"
+                [readOnly]="readOnly"
+                [(value)]="FPlanes.DIAS_PRIMERA_CUOTA"
+                (onValueChanged)="onValueChanged($event, 'DIAS_PRIMERA_CUOTA')"
+              ></dx-number-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colSpan]="1" [colCount]="2">
+          <dxi-item dataField="FINANCIAR_GRAV">
+            <dxo-label text="Financiar Grav"></dxo-label>
+            <div *dxTemplate>
+              <dx-select-box
+                placeholder="Seleccione la Financiación de Grav"
+                [readOnly]="readOnly"
+                [(value)]="FPlanes.FINANCIAR_GRAV"
+                [dataSource]="['FINANCIADOS', 'PRIMERA CUOTA']"
+                (onValueChanged)="onValueChanged($event, 'FINANCIAR_GRAV')"
+              ></dx-select-box>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="NUMERO_PAGOS">
+            <dxo-label text="Número de Pagos"></dxo-label>
+            <div *dxTemplate>
+              <dx-number-box
+                placeholder="Número de Pagos"
+                [readOnly]="readOnly"
+                [(value)]="FPlanes.NUMERO_PAGOS"
+                (onValueChanged)="onValueChanged($event, 'NUMERO_PAGOS')"
+              ></dx-number-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </div>
+
+  <div class="row gx-3">
+    <div class="col-12">
+      <div class="card-content card-table" id="FIN224" #FIN224>
+        <div class="container-child-dos-app xt-gesptabs">
+          <dx-data-grid
+            #gridPlanesFin
+            id="gridPlanesFin"
+            [columnAutoWidth]="true"
+            [dataSource]="Itm_PlanesFin"
+            [allowColumnResizing]="true"
+            [columnAutoWidth]="true"
+            columnResizingMode="widget"
+            [focusedRowEnabled]="true"
+            [rowAlternationEnabled]="true"
+            [hoverStateEnabled]="true"
+            keyExpr="ITEM"
+            noDataText=""
+            [showBorders]="true"
+            (onContentReady)="onContentReady($event)"
+            (onRowValidating)="onRowValidating($event)"
+            (onInitNewRow)="onInitNewRowPro($event)"
+            (onSelectionChanged)="selectionGrid($event)"
+            (onEditingStart)="onEditingStart($event)"
+            (onEditingStart)="startEdit($event)">
+
+            <dxo-editing mode="row" [useIcons]="false" [allowUpdating]="!readOnly" [allowDeleting]="false"
+              [allowAdding]="!readOnly">
+              <dxo-texts confirmDeleteMessage=""> </dxo-texts>
+            </dxo-editing>
+            <dxo-scrolling mode="virtual"></dxo-scrolling>
+            <dxo-selection
+              selectAllMode="allPages"
+              [showCheckBoxesMode]="esVisibleSelecc"
+              mode="multiple"
+            >
+            </dxo-selection>
+
+            <dxi-column
+              dataField="ID_TASA"
+              caption="Tasa Financiera"
+              editCellTemplate="editListaTasa"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="PAGO"
+              caption="Pagos"
+              editCellTemplate="editPagos"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="DIAS"
+              caption="N° Dias"
+              editCellTemplate="editDias"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Variable'"
+            >
+            </dxi-column>
+
+            <dxi-column
+              dataField="PORC_GRAV"
+              caption="% Grav"
+              editCellTemplate="editPORC_GRAV"
+              [format]="customFormatPorcentaje"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Variable'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="PORC_PAGO"
+              caption="% Pago"
+              editCellTemplate="editPORC_PAGO"
+              [format]="customFormatPorcentaje"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Variable'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="PORC_TASA"
+              caption="% Tasa"
+              editCellTemplate="editPORC_TASA"
+              [format]="customFormatPorcentaje"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="FACTOR"
+              caption="Factor"
+              editCellTemplate="editFactor"
+              cellTemplate="cellFactor"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="DESCUENTO_PPP"
+              caption="% Des PPP"
+              editCellTemplate="editDESCUENTO_PPP"
+              [format]="customFormatPorcentaje"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="CUOTA_INICIAL"
+              caption="Cuota Inicial"
+              editCellTemplate="editCUOTA_INICIAL"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+
+            <dxi-column
+              dataField="TIPO_CI"
+              caption="Tipo Valor"
+              editCellTemplate="editTIPO_CI"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="MINIMO_CI"
+              caption="Valor Minimo"
+              editCellTemplate="editMINIMO_CI"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="DIAS_PLAZO_CI"
+              caption="Dias de plazo"
+              editCellTemplate="editDIAS_PLAZO_CI"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="DIFERIR_CI"
+              caption="1ra Cuota CI"
+              editCellTemplate="editDIFERIR_CI"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="DESCONTAR_CI"
+              caption="Desc CI"
+              editCellTemplate="editDESCONTAR_CI"
+              *ngIf="FPlanes.TIPO_FRECUENCIA === 'Constante'"
+            >
+            </dxi-column>
+            <dxi-column
+              dataField="ID_CONDICION"
+              caption="Tipo Condición"
+              editCellTemplate="editCondicion"
+            >
+            </dxi-column>
+
+            <div *dxTemplate="let cellInfo of 'cellFactor'">
+              <span>
+                {{
+                  cellInfo.data.FACTOR
+                    | number
+                      : (cellInfo.data.FACTOR?.toString().length > 5
+                          ? "1.8-8"
+                          : "1.2-2")
+                }}
+              </span>
+            </div>
+
+            <!-- TEMPLATE -->
+            <div *dxTemplate="let cellInfo of 'editListaTasa'">
+              <dx-select-box
+                #dxEstado
+                id="dxPLAN_FINANCIERO"
+                displayExpr="ID_TASA"
+                valueExpr="ID_TASA"
+                [dataSource]="DLTasas"
+                [(value)]="cellInfo.data.ID_TASA"
+                [readOnly]="readOnly"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'ID_TASA')
+                "
+              >
+              </dx-select-box>
+            </div>
+
+            <div *dxTemplate="let cellInfo of 'editPagos'">
+              <dx-select-box
+                placeholder="Seleccione el Pago"
+                [(value)]="cellInfo.data.PAGO"
+                [dataSource]="DLNDias"
+                [readOnly]="FPlanes.TIPO_FRECUENCIA === 'Variable'"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'PAGO')
+                "
+              ></dx-select-box>
+            </div>
+
+            <div *dxTemplate="let cellInfo of 'editDias'">
+              <dx-number-box
+                placeholder="Dias"
+                [value]="cellInfo.data.DIAS"
+                [min]="0"
+                [readOnly]="readOnly"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'DIAS')
+                "
+              >
+              </dx-number-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editPORC_GRAV'">
+              <dx-number-box
+                placeholder="% Grav"
+                [value]="cellInfo.data.PORC_GRAV"
+                [min]="0"
+                [readOnly]="readOnly"
+                [format]="customFormatPorcentaje"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'PORC_GRAV')
+                "
+              >
+              </dx-number-box>
+            </div>
+
+            <div *dxTemplate="let cellInfo of 'editPORC_PAGO'">
+              <dx-number-box
+                placeholder="% Pago"
+                [value]="cellInfo.data.PORC_PAGO"
+                [min]="0"
+                [max]="30"
+                [format]="customFormatPorcentaje"
+                [readOnly]="readOnly"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'PORC_PAGO')
+                "
+              >
+              </dx-number-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editPORC_TASA'">
+              <dx-number-box
+                placeholder="% Tasa"
+                [value]="cellInfo.data.PORC_TASA"
+                [min]="0"
+                [format]="customFormatPorcentaje"
+                [readOnly]="readOnly"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'PORC_TASA')
+                "
+              >
+              </dx-number-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editFactor'">
+              <dx-number-box placeholder="Factor" [value]="cellInfo.data.FACTOR" [readOnly]="!cellInfo.data.ID_TASA || readOnly" [min]="0"
+                [format]="customFormatFactor" (onValueChanged)="onValueChangedGridLista($event, cellInfo, 'FACTOR')">
+              </dx-number-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editDESCUENTO_PPP'">
+              <dx-number-box
+                placeholder="% Descuento PPP"
+                [value]="cellInfo.data.DESCUENTO_PPP"
+                [min]="0"
+                [max]="100"
+                [format]="customFormatPorcentaje"
+                [readOnly]="readOnly"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'DESCUENTO_PPP')
+                "
+              >
+              </dx-number-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editCUOTA_INICIAL'">
+              <dx-select-box
+                placeholder="Seleccione cuota inicial"
+                [(value)]="cellInfo.data.CUOTA_INICIAL"
+                [dataSource]="['Si', 'No']"
+                [readOnly]="readOnly"
+                (onValueChanged)="
+                  onValueChangedGridLista($event, cellInfo, 'CUOTA_INICIAL')
+                "
+              ></dx-select-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editTIPO_CI'">
+              <dx-select-box placeholder="Tipo Valor" [(value)]="cellInfo.data.TIPO_CI" [readOnly]="cellInfo.data.CUOTA_INICIAL !== 'Si' || readOnly"
+                [dataSource]="['Porcentaje','Valor']"
+                (onValueChanged)="onValueChangedGridLista($event, cellInfo, 'TIPO_CI')"></dx-select-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editMINIMO_CI'">
+              <dx-number-box placeholder="Valor Minimo" [(value)]="cellInfo.data.MINIMO_CI" [min]="0"
+                [format]="cellInfo.data.TIPO_CI === 'Valor' ? customFormatPorcentaje : customFormatNormal"
+                (onValueChanged)="onValueChangedGridLista($event, cellInfo, 'MINIMO_CI')"
+                [readOnly]="cellInfo.data.CUOTA_INICIAL !== 'Si' || readOnly"></dx-number-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editDIAS_PLAZO_CI'">
+              <dx-number-box placeholder="Dias de plazo" [(value)]="cellInfo.data.DIAS_PLAZO_CI" [min]="0"
+                (onValueChanged)="onValueChangedGridLista($event, cellInfo, 'DIAS_PLAZO_CI')"
+                [readOnly]="cellInfo.data.CUOTA_INICIAL !== 'Si' || readOnly"></dx-number-box>
+            </div>
+
+            <div *dxTemplate="let cellInfo of 'editDIFERIR_CI'">
+              <dx-select-box placeholder="Tomar primera cuota como CI" [(value)]="cellInfo.data.DIFERIR_CI"
+                [dataSource]="['Si','No']" [readOnly]="cellInfo.data.CUOTA_INICIAL !== 'Si' || readOnly"
+                (onValueChanged)="onValueChangedGridLista($event, cellInfo, 'DIFERIR_CI')"></dx-select-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editDESCONTAR_CI'">
+              <dx-select-box placeholder="Descontar CI antes de financiar" [(value)]="cellInfo.data.DESCONTAR_CI"
+                [dataSource]="['Si','No']" [readOnly]="cellInfo.data.CUOTA_INICIAL !== 'Si' || readOnly"
+                (onValueChanged)="onValueChangedGridLista($event, cellInfo, 'DESCONTAR_CI')"></dx-select-box>
+            </div>
+            <div *dxTemplate="let cellInfo of 'editCondicion'">
+              <dx-select-box
+                  [(value)]="cellInfo.value"
+                  [stylingMode]="'filled'"
+                  [dataSource]="DCondiciones"
+                  displayExpr="ID_CONDICION"
+                  valueExpr="ID_CONDICION"
+                  [searchEnabled]="true"
+                  searchMode="contains"
+                  [dropDownOptions]="dropDownOptions"
+                  (onSelectionChanged)="onCondicSelecc($event, cellInfo)">
+                  >
+              </dx-select-box>
+            </div>
+
+            <dxo-toolbar *ngIf="!readOnly">
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button
+                    icon="plus"
+                    matTooltip="Nuevo"
+                    (onClick)="operGrid($event, 'new')"
+                    *ngIf="rowNew"
+                  >
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button
+                    icon="edit"
+                    matTooltip="Actualizar"
+                    (onClick)="operGrid($event, 'edit')"
+                    *ngIf="rowEdit"
+                  >
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button
+                    icon="trash"
+                    matTooltip="Eliminar"
+                    (onClick)="operGrid($event, 'delete')"
+                    *ngIf="rowDelete"
+                  >
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button
+                    icon="todo"
+                    matTooltip="Guardar"
+                    (onClick)="operGrid($event, 'save')"
+                    *ngIf="rowApplyChanges"
+                  >
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button
+                    icon="undo"
+                    matTooltip="Cancelar"
+                    (onClick)="operGrid($event, 'cancel')"
+                    *ngIf="rowApplyChanges"
+                  >
+                  </dx-button>
+                </div>
+              </dxi-item>
+            </dxo-toolbar>
+          </dx-data-grid>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-filtrobusq
+  [events]="eventsSubjectFiltro.asObservable()"
+  (onRespuestaSelecc)="onRespuestaFiltro($event)"
+>
+</app-filtrobusq>
+
+<app-vistarapida
+  id="vistafin221"
+  [aplicacion]="prmUsrAplBarReg.aplicacion"
+></app-vistarapida>
+
+<app-geninformes [events]="eventsSubjectInformes.asObservable()">
+</app-geninformes>

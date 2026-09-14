@@ -1,0 +1,152 @@
+<div class="dx-fieldset  mt-0 card-content">
+
+  <!-- Principal -->
+  <div class="inf-principal" *ngIf="pasoInforme==0">
+
+    <div class="dx-fieldset-header">Biblioteca</div>
+
+      <!-- partial:index.partial.html -->
+      <div class="container-fluid p-0">
+        <div class="row gx-3 drag-list">
+          <div class="col-sm-2 drag-item" draggable="true">
+            <div class="tile nuevo">
+              <i class="fi fi-br-plus"></i>
+              <p class="card-title1">Crear nuevo informe</p>
+              <p class="card-title2">Diseñe y personalice un informe</p>
+            </div>
+          </div>
+
+          <div class="col-sm-2 drag-item" draggable="true">
+            <div class="tile primary">
+              <div class="img-card mb-3">
+                <img class="img-informe-prev" src="../../../../assets/img/informe-preview.png">
+              </div>
+              <p class="tit-tile px-1">Top de compras</p>
+            </div>
+          </div>
+
+          <div class="col-sm-2 drag-item" draggable="true">
+            <div class="tile primary">
+              <p class="tit-tile">Comportamiento de ventas</p>
+            </div>
+          </div>
+          <div class="col-sm-2 drag-item" draggable="true">
+            <div class="tile primary">
+              <p class="tit-tile">Cartera general</p>
+            </div>
+          </div>
+          <div class="col-sm-2 drag-item" draggable="true">
+            <div class="tile primary">
+              <p class="tit-tile">General de productos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <hr>
+    <div class="dx-fieldset-header">Módulos</div>
+
+      <!-- partial:index.partial.html -->
+      <div class="container-fluid p-0">
+        <div class="row gx-3 drag-list">
+          <div class="col-sm-2 drag-item" 
+              *ngFor="let modapl of listaModulos">
+
+            <!-- Abre informes del módulo -->
+            <div (click)="cargarInformeMod(modapl.ID_APLICACION);" 
+                 style="cursor: pointer;"
+                 class="tile-modulo primary">
+              <i class="{{ modapl.IMAGEN_URL }} img-modulo"></i>
+              <p class="tit-tile-modulo">{{ modapl.NOMBRE }}</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+  </div>
+
+</div>
+
+<!-- Navegación Informes del módulo o aplicación -->
+<div class="inf-asistente" *ngIf="pasoInforme==1">
+  <app-pasos [prmdatos]="prmDatosPasos"></app-pasos>
+
+  <!-- Categoriza reportes del módulo -->
+  <dx-gallery
+    #tabsPasosModulo
+    id="tabsPasosModulo"  
+    [dataSource]="tabsInformesModApl"
+    width="100%"
+    [loop]="true"
+    [showIndicator]="false"
+  >
+    <div *dxTemplate="let galleryItem of 'item'">
+
+      <!-- Lista de informes del módulo por sección -->
+      <div class="row gx-3 drag-list">
+        <div class="col-sm-2 drag-item" *ngFor="let infmod of galleryItem.REPORTES">
+          <div class="tile info-modulo">
+            <div (click)="generarInforme(infmod);" 
+                style="cursor: pointer;" 
+                class="img-card">
+              <img class="img-informe-prev" src="../../../../assets/img/informe-preview.png">
+            </div>
+            <table cellPadding="0" cellSpacing="0" style="table-layout: fixed;">
+              <tr>
+                <td height="10px" style="padding: 0; text-align: left;">
+                  <p class="tit-title-infmod">{{infmod.NOMBRE}}</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 0px 0px 0px 0px; white-space: normal;">
+                  <p class="tit-title-infdesc">{{infmod.DESCRIPCION}}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Opciones de visualización -->
+            <a href="javascript:void(0)" (click)="verUltimo(infmod)" class="link-info ver-ultimo">Ver último</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </dx-gallery>
+
+  
+</div>  
+
+<!-- Generación del reporte -->
+<div class="inf-generacion" *ngIf="pasoInforme==2">
+
+  <app-pasos [prmdatos]="prmDatosPasos"></app-pasos>
+
+  <dx-gallery
+    #tabsPasosGenInf
+    id="tabsPasosGenInf"  
+    [dataSource]="tabsGenInforme"
+    height="100%"
+    width="100%"
+    [loop]="true"
+    [showIndicator]="false"
+  >
+    <div *dxTemplate="let galleryItem of 'item'">
+      <div>
+        <div *ngIf="galleryItem === 'Agrupación'">
+          <app-agrupar></app-agrupar>
+        </div>
+        <div *ngIf="galleryItem === 'Ordenamiento'">
+          <app-ordenar></app-ordenar>
+        </div>
+        <div *ngIf="galleryItem === 'Especificaciones'">
+          <!-- <app-infoespec></app-infoespec> -->
+        </div>
+        <div *ngIf="galleryItem === 'Filtro'">
+          <!-- <app-infofiltro></app-infofiltro> -->
+        </div>
+      </div>
+    </div>
+  </dx-gallery>
+
+</div>  

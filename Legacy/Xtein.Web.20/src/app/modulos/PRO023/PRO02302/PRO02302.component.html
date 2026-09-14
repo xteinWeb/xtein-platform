@@ -1,0 +1,679 @@
+
+<div #silumadorCapacidad id="silumadorCapacidad" style="width: 100%; height: 100%;" >
+  <dx-scroll-view width="100%" height="100%">
+
+    <span><h3>Rengo de fechas programadas</h3></span>
+    <div class="row gx-3">
+      <div class="row" style="display: flex; align-items: center;">
+        <div class="col-2">
+          <span class="text-editor-caption"> Fecha Desde </span>
+          <dx-date-box
+            [value]="fechaDesde"
+            type="datetime"
+            [readOnly]="true"
+          ></dx-date-box>
+        </div>
+    
+        <div class="col-2">
+          <span class="text-editor-caption"> Fecha Hasta </span>
+          <dx-date-box
+            [value]="fechaHasta"
+            type="datetime"
+            [readOnly]="true"
+          ></dx-date-box>
+        </div>
+
+        <!-- <div class="col-2">
+          <dx-check-box #checkCriterios id="checkCriterios" text="Aplicar criterios" class="check-filtro"
+            [readOnly]="false" (onValueChanged)="activeFiltros = $event.value"
+          ></dx-check-box>
+        </div> -->
+  
+        <div class="col-3" style="display: flex; align-items: center;">
+          <!-- <dx-button
+            stylingMode="contained"
+            text="Balancear"
+            type="success"
+            [width]="'auto'"
+            class="align-self-end"
+            style="margin-right: 5px;"
+            [disabled]="(activeFiltros && (activeCriterio1 || activeCriterio2 || activeCriterio3) ) ? false : true"
+            (onClick)="calcularFechas($event)"
+          ></dx-button>
+          <dx-button
+            stylingMode="contained"
+            text="Generar PMP"
+            type="success"
+            [width]="'auto'"
+            class="align-self-end"
+            [disabled]="(fechaDesde === null || fechaDesde === undefined) ||
+                        (fechaHasta === null || fechaHasta === undefined)
+                        ? true : 
+                        (activeFiltros && (FSimulador.FECHA_ENTREGA === null || FSimulador.FECHA_ENTREGA === undefined) &&
+                         (!FSimulador.CRITERIO_1 || !FSimulador.CRITERIO_2 || !FSimulador.CRITERIO_3 ||
+                          !FSimulador.CRITERIO_4 || !FSimulador.CRITERIO_5 || !FSimulador.CRITERIO_6 )
+                        )
+                        ? false :
+                        false"
+              (onClick)="opPrepararGuardar('GUARDAR AGENDA')"
+          ></dx-button> -->
+
+          <dx-button
+            stylingMode="contained"
+            text="Generar PMP"
+            type="success"
+            [width]="'auto'"
+            class="align-self-end"
+            [disabled]="(fechaDesde === null || fechaDesde === undefined) ||
+                        (fechaHasta === null || fechaHasta === undefined)
+                        ? true : 
+                        false"
+              (onClick)="opPrepararGuardar('GUARDAR AGENDA')"
+          ></dx-button>
+        </div>
+
+      </div>
+    </div>
+
+    <br/>
+
+    <!-- <div>
+      <dx-form #formCriterios id="formCriterios" [formData]="FSimulador" [colCount]="1" *ngIf="activeFiltros">
+        <dxi-item
+          itemType="group"
+          captionTemplate="Datos para Balanceo"
+          caption="Datos para Balanceo:"
+          [colSpan]="8"
+        >
+          <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="4" [lg]="6"></dxo-col-count-by-screen>
+          <dxi-item dataField="FECHA_INICIO">
+            <dxo-label text="Fecha Inicio Sección" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-date-box 
+                #fechaEntrega
+                placeholder="Seleccione fecha..." 
+                [readOnly]="false"
+                [showClearButton]="true"
+                [(value)]="FSimulador.FECHA_INICIO"
+                (onValueChanged)="onValueChangedFechaLimite($event)"
+              ></dx-date-box>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="FECHA_FINAL">
+            <dxo-label text="Fecha Final Sección" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-date-box 
+                #fechaEntrega
+                placeholder="Seleccione fecha..." 
+                [readOnly]="false"
+                [showClearButton]="true"
+                [(value)]="FSimulador.FECHA_FINAL"
+                (onValueChanged)="onValueChangedFechaLimite($event)"
+              ></dx-date-box>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="FECHA_ENTREGA">
+            <dxo-label text="Fecha limite de entrega" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-date-box 
+                #fechaEntrega
+                placeholder="Seleccione fecha..." 
+                [readOnly]="false"
+                [showClearButton]="true"
+                [(value)]="FSimulador.FECHA_ENTREGA"
+                (onValueChanged)="onValueChangedFechaLimite($event)"
+              ></dx-date-box>
+            </div>
+          </dxi-item>  
+        </dxi-item>
+
+        <dxi-item itemType="group" [colSpan]="8">
+          <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="4" [lg]="8"></dxo-col-count-by-screen>
+          <dxi-item
+            dataField="ACTIVE_CRITERIO_1"
+            [editorOptions]="{ inputAttr: { id: 'idCheckCriterio1' } }" 
+          >
+            <dxo-label text="Criterio 1" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-check-box #checkCol id="checkHorarios" text="Horarios (Aumentar horas)" class="check-filtro"
+                [readOnly]="false" (onValueChanged)="onValueChangedCiterio($event, 'activeCriterio1')"
+              ></dx-check-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="ACTIVE_CRITERIO_2"
+            [editorOptions]="{ inputAttr: { id: 'idCheckCriterio2' } }" 
+          >
+            <dxo-label text="Criterio 2" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-check-box #checkCol id="checkMoverMO" text="Mover Mano Obra" class="check-filtro"
+                [readOnly]="false" (onValueChanged)="onValueChangedCiterio($event, 'activeCriterio2')"
+              ></dx-check-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="ACTIVE_CRITERIO_3"
+            [editorOptions]="{ inputAttr: { id: 'idCheckCriterio3' } }" 
+          >
+            <dxo-label text="Criterio 3" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-check-box #checkCol id="checkNuevaMO" text="Nueva Mano Obra" class="check-filtro"
+                [readOnly]="false" (onValueChanged)="onValueChangedCiterio($event, 'activeCriterio3')"
+              ></dx-check-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="ACTIVE_CRITERIO_4"
+            [editorOptions]="{ inputAttr: { id: 'idCheckCriterio4' } }" 
+          >
+            <dxo-label text="Criterio 4" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-check-box #checkCol id="checkCapacidadO" text="Capacidad Ociosa" class="check-filtro"
+                [readOnly]="true" (onValueChanged)="onValueChangedCiterio($event, 'activeCriterio4')"
+              ></dx-check-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="ACTIVE_CRITERIO_5"
+            [editorOptions]="{ inputAttr: { id: 'idCheckCriterio5' } }" 
+          >
+            <dxo-label text="Criterio 5" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-check-box #checkCol id="checkCuellosB" text="Cuellos de Botella" class="check-filtro"
+                [readOnly]="true" (onValueChanged)="onValueChangedCiterio($event, 'activeCriterio5')"
+              ></dx-check-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="ACTIVE_CRITERIO_6"
+            [editorOptions]="{ inputAttr: { id: 'idCheckCriterio6' } }" 
+          >
+            <dxo-label text="Criterio 6" style="margin-left: -10px;"></dxo-label>
+            <div *dxTemplate>
+              <dx-check-box #checkCol id="checkDisminuirMO" text="Disminuir Mano Obra" class="check-filtro"
+                [readOnly]="true" (onValueChanged)="onValueChangedCiterio($event, 'activeCriterio6')"
+              ></dx-check-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item *ngIf="activeCriterio1 || activeCriterio2 || activeCriterio3 || activeCriterio4 || activeCriterio5 || activeCriterio6" 
+          itemType="group" caption=""  [colSpan]="8" 
+        >
+          <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="6" [lg]="8"></dxo-col-count-by-screen>
+
+          <dxi-item #CRITERIO1 id="CRITERIO1" *ngIf="activeCriterio1" itemType="group" caption="Citerio 1 - Aumentar horas laborales"  [colSpan]="2">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="1"></dxo-col-count-by-screen>
+            <dxi-item dataField="CRITERIO_1.ID_HORARIO" >
+              <dxo-label text="Turno" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box
+                  #dropDropTurnos
+                  id="dropDropTurnos"
+                  valueExpr="ID_HORARIO"
+                  displayExpr="DESCRIPCION"
+                  placeholder="Seleccione turno"
+                  [readOnly]="false"
+                  [showClearButton]="true"
+                  [dataSource]="Dturnos"
+                  [(opened)]="openDropTurnos"
+                  [(value)]="selectTurnos"
+                  [dropDownOptions]="{ width: 350, height: 300, hideOnParentScroll: true, container: '#router-container'}"
+                  (onValueChanged)="onValueChangedTurno($event)"
+                >
+                  <div *dxTemplate="let data of 'content'">
+                    <dx-list
+                      #listaTurnos
+                      id="listaTurnos"
+                      width="100%"
+                      height="100%"
+                      selectionMode="all"
+                      selectAllMode="allPages"
+                      keyExpr="ID_HORARIO"
+                      searchMode="contains"
+                      searchExpr="DESCRIPCION"
+                      noDataText="No se encontraron turnos."
+                      selectionMode="single"
+                      [searchEnabled]="true"
+                      [showSelectionControls]="false"
+                      [dataSource]="Dturnos"
+                      [(selectedItemKeys)]="selectTurnos"
+                      (onSelectionChanged)="onSelectTurno($event)"
+                    >
+                      <div *dxTemplate="let data of 'item'">
+                        <div>{{ data.ID_HORARIO +' -- '+ data.DESCRIPCION }}</div>
+                      </div>
+                    </dx-list>
+                  </div>
+                </dx-drop-down-box> 
+              </div>
+            </dxi-item>
+            <dxi-item dataField="CRITERIO_1.N_HORAS" >
+              <dxo-label text="N° Horas" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-number-box
+                  [min]="0"
+                  [showSpinButtons]="true"
+                  [showClearButton]="true"
+                  format="#,##0 horas"
+                  [(value)]="FSimulador.CRITERIO_1.N_HORAS"
+                  (onValueChanged)="onValueChangedCriterio1($event)"
+                ></dx-number-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="CRITERIO_1.DIAS" >
+              <dxo-label text="Días" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-button-group style="width: 100%" [items]="DDiaSemana" buttonTemplate="tempBtnDias"
+                  selectionMode="multiple" keyExpr="id" [(selectedItemKeys)]="selectedDiasSemana"
+                  (onSelectionChanged)="selectDia($event)">
+                  <div *dxTemplate="let buttonData of 'tempBtnDias'">
+                    {{ buttonData.text }}
+                  </div>
+                </dx-button-group>
+              </div>
+            </dxi-item>
+
+          </dxi-item>
+  
+          <dxi-item #CRITERIO2 id="CRITERIO2" *ngIf="activeCriterio2" itemType="group" caption="Citerio 2 - Mover Mano Obra"  [colSpan]="2" >
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="1"></dxo-col-count-by-screen>
+            <dxi-item dataField="CRITERIO_2.ID_SECCION_SALIDA" >
+              <dxo-label text="Sección de Salida" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box
+                  #dropDropSeccCr2
+                  id="dropDropSeccCr2"
+                  valueExpr="ITEM"
+                  displayExpr="DESCRIPCION"
+                  placeholder="Seleccione sección"
+                  [readOnly]="false"
+                  [showClearButton]="true"
+                  [dataSource]="DSecciones"
+                  [(opened)]="openDropSeccSalidaCr2"
+                  [(value)]="selectSeccionSalidaCR2"
+                  [dropDownOptions]="{ width: 400, height: 450, hideOnParentScroll: true, container: '#router-container'}"
+                  (onValueChanged)="onValueChangedSecciones($event, 'CR2', 'Salida')"
+                >
+                  <div *dxTemplate="let data of 'content'">
+                    <dx-tree-list
+                      #treeListSecciones
+                      id="treeListSecciones"
+                      width="100%"
+                      height="88%"
+                      keyExpr="ITEM"
+                      parentIdExpr="ANTERIOR"
+                      columnResizingMode="widget"
+                      noDataText="No hay datos"
+                      [showBorders]="true"
+                      [columnAutoWidth]="true"
+                      [autoExpandAll]="true"
+                      [hoverStateEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [allowColumnResizing]="true"
+                      [rowAlternationEnabled]="true"
+                      [dataSource]="DSecciones"
+                      [(selectedRowKeys)]="selectSeccionSalidaCR2"
+                      (onCellPrepared)="onCellPrepared($event)"
+                      (onSelectionChanged)="selectSeccion($event, 'CR2', 'Salida')"
+                    >
+                      <dxo-selection mode="single" [recursive]="false"></dxo-selection>
+                      <dxo-search-panel [visible]="true" [width]="350" placeholder="Buscar..."></dxo-search-panel>
+
+                      <dxi-column
+                        dataField="ID_SECCION"
+                        caption="Id Sección"
+                        [width]="180"
+                      ></dxi-column>
+                      <dxi-column
+                        dataField="DESCRIPCION"
+                        caption="Descripción"
+                      ></dxi-column>
+                    </dx-tree-list>
+                    <div style="
+                      display: flex;
+                      justify-content: center;
+                      width: 100%;
+                      padding: 5px;
+                    ">
+                      <dx-button id="btnAceptarPT" stylingMode="contained" text="Aceptar" type="default" [width]="100"
+                        (onClick)="aceptarBottom($event, 'Aceptar', 'CR2', 'Salida')"></dx-button>
+                      <dx-button id="btnCancelarPT" stylingMode="contained" text="Cancelar" type="normal" [width]="110"
+                        [style.margin-left]="'20px'" (onClick)="aceptarBottom($event, 'Cancelar', 'CR2', 'Salida')"></dx-button>
+                    </div>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="CRITERIO_2.ID_SECCION_ENTRADA" >
+              <dxo-label text="Sección de Entrada" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box
+                  #dropDropSeccEntradaCr2
+                  id="dropDropSeccEntradaCr2"
+                  valueExpr="ITEM"
+                  displayExpr="DESCRIPCION"
+                  placeholder="Seleccione sección"
+                  [readOnly]="false"
+                  [showClearButton]="true"
+                  [dataSource]="DSecciones"
+                  [(opened)]="openDropSeccEntradaCr2"
+                  [(value)]="selectSeccionEntradaCR2"
+                  [dropDownOptions]="{ width: 400, height: 450, hideOnParentScroll: true, container: '#router-container'}"
+                  (onValueChanged)="onValueChangedSecciones($event, 'CR2', 'Entrada')"
+                >
+                  <div *dxTemplate="let data of 'content'">
+                    <dx-tree-list
+                      #treeListSecciones
+                      id="treeListSecciones"
+                      width="100%"
+                      height="88%"
+                      keyExpr="ITEM"
+                      parentIdExpr="ANTERIOR"
+                      columnResizingMode="widget"
+                      noDataText="No hay datos"
+                      [showBorders]="true"
+                      [columnAutoWidth]="true"
+                      [autoExpandAll]="true"
+                      [hoverStateEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [allowColumnResizing]="true"
+                      [rowAlternationEnabled]="true"
+                      [dataSource]="DSecciones"
+                      [(selectedRowKeys)]="selectSeccionEntradaCR2"
+                      (onCellPrepared)="onCellPrepared($event)"
+                      (onSelectionChanged)="selectSeccion($event, 'CR2', 'Entrada')"
+                    >
+                      <dxo-selection mode="single" [recursive]="false"></dxo-selection>
+                      <dxo-search-panel [visible]="true" [width]="350" placeholder="Buscar..."></dxo-search-panel>
+
+                      <dxi-column
+                        dataField="ID_SECCION"
+                        caption="Id Sección"
+                        [width]="180"
+                      ></dxi-column>
+                      <dxi-column
+                        dataField="DESCRIPCION"
+                        caption="Descripción"
+                      ></dxi-column>
+                    </dx-tree-list>
+                    <div style="
+                      display: flex;
+                      justify-content: center;
+                      width: 100%;
+                      padding: 5px;
+                    ">
+                      <dx-button id="btnAceptarPT" stylingMode="contained" text="Aceptar" type="default" [width]="100"
+                        (onClick)="aceptarBottom($event, 'Aceptar', 'CR2', 'Entrada')"></dx-button>
+                      <dx-button id="btnCancelarPT" stylingMode="contained" text="Cancelar" type="normal" [width]="110"
+                        [style.margin-left]="'20px'" (onClick)="aceptarBottom($event, 'Cancelar', 'CR2', 'Entrada')"></dx-button>
+                    </div>
+                  </div>
+                </dx-drop-down-box> 
+                
+                <div *ngIf="activeListEmpleados" style="margin-top: 10px;">
+                  <cdk-accordion class="accordion-container" [multi]="false" >
+                    <cdk-accordion-item *ngFor="let item of itemsAccordion; let index = index;"
+                      #accordionItem="cdkAccordionItem"
+                      class="accordion-item"
+                      role="button"
+                      tabindex="0"
+                      [expanded]="accordionExpand[index]"
+                      [attr.id]="'accordion-header-' + index"
+                      [attr.aria-expanded]="accordionItem.expanded"
+                      [attr.aria-controls]="'accordion-body-' + index"
+                    >
+                      <div class="accordion-item-header" (click)="accordionItem.toggle() ; accordionItem.expanded === true ? valoresObjetos('empleados secciones', item) : '' " >
+                        <div>
+                          <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+                            <i class="icon-chevron-up-xs"></i>
+                          </span>
+                          <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+                            <i class="icon-chevron-down-xs"></i>
+                          </span>
+                        </div>
+                        <span class="accordion-caption"> {{ item }} </span>
+                      </div>
+                      <div
+                        class="accordion-item-body"
+                        role="region"
+                        [style.display]="accordionItem.expanded ? '' : 'none'"
+                        [attr.id]="'accordion-body-' + index"
+                        [attr.aria-labelledby]="'accordion-header-' + index"
+                      >
+                        <div [ngStyle]="{'width': '100%', 'height': (DGEmpleados.length > 0 ? '200px' : '90px')}">
+                          <dx-list
+                            #listaEmpleados
+                            id="listaEmpleados"
+                            width="100%"
+                            height="100%"
+                            selectionMode="all"
+                            selectAllMode="allPages"
+                            keyExpr="ID_EMPLEADO"
+                            searchMode="contains"
+                            searchExpr="NOMBRE_COMPLETO"
+                            [noDataText]="noDataEmpleados"
+                            [searchEnabled]="true"
+                            [showSelectionControls]="true"
+                            [dataSource]="DGEmpleados"
+                            [(selectedItemKeys)]="selectEmpleados"
+                            (onSelectionChanged)="onSelectListaEmpleados($event)"
+                          >
+                            <div *dxTemplate="let data of 'item'">
+                              <div>{{ data.ID_EMPLEADO +' -- '+ data.NOMBRE_COMPLETO }}</div>
+                            </div>
+                          </dx-list>
+                        </div>
+                      </div>
+                    </cdk-accordion-item>
+                  </cdk-accordion>
+                </div>
+
+              </div>
+            </dxi-item>
+          </dxi-item>
+  
+          <dxi-item #CRITERIO3 id="CRITERIO3" *ngIf="activeCriterio3" itemType="group" caption="Citerio 3 - Nueva Mano Obra"  [colSpan]="2" >
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="1"></dxo-col-count-by-screen>
+            <dxi-item dataField="CRITERIO_3.FECHA_INGRESO" >
+              <dxo-label text="Fecha ingreso" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box 
+                  #fechaIngreso
+                  placeholder="Seleccione fecha..." 
+                  [showClearButton]="true"
+                  [(value)]="FSimulador.CRITERIO_3.FECHA_INGRESO"
+                ></dx-date-box>
+              </div>
+            </dxi-item>
+            
+            <dxi-item dataField="CRITERIO_3.ID_SECCION" >
+              <dxo-label text="Secciones" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box
+                  #dropDropSeccCr3
+                  id="dropDropSeccCr3"
+                  valueExpr="ITEM"
+                  displayExpr="DESCRIPCION"
+                  placeholder="Seleccione sección"
+                  [readOnly]="false"
+                  [showClearButton]="true"
+                  [dataSource]="DSecciones"
+                  [(opened)]="openDropSeccCr3"
+                  [(value)]="selectSeccionCR3"
+                  [dropDownOptions]="{ width: 400, height: 450, hideOnParentScroll: true, container: '#router-container'}"
+                  (onValueChanged)="onValueChangedSecciones($event, 'CR3', '')"
+                >
+                  <div *dxTemplate="let data of 'content'">
+                    <dx-tree-list
+                      #treeListSecciones
+                      id="treeListSecciones"
+                      width="100%"
+                      height="88%"
+                      keyExpr="ITEM"
+                      parentIdExpr="ANTERIOR"
+                      columnResizingMode="widget"
+                      noDataText="No hay datos"
+                      [showBorders]="true"
+                      [columnAutoWidth]="true"
+                      [autoExpandAll]="true"
+                      [hoverStateEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [allowColumnResizing]="true"
+                      [rowAlternationEnabled]="true"
+                      [dataSource]="DSecciones"
+                      [(selectedRowKeys)]="selectSeccionCR3"
+                      (onCellPrepared)="onCellPrepared($event)"
+                      (onSelectionChanged)="selectSeccion($event, 'CR3', '')"
+                    >
+                      <dxo-selection mode="single" [recursive]="false"></dxo-selection>
+                      <dxo-search-panel [visible]="true" [width]="350" placeholder="Buscar..."></dxo-search-panel>
+
+                      <dxi-column
+                        dataField="ID_SECCION"
+                        caption="Id Sección"
+                        [width]="180"
+                      ></dxi-column>
+                      <dxi-column
+                        dataField="DESCRIPCION"
+                        caption="Descripción"
+                      ></dxi-column>
+                    </dx-tree-list>
+                    <div style="
+                      display: flex;
+                      justify-content: center;
+                      width: 100%;
+                      padding: 5px;
+                    ">
+                      <dx-button id="btnAceptarPT" stylingMode="contained" text="Aceptar" type="default" [width]="100"
+                        (onClick)="aceptarBottom($event, 'Aceptar','CR3', '')"></dx-button>
+                      <dx-button id="btnCancelarPT" stylingMode="contained" text="Cancelar" type="normal" [width]="110"
+                        [style.margin-left]="'20px'" (onClick)="aceptarBottom($event, 'Cancelar', 'CR3', '')"></dx-button>
+                    </div>
+                  </div>
+                </dx-drop-down-box> 
+              </div>
+            </dxi-item>
+
+            <dxi-item dataField="CRITERIO_3.N_EMPLEADOS" >
+              <dxo-label text="N° Empleados" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-number-box
+                  [min]="0"
+                  [showSpinButtons]="true"
+                  [showClearButton]="true"
+                  format="#,##0 Empleados"
+                  [(value)]="FSimulador.CRITERIO_3.N_EMPLEADOS"
+                ></dx-number-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+  
+          <dxi-item #CRITERIO4 id="CRITERIO4" *ngIf="activeCriterio4" itemType="group" caption="Citerio 4 - Capacidad Ociosa"  [colSpan]="4" >
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="3" [lg]="3"></dxo-col-count-by-screen>
+            <dxi-item dataField="NEW_FECHA_INICIO" >
+              <dxo-label text="Fecha inicio" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box 
+                  #fechaEntrega
+                  placeholder="Seleccione fecha..." 
+                ></dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="NEW_FECHA_FIN" >
+              <dxo-label text="Fecha final" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box 
+                  #fechaEntrega
+                  placeholder="Seleccione fecha..." 
+                ></dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="NEW_NUMERO_HORAS" >
+              <dxo-label text="N° Horas" style="margin-left: -10px;"></dxo-label>
+              <div *dxTemplate>
+                <dx-number-box
+                  [min]="0"
+                  [showSpinButtons]="true"
+                  [showClearButton]="true"
+                  format="#,##0 horas"
+                ></dx-number-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+        </dxi-item>
+  
+  
+      </dx-form>
+  
+    </div>
+
+    <br/>
+    <br/> -->
+    
+    <!-- <div class="d-flex justify-content-end overflow-hidden xt-tabs-container">
+      <dx-tabs
+        class="xt-tabs-gespro"
+        style="width: 100%;"
+        [scrollByContent]="true"
+        [showNavButtons]="false"
+        [selectedIndex]="2"
+        (onItemClick)="onTabChanged($event)"
+      >
+        <dxi-item>
+          <div *dxTemplate>
+            <i class="icon-layout-planta" ></i>
+            <span style="margin-left: 5px;"> Layout de Planta </span>
+          </div>
+        </dxi-item>
+        <dxi-item>
+          <div *dxTemplate>
+            <i class="icon-matriz" ></i>
+            <span style="margin-left: 5px;"> DashBoard </span>
+          </div>
+        </dxi-item>
+        <dxi-item>
+          <div *dxTemplate>
+            <i class="icon-tarea-sl" ></i>
+            <span style="margin-left: 5px;"> Diagrama </span>
+          </div>
+        </dxi-item>
+      </dx-tabs>
+    </div> -->
+    <!-- <div id="tabsContentSimulador" class="content dx-fieldset">
+      <div *ngIf="tabsAgenda[0].content">
+        <div>
+          <app-PRO02303 [events]="datosPassDiagram.asObservable()"></app-PRO02303>
+        </div>
+      </div>
+      <div *ngIf="tabsAgenda[1].content">
+        <div style="margin-top: 20px;">
+          <app-PRO02901
+            [events]="eventsDatos01.asObservable()"
+            (onRespuestaComponent)="onRespuestaComponent($event, 'DASHBOARD')"
+          ></app-PRO02901>
+        </div>
+      </div>
+      <div *ngIf="tabsAgenda[2].content">
+        <div style="margin-top: 20px;">
+          <div>
+            <app-PRO02304 
+              [events]="datosPassGrantt.asObservable()"
+              (onRespuestaDatos)="onRespuestaComponent($event, 'GANTT')"
+            ></app-PRO02304>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <div>
+      <app-PRO02304 
+        [events]="datosPassGrantt.asObservable()"
+        (onRespuestaDatos)="onRespuestaComponent($event, 'GANTT')"
+      ></app-PRO02304>
+    </div>
+
+  </dx-scroll-view>
+  
+</div>

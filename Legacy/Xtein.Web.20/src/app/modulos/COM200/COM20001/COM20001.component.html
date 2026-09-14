@@ -1,0 +1,65 @@
+<!-- Sub-Menú de opciones -->
+<dx-popup
+    width="600"
+    [height]="'auto'"
+    [showTitle]="false"
+    title="Selección de Iva"
+    [hideOnOutsideClick]="false"
+    [showCloseButton]="true"
+    [shading]="true"
+    (onInitialized)="onInit($event)"
+    [(visible)]="visiblePopup">
+
+    <!-- <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonAceptar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonCancelar"
+    >
+    </dxi-toolbar-item> -->
+    <dxi-toolbar-item
+      toolbar="top"
+      location="left"
+      template="tempEncab"
+    >
+    </dxi-toolbar-item>
+
+    <div *dxTemplate="let data of 'content'">
+      <dx-list
+        id="listaOpcionesGrav"
+        [dataSource]="listaValores"
+        keyExpr="ID_TASA"
+        selectionMode="single"
+        selectByClick="true"
+        [showSelectionControls]="true"
+        [(selectedItemKeys)]="seleccionIva"
+        (onSelectionChanged)="onSelectionChanged($event)"
+        (onInitialized)="onInitialized($event)"
+        (onItemClick)="onItemClick($event)"
+      >
+        <div *dxTemplate="let item of 'item'" 
+            style="width: 100%; border-style: solid; border-width: 1px; border-color: #e0e7e0;">
+          <div style="width: 25%; float:left;">{{ item.ID_TASA }}</div>
+          <div style="width: 20%; float:right;">{{ item.VALOR_BASE }}</div>
+          <div style="width: 20%; float:right;">{{ item.PORCENTAJE }}</div>
+          <div style="width: 35%; float:right;">{{ item.DESCRIPCION }}</div>
+        </div>
+      </dx-list>
+
+    </div>
+
+    <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+        <div style="font-weight: bold; color: rgba(10,57,96,.95); width: 25%; float:left;">Id Tasa</div>
+        <div style="font-weight: bold; color: rgba(10,57,96,.95); width: 20%; float:right;">Valor base</div>
+        <div style="font-weight: bold; color: rgba(10,57,96,.95); width: 20%; float:right;">%</div>
+        <div style="font-weight: bold; color: rgba(10,57,96,.95); width: 35%; float:right;">Descripción</div>
+    </div>
+
+</dx-popup>

@@ -1,0 +1,316 @@
+/* ::ng-deep .dx-treelist-rowsview .dx-treelist-cell-expandable {
+  padding: 0px 14px !important;
+} */
+.xt-gespdatagrid {
+  height: 100% !important;
+}
+#TreeListTareas {
+  max-height: 100% !important;
+  height: 100%;
+  min-width: 100%;
+}
+
+.span_title {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  transition: all 0.3s ease;
+  transform: translateX(-25px);
+  margin-left: 5px;
+  font-size: 12.5px;
+}
+
+::ng-deep .xt-gesptreelist .dx-tag {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+::ng-deep
+  .xt-gesptreelist
+  .dx-treelist-rowsview
+  .dx-row.dx-edit-row
+  .dx-editor-cell
+  .dx-texteditor
+  .dx-texteditor-input {
+  height: 100%;
+  min-height: 33px !important;
+}
+
+::ng-deep
+  .xt-gesptreelist
+  .dx-edit-row
+  .dx-tagbox:not(.dx-tagbox-single-line)
+  .dx-texteditor-input-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.programacion-repetir {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 15px;
+}
+.programacion-sin-repetir {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+::ng-deep
+  .xt-gesptreelist
+  .dx-treelist-headers
+  .dx-treelist-table
+  .dx-row
+  > td {
+  background-color: #eef2f6 !important;
+  border-radius: 0;
+}
+::ng-deep .dx-tagbox.dx-state-disabled .dx-tag-content {
+  color: #fff !important;
+  background-color: #3d88ec !important;
+}
+
+.parpadea {
+  font-size: 15px;
+  place-content: center;
+  color: #ff6000eb;
+  animation-name: parpadeo;
+  animation-duration: 2s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+
+  -webkit-animation-name: parpadeo;
+  -webkit-animation-duration: 2s;
+  -webkit-animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+}
+
+@-moz-keyframes parpadeo {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes parpadeo {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes parpadeo {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.icon-chat-m-sl {
+  font-size: 16px;
+}
+
+::ng-deep.mat-badge-medium.mat-badge-above .mat-badge-content {
+  top: -5px !important;
+}
+::ng-deep.mat-badge-medium .mat-badge-content {
+  width: 20px !important;
+  height: 20px !important;
+  line-height: 20px !important;
+}
+.content_tooltip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.descripcion_tarea {
+  width: 100%;
+  font-size: 14px;
+  text-wrap: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.estado_tarea {
+  border-radius: 20px;
+  min-width: 97px;
+  height: 3.5vh;
+  display: flex;
+  place-content: center;
+  align-items: center;
+}
+::ng-deep .dx-progressbar-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.avatar-container {
+  display: flex;
+  gap: 5px;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #1991ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.tooltip {
+  visibility: hidden;
+  background-color: #000000;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 6px 10px;
+  position: fixed; /* ✅ Cambiado de absolute a fixed */
+  z-index: 9999;
+  white-space: nowrap;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none; /* Evita interferencia con mouse */
+}
+
+.avatar-wrapper:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.dropdown-container {
+  position: relative;
+  width: 250px;
+  user-select: none;
+}
+
+.dropdown-button {
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.arrow {
+  float: right;
+  transition: transform 0.3s ease;
+}
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-panel {
+  position: fixed;
+  background-color: white;
+  border: 1px solid #ddd;
+  /* width: 100%; */
+  max-height: 420px;
+  overflow-y: auto;
+  z-index: 1000;
+  padding: 12px 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.radio-options {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+.user-list {
+  height: 100%;
+}
+.user-list .user-item {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.user-list .user-item:hover {
+  background-color: #e0f0ff;
+}
+
+::ng-deep .dx-dropdown-content .dropdown-content-container {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 16px !important;
+  gap: 12px !important;
+  min-width: 500px !important;
+  max-height: 450px !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+}
+
+/* Alinear los radio buttons en fila */
+::ng-deep .dropdown-content-container .dx-radiogroup {
+  display: flex !important;
+  width: 100% !important;
+}
+
+/* Radio buttons normales (sin fondo gris por defecto) */
+::ng-deep .dx-dropdowneditor-overlay.dx-popup-wrapper .dx-overlay-content {
+  width: 500px !important;
+}
+::ng-deep .dx-radiobutton {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Ajuste visual del DataGrid */
+::ng-deep .dx-radiogroup-horizontal .dx-collection {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+::ng-deep .dropdown-content-container .dx-datagrid {
+  height: 250px !important;
+  width: 100% !important;
+}
+
+::ng-deep .dx-field-value:not(.dx-switch):not(.dx-checkbox):not(.dx-button){
+  width: 100% !important;
+}
+
+::ng-deep .dropdown-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
