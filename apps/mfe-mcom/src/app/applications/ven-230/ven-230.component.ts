@@ -299,10 +299,20 @@ export class Ven230Component
     effect(() => {
       this.publishToolbarState();
     });
+    effect(() => {
+      if (this.toolbar.activeApplicationId() !== this.applicationId) {
+        this.filterVisible.set(false);
+        this.viewVisible.set(false);
+        this.reportsVisible.set(false);
+      }
+    });
   }
 
   ngOnInit(): void {
     this.disableFormControls();
+    this.subscriptions.add(this.form.valueChanges.subscribe(() => {
+      if (!this.readOnly()) this.workspace.setDirty(this.applicationId, true);
+    }));
 
     // Subscribe to toolbar commands for VEN-230
     this.subscriptions.add(
@@ -328,8 +338,7 @@ export class Ven230Component
     );
 
     // Load initial catalogs and data
-    void this.loadDataLists();
-    void this.searchRecords('');
+    void this.loadDataLists();    
   }
 
   ngOnDestroy(): void {
@@ -341,19 +350,16 @@ export class Ven230Component
    * Publishes the current state to the platform toolbar.
    */
   private publishToolbarState(): void {
-    untracked(() => {
-      this.toolbar.setState(
-        createRecordToolbarState({
-          busy: this.loading(),
-          applicationId: this.applicationId,
-          mode: this.mode(),
-          permissions: this.permissions(),
-          capabilities: Ven230ToolbarCapabilities,
-          currentIndex: this.currentIndex(),
-          totalRecords: this.records().length
-        })
-      );
+    const state = createRecordToolbarState({
+      busy: this.loading(),
+      applicationId: this.applicationId,
+      mode: this.mode(),
+      permissions: this.permissions(),
+      capabilities: Ven230ToolbarCapabilities,
+      currentIndex: this.currentIndex(),
+      totalRecords: this.records().length
     });
+    untracked(() => this.toolbar.setState(state));
   }
 
   /**
@@ -370,6 +376,7 @@ export class Ven230Component
    * Handles incoming toolbar commands.
    */
   private handleToolbarCommand(command: ToolbarCommand): void {
+    if (this.loading()) return;
     switch (command.action) {
       case ToolbarAction.New:
         this.newRecord();
@@ -388,7 +395,7 @@ export class Ven230Component
         break;
 
       case ToolbarAction.Cancel:
-        this.cancelEdit();
+        void this.cancelEdit();
         break;
 
       case ToolbarAction.Search:
@@ -405,6 +412,13 @@ export class Ven230Component
 
       case ToolbarAction.First:
         this.navigateRecord('first');
+        break;
+
+      case ToolbarAction.GoTo:
+        if (this.readOnly() && typeof command.payload === 'number' && Number.isInteger(command.payload)
+          && command.payload >= 1 && command.payload <= this.records().length) {
+          this.selectRecordIndex(command.payload - 1);
+        }
         break;
 
       case ToolbarAction.Previous:
@@ -432,31 +446,48 @@ export class Ven230Component
    * Switches to creation mode.
    */
   newRecord(): void {
+    if (this.loading() || !this.readOnly()) return;
     this.mode.set(RecordToolbarMode.Creating);
     this.enableFormControls();
     this.form.reset({
       ...Ven230DefaultRecord,
       FECHA: new Date().toISOString().substring(0, 10),
       ESTADO: 'REGISTRADO'
-    });
+    }, { emitEvent: false });
     this.items.set([]);
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   /**
    * Switches to edit mode for the current record.
    */
   editRecord(): void {
+    if (this.loading() || !this.readOnly()) return;
     if (!this.currentRecord()) {
       return;
     }
     this.mode.set(RecordToolbarMode.Editing);
     this.enableFormControls();
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   /**
    * Cancels current creation or edit operation.
    */
-  cancelEdit(): void {
+  async cancelEdit(): Promise<void> {
+    if (this.loading() || this.readOnly()) return;
+    const dirty = this.workspace.getTab(this.applicationId)?.dirty ?? false;
+    const confirmation = await Swal.fire({
+      title: this.workspace.getApplicationTitle(this.applicationId),
+      text: dirty ? '¿Desea cancelar sin guardar cambios?' : '¿Desea cancelar la operación?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#DF3E3E',
+      cancelButtonColor: '#438ef1',
+      cancelButtonText: 'No',
+      confirmButtonText: 'Sí, cancelar'
+    });
+    if (!confirmation.isConfirmed) return;
     this.mode.set(
       this.records().length
         ? RecordToolbarMode.Browsing
@@ -466,10 +497,12 @@ export class Ven230Component
     const current = this.currentRecord();
     if (current) {
       this.populateForm(current);
+      void this.loadAdditionalData(current);
     } else {
       this.form.reset();
       this.items.set([]);
     }
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   /**
@@ -514,6 +547,7 @@ export class Ven230Component
 
       this.mode.set(RecordToolbarMode.Browsing);
       this.disableFormControls();
+      this.workspace.setDirty(this.applicationId, false);
 
       // Refresh list to reflect changes
       await this.searchRecords(formValue.DOCUMENTO || '');
@@ -588,6 +622,7 @@ export class Ven230Component
    * Refreshes the active view or dataset.
    */
   refresh(): void {
+    if (this.loading() || !this.readOnly()) return;
     const current = this.currentRecord();
     void this.searchRecords(current?.DOCUMENTO || '');
   }
@@ -596,12 +631,15 @@ export class Ven230Component
    * Searches records matching a filter string or query object.
    */
   async searchRecords(filter: string | XteinRecordFilterResult): Promise<void> {
+    // String queries are also used internally after saving and deleting.
+    if (typeof filter !== 'string' && (this.loading() || !this.readOnly() || !this.permissions().search)) return;
+    this.filterVisible.set(false);
     this.loading.set(true);
 
     try {
       const prm = typeof filter === 'string'
         ? { filtro: filter }
-        : filter;
+        : { PREFACTURA: filter.ESTRUCTURA };
 
       const response = await firstValueFrom(this.service.getRecords(prm));
 
@@ -643,6 +681,9 @@ export class Ven230Component
     }
 
     this.currentIndex.set(index);
+    this.mode.set(RecordToolbarMode.Browsing);
+    this.disableFormControls();
+    this.workspace.setDirty(this.applicationId, false);
     const selected = list[index];
     this.populateForm(selected);
     void this.loadAdditionalData(selected);
@@ -652,15 +693,13 @@ export class Ven230Component
    * Selects a record chosen from the XteinRecordView modal.
    */
   selectViewedRecord(record: unknown): void {
+    if (this.loading() || !this.readOnly()) return;
     const rec = record as Ven230PrefacturaRecord;
     const list = this.records();
     const foundIndex = list.findIndex(r => r.DOCUMENTO === rec.DOCUMENTO);
 
     if (foundIndex >= 0) {
       this.selectRecordIndex(foundIndex);
-    } else {
-      this.records.set([rec, ...list]);
-      this.selectRecordIndex(0);
     }
     this.viewVisible.set(false);
   }
@@ -669,6 +708,7 @@ export class Ven230Component
    * Handles toolbar record navigation.
    */
   navigateRecord(direction: 'first' | 'prev' | 'next' | 'last'): void {
+    if (this.loading() || !this.readOnly()) return;
     const total = this.records().length;
     if (total === 0) {
       return;
@@ -732,7 +772,7 @@ export class Ven230Component
       ID_UN_BODEGA: record.ID_UN_BODEGA || '',
       FECHA_PRIMER_VENC: record.FECHA_PRIMER_VENC ? String(record.FECHA_PRIMER_VENC).substring(0, 10) : null,
       CUOTA_INICIAL: record.CUOTA_INICIAL || 0
-    });
+    }, { emitEvent: false });
   }
 
   /**
@@ -787,18 +827,18 @@ export class Ven230Component
   }
 
   private disableFormControls(): void {
-    this.form.disable();
+    this.form.disable({ emitEvent: false });
   }
 
   private enableFormControls(): void {
-    this.form.enable();
+    this.form.enable({ emitEvent: false });
     // System-generated key/audit fields remain read-only
-    this.form.controls.DOCUMENTO.disable();
-    this.form.controls.FECHA_REGISTRO.disable();
-    this.form.controls.USUARIO.disable();
-    this.form.controls.TOTAL.disable();
-    this.form.controls.SUB_TOTAL.disable();
-    this.form.controls.NOMBRE_CLIENTE.disable();
-    this.form.controls.VALOR_COSTOS.disable();
+    this.form.controls.DOCUMENTO.disable({ emitEvent: false });
+    this.form.controls.FECHA_REGISTRO.disable({ emitEvent: false });
+    this.form.controls.USUARIO.disable({ emitEvent: false });
+    this.form.controls.TOTAL.disable({ emitEvent: false });
+    this.form.controls.SUB_TOTAL.disable({ emitEvent: false });
+    this.form.controls.NOMBRE_CLIENTE.disable({ emitEvent: false });
+    this.form.controls.VALOR_COSTOS.disable({ emitEvent: false });
   }
 }
