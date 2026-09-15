@@ -1,21 +1,8 @@
-import {
-  computed,
-  Injectable,
-  signal
-} from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 
-import {
-  Observable,
-  Subject,
-  filter
-} from 'rxjs';
+import { Observable, Subject, filter } from 'rxjs';
 
-import {
-  ToolbarAction,
-  ToolbarCommand,
-  ToolbarState
-} from '@xtein/sdk';
-
+import { ToolbarAction, ToolbarCommand, ToolbarState } from '@xtein/sdk';
 
 /**
  * Maintains the toolbar runtime state independently for every
@@ -26,37 +13,20 @@ import {
  * toolbar state and route toolbar commands.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ToolbarRuntimeService {
-
   /**
    * Toolbar states indexed by application identifier.
    */
-  private readonly states =
-    signal<
-      ReadonlyMap<
-        string,
-        ToolbarState
-      >
-    >(
-      new Map<
-        string,
-        ToolbarState
-      >()
-    );
-
+  private readonly states = signal<ReadonlyMap<string, ToolbarState>>(
+    new Map<string, ToolbarState>(),
+  );
 
   /**
    * Application currently active in the workspace.
    */
-  private readonly activeApplicationIdState =
-    signal<
-      string | null
-    >(
-      null
-    );
-
+  private readonly activeApplicationIdState = signal<string | null>(null);
 
   /**
    * Internal toolbar command channel.
@@ -69,19 +39,12 @@ export class ToolbarRuntimeService {
    * - the requested action is visible;
    * - the requested action is enabled.
    */
-  private readonly commandsSubject =
-    new Subject<
-      ToolbarCommand
-    >();
-
+  private readonly commandsSubject = new Subject<ToolbarCommand>();
 
   /**
    * Read-only identifier of the active application.
    */
-  readonly activeApplicationId =
-    this.activeApplicationIdState
-      .asReadonly();
-
+  readonly activeApplicationId = this.activeApplicationIdState.asReadonly();
 
   /**
    * Toolbar state associated with the currently active
@@ -89,30 +52,15 @@ export class ToolbarRuntimeService {
    *
    * PlatformToolbar consumes this value.
    */
-  readonly activeToolbarState =
-    computed<
-      ToolbarState | null
-    >(
-      () => {
+  readonly activeToolbarState = computed<ToolbarState | null>(() => {
+    const applicationId = this.activeApplicationIdState();
 
-        const applicationId =
-          this.activeApplicationIdState();
+    if (!applicationId) {
+      return null;
+    }
 
-        if (!applicationId) {
-
-          return null;
-        }
-
-        return (
-          this.states()
-            .get(
-              applicationId
-            ) ??
-          null
-        );
-      }
-    );
-
+    return this.states().get(applicationId) ?? null;
+  });
 
   /**
    * Global read-only stream of toolbar commands.
@@ -120,11 +68,8 @@ export class ToolbarRuntimeService {
    * Applications should normally use commandsForApplication()
    * instead of subscribing directly to this stream.
    */
-  readonly commands:
-    Observable<ToolbarCommand> =
-      this.commandsSubject
-        .asObservable();
-
+  readonly commands: Observable<ToolbarCommand> =
+    this.commandsSubject.asObservable();
 
   /**
    * Stores or replaces the toolbar state of an application.
@@ -134,34 +79,18 @@ export class ToolbarRuntimeService {
    *
    * @param state Toolbar state to store.
    */
-  setState(
-    state:
-      ToolbarState
-  ): void {
+  setState(state: ToolbarState): void {
+    const applicationId = this.normalizeApplicationId(state.applicationId);
 
-    const applicationId =
-      this.normalizeApplicationId(
-        state.applicationId
-      );
+    const updatedStates = new Map(this.states());
 
-    const updatedStates =
-      new Map(
-        this.states()
-      );
-
-    updatedStates.set(
+    updatedStates.set(applicationId, {
+      ...state,
       applicationId,
-      {
-        ...state,
-        applicationId
-      }
-    );
+    });
 
-    this.states.set(
-      updatedStates
-    );
+    this.states.set(updatedStates);
   }
-
 
   /**
    * Returns the toolbar state stored for an application.
@@ -169,19 +98,9 @@ export class ToolbarRuntimeService {
    * @param applicationId Application identifier.
    * @returns Stored toolbar state or undefined.
    */
-  getState(
-    applicationId:
-      string
-  ): ToolbarState | undefined {
-
-    return this.states()
-      .get(
-        this.normalizeApplicationId(
-          applicationId
-        )
-      );
+  getState(applicationId: string): ToolbarState | undefined {
+    return this.states().get(this.normalizeApplicationId(applicationId));
   }
-
 
   /**
    * Indicates whether an application already has a
@@ -190,19 +109,9 @@ export class ToolbarRuntimeService {
    * @param applicationId Application identifier.
    * @returns True when toolbar state exists.
    */
-  hasState(
-    applicationId:
-      string
-  ): boolean {
-
-    return this.states()
-      .has(
-        this.normalizeApplicationId(
-          applicationId
-        )
-      );
+  hasState(applicationId: string): boolean {
+    return this.states().has(this.normalizeApplicationId(applicationId));
   }
-
 
   /**
    * Activates the toolbar state belonging to an application.
@@ -212,18 +121,11 @@ export class ToolbarRuntimeService {
    *
    * @param applicationId Application identifier.
    */
-  activateApplication(
-    applicationId:
-      string
-  ): void {
-
+  activateApplication(applicationId: string): void {
     this.activeApplicationIdState.set(
-      this.normalizeApplicationId(
-        applicationId
-      )
+      this.normalizeApplicationId(applicationId),
     );
   }
-
 
   /**
    * Returns a command stream containing only commands directed
@@ -235,29 +137,13 @@ export class ToolbarRuntimeService {
    * @param applicationId Application identifier.
    * @returns Application-specific toolbar command stream.
    */
-  commandsForApplication(
-    applicationId:
-      string
-  ): Observable<
-    ToolbarCommand
-  > {
+  commandsForApplication(applicationId: string): Observable<ToolbarCommand> {
+    const normalizedApplicationId = this.normalizeApplicationId(applicationId);
 
-    const normalizedApplicationId =
-      this.normalizeApplicationId(
-        applicationId
-      );
-
-    return this.commands
-      .pipe(
-
-        filter(
-          command =>
-            command.applicationId ===
-            normalizedApplicationId
-        )
-      );
+    return this.commands.pipe(
+      filter((command) => command.applicationId === normalizedApplicationId),
+    );
   }
-
 
   /**
    * Dispatches a toolbar action to the currently active
@@ -271,77 +157,42 @@ export class ToolbarRuntimeService {
    * @returns True when the command was dispatched.
    */
   dispatchAction(
-    action:
-      ToolbarAction,
+    action: ToolbarAction,
 
-    payload?:
-      unknown
+    payload?: unknown,
   ): boolean {
-
-    const applicationId =
-      this.activeApplicationIdState();
+    const applicationId = this.activeApplicationIdState();
 
     if (!applicationId) {
-
       return false;
     }
 
-
-    const toolbarState =
-      this.states()
-        .get(
-          applicationId
-        );
+    const toolbarState = this.states().get(applicationId);
 
     if (!toolbarState) {
-
       return false;
     }
 
+    const actionState = toolbarState.actions[action];
 
-    const actionState =
-      toolbarState.actions[
-        action
-      ];
-
-    if (
-      !actionState ||
-      !actionState.visible ||
-      !actionState.enabled
-    ) {
-
+    if (!actionState || !actionState.visible || !actionState.enabled) {
       return false;
     }
 
+    const command: ToolbarCommand = {
+      applicationId,
 
-    const command:
-      ToolbarCommand = {
+      action,
+    };
 
-        applicationId,
-
-        action
-      };
-
-
-    if (
-      payload !==
-        undefined
-    ) {
-
-      command.payload =
-        payload;
+    if (payload !== undefined) {
+      command.payload = payload;
     }
 
-
-    this.commandsSubject
-      .next(
-        command
-      );
-
+    this.commandsSubject.next(command);
 
     return true;
   }
-
 
   /**
    * Removes the toolbar state associated with a closed
@@ -349,41 +200,19 @@ export class ToolbarRuntimeService {
    *
    * @param applicationId Application identifier.
    */
-  removeApplication(
-    applicationId:
-      string
-  ): void {
+  removeApplication(applicationId: string): void {
+    const normalizedApplicationId = this.normalizeApplicationId(applicationId);
 
-    const normalizedApplicationId =
-      this.normalizeApplicationId(
-        applicationId
-      );
+    const updatedStates = new Map(this.states());
 
-    const updatedStates =
-      new Map(
-        this.states()
-      );
+    updatedStates.delete(normalizedApplicationId);
 
-    updatedStates.delete(
-      normalizedApplicationId
-    );
+    this.states.set(updatedStates);
 
-    this.states.set(
-      updatedStates
-    );
-
-
-    if (
-      this.activeApplicationIdState() ===
-        normalizedApplicationId
-    ) {
-
-      this.activeApplicationIdState.set(
-        null
-      );
+    if (this.activeApplicationIdState() === normalizedApplicationId) {
+      this.activeApplicationIdState.set(null);
     }
   }
-
 
   /**
    * Clears every toolbar runtime state.
@@ -394,19 +223,10 @@ export class ToolbarRuntimeService {
    * service continues to exist for the lifetime of the platform.
    */
   clear(): void {
+    this.states.set(new Map<string, ToolbarState>());
 
-    this.states.set(
-      new Map<
-        string,
-        ToolbarState
-      >()
-    );
-
-    this.activeApplicationIdState.set(
-      null
-    );
+    this.activeApplicationIdState.set(null);
   }
-
 
   /**
    * Normalizes an application identifier.
@@ -414,20 +234,12 @@ export class ToolbarRuntimeService {
    * @param applicationId Application identifier.
    * @returns Normalized identifier.
    */
-  private normalizeApplicationId(
-    applicationId:
-      string
-  ): string {
-
-    const normalizedApplicationId =
-      applicationId
-        ?.trim()
-        .toUpperCase();
+  private normalizeApplicationId(applicationId: string): string {
+    const normalizedApplicationId = applicationId?.trim().toUpperCase();
 
     if (!normalizedApplicationId) {
-
       throw new Error(
-        'The XTEIN application identifier cannot be empty in ToolbarRuntimeService.'
+        'The XTEIN application identifier cannot be empty in ToolbarRuntimeService.',
       );
     }
 

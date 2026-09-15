@@ -51,7 +51,6 @@ import {
   XteinInputComponent,
   XteinNumberComponent,
   XteinSelectComponent,
-  XteinTextareaComponent,
   XteinLoadingComponent,
   XteinNotificationService
 } from '@xtein/ui';
@@ -98,7 +97,6 @@ import {
     XteinInputComponent,
     XteinNumberComponent,
     XteinSelectComponent,
-    XteinTextareaComponent,
     XteinLoadingComponent
   ],
 
@@ -134,12 +132,6 @@ export class Ven230Component
     Ven230StatusOptions;
 
   /**
-   * Available sale type options.
-   */
-  readonly tipoVentaOptions =
-    Ven230TipoVentaOptions;
-
-  /**
    * Loaded query records.
    */
   readonly records =
@@ -162,6 +154,25 @@ export class Ven230Component
    */
   readonly dataLists =
     signal<Ven230DataLists>({});
+
+  /** Catalog options exposed to the commercial parameter selectors. */
+  readonly unidadesNegocioOptions =
+    computed(() => this.dataLists().unidadesNegocio ?? []);
+
+  readonly monedasOptions =
+    computed(() => this.dataLists().monedas ?? []);
+
+  readonly condicionesOptions =
+    computed(() => this.dataLists().condiciones ?? []);
+
+  readonly bodegasOptions =
+    computed(() => this.dataLists().bodegas ?? []);
+
+  readonly tipoVentaOptions =
+    computed(() => {
+      const options = this.dataLists().tiposVenta;
+      return options?.length ? options : Ven230TipoVentaOptions;
+    });
 
   /**
    * General loading indicator state.
