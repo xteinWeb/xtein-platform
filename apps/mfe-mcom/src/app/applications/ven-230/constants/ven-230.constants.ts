@@ -10,7 +10,7 @@ export const Ven230Application = {
     'VEN230',
 
   Table:
-    'PREFACTURAS'
+    'PREFACTURA'
 
 } as const;
 

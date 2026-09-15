@@ -119,6 +119,9 @@ export class Ven230Component
   readonly applicationId =
     Ven230Application.Id;
 
+  readonly tableBase =
+  Ven230Application.Table;
+
   /**
    * Internal subscription manager.
    */

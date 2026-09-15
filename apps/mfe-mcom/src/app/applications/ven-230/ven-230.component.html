@@ -511,7 +511,7 @@
 <xtein-record-filter
   [visible]="filterVisible()"
   (visibleChange)="filterVisible.set($event)"
-  tableBase="PREFACTURAS"
+  [tableBase]="tableBase"
   (search)="searchRecords($event)"
 >
 </xtein-record-filter>
@@ -531,7 +531,7 @@
     [visible]="reportsVisible()"
     (visibleChange)="reportsVisible.set($event)"
     [applicationId]="applicationId"
-    table="PREFACTURAS"
+    [table]="tableBase"
     [currentFilter]="currentReportFilter()"
     [allFilter]="queryFilter()"
   >
