@@ -1,0 +1,23 @@
+<!-- Botón Agregar -->
+<button class="tag-add-btn" (click)="addTag()" title="Agregar codeudor">
+    <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1V11M1 6H11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+    </svg>
+    <!-- <span>Agregar</span> -->
+</button>
+
+<!-- Tags dinámicos -->
+<span class="tag" *ngFor="let tag of tags" (click)="onTagClick(tag)">
+    <!-- Modo lectura -->
+    <ng-container>
+        <span class="tag-text">
+            {{ tag.name }}
+        </span>
+    </ng-container>
+
+    <button class="tag-remove" (click)="removeTag(tag.id)" [title]="'Eliminar ' + tag.name" tabindex="-1">
+        <svg width="8" height="8" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+    </button>
+</span>

@@ -1,0 +1,137 @@
+<div>
+  <div [ngStyle]="{'display': modoGrid!=='Consolidado' ? 'block':'none'}">
+    <dx-data-grid
+      #gridMateriales
+      id="gridMateriales"
+      [keyExpr]="['ID_SECCION','ID_PARTE']"
+      [dataSource]="DGseccionesMateriales"
+      [columnAutoWidth]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [rowAlternationEnabled]="true"
+      [showBorders]="true"
+      [allowColumnResizing]="true"
+      columnResizingMode="nextColumn"
+      (onRowPrepared)="onRowPrepared($event)"
+      (onRowExpanding)="onSelectionExpand($event)"
+      (onSelectionChanged)="selectionGrid($event)"
+    >
+      <dxi-column 
+        dataField="ID_SECCION"
+        caption="Id Sección"
+        cssClass="clsEncabHis"
+        alignment="left"
+        width="20%"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="DESCRIPCION"
+        caption="Nombre"
+        cssClass="clsEncabHis"
+        width="40%"
+      ></dxi-column>
+
+      <dxi-column
+        dataField="FACTOR_MA"
+        caption="Factor de Protección"  
+        alignment="right"
+        dataType="number"
+        format="#,00%"
+        width="20%"
+        [editorOptions]="{format: '#,00%', min:0, readOnly: true}"
+      ></dxi-column>
+      
+      <dxi-column
+        dataField="TOTAL"
+        caption="Total"
+        alignment="right"
+        dataType="number"
+        format="#,##0.00"
+        width="20%"
+        [editorOptions]="{format: '#,##0.00', min:0}"
+      ></dxi-column>
+      
+      <dxo-master-detail [enabled]="true" template="detail" > </dxo-master-detail>
+      <div *dxTemplate="let material of 'detail'">
+        <app-PRO01902_02 [getData]="material.data" (send_totalSeccionMateriales)="getTotalSeccionMateriales($event)"></app-PRO01902_02>
+      </div>
+      
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="pulldown" matTooltip="Refrescar" (onClick)="operGrid($event,'refrescar')" >
+            </dx-button>
+          </div>
+        </dxi-item>
+      </dxo-toolbar>
+
+    </dx-data-grid>
+  </div>
+
+  <div [ngStyle]="{'display':modoGrid==='Consolidado' ? 'block':'none'}">
+    <dx-data-grid
+      #gridMaterialesConsolidado
+      id="gridMaterialesConsolidado"
+      class="xt-datagrid"
+      keyExpr="ID_COMPONENTE"
+      width="100%"
+      [dataSource]="DGMaterialesConsolidado"
+      [showBorders]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      [columnMinWidth]="100"
+      columnResizingMode="widget"
+      [remoteOperations]="true"
+    >
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-search-panel [visible]="true"  [width]="250" ></dxo-search-panel>
+
+      <dxi-column
+        dataField="ID_COMPONENTE"
+        caption="Id Componente"
+        cssClass="clsEncabHis"
+        alignment="left"
+        [width]="200"
+      ></dxi-column>
+
+      <dxi-column dataField="NOMBRE"  caption="Nombre" cssClass="clsEncabHis" editCellTemplate="temNombre" [width]="250"></dxi-column>
+
+      <dxi-column
+        dataField="CANTIDAD"
+        caption="Cantidad"
+        alignment="right"
+        [width]="120"
+        [editorOptions]="{format: '#,##0.00', min:0}"
+      >
+        <dxo-format
+          type="fixedPoint"
+          [precision]="2">
+        </dxo-format>
+      </dxi-column>
+
+      <dxi-column 
+        dataField="VALOR_UNITARIO"
+        caption="Valor Uni."
+        dataType="number"
+        alignment="right"
+        format="#,##0.00"
+        [width]="150"
+      ></dxi-column>
+
+      <dxi-column dataField="ID_UDM" caption="Uni. Medida" [width]="100" editCellTemplate="temUniMedi" ></dxi-column>
+      
+      <dxi-column
+        dataField="TOTAL"
+        caption="Total"
+        alignment="right"
+        dataType="number"
+        format="#,##0.00"
+        [width]="150"
+        [editorOptions]="{format: '#,##0.00', min:0, readOnly:true}"
+      ></dxi-column>
+    
+    </dx-data-grid>
+  </div>
+</div>

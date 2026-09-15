@@ -1,0 +1,56 @@
+<dx-tree-list
+	#treeListPartes
+	id="treeListPartes"
+	width="auto"
+	height="300px"
+	style="min-width: 700px; max-width: 1400px;"
+	keyExpr="ID_PARTE"
+	parentIdExpr="PRODUCTO"
+	rootValue="RAIZ"
+	columnResizingMode="widget"
+	[noDataText]="noDataText"
+	[dataSource]="DGPartes"
+	[showBorders]="true"
+	[autoExpandAll]="true"
+	[columnAutoWidth]="true"
+	[hoverStateEnabled]="true"
+	[focusedRowEnabled]="true"
+	[allowColumnResizing]="true"
+	[columnHidingEnabled]="true"
+	[rowAlternationEnabled]="true"
+>
+	<dxo-scrolling mode="standard"></dxo-scrolling>
+
+	<dxi-column
+		dataField="ID_PARTE"
+		caption="Parte"
+		[width]="130"
+	></dxi-column>
+
+	<dxi-column
+		dataField="NOMBRE"
+		caption="Nombre"
+		[width]="200"
+	></dxi-column>
+
+	<dxi-column
+		caption="Atributos"
+		alignment="center"
+		[isBand]="true"
+	></dxi-column>
+
+	<dxi-column
+		dataField="CANTIDAD"
+		alignment="center"
+		caption="Cantidad"
+		[width]="80"
+	></dxi-column>
+
+	<!-- <dxi-column
+		dataField="T_PRODUCCION"
+		alignment="center"
+		caption="Tiempo(Hrs)"
+		[width]="100"
+	></dxi-column> -->
+
+</dx-tree-list>

@@ -1,0 +1,847 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content" id="PRO029" #PRO029>
+			<div class="container-child-dos-app xt-gesptabs" >
+        
+        <dx-tree-list
+          #gridGestionProd
+          id="gridGestionProd"
+          width="100%"
+          height="auto"
+          style="min-height: 350px; max-height: 750px;"
+          keyExpr="ID_PARTE"
+          parentIdExpr="PRODUCTO"
+          rootValue="RAIZ"
+          columnResizingMode="widget"
+          [dataSource]="DGdetalles"
+          [showBorders]="true"
+          [autoExpandAll]="true"
+          [columnAutoWidth]="true"
+          [hoverStateEnabled]="true"
+          [focusedRowEnabled]="true"
+          [allowColumnResizing]="true"
+          [columnHidingEnabled]="true"
+          [rowAlternationEnabled]="true"
+          [allowColumnReordering]="false"
+          (onCellPrepared)="onCellPrepared($event)"
+          (onCellDblClick)="onCellDblClick($event)"
+          (onContentReady)="onContentReady($event)"
+        >
+          <dxo-scrolling mode="virtual"></dxo-scrolling>
+          <dxo-search-panel [visible]="false" [width]="250" ></dxo-search-panel>
+          <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+          <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[10, 25, 50, 100]"></dxo-pager>
+          <dxo-header-filter [visible]="true" [allowSearch]="true" ></dxo-header-filter>
+          <dxo-filter-row [visible]="true"></dxo-filter-row>
+          <!-- <dxo-column-fixing [enabled]=""></dxo-column-fixing> -->
+
+          <dxi-column
+            dataField="PRODUCTO"
+            caption="Cod. Producto"
+            [width]="120"
+            [visible]="false"
+          ></dxi-column>
+            
+          <dxi-column
+            dataField="NOMBRE_PRODUCTO"
+            caption="Producto"
+            [width]="350"
+            [visible]="false"
+		        groupCellTemplate="tempGroupNombre"
+          ></dxi-column>
+
+          <dxi-column
+            dataField="ID_PARTE"
+            caption="Id. Parte"
+            [width]="120"
+            [visible]="false"  
+          ></dxi-column>
+            
+          <dxi-column
+            dataField="NOMBRE_PARTE"
+            caption="Productos / Partes"
+            [width]="350"
+		        cellTemplate="tempNombreParte"
+          ></dxi-column>
+
+          <dxi-column 
+            dataField="ESTADO"
+            caption="Estado"
+            alignment="left"
+            [width]="130"
+            cellTemplate="cellTempEstado"
+          ></dxi-column>
+
+          <dxi-column
+            caption="Atributos"
+            alignment="center"
+            [isBand]="true"
+          ></dxi-column>
+
+          <dxi-column
+            caption="Secciones"
+            alignment="center"
+            [isBand]="true"
+          ></dxi-column>
+
+          <div *dxTemplate="let grupoObj of 'tempGroupNombre'" style="display: flex">
+            <div class="span_title">
+              <div style="font-weight: bold;">
+                <span>{{ templateHtml(grupoObj, 'NOMBRE_PRODUCTO') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *dxTemplate="let cellInfo of 'tempNombreParte' " >
+            <div class="span_title">
+              <div style="font-weight: bold;" *ngIf="cellInfo.row.data.PRODUCTO === 'RAIZ' " > 
+                <span>{{ templateHtml(cellInfo, 'NOMBRE_PARTE') }}</span>
+              </div>
+              <!-- <span>{{ templateHtml(cellInfo, 'NOMBRE_PARTE') }}</span> -->
+              <div *ngIf="cellInfo.row.data.PRODUCTO !== 'RAIZ' " >
+                <span>{{ templateHtml(cellInfo, 'NOMBRE_PARTE') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *dxTemplate="let cellInfo of 'cellContenidoSeccion' " >
+            <div
+              *ngIf="(selectCellTemplate(cellInfo, 'Start Seccion') | async)"
+              class="estado"
+              style="background-color: rgba(0, 255, 0, .1); color: rgba(0, 255, 0, 1);"
+            >
+              <div class="container-estado">
+                <span
+                  class="status-badge"
+                  style="background-color: rgba(0, 255, 0, 1);"
+                ></span>
+                <span>Iniciar</span>
+              </div>
+            </div>
+
+            <div
+              *ngIf="(selectCellTemplate(cellInfo, 'Finish Seccion') | async)"
+              class="estado"
+              style="background-color: rgba(53,204,172,.2); color: rgba(53,204,172,1);"
+            >
+              <i class="dx-icon-check" style="color: rgba(53,204,172,1);"></i>
+              <span>Finalizado</span>
+            </div>
+            
+            <div 
+              *ngIf="(selectCellTemplate(cellInfo, 'No Contenido') | async)"
+              style="display: flex; flex-direction: column; justify-content: space-around; align-items: center; "
+            >
+              <div>
+                <i class="dx-icon-remove" style="color: red;"></i>
+              </div>
+            </div>
+            <div 
+              *ngIf="(selectCellTemplate(cellInfo, 'Process Seccion') | async)"
+              style="width: 100%; display: flex; justify-content: center; height: 30px;" 
+            >
+              <div class="spinner-container">
+                <i class="dx-icon-preferences spinner" style="font: 17px / 1 DXIcons;"></i>
+                <div class="base-dots">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            *dxTemplate="let cellInfo of 'cellTempEstado'"
+            [ngStyle]="{
+              'background-color':
+                (cellInfo.data.ESTADO === 'REGISTRADO'
+                  ? 'rgba(15,76,129,.05)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'PROGRAMADO' 
+                  ? 'rgba(98,121,140, .3)' 
+                  : '') ||
+                (cellInfo.data.ESTADO === 'EN PROCESO'
+                  ? 'rgba(26,115,232,.2)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'CANCELADO' 
+                  ? 'rgba(200,78,224,.2)' 
+                  : '') ||
+                (cellInfo.data.ESTADO === 'FINALIZADO'
+                  ? 'rgba(53,204,172,.2)'
+                  : ''),
+              'color':
+                (cellInfo.data.ESTADO === 'REGISTRADO' ? 'rgba(98,121,140,.9)' : '') ||
+                (cellInfo.data.ESTADO === 'PROGRAMADO' ? 'rgba(98,121,140,.75)' : '') ||
+                (cellInfo.data.ESTADO === 'EN PROCESO' ? 'rgba(26,115,232,1)' : '') ||
+                (cellInfo.data.ESTADO === 'CANCELADO' ? 'rgba(200,78,224,1)' : '') ||
+                (cellInfo.data.ESTADO === 'FINALIZADO' ? 'rgba(53,204,172,1)' : '')
+            }"
+            class="estado"
+          >
+            <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+              <div class="container-estado" *ngIf="!cellInfo.data.CANCELADO">
+                <span
+                  class="status-badge"
+                  [ngStyle]="{
+                    'background-color':
+                      (cellInfo.data.ESTADO === 'REGISTRADO'
+                        ? 'rgba(98,121,140,.9)'
+                        : '') ||
+                      (cellInfo.data.ESTADO === 'EN PROCESO'
+                        ? 'rgba(26,115,232,1)'
+                        : '') ||
+                      (cellInfo.data.ESTADO === 'CANCELADO'
+                        ? 'rgba(200,78,224,1)'
+                        : '') ||
+                      (cellInfo.data.ESTADO === 'FINALIZADO'
+                        ? 'rgba(53,204,172,1)'
+                        : '') ||
+                      (cellInfo.data.ESTADO === 'PROGRAMADO'
+                        ? 'rgba(98,121,140,.75)'
+                        : '')
+                  }"
+                ></span>
+                <span>{{ cellInfo.data.ESTADO }}</span>
+              </div>
+              <span
+                *ngIf="cellInfo.data.CANCELADO"
+                [ngStyle]="{
+                  color: cellInfo.data.CANCELADO ? 'rgba(98,121,140,.75)' : ''
+                }"
+              >
+                {{ cellInfo.data.ESTADO }}
+              </span>
+            </div>
+          </div>
+
+        </dx-tree-list>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<dx-tooltip
+	#tooltipInfoDetalles
+	id="tooltipInfoDetalles"
+	class="xt-tootips"
+	position="top"
+	showEvent="mouseenter"
+	[target]='targetIdTooltip'
+	[wrapperAttr]="wrapperAttr"
+	[hideOnOutsideClick]="false"
+>
+	<div *dxTemplate="let data = data; of: 'content'">
+		<table class="tabIvas" *ngIf="tooltipInfo[0].ErrMesaje === '' || tooltipInfo[0].ErrMesaje === null || tooltipInfo[0].ErrMesaje === undefined ">
+			<tr>
+				<td>Orden de Producción</td>
+				<td><b>{{ tooltipInfo[0].ORDEN_PRO }}</b></td>
+			</tr>
+      <tr>
+				<td>Cantidad</td>
+				<td><b>{{ tooltipInfo[0].CANTIDAD }}</b></td>
+			</tr>
+			<tr>
+				<td>Pendiente</td>
+				<td>{{ tooltipInfo[0].CANTIDAD_PENDIENTE }}</td>
+			</tr>
+			<tr>
+				<td>Producida</td>
+				<td>{{ tooltipInfo[0].CANTIDAD_PRODUCIDA }}</td>
+			</tr>
+			<tr>
+				<td>Inicio</td>
+				<td><b>{{ tooltipInfo[0].FECHA_INICIO_PRODUCCION ? tooltipInfo[0].FECHA_INICIO_PRODUCCION : tooltipInfo[0].FECHA_INICIO_PROGRAMADA | date : "dd/MM/yyyy"  }}</b></td>
+			</tr>
+			<tr>
+				<td>Finaliza</td>
+				<td><b>{{ tooltipInfo[0].FECHA_FIN_PRODUCCION ? tooltipInfo[0].FECHA_FIN_PRODUCCION : tooltipInfo[0].FECHA_FIN_PROGRAMADA | date : "dd/MM/yyyy"  }}</b></td>
+			</tr>
+		</table>
+    <div *ngIf="tooltipInfo[0].ErrMesaje !== '' || tooltipInfo[0].ErrMesaje !== null || tooltipInfo[0].ErrMesaje !== undefined ">
+      <span><b>{{ tooltipInfo[0].ErrMesaje }}</b></span>
+    </div>
+	</div>
+</dx-tooltip>
+
+
+
+<dx-popup
+  #popUpProgramacion
+  id="popUpProgramacion"
+  width="auto"
+  height="auto"
+  min-width="50%"
+  max-width="70%"
+  max-height="60%"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="true"
+	[title]="tituloPopupProgramacion"
+  [(visible)]="popupVisibleProgramacion"
+>
+  <dxo-position my="center" at="center" of="window"> </dxo-position>
+  <div *dxTemplate="let data of 'content'" >
+		<div style="display: flex; justify-content: center; align-items: center; height: 90%;">
+      <!-- Sección Actual -->
+      <div>
+        <h3 style="margin: 0px !important" >Actual: {{ infoPopupProgramacion.INFO_SECCION.NOMBRE_SECCION }} </h3>
+        <mat-card class="card" style="max-width: 400px !important; min-width: 350px !important; min-height: 290px !important;" >
+          <mat-card-header>
+            <mat-card-title style="margin: 0px !important;">
+              <p class="title_card" style="font-size: 17px !important;">
+                {{ infoPopupProgramacion.NOMBRE_PRODUCTO }}
+              </p>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;">{{ "Parte: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ infoPopupProgramacion.NOMBRE_PARTE }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;">{{ "Orden de Producción: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ infoPopupProgramacion.ORDEN_PRO }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;">{{ "Estado: " }}</p>
+              <p class="content-description" style="margin-left: 5px;"
+                [ngStyle]="{
+                  'width': '110px',
+                  'font-size': '13px !important',
+                  'background-color':
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'REGISTRADO'
+                      ? 'rgba(15,76,129,.05)'
+                      : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'PROGRAMADO' 
+                      ? 'rgba(98,121,140, .3)' 
+                      : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'EN PROCESO'
+                      ? 'rgba(26,115,232,.2)'
+                      : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'CANCELADO' 
+                      ? 'rgba(200,78,224,.2)' 
+                      : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'FINALIZADO'
+                      ? 'rgba(53,204,172,.2)'
+                      : ''),
+                  'color':
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'REGISTRADO' ? 'rgba(98,121,140,.9)' : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'PROGRAMADO' ? 'rgba(98,121,140,.75)' : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'EN PROCESO' ? 'rgba(26,115,232,1)' : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'CANCELADO' ? 'rgba(200,78,224,1)' : '') ||
+                    (infoPopupProgramacion.INFO_SECCION.ESTADO === 'FINALIZADO' ? 'rgba(53,204,172,1)' : '')
+                }"
+                class="estado"
+              >
+                {{ infoPopupProgramacion.INFO_SECCION.ESTADO }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;" >{{ "Programación: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ getFechaFormateada(infoPopupProgramacion.INFO_SECCION.FECHA_INICIO_PROGRAMADA, infoPopupProgramacion.INFO_SECCION.FECHA_FIN_PROGRAMADA) }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;" *ngIf="infoPopupProgramacion.INFO_SECCION.FECHA_INICIO_PRODUCCION">
+              <p class="content-title" style="font-weight: bold;" >{{ "Producción: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ getFechaFormateada(infoPopupProgramacion.INFO_SECCION.FECHA_INICIO_PRODUCCION, 
+                                      infoPopupProgramacion.INFO_SECCION.FECHA_FIN_PRODUCCION ? infoPopupProgramacion.INFO_SECCION.FECHA_FIN_PRODUCCION : undefined 
+                                    ) 
+                }}
+              </p>
+            </div>
+            <div>
+              <cdk-accordion class="accordion-container unbg-input" [multi]="true">
+                <cdk-accordion-item
+                  *ngFor="let item of items; let index = index;"
+                  #accordionItem="cdkAccordionItem"
+                  class="accordion-item"
+                  role="button"
+                  tabindex="0"
+                  [expanded]="accordionExpand[index]"
+                  [attr.id]="'accordion-header-' + index"
+                  [attr.aria-expanded]="accordionItem.expanded"
+                  [attr.aria-controls]="'accordion-body-' + index"
+                >
+                  <div
+                    (click)="accordionItem.toggle()"
+                    class="accordion-item-header"
+                    [ngStyle]="{'background-color': accordionItem.expanded ? 'transparent' : '',
+                                'border-radius': accordionItem.expanded ? '10px 10px 0 0' : '' ,
+                                'padding': '0px'
+                    }"
+                  >
+                    <div class="accordion-item-group" style="width: 90%;">
+                      <div>
+                        <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+                          <i class="icon-chevron-up-xs"></i>
+                        </span>
+                        <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+                          <i class="icon-chevron-down-xs"></i>
+                        </span>
+                      </div>
+                      <span 
+                        class="content-title" 
+                        style="font-weight: bold; margin: 0px !important; font-size: 14px; color: black;" 
+                      > 
+                        {{ item }} 
+                      </span>
+                    </div>
+                    
+                    <div 
+                      *ngIf="item === 'Partes Requeridas'"
+                      class="accordion-item-description" 
+                      style="width: 90%; font-size: 12px !important; margin-right: 10px; font-weight: bold; color: black;" 
+                    >
+                      {{ infoPopupProgramacion.INFO_SECCION.PARTES.length }}
+                    </div>
+                  </div>
+                  <!-- PESTAÑAS/COMPONENTES SECCIONES -->
+                  <div
+                    class="accordion-item-body"
+                    role="region"
+                    style="padding: .75rem 0rem !important;"
+                    [style.display]="accordionItem.expanded ? '' : 'none'"
+                    [attr.id]="'accordion-body-' + index"
+                    [attr.aria-labelledby]="'accordion-header-' + index"
+                  >
+                    <div *ngIf="item === 'Cantidades'">
+                      <div class="content-body" class="xt-gespdatagrid" >
+                        <div class="content-description" style="display: flex; justify-content: space-between;" >
+                          <div style="width: 50%;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">{{ "Requerida: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [(value)]="infoPopupProgramacion.INFO_SECCION.CANTIDAD"
+                              ></dx-number-box>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">{{ "Pendiente: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [(value)]="infoPopupProgramacion.INFO_SECCION.CANTIDAD_PENDIENTE"
+                              ></dx-number-box>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;" *ngIf="infoPopupProgramacion.INFO_SECCION.ESTADO !== 'FINALIZADO'">
+                              <span class="content-title" style="font-weight: bold;">{{ "Trabajadores: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="1"
+                                [(value)]="numTrabajadores"
+                              ></dx-number-box>
+                            </div>
+                          </div>
+                          <div style="width: 50%;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold; color: black;">
+                                {{ 
+                                  infoPopupProgramacion.INFO_SECCION.ESTADO === 'REGISTRADO' || infoPopupProgramacion.INFO_SECCION.ESTADO === 'PROGRAMADO'
+                                  ? 'Autorizar: '
+                                  : infoPopupProgramacion.INFO_SECCION.ESTADO === 'EN PROCESO'
+                                  ? 'Mover: '
+                                  : infoPopupProgramacion.INFO_SECCION.ESTADO === 'FINALIZADO'
+                                  ? 'Autorizada: '
+                                  : 'Autorizar: '
+                                }}
+                              </span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="infoPopupProgramacion.INFO_SECCION.ESTADO === 'FINALIZADO' ? true : false"
+                                [max]="infoPopupProgramacion.INFO_SECCION.CANTIDAD"
+                                [(value)]="infoPopupProgramacion.INFO_SECCION.CANTIDAD_AUTORIZADA"
+                              ></dx-number-box>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">{{ "Producida: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [(value)]="infoPopupProgramacion.INFO_SECCION.CANTIDAD_PRODUCIDA"
+                              ></dx-number-box>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;" *ngIf="infoPopupProgramacion.INFO_SECCION.ESTADO !== 'FINALIZADO'">
+                              <span class="content-title" style="font-weight: bold;">{{ "Hora Salida: " }}</span>
+                              <dx-date-box
+                                width="100px"
+                                type="time"
+                                displayFormat="hh:mm a"
+                                [(value)]="horaSalida"
+                              ></dx-date-box>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="item === 'Partes Requeridas'">
+                      <div class="content-body" class="xt-gespdatagrid" >
+                        <div class="content-body">
+                          <dx-data-grid
+                            #gridPartes1
+                            id="gridPartes1"
+                            width="100%"
+                            height="auto"
+                            keyExpr="ID_PARTE"
+                            columnResizingMode="widget"
+                            [dataSource]="infoPopupProgramacion.INFO_SECCION.PARTES"
+                            [showBorders]="true"
+                            [columnAutoWidth]="true"
+                            [hoverStateEnabled]="true"
+                            [focusedRowEnabled]="true"
+                            [allowColumnResizing]="true"
+                            [columnHidingEnabled]="true"
+                            [rowAlternationEnabled]="true"
+                          >
+                            <dxo-scrolling mode="virtual"></dxo-scrolling>
+                            <dxi-column dataField="NOMBRE_PARTE" caption="Parte" [width]="160" ></dxi-column>
+                            <dxi-column dataField="ESTADO" caption="Estado" [width]="100" ></dxi-column>
+                            <dxi-column dataField="CANTIDAD" caption="Cant" ></dxi-column>
+                            <dxi-column dataField="FECHA_INICIO_PROGRAMADA" caption="Fecha" dateType="date" [width]="140" cellTemplate="cellTempFecha" ></dxi-column>
+
+                            <div *dxTemplate="let cellInfo of 'cellTempFecha' " >
+                              {{ getFechaFormateada(cellInfo.data.FECHA_INICIO_PROGRAMADA, undefined) }}
+                            </div>
+                          </dx-data-grid>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </cdk-accordion-item>
+              </cdk-accordion>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div 
+        *ngIf="(infoPopupProgramacion.INFO_SECCION.ORDEN_SECC === 0 || infoPopupProgramacion.INFO_SECCION.ORDEN_SECC === 1 &&
+                infoPopupProgramacion.INFO_SECCION.ESTADO === 'REGISTRADO' || infoPopupProgramacion.INFO_SECCION.ESTADO === 'PROGRAMADO') 
+              ? false 
+              : (infoPopupProgramacion.INFO_SECCION.ORDEN_SECC === 0 || infoPopupProgramacion.INFO_SECCION.ORDEN_SECC === 1 &&
+                infoPopupProgramacion.INFO_SECCION.ESTADO === 'EN PROCESO') 
+              ? true
+              : (infoPopupProgramacion.INFO_SECCION.ORDEN_SECC > 1) "
+        style="display: flex; flex-direction: column; justify-content: space-between; align-items: center; margin: 0px 5px; height: 100px;"
+      >
+        <dx-button
+          id="btnAceptar"
+          stylingMode="contained"
+          style="border-radius: 5px;"
+          icon="chevrondoubleright"
+          type="normal"
+          [width]="50"
+          [disabled]="!activeNextSeccion || infoPopupProgramacion.INFO_SECCION.CANTIDAD_AUTORIZADA <= 0"
+          (onClick)="onClickSeccion($event, 'Next', infoPopupProgramacion)"
+        ></dx-button>
+        <dx-button
+          id="btnCancelar"
+          stylingMode="contained"
+          style="border-radius: 5px;"
+          icon="chevrondoubleleft"
+          type="normal"
+          [width]="50"
+          [disabled]="!activeNextSeccion || infoNextSeccion.INFO_SECCION.CANTIDAD <= 0"
+          (onClick)="onClickSeccion($event, 'Before', '')"
+        ></dx-button>
+      </div>
+
+      <!-- Siguiente Sección -->
+      <div *ngIf="!activeNextSeccion && infoPopupProgramacion.INFO_SECCION.ESTADO !== 'PROGRAMADO' " >
+        <h4 style="margin: 0px !important" >{{ 'Siguiente: '+infoPopupProgramacion.INFO_SECCION.ID_SECCION_SIG }}</h4>
+        <mat-card class="card" style="max-width: 400px !important; min-width: 350px !important; min-height: 290px !important; align-content: center;" >
+          <mat-card-header>
+            <mat-card-title style="margin: 0px !important;">
+              <p class="title_card" style="font-size: 17px !important;"></p>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold; width: 100%; text-align: center;" >
+                {{ noInfoSeccion }}
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div *ngIf="validateComponent('cardNextSeccion')" >
+        <h4 style="margin: 0px !important" >Siguiente: {{ infoNextSeccion.INFO_SECCION.NOMBRE_SECCION }} </h4>
+        <mat-card class="card" style="max-width: 400px !important; min-width: 350px !important; min-height: 290px !important;" >
+          <mat-card-header>
+            <mat-card-title style="margin: 0px !important;">
+              <p class="title_card" style="font-size: 17px !important;">
+                {{ infoNextSeccion.NOMBRE_PRODUCTO }}
+              </p>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;">{{ "Parte: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ infoNextSeccion.NOMBRE_PARTE }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;">{{ "Orden de Producción: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ infoNextSeccion.ORDEN_PRO }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;">{{ "Estado: " }}</p>
+              <p class="content-description" style="margin-left: 5px;"
+                [ngStyle]="{
+                  'width': '110px',
+                  'font-size': '13px !important',
+                  'background-color':
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'REGISTRADO'
+                      ? 'rgba(15,76,129,.05)'
+                      : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'PROGRAMADO' 
+                      ? 'rgba(98,121,140, .3)' 
+                      : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'EN PROCESO'
+                      ? 'rgba(26,115,232,.2)'
+                      : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'CANCELADO' 
+                      ? 'rgba(200,78,224,.2)' 
+                      : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'FINALIZADO'
+                      ? 'rgba(53,204,172,.2)'
+                      : ''),
+                  'color':
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'REGISTRADO' ? 'rgba(98,121,140,.9)' : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'PROGRAMADO' ? 'rgba(98,121,140,.75)' : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'EN PROCESO' ? 'rgba(26,115,232,1)' : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'CANCELADO' ? 'rgba(200,78,224,1)' : '') ||
+                    (infoNextSeccion.INFO_SECCION.ESTADO === 'FINALIZADO' ? 'rgba(53,204,172,1)' : '')
+                }"
+                class="estado"
+              >
+                {{ infoNextSeccion.INFO_SECCION.ESTADO }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;">
+              <p class="content-title" style="font-weight: bold;" >{{ "Programación: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ getFechaFormateada(infoNextSeccion.INFO_SECCION.FECHA_INICIO_PROGRAMADA, infoNextSeccion.INFO_SECCION.FECHA_FIN_PROGRAMADA) }}
+              </p>
+            </div>
+            <div class="content-body" style="display: flex; justify-content: space-between;" *ngIf="infoNextSeccion.INFO_SECCION.FECHA_INICIO_PRODUCCION">
+              <p class="content-title" style="font-weight: bold;" >{{ "Producción: " }}</p>
+              <p class="content-description" style="margin-left: 5px;">
+                {{ getFechaFormateada(infoPopupProgramacion.INFO_SECCION.FECHA_INICIO_PRODUCCION, 
+                                      infoPopupProgramacion.INFO_SECCION.FECHA_FIN_PRODUCCION ? infoPopupProgramacion.INFO_SECCION.FECHA_FIN_PRODUCCION : undefined 
+                  ) 
+                }}
+              </p>
+            </div>
+            <div>
+              <cdk-accordion class="accordion-container unbg-input" [multi]="true">
+                <cdk-accordion-item
+                  *ngFor="let item of items; let index = index;"
+                  #accordionItem="cdkAccordionItem"
+                  class="accordion-item"
+                  role="button"
+                  tabindex="0"
+                  [expanded]="accordionExpand[index]"
+                  [attr.id]="'accordion-header-' + index"
+                  [attr.aria-expanded]="accordionItem.expanded"
+                  [attr.aria-controls]="'accordion-body-' + index"
+                >
+                  <div
+                    (click)="accordionItem.toggle()"
+                    class="accordion-item-header"
+                    [ngStyle]="{'background-color': accordionItem.expanded ? 'transparent' : '',
+                                'border-radius': accordionItem.expanded ? '10px 10px 0 0' : '' ,
+                                'padding': '0px'
+                    }"
+                  >
+                    <div class="accordion-item-group" style="width: 90%;" >
+                      <div>
+                        <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+                          <i class="icon-chevron-up-xs"></i>
+                        </span>
+                        <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+                          <i class="icon-chevron-down-xs"></i>
+                        </span>
+                      </div>
+                      <span 
+                        class="content-title" 
+                        style="font-weight: bold; margin: 0px !important; font-size: 14px; color: black;" 
+                      > 
+                        {{ item }} 
+                      </span>
+                    </div>
+                    
+                    <div 
+                      *ngIf="item === 'Partes Requeridas'"
+                      class="accordion-item-description" 
+                      style="width: 10%; font-size: 12px !important; margin-right: 10px; font-weight: bold; color: black;" 
+                    >
+                      {{ infoNextSeccion.INFO_SECCION.PARTES.length }}
+                    </div>
+                  </div>
+                  <!-- PESTAÑAS/COMPONENTES SECCIONES -->
+                  <div
+                    class="accordion-item-body"
+                    role="region"
+                    style="padding: .75rem 0rem !important;"
+                    [style.display]="accordionItem.expanded ? '' : 'none'"
+                    [attr.id]="'accordion-body-' + index"
+                    [attr.aria-labelledby]="'accordion-header-' + index"
+                  >
+                    <div *ngIf="item === 'Partes Requeridas'">
+                      <div class="content-body" class="xt-gespdatagrid" >
+                        <div class="content-body">
+                          <dx-data-grid
+                            #gridPartes2
+                            id="gridPartes2"
+                            width="100%"
+                            height="auto"
+                            keyExpr="ID_PARTE"
+                            columnResizingMode="widget"
+                            [dataSource]="[]"
+                            [showBorders]="true"
+                            [columnAutoWidth]="true"
+                            [hoverStateEnabled]="true"
+                            [focusedRowEnabled]="true"
+                            [allowColumnResizing]="true"
+                            [columnHidingEnabled]="true"
+                            [rowAlternationEnabled]="true"
+                          >
+                            <dxo-scrolling mode="virtual"></dxo-scrolling>
+                            <dxi-column dataField="NOMBRE_PARTE" caption="Parte" [width]="160" ></dxi-column>
+                            <dxi-column dataField="ESTADO" caption="Estado" [width]="100" ></dxi-column>
+                            <dxi-column dataField="CANTIDAD" caption="Cant" [width]="80"></dxi-column>
+                            <dxi-column dataField="FECHA_INICIO_PROGRAMADA" caption="Fecha" dateType="date" [width]="140" cellTemplate="cellTempFecha" ></dxi-column>
+
+                            <div *dxTemplate="let cellInfo of 'cellTempFecha' " >
+                              {{ getFechaFormateada(cellInfo.data.FECHA_INICIO_PROGRAMADA, undefined) }}
+                            </div>
+                          </dx-data-grid>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="item === 'Cantidades'">
+                      <div class="content-body" class="xt-gespdatagrid" >
+                        <div class="content-description" style="display: flex; justify-content: space-between;" >
+                          <div style="width: 50%;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">{{ "Requerida: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [(value)]="infoNextSeccion.INFO_SECCION.CANTIDAD"
+                              ></dx-number-box>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">{{ "Pendiente: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [(value)]="infoNextSeccion.INFO_SECCION.CANTIDAD_PENDIENTE"
+                              ></dx-number-box>
+                            </div>
+                          </div>
+                          <div style="width: 50%;">
+                            <!-- <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">
+                                {{ 
+                                  infoNextSeccion.INFO_SECCION.ESTADO === 'REGISTRADO' || infoNextSeccion.INFO_SECCION.ESTADO === 'PROGRAMADO'
+                                  ? 'Autorizar: '
+                                  : infoNextSeccion.INFO_SECCION.ESTADO === 'EN PROCESO'
+                                  ? 'Mover: '
+                                  : infoNextSeccion.INFO_SECCION.ESTADO === 'FINALZADO'
+                                  ? 'Autorizada: '
+                                  : 'Autorizar: '
+                                }}
+                              </span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [max]="infoNextSeccion.INFO_SECCION.CANTIDAD"
+                                [(value)]="infoNextSeccion.INFO_SECCION.CANTIDAD_AUTORIZADA"
+                              ></dx-number-box>
+                            </div> -->
+                            <div style="display: flex; justify-content: space-between; align-items: center;" >
+                              <span class="content-title" style="font-weight: bold;">{{ "Producida: " }}</span>
+                              <dx-number-box
+                                width="70px"
+                                [min]="0"
+                                format="#00 Und"
+                                [readOnly]="true"
+                                [(value)]="infoNextSeccion.INFO_SECCION.CANTIDAD_PRODUCIDA"
+                              ></dx-number-box>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </cdk-accordion-item>
+              </cdk-accordion>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+    </div>
+    <div style="display: flex; justify-content: space-between; width: 100%; padding: 5px; height: 10%; margin-top: 10px;">
+      <dx-button
+        id="btnAceptarPT"
+        stylingMode="contained"
+        text="Programar"
+        type="default"
+        [width]="120"
+        [disabled]="validateComponent('btnAceptar')"
+        (onClick)="onClickBtnProgramacion($event, 'Aceptar')"
+      ></dx-button>
+      <dx-button
+        id="btnCancelarPT"
+        stylingMode="contained"
+        text="Cancelar"
+        type="normal"
+        [width]="110"
+        [style.margin-left]="'20px'"
+        (onClick)="onClickBtnProgramacion($event, 'Cancelar')"
+      ></dx-button>
+    </div>
+  </div>
+</dx-popup>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#gridGestionProd11' }"
+  [(visible)]="loadingVisible1"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos.."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

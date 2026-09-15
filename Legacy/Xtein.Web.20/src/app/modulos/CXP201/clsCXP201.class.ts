@@ -1,0 +1,79 @@
+export class clsConsecGexCxp{
+  public ID_DOCUMENTO: string;
+  public PREFIJO: string;
+  public CONSECUTIVO: number;
+  public SUFIJO: string;
+  public DOCUMENTO: string;
+  public FECHA: any;
+  public HORA: any;
+  public USUARIO: string;
+  public ESTADO: string;
+}
+
+
+export class clsCuentasPagar{
+  public ID_UN: string;
+  public ID_UN_DESTINO: string;
+  public ID_DOCUMENTO: string;
+  public NOMBRE_DOCUMENTO: string;
+  public PREFIJO: string;
+  public CONSECUTIVO: number;
+  public SUFIJO: string;
+  public DOCUMENTO: string;
+  public FECHA_REGISTRO: any;
+  public FECHA_SOLICITUD: any;
+  public HORA: any;
+  public ID_PROVEEDOR: string;
+  public NOMBRE_PROVEEDOR: string;
+  public ID_ADC: string;
+  public ID_CONDICION: string;
+  public DESCRIPCION: string;
+  public ID_MONEDA: string;
+  public TASA_CAMBIO: number;
+  public VIGENCIA: any;
+  public TIPO_INVENTARIO: string;
+  public NC_DOC_SOPORTE: number;
+  public FECHA_ENTREGA: any;
+  public CUOTA_INICIAL: number;
+  public PLAZO: number;
+  public CONDICIONES_GENERALES: string;
+  public SUB_TOTAL: number;
+  public VALOR_DESCUENTO: number;
+  public GRAVAMENES: string;
+  public VALOR_COSTOS: number;
+  public TOTAL: number;
+  public FECHA_PRIMER_VENC: any;
+  public DIAS_CUOTA: number;
+  public UM_DIAS_CUOTA: string;
+  public USUARIO: string;
+  public ESTADO: string;
+  public FECHA_OC: any;
+  public ID_UBICACION: string;
+  public ID_DIRECCION: string;
+  public EMAIL: string;
+  public ITEM: number;
+}
+
+export class clsPreEgresos{
+  public ID_ACREEDOR: string;
+  public NOMBRE: string;
+  public FECHA: any;
+  public ID_FACTURA: string;
+  public NC_FACTURA: string;
+  public ID_SOPORTE: string;
+  public NC_SOPORTE: string;
+  public VALOR: number;
+  public SALDO: number;
+  public ID_EGRESO: string;
+  public NC_EGRESO: string;
+  public FECHA_EGRESO: any;
+  public USUARIO: string;
+  public ESTADO: string;
+  public ITEM: number;
+  public DOCUMENTO: string;
+  public ID_DOCUMENTO: string;
+  public BANCO: string;
+  public ES_PRE_EG: boolean;
+  public GENERA_ELEC: boolean;
+}
+

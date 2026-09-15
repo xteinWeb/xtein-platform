@@ -1,0 +1,123 @@
+.form-item-data-MDP {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.form-item-data-MDP>div {
+  width: 100%;
+}
+
+.form-item-data-MDP>div>div {
+  width: 100%;
+}
+
+::ng-deep .dx-datagrid-header-panel {
+  padding: 0px 0px 10px !important;
+}
+
+.estado {
+  border-radius: 20px;
+  min-width: 97px;
+  height: 2.5vh;
+  display: flex;
+  place-content: center;
+  align-items: center;
+  font-size: 13px !important;
+}
+
+/* Cambiar el color de fondo y el color del texto del botón principal */
+::ng-deep .btn-acciones-pro032 .dx-button-content {
+  background-color: #1a73e8 !important;
+  color: white !important;
+  border-radius: 8px;
+  /* Bordes más redondeados */
+}
+
+::ng-deep .dx-buttongroup-item.dx-button.dx-button-mode-contained:not(.dx-item-selected) {
+  background-color: #1a73e8 !important;
+  color: white !important;
+}
+
+::ng-deep .dx-button-has-icon.dx-button-has-text .dx-icon {
+  color: #ffffff !important;
+}
+
+/* Estilos Premium (Basados en PRO026) */
+
+::ng-deep .dx-treelist {
+  background-color: #ffffff;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: 1px solid #e3e6f0;
+}
+
+::ng-deep .dx-treelist-headers {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #5a5c69;
+}
+
+/* Aumentar altura del header */
+:host ::ng-deep .dx-treelist .dx-header-row {
+  height: 60px !important;
+}
+
+:host ::ng-deep .dx-treelist .dx-header-row td {
+  height: 60px !important;
+  vertical-align: middle;
+  padding: 15px 8px;
+}
+
+/* Estilo para registros PADRES (Nivel 0) */
+:host ::ng-deep .row-padre {
+  background-color: #f8f9fa !important;
+  font-weight: 500 !important;
+  border-left: 4px solid #3498db !important; /* Acento lateral azul */
+}
+
+/* Estilo para registros HIJOS */
+:host ::ng-deep .row-hijo {
+  background-color: #ffffff !important;
+  font-weight: normal !important;
+  border-left: 4px solid transparent !important;
+}
+
+/* Bordes ligeros y elegantes */
+:host ::ng-deep .dx-treelist-rowsview .dx-row {
+  border-bottom: 1px solid #f1f3f5 !important;
+  transition: background-color 0.2s ease-in-out;
+}
+
+:host ::ng-deep .row-padre:hover {
+  background-color: #f1f5f9 !important;
+}
+
+:host ::ng-deep .row-hijo:hover {
+  background-color: #fcfcfc !important;
+}
+
+/* Ajustes de espaciado */
+.grid-container {
+  padding-bottom: 20px;
+}
+
+/* Estados de Producción - Estilos Eficientes */
+:host ::ng-deep .estado-grid {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-block;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .estado-registrado { background-color: rgba(255,255,255); color: rgba(98,121,140,.9); border: 1px solid #ccc; }
+:host ::ng-deep .estado-comprometido { background-color: rgba(128, 178, 200, .1); color: rgba(100, 150, 170, 0.8); }
+:host ::ng-deep .estado-programado { background-color: rgba(255,255,255); color: rgba(98,121,140,.75); border: 1px solid #ccc; }
+:host ::ng-deep .estado-en-proceso { background-color: rgba(255,115,232,.2); color: rgba(26,115,232,1); }
+:host ::ng-deep .estado-anulado { background-color: rgba(200,78,224,.2); color: rgba(200,78,224,1); }
+:host ::ng-deep .estado-finalizado { background-color: rgba(53,204,172,.2); color: rgba(53,204,172,1); }

@@ -1,0 +1,225 @@
+::ng-deep .contenedor-xt {
+  background: #fff;
+  border: 0;
+  border-radius: 0 0 10px 10px;
+}
+
+::ng-deep #formProductos {
+  margin-right: 10px;
+}
+::ng-deep .tab-atributos {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+::ng-deep .dx-card {
+  border: 0;
+}
+
+::ng-deep .dx-datagrid .dx-column-lines > td {
+  border-left: 1;
+  border-right: 0;
+}
+
+::ng-deep .dx-editor-underlined.dx-texteditor-with-floating-label .dx-texteditor-input,
+.dx-editor-underlined.dx-texteditor-with-floating-label.dx-lookup .dx-lookup-field,
+.dx-editor-underlined.dx-texteditor-with-label .dx-texteditor-input,
+.dx-editor-underlined.dx-texteditor-with-label.dx-lookup .dx-lookup-field {
+  padding-top: .75rem !important;
+  padding-bottom: 4px;
+}
+
+::ng-deep #tabPanel > div > div > div.dx-item.dx-gallery-item.dx-item-selected.dx-gallery-item-selected {
+  display: block;
+}
+
+::ng-deep div.dx-field-label.subtit-partes {
+  padding: 0px 15px 9px 0;
+}
+::ng-deep .dx-texteditor-input.is-dirty {  
+  color: #2959a4 !important;
+  background-color:#ebfffa !important;
+}  
+::ng-deep .dx-dropdowneditor.dx-dropdowneditor-field-clickable.is-dirty {  
+  color: #2959a4 !important;
+  background-color: rgba(255,255,0,.1);
+  outline: 2px solid;
+  outline-offset: -2px;
+  outline-color: rgba(255,255,0,.15);
+}  
+::ng-deep .dx-dropdowneditor.dx-dropdowneditor-field-clickableX, .dx-dropdowneditor.dx-dropdowneditor-field-clickableX .dx-texteditor-inputX {  
+  color: #2959a4 !important;
+  background-color: rgba(255,255,0,.1);
+  outline: 2px solid;
+  outline-offset: -2px;
+  outline-color: rgba(255,255,0,.15);
+}  
+
+::ng-deep .booking-text-box {  
+  border: 1px solid #ef1032;  
+}
+
+/* Forma ID */@at-root
+::ng-deep #formProductosId {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+::ng-deep .info {
+  position: relative;
+  padding-bottom: 30px;
+
+  app-estado {
+    position: absolute;
+    margin-top: 15px;
+  }
+}
+  
+::ng-deep .form-custom-list-prop {
+  app-estado {
+    position: absolute;
+    padding: 15px 11px;
+  }
+}
+::ng-deep .dx-editor-underlined:after {
+  content: none !important;
+  border-bottom: none !important;
+}  
+  
+::ng-deep div.sticky1 {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+}
+
+::ng-deep #galleryPro {
+  position: relative;
+}
+
+::ng-deep .dx-gallery-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+::ng-deep #formProductos > div > div > div > div > div > div:nth-child(2) {
+  flex: none !important;
+}
+
+::ng-deep #dx_dx-368201ee-c833-9da7-6c5d-285351798ef5_PRODUCTO {
+  background: rgba(0, 0, 0, 0);
+} 
+
+::ng-deep .gb-primary {
+  background: #f2f2f2;
+}
+
+::ng-deep .btn-tools {
+  color: #707070;
+  background: #ccc;
+}
+::ng-deep #btnAceptarPT > div > span {
+  text-transform: capitalize;
+}
+::ng-deep #btnCancelarPT > div > span {
+  text-transform: capitalize;
+}
+
+::ng-deep .dx-loadpanel-message {
+  display: unset !important;
+}
+::ng-deep .dx-loadpanel-content {
+  width: 300px !important;
+  height: auto !important;
+  min-height: 80px !important;
+  max-width: 300px !important;
+  max-height: 90px !important;
+  border-radius: 10px !important;
+}
+
+::ng-deep .dx-editor-filled.dx-texteditor-with-floating-label .dx-texteditor-label, .dx-editor-filled.dx-texteditor-with-label .dx-texteditor-label  {
+  top: -18px;
+  font-size: 14px;
+}
+
+::ng-deep .dx-form-group-with-caption .dx-form-group.dx-form-group-with-caption {
+  padding-left: 0px !important;
+}
+
+::ng-deep .dx-editor-filled.dx-texteditor-with-floating-label .dx-texteditor-input, .dx-editor-filled.dx-texteditor-with-floating-label.dx-lookup .dx-lookup-field, .dx-editor-filled.dx-texteditor-with-label .dx-texteditor-input, .dx-editor-filled.dx-texteditor-with-label.dx-lookup .dx-lookup-field {
+  padding-top: 5px;
+  padding-bottom: 2px;
+  height: 2.25rem;
+}
+
+.container-consecutivo {
+  display: flex !important;
+  width: 100%;
+  flex-direction: column;
+  margin-top: -21px;
+}
+
+.consecutivo {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 3px;
+  z-index: 1;
+}
+
+.consecutivo span {
+  margin: 0 5px;
+  font-size: 12px;
+  width: 25%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-container-hijo {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+}
+
+.container-hijo-uno {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 70%;
+}
+
+.container-hijo-dos {
+  width: 30%;
+  max-height: 500px;
+  padding: 0 0 0 1rem;
+}
+
+::ng-deep #formProductos > div > div > div > div > div > div:nth-child(1) > div > div {
+  padding-left: 0 !important;
+}
+
+::ng-deep #formProductos > div > div > div > div > div > div:nth-child(1) > div > div > div > div > div > div > div > div > div > div > div:nth-child(1) > div > div {
+  padding-left: 0 !important;
+}
+
+::ng-deep #formProductos > div > div > div > div > div > div:nth-child(1) > div > div {
+  padding-right: 0 !important;
+}
+
+::ng-deep #formProductos > div > div > div > div > div > div:nth-child(1) > div > div > div > div > div > div > div > div > div > div > div:nth-child(2) > div > div {
+  padding-right: 0;
+}
+
+p {
+  margin: 0px;
+}
+
+::ng-deep #treeListaClases > div.dx-scrollable.dx-visibility-change-handler.dx-scrollable-vertical.dx-scrollable-simulated {
+  height: 100% !important;
+}

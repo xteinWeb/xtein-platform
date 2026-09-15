@@ -1,0 +1,793 @@
+// Variables
+$primary-color: #0066FF;
+$success-color: #00CC66;
+$warning-color: #FFA500;
+$danger-color: #f9b2b2;
+$danger-delete: #f97c7c;
+$info-color: #17A2B8;
+
+$seccion-basicos-bg: #eefaf8;
+$seccion-cliente-bg: #FFFFDB;
+
+$readonly-blue: #bed5f7;
+$readonly-green: #c8e5c8;
+$readonly-orange: #e9e0d0;
+$readonly-yellow: #FFFFCC;
+$readonly-purple: #eefcea;
+$readonly-red: #f97c7c;
+
+$border-radius: 4px;
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$transition: all 0.3s ease;
+
+$dark: #1f2937;
+$light-gray: #f8f9fa;
+$border: #e5e7eb;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin card-style {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+@mixin readonly-field($bg-color, $text-color: white) {
+  background-color: $bg-color !important;
+  color: $text-color !important;
+  font-weight: bold;
+  cursor: not-allowed;
+}
+
+// Contenedor principal
+.solicitud-credito-container {
+  padding: 0px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: #f5f5f5;
+
+  // Utilidades de espaciado
+  .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .mt-3 {
+    margin-top: 1rem !important;
+  }
+
+  .mt-4 {
+    margin-top: 1.5rem !important;
+  }
+
+  ::ng-deep .dx-layout-manager .dx-field-item {
+    padding-left: 5px !important;
+    padding-right: 6px !important;
+  }
+
+  // Botones principales
+  .button-group {
+    @include card-style;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .codeudor-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+
+      dx-button {
+        min-width: 100px;
+      }
+    }
+
+    .button-danger {
+      background-color: $danger-color;
+      border-color: $danger-color;
+      color: white;
+
+      &:hover {
+        background-color: darken($danger-color, 10%);
+        border-color: darken($danger-color, 10%);
+      }
+    }
+
+    .button-delete {
+      background-color: $danger-delete;
+      border-color: $danger-delete;
+      color: white;
+
+      &:hover {
+        background-color: darken($danger-delete, 10%);
+        border-color: darken($danger-delete, 10%);
+      }
+    }
+
+    .button-modify {
+      background-color: $info-color;
+      border-color: $info-color;
+      color: white;
+
+      &:hover {
+        background-color: darken($info-color, 10%);
+        border-color: darken($info-color, 10%);
+      }
+    }
+
+    .hyperlink-anotaciones {
+      font-weight: bold;
+      font-size: 14px;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .button-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-rounded :deep(.dx-button) {
+    border-radius: 20px !important;
+  }
+
+  // Secciones de formulario
+  .seccion-datos-basicos {
+    @include card-style;
+    background-color: $seccion-basicos-bg;
+    border-left: 4px solid $primary-color;
+
+    ::ng-deep {
+      .dx-field-item-label-text {
+        background-color: transparent;
+        font-weight: 600;
+      }
+
+      .dx-form-group-caption {
+        background-color: $seccion-basicos-bg;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        padding: 2px;
+        border-bottom: 2px solid $primary-color;
+      }
+    }
+  }
+
+  .seccion-datos-cliente {
+    @include card-style;
+    background-color: $seccion-cliente-bg;
+    border-left: 4px solid $warning-color;
+
+    ::ng-deep {
+      .dx-field-item-label-text {
+        background-color: transparent;
+        font-weight: 600;
+      }
+
+      .dx-form-group-caption {
+        background-color: $seccion-cliente-bg;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        padding: 10px;
+        border-bottom: 2px solid $warning-color;
+      }
+    }
+  }
+
+  // Formularios generales
+  dx-form {
+    @include card-style;
+
+    ::ng-deep {
+      .dx-form-group-caption {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+        background-color: #fafafa;
+      }
+
+      .dx-field-item {
+        padding: 8px 0;
+      }
+
+      .dx-field-item-label {
+        width: 180px;
+
+        .dx-field-item-label-text {
+          font-weight: 500;
+          color: #555;
+        }
+      }
+
+      .dx-field-item-content {
+        flex: 1;
+      }
+
+      // Campos requeridos
+      .dx-field-item-required-mark {
+        color: $danger-color;
+        font-weight: bold;
+      }
+    }
+  }
+
+  // Campos readonly con colores
+  ::ng-deep {
+    .readonly-blue {
+      .dx-texteditor-input {
+        @include readonly-field($readonly-blue, rgb(29, 3, 70));
+        font-size: 16px;
+        color: rgb(22, 6, 92);
+      }
+
+      &.dx-state-readonly {
+        .dx-texteditor-input {
+          @include readonly-field($readonly-blue, rgb(29, 3, 70));
+        }
+      }
+    }
+
+    .readonly-orange {
+      .dx-texteditor-input {
+        @include readonly-field($readonly-orange, rgb(29, 3, 70));
+      }
+
+      &.dx-state-readonly {
+        .dx-texteditor-input {
+          @include readonly-field($readonly-orange, rgb(29, 3, 70));
+        }
+      }
+    }
+
+    .readonly-green {
+      .dx-texteditor-input {
+        @include readonly-field($readonly-green, rgb(29, 3, 70));
+      }
+
+      &.dx-state-readonly {
+        .dx-texteditor-input {
+          @include readonly-field($readonly-green, rgb(29, 3, 70));
+        }
+      }
+    }
+
+    .readonly-purple {
+      .dx-texteditor-input {
+        @include readonly-field($readonly-purple, rgb(29, 3, 70));
+        border: #5f90db 1px solid !important;
+      }
+
+      &.dx-state-readonly {
+        .dx-texteditor-input {
+          @include readonly-field($readonly-purple, rgb(29, 3, 70));
+          border: #5f90db 1px solid !important;
+        }
+      }
+    }
+
+    .total-value {
+      .dx-texteditor-input {
+        @include readonly-field($readonly-yellow, #333);
+        font-size: 16px;
+      }
+    }
+
+    // Estados de validación
+    .dx-invalid {
+      .dx-texteditor-input {
+        border-color: $danger-color !important;
+      }
+    }
+
+    .dx-valid {
+      .dx-texteditor-input {
+        border-color: $success-color !important;
+      }
+    }
+  }
+
+  // Grids
+  ::ng-deep {
+    .dx-datagrid {
+      border-radius: $border-radius;
+      overflow: hidden;
+      box-shadow: $box-shadow;
+
+      .dx-datagrid-headers {
+        background-color: #f5f5f5;
+        font-weight: 600;
+
+        .dx-datagrid-text-content {
+          color: #333;
+        }
+      }
+
+      .dx-row {
+        &:hover {
+          background-color: #f9f9f9;
+        }
+
+        &.dx-row-focused {
+          background-color: #e3f2fd !important;
+        }
+      }
+
+      .dx-row-alt {
+        background-color: #fafafa;
+      }
+
+      // Botones de edición
+      .dx-link {
+        color: $primary-color;
+        transition: $transition;
+
+        &:hover {
+          color: darken($primary-color, 10%);
+        }
+      }
+
+      // Paginador
+      .dx-pager {
+        padding: 10px;
+        background-color: #fafafa;
+
+        .dx-page-sizes {
+          margin-right: 15px;
+        }
+      }
+    }
+  }
+
+  // Popup
+  .popup-content {
+    padding: 20px;
+
+    dx-select-box,
+    dx-text-box {
+      margin-bottom: 15px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+  }
+
+  ::ng-deep {
+    .dx-popup-content {
+      padding: 0;
+    }
+
+    .dx-popup-title {
+      background-color: $primary-color;
+      color: white;
+      font-weight: bold;
+      padding: 15px 20px;
+    }
+  }
+
+  // Botones de acción
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    dx-button {
+      width: 100%;
+    }
+  }
+
+  // Select boxes con búsqueda
+  ::ng-deep {
+    .dx-selectbox {
+      .dx-dropdowneditor-input-wrapper {
+        .dx-texteditor-input {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .dx-dropdowneditor-button {
+      transition: $transition;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+    }
+  }
+
+  // Tag box (requisitos)
+  ::ng-deep {
+    .dx-tagbox {
+      .dx-tag {
+        background-color: $primary-color;
+        color: white;
+        border-radius: 3px;
+        padding: 5px 10px;
+        margin: 2px;
+
+        .dx-tag-content {
+          font-weight: 500;
+        }
+      }
+
+      .dx-tag-remove-button {
+        color: white;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+      }
+    }
+  }
+
+  // Botones
+  ::ng-deep {
+    dx-button {
+      .dx-button {
+        border-radius: $border-radius;
+        transition: $transition;
+        font-weight: 500;
+
+        &.dx-button-success {
+          background-color: $success-color;
+          border-color: $success-color;
+
+          &:hover {
+            background-color: darken($success-color, 10%);
+          }
+        }
+
+        &.dx-button-default {
+          background-color: $primary-color;
+          border-color: $primary-color;
+
+          &:hover {
+            background-color: darken($primary-color, 10%);
+          }
+        }
+      }
+    }
+  }
+
+  // Date boxes
+  ::ng-deep {
+    .dx-datebox {
+      .dx-dropdowneditor-icon {
+        color: $primary-color;
+      }
+    }
+  }
+
+  // Number boxes
+  ::ng-deep {
+    .dx-numberbox {
+      .dx-texteditor-input {
+        text-align: right;
+      }
+    }
+  }
+
+  // Loading panel
+  ::ng-deep {
+    .dx-loadpanel-content {
+      border-radius: $border-radius;
+
+      .dx-loadpanel-message {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .dx-loadindicator-segment {
+        background-color: $primary-color;
+      }
+    }
+  }
+
+  // Validación
+  ::ng-deep {
+    .dx-validationsummary {
+      background-color: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: $border-radius;
+      padding: 15px;
+      margin: 20px 0;
+
+      .dx-validationsummary-item {
+        color: #856404;
+        padding: 5px 0;
+
+        &:before {
+          content: "• ";
+          font-weight: bold;
+        }
+      }
+    }
+
+    .dx-invalid-message {
+      color: $danger-color;
+      font-size: 12px;
+      margin-top: 5px;
+
+      .dx-overlay-content {
+        background-color: $danger-color;
+        color: white;
+        padding: 8px 12px;
+        border-radius: $border-radius;
+        box-shadow: $box-shadow;
+      }
+    }
+  }
+
+  // Textos de utilidad
+  .text-danger {
+    color: $danger-color;
+  }
+
+  .text-success {
+    color: $success-color;
+  }
+
+  .text-warning {
+    color: $warning-color;
+  }
+
+  .text-info {
+    color: $info-color;
+  }
+
+  .text-muted {
+    color: #6c757d;
+  }
+
+  .text-bold {
+    font-weight: bold;
+  }
+
+  // Responsive
+  @media (max-width: 992px) {
+    padding: 15px;
+
+    .button-group {
+      flex-direction: column;
+      align-items: stretch;
+
+      .codeudor-buttons {
+        flex-direction: column;
+
+        dx-button {
+          width: 100%;
+        }
+      }
+    }
+
+    dx-form {
+      ::ng-deep {
+        .dx-field-item-label {
+          width: 100% !important;
+          padding-bottom: 5px;
+        }
+
+        .dx-layout-manager {
+          .dx-field-item {
+            flex-direction: column !important;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
+
+    ::ng-deep {
+      .dx-form {
+        .dx-form-group {
+          .dx-layout-manager {
+
+            .dx-col-0,
+            .dx-col-1,
+            .dx-col-2,
+            .dx-col-3 {
+              width: 100% !important;
+            }
+          }
+        }
+      }
+
+      .dx-datagrid {
+        font-size: 14px;
+
+        .dx-datagrid-headers {
+          .dx-datagrid-text-content {
+            font-size: 13px;
+          }
+        }
+      }
+    }
+
+    .action-buttons {
+      dx-button {
+        .dx-button {
+          font-size: 14px;
+          padding: 10px;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    padding: 5px;
+
+    .button-group {
+      padding: 10px;
+
+      dx-button {
+        .dx-button {
+          font-size: 13px;
+          padding: 8px;
+        }
+      }
+    }
+
+    dx-form {
+      padding: 10px;
+    }
+
+    ::ng-deep {
+      .dx-popup-wrapper {
+        .dx-popup-content {
+          .popup-content {
+            padding: 10px;
+          }
+        }
+      }
+    }
+  }
+
+  // Animaciones
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  dx-form,
+  .button-group {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  // Scrollbar personalizado
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+
+    &:hover {
+      background: #555;
+    }
+  }
+
+  // Impresión
+  @media print {
+
+    .button-group,
+    .action-buttons,
+    dx-button {
+      display: none !important;
+    }
+
+    dx-form {
+      box-shadow: none;
+      border: 1px solid #ddd;
+    }
+
+    ::ng-deep {
+      .dx-datagrid {
+        .dx-datagrid-rowsview {
+          .dx-command-edit {
+            display: none !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+// Clases globales para DevExtreme
+::ng-deep {
+
+  // Tooltips
+  .dx-tooltip-wrapper {
+    .dx-overlay-content {
+      background-color: #333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: $border-radius;
+      font-size: 13px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  // Context menu
+  .dx-context-menu {
+    .dx-menu-item {
+      transition: $transition;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+
+      &.dx-state-focused {
+        background-color: #e3f2fd;
+      }
+    }
+  }
+
+  // Toast notifications
+  .dx-toast {
+    &.dx-toast-success {
+      .dx-toast-content {
+        background-color: $success-color;
+      }
+    }
+
+    &.dx-toast-error {
+      .dx-toast-content {
+        background-color: $danger-color;
+      }
+    }
+
+    &.dx-toast-warning {
+      .dx-toast-content {
+        background-color: $warning-color;
+      }
+    }
+
+    &.dx-toast-info {
+      .dx-toast-content {
+        background-color: $info-color;
+      }
+    }
+  }
+}

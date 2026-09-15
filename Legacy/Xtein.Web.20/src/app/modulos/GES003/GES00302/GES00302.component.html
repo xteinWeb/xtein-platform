@@ -1,0 +1,219 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <dx-data-grid
+      #gridResponsablesCargo
+      id="gridResponsablesCargo"
+      width="100%"
+      keyExpr="ITEM"
+      [dataSource]="DResponsablesCargo"
+      [showBorders]="true"
+      [columnAutoWidth]="true"
+      [allowColumnResizing]="true"
+      columnResizingMode="nextColumn"
+      [rowAlternationEnabled]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [columnMinWidth]="120"
+      (onInitNewRow)="initNewRow($event)"
+      (onRowInserted)="onRowInserted($event)"
+      (onRowUpdated)="onRowUpdated($event)"
+      (onEditingStart)="onEditingStart($event)"
+      (onRowValidating)="onRowValidating($event)"
+      (onSelectionChanged)="selectionGrid($event)"
+    >
+      <dxo-editing
+        mode="row"
+        [useIcons]="false"
+        [allowUpdating]="false"
+        [allowDeleting]="false"
+        [allowAdding]="false">
+        <dxo-texts
+          confirmDeleteMessage="">
+        </dxo-texts>
+      </dxo-editing>
+      
+      <dxo-selection 
+        selectAllMode="allPages"
+        [showCheckBoxesMode]="esVisibleSelecc" 
+        mode="multiple">
+      </dxo-selection>
+
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-search-panel [visible]="true" [width]="380" ></dxo-search-panel>
+      <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+      <dxi-column dataField="ID_RESPONSABLE" 
+                  caption="Id Responsable"
+                  alignment="left"
+                  [width]="200"
+                  editCellTemplate="editTempIdResponsable"
+      ></dxi-column>
+      <dxi-column dataField="NOMBRE"
+                  caption="Nombre"
+                  [width]="250"
+                  editCellTemplate="editCellTempNombre"
+      ></dxi-column>
+      <dxi-column dataField="NOMBRE_CARGO_CONTRACTUAL"
+                  caption="Cargo Contractual"
+                  [width]="250"
+                  editCellTemplate="editCellTempNombreContactual"
+      ></dxi-column>
+      <dxi-column dataField="FOTO"
+                  caption="Foto"
+                  alignment="left"
+                  cellTemplate="cellTempFoto"
+                  editCellTemplate="editCellTempFoto"
+      ></dxi-column>
+      <dxi-column dataField="ESTADO"
+                  caption="Estado"
+                  alignment="left"
+                  editCellTemplate="editCellTempEstado"
+      ></dxi-column>
+
+      <div *dxTemplate="let cellInfo of 'editTempIdResponsable'">
+        <dx-drop-down-box 
+          #dropSelectResponsable
+          id="dropSelectResponsable"
+          [(value)]="selectResponsable"
+          valueExpr="ID_RESPONSABLE"
+          displayExpr="ID_RESPONSABLE"
+          placeholder="Seleccione Responsables"
+          [readOnly]="readOnly"
+          [showClearButton]="true"
+          [(opened)]="openDropResponsable"
+          [dataSource]="DResponsables"
+          columnResizingMode="widget"
+          [dropDownOptions]="{width: 350, height: 'auto', hideOnParentScroll: true, container:'#router-container'}"
+        >
+          <div id="containerDgResponsables" *dxTemplate="let data of 'content'">
+            <dx-data-grid
+              #dataGridResponsables
+              height="100%"
+              width="100%"
+              keyExpr="ID_RESPONSABLE"
+              [dataSource]="DResponsables"
+              [(selectedRowKeys)]="selectResponsable"
+              [selection]="{ mode: 'single' }"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [columnMinWidth]="100"
+              [rowAlternationEnabled]="true"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              (onSelectionChanged)="onSelectionChangedResponsable($event, cellInfo)"
+            >
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="300" ></dxo-search-panel>
+
+              <dxi-column dataField="ID_RESPONSABLE" caption="Cédula" cssClass="clsEncabHis" [width]="120"></dxi-column>
+              <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis" [width]="125"></dxi-column>
+            </dx-data-grid>
+          </div>
+        </dx-drop-down-box>
+      </div>
+
+      <div *dxTemplate="let cellInfo of 'editCellTempNombre'">
+        <dx-text-box
+          class="product-name"
+          [value]="cellInfo.data.NOMBRE"
+          [readOnly]="true"
+        ></dx-text-box>
+      </div>
+
+      <div *dxTemplate="let cellInfo of 'editCellTempNombreContactual'">
+        <dx-text-box
+          class="product-name"
+          [value]="cellInfo.data.NOMBRE_CARGO_CONTRACTUAL"
+          [readOnly]="true"
+        ></dx-text-box>
+      </div>
+
+      <div *dxTemplate="let cellInfo of 'cellTempFoto'">
+        <div *ngIf="cellInfo.data.FOTO !== '' ">
+          <a class="avatar-content">
+            <img
+              [id]="'USER-'+cellInfo.data.id+cellInfo.data.ITEM"
+              width="20px"
+              height="20px"
+              [src]="cellInfo.data.FOTO"
+              [alt]="cellInfo.data.NOMBRE"
+            />
+          </a>
+        </div>
+        <div *ngIf="cellInfo.data.FOTO === '' ">
+          <span class="avatar-content-name">
+            <span [id]="'USER-'+cellInfo.data.ITEM">{{ cellInfo.data.iconNameUser }}</span>
+          </span>
+        </div>
+      </div>
+
+      <div *dxTemplate="let cellInfo of 'editCellTempFoto'">
+        <div *ngIf="cellInfo.data.FOTO !== '' ">
+          <a class="avatar-content">
+            <img
+              [id]="'USER-'+cellInfo.data.id+cellInfo.data.ITEM"
+              width="20px"
+              height="20px"
+              [src]="cellInfo.data.FOTO"
+              [alt]="cellInfo.data.NOMBRE"
+            />
+          </a>
+        </div>
+        <div *ngIf="cellInfo.data.FOTO === '' ">
+          <span class="avatar-content-name">
+            <span [id]="'USER-'+cellInfo.data.ITEM">{{ cellInfo.data.iconNameUser }}</span>
+          </span>
+        </div>
+      </div>
+
+      <div *dxTemplate="let cellInfo of 'editCellTempEstado'">
+        <dx-select-box
+          #dropSelectEstado
+          id="dropSelectEstado"
+          [(value)]="cellInfo.data.ESTADO"
+          placeholder="Seleccione Estado"
+          [showClearButton]="true"
+          [(opened)]="openDropEstado"
+          [dataSource]="DlEstados"
+          [dropDownOptions]="{hideOnParentScroll: true, container:'#gridResponsablesCargo'}"
+          (onValueChanged)="onValueChangedEstado($event, cellInfo)"
+        ></dx-select-box>
+      </div>
+
+      <dxo-toolbar *ngIf="!readOnly">
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+            </dx-button>
+          </div>
+        </dxi-item>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+            </dx-button>
+          </div>
+        </dxi-item>
+      </dxo-toolbar>
+                    
+    </dx-data-grid>
+
+  </div>
+</div>

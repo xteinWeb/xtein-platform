@@ -1,0 +1,45 @@
+<dx-popup
+  [(title)]="titAlert"
+  [showTitle]="true"
+  [width]="'400px'"
+  [height]="'250px'"
+  [title]="titPopUpAlert"
+  [dragEnabled]="false"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="false"
+  [hideOnParentScroll]="true"
+  [(visible)]="esVisible"
+  [shading]="false"
+  (onShown)="onShownAlert($event)"
+>
+  <dxi-toolbar-item
+    widget="dxButton"
+    toolbar="bottom"
+    location="before"
+    [options]="aceptarButtonOptions"
+  >
+  </dxi-toolbar-item>
+  <dxi-toolbar-item
+    widget="dxButton"
+    toolbar="bottom"
+    location="after"
+    [options]="closeButtonOptions"
+  >
+  </dxi-toolbar-item>
+  <dxo-position at="center" my="center" of="window"> </dxo-position>
+
+  <div *dxTemplate="let data of 'content'">
+    <dx-radio-group
+      [items]="itemsOpciones"
+      [(value)]="opcionSelecc"
+      valueExpr="opcion"
+      displayExpr="opcion"
+    >
+      <div *dxTemplate="let datopc of 'item'">
+        <div class="items">{{ datopc.opcion }}</div>
+        <div class="texto">{{ datopc.texto }}</div>
+      </div>
+    </dx-radio-group>
+  </div>
+
+</dx-popup>

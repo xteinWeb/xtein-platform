@@ -1,0 +1,9 @@
+.temResponsable {
+  display: flex;
+  justify-content: flex-start;
+  height: 30px;
+}
+
+.temResponsable a {
+  padding: 5px;
+}

@@ -1,0 +1,206 @@
+<dx-data-grid class="dx-card wide-card"
+    #GEspecPro
+    id="GEspecPro"
+    [dataSource]="DEspecPro"
+    [allowColumnReordering]="true"
+    [focusedRowEnabled]="false"
+    [showBorders]="true"
+    [showColumnHeaders]="false"
+    keyExpr="ITEM"
+    [showRowLines]="true"
+    [showColumnLines]="true"
+    [hoverStateEnabled]="true"
+    (onEditingStart)="onEditingStart($event)"
+    (onRowInserted)="insertedRow($event)"
+    (onRowUpdated)="updatedRow($event)"
+    (onRowRemoved)="removedRow($event)"
+    (onRowUpdating)="updatingRow($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onRowClick)="startEdit($event)"
+    (onContentReady)="onContentReady($event)"
+>
+    <dxo-editing
+        [allowUpdating]="esEdicion"
+        mode="row"> <!-- 'batch' | 'cell' | 'form' | 'popup' -->
+    </dxo-editing>
+
+    <dxi-column dataField="ID_ESPECIFICACION" [width]="210" [allowEditing]="false"></dxi-column>
+    <dxi-column dataField="VALOR" editCellTemplate="cellTipo" cellTemplate="cellValor" [allowEditing]="esEdicion" cssClass="no-border"></dxi-column>
+
+    <dxi-column dataField="CATEGORIA" [groupIndex]="0" [calculateGroupValue]="ordenGrupo" groupCellTemplate="grpCat"></dxi-column>
+
+    <dxi-column dataField="edicion" caption="#" [visible]="esEdicionFila" editCellTemplate="editCtCmd" width="100"></dxi-column> 
+
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    
+    <div *dxTemplate="let data of 'editCtCmd'">
+        <div *ngIf="esEdicion === true && verBarraOper">
+            <dx-button id="btnGuardar" matTooltip="Aplicar cambios" (onClick)="saveEditData(data)" class="xt-btn" icon="todo"></dx-button>  
+            <dx-button id="btnCancelar" matTooltip="Cancelar cambios" (onClick)="cancelEditData(data)" class="xt-btn" icon="undo"></dx-button>  
+            <dx-button id="btnLimpiar" matTooltip="Borrar datos" (onClick)="cleanEditData(data)" class="xt-btn" icon="clearformat"></dx-button>  
+        </div>
+    </div>
+
+    <div *dxTemplate="let grupoObj of 'grpCat'">
+        <!--
+        <p class="headergrupo m-0">{{ grupoObj.row.data.items[0].CATEGORIA }}</p>
+        -->
+        <p class="headergrupo m-0">{{ templateHtml(grupoObj) }}</p>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'cellValor'" >
+        <span *ngIf="cellInfo.data.INFO!==''">
+            <div *ngIf="cellInfo.data.OBJETO !== 'Memo'">
+                {{ setDatosRow(cellInfo.data.INFO) }}
+            </div>
+            <div *ngIf="cellInfo.data.OBJETO === 'Memo'">
+                <dx-text-area
+                    [autoResizeEnabled]="false"
+                    [minHeight]="100"
+                    [readOnly]="true"
+                    [(value)]="cellInfo.data.INFO"
+                >
+                </dx-text-area>
+            </div>
+        </span>
+        <span *ngIf="cellInfo.data.INFO===''" class="xt-text-sm-l-muted">
+            {{ setDatosRow('Clic para agregar informaci&oacute;n') }}
+        </span>
+    </div>
+    
+    <div *dxTemplate="let cellObj of 'cellTipo'">
+        <div *ngIf="cellObj.data.OBJETO === 'Numero'" id="listaBox">
+            <div style="display: inline-block;" class="datoValor">
+                <dx-number-box
+                    [value]="cellObj.data.VALOR_INFO"
+                    (onValueChanged)="onValueChangedNum($event, cellObj)">
+                    <dx-validator #ddValidatorNum>
+                        <dxi-validation-rule type="required" message="Un valor es requerido"></dxi-validation-rule>
+                        <dxi-validation-rule type="custom" 
+                            [validationCallback]="validarNumero" 
+                            [message]="cellObj.data.MSG_VALIDACION1">
+                        </dxi-validation-rule>
+                    </dx-validator>                        
+                </dx-number-box>
+            </div>
+            <div *ngIf="cellObj.data.ASOCIADO == 1" style="display: inline-block;">
+                <div style="display: inline-block;">
+                    <label style="padding-left: 5px; padding-right: 5px;"> {{cellObj.data.TITULO}} </label>
+                </div>
+                <div style="display: inline-block;" class="listaDatos" >
+                    <dx-drop-down-box #ddBox 
+                        [(value)]="gridBoxAso"
+                        [(opened)]="isGridBoxOpenedAso"
+                        (onValueChanged)="onValueChangedUM($event, cellObj)" 
+                        (onOptionChanged)="onSelectionAso($event)"
+                        [dataSource]="cellObj.data.DATA" 
+                        [showClearButton]="true"
+                        [dropDownOptions]="dropDownOptionsListBox"
+                        [valueExpr]="cellObj.data.KEY_COLUMNA"
+                        [displayExpr]="cellObj.data.KEY_COLUMNA"
+                    >
+
+                        <dxo-drop-down-options height="auto"></dxo-drop-down-options>
+                        <dx-validator #ddValidatorDrop>
+                            <dxi-validation-rule type="required" [message]="cellObj.data.MSG_VALIDACION2"></dxi-validation-rule>
+                        </dx-validator>
+                        <div *dxTemplate="let data of 'content'">
+                            <dx-data-grid 
+                                    [keyExpr]="cellObj.data.KEY_COLUMNA" 
+                                    [(selectedRowKeys)]="gridBoxAso" 
+                                    width="100%" 
+                                    height="100%"
+                                    (onSelectionChanged)="onSelectionChangedUM($event, ddBox.instance)" 
+                                    [dataSource]="cellObj.data.DATA"
+                                    [rowAlternationEnabled]="true"
+                                    [focusedRowEnabled]="true"
+                                    [hoverStateEnabled]="true">
+                                <dxo-scrolling mode="infinite"></dxo-scrolling>
+                                <dxo-selection mode="single" ></dxo-selection>
+                            </dx-data-grid>
+                        </div>
+                    </dx-drop-down-box>
+                </div>
+            </div>
+            <div *ngIf="cellObj.data.OBJETO === 'Texto'">
+                <div>
+                    <dx-text-box
+                        (onValueChanged)="onValueChangedTexto($event, cellObj)"
+                        [(value)]="cellObj.data.VALOR">
+                    </dx-text-box>
+                </div>
+            </div>
+            <div *ngIf="cellObj.data.OBJETO === 'Memo'">
+                <div style="display: flex; flex-direction: column">
+                    <dx-text-area
+                        [autoResizeEnabled]="false"
+                        [minHeight]="100"
+                        [maxHeight]="120"
+                        (onValueChanged)="onValueChangedMemo($event, cellObj)"
+                        [(value)]="cellObj.data.VALOR"
+                    >
+                    </dx-text-area>
+                </div>
+            </div>
+            <div *ngIf="cellObj.data.OBJETO === 'Lista'">
+                <div>
+                    <dx-select-box 
+                        [dataSource]="cellObj.data.DATA"
+                        [height]="30"
+                        displayExpr="ID_UDM"
+                        valueExpr="ID_UDM"
+                        [dropDownOptions]="dropDownOptionsListBox"
+                        (onValueChanged)="onSeleccValorLista($event, cellObj)"
+                        [value]="cellObj.data.VALOR">
+                    </dx-select-box>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="cellObj.data.OBJETO === 'Texto'">
+            <div>
+                <dx-text-box
+                    (onValueChanged)="onValueChangedTexto($event, cellObj)"
+                    [(value)]="cellObj.data.VALOR">
+                    <dx-validator #ddValidatorText>
+                        <dxi-validation-rule type="required" [message]="cellObj.data.MSG_VALIDACION"></dxi-validation-rule>
+                    </dx-validator>
+                </dx-text-box>
+            </div>
+        </div>
+        <div *ngIf="cellObj.data.OBJETO === 'Memo'">
+            <div style="display: flex; flex-direction: column">
+                <dx-text-area
+                    [autoResizeEnabled]="false"
+                    [minHeight]="100"
+                    [maxHeight]="120"
+                    [(value)]="cellObj.data.VALOR"
+                    (onValueChanged)="onValueChangedMemo($event, cellObj)"
+                    (onKeyDown)="onKeyDownText($event)"
+                >
+                </dx-text-area>
+            </div>
+        </div>
+        <div *ngIf="cellObj.data.OBJETO === 'Lista'" >
+            <div>
+                <dx-select-box 
+                    [dataSource]="cellObj.data.DATA"
+                    [height]="30"
+                    displayExpr="ID_UDM"
+                    valueExpr="ID_UDM"
+                    [showClearButton]="true"
+                    [dropDownOptions]="dropDownOptionsListBox"
+                    (onValueChanged)="onSeleccValorLista($event, cellObj)"
+                    [value]="cellObj.data.VALOR">
+                    <dx-validator #ddValidatorList>
+                        <dxi-validation-rule type="required" [message]="cellObj.data.MSG_VALIDACION"></dxi-validation-rule>
+                    </dx-validator>
+                </dx-select-box>
+            </div>
+        </div>
+    </div>
+
+</dx-data-grid>
+
+<!-- <dx-toast [(visible)]="toaVisible" [type]="toaTipo" [message]="toaMessage" [width]="300"></dx-toast> -->

@@ -1,0 +1,106 @@
+  <div class="row gx-3">
+    <div class="col-12">
+      <div class="card-content">
+        <dx-form
+          #formEntradas
+          labelLocation="left"
+          [colCount]="1"
+          [formData]="DEntradas"
+          (onEditorEnterKey)="onEditorEnterKey"  
+          [readOnly]="readOnly"
+          (onFieldDataChanged)="cambiosItemForma($event)">
+
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="ID_DOCUMENTO"
+            editorType="ddBoxDocumento">
+            <dxo-label text="Documento"></dxo-label>
+            <dx-drop-down-box
+              #ddBoxID_DOCUMENTO
+              [dataSource]="DDocumentos"
+              [(value)]="gridBoxDocumento"
+              [(opened)]="isGridBoxOpened"
+              [showClearButton]="true"
+              displayExpr="ID_DOCUMENTO"
+              valueExpr="ID_DOCUMENTO"
+              [readOnly]="readOnly"
+              [dropDownOptions]="{ width: 450 }">
+              <div *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  [dataSource]="DDocumentos"
+                  keyExpr="ID_DOCUMENTO"
+                  [selection]="{ mode: 'single' }"
+                  [allowColumnResizing]="true"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  columnResizingMode="nextColumn"
+                  [paging]="{ enabled: true, pageSize: 10 }"
+                  [(selectedRowKeys)]="gridBoxDocumento"
+                  (onSelectionChanged)="onSelectionChangedDocumento($event)">
+                  <dxo-selection
+                    selectAllMode="allPages"
+                    [showCheckBoxesMode]="esVisibleSelecc">
+                  </dxo-selection>
+                  <dxi-column dataField="ID_DOCUMENTO" caption="Documento"></dxi-column>
+                  <dxi-column dataField="DESCRIPCION" caption="Nombre del Documento"></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dx-drop-down-box>
+            </dxi-item>
+
+            <dxi-item dataField="NOMBRE_DOCUMENTO"
+              readOnly="true">
+            </dxi-item>
+
+            <dxi-item dataField="CONSECUTIVO">
+            </dxi-item>
+
+            <dxi-item dataField="FECHA">
+            </dxi-item>
+
+            <dxi-item dataField="FECHA_REGISTRO">
+            </dxi-item>
+
+            <dxi-item dataField="TIPO"
+              editorType="dxSelectBox">
+
+              <dxo-label text="Tipo de Movimiento"></dxo-label>
+              <dx-select-box
+                #xs__TIPO
+                [dataSource]="DTipoMovimiento"
+                displayExpr="VALOR1"
+                valueExpr="VALOR1"
+                [value]="DEntradas.TIPO"
+                [readOnly]="readOnly"
+                placeholder="Tipo de Movimiento"
+                [inputAttr]="{ name: 'VALOR1' }"
+                [searchEnabled]="true"
+                [readOnly]="readOnly"
+                [stylingMode]="stylingMode"
+                [dropDownOptions]="dropDownOptionsListBox"
+                (onValueChanged)="onSeleccTipo($event)">
+              </dx-select-box>
+            </dxi-item>
+
+            <dxi-item dataField="DETALLE">
+            </dxi-item>
+            
+            <dxi-item dataField="ID_SOPORTE">
+            </dxi-item>
+
+            <dxi-item dataField="NC_SOPORTE">
+            </dxi-item>
+
+            <dxi-item dataField="USUARIO">
+            </dxi-item>
+
+            <dxi-item dataField="ESTADO">
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+    </div>
+  </div>
+
+

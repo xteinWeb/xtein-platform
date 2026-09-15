@@ -1,0 +1,355 @@
+<div class="row gx-3" id="splitterMain">
+  <as-split
+    direction="horizontal"
+    (dragEnd)="dragEnd('percent', $event)"
+    #split="asSplit"
+    class="col-12"
+  >
+    <as-split-area class="col-4" [size]="40" #area1="asSplitArea" (resized)="onResized($event)">
+      <div class="card-content-clean-alt">
+          
+        <div id="constainer-expandir" class="dropdown-expand dpdown-p-absolute">
+          <dx-toolbar>
+            <dxi-item location="before" (click)="onExpanding($event)">
+              <div class="accordion-item-group">
+                <div>
+                  <span class="accordion-item-description" *ngIf="expandAreas">
+                    <i class="icon-chevron-right-xs"></i>
+                  </span>
+                  <span class="accordion-item-description" *ngIf="!expandAreas">
+                    <i class="icon-chevron-down-xs"></i>
+                  </span>
+                </div>
+                <span class="xt-dropdown-caption" >{{ btnContraer }}</span>
+              </div>
+            </dxi-item>
+          </dx-toolbar>
+        </div>
+
+        <dx-tree-list
+          #treeListAreas
+          id="treeListAreas"
+          [dataSource]="DListaAreas"
+          keyExpr="ID_AREA"
+          parentIdExpr="ID_AREA_SUPERIOR"
+          rootValue="RAIZ"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [(autoExpandAll)]="autoExpandAll"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          [focusedRowEnabled]="true"
+          [allowColumnResizing]="true"
+          [columnHidingEnabled]="true"
+          columnResizingMode="nextColumn"
+          [(focusedRowKey)]="focusedSeccion"
+          (onToolbarPreparing)="onToolbarPreparing($event)"
+          (onFocusedRowChanged)="selectArea($event)"
+          (onRowClick)="onRowClickSeccion($event)"
+          (onInitialized)="onInitialized($event)"
+          height="calc(100vh - 160px)"
+        >
+          <dxo-scrolling mode="standard"></dxo-scrolling>
+          <dxo-header-filter [visible]="true"></dxo-header-filter>
+          <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="widthSerchTreeList"></dxo-search-panel>
+
+          <dxi-column
+            dataField="ID_AREA"
+            caption="Id Area"
+            [width]="200"
+          ></dxi-column>
+          <dxi-column
+            dataField="DESCRIPCION"
+            caption="Descripción"
+            [width]="200"
+            [hidingPriority]="0"
+          ></dxi-column>
+          <dxi-column dataField="IsActive" [visible]="false"></dxi-column>
+
+          <div *dxTemplate="let info of 'cfgEncabezado'">
+            <p style="font-size: 16px">{{ info.column.caption }}</p>
+          </div>
+      
+          <dxo-export [enabled]="true"></dxo-export>
+
+        </dx-tree-list>
+      </div>
+    </as-split-area>
+
+    <as-split-area class="col-8 ml-0" [size]="60" #area2="asSplitArea">
+      <div id="form-container" class="card-content-secondary-alt" >
+        <dx-form
+          #formAreasFuncionales
+          id="formAreasFuncionales"
+          [(formData)]="FAreas"
+          [readOnly]="readOnly"
+          labelLocation="left"
+          colCount="1"
+          [screenByWidth]="getSizeQualifier"
+          (onContentReady)="onContentReadyFSecc($event)"
+        >
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="ID_AREA" >
+              <dxo-label text="Id Area"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Id Area"
+                  [readOnly]="readOnlyIdArea"
+                  [(value)]="FAreas.ID_AREA"
+                  (onValueChanged)="onValueChangedIdArea($event)"
+                ></dx-text-box>
+              </div>
+            </dxi-item>
+            
+            <dxi-item
+              editorType="dxSelectBox"
+              dataField="ESTADO"
+              [editorOptions]="{ items: ['ACTIVO','INACTIVO'], placeholder:'Seleccione Estado', hideOnParentScroll: true, container:'#router-container' }" 
+            >
+              <dxo-label text="Estado"></dxo-label>
+            </dxi-item>
+
+            <dxi-item dataField="DESCRIPCION" placeholder="Descripción del Area" >
+              <dxo-label text="Descripción"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Descripción Area"
+                  [readOnly]="readOnly"
+                  [(value)]="FAreas.DESCRIPCION">
+                </dx-text-box>
+              </div>
+            </dxi-item>
+            
+            <dxi-item dataField="ID_AREA_SUPERIOR" 
+              editorType="dxDropDownBox" 
+              [editorOptions]="{ dataSource: LDatosAreas, 
+                                  displayExpr: 'ID_AREA',
+                                  valueExpr: 'ID_AREA', 
+                                  placeholder:'Superior',
+                                  value: seleccSeccAnt,
+                                  dropDownOptions: dropDownOptions,
+                                  searchEnabled: true,
+                                  opened: isGridBoxOpened,
+                                  contentTemplate: 'contentAnt',
+                                  inputAttr: { id: 'dropAreaSuperior' }
+                              }"
+            >
+              <dxo-label text="Area padre"></dxo-label>
+            </dxi-item>
+            <dxi-item dataField="NOMBRE_AREA_PADRE">
+              <dxo-label text="Nombre Area padre"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre Area padre"
+                  [readOnly]="true"
+                  [(value)]="NOMBRE_AREA_PADRE">
+                </dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ID_CARGO" >
+              <dxo-label text="Cargo"></dxo-label>
+              <div *dxTemplate>
+                <dx-drop-down-box
+                  #xs__CLASE
+                  id="xs__CLASE"
+                  [(value)]="seleccSeccCargo"
+                  [dataSource]="LCargos"
+                  valueExpr="ID_CARGO"
+                  displayExpr="ID_CARGO"
+                  contentTemplate="contentTemplate"
+                  placeholder="Seleccione cargo..."
+                  [readOnly]="readOnly"
+                  [inputAttr]="{ name: 'ID_CARGO' }"
+                  [showClearButton]="true"
+                  [(opened)]="isGridBoxOpenedCargo"
+                  [dropDownOptions]="dropDownOptions"
+                  (onValueChanged)="onValueChangedCargo($event)"
+                >
+                  <div *dxTemplate="let data of 'contentTemplate'">
+                    <dx-tree-list 
+                      height="100%"
+                      keyExpr="ID_CARGO"
+                      parentIdExpr="ID_CARGO_SUPERIOR"
+                      rootValue="__FUNCIONAL__"
+                      [dataSource]="LCargos"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      [allowColumnResizing]="true"
+                      columnResizingMode="nextColumn"
+                      [(focusedRowKey)]="focusedRowKeyCargo"
+                      [autoExpandAll]="true"
+                      [(selectedRowKeys)]="seleccSeccCargo"
+                      (onSelectionChanged)="onSeleccRowSeccionCargo($event, data)"
+                    >
+                      <dxo-selection mode="single"></dxo-selection> 
+                      <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+                      <dxi-column dataField="ID_CARGO" caption="Id Cargo" [width]="120"></dxi-column>
+                      <dxi-column dataField="NOMBRE" caption="Nombre" [width]="200"></dxi-column>
+                      <dxi-column dataField="DESCRIPCION" caption="Descripción" [width]="200"></dxi-column>
+                    </dx-tree-list>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="NOMBRE_CARGO">
+              <dxo-label text="Nombre Cargo"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre Cargo"
+                  [readOnly]="true"
+                  [(value)]="NOMBRE_CARGO"
+                ></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="1"></dxo-col-count-by-screen>
+            <dxi-item dataField="RESPONSABLE" [colSpan]="2" >
+              <dxo-label text="Responsables"></dxo-label>
+              <div *dxTemplate>
+                <dx-data-grid
+                  #gridResponsablesCargo
+                  id="gridResponsablesCargo"
+                  keyExpr="ID_RESPONSABLE"
+                  width="100%"
+                  [dataSource]="RESPONSABLE"
+                  [showBorders]="true"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+                  <dxi-column dataField="ID_RESPONSABLE" 
+                    caption="Id Responsable"
+                    alignment="left"
+                    [width]="200"
+                  ></dxi-column>
+                  <dxi-column dataField="NOMBRE"
+                    caption="Nombre"
+                    [width]="250"
+                  ></dxi-column>
+                </dx-data-grid>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <div *dxTemplate="let data of 'contentAnt'">
+            <dx-tree-list 
+              #treeListSelectArea
+              id="treeListSelectArea"
+              height="100%"
+              keyExpr="ID_AREA"
+              parentIdExpr="ID_AREA_SUPERIOR"
+              rootValue=""
+              [dataSource]="DListaAreas"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="nextColumn"
+              [(focusedRowKey)]="focusedRowKey"
+              [autoExpandAll]="true"
+              [(selectedRowKeys)]="seleccSeccAnt"
+              (onSelectionChanged)="onSeleccRowSeccionAnt($event)"
+            >
+              <dxo-selection mode="single"></dxo-selection> 
+              <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+              <dxi-column dataField="ID_AREA" caption="Id Area" [width]="200"></dxi-column>
+              <dxi-column dataField="DESCRIPCION" caption="Descripción" [width]="200"></dxi-column>
+            </dx-tree-list>
+          </div>
+
+          <!-- <div *dxTemplate="let data of 'contentCargos'">
+            <dx-tree-list 
+              height="100%"
+              keyExpr="ID_CARGO"
+              parentIdExpr="ID_CARGO_SUPERIOR"
+              rootValue="__FUNCIONAL__"
+              [dataSource]="LCargos"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="nextColumn"
+              [(focusedRowKey)]="focusedRowKeyCargo"
+              [autoNavigateToFocusedRow]="true"
+              [autoExpandAll]="true"
+              [(selectedRowKeys)]="seleccSeccCargo"
+              (onSelectionChanged)="onSeleccRowSeccionCargo($event, data)"
+            >
+              <dxo-selection mode="single"></dxo-selection> 
+              <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+              <dxi-column dataField="ID_CARGO" caption="Id Cargo" [width]="120"></dxi-column>
+              <dxi-column dataField="NOMBRE" caption="Nombre" [width]="200"></dxi-column>
+              <dxi-column dataField="DESCRIPCION" caption="Descripción" [width]="200"></dxi-column>
+            </dx-tree-list>
+          </div> -->
+
+        </dx-form>
+        <br/>
+        <span class="xt-caption" id="xs_areas_aso">Areas asociadas:</span>
+        <dx-data-grid
+          id="gridContainer"
+          keyExpr="ID_AREA"
+          [dataSource]="DAreasAsociadas"
+          [showBorders]="true"
+          noDataText="No hay datos."
+          [columnAutoWidth]="true"
+          [allowColumnResizing]="true" 
+          [rowAlternationEnabled]="true"
+          [focusedRowEnabled]="true"
+          [hoverStateEnabled]="true"
+        >
+          <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+          <dxi-column dataField="ID_AREA" caption="Id Area" alignment="right"></dxi-column>
+          <dxi-column dataField="DESCRIPCION" caption="Descripcion" [width]="300"></dxi-column>
+        </dx-data-grid>
+      </div>
+    </as-split-area>
+  </as-split>
+</div>
+
+<app-menufloat 
+  *ngIf="activaMenuFloat"
+  [popupVisible]="activaMenuFloat" 
+  [popupVisible]="activaMenuFloat" 
+  [targetElem]="targetMenuFloat"
+  [data]="dataMenuFloat"
+  [events]="eventsSubject.asObservable()"
+  (cerrarMenu)="activaMenuFloat = false"
+></app-menufloat>
+
+
+<app-vistarapida id="vistapro008" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-tooltip
+  [target]="idTargetToolTip"
+  position="top"
+  [(visible)]="verToolTip"
+  showEvent="mouseenter"
+  hideEvent="mouseleave"
+  [wrapperAttr]="wrapperAttr"
+>
+  <div *dxTemplate="let data of 'content'">
+    {{ msgToolTip }}
+  </div>
+</dx-tooltip>
+
+<dx-load-panel
+  #loadPanelPro
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

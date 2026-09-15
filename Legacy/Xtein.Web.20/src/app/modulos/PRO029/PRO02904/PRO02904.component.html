@@ -1,0 +1,28 @@
+<div>
+  <dx-gantt #ganttAgenda id="ganttAgenda" height="630" scaleType="days" [rootValue]="-1" [taskListWidth]="500">
+    <dxo-tasks keyExpr="PRODUCTO" parentIdExpr="RAIZ" titleExpr="NOMBRE_COMPLETO" startExpr="FECHA_PEDIDO"
+      endExpr="FECHA_ENTREGA" [dataSource]="DAgenda"></dxo-tasks>
+    <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre producto" [width]="500"></dxi-column>
+    <dxi-column dataField="CANTIDAD" caption="Cantidad requerida" [width]="150"></dxi-column>
+    <dxi-column dataField="NOMBRE_CLIENTE" caption="Nombre Cliente" [width]="200"></dxi-column>
+    <dxi-column dataField="FECHA_PEDIDO" caption="Fecha de inicio" dataType="date" [width]="100"></dxi-column>
+    <dxi-column dataField="FECHA_ENTREGA" caption="Fecha final" dataType="date" [width]="100"></dxi-column>
+    <dxo-toolbar>
+      <dxi-item name="collapseAll"></dxi-item>
+      <dxi-item name="expandAll"></dxi-item>
+      <dxi-item name="separator"></dxi-item>
+      <dxi-item name="zoomIn"></dxi-item>
+      <dxi-item name="zoomOut"></dxi-item>
+    </dxo-toolbar>
+
+    <!-- <div *dxTemplate="let item of 'taskContentTemplate'">
+      <div class="custom-task {{ item.taskData.COLOR}}">
+        <div class="custom-task-wrapper">
+          <div class="custom-task-title">{{ item.taskData.COLOR }}</div>
+          <div class="custom-task-title">{{ item.taskData.NOMBRE_COMPLETO }}</div>
+        </div>
+      </div>
+    </div> -->
+  </dx-gantt>
+
+</div>

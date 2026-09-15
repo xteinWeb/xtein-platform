@@ -1,0 +1,127 @@
+<dx-data-grid
+  #gridTelefonos
+  id="gridTelefonos"
+  [dataSource]="DTelefonos"
+  keyExpr="ID_TELEFONO"
+  [showBorders]="true"
+  (onInitNewRow)="initNewRow($event)"
+  (onRowInserting)="insertingRow($event)"
+  (onRowInserted)="insertedRow($event)"
+  (onRowUpdating)="updatingRow($event)"
+  (onRowUpdated)="updatedRow($event)"
+  (onRowRemoved)="removedRow($event)"
+  (onEditingStart)="onEditingStart($event)"
+  (onEditorPreparing)="onEditorPreparing($event)"
+  (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+  (onRowPrepared)="onRowPrepared($event)"
+  (onRowValidating)="onRowValidating($event)"
+  (onFocusedRowChanged)="onFocusedRowChanged($event)"
+  (onEditCanceled)="onEditCanceled($event)"
+  (onCellClick)="onCellClick($event)"
+  (onCellPrepared)="onCellPrepared($event)"
+  >
+    <dxo-editing
+        mode="cell"
+        [useIcons]="false" 
+        [allowUpdating]="esEdicion"
+        [allowDeleting]="false"
+        [allowAdding]="esEdicion"
+        >
+        <dxo-texts
+            confirmDeleteMessage="">
+        </dxo-texts>
+    </dxo-editing>      
+    <dxo-selection
+        selectAllMode="allPages"
+        [showCheckBoxesMode]="esVisibleSelecc"
+        mode="multiple">
+    </dxo-selection>
+
+    <dxi-column dataField="ID_TELEFONO"
+        caption="Id telefono"
+        calculateDisplayValue="ID_TELEFONO"
+        [allowEditing]="false"
+        width="80"
+    >
+    </dxi-column>
+    <dxi-column dataField="TIPO_TELEFONO"
+        caption="Tipo telefono"
+        calculateDisplayValue="TIPO_TELEFONO"
+        editCellTemplate="tempTipoTel"
+    >
+    </dxi-column>
+    <dxi-column dataField="TELEFONO"
+        caption="Teléfono"
+        calculateDisplayValue="TELEFONO"
+    >
+    </dxi-column>
+    <dxi-column dataField="EXTENSION"
+        caption="Extensión"
+        calculateDisplayValue="EXTENSION"
+    >
+    </dxi-column>
+
+    <div *dxTemplate="let cellInfo of 'tempTipoTel'">
+        <dx-drop-down-box
+            #ddBox
+            [(value)]="cellInfo.value"
+            [inputAttr]="{ 'aria-label': 'Owner' }"
+            valueExpr="TIPO"
+            displayExpr="TIPO"
+            placeholder="Tipo..."
+            [showClearButton]="true"
+            [dataSource]="DTiposTel"
+            [dropDownOptions]="{ width: 400 }"
+        >
+            <div *dxTemplate="let templateData of 'content'">
+                <dx-data-grid
+                    [dataSource]="DTiposTel"
+                    [columns]="['TIPO']"
+                    [selection]="{ mode: 'multiple' }"
+                    [hoverStateEnabled]="true"
+                    [paging]="{ enabled: true, pageSize: 10 }"
+                    [filterRow]="{ visible: true }"
+                    [scrolling]="{ mode: 'virtual' }"
+                    [height]="345"
+                    [(selectedRowKeys)]="gridBoxValue"
+                    (onSelectionChanged)="onSelectionTipoTel($event, cellInfo)"
+                    >
+                </dx-data-grid>
+            </div>
+      </dx-drop-down-box>
+    </div>
+
+    <dxo-toolbar *ngIf="esEdicion">
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+                </dx-button>
+            </div>
+        </dxi-item>
+    </dxo-toolbar>
+
+</dx-data-grid>

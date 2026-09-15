@@ -1,0 +1,216 @@
+<div id="tree-list-demo">
+  <dx-data-grid
+    #gridPartes
+    id="gridPartes"
+    class="xt-datagrid"
+    noDataText="" 
+    [dataSource]="DPartes"
+    keyExpr="ITEM"
+    [allowColumnResizing]="true"
+    columnResizingMode="widget"
+    [showBorders]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    (onInitNewRow)="initNewRow($event)"
+    (onRowInserting)="insertingRow($event)"
+    (onRowInserted)="insertedRow($event)"
+    (onRowUpdating)="updatingRow($event)"
+    (onRowUpdated)="updatedRow($event)"
+    (onRowRemoved)="removedRow($event)"
+    (onEditingStart)="onEditingStart($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onSelectionChanged)="selectionGrid($event)"
+    (onRowClick)="startEdit($event)"
+    (onContentReady)="onContentReady($event)"
+  >
+    <dxo-editing
+      mode="cell"
+      [useIcons]="false"
+      [allowUpdating]="esEdicion"
+      [allowDeleting]="false"
+      [allowAdding]="esEdicion">
+      <dxo-texts
+          confirmDeleteMessage="">
+      </dxo-texts>
+    </dxo-editing>
+
+    <dxo-selection 
+        selectAllMode="allPages"     
+        [showCheckBoxesMode]="esVisibleSelecc" 
+        mode="multiple">
+    </dxo-selection>
+
+    <dxi-column dataField="ITEM" [visible]="false"></dxi-column>
+    <dxi-column 
+        dataField="ID_PARTE" 
+        caption="Id Parte" 
+        width="20%" 
+        editCellTemplate="listaPartes">
+    </dxi-column>
+    <dxi-column dataField="NOMBRE_PARTE" caption="Nombre" width="35%"  [allowEditing]="false">
+    </dxi-column>
+    <dxi-column dataField="ID_UDM" caption="UM" width="15%" [allowEditing]="false">
+    </dxi-column>
+    <dxi-column 
+        dataField="ATRIBUTO" 
+        caption="Atributo" 
+        editCellTemplate="listaAtributos" 
+        width="20%"
+        [visible]="false">
+    </dxi-column>
+    <dxi-column dataField="CANTIDAD" caption="Cantidad" width="15%" dataType="number" [editorOptions]="{format: '#,##0.00'}" alignment="right" >
+      <dxo-format
+          type="fixedPoint"
+          [precision]="2">
+      </dxo-format>
+    </dxi-column>
+    <dxi-column 
+        dataField="ESTADO" 
+        caption="Estado" 
+        width="15%" 
+        calculateDisplayValue="ESTADO"
+        >
+        <dxo-lookup
+            [dataSource]="['ACTIVO','INACTIVO']">
+        </dxo-lookup>
+    </dxi-column>
+
+    <div *dxTemplate="let cellInfo of 'listaPartes'">
+        <dx-drop-down-box   
+          #ddParte
+          id="ddParte"
+          [(value)]="gridBoxParte"
+          valueExpr="PRODUCTO"
+          displayExpr="PRODUCTO"
+          placeholder="Producto"
+          [showClearButton]="false"
+          [dataSource]="DProductos"
+          [acceptCustomValue]="false"
+          [readOnly]="readOnly"
+          [dropDownOptions]="dropDownOptions"
+          (onOptionChanged)="onSelectionParte($event)"
+          [inputAttr]="{style: 'text-transform: uppercase'}"
+          (onValueChanged)="onValueChanged($event, cellInfo)"
+        >
+            <div *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                    [focusedRowIndex]="focusedRowIndex"
+                    keyExpr="PRODUCTO"
+                    [dataSource]="DProductos"
+                    [hoverStateEnabled]="true"
+                    [allowColumnResizing]="true"
+                    [rowAlternationEnabled]="true"
+                    [focusedRowEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    columnResizingMode="nextColumn"
+                    [(focusedRowKey)]="focusedRowKey"
+                    [autoNavigateToFocusedRow]="true"
+                    [(selectedRowKeys)]="gridBoxParte"
+                    height="100%"
+                    (onRowClick)="onSeleccRowParte($event, cellInfo)"
+                    >
+                    <dxo-paging [pageSize]="100"> </dxo-paging>
+                    <dxo-pager
+                        [visible]="true"
+                        allowedPageSizes="[5, 10, 'all']"
+                        [showPageSizeSelector]="true"
+                        [showInfo]="true"
+                        [showNavigationButtons]="true"
+                    >
+                    </dxo-pager>
+                    <dxo-search-panel [width]="250" [visible]="true"></dxo-search-panel>
+                    <dxo-selection mode="single"></dxo-selection>
+                    <dxi-column dataField="PRODUCTO" caption="Producto" width="30%"></dxi-column>
+                    <dxi-column dataField="NOMBRE" caption="Nombre" ></dxi-column>
+                    <dxi-column dataField="CLASE" caption="Clase" ></dxi-column>
+                </dx-data-grid>
+            </div>
+        </dx-drop-down-box>                    
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'listaAtributos'">
+    <dx-drop-down-box
+        #ddParteAtributo
+        id="ddParteAtributo"
+        [dropDownOptions]="dropDownOptions"
+        [dataSource]="DListaAtributos"
+        [(value)]="cellInfo.value"
+        displayExpr="ATRIBUTO"
+        valueExpr="ATRIBUTO"
+        [deferRendering]="false"
+        placeholder="Atributo..."
+        [showClearButton]="true"
+        contentTemplate="contentTemplate"
+    >
+
+        <div *dxTemplate="let data of 'contentTemplate'">
+            <dx-data-grid
+                #GListaProKit
+                keyExpr="ATRIBUTO"
+                [dataSource]="DListaAtributos"
+                [focusedRowEnabled]="true"
+                [hoverStateEnabled]="true"
+                height="100%"
+                [selectedRowKeys]="[cellInfo.value]"
+                [focusedRowKey]="cellInfo.value"
+                (onSelectionChanged)="onSelectionChangedAtr($event.selectedRowKeys, cellInfo, data.component, $event)"
+            >
+                <dxo-selection mode="single"></dxo-selection>
+                <dxo-scrolling mode="virtual"></dxo-scrolling>
+                <dxo-search-panel [width]="250" [visible]="true"></dxo-search-panel>
+                <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+                <dxi-column dataField="ATRIBUTO" [width]="200" caption="Atributo" ></dxi-column>
+                <dxi-column dataField="VALOR" caption="Valor" ></dxi-column>
+
+            </dx-data-grid>
+        </div>
+    </dx-drop-down-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'estadoTemplate'">
+    <app-sboxestados
+        [data]="cellInfo"
+        [modo]="esEdicionFila ? 'grid_edit' : 'grid_read'"
+        [value]="cellInfo.data.ESTADO"
+        (setValueEstado)="setValueEstado($event, cellInfo)"
+    >
+    </app-sboxestados>
+    </div>
+
+    <dxo-toolbar *ngIf="esEdicion">
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Editar" (onClick)="operGrid($event,'edit')" *ngIf="rowEdit">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+            </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+            </dx-button>
+            </div>
+        </dxi-item>
+    </dxo-toolbar>
+
+  </dx-data-grid>
+</div>

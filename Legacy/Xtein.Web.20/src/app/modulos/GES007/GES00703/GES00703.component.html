@@ -1,0 +1,78 @@
+<div>
+  <dx-form #formPYT id="formPytGantt" labelLocation="left" [colCount]="1" [formData]="FProyectos" [readOnly]="readOnly">
+    <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="3"></dxo-col-count-by-screen>
+    <dxi-item dataField="NOMBRE">
+      <dxo-label text="Proyecto"></dxo-label>
+      <div *dxTemplate>
+        <dx-text-box placeholder="Nombre del Proyecto" [readOnly]="readOnly" [(value)]="FProyectos.NOMBRE"
+          (onValueChanged)="onValueChanged($event, 'NOMBRE')"></dx-text-box>
+      </div>
+    </dxi-item>
+    <dxi-item dataField="RESPONSABLE" editorType="dxSelectBox">
+      <dxo-label text="Responsable"></dxo-label>
+      <div *dxTemplate>
+        <dx-select-box displayExpr="NOMBRE" valueExpr="ID_RESPONSABLE" placeholder="Seleccione un Responsable"
+          [searchEnabled]="true" [readOnly]="readOnly" [value]="FProyectos.RESPONSABLE" [dataSource]="RESOURCES"
+          (onValueChanged)="onValueChanged($event, 'RESPONSABLE')"></dx-select-box>
+      </div>
+    </dxi-item>
+    <dxi-item dataField="SUB_ESTADO">
+      <dxo-label text="Estado"></dxo-label>
+      <div *dxTemplate>
+        <dx-text-box placeholder="Estado" [readOnly]="true" [(value)]="FProyectos.SUB_ESTADO"
+          (onValueChanged)="onValueChanged($event, 'SUB_ESTADO')"></dx-text-box>
+      </div>
+    </dxi-item>
+    <dxi-item dataField="FECHA_INICIO">
+      <dxo-label text="Fecha inicial"></dxo-label>
+      <div *dxTemplate>
+        <dx-date-box placeholder="d/m/aa" [readOnly]="readOnly" [(value)]="FProyectos.FECHA_INICIO"
+          (onValueChanged)="onValueChanged($event, 'FECHA_INICIO')"></dx-date-box>
+      </div>
+    </dxi-item>
+    <dxi-item dataField="FECHA_FIN">
+      <dxo-label text="Fecha final"></dxo-label>
+      <div *dxTemplate>
+        <dx-date-box placeholder="d/m/aa" [readOnly]="readOnly" [(value)]="FProyectos.FECHA_FIN" type="date"
+          [inputAttr]="{ 'aria-label': 'Date And Time' }"
+          (onValueChanged)="onValueChanged($event, 'FECHA_FIN')"></dx-date-box>
+      </div>
+    </dxi-item>
+    <dxi-item dataField="AVANCE">
+      <dxo-label text="Avance"></dxo-label>
+      <div *dxTemplate>
+        <dx-progress-bar #progressBar id="progress-bar-status" width="100%"
+          [elementAttr]="{ 'aria-label': 'Progress Bar' }" [class.complete]="FProyectos.AVANCE == maxValue" [min]="0"
+          [max]="maxValue" [statusFormat]="format" [value]="FProyectos.AVANCE">
+        </dx-progress-bar>
+      </div>
+    </dxi-item>
+  </dx-form>
+</div>
+<br />
+<div>
+  <dx-gantt #ganttProyectos id="ganttProyectos" height="630" scaleType="days" [rootValue]="-1" [taskListWidth]="500">
+    <dxo-tasks keyExpr="ID_ACTIVIDAD" parentIdExpr="ID_ACTIVIDAD_PADRE" titleExpr="NOMBRE" startExpr="FECHA_INICIO"
+      endExpr="FECHA_FIN" progressExpr="AVANCE" [dataSource]="DTareas"></dxo-tasks>
+    <dxo-resources keyExpr="ID_RESPONSABLE" textExpr="NOMBRE" [dataSource]="RESOURCES"></dxo-resources>
+    <dxo-resource-assignments keyExpr="ID_ACTIVIDAD" resourceIdExpr="RESPONSABLE" taskIdExpr="ID_ACTIVIDAD"
+      [dataSource]="DTareas"></dxo-resource-assignments>
+    <dxo-dependencies keyExpr="id" predecessorIdExpr="predecessorId" successorIdExpr="successorId" typeExpr="type"
+      [dataSource]="PRECEDENTES"></dxo-dependencies>
+
+    <dxi-column dataField="NOMBRE" caption="Actividad" [width]="300"></dxi-column>
+    <dxi-column dataField="FECHA_INICIO" caption="Fecha de inicio" dataType="date"></dxi-column>
+    <dxi-column dataField="FECHA_FIN" caption="Fecha final" dataType="date"></dxi-column>
+    <dxo-toolbar>
+      <dxi-item name="collapseAll"></dxi-item>
+      <dxi-item name="expandAll"></dxi-item>
+      <dxi-item name="separator"></dxi-item>
+      <dxi-item name="zoomIn"></dxi-item>
+      <dxi-item name="zoomOut"></dxi-item>
+      <dxi-item widget="dxButton" [options]="exportButtonOptions"> </dxi-item>
+    </dxo-toolbar>
+
+    <dxo-validation [autoUpdateParentTasks]="true"></dxo-validation>
+    <dxo-editing [enabled]="false"></dxo-editing>
+  </dx-gantt>
+</div>

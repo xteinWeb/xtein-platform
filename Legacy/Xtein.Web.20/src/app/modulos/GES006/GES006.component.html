@@ -1,0 +1,311 @@
+<div id="splitterMain" class="row gx-3 h-250" style="height: 100%;">
+  <div class="col-12">
+    <div class="card-content">
+      <dx-form #formPLT id="formPLT" labelLocation="left" [colCount]="1" [formData]="FPlantilla"
+        [readOnly]="objReadOnly.readOnly">
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+        <dxi-item dataField="ID_DOCUMENTO">
+          <dxo-label text="Código"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box #textIDRuta placeholder="Código" [(value)]="FPlantilla.ID_DOCUMENTO"
+              [readOnly]="true"></dx-text-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="ESTADO" editorType="dxSelectBox">
+          <dxo-label text="Estado"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box placeholder="Seleccion Estado" [(value)]="FPlantilla.ESTADO"
+              [readOnly]="objReadOnly.readOnly" [dataSource]="['ACTIVO','INACTIVO']"
+              (onValueChanged)="onValueChanged($event, 'Plantilla', 'ESTADO')"></dx-select-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="NOMBRE">
+          <dxo-label text="Plantilla"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box #textIDRuta placeholder="Nombre de la plantilla" [(value)]="FPlantilla.NOMBRE"
+              [readOnly]="objReadOnly.readOnly"
+              (onValueChanged)="onValueChanged($event, 'Plantilla', 'NOMBRE_PLANTILLA')"></dx-text-box>
+          </div>
+        </dxi-item>
+        <!-- <dxi-item dataField="TIPO" editorType="dxSelectBox">
+          <dxo-label text="Tipo"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box
+              [dataSource]="['Por Estado','Por Etapa','Libre']"
+              [value]="FPlantilla.TIPO"
+              [readOnly]="objReadOnly.readOnly"
+              placeholder="Seleccione Tipo"
+            ></dx-select-box>
+          </div>
+        </dxi-item> -->
+        <dxi-item dataField="FECHA_REGISTRO">
+          <dxo-label text="Fecha"></dxo-label>
+          <div *dxTemplate>
+            <dx-date-box placeholder="d/m/aa" type="date" [value]="FPlantilla.FECHA_REGISTRO" [readOnly]="true"
+              (onValueChanged)="onValueChanged($event, 'Plantilla', 'FECHA_REGISTRO')"></dx-date-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="DESCRIPCION" [editorOptions]="{placeholder:'Descripción de la plantilla'}">
+          <dxo-label text="Descripción"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-area id="txtDescripcionPlantilla" placeholder="Descripción..." [height]="50" [spellcheck]="true"
+              [autoResizeEnabled]="false" [(value)]="FPlantilla.DESCRIPCION" [readOnly]="objReadOnly.readOnly"
+              (onValueChanged)="onValueChanged($event, 'Plantilla', 'DESCRIPCION')"></dx-text-area>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="CATEGORIA">
+          <dxo-label text="Categoria"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box valueExpr="ID" displayExpr="NOMBRE" placeholder="Selecciones categoria"
+              [searchEnabled]="true" [dataSource]="DCategorias" [readOnly]="objReadOnly.readOnly"
+              [(value)]="FPlantilla.CATEGORIA"
+              (onValueChanged)="onValueChanged($event, 'Plantilla', 'CATEGORIA')"></dx-select-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="Tipo">
+          <dxo-label text="Tipo Categoria"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box valueExpr="VALOR1" displayExpr="VALOR1" placeholder="Selecciones categoria"
+              [searchEnabled]="true" [dataSource]="DtipoPlantillas" [readOnly]="objReadOnly.readOnly"
+              [(value)]="FPlantilla.TIPO"
+              (onValueChanged)="onValueChanged($event, 'Plantilla', 'TIPO')"></dx-select-box>
+          </div>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </div>
+
+
+  <as-split direction="horizontal" #split="asSplit" class="col-12" (dragEnd)="dragEnd($event)">
+    <as-split-area #area1="asSplitArea" id="asSplitArea" class="col-4" [size]="35">
+      <div #contentComponente id="contentComponente" class="xt-gesptreelist" style="height: 95%; padding: 5px;">
+        <dx-tree-list #treeListTareasPlantilla id="treeListTareasPlantilla" width="100%" height="100%"
+          noDataText="No hay Actividades" keyExpr="ID_ACTIVIDAD" parentIdExpr="ID_ACTIVIDAD_PADRE" [rootValue]="-1"
+          [columnMinWidth]="100" [expandedRowKeys]="[-5]" [autoExpandAll]="true" [showBorders]="true"
+          [showRowLines]="true" [columnAutoWidth]="true" [focusedRowEnabled]="true" [hoverStateEnabled]="false"
+          [allowColumnResizing]="true" [allowColumnReordering]="true" [dataSource]="DTareas"
+          (onRowPrepared)="onRowPrepared($event)" (onContentReady)="onContentReady($event, 'treeListTareasPlantilla')"
+          (onSelectionChanged)="selectionTreeList($event)">
+          <!-- <dxo-editing
+            mode="row"
+            [useIcons]="false"
+            [allowUpdating]="false"
+            [allowDeleting]="!objReadOnly.readOnly"
+            [allowAdding]="false"
+          > 
+            <dxo-texts
+              confirmDeleteMessage="">
+            </dxo-texts>
+          </dxo-editing> -->
+
+          <dxo-row-dragging *ngIf="!objReadOnly.readOnly" [allowDropInsideItem]="true" [allowReordering]="true"
+            [showDragIcons]="true" [onReorder]="onDragChange"></dxo-row-dragging>
+          <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="widthBuscarTree"></dxo-search-panel>
+          <dxo-selection selectAllMode="allPages" showCheckBoxesMode="none" mode="single"></dxo-selection>
+
+
+          <dxi-column dataField="ORDEN" caption="N°" cellTemplate="cellTempOrden"></dxi-column>
+          <dxi-column dataField="ACTIVIDAD" caption="Actividades" cellTemplate="cellTempNombre"></dxi-column>
+
+          <div *dxTemplate="let cellInfo of 'cellTempOrden'">
+            <span [id]="'txtOrden' + cellInfo.data.ORDEN" class="span_title">
+              <div>{{ cellInfo.data.ORDEN ? cellInfo.data.ORDEN + ')' : '' }}</div>
+            </span>
+          </div>
+          <div *dxTemplate="let cellInfo of 'cellTempNombre'">
+            <span [id]="'txtNombre' + cellInfo.data.ID_ACTIVIDAD" class="span_title">
+              <div>{{ cellInfo.data.ACTIVIDAD }}</div>
+            </span>
+          </div>
+
+          <!-- <dxo-toolbar *ngIf="!objReadOnly.readOnly">
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete', 'TreeListTareas')" *ngIf="rowDeleteTree">
+                </dx-button>
+              </div>
+            </dxi-item>
+          </dxo-toolbar> -->
+        </dx-tree-list>
+      </div>
+    </as-split-area>
+
+    <as-split-area class="col-8 ml-0" [size]="65" #area2="asSplitArea">
+      <div class="card-content-clean"
+        style="height: 95%; padding: 5px; margin-bottom: 0 !important; flex-direction: column; ">
+        <div *ngIf="!objReadOnly.tareas" style="display: flex; justify-content: flex-end; width: 100%; padding: 5px; ">
+          <dx-button id="btnAceptarPT" stylingMode="contained" type="default" [disabled]="activeBtn"
+            [width]="accionAct !== 'new' ? 120 : 100 " [text]="accionAct !== 'new' ? 'Actualizar' : 'Agregar' "
+            (onClick)="onClickBtn($event, 'ACEPTAR')"></dx-button>
+          <dx-button *ngIf="activeBtnEliminar" id="btnCancelarPT" stylingMode="contained" text="Eliminar" type="danger"
+            [width]="110" [style.margin-left]="'20px'" [disabled]="activeBtn"
+            (onClick)="onClickBtn($event, 'ELIMINAR')"></dx-button>
+          <dx-button id="btnCancelarPT" stylingMode="contained" text="Limpiar" type="normal" [width]="110"
+            [style.margin-left]="'20px'" [disabled]="activeBtn" (onClick)="onClickBtn($event, 'LIMPIAR')"></dx-button>
+        </div>
+        <div style="padding: 5px;">
+          <dx-form #formRPro id="formRPro" labelLocation="left" [colCount]="1" [formData]="FTareas"
+            [readOnly]="objReadOnly.tareas">
+            <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+            <dxi-item dataField="ACTIVIDAD">
+              <dxo-label text="Actividad"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box #textIDRuta placeholder="Actividad" [(value)]="FTareas.ACTIVIDAD"
+                  [readOnly]="objReadOnly.tareas"
+                  (onValueChanged)="onValueChanged($event, 'Tareas', 'NOMBRE_ACTIVIDAD')"></dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ID_ACTIVIDAD_PADRE">
+              <dxo-label text="Actividad padre"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box placeholder="Seleccione..." displayExpr="ACTIVIDAD" valueExpr="ID_ACTIVIDAD"
+                  [dataSource]="DGtareas" [(value)]="FTareas.ID_ACTIVIDAD_PADRE" [readOnly]="objReadOnly.readOnly"
+                  (onValueChanged)="onValueChanged($event, 'Tareas', 'ID_ACTIVIDAD_PADRE')"></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="OBJETIVO" colSpan="2">
+              <dxo-label text="Objetivo"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-area id="txtObjetivo" placeholder="Objetivo..." [height]="50" [spellcheck]="true"
+                  [autoResizeEnabled]="false" [readOnly]="objReadOnly.tareas" [(value)]="FTareas.OBJETIVO"
+                  (onValueChanged)="onValueChanged($event, 'Tareas', 'OBJETIVO')"></dx-text-area>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="DESCRIPCION" colSpan="2">
+              <dxo-label text="Descripción"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-area id="txtDescripcionTarea" placeholder="Descripción..." [height]="50" [spellcheck]="true"
+                  [autoResizeEnabled]="false" [readOnly]="objReadOnly.tareas" [(value)]="FTareas.DESCRIPCION"
+                  (onValueChanged)="onValueChanged($event, 'Tareas', 'DESCRIPCION')"></dx-text-area>
+              </div>
+            </dxi-item>
+
+            <dxi-item dataField="ORDEN">
+              <dxo-label text="Orden"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box #textIDRuta placeholder="Oraden" [(value)]="FTareas.ORDEN" [readOnly]="objReadOnly.tareas"
+                  (onValueChanged)="onValueChanged($event, 'Tareas', 'ORDEN')"></dx-text-box>
+              </div>
+            </dxi-item>
+
+            <!-- <dxi-item dataField="EJECUTABLE" editorType="dxSwitch"
+              [editorOptions]="{ onValueChanged: switchEjecutable, disabled: objReadOnly.tareas }">
+              <div *dxTemplate>
+
+              </div>
+              <dxo-label text="Ejecutable"></dxo-label>
+            </dxi-item> -->
+
+
+            <dxi-item dataField="EJECUTABLE" [colSpan]="2">
+              <dxo-label text="Ejecutable"></dxo-label>
+              <div *dxTemplate>
+                <dx-switch class="mx-2" [readOnly]="objReadOnly.tareas" [(value)]="FTareas.EJECUTABLE"
+                  (onValueChanged)="switchEjecutable($event)"></dx-switch>
+              </div>
+            </dxi-item>
+
+            <dxi-item dataField="RESPONSABLE">
+              <dxo-label text="Responsable"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box placeholder="Seleccione..." [dataSource]="RESPONSABLES" [(value)]="FTareas.RESPONSABLE" [searchEnabled]="true" 
+                  displayExpr="NOMBRE" valueExpr="ID_RESPONSABLE" [readOnly]="objReadOnly.tareas && !FTareas.EJECUTABLE"
+                  (onValueChanged)="onValueChanged($event, 'Tareas', 'RESPONSABLE')"></dx-select-box>
+              </div>
+            </dxi-item>
+          </dx-form>
+        </div>
+
+        <div style="padding: 5px;">
+          <dx-data-grid #gridPrecedentes id="gridPrecedentes" width="100%" height="200px" noDataText="No hay datos."
+            keyExpr="ID_ACTIVIDAD" [dataSource]="Gprecedentes"
+            (onContentReady)="onContentReady($event, 'gridPrecedentes')"
+            (onInitNewRow)="onInitNewRowPrecedentes($event)" (onRowValidating)="onRowValidatingPrecedentes($event)"
+            (onRowInserted)="onRowInsertedPrecedentes($event)" (onRowUpdated)="onRowInsertedPrecedentes($event)"
+            (onSelectionChanged)="onSelectionChangedPrecedentes($event)">
+            <dxo-editing mode="row" [useIcons]="false" [allowUpdating]="!objReadOnly.tareas" [allowDeleting]="false"
+              [allowAdding]="!objReadOnly.tareas">
+              <dxo-texts confirmDeleteMessage="">
+              </dxo-texts>
+            </dxo-editing>
+
+            <dxo-selection selectAllMode="allPages" showCheckBoxesMode="onClick" mode="multiple">
+            </dxo-selection>
+
+            <dxi-column dataField="ACTIVIDAD" caption="Actividades precedentes"
+              editCellTemplate="editTemplateAct"></dxi-column>
+            <dxi-column dataField="ACTIVIDAD_PADRE" caption="Actividad padre de precedente"></dxi-column>
+
+            <div *dxTemplate="let cellInfo of 'editTemplateAct'">
+              <dx-drop-down-box #Precedentes id="Precedentes" valueExpr="ID_ACTIVIDAD" displayExpr="ACTIVIDAD"
+                [showClearButton]="false" [dataSource]="DGtareas" [(value)]="selectPrecedentes"
+                [dropDownOptions]="{width:500, hideOnParentScroll: true, container:'#gridPrecedentes'}">
+                <div *dxTemplate="let data of 'content'">
+                  <dx-data-grid id="GPrecedentes" #GPrecedentes height="100%" width="100%" keyExpr="ID_ACTIVIDAD"
+                    displayExpr="ACTIVIDAD" [dataSource]="DGtareas" [(selectedRowKeys)]="selectPrecedentes"
+                    [selection]="{ mode: 'single' }" [columnAutoWidth]="true" [allowColumnResizing]="true"
+                    [columnMinWidth]="100" [rowAlternationEnabled]="true" [focusedRowEnabled]="true"
+                    [hoverStateEnabled]="true" (onSelectionChanged)="onSelectionPrecedente($event, cellInfo)">
+                    <dxo-scrolling mode="virtual"></dxo-scrolling>
+                    <dxo-search-panel [visible]="true" [width]="400"></dxo-search-panel>
+
+                    <dxi-column dataField="ACTIVIDAD" caption="Actividad" cssClass="clsEncabHis"
+                      [width]="200"></dxi-column>
+                  </dx-data-grid>
+                </div>
+              </dx-drop-down-box>
+            </div>
+
+            <dxo-toolbar *ngIf="!objReadOnly.tareas">
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new','GreedPrececentes')"
+                    *ngIf="rowNewPre">
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <!-- <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="edit" matTooltip="Editar" (onClick)="operGrid($event,'update','GreedPrececentes')" *ngIf="rowEditPre">
+                  </dx-button>
+                </div>
+              </dxi-item> -->
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete','GreedPrececentes')"
+                    *ngIf="rowDeletePre">
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save','GreedPrececentes')"
+                    *ngIf="rowApplyChangesPre">
+                  </dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel','GreedPrececentes')"
+                    *ngIf="rowApplyChangesPre">
+                  </dx-button>
+                </div>
+              </dxi-item>
+            </dxo-toolbar>
+          </dx-data-grid>
+        </div>
+
+        <br>
+
+
+      </div>
+    </as-split-area>
+  </as-split>
+</div>
+
+
+<app-vistarapida id="vistaGES006" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-load-panel #loadPanelPro shadingColor="rgba(0,0,0,0.4)" [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true" [shading]="true"
+  message="Un momento. Cargando consulta..." [hideOnOutsideClick]="false"></dx-load-panel>

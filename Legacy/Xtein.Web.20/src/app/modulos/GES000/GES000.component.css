@@ -1,0 +1,10 @@
+::ng-deep .text-bg-info  {
+    background-color: rgb(216, 237, 212) !important;
+    font-size: 12px;
+    margin-left: 10px;
+    font-weight: 500;
+}
+
+::ng-deep .max-col-gespro {
+    max-width: 450px !important;
+}

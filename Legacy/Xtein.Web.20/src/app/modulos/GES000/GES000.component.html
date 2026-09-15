@@ -1,0 +1,806 @@
+<div
+  #contentComponente
+  id="contentComponente"
+  class="xt-gesptreelist xt-gespdatagrid"
+  style="background-color: #fff"
+>
+  <dx-tree-list
+    #TreeListTareas
+    id="TreeListTareas"
+    keyExpr="ID_ACTIVIDAD"
+    parentIdExpr="ID_ACTIVIDAD_PADRE"
+    columnResizingMode="nextColumn"
+    noDataText="No hay datos configurados"
+    [rootValue]="-1"
+    [columnMinWidth]="45"
+    [showBorders]="true"
+    [showRowLines]="true"
+    [columnAutoWidth]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="false"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [dataSource]="DTareas"
+    [focusedRowIndex]="focusedRowIndex"
+    [customizeColumns]="customizeColumns"
+    [(selectedRowKeys)]="filasSeleccTareas"
+    [expandedRowKeys]="[-10, -20, -30, -40, -50]"
+    (onInitNewRow)="initNewRow($event)"
+    (onCellDblClick)="onRowClick($event)"
+    (onRowUpdated)="onRowUpdated($event)"
+    (onRowInserted)="onRowInserted($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onEditingStart)="onEditingStart($event)"
+    (onEditCanceled)="onEditCanceled($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onCellHoverChanged)="onCellHoverChanged($event)"
+    (onContextMenuPreparing)="onContextMenuPreparing($event)"
+  >
+    <dxo-editing
+      mode="row"
+      [useIcons]="false"
+      [allowAdding]="false"
+      [allowUpdating]="false"
+      [allowDeleting]="false"
+    ></dxo-editing>
+
+    <dxo-scrolling mode="standard"></dxo-scrolling>
+    <dxo-header-filter
+      [visible]="true"
+      width="280"
+      [allowSearch]="true"
+    ></dxo-header-filter>
+
+    <dxo-state-storing
+      [enabled]="true"
+      type="custom"
+      [customSave]="saveState"
+    ></dxo-state-storing>
+
+    <dxo-row-dragging
+      *ngIf="JsonAcciones.DRAG"
+      [allowDropInsideItem]="true"
+      [allowReordering]="true"
+      [showDragIcons]="true"
+      [onDragStart]="onDragStart"
+      [onDragChange]="onDragChange"
+      [onReorder]="onReorder"
+    ></dxo-row-dragging>
+
+    <div
+      [id]="'cellTempNombre' + cellInfo.data.ID_ACTIVIDAD"
+      *dxTemplate="let cellInfo of 'cellTempNombre'"
+      style="display: flex"
+    >
+      <div
+        [id]="'containerBtnNuevoTarea' + cellInfo.data.ID_ACTIVIDAD"
+        style="
+          display: flex;
+          align-items: center;
+          transition: all 0.3s ease;
+          opacity: 0;
+        "
+      >
+        <dx-button
+          #btnNuevoTareaHijo
+          [id]="'btnNuevoTareaHijo' + cellInfo.data.ID_ACTIVIDAD"
+          icon="plus"
+          (onClick)="opPrepararNuevaFila(cellInfo, 'new')"
+        ></dx-button>
+      </div>
+      <span
+        [id]="'txtNombre' + cellInfo.data.ID_ACTIVIDAD"
+        style="
+          height: 30px;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          transition: all 0.3s ease;
+          transform: translateX(-25px);
+        "
+        [ngStyle]="{
+          color: cellInfo.data.ANULADO ? 'rgba(98,121,140,.75)' : ''
+        }"
+      >
+        <!-- <div *ngIf="accionFiltro != 'areas'">{{ cellInfo.data.NOMBRE }}</div> -->
+        <div [innerHTML]="cellInfo.data.NOMBRE"></div>
+      </span>
+    </div>
+    <div *dxTemplate="let cellInfo of 'editTempNombre'" style="display: flex">
+      <div style="display: flex; align-items: center">
+        <dx-button
+          class="btn-width-m btn-guardar"
+          id="btnGuardarCambios"
+          #btnGuardarCambios
+          icon="todo"
+          (onClick)="opPrepararNuevaFila(cellInfo, 'save')"
+        ></dx-button>
+        <dx-button
+          class="btn-width-m btn-cancelar"
+          id="btnCancelarCambios"
+          #btnCancelarCambios
+          icon="undo"
+          (onClick)="opPrepararNuevaFila(cellInfo, 'cancel')"
+        ></dx-button>
+      </div>
+      <dx-text-box
+        #txtNombreTarea+cellInfo.data.ID_ACTIVIDAD
+        [id]="'txtNombreTarea' + cellInfo.data.ID_ACTIVIDAD"
+        placeholder="Nombre..."
+        width="100%"
+        height="auto"
+        maxLength="100"
+        [spellcheck]="true"
+        [(value)]="cellInfo.data.NOMBRE"
+        (onValueChanged)="onValueChangedNombre($event, cellInfo)"
+      >
+        <dx-validator>
+          <dxi-validation-rule
+            type="stringLength"
+            [min]="5"
+            [max]="100"
+            message="Debe tener min:5 y max:100 caracteres*"
+          ></dxi-validation-rule>
+        </dx-validator>
+      </dx-text-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'cellTempEstado'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <div
+          class="container-estado"
+          *ngIf="!cellInfo.data.ANULADO"
+          [ngStyle]="{
+            'background-color':
+              (cellInfo.data.ESTADO === 'Sin Iniciar'
+                ? 'rgba(15,76,129,.05)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'En Proceso'
+                ? 'rgba(26,115,232,.2)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'En Pausa'
+                ? 'rgba(200,78,224,.2)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'Ejecutada'
+                ? 'rgba(53,204,172,.2)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'Finalizado'
+                ? 'rgba(53,204,172,.2)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'Descartada'
+                ? 'rgba(98,121,140, .3)'
+                : ''),
+            color:
+              (cellInfo.data.ESTADO === 'Sin Iniciar'
+                ? 'rgba(98,121,140,.9)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'En Proceso'
+                ? 'rgba(26,115,232,1)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'En Pausa'
+                ? 'rgba(200,78,224,1)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'Ejecutada'
+                ? 'rgba(53,204,172,1)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'Finalizado'
+                ? 'rgba(53,204,172,1)'
+                : '') ||
+              (cellInfo.data.ESTADO === 'Descartada'
+                ? 'rgba(98,121,140,.75)'
+                : '')
+          }"
+        >
+          <span
+            class="status-badge"
+            [ngStyle]="{
+              'background-color':
+                (cellInfo.data.ESTADO === 'Sin Iniciar'
+                  ? 'rgba(98,121,140,.9)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'En Proceso'
+                  ? 'rgba(26,115,232,1)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'En Pausa'
+                  ? 'rgba(200,78,224,1)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'Ejecutada'
+                  ? 'rgba(200,78,224,1)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'Finalizado'
+                  ? 'rgba(53,204,172,1)'
+                  : '') ||
+                (cellInfo.data.ESTADO === 'Descartada'
+                  ? 'rgba(98,121,140,.75)'
+                  : '')
+            }"
+          ></span>
+          <span>{{ cellInfo.data.ESTADO }}</span>
+        </div>
+        <span
+          *ngIf="cellInfo.data.ANULADO"
+          [ngStyle]="{
+            color: cellInfo.data.ANULADO ? 'rgba(98,121,140,.75)' : ''
+          }"
+        >
+          {{ cellInfo.data.ESTADO }}
+        </span>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'editTempEstado'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <!-- [dataSource]="['Sin Iniciar','En Proceso','Ejecutada']" -->
+        <dx-select-box
+          #selectEstadoTarea
+          id="selectEstadoTarea"
+          displayExpr="VALOR1"
+          valueExpr="VALOR1"
+          placeholder="Seleccione..."
+          [searchEnabled]="true"
+          [value]="cellInfo.data.ESTADO"
+          [dataSource]="getDataSource(cellInfo) | async"
+          [dropDownOptions]="{
+            width: '220px',
+            hideOnParentScroll: true,
+            closeOnOutsideClick: false,
+            container: '#contentComponente'
+          }"
+          (onValueChanged)="onSelectionEstado($event, cellInfo)"
+        ></dx-select-box>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'editTempResponsable'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <dx-select-box
+          #selectResponsables
+          id="selectResponsables"
+          width="100%"
+          height="100%"
+          placeholder="Seleccione Responsables..."
+          stylingMode="filled"
+          displayExpr="NOMBRE"
+          valueExpr="ID_RESPONSABLE"
+          [searchEnabled]="true"
+          [(value)]="cellInfo.data.RESPONSABLE"
+          [readOnly]="getDataReadOnly(cellInfo, 'RESPONSABLE') | async"
+          [disabled]="cellInfo.data.ANULADO"
+          [dataSource]="getDataSource(cellInfo) | async"
+          [dropDownOptions]="{
+            width: '220px',
+            height: 'auto',
+            hideOnParentScroll: true,
+            closeOnOutsideClick: false,
+            container: '#contentComponente'
+          }"
+          (onValueChanged)="onSelectionChangedResponsable($event, cellInfo)"
+        ></dx-select-box>
+      </div>
+    </div>
+
+    <div
+      id="temColaboradores"
+      *dxTemplate="let cellInfo of 'temColaboradores'"
+      class="temColaboradores"
+    >
+      <div
+        *ngIf="cellInfo.data.CLASE !== 'NODOS'"
+        style="display: flex; justify-content: flex-start"
+        [ngStyle]="{
+          color: cellInfo.data.ANULADO ? 'rgba(98,121,140,.75)' : ''
+        }"
+      >
+        <div *ngFor="let item of cellInfo.data.COLABORADORES">
+          <div style="display: flex; align-items: center">
+            <span
+              class="avatar-content-name"
+              [id]="'USER-' + item.ID_RESPONSABLE + cellInfo.data.ITEM"
+            >
+              <span>{{ templateHtmlColb(item, "iconNameUser") }}</span>
+            </span>
+            <span
+              *ngIf="cellInfo.data.COLABORADORES.length === 1"
+              style="margin-left: 5px; overflow: hidden"
+            >
+              {{ templateHtmlColb(item, "NOMBRE") }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *dxTemplate="let cellInfo of 'temEditColaboradores'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <dx-tag-box
+          #tagBoxColaboradores
+          id="tagBoxColaboradores"
+          width="100%"
+          displayExpr="NOMBRE"
+          valueExpr="ID_RESPONSABLE"
+          applyValueMode="useButtons"
+          [height]="getDataHieght(cellInfo, 'COLABORADORES') | async"
+          [maxDisplayedTags]="3"
+          [searchEnabled]="true"
+          [showSelectionControls]="true"
+          [dataSource]="getDataSource(cellInfo) | async"
+          [(value)]="cellInfo.data.COLABORADORES"
+          [disabled]="getDataReadOnly(cellInfo, 'COLABORADORES') | async"
+          [dropDownOptions]="{
+            width: 400,
+            height: 'auto',
+            hideOnParentScroll: true,
+            closeOnOutsideClick: false,
+            container: '#contentComponente'
+          }"
+          (onValueChanged)="onValueColaboradores($event, cellInfo)"
+        ></dx-tag-box>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'editTempFecha'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <dx-date-box
+          #fechaInicio
+          placeholder="Fecha..."
+          [(value)]="cellInfo.data.FECHA"
+        ></dx-date-box>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'cellTemProgramacion'">
+      <div
+        *ngIf="cellInfo.data.CLASE !== 'NODOS'"
+        [ngClass]="
+          cellInfo.data.REPETIR
+            ? 'programacion-repetir'
+            : 'programacion-sin-repetir'
+        "
+        (click)="showProgramarFechas($event, cellInfo)"
+        style="cursor: pointer"
+      >
+        <span
+          *ngIf="cellInfo.data.PROGRAMACION !== ''"
+          [ngStyle]="{
+            'font.size': '.735rem',
+            color: cellInfo.data.ANULADO
+              ? 'rgba(98,121,140,.75)'
+              : 'rgba(10,57,96,.55)'
+          }"
+        >
+          {{ cellInfo.data.PROGRAMACION }}
+        </span>
+        <dx-button
+          id="btnProgramarFechas"
+          #btnProgramarFechas
+          icon="icon-calendar-sl"
+          (click)="showProgramarFechas($event, cellInfo)"
+          *ngIf="!cellInfo.data.ANULADO && cellInfo.data.PROGRAMACION === ''"
+        >
+          <i class="icon-programacion-ol" style="font-size: 15px"></i>
+        </dx-button>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'cellTempDescripcion'">
+      <div [id]="'cellDescripcion' + cellInfo.data.ITEM">
+        <span
+          [ngStyle]="{
+            color: cellInfo.data.ANULADO ? 'rgba(98,121,140,.75)' : ''
+          }"
+        >
+          {{ cellInfo.data.DESCRIPCION }}
+        </span>
+      </div>
+    </div>
+    <div *dxTemplate="let cellInfo of 'editTempDescripcion'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <div [id]="'cellEditDescripcion' + cellInfo.data.ITEM">
+          <dx-text-area
+            id="txtDescripcionTarea"
+            placeholder="Descripción..."
+            [height]="50"
+            [spellcheck]="true"
+            [autoResizeEnabled]="false"
+            [(value)]="cellInfo.data.DESCRIPCION"
+            (onFocusIn)="onFocusIn($event, cellInfo)"
+            (onValueChanged)="onValueChangedDescripcion($event, cellInfo)"
+          ></dx-text-area>
+        </div>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'temPrioridad'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <div
+          class="container-estado"
+          *ngIf="!cellInfo.data.ANULADO"
+          [ngStyle]="{
+            'background-color':
+              (cellInfo.data.PRIORIDAD === 'Inmediato'
+                ? 'rgba(223,62,62,.075)'
+                : '') ||
+              (cellInfo.data.PRIORIDAD === 'Alta'
+                ? 'rgba(237,104,69,.075)'
+                : '') ||
+              (cellInfo.data.PRIORIDAD === 'Media'
+                ? 'rgba(252,204,72,.1)'
+                : '') ||
+              (cellInfo.data.PRIORIDAD === 'Baja' ? 'rgba(26,115,232,.2)' : ''),
+            color:
+              (cellInfo.data.PRIORIDAD === 'Inmediato'
+                ? 'rgba(223,62,62,1)'
+                : '') ||
+              (cellInfo.data.PRIORIDAD === 'Alta'
+                ? 'rgba(237,104,69,1)'
+                : '') ||
+              (cellInfo.data.PRIORIDAD === 'Media'
+                ? 'rgba(252,204,72,1)'
+                : '') ||
+              (cellInfo.data.PRIORIDAD === 'Baja' ? 'rgba(26,115,232,1)' : '')
+          }"
+        >
+          <div
+            class="status-badge"
+            [ngStyle]="{
+              'background-color':
+                (cellInfo.data.PRIORIDAD === 'Inmediato'
+                  ? 'rgba(223,62,62,1)'
+                  : '') ||
+                (cellInfo.data.PRIORIDAD === 'Alta'
+                  ? 'rgba(237,104,69,1)'
+                  : '') ||
+                (cellInfo.data.PRIORIDAD === 'Media'
+                  ? 'rgba(252,204,72,1)'
+                  : '') ||
+                (cellInfo.data.PRIORIDAD === 'Baja' ? 'rgba(26,115,232,1)' : '')
+            }"
+          ></div>
+          <span> {{ cellInfo.data.PRIORIDAD }} </span>
+        </div>
+        <span
+          *ngIf="cellInfo.data.ANULADO"
+          [ngStyle]="{
+            color: cellInfo.data.ANULADO ? 'rgba(98,121,140,.75)' : ''
+          }"
+        >
+          {{ cellInfo.data.PRIORIDAD }}
+        </span>
+      </div>
+    </div>
+    <div *dxTemplate="let cellInfo of 'editTemPrioridad'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS'">
+        <dx-select-box
+          #selectPrioridad
+          id="selectPrioridad"
+          displayExpr="VALOR1"
+          valueExpr="VALOR1"
+          placeholder="Seleccione..."
+          [searchEnabled]="true"
+          [dataSource]="getDataSource(cellInfo) | async"
+          [value]="cellInfo.data.PRIORIDAD"
+          placeholder="Seleccione..."
+          (onValueChanged)="onSelectionPrioridad($event, cellInfo)"
+        ></dx-select-box>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'temVerComentariosTareas'">
+      <div *ngIf="cellInfo.data.CLASE !== 'NODOS' && accionLocal !== 'new'">
+        <dx-button
+          id="btnChatsComentariosTareas"
+          #btnChatsComentariosTareas
+          icon="icon-chat-m-sl"
+          (onClick)="showChatsComentarios($event, cellInfo)"
+        >
+          <i class="icon-chat-m-sl"></i>
+        </dx-button>
+      </div>
+    </div>
+  </dx-tree-list>
+
+  <!-- <div style="height:1px; width:1px; visibility: hidden;">
+    <dx-scheduler
+      #schedulerProg
+      id="schedulerProg"
+      currentView="week"
+      recurrenceEditMode="series"
+      [startDayHour]="9"
+      [views]="['week', 'month']"
+      [dataSource]="dataProg"
+      (onAppointmentUpdated)="onAppointmentUpdated($event)"
+    > 
+      <dxo-editing
+        #editingOptions
+        [allowAdding]="dataProg.editing"
+        [allowDeleting]="dataProg.editing"
+        [allowUpdating]="dataProg.editing"
+        [allowDragging]="true"
+      ></dxo-editing>
+    </dx-scheduler>
+  </div> -->
+  <app-fechaplan
+    [events]="eventsSubjectProg.asObservable()"
+    (onRespuestaProg)="onRespuestaProg($event)"
+  >
+  </app-fechaplan>
+
+  <dx-load-panel
+    #loaderPanel
+    shadingColor="rgba(0,0,0,0.4)"
+    [position]="{ of: '#contentComponente' }"
+    [(visible)]="loadingVisible"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    message="Un momento. Cargando datos..."
+    [hideOnOutsideClick]="false"
+  ></dx-load-panel>
+</div>
+
+<dx-tooltip
+  id="tooltipProgramacion"
+  position="bottom"
+  showEvent="mouseenter"
+  hideEvent="mouseleave"
+  [width]="widthTooltip"
+  [target]="targetIdTooltip"
+  [(visible)]="toolTipVisible"
+  [hideOnOutsideClick]="false"
+>
+  <div *dxTemplate="let data = data; of: 'content'">
+    <!-- Actividad -->
+    <span *ngIf="tooltipInfo.TITULO === 'Actividad'">
+      {{ tooltipInfo.NOMBRE }} <br
+    /></span>
+    <!-- Colaboradores -->
+    <div
+      *ngIf="tooltipInfo.TITULO === 'Colaboradores'"
+      style="display: flex; flex-direction: column; align-items: flex-start"
+    >
+      <span *ngFor="let emple of tooltipInfo.NOMBRE">
+        {{ emple.NOMBRE }} <br
+      /></span>
+    </div>
+    <!-- Programación -->
+    <b style="font-size: 13px" *ngIf="tooltipInfo.TITULO === 'Programación'"
+      >{{ tooltipInfo.TITULO }} <br
+    /></b>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación'">
+      Fecha de Inicio: {{ tooltipInfo.FECHA_INICIO }} <br
+    /></span>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación'">
+      Fecha de Final: {{ tooltipInfo.FECHA_FIN }} <br
+    /></span>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación'">
+      Todo día: {{ tooltipInfo.TODO_DIA_DES }} <br
+    /></span>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación'">
+      Repetir: {{ tooltipInfo.REPETIR_DES }} <br
+    /></span>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación' && tooltipInfo.REPETIR">
+      Periodo: {{ tooltipInfo.PERIODO_FRECUENCIA }} <br
+    /></span>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación' && tooltipInfo.REPETIR">
+      Intervalo: {{ tooltipInfo.INTERVALO_FRECUENCIA }} <br
+    /></span>
+    <span *ngIf="tooltipInfo.TITULO === 'Programación' && tooltipInfo.REPETIR">
+      Frecuencia: {{ tooltipInfo.FRECUENCIA }} <br
+    /></span>
+  </div>
+</dx-tooltip>
+
+<dx-popup
+  #popupGesproHistorial
+  id="popupGesproHistorial"
+  width="35%"
+  height="60%"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="false"
+  [container]="container"
+  [title]="tituloHistorial"
+  [(visible)]="visibleGesproHistorial"
+>
+  <dxo-position at="center"> </dxo-position>
+  <div
+    *dxTemplate="let data of 'content'"
+    style="
+      background: rgba(18, 94, 220, 0.05);
+      border-radius: 10px;
+      padding-top: 10px;
+    "
+  >
+    <dx-scroll-view width="100%" height="100%">
+      <p-timeline
+        [value]="DTimeline"
+        align="left"
+        styleClass="customized-timeline"
+      >
+        <ng-template pTemplate="marker" let-evento>
+          <span
+            class="custom-marker p-shadow-2"
+            [style.backgroundColor]="evento.color"
+          >
+            <!-- <i [ngClass]="evento.ICON"></i> -->
+            <i class="icon-programacion-sl"></i>
+          </span>
+        </ng-template>
+        <ng-template pTemplate="content" let-evento>
+          <p-card [header]="evento.NOMBRE">
+            <div class="container-fechas xt-texteditor-clear-x">
+              <dx-date-box
+                #fechaInicio
+                type="datetime"
+                [readOnly]="true"
+                class="dateBox-fechas"
+                [(value)]="evento.FECHA"
+              ></dx-date-box>
+            </div>
+            <br />
+            <p>{{ evento.DESCRIPCION }}</p>
+            <br />
+            <div *ngIf="evento.ARCHIVOS.length > 0">
+              <p>
+                <b *ngIf="evento.ARCHIVOS.length === 1">Un archivo adjunto.</b>
+                <b *ngIf="evento.ARCHIVOS.length > 1"
+                  >{{ evento.ARCHIVOS.length }} archivos adjuntos.</b
+                >
+                <i class="icon-adjuntar-ol" style="margin-left: 5px"></i>
+              </p>
+              <div class="form-item-flow-wrap">
+                <!-- <dx-scroll-view #scrollArchivos id="scrollArchivos" width="100%" height="100%" > -->
+                <div
+                  *ngFor="let archivo of evento.ARCHIVOS"
+                  style="
+                    width: 150px;
+                    height: 150px;
+                    overflow: hidden;
+                    margin: 5px;
+                    cursor: pointer;
+                  "
+                >
+                  <img
+                    width="100%"
+                    height="100%"
+                    [src]="archivo.IMAGEN"
+                    [alt]="archivo.ARCHIVO"
+                  />
+                </div>
+                <!-- </dx-scroll-view> -->
+              </div>
+            </div>
+          </p-card>
+        </ng-template>
+      </p-timeline>
+    </dx-scroll-view>
+  </div>
+</dx-popup>
+
+<dx-popup
+  #popupGesproEditor
+  id="popupGesproEditor"
+  width="35%"
+  height="60%"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [showCloseButton]="false"
+  [hideOnOutsideClick]="false"
+  [title]="tituloEditor"
+  [container]="container"
+  [(visible)]="visibleEditorTexto"
+>
+  <dxo-position at="center"> </dxo-position>
+  <div *dxTemplate="let data of 'content'">
+    <dx-html-editor
+      #htmlEditorTextGespro
+      id="htmlEditorTextGespro"
+      width="100%"
+      height="95%"
+      [value]="valueContentDescripcion"
+      (onValueChanged)="onValueChangedEditorText($event)"
+    >
+      <dxo-toolbar [multiline]="true">
+        <dxi-item name="undo"></dxi-item>
+        <dxi-item name="redo"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item
+          name="size"
+          [acceptedValues]="[
+            '8pt',
+            '10pt',
+            '12pt',
+            '14pt',
+            '18pt',
+            '24pt',
+            '36pt'
+          ]"
+          [options]="{ inputAttr: { 'aria-label': 'Font size' } }"
+        ></dxi-item>
+        <dxi-item
+          name="font"
+          [acceptedValues]="[
+            'Arial',
+            'Courier New',
+            'Georgia',
+            'Impact',
+            'Lucida Console',
+            'Tahoma',
+            'Times New Roman',
+            'Verdana'
+          ]"
+          [options]="{ inputAttr: { 'aria-label': 'Font family' } }"
+        ></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item name="bold"></dxi-item>
+        <dxi-item name="italic"></dxi-item>
+        <dxi-item name="strike"></dxi-item>
+        <dxi-item name="underline"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item name="alignLeft"></dxi-item>
+        <dxi-item name="alignCenter"></dxi-item>
+        <dxi-item name="alignRight"></dxi-item>
+        <dxi-item name="alignJustify"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item name="orderedList"></dxi-item>
+        <dxi-item name="bulletList"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item
+          name="header"
+          [acceptedValues]="[false, 1, 2, 3, 4, 5]"
+          [options]="{ inputAttr: { 'aria-label': 'Header' } }"
+        ></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item name="color"></dxi-item>
+        <dxi-item name="background"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item name="link"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+        <dxi-item name="clear"></dxi-item>
+        <dxi-item name="codeBlock"></dxi-item>
+        <dxi-item name="blockquote"></dxi-item>
+        <dxi-item name="separator"></dxi-item>
+      </dxo-toolbar>
+      <dxo-media-resizing [enabled]="true"> </dxo-media-resizing>
+    </dx-html-editor>
+    <!-- <dx-text-area
+      id="txtDescripcionPopup"
+      placeholder="Descripción..."
+      width="100%"
+      height="95%"
+      [spellcheck]="true"
+      [autoResizeEnabled]="false"
+      [(value)]="valueContentDescripcion"
+      (onValueChanged)="onValueChangedEditorText($event)"
+    ></dx-text-area> -->
+
+    <div
+      style="display: flex; justify-content: center; width: 100%; padding: 5px"
+    >
+      <dx-button
+        id="btnAceptarPT"
+        stylingMode="contained"
+        text="Aceptar"
+        type="default"
+        [width]="100"
+        (onClick)="aceptarBottom($event)"
+      ></dx-button>
+      <dx-button
+        id="btnCancelarPT"
+        stylingMode="contained"
+        text="Cancelar"
+        type="normal"
+        [width]="110"
+        [style.margin-left]="'20px'"
+        (onClick)="closeBottom($event)"
+      ></dx-button>
+    </div>
+  </div>
+</dx-popup>
+
+<!-- <app-pro-fechas
+  [events]="eventsGesInfo.asObservable()"
+  (onRespuestaComponent)="onRespuestaGesInfo($event)"
+></app-pro-fechas> -->

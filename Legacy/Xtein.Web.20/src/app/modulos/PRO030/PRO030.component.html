@@ -1,0 +1,274 @@
+<div class="row gx-3">
+    <div class="col-12">
+       <div class="card-content">
+        <div>
+            <dx-form
+                #formAdminRutas
+                id="formAdminRutas"
+                labelLocation="top"
+                [formData]="FRutas"
+                [readOnly]="readOnly"
+                [colCount]="2"
+                labelLocation="left"
+                >
+
+                <dxi-item dataField="ID_RUTA" >
+                    <dxo-label text="Ruta"></dxo-label>
+                    <div *dxTemplate>
+                        <dx-select-box
+                            #dxRuta
+                            id="dxRuta"
+                            [dataSource]="DListaRutas"
+                            [readOnly]="readOnly"
+                            displayExpr="ID_RUTA"
+                            valueExpr="ID_RUTA"
+                            [(value)]="FRutas.ID_RUTA"
+                            (onValueChanged)="onSeleccRuta($event)"
+                        >
+                            <div *dxTemplate="let data of 'item'" 
+                                style="display: flex;
+                                    height: 40px;
+                                    justify-content: space-between;
+                                    align-items: center;"
+                                >
+                                    <div style="width: 20%; height: 100%;">
+                                        {{ data.ID_RUTA }}
+                                    </div>
+                                    <div style="width: 50%;
+                                                height: 100%;
+                                                overflow: hidden;
+                                                text-overflow: ellipsis; "
+                                    >
+                                        {{ data.DESCRIPCION }}
+                                    </div>
+                                    <div style="width: 30%; height: 100%; text-align: end;">
+                                        {{ data.TIPO }}
+                                    </div>
+                            </div>
+                        </dx-select-box>
+                    </div>
+                </dxi-item>
+
+                <dxi-item dataField="NOMBRE" >
+                    <dxo-label text="Nombre"></dxo-label>
+                </dxi-item>
+
+            </dx-form>
+        </div>
+        <br/>
+    </div>
+</div>
+
+<div class="row gx-3">
+    <div class="col-12">
+       <div class="card-content">
+
+        <div class="row gx-3" id="splitterMain">
+            <as-split
+              direction="horizontal"
+              (dragEnd)="dragEnd('percent', $event)"
+              #split="asSplit"
+              class="col-12"
+            >
+                <as-split-area class="col-4" [size]="50" #area1="asSplitArea" (resized)="onResized($event)">
+                    <dx-data-grid
+                    #gridRutasSust
+                    id="gridRutasSust"
+                    [dataSource]="DItemsRutas"
+                    [allowColumnResizing]="true"
+                    columnResizingMode="nextColumn"
+                    [focusedRowEnabled]="true"
+                    [rowAlternationEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    keyExpr="ITEM"
+                    noDataText=""
+                    [showBorders]="true"
+                    (onInitNewRow)="initNewRow($event)"
+                    (onRowInserting)="insertingRow($event)"
+                    (onRowInserted)="insertedRow($event)"
+                    (onRowUpdating)="updatingRow($event)"
+                    (onRowUpdated)="updatedRow($event)"
+                    (onRowRemoved)="removedRow($event)"
+                    (onEditingStart)="onEditingStart($event)"
+                    (onEditorPreparing)="onEditorPreparing($event)"
+                    (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+                    (onRowPrepared)="onRowPrepared($event)"
+                    (onRowValidating)="onRowValidating($event)"
+                    (onSelectionChanged)="selectionGrid($event)"
+                    (onFocusedRowChanged)="onFocusedRowChanged($event)"
+                    (onEditCanceled)="onEditCanceled($event)"
+                    (onCellClick)="onCellClick($event)"
+                    (onRowClick)="onRowClick($event)"
+                >
+                
+                    <dxo-editing
+                        mode="cell"
+                        [useIcons]="false" 
+                        [allowUpdating]="esEdicion"
+                        [allowDeleting]="false"
+                        [allowAdding]="esEdicion"
+                    >
+                        <dxo-texts
+                            confirmDeleteMessage="">
+                        </dxo-texts>
+                    </dxo-editing>      
+                    <dxo-selection
+                        selectAllMode="allPages"
+                        [showCheckBoxesMode]="esVisibleSelecc"
+                        mode="multiple">
+                    </dxo-selection>
+                
+                    <dxi-column dataField="ITEM"
+                        [visible]="false">
+                    </dxi-column>
+                
+                    <dxi-column dataField="ID_RUTA"
+                        caption="Ruta"
+                        calculateDisplayValue="ID_RUTA"
+                        editCellTemplate="listaRutas">
+                    </dxi-column>
+                
+                    <dxi-column dataField="NOMBRE_RUTA"
+                        caption="Nombre"
+                        [allowEditing]="false">
+                    </dxi-column>
+                
+                    <dxi-column dataField="TIPO"
+                        caption="Tipo"
+                        [allowEditing]="false">
+                    </dxi-column>
+                
+                    <dxi-column dataField="ACCION"
+                        caption="Accion"
+                        [allowEditing]="false"
+                        cellTemplate="cellAccion">
+                    </dxi-column>
+                
+                    <dxi-column dataField="SECCIONES"
+                        [visible]="false">
+                    </dxi-column>
+
+                    <div *dxTemplate="let cellInfo of 'listaRutas'">
+                        <dx-select-box 
+                            #xs_RUTAS_SEL
+                            id="xs_RUTAS_SEL"
+                            [dataSource]="DListaRutas" 
+                            [(value)]="cellInfo.data.ID_RUTA" 
+                            valueExpr="ID_RUTA"
+                            displayExpr="ID_RUTA"
+                            [searchEnabled]="true"
+                            searchMode="contains"
+                            [searchExpr]="['ID_RUTA', 'DESCRIPCION']"
+                            [dropDownOptions]="dropDownOptions"
+                            (onValueChanged)="onSeleccRowRuta($event, cellInfo)">
+
+                            <div *dxTemplate="let data of 'item'" 
+                                style="display: flex;
+                                    height: 40px;
+                                    justify-content: space-between;
+                                    align-items: center;"
+                            >
+                                <div style="width: 20%; height: 100%;">
+                                {{ data.ID_RUTA }}
+                                </div>
+                                <div style="width: 50%;
+                                            height: 100%;
+                                            overflow: hidden;
+                                            text-overflow: ellipsis; "
+                                >
+                                {{ data.DESCRIPCION }}
+                                </div>
+                                <div style="width: 30%; height: 100%; text-align: end;">
+                                    {{ data.TIPO }}
+                                </div>
+                            </div>
+                        </dx-select-box>
+                    </div>
+
+                    <div *dxTemplate="let cellInfo of 'cellAccion'">
+                        <span *ngIf="cellInfo.data.ACCION=='aplica'"><i class="icon-check-ol"></i></span>
+                        <span *ngIf="cellInfo.data.ACCION=='cancela'"><i class="icon-cancelar-ol"></i></span>
+                    </div>
+
+                    <dxo-toolbar>
+                        <dxi-item location="before">
+                            <div *dxTemplate>
+                              <div><h2 style="color: #0a396073">Rutas a sustituir</h2></div>
+                            </div>
+                        </dxi-item>
+                        <dxi-item location="before" *ngIf="esEdicion">
+                            <div *dxTemplate>
+                                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                                </dx-button>
+                                </div>
+                        </dxi-item>
+                        <dxi-item location="before" *ngIf="esEdicion">
+                            <div *dxTemplate>
+                                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                            </dx-button>
+                            </div>
+                        </dxi-item>
+                        <dxi-item location="before" *ngIf="esEdicion">
+                            <div *dxTemplate>
+                            <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                            </dx-button>
+                            </div>
+                        </dxi-item>
+                        <dxi-item location="before" *ngIf="esEdicion">
+                            <div *dxTemplate>
+                            <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                            </dx-button>
+                            </div>
+                        </dxi-item>
+                        <dxi-item location="before" *ngIf="esEdicion">
+                            <div *dxTemplate>
+                            <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+                            </dx-button>
+                            </div>
+                        </dxi-item>
+                    </dxo-toolbar>
+                    </dx-data-grid>
+                </as-split-area>
+
+                <as-split-area class="col-8 ml-0" [size]="50" #area2="asSplitArea">
+                    <dx-data-grid
+                        #gridRutasSecc
+                        id="gridRutasSecc"
+                        [dataSource]="DSeccRutas"
+                        [allowColumnResizing]="true"
+                        columnResizingMode="nextColumn"
+                        [focusedRowEnabled]="true"
+                        [rowAlternationEnabled]="true"
+                        [hoverStateEnabled]="true"
+                        keyExpr="ITEM"
+                        noDataText=""
+                        [showBorders]="true"
+                    >
+                    
+                        <dxi-column dataField="ITEM" [visible]="false"></dxi-column>
+                        <dxi-column dataField="ID_SECCION" caption="Sección"></dxi-column>
+                        <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                        <dxi-column dataField="ACCION" caption="Estado"></dxi-column>
+
+                        <dxo-toolbar>
+                            <dxi-item location="before">
+                                <div *dxTemplate>
+                                    <div><h2 style="color: #0a396073">Secciones de la ruta {{rutaSecciones}}</h2></div>
+                                </div>
+                            </dxi-item>
+                        </dxo-toolbar>
+                    </dx-data-grid>
+
+                </as-split-area>
+            </as-split>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+<app-filtrobusq
+  [events]="eventsSubjectFiltro.asObservable()"
+  (onRespuestaSelecc)="onRespuestaFiltro($event)"
+  >
+</app-filtrobusq>

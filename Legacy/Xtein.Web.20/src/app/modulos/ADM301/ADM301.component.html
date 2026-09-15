@@ -1,0 +1,78 @@
+<div class="row gx-3" >
+  <div class="col-12">
+    <div class="card-content">
+      <dx-form
+        id="formCalendario"
+        labelLocation="left"
+        [colCount]="1"
+        labelLocation="left"
+        [formData]="DCalendario"
+        [readOnly]="readOnly">
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+
+        <dxi-item dataField="ID_CALENDARIO" editorType="dxTextBox" [editorOptions]="{placeholder:'Identificador del Calendario'}">
+          <dxo-label text="Identificador"></dxo-label>
+        </dxi-item>
+        
+        <dxi-item dataField="ESTADO" editorType="dxSelectBox" [editorOptions]="{ items: dSBEstados, value: 'ACTIVO', placeholder:'Estado'}" >
+          <dxo-label text="Estado"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="NOMBRE" editorType="dxTextBox" [editorOptions]="{placeholder:'Descripción del Calendario'}">
+          <dxo-label text="Descripción"></dxo-label>
+        </dxi-item>
+
+      </dx-form>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card-content-secondary">
+      <dx-scheduler
+        #schedulerEventos
+        id="schedulerEventos"
+        timeZone="America/Bogota"
+        currentView="month"
+        currentView="Mes"
+        allDayPanelMode="all"
+        [height]="600"
+        [firstDayOfWeek]="0"
+        [startDayHour]="00"
+        [endDayHour]="23"
+        [dataSource]="DEventosCalendario"
+        [currentDate]="currentDate"
+        (onAppointmentAdded)="onAppointmentAdded($event)"
+        (onAppointmentUpdated)="onAppointmentUpdated($event)"
+        (onAppointmentDeleted)="onAppointmentDeleted($event)"
+        (onAppointmentDblClick)="onAppointmentDblClick($event)">
+
+        <dxo-editing
+          #editingOptions
+          [allowAdding]="!readOnly"
+          [allowDeleting]="!readOnly"
+          [allowUpdating]="!readOnly"
+          [allowResizing]="!readOnly"
+          [allowDragging]="!readOnly">
+        </dxo-editing>
+
+        <dxi-view type="day" name="Dia" ></dxi-view>
+        <dxi-view type="week" name="Semana" ></dxi-view>
+        <dxi-view type="month" name="Mes" ></dxi-view>
+        <dxi-view type="agenda" name="Agenda" ></dxi-view>
+
+      </dx-scheduler>
+    </div>
+  </div>
+</div>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false">
+</dx-load-panel>

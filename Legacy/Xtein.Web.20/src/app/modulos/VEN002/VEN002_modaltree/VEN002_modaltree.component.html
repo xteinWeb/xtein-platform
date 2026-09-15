@@ -1,0 +1,99 @@
+<dx-popup
+  id="popupListaPrecios"
+  title="Lista de Precios"
+  [width]="750"
+  [height]="460"
+  [showTitle]="true"
+  [hideOnOutsideClick]="true"
+  [(visible)]="visiblePopup"
+  (onShown)="onShown($event)"
+  (onHidden)="onHidden($event)">
+
+  <dxi-toolbar-item
+    widget="dxButton"
+    location="before"
+    toolbar="bottom"
+    [options]="{
+      stylingMode: 'contained',
+      text: 'Aceptar',
+      type: 'success',
+      onClick: aceptarCambios
+    }">
+  </dxi-toolbar-item>
+
+  <dxi-toolbar-item
+    widget="dxButton"
+    location="after"
+    toolbar="bottom"
+    [options]="{
+      stylingMode: 'contained',
+      text: 'Cancelar',
+      type: 'danger',
+      onClick: cancelarCambios
+    }">
+  </dxi-toolbar-item>
+
+  <div *dxTemplate="let data of 'content'">
+    <dx-data-grid
+      #gridListaPrecios
+      [dataSource]="listaPrecios"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      columnResizingMode="widget"
+      [focusedRowEnabled]="true"
+      [rowAlternationEnabled]="true"
+      [hoverStateEnabled]="true"
+      keyExpr="ID_LISTA"
+      noDataText=""
+      [showBorders]="true"
+      (onRowUpdating)="updatingRow($event)"
+      (onRowUpdated)="updatedRow($event)"
+      (onRowPrepared)="onRowPrepared($event)"
+      (onRowValidating)="onRowValidating($event)">
+
+      <dxo-editing
+        mode="cell"
+        [useIcons]="false"
+        [allowUpdating]="true"
+        [allowDeleting]="false"
+        [allowAdding]="false">
+        <dxo-texts
+          confirmDeleteMessage="">
+        </dxo-texts>
+      </dxo-editing>
+
+      <dxi-column dataField="ID_LISTA"
+        caption="Codigo de lista">
+      </dxi-column>
+
+      <dxi-column dataField="DESCRIPCION"
+        caption="Nombre de Lista">
+      </dxi-column>
+
+      <dxi-column dataField="TIPO"
+        caption="Tipo">
+      </dxi-column>
+
+      <dxi-column dataField="PRODUCTO"
+        caption="Producto"
+        [visible]="false">
+      </dxi-column>
+
+      <dxi-column dataField="PRECIO"
+        caption="Precio"
+        alignment="right"
+        dataType="number"
+        format="$#,##0.00"
+        [editorOptions]="{format: '#,##0.00'}">
+      </dxi-column>
+
+      <dxi-column dataField="PRECIO_BASE"
+        caption="Precio Base"
+        alignment="right"
+        dataType="number"
+        format="$#,##0.00"
+        [editorOptions]="{format: '#,##0.00'}" >
+      </dxi-column>
+    </dx-data-grid>
+  </div>
+</dx-popup>

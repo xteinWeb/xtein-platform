@@ -1,0 +1,48 @@
+.colorplaceholder {
+    color: #999 !important;
+}
+
+::ng-deep .full-width-content {
+    width: 100%;
+}
+
+::ng-deep .full-width-content > .dx-widget {
+    margin-bottom: 20px;
+}
+
+::ng-deep .full-width-content .dx-field {
+    max-width: 385px;
+}
+
+::ng-deep .dx-texteditor.dx-editor-outlined .dx-placeholder:before {
+    padding-top: 5px;
+}
+
+::ng-deep .datoValor {
+    border-width: 1px;
+    border-style: solid;
+    border-color: lightblue;
+}
+
+::ng-deep .listaDatos {
+    border-width: 1px;
+    border-style: solid;
+    border-color: lightblue;
+}
+
+::ng-deep .dx-invalid-message.dx-overlay {  
+    position: fixed!important;  
+    z-index: 5000!important;  
+}
+
+#GEspecPro > .dx-datagrid .dx-column-lines > td {
+    border-left: 1 !important;
+}
+
+#btnCancelar, #btnGuardar, #btnLimpiar {
+    background-color: transparent;
+}
+
+::ng-deep .no-border {
+    border-right: 1px solid transparent!important;
+}

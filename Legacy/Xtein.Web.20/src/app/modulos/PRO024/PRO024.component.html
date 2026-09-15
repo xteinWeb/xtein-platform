@@ -1,0 +1,283 @@
+  <div class="row gx-3">
+    <div class="col-12">
+      <div class="card-content">
+        <dx-form
+          #formTurnos
+          id="formTurnos"
+          [formData]="FTurnos"
+          colCount="auto"
+          [colCountByScreen]="colCountByScreen"
+          labelLocation="left"
+        >
+          <dxi-item itemType="group" caption="Información Horario" [colCount]="1">
+
+            <dxi-item dataField="ID_HORARIO" >
+              <dxo-label text="Código"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Código del turno"
+                  [readOnly]="readOnly"
+                  [value]="FTurnos.ID_HORARIO"
+                  (onValueChanged)="onValueChangedFormID_HORARIO($event)"
+                >
+                  <dx-validator>
+                    <dxi-validation-rule
+                      type="async"
+                      message="Ya existe este Código de Turno"
+                      [validationCallback]="ValideExistencia"
+                    ></dxi-validation-rule>
+                    <dxi-validation-rule type="required" message="Código es requerido"></dxi-validation-rule>
+                  </dx-validator>
+                </dx-text-box>
+              </div>
+            </dxi-item>
+      
+            <dxi-item dataField="ESTADO" >
+              <dxo-label text="Estado"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  [items]="['ACTIVO','INACTIVO']"
+                  placeholder="Estado del turno"
+                  [readOnly]="readOnly"
+                  [value]="FTurnos.ESTADO"
+                  (onValueChanged)="onValueChangedFormESTADO($event)">
+                </dx-select-box>
+              </div>
+            </dxi-item>
+            
+            <dxi-item dataField="DESCRIPCION">
+              <dxo-label text="Nombre"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre del turno"
+                  [readOnly]="readOnly"
+                  [value]="FTurnos.DESCRIPCION"
+                  (onValueChanged)="onValueChangedFormDESCRIPCION($event)">
+                  <dx-validator>
+                    <dxi-validation-rule type="required" message="Nombre es requerido"></dxi-validation-rule>
+                  </dx-validator>
+                </dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+    
+          <dxi-item itemType="group" caption="Horas totales según la jornada" [colCount]="1">
+            <dxi-item>
+              <dxo-label text="Jornada Productiva"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Total jornada Productiva"
+                  [readOnly]="true"
+                  [value]="TOTAL_JORNADA_PRODUCTIVA"
+                ></dx-text-box>
+              </div>
+            </dxi-item>
+        
+            <dxi-item>
+              <dxo-label text="Jornada Receso"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Total jornada Receso"
+                  [readOnly]="true"
+                  [value]="TOTAL_JORNADA_RECESO"
+                ></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+
+        <dx-data-grid
+          #gridTurnos
+          id="gridTurnos"
+          keyExpr="ITEM"
+          style="margin-top: 15px;"
+          [dataSource]="Itm_Turnos"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [allowColumnResizing]="true"
+          [allowColumnReordering]="true"
+          [rowAlternationEnabled]="true"
+          [focusedRowEnabled]="true"
+          [hoverStateEnabled]="true"
+          [columnMinWidth]="100"
+          width="100%"
+          columnResizingMode="widget"
+          (onInitNewRow)="onInitNewRowPro($event)"
+          (onRowValidating)="onRowValidating($event)"
+          (onEditingStart)="onEditingStart($event)"
+          (onSelectionChanged)="selectionGrid($event)"
+          (onRowInserted)="onRowInserted($event)"
+          (onRowUpdated)="onRowUpdated($event)"
+        >
+          <dxo-editing
+            mode="cell"
+            [useIcons]="false"
+            [allowUpdating]="!readOnly"
+            [allowDeleting]="false"
+            [allowAdding]="!readOnly"
+          >
+          <dxo-texts
+            confirmDeleteMessage="">
+          </dxo-texts>
+          </dxo-editing>
+          <dxo-scrolling mode="virtual"></dxo-scrolling>
+          <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+          <dxo-selection 
+            selectAllMode="allPages"
+            [showCheckBoxesMode]="esVisibleSelecc" 
+            mode="multiple">
+          </dxo-selection>
+
+          <dxi-column dataField="TIPO"
+                      caption="Tipo Jornada"
+                      cssClass="clsEncabHis"
+                      alignment="left"
+                      editCellTemplate="editTempTipo"
+                      width="20%"
+          ></dxi-column>
+
+          <dxi-column dataField="DIAS" 
+                      caption="Dias de la semana"
+                      cssClass="clsEncabHis"
+                      alignment="left"
+                      width="40%"
+                      editCellTemplate="editTempDias"
+          ></dxi-column>
+
+          <dxi-column dataField="INICIO"
+                      caption="Inicia"
+                      cssClass="clsEncabHis"
+                      alignment="right"
+                      format='HH:mm'
+                      [editorOptions]="{ type: 'time', displayFormat: 'HH:mm' }"
+                      editCellTemplate="editTempInicio"
+                      dataType="datetime"
+                      width="10%"
+          ></dxi-column>
+
+          <dxi-column dataField="FINAL"
+                      caption="Finaliza"
+                      cssClass="clsEncabHis"
+                      alignment="right"
+                      format='HH:mm'
+                      [editorOptions]="{ type: 'time', displayFormat: 'HH:mm' }"
+                      editCellTemplate="editTempFin"
+                      dataType="datetime"
+                      width="10%"
+          ></dxi-column>
+
+          <dxi-column dataField="HORAS"
+                      caption="Hrs"
+                      cssClass="clsEncabHis"
+                      alignment="right"
+                      dataType="time"
+                      width="10%"
+                      [editorOptions]="{readOnly: true}"
+          ></dxi-column>
+
+          <dxi-column dataField="MINUTOS"
+                      caption="Min"
+                      cssClass="clsEncabHis"
+                      alignment="right"
+                      dataType="time"
+                      width="10%"
+                      [editorOptions]="{readOnly: true}"
+          ></dxi-column>
+
+          <!-- TEMPLATE -->
+          <div *dxTemplate="let cellInfo of 'editTempTipo'">
+            <dx-select-box
+              width="100%"
+              [items]="['PRODUCTIVA','RECESO']"
+              [value]="cellInfo.data.TIPO"
+              (onValueChanged)="onValueChangedTipo($event, cellInfo)"
+            ></dx-select-box>
+          </div>
+
+          <div *dxTemplate="let cellInfo of 'editTempDias'">
+            <dx-tag-box
+              [items]="DiasSemana"
+              placeholder="Seleccione Control de Cambios"
+              stylingMode="filled"
+              [multiline]="true"
+              [showSelectionControls]="true"
+              applyValueMode="useButtons"
+              [readOnly]="readOnly"
+              [(value)]="cellInfo.data.DIAS"
+              (onValueChanged)="onValueChangedDias($event, cellInfo)"
+              [dropDownOptions]="{ width: 360, height: 'auto', hideOnParentScroll: true, container: '#router-container' }"
+            >
+            </dx-tag-box>
+          </div>
+
+          <div *dxTemplate="let cellInfo of 'editTempInicio'">
+            <dx-date-box
+              type="time"
+              displayFormat="HH:mm"
+              [useMaskBehavior]="true"
+              [value]="cellInfo.data.INICIO"
+              (onValueChanged)="onValueChangedInicio($event, cellInfo)"
+            ></dx-date-box>
+          </div>
+
+          <div *dxTemplate="let cellInfo of 'editTempFin'">
+            <dx-date-box
+              type="time"
+              displayFormat="HH:mm"
+              [useMaskBehavior]="true"
+              [value]="cellInfo.data.FINAL"
+              (onValueChanged)="onValueChangedFin($event, cellInfo)"
+            ></dx-date-box>
+          </div>
+
+          <dxo-toolbar *ngIf="!readOnly">
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+                </dx-button>
+              </div>
+            </dxi-item>
+          </dxo-toolbar>
+        </dx-data-grid>
+
+      </div>
+    </div>
+  </div>
+
+<app-vistarapida id="vistapro024" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

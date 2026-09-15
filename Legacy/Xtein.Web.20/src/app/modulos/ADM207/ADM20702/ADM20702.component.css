@@ -1,0 +1,11 @@
+.dx-layout-manager .dx-field-item:not(.dx-first-row){
+    width: 100%;
+    max-width: 100%;
+}
+::ng-deep .dx-layout-manager .dx-label-h-align.dx-flex-layout .dx-field-item-content,
+.dx-layout-manager .dx-label-h-align.dx-flex-layout .dx-field-item-content-wrapper {
+  max-width: 91%;
+}
+.xt-tabs-gespro{
+  width: max-content !important;
+}

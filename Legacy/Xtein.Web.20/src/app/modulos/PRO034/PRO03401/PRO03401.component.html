@@ -1,0 +1,157 @@
+<div class="card-content">
+    <div class="form-content-data">
+        <!-- Fila 1: Selección y Fechas -->
+        <div class="row gx-3">
+            <div class="col-md-4 col-sm-12">
+                <div class="form-item-label-data">Plan de Producción</div>
+                <div class="form-input-box-data">
+                    <dx-drop-down-box placeholder="Seleccione Plan..." [readOnly]="false" valueExpr="CONSECUTIVO"
+                        displayExpr="NOMBRE" [dataSource]="DGplanesFiltro" [(value)]="planMaestro"
+                        [(opened)]="openPlanes" [dropDownOptions]="{ maxHeight: '350px' }"
+                        (onSelectionChanged)="onSelectionChangedPlan($event, 'DROP')">
+
+                        <div *dxTemplate="let data of 'content'">
+                            <dx-data-grid width="100%" height="100%" keyExpr="CONSECUTIVO"
+                                [selection]="{ mode: 'single' }" [focusedRowEnabled]="true" [hoverStateEnabled]="true"
+                                [dataSource]="DGplanesFiltro" [(selectedRowKeys)]="selectPlanes"
+                                (onSelectionChanged)="onSelectionChangedPlan($event, 'GRID')">
+                                <dxi-column dataField="CONSECUTIVO" caption="Consecutivo" width="100"></dxi-column>
+                                <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                            </dx-data-grid>
+                        </div>
+                    </dx-drop-down-box>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="form-item-label-data">Día de Programación</div>
+                <div class="form-input-box-data">
+                    <dx-date-box type="date" pickerType="calendar" [readOnly]="readOnly || !planMaestro"
+                        [min]="NOW < planFechas.inicio ? planFechas.inicio : NOW" [max]="planFechas.final"
+                        [(value)]="fechaProgramacion" (onValueChanged)="onValueChangedFecha($event)"
+                        [inputAttr]="{ readonly: 'readonly' }">
+                    </dx-date-box>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Fila 2: Totales de Resumen -->
+        <div class="row gx-3 mt-3">
+            <div class="col-md-2 col-sm-12">
+                <div class="form-item-label-data">Limites Plan</div>
+                <div class="form-input-box-data d-flex gap-2">
+                    <small class="d-block">{{ formatDate(planFechas.inicio) }}</small>
+                    <span> | </span>
+                    <small class="d-block">{{ formatDate(planFechas.final) }}</small>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-12">
+                <div class="form-item-label-data">Total Programado</div>
+                <div class="form-input-box-data d-flex gap-2">
+                    <small class="d-block">{{ totales.programado.cant | number:'1.0-2' }} uds.</small>
+                    <span> | </span>
+                    <small class="d-block">{{ totales.programado.money | currency:'USD':'symbol':'1.0-0' }}</small>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-12">
+                <div class="form-item-label-data">Total Pendiente</div>
+                <div class="form-input-box-data d-flex gap-2">
+                    <small class="d-block">{{ totales.pendiente.cant | number:'1.0-2' }} uds.</small>
+                    <span> | </span>
+                    <small class="d-block">{{ totales.pendiente.money | currency:'USD':'symbol':'1.0-0' }}</small>
+                </div>
+            </div>
+            <!-- <div class="col-md-3 col-sm-6">
+                <div class="summary-card total-programado">
+                    <div class="label">Total Programado</div>
+                    <div class="main-stats">
+                        <div class="stat">
+                            <span class="stat-value">{{ totales.programado.cant | number:'1.0-2' }}</span>
+                            <span class="stat-unit">uds</span>
+                        </div>
+                        <div class="stat money">
+                            <span class="stat-value">{{ totales.programado.money | currency:'USD':'symbol':'1.0-0' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="summary-card total-pendiente">
+                    <div class="label">Total Pendiente</div>
+                    <div class="main-stats">
+                        <div class="stat">
+                            <span class="stat-value">{{ totales.pendiente.cant | number:'1.0-2' }}</span>
+                            <span class="stat-unit">uds</span>
+                        </div>
+                        <div class="stat money">
+                            <span class="stat-value">{{ totales.pendiente.money | currency:'USD':'symbol':'1.0-0' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        <!-- Fila 3: Porcentajes -->
+        <div class="row gx-3 mt-3">
+            <div class="col-md-2 col-sm-4">
+                <div class="percentage-card sobredimensionado" id="cardSobredimensionado">
+                    <div class="d-flex align-items-center justify-content-center gap-1">
+                        <i class="material-icons" style="font-size: 14px; color: #df3e3e;">report_problem</i>
+                        <div class="label" style="margin-bottom: 0;">Sobredimensionado</div>
+                    </div>
+                    <div class="value">{{ porcentajes.sobredimensionado }}%</div>
+                </div>
+
+                <dx-tooltip target="#cardSobredimensionado" showEvent="mouseenter" hideEvent="mouseleave"
+                    [hideOnOutsideClick]="false" wrapperAttr="{ class: 'white-tooltip' }">
+                    <div *dxTemplate="let data of 'content'" style="width: 320px;">
+                        <div class="tooltip-header">
+                            <h3 style="color: #FFF;">Secciones faltantes por capacidad</h3>
+                        </div>
+
+                        <div class="tooltip-body">
+                            <div *ngIf="sinCapacidad.length > 0; else noDates">
+                                <ul style="margin: 12px 0 0 0; padding-left: 18px;">
+                                    <li *ngFor="let item of sinCapacidad"
+                                        style="margin-bottom: 6px; color: #FFF; text-align: left">
+                                        <b style="color: #FFF;">{{ item.ID_SECCION }}</b> - {{ item.DESCRIPCION }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <ng-template #noDates>
+                                <p>No se han detectado cuellos de botella en las secciones de producción.</p>
+                            </ng-template>
+                        </div>
+                    </div>
+                </dx-tooltip>
+            </div>
+            <div class="col-md-2 col-sm-4">
+                <div class="percentage-card programado">
+                    <div class="label">Programado</div>
+                    <div class="value">{{ porcentajes.programado }}%</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4">
+                <div class="percentage-card comprometido">
+                    <div class="label">Comprometido</div>
+                    <div class="value">{{ porcentajes.comprometido }}%</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <div class="percentage-card en-proceso">
+                    <div class="label">En Proceso</div>
+                    <div class="value">{{ porcentajes.enProceso }}%</div>
+                </div>
+            </div>
+
+            <div class="col-md-2 col-sm-6">
+                <div class="percentage-card finalizado">
+                    <div class="label">Finalizado</div>
+                    <div class="value">{{ porcentajes.finalizado }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

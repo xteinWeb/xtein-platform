@@ -1,0 +1,37 @@
+<div class="container">
+  <p>
+    Las imágenes que se presentan a continuación son utilizadas como representaciones ilustrativas y como apoyo de
+    documentación
+  </p>
+  <div class="row">
+    <div class="col-md-4 mb-4 d-flex flex-column align-items-center">
+      <h4>Icono 16x16</h4>
+      <div class="icon-container mb-3">
+        <img [src]="DImagenes.LOGO16 != '' ? DImagenes.LOGO16 : 'assets/no-image.jpg'" alt="Icono 16x16"
+          class="img-fluid rounded border" (error)="onImgError($event)" style="max-width: 150px; max-height: 150px;"
+          (click)="fileInput16.click()" />
+        <input #fileInput16 type="file" class="form-control mb-3" accept="image/*" [disabled]="readOnly"
+          (change)="onFileChange($event, 'LOGO16')" hidden />
+      </div>
+
+      <h4>Icono 32x32</h4>
+      <div class="icon-container mb-3">
+        <img [src]="DImagenes.LOGO32 != '' ? DImagenes.LOGO32 : 'assets/no-image.jpg'" alt="Icono 32x32"
+          class="img-fluid rounded border" (error)="onImgError($event)" style="max-width: 150px; max-height: 150px;"
+          (click)="fileInput32.click()" />
+        <input #fileInput32 type="file" class="form-control mb-3" accept="image/*" [disabled]="readOnly"
+          (change)="onFileChange($event, 'LOGO32')" hidden />
+      </div>
+    </div>
+    <div class="col-md-8 d-flex flex-column align-items-center justify-content-center">
+      <h4>Imagen industrial</h4>
+      <div class="icon-container mb-3">
+        <img [src]="DImagenes.LOGOSIMBOLO != '' ? DImagenes.LOGOSIMBOLO : 'assets/no-image.jpg'" alt="Imagen industrial"
+          class="img-fluid rounded border" (error)="onImgError($event)" style="max-width: 400px; max-height: 300px;"
+          (click)="fileInputSimbolo.click()" />
+        <input #fileInputSimbolo type="file" class="form-control mb-3" accept="image/*" [disabled]="readOnly"
+          (change)="onFileChange($event, 'LOGOSIMBOLO')" hidden />
+      </div>
+    </div>
+  </div>
+</div>

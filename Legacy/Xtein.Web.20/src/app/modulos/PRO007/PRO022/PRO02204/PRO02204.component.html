@@ -1,0 +1,40 @@
+<dx-data-grid class="dx-card wide-card"
+    #GEspecCompo
+    id="GEspecCompo"
+    [dataSource]="DCompoPro"
+    [allowColumnReordering]="true"
+    [focusedRowEnabled]="false"
+    [showBorders]="true"
+    [showColumnHeaders]="false"
+    keyExpr="TIPO"
+    [showRowLines]="false"
+    (onCellClick)="onCellClick()"
+    (onEditorPreparing)="onEditorPreparing($event)"
+    >    
+
+        <dxo-editing
+            [allowUpdating]="esEdicion"
+            mode="cell"> <!-- 'batch' | 'cell' | 'form' | 'popup' -->
+        </dxo-editing>
+
+        <dxi-column dataField="TIPO" [width]="150" [allowEditing]="false"></dxi-column>
+        <dxi-column dataField="DETALLE" cellTemplate="cellTipo" editCellTemplate="cellTipo"></dxi-column>
+
+        <dxo-search-panel [width]="250" [visible]="false"></dxo-search-panel>
+        <dxo-paging [pageSize]="10"></dxo-paging>
+        <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+        <div *dxTemplate="let cellObj of 'cellTipo'">
+            <div>
+                <dx-text-area
+                    [autoResizeEnabled]="false"
+                    [minHeight]="100"
+                    [maxHeight]="120"
+                    [readOnly]="!esEdicion"
+                    [(value)]="cellObj.data.DETALLE"
+                    (onValueChanged)="onValueChanged($event)">
+                </dx-text-area>
+            </div>
+        </div>
+
+</dx-data-grid>

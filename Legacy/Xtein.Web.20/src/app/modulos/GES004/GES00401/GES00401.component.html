@@ -1,0 +1,141 @@
+<div class="row gx-3 container-form">
+    <div class="col-12" style="height: 100%;">
+        <as-split direction="horizontal" (dragEnd)="dragEnd('percent', $event)" #split="asSplit" class="col-12">
+            <as-split-area class="col-4" [size]="40" #area1="asSplitArea" (resized)="onResized($event)">
+                <div class="card-content-clean-alt">
+                    <dx-data-grid width="100%" height="100%" keyExpr="USUARIO" [columnAutoWidth]="true" #gridGrupos
+                        [focusedRowEnabled]="true" [hoverStateEnabled]="true" [hoverStateEnabled]="true"
+                        [allowColumnResizing]="true" (onSelectionChanged)="onSelectionGroup($event)"
+                        [rowAlternationEnabled]="true" [dataSource]="DGrupos">
+                        <dxo-selection mode="single"></dxo-selection>
+                        <dxo-scrolling mode="virtual"></dxo-scrolling>
+                        <dxo-search-panel [width]="150" [visible]="true"></dxo-search-panel>
+
+                        <dxi-column dataField="USUARIO" caption="Código"></dxi-column>
+                        <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                        <dxi-column dataField="ESTADO" caption="Estado"></dxi-column>
+                    </dx-data-grid>
+                </div>
+            </as-split-area>
+            <as-split-area class="col-8 ml-0" [size]="60" #area2="asSplitArea">
+
+                <div class="card-content">
+                    <div class="content-form">
+                        <div style="display: flex; justify-content: flex-end; width: 100%; padding: 5px; ">
+                            <dx-button id="btnAceptarPT" stylingMode="contained" type="default" [disabled]="activeBtn"
+                                [width]="accionAct !== 'new' ? 120 : 100 "
+                                [text]="accionAct !== 'new' ? 'Actualizar' : 'Agregar' "
+                                (onClick)="onClickBtn($event, 'ACEPTAR')"></dx-button>
+                            <dx-button *ngIf="activeBtnEliminar" id="btnCancelarPT" stylingMode="contained"
+                                text="Eliminar" type="danger" [width]="110" [style.margin-left]="'20px'"
+                                [disabled]="activeBtn" (onClick)="onClickBtn($event, 'ELIMINAR')"></dx-button>
+                            <dx-button id="btnCancelarPT" stylingMode="contained" text="Limpiar" type="normal"
+                                [width]="110" [style.margin-left]="'20px'" [disabled]="activeBtn"
+                                (onClick)="onClickBtn($event, 'LIMPIAR')"></dx-button>
+                        </div>
+                        <dx-form #formGrupos id="formGrupos" labelLocation="left" [formData]="FGrupos" [colCount]="1">
+
+                            <dxi-item dataField="NOMBRE" [colSpan]="4">
+                                <dxo-label text="Nombre"></dxo-label>
+                                <div *dxTemplate>
+                                    <dx-text-box [readOnly]="readOnly" [value]="FGrupos.NOMBRE"
+                                        (valueChange)="changeNombre($event)" placeholder="Nombre del Grupo">
+                                        <dx-validator>
+                                            <dxi-validation-rule type="stringLength" [min]="5"
+                                                message="El Nombre debe tener mínimo 5 caracteres"></dxi-validation-rule>
+                                            <dxi-validation-rule type="required"
+                                                message="El Nombre es requerido"></dxi-validation-rule>
+                                        </dx-validator>
+                                    </dx-text-box>
+                                </div>
+                            </dxi-item>
+
+
+                            <dxi-item dataField="DESCRIPCION" [colSpan]="4">
+                                <dxo-label text="Descripción"></dxo-label>
+                                <div *dxTemplate>
+
+                                    <dx-text-area [height]="100" [readOnly]="readOnly" [(value)]="FGrupos.DESCRIPCION"
+                                        (valueChange)="changeDescripcion($event)"
+                                        placeholder="Describa detalladamente la unidad de negocio">
+                                        <dx-validator>
+                                            <dxi-validation-rule type="required"
+                                                message="La descripción es requerido"></dxi-validation-rule>
+                                        </dx-validator>
+                                    </dx-text-area>
+                                </div>
+                            </dxi-item>
+
+                            <dxi-item dataField="USUARIOS" [colSpan]="4">
+                                <dxo-label text="USUARIOS"></dxo-label>
+                                <div *dxTemplate>
+                                    <dx-drop-down-box #dropUsuarios id="dropUsuarios" valueExpr="ID_RESPONSABLE"
+                                        displayExpr="NOMBRE" placeholder="Seleccione un usuario"
+                                        [dataSource]="DUsuarios" [(opened)]="isGridBoxOpened" [showClearButton]="true"
+                                        [readOnly]="readOnly" [(value)]="this.miembros"
+                                        contentTemplate="contentTemplateUsuarios"
+                                        [dropDownOptions]="{width: 500,height: 300,hideOnParentScroll: true,container: '#formGrupos'}">
+                                        <div *dxTemplate="let data of 'contentTemplateUsuarios'">
+                                            <dx-data-grid width="100%" height="100%" keyExpr="ID_RESPONSABLE"
+                                                [columnAutoWidth]="true" [focusedRowEnabled]="true"
+                                                
+                                                [hoverStateEnabled]="true" [hoverStateEnabled]="true"
+                                                [allowColumnResizing]="true" [rowAlternationEnabled]="true"
+                                                [dataSource]="DUsuarios" [(selectedRowKeys)]="this.miembros"
+                                                (onSelectionChanged)="onSelectUsuarios($event)">
+                                                <dxo-selection mode="multiple"></dxo-selection>
+                                                <dxo-scrolling mode="virtual"></dxo-scrolling>
+                                                <dxo-search-panel [width]="300" [visible]="true"></dxo-search-panel>
+
+                                                <dxi-column dataField="ID_RESPONSABLE" caption="Código"></dxi-column>
+                                                <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                                            </dx-data-grid>
+                                        </div>
+                                    </dx-drop-down-box>
+
+
+                                </div>
+                            </dxi-item>
+                        </dx-form>
+                    </div>
+                    <div class="col-4 col-xl-3 d-flex justify-content-end">
+                        <div class="Container-foto-grupo" #fotoGrupo id="fotoGrupo">
+                            <label class="contenedor-imagen-upload">
+                                <img [src]="getImagenSegura()" alt="Foto del grupo" class="imagen-upload" width="150"
+                                    height="150" />
+
+                                <input type="file" (change)="onFileSelected($event)" accept="image/*" hidden />
+                            </label>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div *ngIf="miembros.length > 0" class="content-miembros">
+                    <div *ngFor="let usuario of miembrosArray()">
+                        <ng-container>
+                            <div class="miembro-container">
+                                <div class="avatar-wrapper">
+                                    <div class="circle-avatar"
+                                        [ngStyle]="{ 'background-color': generarColorPorUsuario(usuario) }"
+                                        (click)="eliminarMiembro(usuario)">
+                                        {{ getInitials(usuario) }}
+                                    </div>
+                                    <div class="close-icon" (click)="eliminarMiembro(usuario)">
+                                        <span>&times;</span>
+                                    </div>
+                                </div>
+                                <div class="username">
+                                    {{ getNombreUsuario(usuario).toUpperCase() }}
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+
+            </as-split-area>
+
+        </as-split>
+    </div>
+</div>´
