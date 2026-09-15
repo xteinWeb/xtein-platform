@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component
 } from '@angular/core';
+import { inject } from '@angular/core';
+import { ShellSessionService } from './services/shell-session.service';
 
 import {
   RouterOutlet
@@ -31,4 +33,5 @@ import {
     ChangeDetectionStrategy.OnPush
 })
 export class App {
+  private readonly sessionLifecycle = inject(ShellSessionService);
 }

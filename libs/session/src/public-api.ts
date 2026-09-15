@@ -6,3 +6,6 @@ export * from './lib/contracts/session-context';
 export * from './lib/storage/session-storage-keys';
 export * from './lib/storage/session-storage.service';
 export * from './lib/services/session.service';
+export * from './lib/models/session-policy.model';
+export * from './lib/services/session-activity.service';
+export * from './lib/services/session-tabs.service';

@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  session: { inactivityTimeoutSeconds: 15 * 60, useBackendTimeout: true },
   apiUrlNode: '/e',
   apinet: '/api',
   apiDocElec: 'http://190.85.54.78:8770',

@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  session: { inactivityTimeoutSeconds: 15 * 60, useBackendTimeout: true },
   apiUrlNode: 'http://localhost:5000',
   apinet: '/api',
   //apiBaseUrl: 'https://api.dev.colchonessunmoon.com/api',
