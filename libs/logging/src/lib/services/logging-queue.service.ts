@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LogEvent } from '../models/log-event.model';
+import { normalizeLogDate } from '../utils/log-date';
 
 @Injectable({ providedIn: 'root' })
 export class LoggingQueueService {
@@ -21,8 +22,8 @@ export class LoggingQueueService {
         const request = db.transaction('events').objectStore('events').getAll();
         request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
       });
-      return [...new Map([...rows, ...this.memory].map(row => [row.ID_EVENTO, row])).values()];
-    } catch { return [...this.memory]; }
+      return [...new Map([...rows, ...this.memory].map(row => [row.ID_EVENTO, row])).values()].map(normalizeLogDate);
+    } catch { return this.memory.map(normalizeLogDate); }
   }
   async put(event: LogEvent): Promise<void> {
     this.memory.push(event); this.memory = this.memory.slice(-100);
@@ -33,7 +34,7 @@ export class LoggingQueueService {
         tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
       });
       this.memory = this.memory.filter(row => row.ID_EVENTO !== event.ID_EVENTO);
-      const rows = (await this.list()).sort((a,b) => a.FECHA_EVENTO_UTC.localeCompare(b.FECHA_EVENTO_UTC));
+      const rows = (await this.list()).sort((a,b) => a.ENCOLADO_EN - b.ENCOLADO_EN);
       for (const row of rows.slice(0, Math.max(0, rows.length - 100))) await this.remove(row.ID_EVENTO);
     } catch { /* Memory queue remains available when browser storage is disabled/full. */ }
   }

@@ -27,7 +27,7 @@ export class LoggingService {
     const json = JSON.stringify(sanitized);
     const data = json.length <= 64000 ? sanitized : { DATOS_TRUNCADOS: true, DETALLE: this.sanitizer.clean(error) };
     const event: LogEvent = { ...data as object, ...context, ID_EVENTO: crypto.randomUUID(),
-      FECHA_EVENTO_UTC: new Date().toISOString(), ORIGEN: 'FRONTEND',
+      ENCOLADO_EN: Date.now(), ORIGEN: 'FRONTEND',
       TIPO_ORIGEN: context.TIPO_ORIGEN || (context.ID_APLICACION ? 'APLICACION' : 'PLATAFORMA'),
       EMPRESA: identity?.companyId, USUARIO: identity?.userId,
       MENSAJE: String(this.sanitizer.clean(error instanceof Error ? error.message : typeof error === 'string' ? error : 'Error de plataforma')).slice(0, 4000) };
@@ -39,12 +39,12 @@ export class LoggingService {
     try {
       const identity = this.config.identity();
       const rows = await this.queue.list();
-      for (const row of rows) if (Date.now() - Date.parse(row.FECHA_EVENTO_UTC) > 7 * 86400000) await this.queue.remove(row.ID_EVENTO);
-      const events = rows.filter(row => Date.now() - Date.parse(row.FECHA_EVENTO_UTC) <= 7 * 86400000 &&
+      for (const row of rows) if (!Number.isFinite(row.ENCOLADO_EN) || Date.now() - row.ENCOLADO_EN > 7 * 86400000) await this.queue.remove(row.ID_EVENTO);
+      const events = rows.filter(row => Date.now() - row.ENCOLADO_EN <= 7 * 86400000 &&
         (!row.USUARIO || (row.USUARIO === identity?.userId && row.EMPRESA === identity?.companyId))).slice(0, 20);
       if (!events.length) return;
       const response = await firstValueFrom(this.http.post<{ data: string }>(this.config.endpoint, {
-        prmAccion: 'registrar', prmDatos: JSON.stringify({ EVENTOS: events }),
+        prmAccion: 'registrar', prmDatos: JSON.stringify({ EVENTOS: events.map(({ ENCOLADO_EN, ...event }) => event) }),
         prmTokenDatos: identity ? { USUARIO: identity.userId, EMPRESA: identity.companyId, TOKEN: identity.token } : undefined
       }).pipe(timeout(10000)));
       const results: { ID_EVENTO: string; DESTINO: string }[] = JSON.parse(response.data);

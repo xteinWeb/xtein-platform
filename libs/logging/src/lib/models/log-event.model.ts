@@ -9,7 +9,7 @@ export interface LogContext {
 }
 export interface LogEvent extends LogContext {
   ID_EVENTO: string;
-  FECHA_EVENTO_UTC: string;
+  ENCOLADO_EN: number;
   ORIGEN: 'FRONTEND';
   MENSAJE: string;
   EMPRESA?: string;
