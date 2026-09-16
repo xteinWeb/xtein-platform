@@ -5,6 +5,10 @@
  * existing XTEIN API contract.
  */
 export interface Ven230PrefacturaRecord {
+  PREFACTURA_GRAV?: Ven230PrefacturaGrav[];
+  PREFACTURA_PAGOS?: Ven230PrefacturaPago[];
+  Prefactura_GRAV?: Ven230PrefacturaGrav[];
+  Prefactura_PAGOS?: Ven230PrefacturaPago[];
 
   /**
    * Business unit identifier.
@@ -149,7 +153,7 @@ export interface Ven230PrefacturaRecord {
   /**
    * Tax identifiers list.
    */
-  GRAVAMENES?: string;
+  GRAVAMENES?: unknown;
 
   /**
    * Total operational / logistics costs.
@@ -252,6 +256,18 @@ export interface Ven230PrefacturaRecord {
  * Represents an individual line item of a prefactura.
  */
 export interface Ven230PrefacturaItem {
+  FECHA_ENTREGA?: string | null;
+  NOMBRE_PRODUCTO?: string;
+  REFERENCIA?: string;
+  PORC_IVA?: number;
+  PRESENTACION?: import('./ven-230-business.model').Ven230Lookup[];
+  IVAS?: import('./ven-230-business.model').Ven230Lookup[];
+  UDM_EQUIV?: string;
+  CANTIDAD_PRES?: number;
+  CANTIDAD_EQUIV?: number;
+  CANTIDAD_REAL?: number;
+  APLICACION?: number;
+
 
   ID_UN?: string;
 
@@ -301,7 +317,7 @@ export interface Ven230PrefacturaItem {
 
   POR_IVA: number;
 
-  GRAVAMENES?: string;
+  GRAVAMENES?: unknown;
 
   GRAV_TOTAL?: number;
 

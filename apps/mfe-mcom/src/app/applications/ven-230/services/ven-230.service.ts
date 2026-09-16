@@ -37,6 +37,11 @@ export class Ven230Service {
   }
 
 
+  request(endpoint: string, action: string, data: unknown): Observable<XteinDataApiResponse<string>> {
+    return this.apiClient.execute<XteinDataApiResponse<string>>({ endpoint, action, data,
+      logContext: this.log.Query, accessMode: XteinApiAccessMode.Authenticated });
+  }
+
   /**
    * Returns the application identifier.
    */
@@ -49,7 +54,7 @@ export class Ven230Service {
    * Executes a query operation on VEN-230.
    */
   query(
-    action: Ven230Action,
+    action: string,
     data: unknown
   ): Observable<XteinDataApiResponse<string>> {
     return this.apiClient
@@ -95,17 +100,6 @@ export class Ven230Service {
         logContext: this.log.Delete,
         accessMode: XteinApiAccessMode.Authenticated
       });
-  }
-
-
-  /**
-   * Loads general catalog lists required by VEN-230.
-   */
-  getDataLists(): Observable<XteinDataApiResponse<string>> {
-    return this.query(
-      Ven230Action.DataLists,
-      {}
-    );
   }
 
 

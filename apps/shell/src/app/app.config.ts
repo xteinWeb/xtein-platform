@@ -27,7 +27,8 @@ export const appConfig: ApplicationConfig = {
     {
       provide: XTEIN_API_CONFIG,
       useValue: {
-        baseUrl: environment.apiBaseUrl
+        baseUrl: environment.apiBaseUrl,
+        electronicDocumentBaseUrl: environment.apiDocElec
       }
     }
   ]

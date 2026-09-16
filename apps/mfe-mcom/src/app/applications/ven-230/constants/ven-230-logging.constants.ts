@@ -8,5 +8,6 @@ export const createVen230Log = () => createLogContexts({
 }, {
   "Query": "query",
   "Save": "save",
-  "Delete": "delete"
+  "Delete": "delete",
+  "Electronic": "electronicDocument"
 });

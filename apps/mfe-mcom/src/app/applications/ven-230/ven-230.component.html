@@ -12,14 +12,7 @@
                 Prefactura Número
               </label>
               <div class="ven-230__control-inline">
-                <xtein-input
-                  id="ven-230-documento"
-                  name="DOCUMENTO"
-                  placeholder="Número asignado"
-                  formControlName="DOCUMENTO"
-                  [readOnly]="true"
-                >
-                </xtein-input>
+                <xtein-select id="ven-230-documento" [items]="documents()" displayExpr="DOCUMENTO" valueExpr="DOCUMENTO" [searchEnabled]="true" formControlName="DOCUMENTO" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
               </div>
             </div>
 
@@ -28,16 +21,15 @@
                 Fecha
               </label>
               <div class="ven-230__control-inline">
-                <xtein-input
+                <xtein-date
                   id="ven-230-fecha"
                   name="FECHA"
-                  type="date"
                   placeholder="YYYY-MM-DD"
                   formControlName="FECHA"
                   [required]="true"
-                  [readOnly]="readOnly()"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
                 >
-                </xtein-input>
+                </xtein-date>
               </div>
             </div>
 
@@ -48,14 +40,13 @@
               <div
                 class="ven-230__control-inline ven-230__control-inline--shaded"
               >
-                <xtein-input
+                <xtein-date
                   id="ven-230-fecha-registro"
                   name="FECHA_REGISTRO"
-                  type="date"
                   formControlName="FECHA_REGISTRO"
                   [readOnly]="true"
                 >
-                </xtein-input>
+                </xtein-date>
               </div>
             </div>
           </div>
@@ -64,21 +55,7 @@
             <div class="ven-230__field-inline">
               <label class="ven-230__label-inline"> Estado </label>
               <div class="ven-230__control-inline">
-                @if (readOnly()) {
-                  <span class="ven-230__badge-status">
-                    {{ form.get("ESTADO")?.value || "REGISTRADO" }}
-                  </span>
-                } @else {
-                  <xtein-select
-                    id="ven-230-estado"
-                    [items]="$any(statusOptions)"
-                    displayExpr="text"
-                    valueExpr="value"
-                    placeholder="Seleccione estado"
-                    formControlName="ESTADO"
-                  >
-                  </xtein-select>
-                }
+                <span class="ven-230__badge-status" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
               </div>
             </div>
 
@@ -114,15 +91,7 @@
                 Documento del Cliente
               </label>
               <div class="ven-230__control-inline">
-                <xtein-input
-                  id="ven-230-id-cliente"
-                  name="ID_CLIENTE"
-                  placeholder="Documento"
-                  formControlName="ID_CLIENTE"
-                  [required]="true"
-                  [readOnly]="readOnly()"
-                >
-                </xtein-input>
+                <xtein-select id="ven-230-id-cliente" [items]="clients()" displayExpr="NOMBRE_COMPLETO" valueExpr="ID_CLIENTE" [searchEnabled]="true" formControlName="ID_CLIENTE" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
               </div>
             </div>
 
@@ -131,14 +100,7 @@
                 Dirección
               </label>
               <div class="ven-230__control-inline">
-                <xtein-input
-                  id="ven-230-direccion"
-                  name="DIRECCION"
-                  placeholder="Dirección"
-                  formControlName="DIRECCION"
-                  [readOnly]="readOnly()"
-                >
-                </xtein-input>
+                <xtein-select id="ven-230-direccion" [items]="addresses()" displayExpr="DIRECCION" valueExpr="DIRECCION" [searchEnabled]="true" formControlName="DIRECCION" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
               </div>
             </div>
 
@@ -147,14 +109,13 @@
                 Fecha Orden de Compra
               </label>
               <div class="ven-230__control-inline">
-                <xtein-input
+                <xtein-date
                   id="ven-230-fecha-oc"
                   name="FECHA_OC"
-                  type="date"
                   formControlName="FECHA_OC"
-                  [readOnly]="readOnly()"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
                 >
-                </xtein-input>
+                </xtein-date>
               </div>
             </div>
           </div>
@@ -188,7 +149,7 @@
                   name="ID_DOC_SOPORTE"
                   placeholder="Orden de compra"
                   formControlName="ID_DOC_SOPORTE"
-                  [readOnly]="readOnly()"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
                 >
                 </xtein-input>
               </div>
@@ -207,21 +168,21 @@
           <div class="ven-230__totals-row">
             <span class="ven-230__totals-label">Subtotal</span>
             <span class="ven-230__totals-value">
-              {{ form.get("SUB_TOTAL")?.value | number: "1.2-2" }}
+              {{ money(form.get("SUB_TOTAL")?.value) }}
             </span>
           </div>
 
           <div class="ven-230__totals-row">
             <span class="ven-230__totals-label">Descuentos</span>
             <span class="ven-230__totals-value">
-              {{ form.get("VALOR_DESCUENTO")?.value | number: "1.2-2" }}
+              {{ money(form.get("VALOR_DESCUENTO")?.value) }}
             </span>
           </div>
 
           <div class="ven-230__totals-row">
             <span class="ven-230__totals-label">Anticipos</span>
             <span class="ven-230__totals-value">
-              {{ form.get("VALOR_COSTOS")?.value | number: "1.2-2" }}
+              {{ money(advances()) }}
             </span>
           </div>
 
@@ -230,7 +191,7 @@
           <div class="ven-230__totals-row ven-230__totals-row--grand">
             <span class="ven-230__totals-label">TOTAL</span>
             <span class="ven-230__totals-value">
-              {{ form.get("TOTAL")?.value | number: "1.2-2" }}
+              {{ money(form.get("TOTAL")?.value) }}
             </span>
           </div>
         </div>
@@ -259,9 +220,9 @@
                     displayExpr="NOMBRE"
                     valueExpr="ID_UN"
                     placeholder="Seleccionar..."
-                    formControlName="ID_UN"
+                    formControlName="ID_UN_ITEM"
                     [required]="true"
-                    [readOnly]="readOnly()"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
                   </xtein-select>
                 </div>
@@ -279,7 +240,7 @@
                     valueExpr="ID_MONEDA"
                     placeholder="Seleccionar..."
                     formControlName="ID_MONEDA"
-                    [readOnly]="readOnly()"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
                   </xtein-select>
                 </div>
@@ -290,14 +251,7 @@
                   ADC / Vendedor
                 </label>
                 <div class="ven-230__control-inline">
-                  <xtein-input
-                    id="ven-230-id-adc"
-                    name="ID_ADC"
-                    placeholder="Seleccionar..."
-                    formControlName="ID_ADC"
-                    [readOnly]="readOnly()"
-                  >
-                  </xtein-input>
+                  <xtein-select id="ven-230-id-adc" [items]="sellers()" displayExpr="NOMBRE_COMPLETO" valueExpr="ID_ADC" [searchEnabled]="true" formControlName="ID_ADC" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
                 </div>
               </div>
 
@@ -330,7 +284,7 @@
                     valueExpr="ID_BODEGA"
                     placeholder="Seleccionar..."
                     formControlName="ID_UN_BODEGA"
-                    [readOnly]="readOnly()"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
                   </xtein-select>
                 </div>
@@ -346,7 +300,7 @@
                     name="DESCRIPCION"
                     placeholder="Descripción de la prefactura..."
                     formControlName="DESCRIPCION"
-                    [readOnly]="readOnly()"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
                   </xtein-input>
                 </div>
@@ -372,7 +326,7 @@
                     valueExpr="ID_CONDICION"
                     placeholder="Condición"
                     formControlName="ID_CONDICION"
-                    [readOnly]="readOnly()"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
                   </xtein-select>
                 </div>
@@ -383,12 +337,7 @@
                   Plazo
                 </label>
                 <div class="ven-230__control-inline">
-                  <xtein-number
-                    id="ven-230-plazo"
-                    placeholder="0"
-                    formControlName="PLAZO"
-                  >
-                  </xtein-number>
+                  <xtein-select id="ven-230-plazo" [items]="terms()" displayExpr="PLAZO" valueExpr="PLAZO" formControlName="PLAZO" [readOnly]="readOnly() || headerLocked() || itemPending()" />
                 </div>
               </div>
 
@@ -397,14 +346,13 @@
                   Vencimiento
                 </label>
                 <div class="ven-230__control-inline">
-                  <xtein-input
+                  <xtein-date
                     id="ven-230-vencimiento"
-                    name="FECHA_PRIMER_VENC"
-                    type="date"
+                    name="FECHA_PRIMER_VENC" [min]="form.controls.FECHA.value || null"
                     formControlName="FECHA_PRIMER_VENC"
-                    [readOnly]="readOnly()"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
-                  </xtein-input>
+                  </xtein-date>
                 </div>
               </div>
 
@@ -428,69 +376,25 @@
           </div>
         </div>
 
+        <div class="ven-230__field-inline"><label class="ven-230__label-inline" for="ven-230-tasa-cambio">Tasa de cambio</label><div class="ven-230__control-inline"><xtein-number id="ven-230-tasa-cambio" formControlName="TASA_CAMBIO" /></div></div>
         <!-- Tabla de Items -->
         <div class="ven-230__section-divider">
           <h3 class="ven-230__section-title">Detalle de Items</h3>
         </div>
 
-        @if (items().length > 0) {
-          <div class="ven-230__items-table-container">
-            <table class="ven-230__items-table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Nombre del Producto</th>
-                  <th class="text-end">Cantidad</th>
-                  <th>UM</th>
-                  <th class="text-end">Vr. Unitario</th>
-                  <th class="text-end">Subtotal</th>
-                  <th class="text-end">IVA</th>
-                  <th class="text-end">%</th>
-                  <th class="text-end">Total</th>
-                  <th>Fecha entrega</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (line of items(); track line.ITEM) {
-                  <tr>
-                    <td>{{ line.PRODUCTO }}</td>
-                    <td>{{ line.ATRIBUTO || "" }}</td>
-                    <td class="text-end">
-                      {{ line.CANTIDAD | number: "1.0-2" }}
-                    </td>
-                    <td>{{ line.UDM_VENTA || "" }}</td>
-                    <td class="text-end">
-                      {{ line.VALOR_UNITARIO | number: "1.2-2" }}
-                    </td>
-                    <td class="text-end">
-                      {{ line.SUB_TOTAL | number: "1.2-2" }}
-                    </td>
-                    <td class="text-end">
-                      {{ line.VALOR_IVA | number: "1.2-2" }}
-                    </td>
-                    <td class="text-end">
-                      {{ line.POR_IVA | number: "1.0-2" }}
-                    </td>
-                    <td class="text-end font-weight-bold">
-                      {{ line.TOTAL | number: "1.2-2" }}
-                    </td>
-                    <td>{{ line.FECHA | date: "dd/MM/yyyy" }}</td>
-                    <td>
-                      <span class="ven-230__badge-item-status">
-                        {{ line.ESTADO || "" }}
-                      </span>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        } @else {
-          <div class="ven-230__empty-items">
-            <span>No hay items cargados en esta prefactura.</span>
-          </div>
+        <xtein-ven230-items [items]="items()" [products]="products()" [productsLoading]="productsLoading()" [onlyStock]="onlyStock"
+          [recordKey]="itemRecordKey()" [header]="header()"
+          [readOnly]="readOnly()" [ready]="itemsReady()" [busy]="loading()" [conditionType]="conditionType"
+          [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'" [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'" [repeatItem]="enabledSpec('REPETIR ITEM')" [editPrice]="enabledSpec('MODIFICAR PRECIO')"
+          [persist]="persistItem" (removed)="removeItem($event)" (removedMany)="removeItem($event)" (pending)="onItemPending($event)" (stockOnly)="loadProducts($event)" (refreshProducts)="loadProducts()" />
+        @if (form.controls.PLAZO.value) { <p>Valor cuota: {{form.controls.VALOR_CUOTA.value | number:'1.2-2'}}</p> }
+        <div class="ven-230__items-table-container"><table class="ven-230__items-table"><thead><tr><th>Gravamen</th><th>Porcentaje</th><th>Valor</th></tr></thead><tbody>
+          @for (tax of taxes(); track $index) { <tr><td>{{tax.CLASE}}</td><td>{{tax.POR_TASA}}</td><td>{{tax.VALOR | number:'1.2-2'}}</td></tr> }
+        </tbody></table></div>
+        @if (!readOnly() && enabledSpec('MODIFICAR GRAVAMENES')) {
+          <xtein-button text="Restablecer gravámenes originales" [disabled]="loading() || itemPending()" (clicked)="restoreTaxes()" />
         }
+
       </div>
     </div>
   </div>
@@ -534,6 +438,29 @@
     [table]="tableBase"
     [currentFilter]="currentReportFilter()"
     [allFilter]="queryFilter()"
+    [emailContext]="reportEmailContext()"
   >
   </xtein-record-reports>
 }
+
+<dx-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
+  <div class="ven-230__options">@for(option of settings();track $index){<xtein-button [text]="option.VALOR || ''" [disabled]="loading()" (clicked)="executeSetting(option)" />}</div>
+</dx-popup>
+<xtein-ven230-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
+  [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="loading()" (accepted)="applySelection($event)" />
+
+<dx-popup [visible]="electronicVisible()" (visibleChange)="electronicVisible.set($event)" title="Prefactura electrónica" width="min(900px, 95vw)" height="min(600px, 90dvh)" [showCloseButton]="!electronicBusy()" [hideOnOutsideClick]="false">
+ <div class="ven-230__selection">
+ @if (electronicView(); as document) {
+   <div class="ven-230__electronic-summary">
+     <dl><dt>Documento</dt><dd>{{document.document}}</dd><dt>Fecha</dt><dd>{{document.date}}</dd>
+       <dt>Cliente</dt><dd>{{document.client}}</dd><dt>Correo</dt><dd>{{document.email}}</dd>
+       <dt>CUFE/CUDE</dt><dd>{{document.cufe}}</dd></dl>
+     @if (document.qr) { <img [src]="electronicQrUrl()" width="100" height="100" alt="QR del documento electrónico"> }
+     @else { <span class="ven-230__no-qr">Sin QR</span> }
+   </div>
+ }
+ @if (electronicBusy()) { <p role="status" aria-live="polite">{{electronicOperation()}}</p> }
+ <dx-data-grid [dataSource]="electronicEvents()" [columnAutoWidth]="true" height="100%" />
+ <div class="ven-230__selection-footer"><xtein-button text="Enviar DIAN" [disabled]="electronicBusy()" (clicked)="sendElectronic()" /><xtein-button text="PDF" [disabled]="electronicBusy()" (clicked)="downloadElectronic()" /></div></div>
+</dx-popup>

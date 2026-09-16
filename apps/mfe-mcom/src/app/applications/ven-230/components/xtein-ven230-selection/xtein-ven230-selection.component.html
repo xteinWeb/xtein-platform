@@ -1,0 +1,25 @@
+<dx-popup [visible]="visible" (visibleChange)="visibleChange.emit($event)" [title]="config?.titulo || 'Seleccionar'"
+  [width]="size('width')" [height]="size('height')" [showCloseButton]="!busy && !saving" [hideOnOutsideClick]="false">
+  <div class="selection">
+    @if (error) { <p role="alert">{{error}}</p> }
+    <label><input type="checkbox" [checked]="onlySelected" [disabled]="busy || saving" (change)="filterSelected($any($event.target).checked)"> Solo seleccionados</label>
+    <div class="selection__grid">
+      <dx-data-grid [dataSource]="rows" keyExpr="ITEM" [columns]="columns" height="100%" [columnAutoWidth]="true"
+        [selectedRowKeys]="keys" (onSelectionChanged)="selectionChanged($event)" (onEditingStart)="editingStart($event)" [disabled]="busy || !!error">
+        <dxo-selection [mode]="config?.modoSeleccion === 'single' ? 'single' : 'multiple'" selectAllMode="allPages" />
+        <dxo-editing mode="cell" [allowUpdating]="true" />
+        <dxo-search-panel [visible]="true" /><dxo-filter-row [visible]="true" /><dxo-header-filter [visible]="true" />
+        <dxo-paging [pageSize]="10" /><dxo-pager [visible]="true" [showPageSizeSelector]="true" [allowedPageSizes]="pageSizes" [showInfo]="true" />
+        <div *dxTemplate="let cell of 'groupSelection'">
+          @if (config?.modoSeleccion === 'multiple-grupo') {
+            <input type="checkbox" aria-label="Seleccionar grupo" [checked]="groupSelected(cell.row.key)" [indeterminate]="groupPartial(cell.row.key)"
+              [disabled]="busy || saving" (click)="$event.stopPropagation()" (change)="toggleGroup(cell.row.key, $any($event.target).checked)">
+          }
+          {{groupLabel(cell.row.key, cell.column.dataField)}}
+        </div>
+      </dx-data-grid>
+    </div>
+    <footer><xtein-button text="Aplicar" [disabled]="busy || saving || !!error" (clicked)="apply()" />
+      <xtein-button text="Cancelar" variant="secondary" [disabled]="busy || saving" (clicked)="visibleChange.emit(false)" /></footer>
+  </div>
+</dx-popup>
