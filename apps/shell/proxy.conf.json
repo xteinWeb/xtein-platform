@@ -38,7 +38,7 @@
         "logLevel": "debug"
     },
     "/api": {
-        "target": "http://192.168.11.151:5779",
+        "target": "http://localhost:5900",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"

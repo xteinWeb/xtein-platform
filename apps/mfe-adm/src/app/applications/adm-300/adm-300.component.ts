@@ -13,6 +13,7 @@ import { TableroPurchase } from './models/tablero-purchase.model';
 
 @Component({
   selector: 'xtein-adm-300', standalone: true,
+  providers: [TableroDataService],
   imports: [CommonModule, DxBarGaugeModule, DxButtonModule, DxListModule, DxPopupModule,
     DxHtmlEditorModule, DxChartModule, DxPieChartModule, DxSchedulerModule],
   templateUrl: './adm-300.component.html', styleUrl: './adm-300.component.scss',

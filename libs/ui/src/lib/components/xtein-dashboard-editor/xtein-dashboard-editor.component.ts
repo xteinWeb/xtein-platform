@@ -5,6 +5,7 @@ import { XteinDashboardConstantLine, XteinDashboardDataService, XteinDashboardEd
 import { XteinButtonComponent } from '../../forms/xtein-button/xtein-button.component';
 
 @Component({
+  providers: [XteinDashboardDataService],
   selector: 'xtein-dashboard-editor', standalone: true,
   imports: [DxDataGridModule, DxPopupModule, DxSelectBoxModule, XteinButtonComponent],
   templateUrl: './xtein-dashboard-editor.component.html', styleUrl: './xtein-dashboard-editor.component.scss',

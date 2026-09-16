@@ -7,6 +7,8 @@ import {
   HttpClient,
   HttpHeaders
 } from '@angular/common/http';
+import { HttpContext } from '@angular/common/http';
+import { XTEIN_LOG_CONTEXT } from '@xtein/logging';
 
 import {
   Observable,
@@ -98,7 +100,10 @@ export class XteinApiClientService {
         url,
         body,
         {
-          headers
+          headers,
+          context: new HttpContext().set(XTEIN_LOG_CONTEXT, {
+            LIBRERIA: '@xtein/api-client', METODO: 'XteinApiClientService.execute', ...request.logContext
+          })
         }
       )
       .pipe(

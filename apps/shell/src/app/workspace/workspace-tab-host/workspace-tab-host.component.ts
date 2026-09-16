@@ -4,11 +4,15 @@ import {
   Component,
   ComponentRef,
   Input,
+  Injector,
+  inject,
   signal,
   Type,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
+import { XTEIN_LOG_SCOPE } from '@xtein/logging';
+import { ApplicationCatalogService } from '@xtein/runtime';
 
 import {
   loadRemoteModule
@@ -73,6 +77,7 @@ const RemoteApplicationHostInput = {
 })
 export class WorkspaceTabHostComponent
   implements AfterViewInit {
+  private readonly applicationCatalog = inject(ApplicationCatalogService);
 
   /**
    * Workspace tab represented by this host.
@@ -185,6 +190,10 @@ export class WorkspaceTabHostComponent
     try {
 
       this.validateTabConfiguration();
+      const loggingScope = Object.freeze({
+        ID_APLICACION: this.tab.applicationId,
+        MICROFRONTEND_ID: this.applicationCatalog.resolveApplication(this.tab.applicationId).microfrontendId
+      });
 
 
       const remoteModule =
@@ -222,7 +231,11 @@ export class WorkspaceTabHostComponent
         this.applicationContainer
           .createComponent(
             remoteModule
-              .ApplicationHostComponent
+              .ApplicationHostComponent,
+            { injector: Injector.create({
+              parent: this.applicationContainer.injector,
+              providers: [{ provide: XTEIN_LOG_SCOPE, useValue: loggingScope }]
+            }) }
           );
 
 

@@ -1,3 +1,4 @@
+import { createVen230Log } from '../constants/ven-230-logging.constants';
 import {
   Injectable
 } from '@angular/core';
@@ -27,6 +28,7 @@ import {
  */
 @Injectable()
 export class Ven230Service {
+  private readonly log = createVen230Log();
 
   constructor(
     private readonly apiClient:
@@ -55,6 +57,7 @@ export class Ven230Service {
         endpoint: Ven230Endpoint.Query,
         action,
         data,
+        logContext: this.log.Query,
         accessMode: XteinApiAccessMode.Authenticated
       });
   }
@@ -72,6 +75,7 @@ export class Ven230Service {
         endpoint: Ven230Endpoint.Save,
         action,
         data,
+        logContext: this.log.Save,
         accessMode: XteinApiAccessMode.Authenticated
       });
   }
@@ -88,6 +92,7 @@ export class Ven230Service {
         endpoint: Ven230Endpoint.Delete,
         action: Ven230Action.Delete,
         data,
+        logContext: this.log.Delete,
         accessMode: XteinApiAccessMode.Authenticated
       });
   }

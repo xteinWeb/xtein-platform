@@ -10,6 +10,7 @@ import {
  * XteinApiClientService.
  */
 export interface XteinApiRequest<TData = unknown> {
+  logContext?: import('@xtein/logging').LogContext;
 
   /**
    * Relative backend endpoint.

@@ -1,3 +1,4 @@
+import { createAdm300Log } from '../constants/adm-300-logging.constants';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable, throwError } from 'rxjs';
 import { XteinApiAccessMode, XteinApiClientService } from '@xtein/api-client';
@@ -11,6 +12,7 @@ export interface TableroApplication {
 
 @Injectable({ providedIn: 'root' })
 export class TableroDataService {
+  private readonly log = createAdm300Log();
   private readonly api = inject(XteinApiClientService);
   private readonly session = inject(SessionService);
 
@@ -21,7 +23,8 @@ export class TableroDataService {
     return this.api.execute<{ data: string | unknown[] }>({
       endpoint: 'generales/consulta', action,
       data: kind === 'available' ? { USUARIO: user, opcion: 'usuario' } : { usuario: user },
-      accessMode: XteinApiAccessMode.Authenticated
+      logContext: this.log.LoadApplications,
+        accessMode: XteinApiAccessMode.Authenticated
     }).pipe(map(response => {
       const rows: unknown = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
       if (!Array.isArray(rows)) throw new Error('La respuesta de aplicaciones no es válida.');

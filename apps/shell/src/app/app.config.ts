@@ -1,6 +1,9 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { ErrorHandler } from '@angular/core';
+import { SessionService } from '@xtein/session';
+import { LoggingErrorHandler, XTEIN_LOGGING_CONFIG, loggingInterceptor } from '@xtein/logging';
 import { XTEIN_API_CONFIG} from '@xtein/api-client';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
@@ -15,7 +18,12 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([loggingInterceptor])),
+    { provide: ErrorHandler, useClass: LoggingErrorHandler },
+    { provide: XTEIN_LOGGING_CONFIG, useFactory: () => {
+      const session = inject(SessionService);
+      return { endpoint: environment.apiBaseUrl.replace(/\/+$/, '') + '/LOG/save', identity: () => session.current };
+    } },
     {
       provide: XTEIN_API_CONFIG,
       useValue: {
