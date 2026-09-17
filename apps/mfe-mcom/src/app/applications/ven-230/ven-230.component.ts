@@ -1,5 +1,4 @@
 import { XteinLookupComponent } from '@xtein/ui';
-import { Ven230ClientColumns, Ven230UnitColumns } from './constants/ven-230-ui.constants';
 import { XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent } from '@xtein/ui';
 import { Ven230ElectronicQrEndpoint } from './constants/ven-230-electronic.constants';
 import { XteinVen230SelectionComponent } from './components/xtein-ven230-selection/xtein-ven230-selection.component';
@@ -77,7 +76,13 @@ import {
 import {
   Ven230DefaultRecord,
   Ven230RecordViewColumns,
-  Ven230ToolbarCapabilities
+  Ven230ToolbarCapabilities,
+  Ven230ClientColumns,
+  Ven230UnitColumns,
+  Ven230CurrencyColumns,
+  Ven230SellerColumns,
+  Ven230WarehouseColumns,
+  Ven230ConditionColumns
 } from './constants/ven-230-ui.constants';
 
 import {
@@ -130,6 +135,10 @@ export class Ven230Component
   implements OnInit, OnDestroy {
   readonly clientColumns = Ven230ClientColumns;
   readonly unitColumns = Ven230UnitColumns;
+  readonly currencyColumns = Ven230CurrencyColumns;
+  readonly sellerColumns = Ven230SellerColumns;
+  readonly warehouseColumns = Ven230WarehouseColumns;
+  readonly conditionColumns = Ven230ConditionColumns;
 
 
   readonly applicationId =
@@ -776,11 +785,13 @@ export class Ven230Component
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'DEF_MONEDA'}),
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'FORMATO MONEDA'}),
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'FORMATO CANTIDAD'})]);
-      this.clients.set(clients);this.sellers.set(sellers);this.specifications.set([...specs,...moneySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO MONEDA'})),...quantitySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO CANTIDAD'}))]);
+      this.clients.set(clients);
+      this.sellers.set(sellers.map(r => ({ ...r, ID_ADC: String(r.ID_ADC ?? ''), NOMBRE_COMPLETO: String(r.NOMBRE_COMPLETO ?? ''), NUM_NOMBRE: String(r['NUM_NOMBRE'] ?? `${r.ID_ADC} - ${r.NOMBRE_COMPLETO ?? ''}`) })));
+      this.specifications.set([...specs,...moneySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO MONEDA'})),...quantitySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO CANTIDAD'}))]);
       this.defaultUnit=String(defaultUnit[0]?.ID_UN ?? '');
       this.defaultCurrency=String(defaultCurrency[0]?.VALOR_DEFECTO ?? this.spec('ID_MONEDA_DEF')?.VALOR_DEFECTO ?? '');
       this.dataLists.set({unidadesNegocio:units.map(r=>({ID_UN:String(r.ID_UN ?? ''),NOMBRE:String(r.NOMBRE ?? r['UN_NOMBRE'] ?? r.ID_UN ?? ''),UN_NOMBRE:String(r['UN_NOMBRE'] ?? `${r.ID_UN} - ${r.NOMBRE ?? ''}`)})),
-        monedas:currencies.map(r=>({ID_MONEDA:String(r.ID_MONEDA ?? ''),MONEDA:String(r['DESCRIPCION'] ?? r.ID_MONEDA ?? '')})),
+        monedas:currencies.map(r=>({ID_MONEDA:String(r.ID_MONEDA ?? ''),DESCRIPCION:String(r['DESCRIPCION'] ?? r.ID_MONEDA ?? ''),MONEDA:String(r['DESCRIPCION'] ?? r.ID_MONEDA ?? '')})),
         tiposVenta:saleTypes.map(r=>({TIPO_VENTA:String(r['VALOR2'] ?? ''),DESCRIPCION:String(r['VALOR2'] ?? '')}))});
     }catch(error){this.showError(error);}finally{this.loading.set(false);}
   }
@@ -880,7 +891,7 @@ export class Ven230Component
     const id=this.form.controls.ID_UN_ITEM.value;if(!id){this.dataLists.update(d=>({...d,bodegas:[]}));return;}
     const rows=await this.business.catalog('warehouses',{ESTADO:'ACTIVO',MOVIMIENTO:'Prefactura',ID_UN_ITEM:id,USUARIO:this.business.identity.USUARIO});
     if(this.form.controls.ID_UN_ITEM.value!==id)return;
-    this.dataLists.update(d=>({...d,bodegas:rows.map(r=>({ID_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),NOMBRE:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? '')}))}));
+    this.dataLists.update(d=>({...d,bodegas:rows.map(r=>({ID_UN_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),ID_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),DESCRIPCION:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE_UN:String(r['NOMBRE_UN'] ?? ''),BODEGA_LABEL:String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))}))}));
   }
   private async resetConditions():Promise<void> {
     if(this.items().length){
@@ -919,7 +930,7 @@ export class Ven230Component
     if(request !== this.conditionRequest || this.form.controls.ID_ADC.value!==h.ID_ADC || this.form.controls.TIPO_VENTA.value!==h.TIPO_VENTA)return;
     this.conditionSeller=h.ID_ADC;this.conditionSaleType=h.TIPO_VENTA;
     this.conditions.set(rows.filter(r=>r.CODIGO));
-    this.dataLists.update(d=>({...d,condiciones:rows.filter(r=>r.CODIGO).map(r=>({ID_CONDICION:String(r.CODIGO),CONDICION:String(r.NOMBRE ?? r.CODIGO)}))}));
+    this.dataLists.update(d=>({...d,condiciones:rows.filter(r=>r.CODIGO).map(r=>({ID_CONDICION:String(r.CODIGO),CODIGO:String(r.CODIGO),CONDICION:String(r.NOMBRE ?? r.CODIGO),NOMBRE:String(r.NOMBRE ?? r.CODIGO)}))}));
     if(!rows.some(r=>r.CODIGO) && !this.readOnly())this.notification.warning('El vendedor seleccionado no tiene condiciones de venta asociadas.');
     this.previousCondition=h.ID_CONDICION ?? '';this.applyCondition(false);await this.loadProducts();
   }

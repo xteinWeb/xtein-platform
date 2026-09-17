@@ -420,16 +420,20 @@ export interface Ven230DataLists {
   monedas?: Array<{
     ID_MONEDA: string;
     MONEDA: string;
+    DESCRIPCION?: string;
   }>;
 
   condiciones?: Array<{
     ID_CONDICION: string;
     CONDICION: string;
+    CODIGO?: string;
+    NOMBRE?: string;
   }>;
 
   unidadesNegocio?: Array<{
     ID_UN: string;
     NOMBRE: string;
+    UN_NOMBRE?: string;
   }>;
 
   tiposVenta?: Array<{
@@ -440,5 +444,9 @@ export interface Ven230DataLists {
   bodegas?: Array<{
     ID_BODEGA: string;
     NOMBRE: string;
+    ID_UN_BODEGA?: string;
+    DESCRIPCION?: string;
+    NOMBRE_UN?: string;
+    BODEGA_LABEL?: string;
   }>;
 }

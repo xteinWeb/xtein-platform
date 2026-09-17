@@ -128,3 +128,24 @@ export const Ven230UnitColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
  {dataField:'ID_UN',caption:'Código',width:110},
  {dataField:'NOMBRE',caption:'Nombre de Unidad de Negocio'}
 ];
+
+export const Ven230CurrencyColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_MONEDA',caption:'Código',width:130},
+ {dataField:'DESCRIPCION',caption:'Nombre de Moneda'}
+];
+
+export const Ven230SellerColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_ADC',caption:'Código de Vendedor',width:130},
+ {dataField:'NOMBRE_COMPLETO',caption:'Nombre de Vendedor'}
+];
+
+export const Ven230WarehouseColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_UN_BODEGA',caption:'Bodega',width:130},
+ {dataField:'DESCRIPCION',caption:'Descripción'},
+ {dataField:'NOMBRE_UN',caption:'Unidad de Negocio'}
+];
+
+export const Ven230ConditionColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_CONDICION',caption:'Código',width:130},
+ {dataField:'CONDICION',caption:'Nombre de Condición/Lista'}
+];

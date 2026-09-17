@@ -240,16 +240,21 @@
                   Moneda
                 </xtein-label>
                 <div class="ven-230__control-inline">
-                  <xtein-select
+                  <xtein-lookup
                     id="ven-230-moneda"
+                    ariaLabel="Moneda"
+                    placeholder="Moneda"
+                    searchPlaceholder="Buscar…"
                     [items]="$any(monedasOptions())"
-                    displayExpr="MONEDA"
                     valueExpr="ID_MONEDA"
-                    placeholder="Seleccionar..."
+                    displayExpr="DESCRIPCION"
+                    [columns]="currencyColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_MONEDA"
                     [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
-                  </xtein-select>
+                  </xtein-lookup>
                 </div>
               </div>
 
@@ -258,7 +263,21 @@
                   ADC / Vendedor
                 </xtein-label>
                 <div class="ven-230__control-inline">
-                  <xtein-select id="ven-230-id-adc" [items]="sellers()" displayExpr="NOMBRE_COMPLETO" valueExpr="ID_ADC" [searchEnabled]="true" formControlName="ID_ADC" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
+                  <xtein-lookup
+                    id="ven-230-id-adc"
+                    ariaLabel="ADC / Vendedor"
+                    placeholder="ADC / Vendedor"
+                    searchPlaceholder="Buscar…"
+                    [items]="sellers()"
+                    valueExpr="ID_ADC"
+                    displayExpr="NUM_NOMBRE"
+                    [columns]="sellerColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(500px, 95vw)"
+                    formControlName="ID_ADC"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  >
+                  </xtein-lookup>
                 </div>
               </div>
 
@@ -284,16 +303,21 @@
                   Bodega
                 </xtein-label>
                 <div class="ven-230__control-inline">
-                  <xtein-select
+                  <xtein-lookup
                     id="ven-230-bodega"
+                    ariaLabel="Bodega"
+                    placeholder="Bodega"
+                    searchPlaceholder="Buscar…"
                     [items]="$any(bodegasOptions())"
-                    displayExpr="NOMBRE"
-                    valueExpr="ID_BODEGA"
-                    placeholder="Seleccionar..."
+                    valueExpr="ID_UN_BODEGA"
+                    displayExpr="BODEGA_LABEL"
+                    [columns]="warehouseColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(650px, 95vw)"
                     formControlName="ID_UN_BODEGA"
                     [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
-                  </xtein-select>
+                  </xtein-lookup>
                 </div>
               </div>
 
@@ -326,16 +350,21 @@
                   Condición / Lista
                 </xtein-label>
                 <div class="ven-230__control-inline">
-                  <xtein-select
+                  <xtein-lookup
                     id="ven-230-condicion"
+                    ariaLabel="Condición / Lista"
+                    placeholder="Condición/Lista"
+                    searchPlaceholder="Buscar…"
                     [items]="$any(condicionesOptions())"
-                    displayExpr="CONDICION"
                     valueExpr="ID_CONDICION"
-                    placeholder="Condición"
+                    displayExpr="ID_CONDICION"
+                    [columns]="conditionColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_CONDICION"
                     [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
-                  </xtein-select>
+                  </xtein-lookup>
                 </div>
               </div>
 
