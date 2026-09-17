@@ -91,8 +91,8 @@
                 Documento del Cliente
               </xtein-label>
               <div class="ven-230__control-inline">
-                <xtein-lookup id="ven-230-id-cliente" ariaLabel="Documento del Cliente" [items]="clients()"
-                  valueExpr="ID_CLIENTE" displayExpr="ID_CLIENTE" searchPlaceholder="Buscar documento o nombre…" [columns]="clientColumns" [required]="true"
+                <xtein-lookup id="ven-230-id-cliente" ariaLabel="Documento del Cliente" placeholder="Documento" [items]="clients()"
+                  valueExpr="ID_CLIENTE" displayExpr="ID_CLIENTE" searchPlaceholder="Buscar…" [columns]="clientColumns" [required]="true"
                   formControlName="ID_CLIENTE" [readOnly]="readOnly() || headerLocked() || itemPending()" />
               </div>
             </div>
@@ -216,17 +216,22 @@
                   Unidad de Negocio
                 </xtein-label>
                 <div class="ven-230__control-inline">
-                  <xtein-select
+                  <xtein-lookup
                     id="ven-230-id-un"
+                    ariaLabel="Unidad de Negocio"
+                    placeholder="Unidad de Negocio"
+                    searchPlaceholder="Buscar…"
                     [items]="$any(unidadesNegocioOptions())"
-                    displayExpr="NOMBRE"
                     valueExpr="ID_UN"
-                    placeholder="Seleccionar..."
+                    displayExpr="UN_NOMBRE"
+                    [columns]="unitColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(480px, 95vw)"
                     formControlName="ID_UN_ITEM"
                     [required]="true"
                     [readOnly]="readOnly() || headerLocked() || itemPending()"
                   >
-                  </xtein-select>
+                  </xtein-lookup>
                 </div>
               </div>
 

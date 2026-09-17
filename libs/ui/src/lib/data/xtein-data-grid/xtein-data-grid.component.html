@@ -4,10 +4,11 @@
   (onRowClick)="rowClick.emit($event)" (onKeyDown)="keyDown($event)">
   <dxo-selection [mode]="selectionMode" selectAllMode="allPages" />
   <dxo-editing mode="cell" [allowUpdating]="allowUpdating" />
-  <dxo-search-panel [visible]="searchEnabled" [placeholder]="searchPlaceholder" />
+  <dxo-search-panel [visible]="searchEnabled" [placeholder]="searchPlaceholder" [width]="searchWidth" />
   <dxo-filter-row [visible]="filterEnabled" /><dxo-header-filter [visible]="filterEnabled" />
+  <dxo-scrolling [mode]="scrollingMode" />
   <dxo-paging [pageSize]="pageSize" />
-  <dxo-pager [visible]="true" [showPageSizeSelector]="true" [allowedPageSizes]="allowedPageSizes" [showInfo]="true" [showNavigationButtons]="true" />
+  <dxo-pager [visible]="showPager" [showPageSizeSelector]="true" [allowedPageSizes]="allowedPageSizes" [showInfo]="true" [showNavigationButtons]="true" />
   <div *dxTemplate="let cell of 'xteinGroup'">
     @if (groupTemplate) { <ng-container [ngTemplateOutlet]="groupTemplate" [ngTemplateOutletContext]="{$implicit:cell}" /> }
     @else { {{cell.text}} }

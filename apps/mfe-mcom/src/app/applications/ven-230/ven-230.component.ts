@@ -1,5 +1,5 @@
 import { XteinLookupComponent } from '@xtein/ui';
-import { Ven230ClientColumns } from './constants/ven-230-ui.constants';
+import { Ven230ClientColumns, Ven230UnitColumns } from './constants/ven-230-ui.constants';
 import { XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent } from '@xtein/ui';
 import { Ven230ElectronicQrEndpoint } from './constants/ven-230-electronic.constants';
 import { XteinVen230SelectionComponent } from './components/xtein-ven230-selection/xtein-ven230-selection.component';
@@ -129,6 +129,7 @@ import {
 export class Ven230Component
   implements OnInit, OnDestroy {
   readonly clientColumns = Ven230ClientColumns;
+  readonly unitColumns = Ven230UnitColumns;
 
 
   readonly applicationId =
@@ -778,7 +779,7 @@ export class Ven230Component
       this.clients.set(clients);this.sellers.set(sellers);this.specifications.set([...specs,...moneySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO MONEDA'})),...quantitySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO CANTIDAD'}))]);
       this.defaultUnit=String(defaultUnit[0]?.ID_UN ?? '');
       this.defaultCurrency=String(defaultCurrency[0]?.VALOR_DEFECTO ?? this.spec('ID_MONEDA_DEF')?.VALOR_DEFECTO ?? '');
-      this.dataLists.set({unidadesNegocio:units.map(r=>({ID_UN:String(r.ID_UN ?? ''),NOMBRE:String(r['UN_NOMBRE'] ?? r.NOMBRE ?? r.ID_UN ?? '')})),
+      this.dataLists.set({unidadesNegocio:units.map(r=>({ID_UN:String(r.ID_UN ?? ''),NOMBRE:String(r.NOMBRE ?? r['UN_NOMBRE'] ?? r.ID_UN ?? ''),UN_NOMBRE:String(r['UN_NOMBRE'] ?? `${r.ID_UN} - ${r.NOMBRE ?? ''}`)})),
         monedas:currencies.map(r=>({ID_MONEDA:String(r.ID_MONEDA ?? ''),MONEDA:String(r['DESCRIPCION'] ?? r.ID_MONEDA ?? '')})),
         tiposVenta:saleTypes.map(r=>({TIPO_VENTA:String(r['VALOR2'] ?? ''),DESCRIPCION:String(r['VALOR2'] ?? '')}))});
     }catch(error){this.showError(error);}finally{this.loading.set(false);}

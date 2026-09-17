@@ -1,7 +1,0 @@
-#gridEmpleados {
-  height: 60vh;
-}
-:host ::ng-deep .dx-datagrid-headers table td div.dx-datagrid-text-content {
-    white-space: normal;
-    text-align: center;
-}

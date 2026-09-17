@@ -22,7 +22,11 @@ export class XteinLookupComponent<T extends object = Record<string,unknown>> imp
  @Input() disabled = false;
  @Input() required = false;
  @Input() showClearButton = false;
- readonly dropDownOptions = {width:'min(680px, 95vw)',height:'min(380px, 65dvh)',hideOnParentScroll:true};
+ @Input() dropDownWidth: string | number = 'min(600px, 95vw)';
+ @Input() dropDownHeight: string | number = 'min(320px, 65dvh)';
+ get dropDownOptions(): { width: string | number; height: string | number; hideOnParentScroll: boolean } {
+  return { width: this.dropDownWidth, height: this.dropDownHeight, hideOnParentScroll: true };
+ }
  value: unknown = null;
  opened = false;
  private formDisabled = false;

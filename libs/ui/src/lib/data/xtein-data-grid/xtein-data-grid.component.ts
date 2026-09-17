@@ -23,8 +23,11 @@ export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChang
   @Input() allowUpdating = false;
   @Input() searchEnabled = true;
   @Input() searchPlaceholder = 'Buscar…';
+  @Input() searchWidth: number | string = 160;
   @Input() filterEnabled = true;
   @Input() pageSize = 10;
+  @Input() showPager = true;
+  @Input() scrollingMode: 'standard' | 'virtual' | 'infinite' = 'standard';
   @Input() allowedPageSizes: (number|string)[] = [5,10,20,50,100,'all'];
   @Input() groupTemplate: TemplateRef<unknown> | null = null;
   @Output() selectionChanged = new EventEmitter<XteinGridSelectionEvent<T,K>>();

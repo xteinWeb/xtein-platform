@@ -1,11 +1,12 @@
 <dx-drop-down-box [dataSource]="items" [valueExpr]="valueExpr" [displayExpr]="displayExpr || valueExpr"
- [value]="value" [(opened)]="opened" [disabled]="isDisabled" [readOnly]="readOnly" [showClearButton]="showClearButton"
- [placeholder]="placeholder" stylingMode="filled" [dropDownOptions]="dropDownOptions"
- [inputAttr]="{id:id,'aria-label':ariaLabel,'aria-required':required.toString()}"
- (onValueChanged)="changed($event)" (onFocusOut)="touched()">
- <div *dxTemplate="let data of 'content'" class="lookup-content">
-  <xtein-data-grid [dataSource]="items" [keyExpr]="valueExpr" [columns]="columns" selectionMode="single"
-   [selectedRowKeys]="selectedKeys" [filterEnabled]="false" [pageSize]="10" [searchPlaceholder]="searchPlaceholder"
-   (rowClick)="$event.rowType === 'data' && choose($event.data)" (rowActivated)="choose($event)" />
- </div>
+  [value]="value" [(opened)]="opened" [disabled]="isDisabled" [readOnly]="readOnly" [showClearButton]="showClearButton"
+  [placeholder]="placeholder" stylingMode="filled" [dropDownOptions]="dropDownOptions"
+  [inputAttr]="{id:id,'aria-label':ariaLabel,'aria-required':required.toString()}"
+  (onValueChanged)="changed($event)" (onFocusOut)="touched()">
+  <div *dxTemplate="let data of 'content'" class="lookup-content">
+    <xtein-data-grid [dataSource]="items" [keyExpr]="valueExpr" [columns]="columns" selectionMode="single"
+      [selectedRowKeys]="selectedKeys" [filterEnabled]="false" [pageSize]="10" [searchPlaceholder]="searchPlaceholder"
+      [searchWidth]="160" scrollingMode="virtual" [showPager]="false"
+      (rowClick)="$event.rowType === 'data' && choose($event.data)" (rowActivated)="choose($event)" />
+  </div>
 </dx-drop-down-box>
