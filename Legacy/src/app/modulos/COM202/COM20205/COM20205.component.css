@@ -1,0 +1,6 @@
+.popup-scroll-content {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 8px;
+    overflow-y: scroll; 
+  }

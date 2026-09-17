@@ -1,0 +1,51 @@
+
+<div class="bg-white">
+  <!-- <span style="position: relative; z-index: 100;">
+    <dx-button
+      text="Actualizar Matriz Partes"
+      width="auto"
+      [disabled]="readOnly && _sdatos.DPartes.length > 0"
+      (onClick)="consultarMatrices()"
+    ></dx-button>
+  </span> -->
+  <!-- <div style="margin-top: -20px;" > -->
+  <div>
+    <dx-data-grid
+      #gridPartes
+      id="gridPartes"
+      keyExpr="ID_PARTE"
+      [dataSource]="_sdatos.DPartes"
+      [(selectedRowKeys)]="selectParte"
+      [selection]="{ mode: 'single' }"
+      (onSelectionChanged)="onSelectionParte($event)"
+      [columnAutoWidth]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [rowAlternationEnabled]="true"
+      [showBorders]="true"
+      [allowColumnResizing]="true"
+      columnResizingMode="nextColumn"
+      [showBorders]="true"
+    >
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-search-panel [visible]="true" [width]="250" ></dxo-search-panel>
+      <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+  
+      <dxi-column dataField="ID_PARTE"  caption="Parte" cssClass="clsEncabHis" alignment="left" [width]="130"></dxi-column>
+      <dxi-column dataField="NOMBRE_PARTE"  caption="Nombre" cssClass="clsEncabHis"></dxi-column>
+      <dxi-column dataField="SUBTOTAL" caption="Subtotal" alignment="right" format="#,##0.00"></dxi-column>
+      <dxi-column dataField="CANTIDAD" caption="Cantidad" alignment="right" format="#.00"></dxi-column>
+      <dxi-column dataField="TOTAL" caption="Total" alignment="right" format="#,##0.00"></dxi-column>
+
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="pulldown" matTooltip="Refrescar" (onClick)="operGrid($event,'refrescar')">
+            </dx-button>
+          </div>
+        </dxi-item>
+      </dxo-toolbar>
+  
+    </dx-data-grid>
+  </div>
+</div>

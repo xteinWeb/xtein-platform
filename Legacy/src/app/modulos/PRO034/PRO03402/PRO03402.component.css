@@ -1,0 +1,70 @@
+.card-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.premium-card {
+    border-top: 4px solid #125edc;
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.premium-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.expand-button {
+    background: #f0f4f8;
+    border: 1px solid #d1d9e6;
+    border-radius: 20px;
+    padding: 5px 15px;
+    color: #125edc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.expand-button:hover {
+    background: #125edc;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(18, 94, 220, 0.3);
+}
+
+.grid-container {
+    margin-top: 5px;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: height 0.3s ease-out;
+}
+
+::ng-deep .dx-datagrid-header-panel {
+    padding: 8px;
+    background-color: #f8f9fa;
+}
+
+::ng-deep .dx-datagrid-headers {
+    background-color: #f1f3f5;
+    color: #495057;
+    font-weight: 600;
+}
+
+::ng-deep .dx-datagrid-rows-view .dx-selection.dx-row>td {
+    background-color: rgba(67, 142, 241, 0.1);
+}

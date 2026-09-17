@@ -1,0 +1,69 @@
+<dx-popup
+  #popUpEmail
+  id="popUpEmail"
+  [maxWidth]="725"
+  [minWidth]="680"
+  [height]="450"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="false"
+  [(visible)]="popupVisible"
+  (onShown)="onShown($event)"
+  (onHidden)="onHidden($event)"
+  (onInitialized)="onInitializedPopUp($event)" 
+
+>
+<div *dxTemplate="let data of 'content'">
+    <form (submit)="handleSubmit($event)">
+        <dx-form
+            id="form"
+            [formData]="DEnvioCorreo"
+            [readOnly]="isFormReadOnly"
+            labelLocation="top"
+            [showColonAfterLabel]="false">
+            <dxi-item 
+                itemType="group" 
+                caption="Envio correo"
+                colCount="2" >
+                <dxi-item dataField="ORIGEN">
+                    <dxo-label text="Envía"></dxo-label>
+                </dxi-item>
+                <dxi-item dataField="ORIGEN_EMAIL">
+                    <dxo-label text="email" ></dxo-label>  
+                    <dxi-validation-rule
+                        type="email"
+                        message="No es un correo válido">
+                    </dxi-validation-rule>
+                </dxi-item>
+                <dxi-item dataField="DESTINO">
+                    <dxo-label text="Recibe"></dxo-label>
+                </dxi-item>
+                <dxi-item dataField="DESTINO_EMAIL">
+                    <dxo-label text="email" ></dxo-label>  
+                    <dxi-validation-rule
+                        type="email"
+                        message="No es un correo válido">
+                    </dxi-validation-rule>
+                </dxi-item>
+                <dxi-item dataField="ASUNTO" colSpan="2">
+                    <dxo-label text="Asunto"></dxo-label>
+                </dxi-item>
+                <dxi-item 
+                    dataField="NOTA"
+                    editorType="dxTextArea"
+                    colSpan="2">
+                </dxi-item>
+            </dxi-item>
+
+            <dxi-item 
+                itemType="button"
+                horizontalAlignment="center"
+                [buttonOptions]="submitButtonOptions">
+            </dxi-item>
+        </dx-form>
+
+    </form>
+</div>
+</dx-popup>

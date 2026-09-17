@@ -1,0 +1,99 @@
+<div class="container-uno-app xt-texteditor-clear">
+  <div class="flex-container">
+    <dx-drop-down-box 
+      #dropDownProyecto
+      id="dropDownProyecto"
+      class="contain-name-proyect"
+      [value]="selectProyecto"
+      valueExpr="ID_GESTION"
+      displayExpr="NOMBRE"
+      placeholder="Seleccione Proyecto..."
+      [showClearButton]="true"
+      [(opened)]="openProyecto"
+      [dataSource]="DProyectos"
+      [dropDownOptions]="{width:450}"
+      columnResizingMode="widget"
+      [inputAttr]="{name: 'NOMBRE', style: 'font-size: 20px; font-weight: 700; text-transform: uppercase; padding: 6px 11px 4px;'}"
+    >
+      <div id="containerGListaEmple" *dxTemplate="let data of 'content'">
+        <div class="button_toolbar-flotante">
+          <dx-button (onClick)="valoresObjetos('proyectos', '')">
+            <i class="icon-refrescar"></i>
+          </dx-button>
+        </div>
+        <dx-data-grid
+          #GListaEmple
+          height="100%"
+          width="100%"
+          class="xt-selectbox xt-serch-box"
+          keyExpr="ID_GESTION"
+          [dataSource]="DProyectos"
+          [(selectedRowKeys)]="selectProyecto"
+          [selection]="{ mode: 'single' }"
+          [columnAutoWidth]="true"
+          [allowColumnResizing]="true"
+          [columnMinWidth]="50"
+          [focusedRowEnabled]="true"
+          [hoverStateEnabled]="true"
+          (onToolbarPreparing)="onToolbarPreparing($event)"
+          (onCellPrepared)="onCellPrepared($event)"
+        >
+          <dxo-scrolling mode="virtual"></dxo-scrolling>
+          <dxo-search-panel [visible]="true" [width]="300"></dxo-search-panel>
+          <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+
+          <dxi-column dataField="ID_GESTION"  caption="ID" cssClass="clsEncabHis" [width]="80"></dxi-column>
+          <dxi-column dataField="NOMBRE"  caption="Nombre" cssClass="clsEncabHis" [width]="150"></dxi-column>
+          <dxi-column dataField="RESPONSABLE"  caption="Responsable" cssClass="clsEncabHis" cellTemplate="temResponsable" [width]="130"></dxi-column>
+          <dxi-column dataField="ESTADO"  caption="Estado" cssClass="clsEncabHis" [width]="80"></dxi-column>
+
+          <!-- TEMPLATES -->
+          <div id="temResponsable" *dxTemplate="let cellInfo of 'temResponsable'" class="temResponsable" >
+            <div *ngFor="let item of cellInfo.data.RESPONSABLE">
+              <!-- Varios responsables -->
+              <div *ngIf="cellInfo.data.RESPONSABLE.length > 1" >
+                <span class="avatar-content-name" (mouseover)="toggleToolTip(item, cellInfo)" (mouseout)="toggleToolTip(item, cellInfo)">
+                  <span [id]="'USER-'+item.ID_RESPONSABLE" matTooltip="{{ item.NOMBRE }}" >{{ item.iconNameUser }}</span>
+                </span>
+              </div>
+              <!-- Un responsable -->
+              <div *ngIf="cellInfo.data.RESPONSABLE.length === 1" >
+                <div style="display: flex; align-items: center; width: 75%;">
+                  <span class="avatar-content-name" style="width: 40% !important;"  (mouseover)="toggleToolTip(item, cellInfo)" (mouseout)="toggleToolTip(item, cellInfo)">
+                    <span [id]="'USER-'+item.ID_RESPONSABLE" matTooltip="{{ item.NOMBRE }}">{{ item.iconNameUser }}</span>
+                  </span>
+                  <span style="margin-left: 10px; text-overflow: ellipsis; overflow: hidden;"> {{ item.NOMBRE }} </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </dx-data-grid>
+      </div>
+    </dx-drop-down-box>
+    <span class="xt-text-sm-muted">{{ tipo_proyect }}</span>
+  </div>
+  <div>
+    <i class="icon-divisor-light divisorGesPro"></i>
+  </div>
+  <div>
+    <dx-button
+      id="buttonDropdown"
+      type="success"
+      height="100%"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      <div class="contain-buttom white-text">
+        <span class="mx-2">Nuevo</span>
+        <a class="dropdown-toggle"></a>
+      </div>
+    </dx-button>
+    <ul class="dropdown-menu dropdown-menu-xt">
+      <li *ngFor="let item of DProyectos_new">
+        <i class="{{ item.Icon }}" style="padding-left: 10px;"></i>
+        <span style="margin-left:10px;" >{{ item.Name }}</span>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+/*
+::ng-deep g.dxdi-main > g:nth-child(2) > g > g.shape:hover  { 
+    rect {
+        stroke: rgb(229, 133, 253) !important; 
+        fill: rgb(224, 204, 236) !important; 
+    }
+    text {
+        fill: rgb(229, 133, 253) !important; 
+    }
+}*/
+
+::ng-deep #diagPartesxxxxx {
+    height: 650px;
+}
+   
+::ng-deep #diagPartesXXXXXX svg.dxdi-canvas.dxdi-touch-action {
+    height: 650px !important;
+}
+
+::ng-deep .p-toolbar {
+    padding: 0.2rem;
+} 
+::ng-deep .dx-field-item {  
+    &.dx-label-v-align {  
+      .dx-invalid-message {  
+        &.dx-overlay-wrapper {  
+          top: 22px !important;
+          max-width: 1200px !important;
+          width: 1200px !important;
+          transform: translate(0px, 0px) !important;  
+        }  
+      }  
+    }  
+  }  
+  
+::ng-deep .dx-overlay-content .dx-invalid-message-content .dx-resizable {
+    max-width: 1200px !important;
+    width: 1200px !important;
+}
+  
+
+// HIGHLIGHT ELEMENT STYLES
+::ng-deep dx-diagram.highlight-is-active {
+    pointer-events:  none;
+}
+  
+::ng-deep .highlight {
+    opacity: 0;
+    animation: rectFade 1s cubic-bezier(0.645, 0.045, 0.355, 1) infinite;
+    /*rect {
+        stroke: rgb(245, 138, 88) !important; 
+        fill: rgb(245, 242, 104) !important; 
+    }
+    text {
+        fill: rgb(245, 138, 88) !important; 
+    }*/
+}
+
+
+::ng-deep #btnCerrarLDP {
+    margin-top: 10px;
+}
+::ng-deep #btnCancelarLDP {
+    margin-top: 10px;
+}
+::ng-deep #btnCerrarLDP > div > span {
+    text-transform: capitalize;
+}
+::ng-deep #btnCancelarLDP > div > span {
+    text-transform: capitalize;
+}
+  
+::ng-deep #GDatosDP .dx-toolbar .dx-texteditor {  
+    width: 100%!important;  
+}  
+
+::ng-deep #GDatosDP .dx-toolbar .dx-toolbar-after {  
+    padding-left: 0px;  
+    width: 100%!important;  
+}  
+
+::ng-deep #GDatosDP .dx-datagrid-search-panel {  
+    margin-left: 0px;  
+}  

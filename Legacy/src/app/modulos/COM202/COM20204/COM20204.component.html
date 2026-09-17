@@ -1,0 +1,53 @@
+<!-- Sub-Menú de opciones -->
+<dx-popup
+    width="800"
+    [height]="'auto'"
+    [showTitle]="false"
+    title="Log histórico de la Orden de compra"
+    [hideOnOutsideClick]="false"
+    [showCloseButton]="true"
+    (onShown)="onShown($event)"
+    (onHidden)="onHidden($event)"
+    (onInitialized)="onInitializedPopUp($event)" 
+    (onResizeEnd)="onResizeEnd($event)"
+    [(visible)]="visiblePopup">
+
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonAceptar"
+    >
+    </dxi-toolbar-item>
+
+    <div *dxTemplate="let data of 'content'">
+        <dx-data-grid
+            #gridLog
+            id="gridLog"
+            class="xt-datagrid"
+            noDataText="" 
+            [dataSource]="DLogOrdenCompra"
+            keyExpr="ITEM"
+            [allowColumnResizing]="true"
+            columnResizingMode="nextColumn"
+            [showBorders]="true"
+            [focusedRowEnabled]="true"
+        >   
+            <dxi-column dataField="FECHA"
+                caption="Fecha" dataType="date" format="yyyy/MM/dd">
+            </dxi-column>
+            <dxi-column dataField="HORA"
+                caption="Hora"  dataType="date" format="HH:mm aa">
+            </dxi-column>
+            <dxi-column dataField="EVENTO" caption="Evento" >
+            </dxi-column>
+            <dxi-column dataField="USUARIO" caption="Usuario" >
+            </dxi-column>
+            <dxi-column dataField="DETALLE_EVENTO" caption="Detalle" >
+            </dxi-column>
+        </dx-data-grid>
+    
+    </div>
+
+</dx-popup>
+

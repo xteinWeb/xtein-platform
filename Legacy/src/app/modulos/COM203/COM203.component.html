@@ -1,0 +1,685 @@
+<div class="row gx-3">
+    <div class="col-12">
+       <div class="card-content">
+        <div>
+            <dx-form
+                #formMovimientos
+                id="formMovimientos"
+                labelLocation="top"
+                [formData]="FMovimientos"
+                [readOnly]="readOnlyForm"
+                [colCount]="2"
+                labelLocation="left"
+                >
+                <dxi-item caption="Identificación" itemType="group" >
+
+                    <dxi-item itemType="group" colCount="2" >
+
+                        <dxi-item dataField="MOVIMIENTO" >
+                            <dxo-label text="Movimiento"></dxo-label>
+                            <div *dxTemplate>
+                                <dx-select-box
+                                    #dxOcupacion
+                                    id="dxOcupacion"
+                                    [dataSource]="DListaMovimientos"
+                                    [readOnly]="readOnly"
+                                    displayExpr="MOVIMIENTO"
+                                    valueExpr="MOVIMIENTO"
+                                    [(value)]="FMovimientos.MOVIMIENTO"
+                                    (onValueChanged)="onSeleccMovimiento($event)"
+                                >
+                                </dx-select-box>
+                            </div>
+                        </dxi-item>
+
+                        <dxi-item *ngIf="FMovimientos.MOVIMIENTO === 'TRASLADO'" >
+                        </dxi-item>
+                        <dxi-item dataField="TIPO" *ngIf="FMovimientos.MOVIMIENTO !== 'TRASLADO'" >
+                            <dxo-label text="Tipo"></dxo-label>
+                            <div *dxTemplate>
+                                <dx-select-box
+                                    #dxTiposMov
+                                    id="dxTiposMov"
+                                    [dataSource]="DListaTiposMov"
+                                    [readOnly]="readOnly"
+                                    displayExpr="TIPO"
+                                    valueExpr="TIPO"
+                                    [(value)]="FMovimientos.TIPO"
+                                    [acceptCustomValue]="readOnly"
+                                    (onValueChanged)="onSeleccTipo($event)"
+                                >
+                                </dx-select-box>
+                            </div>
+                        </dxi-item>
+
+                        <dxi-item dataField="DOCUMENTO"
+                            editorType="dxSelectBox"
+                            [editorOptions]="{placeholder:'Documento'}"
+                        >
+                            <dxo-label text="Documento"></dxo-label>
+                            <div *dxTemplate>
+                                <dx-select-box
+                                    #xs_DOCUMENTO
+                                    id="xs_DOCUMENTO"
+                                    [dataSource]="DDocumentos"
+                                    [(value)]="FMovimientos.DOCUMENTO"
+                                    [searchEnabled]="true"
+                                    displayExpr="DOCUMENTO"
+                                    valueExpr="DOCUMENTO"
+                                    searchMode="contains"
+                                    [acceptCustomValue]="true"
+                                    [readOnly]="readOnly"
+                                    [inputAttr]="{ 'style': 'color: black; ' +
+                                                 'font-weight: bold; ' +
+                                                 'font-size: 16px; ' +
+                                                 'text-transform: uppercase' }"
+                                    [dropDownOptions]="dropDownOptions"
+                                    (onValueChanged)="onSeleccDocumento($event)"
+                                >
+                                </dx-select-box>
+                            </div>
+                        </dxi-item>
+
+                        <dxi-item dataField="FECHA" editorType="dxDateBox">
+                            <div *dxTemplate>
+                                <dx-date-box
+                                    type="date"
+                                    [readOnly]="readOnly"
+                                    [value]="FMovimientos.FECHA"
+                                    (onValueChanged)="onChangeFecha($event)">
+                                </dx-date-box>
+                            </div>
+                            <dxo-label text="Fecha"></dxo-label>
+                        </dxi-item>
+
+                    </dxi-item>
+
+                </dxi-item>
+
+                <dxi-item caption="Estado y Usuario" itemType="group" >
+
+                    <dxi-item itemType="group" colCount="2" >
+
+                        <dxi-item dataField="FECHA_REGISTRO"editorType="dxDateBox">
+                            <div *dxTemplate>
+                                <dx-date-box
+                                    type="date"
+                                    [readOnly]="true"
+                                    [value]="FMovimientos.FECHA_REGISTRO"
+                                    (onValueChanged)="onChangeFechaReg($event)">
+                                </dx-date-box>
+                            </div>
+                            <dxo-label text="Fecha registro"></dxo-label>
+                        </dxi-item>
+
+                        <dxi-item dataField="ESTADO">
+                            <dxo-label text="Estado"></dxo-label>
+                            <div *dxTemplate>
+                                <dx-select-box
+                                    #dxEstado
+                                    id="dxEstado"
+                                    [dataSource]="['ANULADO','REGISTRADO','AUTORIZADO','RECHAZADO','PARCIAL']"
+                                    [readOnly]="true"
+                                    [acceptCustomValue]="readOnly"
+                                    [(value)]="FMovimientos.ESTADO"
+                                    [elementAttr]="{ style: setBackgroundStyle(FMovimientos.ESTADO) }"
+                                >
+                                </dx-select-box>
+                            </div>
+                        </dxi-item>
+
+                        <dxi-item dataField="HORA" [editorOptions]="{ readOnly: true }">
+                            <dxo-label text="Hora"></dxo-label>
+                            <div *dxTemplate>
+                                <dx-date-box
+                                    type="datetime"
+                                    [readOnly]="true"
+                                    displayFormat="hh:mm:ss"
+                                    [value]="FMovimientos.HORA" >
+                                </dx-date-box>
+                            </div>
+                        </dxi-item>
+
+                        <dxi-item dataField="USUARIO" [editorOptions]="{ readOnly: true }" >
+                            <dxo-label text="Usuario"></dxo-label>
+                        </dxi-item>
+
+                    </dxi-item>
+
+                </dxi-item>
+
+            </dx-form>
+        </div>
+        <br/>
+    </div>
+</div>
+
+<div class="row gx-3" *ngIf="FMovimientos.MOVIMIENTO === 'ENTRADA' &&
+                            FMovimientos.TIPO ? !FMovimientos.TIPO.match('TRASLADO|DEPOSITO') : '' ">
+    <div class="col-12">
+       <div class="card-content">
+            <div>
+                <app-COM20302
+                    [events]="eventsSubjectEntrada.asObservable()"
+                    (onRespuestaEntrada)="onRespuestaEntrada($event)"
+                    [(DMovimientos)]="FMovimientos"
+                ></app-COM20302>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FMovimientos.TIPO ? FMovimientos.TIPO.match('TRASLADO|DEVOLUCION|DEPOSITO') : '' "> -->
+<div class="row gx-3" *ngIf="FMovimientos.MOVIMIENTO === 'TRASLADO' ||
+                             FMovimientos.TIPO ? !FMovimientos.TIPO.match('ORDEN DE COMPRA') : '' ">
+    <div class="col-12">
+       <div class="card-content">
+            <div>
+                <app-COM20304
+                    [events]="eventsSubjectTraslado.asObservable()"
+                    (onRespuestaTraslado)="onRespuestaTraslado($event)"
+                    [(DMovimientos)]="FMovimientos"
+                ></app-COM20304>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row gx-3" *ngIf="FMovimientos.MOVIMIENTO !== ''">
+    <div class="col-12">
+       <div class="card-content">
+            <div>
+                <app-COM20301
+                    [events]="eventsSubjectItems.asObservable()"
+                    (onRespuestaItems)="onRespuestaItems($event)"
+                    [(DMovimientos)]="FMovimientos"
+                    [(DMovimientosGrav)]="DMovimientosGrav"
+                    [(DMovimientosGravItems)]="DMovimientosGravItems"
+                ></app-COM20301>
+            </div>
+
+            <div style="right: 0; width: 100%;" *ngIf="especVisibleTotales">
+                <app-COM20305
+                    [events]="eventsSubjectTotales.asObservable()"
+                    (onRespuestaTotales)="onRespuestaTotales($event)"
+                    [(DMovimientos)]="FMovimientos"
+                ></app-COM20305>
+            </div>
+        </div>
+    </div>
+</div>
+
+<dx-popup
+  #popupGesproHistorial
+  id="popupGesproHistorial"
+  width="50%"
+  height="60%"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="false"
+  title="Etiquetas de movimiento."
+  [(visible)]="visiblePopupEtiquetas"
+>
+    <dxo-position at="center"> </dxo-position>
+    <div *dxTemplate="let data of 'content'" >
+        <dx-data-grid
+            #gridProductos
+            id="gridProductos"
+            width="100%"
+            height="90%"
+            keyExpr="ITEM"
+            noDataText="No hay datos que mostrar"
+            columnResizingMode="nextColumn"
+            [showBorders]="true"
+            [focusedRowEnabled]="true"
+            [hoverStateEnabled]="true"
+            [allowColumnResizing]="true"
+            [rowAlternationEnabled]="true"
+            [dataSource]="DGProudctosMovEtiquetas"
+        >
+            <dxo-editing
+                mode="cell"
+                [useIcons]="false"
+                [allowUpdating]="true"
+                [allowDeleting]="false"
+                [allowAdding]="false"
+            >
+                <dxo-texts
+                    confirmDeleteMessage="">
+                </dxo-texts>
+            </dxo-editing>
+
+            <dxi-column dataField="ITEM"
+                [visible]="false">
+            </dxi-column>
+
+            <dxi-column dataField="PRODUCTO"
+                caption="Producto"
+                width="120"
+                [allowEditing]="false"
+            ></dxi-column>
+
+            <dxi-column dataField="NOMBRE_PRODUCTO"
+                caption="Nombre"
+                [allowEditing]="false"
+            ></dxi-column>
+
+
+            <dxi-column dataField="UDM_PRESENTACION"
+                caption="UM Pres."
+                width="85"
+                [allowEditing]="false"
+            ></dxi-column>
+
+            <dxi-column dataField="CANTIDAD"
+                caption="Cantidad"
+                width="90"
+                alignment="right"
+                dataType="number"
+                format="#,##0.00"
+                [allowEditing]="false"
+            ></dxi-column>
+
+            <dxi-column dataField="UDM_EQUIV"
+                caption="UM. Equiv"
+                width="85"
+                [allowEditing]="false"
+            ></dxi-column>
+
+            <dxi-column dataField="CANTIDAD_REAL"
+                caption="Cant. Equiv"
+                width="85"
+                alignment="right"
+                dataType="number"
+                format="#,##0.00"
+                [allowEditing]="false"
+            ></dxi-column>
+
+            <dxi-column dataField="CANTIDAD_QR"
+                caption="Cant. QR"
+                width="90"
+                alignment="right"
+                dataType="number"
+                format="#,##0.00"
+                [allowEditing]="true"
+                editCellTemplate="cellTemplateCantidadQR"
+            ></dxi-column>
+
+            <div *dxTemplate="let cellInfo of 'cellTemplateCantidadQR'">
+                <dx-number-box
+                    format="#,##0"
+                    [showSpinButtons]="true"
+                    [step]="1"
+                    [min]="0"
+                    [max]="cellInfo.data.CANTIDAD"
+                    [value]="cellInfo.value"
+                    (onValueChanged)="onCambioCantidadQR(cellInfo, $event)"
+                ></dx-number-box>
+            </div>
+
+        </dx-data-grid>
+
+        <div style="width: 100%; height: 15%; display: flex; justify-content: flex-end; padding: 5px; align-items: center;" >
+            <dx-button
+                id="btnAceptarPT"
+                stylingMode="contained"
+                text="Aceptar"
+                type="default"
+                [width]="100"
+                (onClick)="aceptarBottom($event, 'aceptar')"
+            ></dx-button>
+            <dx-button
+                id="btnCancelarPT"
+                stylingMode="contained"
+                text="Cancelar"
+                type="normal"
+                [width]="110"
+                [style.margin-left]="'20px'"
+                (onClick)="aceptarBottom($event, 'cancelar')"
+            ></dx-button>
+        </div>
+
+    </div>
+</dx-popup>
+
+
+
+
+
+
+
+
+
+<app-filtrobusq
+  [events]="eventsSubjectFiltro.asObservable()"
+  (onRespuestaSelecc)="onRespuestaFiltro($event)"
+></app-filtrobusq>
+
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false">
+</dx-load-panel>
+
+<app-geninformes
+  [events]="eventsSubjectInformes.asObservable()"
+></app-geninformes>
+
+
+
+<dx-popup
+  #modalRecepcion
+  id="modalRecepcion"
+  title="Información de Proveedores y Productos"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="false"
+  [visible]="visiblePupupRecepcion"
+>
+  <dxi-toolbar-item
+    toolbar="bottom"
+    location="before"
+  >
+    <div style="display: flex; align-items: center;" >
+      <dx-button
+        id="button"
+        type="danger"
+        (onClick)="closePopUpRecepcion()"
+      >
+        <i class="icon-cancelar-sl" style="margin-right: 5px;"></i>
+        <span style="font-weight: bold;">Cancelar</span>
+      </dx-button>
+    </div>
+  </dxi-toolbar-item>
+  <dxi-toolbar-item
+    toolbar="bottom"
+    location="after"
+  >
+    <dx-button
+      id="button"
+      type="success"
+      (onClick)="guardarRecepcion()"
+    >
+      <i class="icon-aceptar-sl" style="margin-right: 5px;"></i>
+      <span style="font-weight: bold;">Guardar</span>
+    </dx-button>
+  </dxi-toolbar-item>
+  <dxo-position at="center" > </dxo-position>
+  <div *dxTemplate="let data of 'content'">
+    <div >
+
+        <!-- Campos antes de la grilla -->
+        <div class="row gx-3" style="margin-bottom: 20px;">
+            <div class="col-4">
+                <dx-form
+                    labelLocation="top"
+                    [colCount]="1"
+                >
+                    <dxi-item dataField="proveedor">
+                        <dxo-label text="Proveedor"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-text-box
+                                [value]="proveedorSeleccionado"
+                                [readOnly]="true"
+                                stylingMode="outlined"
+                            ></dx-text-box>
+                        </div>
+                    </dxi-item>
+                </dx-form>
+            </div>
+            <div class="col-4">
+                <dx-form
+                    labelLocation="top"
+                    [colCount]="1"
+                >
+                    <dxi-item dataField="ordenCompra">
+                        <dxo-label text="Orden de Compra"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-select-box
+                                [dataSource]="DOrdenesCompra"
+                                displayExpr="DESCRIPCION"
+                                valueExpr="CODIGO"
+                                [(value)]="ordenCompraSeleccionada"
+                                [searchEnabled]="true"
+                                searchMode="contains"
+                                placeholder="Seleccione una orden de compra"
+                                stylingMode="outlined"
+                                (onValueChanged)="onOrdenCompraChange($event)"
+                            ></dx-select-box>
+                        </div>
+                    </dxi-item>
+                </dx-form>
+            </div>
+            <div class="col-4">
+                <dx-form
+                    labelLocation="top"
+                    [colCount]="1"
+                >
+                    <dxi-item dataField="bodega">
+                        <dxo-label text="Bodega"></dxo-label>
+                        <div *dxTemplate>
+                            <dx-text-box
+                                [value]="bodegaSeleccionada"
+                                [readOnly]="true"
+                                stylingMode="outlined"
+                            ></dx-text-box>
+                        </div>
+                    </dxi-item>
+                </dx-form>
+            </div>
+        </div>
+
+        <div class="row gx-3 mt-3" >
+            <div class="col-12">
+                <div class="card-content">
+                    <div class="card-body">
+                        <dx-data-grid
+                            #gridProveedoresProductos
+                            id="gridProveedoresProductos"
+                            width="100%"
+                            height="500px"
+                            keyExpr="NOMBRE_PRODUCTO"
+                            noDataText="No hay datos que mostrar"
+                            columnResizingMode="nextColumn"
+                            [showBorders]="true"
+                            [focusedRowEnabled]="true"
+                            [hoverStateEnabled]="true"
+                            [allowColumnResizing]="true"
+                            [rowAlternationEnabled]="true"
+                            [dataSource]="DProveedoresProductos"
+                            (onSelectionChanged)="onSelectionChanged($event)"
+                        >
+                            <!-- Configuración de edición -->
+                            <dxo-editing
+                                mode="cell"
+                                [useIcons]="true"
+                                [allowUpdating]="true"
+                                [allowDeleting]="false"
+                                [allowAdding]="false"
+                            >
+                            </dxo-editing>
+
+                            <!-- Configuración de selección múltiple -->
+                            <dxo-selection
+                                mode="multiple"
+                                [selectAllMode]="'allPages'"
+                                [showCheckBoxesMode]="'always'"
+                            ></dxo-selection>
+
+                            <!-- Configuración de agrupamiento -->
+                            <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
+
+                            <!-- Configuración de filtrado -->
+                            <dxo-filter-row [visible]="true"></dxo-filter-row>
+                            <dxo-header-filter [visible]="true"></dxo-header-filter>
+
+                            <!-- Configuración de paginación -->
+                            <dxo-paging [pageSize]="20"></dxo-paging>
+                            <dxo-pager
+                                [showPageSizeSelector]="true"
+                                [allowedPageSizes]="[10, 20, 50, 100]"
+                                [showInfo]="true"
+                                [showNavigationButtons]="true"
+                            ></dxo-pager>
+
+                            <dxi-column
+                                dataField="NOMBRE"
+                                caption="Nombre"
+                                width="200"
+                                [allowEditing]="false"
+                                [groupIndex]="0"
+                                [showWhenGrouped]="false"
+                            ></dxi-column>
+
+                            <dxi-column
+                                dataField="FACTURA"
+                                caption="No. Factura"
+                                width="120"
+                                [allowEditing]="false"
+                            ></dxi-column>
+
+                            <!-- Columnas de productos (aparecen cuando se expande el grupo) -->
+                            <dxi-column
+                                dataField="PRODUCTO"
+                                caption="Código Producto"
+                                width="120"
+                                [allowEditing]="false"
+                            ></dxi-column>
+
+                            <dxi-column
+                                dataField="NOMBRE_PRODUCTO"
+                                caption="Producto"
+                                width="250"
+                                [allowEditing]="false"
+                            ></dxi-column>
+
+                            <dxi-column dataField="PRODUCTO_ASOCIADO"
+                                caption="Producto Asociado"
+                                width="200"
+                                [allowEditing]="true"
+                                editCellTemplate="listaProductos1">
+                            </dxi-column>
+
+                            <dxi-column
+                                dataField="CANTIDAD"
+                                caption="Cantidad"
+                                width="100"
+                                alignment="right"
+                                dataType="number"
+                                format="#,##0.00"
+                                [allowEditing]="true"
+                            ></dxi-column>
+
+                            <dxi-column
+                                dataField="VALOR_UNITARIO"
+                                caption="Precio Unit."
+                                width="120"
+                                alignment="right"
+                                dataType="currency"
+                                format="currency"
+                                [allowEditing]="false"
+                            ></dxi-column>
+
+                            <dxi-column
+                                dataField="ITM_TOTAL"
+                                caption="Total"
+                                width="120"
+                                alignment="right"
+                                dataType="currency"
+                                format="currency"
+                                [allowEditing]="false"
+                            ></dxi-column>
+
+                            <!-- Configuración de resumen -->
+                            <!-- <dxo-summary>
+                                <dxi-total-item
+                                    column="CANTIDAD"
+                                    summaryType="sum"
+                                    displayFormat="Total: {0}"
+                                ></dxi-total-item>
+                                <dxi-total-item
+                                    column="ITM_TOTAL"
+                                    summaryType="sum"
+                                    displayFormat="Subtotal: {0}"
+                                    valueFormat="currency"
+                                ></dxi-total-item>
+                                <dxi-total-item
+                                    column="ITM_TOTAL"
+                                    summaryType="sum"
+                                    displayFormat="Total General: {0}"
+                                    valueFormat="currency"
+                                ></dxi-total-item>
+                            </dxo-summary> -->
+
+                            <!-- Template para el dropdown de productos -->
+                            <div *dxTemplate="let cellInfo of 'listaProductos1'">
+                                <dx-drop-down-box
+                                    [dataSource]="DProductos"
+                                    valueExpr="PRODUCTO"
+                                    displayExpr="displayText"
+                                    [value]="cellInfo.value"
+                                    searchEnabled="true"
+                                    placeholder="Seleccione un producto"
+                                    [dropDownOptions]="{ width: 800, height: 400, showTitle: false }"
+                                    contentTemplate="productDropdownTemplate"
+                                    (onValueChanged)="onProductoAsociadoChange($event, cellInfo)"
+                                >
+                                    <div *dxTemplate="let data of 'productDropdownTemplate'">
+                                        <dx-data-grid
+                                            [dataSource]="DProductos"
+                                            keyExpr="PRODUCTO"
+                                            [focusedRowEnabled]="true"
+                                            [hoverStateEnabled]="true"
+                                            [rowAlternationEnabled]="true"
+                                            height="350px"
+                                            [columnAutoWidth]="true"
+                                            [allowColumnResizing]="true"
+                                            (onRowClick)="onSelectProduct($event, cellInfo)"
+                                        >
+                                            <dxo-selection mode="single"></dxo-selection>
+                                            <dxo-filter-row [visible]="true"></dxo-filter-row>
+                                            <dxo-search-panel [visible]="true" placeholder="Buscar producto..."></dxo-search-panel>
+                                            <dxo-paging [pageSize]="10"></dxo-paging>
+                                            <dxo-pager
+                                                [visible]="true"
+                                                [allowedPageSizes]="[10, 20, 50]"
+                                                [showPageSizeSelector]="true"
+                                                [showInfo]="true"
+                                            ></dxo-pager>
+
+                                            <dxi-column
+                                                dataField="PRODUCTO"
+                                                caption="Código"
+                                                width="20%"
+                                            ></dxi-column>
+                                            <dxi-column
+                                                dataField="NOMBRE"
+                                                caption="Nombre del Producto"
+                                                width="80%"
+                                            ></dxi-column>
+                                        </dx-data-grid>
+                                    </div>
+                                </dx-drop-down-box>
+                            </div>
+
+                        </dx-data-grid>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+  </div>
+  <br/>
+</dx-popup>

@@ -1,0 +1,213 @@
+/* Estilos para PRO026 - Gestión de Producción */
+
+.container-fluid {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #3498db;
+}
+
+/* Estilos para la toolbar */
+.dx-toolbar {
+  background-color: #ffffff;
+  border: 1px solid #e3e6f0;
+  border-radius: 0.35rem;
+  padding: 0.5rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.dx-toolbar .dx-button {
+  margin-right: 0.5rem;
+}
+
+/* Estilos para la grid */
+.dx-datagrid {
+  background-color: #ffffff;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: 1px solid #e3e6f0;
+}
+
+.dx-datagrid-headers {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #5a5c69;
+}
+
+/* Estilos para tree-list */
+.dx-treelist {
+  background-color: #ffffff;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: 1px solid #e3e6f0;
+}
+
+.dx-treelist-headers {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #5a5c69;
+}
+
+/* Aumentar altura del header */
+.dx-treelist .dx-header-row {
+  height: 60px !important;
+}
+
+.dx-treelist .dx-header-row .dx-treelist-text-content {
+  line-height: 60px;
+  vertical-align: middle;
+}
+
+.dx-treelist .dx-header-row td {
+  height: 60px !important;
+  vertical-align: middle;
+  padding: 15px 8px;
+}
+
+/* También aplicar a data-grid si es necesario */
+.dx-datagrid .dx-header-row {
+  height: 60px !important;
+}
+
+.dx-datagrid .dx-header-row .dx-datagrid-text-content {
+  line-height: 60px;
+  vertical-align: middle;
+}
+
+.dx-datagrid .dx-header-row td {
+  height: 60px !important;
+  vertical-align: middle;
+  padding: 15px 8px;
+}
+
+.dx-datagrid-header-panel {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+/* Filas alternadas */
+.dx-row-alt {
+  background-color: #f8f9fa;
+}
+
+/* Fila seleccionada */
+.dx-selection.dx-row:not(.dx-row-removed) {
+  background-color: #e3f2fd !important;
+}
+
+/* Hover sobre filas */
+.dx-row:hover:not(.dx-selection) {
+  background-color: #f5f5f5;
+}
+
+/* Estilos para celdas numéricas */
+.dx-datagrid td[aria-describedby*="cantidad"] {
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Estilo para fechas */
+.dx-datagrid td[aria-describedby*="fechaHoraProduccion"] {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+/* Panel de filtros */
+.dx-datagrid-filter-row {
+  background-color: #ffffff;
+}
+
+.dx-datagrid-filter-row input {
+  border: 1px solid #d1d3e2;
+  border-radius: 0.25rem;
+}
+
+/* Paginación */
+.dx-datagrid-pager {
+  background-color: #ffffff;
+  border-top: 1px solid #e3e6f0;
+}
+
+/* Load panel */
+.dx-loadpanel {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.dx-loadpanel-content {
+  border-radius: 0.35rem;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Tooltips */
+.dx-tooltip-wrapper {
+  background-color: #2c3e50;
+  color: #ffffff;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+/* Estilos para botones */
+.dx-button.dx-button-mode-contained {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.dx-button.dx-button-mode-contained:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 0.5rem;
+  }
+  
+  .dx-datagrid {
+    font-size: 0.875rem;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Estilos para estados específicos */
+.cantidad-baja {
+  background-color: #fff3cd !important;
+  border-left: 3px solid #ffc107;
+}
+
+.cantidad-alta {
+  background-color: #d4edda !important;
+  border-left: 3px solid #28a745;
+}
+
+/* Animaciones suaves */
+.dx-datagrid-rowsview .dx-row {
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Estilos para el header filter */
+.dx-header-filter-menu {
+  border-radius: 0.35rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para el search panel */
+.dx-datagrid-search-panel input {
+  border-radius: 0.25rem;
+  border: 1px solid #d1d3e2;
+}
+
+/* Estado de carga de filas */
+.dx-datagrid-content .dx-datagrid-table .dx-row.dx-state-loading {
+  opacity: 0.6;
+}

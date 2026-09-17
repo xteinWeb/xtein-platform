@@ -1,0 +1,61 @@
+::ng-deep .dx-radiogroup .dx-radiobutton {
+  height: 63px !important;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.btns-fecha-plan {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.btn-fecha-plan {
+  flex: 0;
+}
+
+.buttongroup-item.dx-button.dx-button-mode-outlined.dx-item-selected.dx-button-normal.dx-state-hover {
+  background-color: #747474 !important;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.btns_actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  gap: 10px;
+  margin: 20px 0px 0px 2px;
+}
+
+::ng-deep .dx-button.dx-button-success {
+  color: #fff;
+  background-color: #125edc !important;
+  width: 110px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+::ng-deep .dx-button-has-text .dx-button-content {
+  font-size: 12px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.box-count {
+  border: 1px solid #d5def1;
+  width: 70px;
+  height: 40px;
+}
+.box-date {
+  border: 1px solid #d5def1;
+  width: 160px;
+  height: 40px;
+}

@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:host {
+  display: block;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* ─── Variables ─── */
+:root {
+  --tag-bg:          #eaf1fb;
+  --tag-border:      #c2d5f0;
+  --tag-text:        #1a4480;
+  --tag-remove-bg:   transparent;
+  --tag-remove-hover:#1a4480;
+  --tag-remove-color:#5b82b5;
+  --box-border:      #d0d7e3;
+  --box-focus:       #4a90d9;
+  --box-bg:          #ffffff;
+  --add-color:       #3a7bd5;
+  --add-bg-hover:    #f0f5fc;
+  --label-color:     #4a5568;
+  --hint-color:      #9aa5b4;
+  --shell-bg:        #f7f9fc;
+}
+
+/* ─── Label ─── */
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--label-color);
+  margin-bottom: 2px;
+}
+
+
+/* ─── Tag individual ─── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px 0px 13px;
+  background: rgb(116, 213, 243); // var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  border-radius: 4px;
+  color: var(--tag-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  height: 35px; 
+  animation: tagIn 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: background 0.12s, border-color 0.12s;
+  margin-left: 8px;
+
+  &:hover {
+    background: #ddeaf8;
+    border-color: #a8c5ea;
+  }
+
+}
+
+@keyframes tagIn {
+  from { opacity: 0; transform: scale(0.72) translateY(3px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ─── Tag text ─── */
+.tag-text {
+  cursor: default;
+  user-select: none;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Remove button (la X) ─── */
+.tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: none;
+  background: var(--tag-remove-bg);
+  color: var(--tag-remove-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: var(--tag-remove-hover);
+    color: #c70f0f;
+  }
+
+  &:active {
+    transform: scale(0.88);
+  }
+}
+
+/* ─── Add button ─── */
+.tag-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0px 10px 3px 7px;
+  border: 1.5px solid #b0c4de;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--add-color);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  height: 35px; 
+
+  svg {
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  &:hover {
+    background: var(--add-bg-hover);
+    border-color: var(--add-color);
+
+    svg { transform: rotate(90deg); }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+

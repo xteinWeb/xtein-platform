@@ -1,0 +1,313 @@
+<dx-data-grid
+    #gridDirecciones
+    id="gridDirecciones"
+    [dataSource]="DDirecciones"
+    [allowColumnResizing]="true"
+    columnResizingMode="widget"
+    [focusedRowEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [hoverStateEnabled]="true"
+    keyExpr="ID_DIRECCION"
+    noDataText=""
+    [showBorders]="true"
+    (onInitNewRow)="initNewRow($event)"
+    (onRowInserting)="insertingRow($event)"
+    (onRowInserted)="insertedRow($event)"
+    (onRowUpdating)="updatingRow($event)"
+    (onRowUpdated)="updatedRow($event)"
+    (onRowRemoved)="removedRow($event)"
+    (onEditingStart)="onEditingStart($event)"
+    (onEditorPreparing)="onEditorPreparing($event)"
+    (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onRowValidating)="onRowValidating($event)"
+    (onFocusedRowChanged)="onFocusedRowChanged($event)"
+    (onEditCanceled)="onEditCanceled($event)"
+    (onCellClick)="onCellClick($event)"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onContentReady)="onContentReady($event)"
+    >
+
+    <dxo-editing
+        mode="cell"
+        [useIcons]="false" 
+        [allowUpdating]="esEdicion"
+        [allowDeleting]="false"
+        [allowAdding]="esEdicion"
+        >
+        <dxo-texts
+            confirmDeleteMessage="">
+        </dxo-texts>
+    </dxo-editing>      
+    <dxo-selection
+        selectAllMode="allPages"
+        [showCheckBoxesMode]="esVisibleSelecc"
+        mode="multiple">
+    </dxo-selection>
+
+    <dxi-column dataField="ID_DIRECCION"
+        caption="Id. Dir"
+        [allowEditing]="false"
+        width="80"
+    >
+    </dxi-column>
+
+    <dxi-column dataField="TIPO_DIRECCION"
+        caption="Tipo dirección"
+        calculateDisplayValue="TIPO_DIRECCION"
+        editCellTemplate="tempTipoDir">
+    </dxi-column>
+
+    <dxi-column dataField="DOMICILIO"
+        caption="Dirección/Domicilio"
+        calculateDisplayValue="DOMICILIO" >
+    </dxi-column>
+
+    <dxi-column dataField="ID_UBICACION"
+        caption="Ciudad/Municipio"
+        calculateDisplayValue="ID_UBICACION"
+        cellTemplate="cellUbicaciones"
+        editCellTemplate="tempUbicaciones" >
+    </dxi-column>
+
+    <dxi-column dataField="BARRIO"
+        caption="Barrio"
+        calculateDisplayValue="BARRIO"
+        editCellTemplate="tempBarrios" >
+    </dxi-column>
+
+    <dxi-column dataField="DEPENDIENTE"
+        caption="Zona"
+        calculateDisplayValue="DEPENDIENTE"
+        editCellTemplate="tempDependiente" >
+    </dxi-column>
+
+    <dxi-column dataField="REFERENCIA"
+        caption="Referencia" >
+    </dxi-column>
+
+    <dxi-column dataField="CODIGO_POSTAL"
+        caption="Código postal"
+        calculateDisplayValue="CODIGO_POSTAL"
+        editCellTemplate="tempCodPostal" >
+    </dxi-column>
+
+    <div *dxTemplate="let cellInfo of 'tempTipoDir'">
+        <dx-drop-down-box
+            #ddBox
+            [(value)]="cellInfo.value"
+            [inputAttr]="{ 'aria-label': 'Owner' }"
+            valueExpr="TIPO"
+            displayExpr="TIPO"
+            placeholder="Tipo..."
+            [showClearButton]="true"
+            [dataSource]="DTiposDir"
+            [dropDownOptions]="{ width: 400 }"
+        >
+            <div *dxTemplate="let templateData of 'content'">
+                <dx-data-grid
+                    [dataSource]="DTiposDir"
+                    [columns]="['TIPO']"
+                    [selection]="{ mode: 'multiple' }"
+                    [hoverStateEnabled]="true"
+                    [paging]="{ enabled: true, pageSize: 10 }"
+                    [filterRow]="{ visible: true }"
+                    [scrolling]="{ mode: 'virtual' }"
+                    [height]="345"
+                    [(selectedRowKeys)]="gridBoxValue"
+                    (onSelectionChanged)="onSelectionTipoDir($event, cellInfo)"
+                    >
+                </dx-data-grid>
+            </div>
+      </dx-drop-down-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'cellUbicaciones'">
+        <span *ngIf="cellInfo.data.NOMBRE_UBICACION !== ''">{{ cellInfo.data.ID_UBICACION+'; '+cellInfo.data.NOMBRE_UBICACION }}</span> 
+        <span *ngIf="cellInfo.data.NOMBRE_UBICACION == ''"></span> 
+    </div>
+    <div *dxTemplate="let cellInfo of 'tempUbicaciones'">
+        <dx-select-box 
+            #xs_ID_UBICACION
+            id="xs_ID_UBICACION"
+            [dataSource]="DUbicaciones" 
+            [(value)]="cellInfo.data.ID_UBICACION" 
+            valueExpr="ID_UBICACION"
+            displayExpr="ID_UBICACION"
+            [searchEnabled]="true"
+            searchMode="contains"
+            [searchExpr]="['ID_UBICACION', 'NOMBRE']"
+            [dropDownOptions]="dropDownOptions"
+            (onOpened)="onOpenedUbic($event)"
+            (onValueChanged)="onSeleccRowUbic($event, cellInfo, 'ciudad')">
+
+            <div *dxTemplate="let data of 'item'">
+                <div style="width: 20%; float:left">
+                    {{ data.ID_UBICACION }}
+                </div>
+
+                <div style="width: 60%; float:right; 
+                            white-space: nowrap; 
+                            overflow: hidden;
+                            text-overflow: ellipsis; "
+                >
+                    {{ data.NOMBRE }}
+                </div>
+            </div>
+            <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                <div id="btnCompoRefreshSbox">
+                    <dx-button icon="refresh" (onClick)="refreshClickUbic('Ciudad')"></dx-button>
+                </div>
+            </div>
+
+        </dx-select-box>
+
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'tempBarrios'">
+        <dx-select-box 
+            #xs_BARRIO
+            id="xs_BARRIO"
+            [dataSource]="DBarrios" 
+            [(value)]="cellInfo.data.BARRIO" 
+            valueExpr="ID_UBICACION"
+            displayExpr="ID_UBICACION"
+            [searchEnabled]="true"
+            searchMode="contains"
+            [searchExpr]="['ID_UBICACION', 'NOMBRE']"
+            [dropDownOptions]="dropDownOptions"
+            (onOpened)="onOpenedUbic($event)"
+            (onValueChanged)="onSeleccRowUbic($event, cellInfo, 'barrio')">
+
+            <div *dxTemplate="let data of 'item'">
+                <div style="width: 20%; float:left">
+                    {{ data.ID_UBICACION }}
+                </div>
+
+                <div style="width: 60%; float:right; 
+                            white-space: nowrap; 
+                            overflow: hidden;
+                            text-overflow: ellipsis; "
+                >
+                    {{ data.NOMBRE }}
+                </div>
+            </div>
+            <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                <div id="btnCompoRefreshSbox">
+                    <dx-button icon="refresh" (onClick)="refreshClickUbic('Barrio')"></dx-button>
+                </div>
+            </div>
+
+        </dx-select-box>
+
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'tempDependiente'">
+        <dx-select-box 
+            #xs_DEPENDIENTE
+            id="xs_DEPENDIENTE"
+            [dataSource]="DDependientes" 
+            [(value)]="cellInfo.data.DEPENDIENTE" 
+            valueExpr="ID_UBICACION"
+            displayExpr="ID_UBICACION"
+            [searchEnabled]="true"
+            searchMode="contains"
+            [searchExpr]="['ID_UBICACION', 'NOMBRE']"
+            [dropDownOptions]="dropDownOptions"
+            (onOpened)="onOpenedUbic($event)"
+            (onValueChanged)="onSeleccRowUbic($event, cellInfo, 'dependiente')">
+
+            <div *dxTemplate="let data of 'item'">
+                <div style="width: 20%; float:left">
+                    {{ data.ID_UBICACION }}
+                </div>
+
+                <div style="width: 60%; float:right; 
+                            white-space: nowrap; 
+                            overflow: hidden;
+                            text-overflow: ellipsis; "
+                >
+                    {{ data.NOMBRE }}
+                </div>
+            </div>
+            <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                <div id="btnCompoRefreshSbox">
+                    <dx-button icon="refresh" (onClick)="refreshClickUbic('Dependiente')"></dx-button>
+                </div>
+            </div>
+
+        </dx-select-box>
+
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'tempCodPostal'">
+        <dx-select-box 
+            #xs_CODIGO_POSTAL
+            id="xs_CODIGO_POSTAL"
+            [dataSource]="DCodigosPostales" 
+            [(value)]="cellInfo.data.CODIGO_POSTAL" 
+            valueExpr="CODIGO_POSTAL"
+            displayExpr="CODIGO_POSTAL"
+            [searchEnabled]="true"
+            searchMode="contains"
+            [searchExpr]="['CODIGO_POSTAL', 'DETALLE']"
+            [dropDownOptions]="dropDownOptions"
+            (onOpened)="onOpenedUbic($event)"
+            (onValueChanged)="onSeleccRowUbic($event, cellInfo, 'codigo_postal')">
+
+            <div *dxTemplate="let data of 'item'">
+                <div style="width: 20%; float:left">
+                    {{ data.CODIGO_POSTAL }}
+                </div>
+
+                <div style="width: 60%; float:right; 
+                            white-space: nowrap; 
+                            overflow: hidden;
+                            text-overflow: ellipsis; "
+                >
+                    {{ data.DETALLE }}
+                </div>
+            </div>
+            <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                <div id="btnCompoRefreshSbox">
+                    <dx-button icon="refresh" (onClick)="refreshClickUbic('CodigoPostal')"></dx-button>
+                </div>
+            </div>
+
+        </dx-select-box>
+
+    </div>
+
+    <dxo-toolbar *ngIf="esEdicion">
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                </dx-button>
+            </div>
+        </dxi-item>
+        <dxi-item location="before">
+            <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+                </dx-button>
+            </div>
+        </dxi-item>
+    </dxo-toolbar>
+</dx-data-grid>

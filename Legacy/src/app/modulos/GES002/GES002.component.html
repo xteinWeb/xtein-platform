@@ -1,0 +1,379 @@
+<div class="row gx-3" style="height: 100%; padding: 0 5px;">
+  <div class="col-12">
+    <div class="card-content">
+      <dx-form
+        #formRPro
+        id="formRPro"
+        labelLocation="left"
+        [colCount]="1"
+        [formData]="FOrganigrama"
+        [readOnly]="readOnly"
+      >
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+        <dxi-item dataField="NOMBRE" [editorOptions]="{placeholder:'Nombre...'}" (onValueChanged)="onValueChangedNombre($event)">
+          <dxo-label text="Nombre"></dxo-label>
+        </dxi-item>
+        
+        <dxi-item dataField="ESTADO" editorType="dxSelectBox">
+          <dxo-label text="Estado"></dxo-label>
+          <div *dxTemplate>
+            <dx-select-box
+              [dataSource]="['ACTIVO','INACTIVO']"
+              [value]="FOrganigrama.ESTADO"
+              [readOnly]="readOnly"
+              placeholder="Seleccione Estado..."
+              (onValueChanged)="onSeleccEstado($event)"
+            ></dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="DESCRIPCION" [editorOptions]="{placeholder:'Descripción del organigrama'}" (onValueChanged)="onValueChangedDescripcion($event)">
+          <dxo-label text="Descripción"></dxo-label>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </div>
+
+  <!-- *** DIAGRAMA DE VISUALIZACION *** -->
+  <div class="col-12">
+    <div class="card-content-clean" style="padding: 5px;">
+      <dx-diagram
+        #organigrama
+        id="organigrama"
+        units="px"
+        viewunits="px"
+        class="dx-diagram-background"
+        pageOrientation="landscape"
+        [readOnly]="diagReadOnly"
+        (onItemDblClick)="onItemDblClick($event)"
+        (onRequestEditOperation)="requestEditOperationHandler($event)"
+        (onOptionChanged)="diagramCambios($event)"
+        (onCustomCommand)="onCustomCommand($event)"
+        (onContentReady)="onContentReady($event)"
+      >
+        
+        <dxo-main-toolbar [visible]="true">
+          <dxi-command name="toolbox" text="Herramientas"></dxi-command>
+          <dxi-command name="undo" text="Deshacer"></dxi-command>
+          <dxi-command name="redo" text="Rehacer"></dxi-command>
+          <dxi-command name="separator"></dxi-command>
+          <dxi-command name="fontName" text="Fuente"></dxi-command>
+          <dxi-command name="fontSize" text="Tamaño Fuente"></dxi-command>
+          <dxi-command name="separator"></dxi-command>
+          <dxi-command name="bold" text="Negrita"></dxi-command>
+          <dxi-command name="italic" text="Inclinar"></dxi-command>
+          <dxi-command name="underline" text="Subrayar"></dxi-command>
+          <dxi-command name="separator"></dxi-command>
+          <dxi-command name="fontColor" text="Color Fuente"></dxi-command>
+          <dxi-command name="lineColor" text="Color Linea"></dxi-command>
+          <dxi-command name="fillColor" text="Color Fondo"></dxi-command>
+          <dxi-command name="separator"></dxi-command>
+          <dxi-command name="zoomLevel" text="Zoom"></dxi-command>
+          <dxi-command
+            name="clear"
+            icon="clearsquare"
+            text="Borrar Diagrama"
+            *ngIf="!diagReadOnly"
+          ></dxi-command>
+          <dxi-command
+            name="areas"
+            icon="upload"
+            text="Generar de areas"
+            *ngIf="!diagReadOnly"
+          ></dxi-command>
+          <dxi-command
+            name="refrescar"
+            icon="refresh"
+            text="Refrescar areas"
+            *ngIf="!diagReadOnly"
+          ></dxi-command>
+        </dxo-main-toolbar>
+    
+        <dxi-custom-shape
+          *ngFor="let svgId of NodosSvg; let i = index"
+          category="organigrama"
+          [type]="svgId.id"
+          title="org"
+          [backgroundImageUrl]="svgId.svg"
+          [defaultWidth]="100"
+          [defaultHeight]="60"
+          defaultText=""
+          [allowEditText]="true"
+          [textWidth]="1"
+        >
+          <dxi-connection-point [x]="0.25" [y]="0"></dxi-connection-point>
+          <dxi-connection-point [x]="0.5" [y]="0"></dxi-connection-point>
+          <dxi-connection-point [x]="0.75" [y]="0"></dxi-connection-point>
+          <dxi-connection-point [x]="1" [y]="0.25"></dxi-connection-point>
+          <dxi-connection-point [x]="1" [y]="0.5"></dxi-connection-point>
+          <dxi-connection-point [x]="1" [y]="0.75"></dxi-connection-point>
+          <dxi-connection-point [x]="0.25" [y]="1"></dxi-connection-point>
+          <dxi-connection-point [x]="0.5" [y]="1"></dxi-connection-point>
+          <dxi-connection-point [x]="0.75" [y]="1"></dxi-connection-point>
+          <dxi-connection-point [x]="0" [y]="0.25"></dxi-connection-point>
+          <dxi-connection-point [x]="0" [y]="0.5"></dxi-connection-point>
+          <dxi-connection-point [x]="0" [y]="0.75"></dxi-connection-point>
+        </dxi-custom-shape>
+        <dxo-nodes
+          [dataSource]="orgNodosDataSource"
+          [customDataExpr]="itemCustomDataExpr"
+          keyExpr="id"
+          textExpr="text"
+          typeExpr="type"
+          leftExpr="x"
+          topExpr="y"
+          widthExpr="width"
+          heightExpr="height"
+          textStyleExpr="textStyle"
+          styleExpr="itemStyleExpr"
+          containerKeyExpr="contenedor"
+          lockedExpr="bloqSeccion"
+        >
+          <dxo-auto-layout [type]="tipoAutoLayout" orientation="horizontal"></dxo-auto-layout>
+        </dxo-nodes>
+        <dxo-edges
+          [dataSource]="orgConecDataSource"
+          keyExpr="id"
+          fromExpr="fromId"
+          toExpr="toId"
+          textExpr="text"
+          styleExpr="conecStyle"
+          fromPointIndexExpr="fromPoint"
+          toPointIndexExpr="toPoint"
+          lockedExpr="bloqConn"
+          pointsExpr="pointsConec"
+          toLineEndExpr="tipoFlecha"
+        >
+        </dxo-edges>
+        <dxo-toolbox visibility="hidden">
+          <dxi-group category="organigrama" title="Areas"></dxi-group>
+        </dxo-toolbox>
+      </dx-diagram>
+    </div>
+  </div>
+
+</div>
+
+<dx-popup
+  #popupRol
+  id="popupRol"
+  [maxWidth]="725"
+  [minWidth]="680"
+  [height]="480"
+  [showTitle]="true"
+  [(title)]="tituloRol"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="false"
+  [(visible)]="popupVisible"
+  (onInitialized)="onInitialized($event)" 
+  (onResizeEnd)="onResizeEnd($event)"
+  (onShown)="onShown($event)"
+>
+  <div *dxTemplate="let data of 'content'">
+    <div class="flex-grow-1 min-h-0">
+
+      <div>
+        <dx-form
+          #formRol
+          id="formRol"
+          labelLocation="left"
+          [colCount]="1"
+          [formData]="FArea"
+          [readOnly]="false"
+        >
+          <dxi-item dataField="ID_AREA" >
+            <dxo-label text="Id area"></dxo-label>
+            <div *dxTemplate >
+              <dx-drop-down-box
+                #ddBox
+                [showClearButton]="true"
+                [dataSource]="LAreas"
+                [(value)]="seleccSeccArea"
+                displayExpr="ID_AREA"
+                valueExpr="ID_AREA"
+                [opened]="isGridBoxOpened"
+                [dropDownOptions]="dropDownOptions"
+              >
+                <div *dxTemplate="let data of 'content'">
+                  <dx-tree-list 
+                    height="100%"
+                    width="100%"
+                    keyExpr="ID_AREA"
+                    parentIdExpr="ID_AREA_SUPERIOR"
+                    rootValue="RAIZ"
+                    [dataSource]="LAreas"
+                    [focusedRowEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    [allowColumnResizing]="true"
+                    columnResizingMode="nextColumn"
+                    [(focusedRowKey)]="focusedRowKeyArea"
+                    [autoNavigateToFocusedRow]="true"
+                    [autoExpandAll]="true"
+                    [(selectedRowKeys)]="seleccSeccArea"
+                    (onSelectionChanged)="onSeleccRowSeccionArea($event, data)"
+                  >
+                    <dxo-selection mode="single"></dxo-selection> 
+                    <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+                    <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+                    <dxi-column dataField="ID_AREA" caption="Id Area" [width]="150"></dxi-column>
+                    <dxi-column dataField="DESCRIPCION" caption="Descripción" [width]="200"></dxi-column>
+                  </dx-tree-list>
+                </div>
+              </dx-drop-down-box>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="DESCRIPCION" [editorOptions]="{placeholder:'Area...',disabled: true}" >
+            <dxo-label text="Nombre área"></dxo-label>
+          </dxi-item>
+
+          <dxi-item dataField="ID_CARGO" [editorOptions]="{placeholder:'Cargo...',disabled: true}" >
+            <dxo-label text="Cargo"></dxo-label>
+          </dxi-item>
+
+          <dxi-item editorType="dxTextBox" [editorOptions]="{value:NOMBRE_CARGO,disabled: true}" >
+            <dxo-label text="Nombre Cargo"></dxo-label>
+          </dxi-item>
+
+          <dxi-item dataField="RESPONSABLE" [editorOptions]="{placeholder:'Responsable',disabled: true}" >
+            <dxo-label text="Responsable"></dxo-label>
+            <div *dxTemplate>
+              <dx-text-area
+                [readOnly]="true"
+                [(value)]="RESPONSABLE">
+              </dx-text-area>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="ESTADO" [editorOptions]="{placeholder:'Estado',disabled: true}">
+            <dxo-label text="Estado"></dxo-label>
+          </dxi-item>
+
+          <!-- <div *dxTemplate="let data of 'contentAreas'">
+            <dx-tree-list 
+              height="100%"
+              keyExpr="ID_AREA"
+              parentIdExpr="ID_AREA_SUPERIOR"
+              rootValue="RAIZ"
+              [dataSource]="LAreas"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="nextColumn"
+              [(focusedRowKey)]="focusedRowKeyArea"
+              [autoNavigateToFocusedRow]="true"
+              [autoExpandAll]="true"
+              [(selectedRowKeys)]="seleccSeccArea"
+              (onSelectionChanged)="onSeleccRowSeccionArea($event, data)"
+              >
+              <dxo-selection mode="single"></dxo-selection> 
+              <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+              <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+              <dxi-column dataField="ID_AREA" caption="Id Area" [width]="150"></dxi-column>
+              <dxi-column dataField="DESCRIPCION" caption="Descripción" [width]="200"></dxi-column>
+            </dx-tree-list>
+          </div> -->
+
+          <dxi-item dataField="FUNCIONES">
+            <dxo-label text="Funciones"></dxo-label>
+            <div *dxTemplate>
+              <dx-data-grid
+                #gridFuncionesRol
+                id="gridFuncionesRol"
+                width="100%"
+                [dataSource]="FCargo.FUNCIONES"
+                keyExpr="ID_FUNCION"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                [showBorders]="true"
+                columnResizingMode="nextColumn"
+                [allowColumnResizing]="true"
+                [rowAlternationEnabled]="true"
+                [focusedRowEnabled]="true"
+                [hoverStateEnabled]="true"
+                [loadPanel]="{ shading: true }"
+                [showColumnLines]="true"
+                (onInitNewRow)="onInitNewRowFunciones($event)"
+                (onRowValidating)="onRowValidating($event)"
+              >
+                <dxo-editing
+                  mode="cell"
+                  [allowUpdating]="true"
+                ></dxo-editing>
+                <dxo-paging [pageSize]="10"></dxo-paging>
+
+                <dxi-column
+                  dataField="NOMBRE"
+                  caption="Nombre"
+                ></dxi-column>
+
+                <dxi-column
+                  dataField="DESCRIPCION"
+                  caption="Descripción"
+                ></dxi-column>
+
+                <dxi-column
+                  dataField="FRECUENCIA"
+                  caption="Frecuencia"
+                  editCellTemplate="tempFrecuencia"
+                ></dxi-column>
+
+                <!-- TEMPLATES -->
+
+                <div *dxTemplate="let cellInfo of 'tempFrecuencia'">
+                  <dx-select-box
+                    displayExpr="VALOR1"
+                    displayValue="ITEM"
+                    [dataSource]="FrecuanciaRol"
+                    [value]="cellInfo.data.FRECUENCIA"
+                    placeholder="Seleccione Frecuencia..."
+                    (onValueChanged)="onSeleccFrecuencia($event, cellInfo)"
+                  ></dx-select-box>
+                </div>
+
+              </dx-data-grid>
+            </div>
+
+          </dxi-item>
+
+      </dx-form>
+
+      <div style="position: absolute; bottom: 10px">
+        <dx-button
+          id="btnAceptarPT"
+          stylingMode="contained"
+          text="Aceptar"
+          type="default"
+          [width]="100"
+          (onClick)="aceptarCambios($event)"
+        ></dx-button>
+        <dx-button
+          id="btnCancelarPT"
+          stylingMode="contained"
+          text="Cancelar"
+          type="normal"
+          [width]="110"
+          [style.margin-left]="'20px'"
+          (onClick)="cancelarCambios($event)"
+        ></dx-button>
+      </div> 
+
+      </div>
+
+    </div>
+  </div>
+</dx-popup>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

@@ -1,0 +1,83 @@
+/* Estilos para el componente COM207 */
+
+.span_title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+}
+
+.span_title span {
+  font-weight: 500;
+  color: #333;
+}
+
+.estado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.container-estado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Estilos para tooltip */
+.xt-tootips {
+  max-width: 300px;
+}
+
+.tabIvas {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabIvas td {
+  padding: 6px 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabIvas td:first-child {
+  font-weight: 600;
+  color: #666;
+  width: 40%;
+}
+
+.tabIvas td:last-child {
+  color: #333;
+}
+
+.tooltip-wrapper {
+  z-index: 10000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .estado {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  
+  .span_title {
+    padding: 2px 4px;
+  }
+  
+  .span_title span {
+    font-size: 13px;
+  }
+}

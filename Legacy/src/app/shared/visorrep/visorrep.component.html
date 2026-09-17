@@ -1,0 +1,7 @@
+<div>
+    <dx-report-viewer [reportUrl]="reportUrl" height="800px">
+      <dxrv-request-options [invokeAction]="invokeAction" [host]="hostUrl" ></dxrv-request-options>
+      <dxrv-callbacks (CustomizeMenuActions)="CustomizeElements($event)" (DocumentReady)="DocumentReady($event)"  
+        (BeforeRender)="BeforeRenderRpt($event)"></dxrv-callbacks>  
+    </dx-report-viewer>
+</div>

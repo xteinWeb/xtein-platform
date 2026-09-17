@@ -1,0 +1,278 @@
+<div class="row gx-3">
+  <div class="col-12">
+    <div class="card-content">
+      <dx-form
+        #formDominios
+        id="formDominios"
+        labelLocation="left"
+        [formData]="FDominios"
+        [colCount]="1"
+      >
+        <dxi-item itemType="group">
+          <dxo-col-count-by-screen
+            [xs]="1"
+            [sm]="1"
+            [md]="1"
+            [lg]="2"
+          ></dxo-col-count-by-screen>
+
+          <dxi-item
+            dataField="ID_DOMINIO"
+            [colSpan]="1"
+          >
+            <dxo-label text="Dominio"></dxo-label>
+            <div *dxTemplate>
+              <dx-text-box
+                [readOnly]="readOnlyForm"
+                [value]="FDominios.ID_DOMINIO"
+                placeholder="Código dominio"
+                (onValueChanged)="onValueChangedFormID_DOMINIO($event)"
+                >
+                <dx-validator>
+                  <dxi-validation-rule
+                    type="stringLength"
+                    [min]="2"
+                    message="El dominio debe tener mínimo 2 caracteres"
+                  ></dxi-validation-rule>
+                  <dxi-validation-rule
+                    type="required"
+                    message="El dominio es requerido"
+                  ></dxi-validation-rule>
+                </dx-validator>
+              </dx-text-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="NOMBRE"
+            [colSpan]="4"
+          >
+            <dxo-label text="Descripción"></dxo-label>
+            <div *dxTemplate>
+              <dx-text-box
+                [readOnly]="readOnly"
+                [value]="FDominios.NOMBRE"
+                (onValueChanged)="onValueChangedFormID_DESDOMINIO($event)"
+                placeholder="Descripción"
+              >
+                <dx-validator>
+                  <dxi-validation-rule
+                  type="required"
+                  message="La descripción es requerido"
+                ></dxi-validation-rule>
+                </dx-validator>
+              </dx-text-box>
+            </div>
+          </dxi-item>
+          <dxi-item
+            dataField="ID_GRUPO_DOMINIO"
+            [colSpan]="4"
+          >
+            <dxo-label text="Grupo dominio"></dxo-label>
+            <div *dxTemplate>
+              <dx-text-box
+                [readOnly]="readOnlyForm"
+                [value]="FDominios.ID_GRUPO_DOMINIO"
+                (onValueChanged)="onValueChangedFormID_GDOMINIO($event)"
+                placeholder="Código grupo dominio"
+              >
+                <dx-validator>
+                  <dxi-validation-rule
+                    type="stringLength"
+                    [min]="2"
+                    message="El grupo debe tener mínimo 2 caracteres"
+                  ></dxi-validation-rule>
+                  <dxi-validation-rule
+                    type="required"
+                    message="El grupo es requerido"
+                  ></dxi-validation-rule>
+                </dx-validator>
+              </dx-text-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+    <div class="card-content">
+      <dx-data-grid
+        #gridDominios
+        id="gridDominios"
+        [columnAutoWidth]="true"
+        [dataSource]="Itm_Dominios"
+        [allowColumnResizing]="true"
+        [columnAutoWidth]="true"
+        columnResizingMode="widget"
+        [focusedRowEnabled]="true"
+        [rowAlternationEnabled]="true"
+        [hoverStateEnabled]="true"
+        keyExpr="ITEM"
+        noDataText=""
+        [showBorders]="true"
+        (onContentReady)="onContentReady($event)"
+        (onRowValidating)="onRowValidating($event)"
+        (onInitNewRow)="onInitNewRowPro($event)"
+        (onSelectionChanged)="selectionGrid($event)"
+        (onEditingStart)="onEditingStart($event)"
+        (onEditingStart)="startEdit($event)"
+      >
+        <dxo-editing
+          mode="row"
+          [useIcons]="false"
+          [allowUpdating]="!readOnly"
+          [allowDeleting]="false"
+          [allowAdding]="!readOnly"
+        >
+          <dxo-texts confirmDeleteMessage=""> </dxo-texts>
+        </dxo-editing>
+        <dxo-scrolling mode="virtual"></dxo-scrolling>
+        <dxo-selection
+          selectAllMode="allPages"
+          [showCheckBoxesMode]="esVisibleSelecc"
+          mode="multiple"
+        >
+        </dxo-selection>
+
+        <dxi-column
+          dataField="VALOR1"
+          caption="Valor 1"
+          editCellTemplate="editValor1"
+        >
+        </dxi-column>
+
+        <dxi-column
+          dataField="VALOR2"
+          editCellTemplate="editValor2"
+          caption="Valor 2"
+        >
+        </dxi-column>
+
+        <dxi-column
+          dataField="VALOR3"
+          caption="Valor 3"
+          editCellTemplate="editValor3"
+        >
+        </dxi-column>
+
+        <dxi-column
+          dataField="VALOR4"
+          caption="Valor 4"
+          editCellTemplate="editValor4"
+        >
+        </dxi-column>
+
+        <!-- TEMPLATE -->
+        <div *dxTemplate="let cellInfo of 'editValor1'">
+          <dx-text-box
+            placeholder="Valor 1"
+            [value]="cellInfo.data.VALOR1"
+            (onValueChanged)="onValueChangedGridValor1($event, cellInfo)"
+          >
+          </dx-text-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editValor2'">
+          <dx-text-box
+            placeholder="Valor 2"
+            [value]="cellInfo.data.VALOR2"
+            [readOnly]="readOnlyVALOR2"
+            (onValueChanged)="onValueChangedGridValor2($event, cellInfo)"
+          >
+          </dx-text-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editValor3'">
+          <dx-text-box
+            placeholder="Valor 3"
+            [value]="cellInfo.data.VALOR3"
+            [readOnly]="readOnlyVALOR3"
+            (onValueChanged)="onValueChangedGridValor3($event, cellInfo)"
+          >
+          </dx-text-box>
+        </div>
+        <div *dxTemplate="let cellInfo of 'editValor4'">
+          <dx-text-box
+            placeholder="Valor 4"
+            [value]="cellInfo.data.VALOR4"
+            [readOnly]="readOnlyVALOR4"
+            (onValueChanged)="onValueChangedGridValor4($event, cellInfo)"
+          >
+          </dx-text-box>
+        </div>
+
+        <dxo-toolbar *ngIf="!readOnly">
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                icon="plus"
+                matTooltip="Nuevo"
+                (onClick)="operGrid($event, 'new')"
+                *ngIf="rowNew"
+              >
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                icon="edit"
+                matTooltip="Actualizar"
+                (onClick)="operGrid($event, 'edit')"
+                *ngIf="rowEdit"
+              >
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                icon="trash"
+                matTooltip="Eliminar"
+                (onClick)="operGrid($event, 'delete')"
+                *ngIf="rowDelete"
+              >
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                icon="todo"
+                matTooltip="Guardar"
+                (onClick)="operGrid($event, 'save')"
+                *ngIf="rowApplyChanges"
+              >
+              </dx-button>
+            </div>
+          </dxi-item>
+          <dxi-item location="before">
+            <div *dxTemplate>
+              <dx-button
+                icon="undo"
+                matTooltip="Cancelar"
+                (onClick)="operGrid($event, 'cancel')"
+                *ngIf="rowApplyChanges"
+              >
+              </dx-button>
+            </div>
+          </dxi-item>
+        </dxo-toolbar>
+      </dx-data-grid>
+    </div>
+  </div>
+</div>
+
+<app-vistarapida
+  id="vistaAdm212"
+  [aplicacion]="prmUsrAplBarReg.aplicacion"
+></app-vistarapida>
+
+<dx-load-panel
+  #loadPanelPro
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>
+<app-geninformes [events]="eventsSubjectInformes.asObservable()">
+</app-geninformes>

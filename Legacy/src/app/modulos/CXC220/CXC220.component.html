@@ -1,0 +1,49 @@
+<div class="row gx-3">
+    <div class="col-12">
+      <div class="card-content row">
+
+        <!-- Toolbar Principal -->
+        <dx-toolbar class="main-toolbar">
+            <dxi-item location="before">
+                <div class="toolbar-title">
+                <span class="icon">📝</span>
+                <span *ngIf="mostrarConSolicitud">Consulta general</span>
+                <span *ngIf="mostrarSolicitud">Solicitud de Crédito</span>
+                </div>
+            </dxi-item>
+
+            <dxi-item location="after" locateInMenu="auto">
+                <dx-button
+                    text="Consulta"
+                    icon="search"
+                    type="default"
+                    (onClick)="consultaSolicitud()">
+                </dx-button>
+            </dxi-item>
+
+            <dxi-item location="after" locateInMenu="auto">
+                <dx-button
+                    text="Gestión Solicitud"
+                    icon="runner"
+                    type="success"
+                    (onClick)="gestionSolicitud()">
+                </dx-button>
+            </dxi-item>
+
+            <dxi-item location="after" locateInMenu="auto">
+                <dx-button
+                    icon="export"
+                    hint="Exportar"
+                    (onClick)="exportarDatos()">
+                </dx-button>
+            </dxi-item>
+
+        </dx-toolbar>
+
+        <!-- Llama a la solicitud -->
+        <app-CXC22001 *ngIf="mostrarConSolicitud"></app-CXC22001>
+        <app-CXC22002 *ngIf="mostrarSolicitud"></app-CXC22002>
+
+        </div>
+    </div>
+</div>  

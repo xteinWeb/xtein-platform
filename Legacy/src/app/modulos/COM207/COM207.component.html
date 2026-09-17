@@ -1,0 +1,93 @@
+<dx-data-grid
+    #gridCOM207
+    id="gridAutorizaciones"
+    keyExpr="FACTURA"
+    noDataText="No hay datos"
+    [dataSource]="DGdatos"
+    [columnAutoWidth]="true"
+    (onContentReady)="onGridContentReady($event)">
+    <dxo-remote-operations 
+        [paging]="true" 
+        [filtering]="false" 
+        [sorting]="false">
+    </dxo-remote-operations>
+    <dxo-search-panel 
+        [visible]="true" 
+        [width]="240" 
+        placeholder="Buscar...">
+    </dxo-search-panel>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    
+    <dxo-paging 
+        [enabled]="true" 
+        [pageSize]="10">
+    </dxo-paging>
+    <dxo-pager 
+        [visible]="true"
+        [showPageSizeSelector]="true" 
+        [allowedPageSizes]="[5, 10, 25, 50, 100]"
+        [showInfo]="true"
+        [showNavigationButtons]="true">
+    </dxo-pager>
+
+    <dxi-column
+        dataField="FACTURA"
+        caption="No Factura"
+        cssClass="clsEncabHis"
+    ></dxi-column>
+
+    <dxi-column
+        dataField="ID_PROVEEDOR"
+        caption="Nit proveedor"
+        cssClass="clsEncabHis"
+    ></dxi-column>
+
+    <dxi-column
+        dataField="NOMBRE"
+        caption="Nombre proveedor"
+        cssClass="clsEncabHis"
+    ></dxi-column>
+    
+    <dxi-column
+        dataField="TOTAL"
+        caption="Valor total"
+        alignment="left"
+        cssClass="clsEncabHis"
+    ></dxi-column>
+
+
+    <dxi-column
+        dataField="PDF"
+        caption="Ver pdf."
+        alignment="center"
+        cellTemplate="grpTemplateAplicacion"
+    ></dxi-column>
+    <dxi-column
+        dataField="ESTADO"
+        caption="Estado"
+        cssClass="clsEncabHis"
+        alignment="left"
+        cellTemplate="estadoTemplate"
+    ></dxi-column>
+
+    <div *dxTemplate="let grupoObj of 'grpTemplateAplicacion'" class="tem-grupo">
+        <a [href]="grupoObj.data.PDF" target="_blank">
+            <i class="icon-pdf-doc-sl"  style="color: rgba(10,57,96,.95); font-size: 20px; text-align: center;"></i>
+        </a>
+    </div>
+
+    <div *dxTemplate="let estadoObj of 'estadoTemplate'">
+        <dx-select-box
+            [dataSource]="estadoOpciones"
+            [value]="estadoObj.data.ESTADO"
+            [readOnly]="true"
+            valueExpr="id"
+            displayExpr="texto"
+            [searchEnabled]="false"
+            [showClearButton]="false"
+            (onValueChanged)="onEstadoChanged($event, estadoObj.data)"
+            [width]="'100%'"
+            [height]="30">
+        </dx-select-box>
+    </div>
+</dx-data-grid>

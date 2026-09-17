@@ -1,0 +1,142 @@
+<dx-data-grid
+  #gridConexiones
+  [columnAutoWidth]="true"
+  [dataSource]="DConexiones"
+  [allowColumnResizing]="true"
+  [columnAutoWidth]="true"
+  columnResizingMode="widget"
+  [focusedRowEnabled]="true"
+  [rowAlternationEnabled]="true"
+  [hoverStateEnabled]="true"
+  keyExpr="ITEM"
+  noDataText=""
+  [showBorders]="true"
+  (onInitNewRow)="initNewRow($event)"
+  (onRowInserting)="insertingRow($event)"
+  (onRowInserted)="insertedRow($event)"
+  (onRowUpdating)="updatingRow($event)"
+  (onRowRemoved)="removedRow($event)"
+  (onEditingStart)="onEditingStart($event)"
+  (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+  (onRowPrepared)="onRowPrepared($event)"
+  (onRowValidating)="onRowValidating($event)"
+  (onSelectionChanged)="selectionGrid($event)"
+>
+
+  <dxo-editing
+    mode="cell"
+    [useIcons]="false" 
+    [allowUpdating]="esEdicion"
+    [allowDeleting]="false"
+    [allowAdding]="esEdicion">
+    <dxo-texts
+      confirmDeleteMessage="">
+    </dxo-texts>
+  </dxo-editing>
+
+  <dxo-selection 
+    selectAllMode="allPages"
+    [showCheckBoxesMode]="esVisibleSelecc" 
+    mode="multiple">
+  </dxo-selection>
+
+  <dxi-column dataField="ITEM" [visible]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ID_CONEXION"
+    caption="Conexión"
+    editCellTemplate="listaConexiones"
+    calculateDisplayValue="ID_CONEXION">
+  </dxi-column>
+
+  <dxi-column dataField="ULTIMA"
+    caption="Defecto">
+  </dxi-column>
+
+  <dxi-column dataField="ULTIMA_UN"
+    caption="Ultima UN">
+  </dxi-column>
+
+  <div *dxTemplate="let cellInfo of 'listaConexiones'">
+    <dx-drop-down-box
+      #ddConexion
+      id="ddConexion"
+      [(value)]="cellInfo.value"
+      [(opened)]="isGridBoxOpened"
+      valueExpr="ID_CONEXION"
+      displayExpr="ID_CONEXION"
+      placeholder="Conexión"
+      [dataSource]="D_Conexiones"
+      [acceptCustomValue]="true"
+      [readOnly]="readOnly"
+      (onFocusOut)="onFocusOutConexion($event, cellInfo)"
+      (onOptionChanged)="onSelectionConexion($event)"
+      [inputAttr]="{style: 'text-transform: uppercase'}"
+      (onValueChanged)="onValueChangedConexion($event, cellInfo)"
+      contentTemplate="contentTemplate"
+      [dropDownOptions]="{width: 300, height: 300, hideOnParentScroll: true, container: '#router-container'}"
+    >
+      <div *dxTemplate="let data of 'contentTemplate'">
+        <dx-data-grid
+          [focusedRowIndex]="focusedRowIndex"
+          keyExpr="ID_CONEXION"
+          [dataSource]="D_Conexiones"
+          [focusedRowEnabled]="true"
+          [hoverStateEnabled]="true"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          [(focusedRowKey)]="focusedRowKey"
+          [autoNavigateToFocusedRow]="true"
+          [(selectedRowKeys)]="gridBoxConexiones"
+          height="100%"
+          (onRowClick)="onSeleccRowConexion($event, cellInfo, data.component)">
+          <dxo-paging [pageSize]="10"></dxo-paging>
+          <dxo-pager
+            [visible]="true"
+            allowedPageSizes="[5, 10, 'all']"
+            [showPageSizeSelector]="true"
+            [showInfo]="true"
+            [showNavigationButtons]="true">
+          </dxo-pager>
+          <dxo-search-panel [width]="250" [visible]="true"></dxo-search-panel>
+          <dxo-selection mode="single"></dxo-selection>
+          <dxi-column dataField="ID_CONEXION" caption="Conexión"></dxi-column>
+        </dx-data-grid>
+      </div>
+    </dx-drop-down-box>
+  </div>
+
+  <dxo-toolbar *ngIf="esEdicion">
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+      </dx-button>
+        </div>
+    </dxi-item>
+  </dxo-toolbar>
+
+</dx-data-grid>

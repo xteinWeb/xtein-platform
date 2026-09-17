@@ -1,0 +1,8 @@
+.tem-grupo-un {
+  display: flex;
+}
+
+.tem-grupo-un > span {
+  display: flex;
+  align-items: center;
+}

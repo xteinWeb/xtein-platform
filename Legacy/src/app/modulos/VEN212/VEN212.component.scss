@@ -1,0 +1,176 @@
+.container-form {
+    display: flex;
+}
+
+:ng-deep .dx-layout-manager .dx-field-item:not(.dx-last-col) {
+    padding-right: 0 !important;
+}
+.main-field {
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/*---------------------------------------------------------------------*/
+
+.container-flex {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.container-flex > div {
+    display: flex;
+    flex-direction: column;
+    width: 49%;
+}
+
+.div-totales {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.container-uno {
+    padding: 0.75rem 1rem;
+    margin-left: 1rem;
+    width: auto;
+    background: #fff;
+    max-width: 73%;
+    min-width: 69%;
+}
+
+#idfac {
+  flex: 1; /* ocupa el espacio restante */
+}
+
+#totfac {
+  flex: 0 0 20%; /* ancho fijo al 20% */
+  background-color: azure;
+  border-radius: 10px;   /* bordes redondeados */
+  padding: 5px;         /* un poco de aire interno */  
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Sombra tenue */
+  border: 1px solid #ddd;          /* Borde fino y suave */
+}
+
+::ng-deep #gridSubTotales .dx-row > td {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  height: 20px;
+  background-color: azure;
+}
+
+::ng-deep #gridSubTotales .dx-row{
+  height: 20px !important;
+}
+::ng-deep #gridPedidoGrav .dx-row > td {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  height: 20px;
+  background-color: azure;
+}
+
+::ng-deep #gridPedidoGrav .dx-row{
+  height: 20px !important;
+}
+.tot-actions {
+  display: flex;
+  justify-content: flex-end; /* icono a la derecha */
+}
+.tot-content {
+  margin-top: 10px; /* espacio debajo del icono */
+}
+.btn-light {
+  padding: 0;
+  background-color: azure;
+}
+.qr-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;   /* ocupa toda la celda del form */
+}
+
+.qr-container img {
+  width: 100px;   /* tamaño del QR */
+  height: 100px;
+}
+.group-with-line .dx-form-group-caption {
+  border-bottom: 1px solid #ccc;  /* línea gris */
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+::ng-deep .group-with-line .dx-form-group-content {
+  border-top-style: solid;
+  border-width: 1px;
+  border-top-color: #ccc;
+
+}
+::ng-deep .dx-layout-manager .dx-label-h-align .dx-field-item-label {
+  width: 20%;
+}
+::ng-deep .dx-layout-manager .dx-field-item  {
+  padding-left: 2px !important;
+  padding-right: 6px !important;
+}
+::ng-deep .group-idfac .dx-layout-manager .dx-label-h-align .dx-field-item-label {
+  width: 40%;
+}
+::ng-deep .group-cliente .dx-layout-manager .dx-label-h-align .dx-field-item-label {
+  width: 60%;
+}
+::ng-deep .group-venta .dx-layout-manager .dx-label-h-align .dx-field-item-label {
+  width: 50%;
+}
+::ng-deep .group-liq .dx-layout-manager .dx-label-h-align .dx-field-item-label {
+  width: 50%;
+}
+.dat-adifac {
+  margin-top: 5px;
+}
+
+/* para la grid de productos */
+::ng-deep .highlighted {
+  color: #fff;
+  background-color: #337ab7;
+}
+
+/* Alto de fila */
+::ng-deep #gridProLista .dx-row > td {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  height: 30px;
+}
+
+// .dat-adifac {
+//   height: calc(100vh - 420px);
+// }
+// #trfac {
+//   height: 50px;
+// }
+::ng-deep #gridPedidoGrav .dx-row .dx-footer-row {
+  border-top-color: gray;
+  border-top-style: solid;
+  border-top-width: 1px;
+}
+
+::ng-deep .help-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #aaa;
+  font-size: 12px;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+::ng-deep .help-icon:hover {
+  background-color: #f1f1f1;
+  color: #000;
+}

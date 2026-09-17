@@ -1,0 +1,103 @@
+<div class="bg-login bx-shadow overflow-hidden">
+    <div class="container px-5 py-5 px-md-0 text-start my-5">
+        <div class="row gx-lg-5 align-items-center" style="height:calc(100vh - 235px);">
+            <div class="d-none d-md-block col-md-7 col-xl-8 mb-lg-0 xxl-fontsize" style="z-index: 10">
+                <h1 class="my-3 display-5 fw-bold ls-tight" style="color: #fff;">
+                    Bienvenido
+                </h1>
+                <p class="mb-4 opacity-70" style="color: hsl(218, 81%, 100%)">
+                    Aquí comienza tu camino al exito... 
+                </p>
+            </div>
+        
+            <div class="col-12 col-md-5 col-xl-4 mb-lg-0 position-relative text-center">
+                <div id="card_face" class="card card-rotating bg-glass h-100">
+                    <div class="face-front">
+                        <div class="card-up loading-logo mt-5">
+                            <img src="assets/img/logo/xtein.svg" width="50%" alt="Logo" />
+                        </div>
+                        
+                        <div class="card-body px-4 py-5 px-md-5 text-center align-middle">
+                            <br>
+                            <label class="mb-2" style="font-size:20px; font-weight:300;">Iniciar Sesión</label>
+                            <br>
+    
+                            <form class="from-login">
+                                <div class="mb-4">
+                                    <label class="visually-hidden" for="inlineFormInputGroupUsername">Usuario</label>
+                                    <div class="input-group input-icon-inside">
+                                        <div class="input-group-text"><i class="icon-usuario"></i></div>
+                                        <input type="text" class="form-control" id="inlineFormInputGroupUsername" placeholder="Username" />
+                                    </div>
+                                </div>
+                                
+                                <div class="form-outline mb-4">
+                                    <div class="input-group input-icon-inside">
+                                        <div class="input-group-text"><i class="icon-secure-sl"></i></div>
+                                        <input type="password" class="form-control" id="form3Example4" placeholder="Contraseña"/>
+                                    </div>
+                                </div>
+    
+                                <div class="mb-4">
+                                    <div class="input-group input-icon-inside">
+                                        <div class="input-group-text"><i class="icon-building-sl"></i></div>
+                                        <select class="form-select" required>
+                                            <option selected disabled value="">Empresa</option>
+                                            <option value="jweb">Artdecon</option>
+                                            <option value="sweb">Enkanta</option>
+                                        </select>
+                                        <div class="valid-feedback">You selected a position!</div>
+                                        <div class="invalid-feedback">Please select a position!</div>
+                                    </div>
+                                </div>
+                    
+                                <div class="row  justify-content-center">
+                                    <button type="submit" class="btn btn-primary col-10 btn-block">
+                                        Iniciar
+                                    </button>
+                                    <button data-card="card-1" class="rotate-btn btn-link col-10 text-muted">
+                                        ¿Has olvidado tu contrasena?
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="face-back">
+                        <div class="card-up loading-logo mt-5">
+                            <img src="assets/img/logo/xtein.svg" width="50%" alt="Logo" />
+                        </div>
+                        <br>
+                        <label class="mb-2" style="font-size:20px; font-weight:500;">Has olvidado tu contraseña</label>
+                        <br>
+                        <label>
+                            Ingrese su usuario y enviaremos un <strong>c&oacute;digo</strong> de restablecimiento a su <strong>número de contacto</strong>.
+                        </label>
+                        <br>
+
+                        <form class="from-login">
+                            <!-- 2 column grid layout with text inputs for the first and last names -->
+                            <div class="my-4">
+                                <label class="visually-hidden" for="inlineFormInputGroupUsername">Usuario</label>
+                                <div class="input-group input-icon-inside">
+                                    <div class="input-group-text"><i class="icon-usuario"></i></div>
+                                    <input type="text" class="form-control" id="inlineFormInputGroupUsername" placeholder="Username" />
+                                </div>
+                            </div>
+                
+                            <div class="row  justify-content-center">
+                                <!-- Submit button -->
+                                <button type="submit" class="btn btn-primary col-10 btn-block">
+                                    Enviar
+                                </button>
+                                <button data-card="card-1" class="rotate-btn col-10">
+                                    Regresar a login
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

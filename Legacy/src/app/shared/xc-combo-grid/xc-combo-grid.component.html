@@ -1,0 +1,200 @@
+<div *ngIf="container=='dropdown'">
+    <dx-drop-down-box
+        #ddBoxGrid
+        [showClearButton]="true"
+        [dataSource]="DDatosGrid"
+        [(value)]="valorItemSelecc"
+        showSelectionControls="true"
+        displayExpr="displayExpr"
+        valueExpr="valueExpr"
+        placeholder="Seleccione datos"
+        [readOnly]="readOnly"
+        stylingMode="filled"
+        [inputAttr]="{ name: nombreDropDown }"
+        [dropDownOptions]="dropDownOptions" 
+        (onOpened)="onOpened($event)"
+        (onValueChanged)="onValueChanged($event)"
+    >
+    <div *dxTemplate="let data of 'content'">
+
+        <app-xc-grid
+            [events]="eventsSubjectGrid.asObservable()" 
+            (onSeleccRows)="onSeleccRows($event)" >
+        </app-xc-grid>
+
+        <div style="position: absolute; bottom: 10px">
+            <dx-button
+                id="btnAceptarPT"
+                stylingMode="contained"
+                text="Aceptar"
+                type="default"
+                [width]="100"
+                (onClick)="cerrarLista($event, 'aceptar', ddBoxGrid.instance)"
+                >
+            </dx-button>
+            <dx-button
+                id="btnCancelarPT"
+                stylingMode="contained"
+                text="Cancelar"
+                type="normal"
+                [width]="100"
+                [style.margin-left]="'20px'"
+                (onClick)="cerrarLista($event, 'cancelar', ddBoxGrid.instance)"
+                >
+            </dx-button>
+            <dx-check-box [value]="false"
+                text="Solo seleccionadas"
+                (onValueChanged)="onSoloSelecc($event)"
+                [style.margin-left]="'20px'"
+            >
+            </dx-check-box>
+        </div>
+
+    </div>
+    </dx-drop-down-box>
+</div>
+
+<div *ngIf="container=='popup'">
+    <dx-popup
+        #popUpGrid
+        id="popUpGrid"
+        [height]="popHeight"
+        [width]="popWidth"
+        [showTitle]="true"
+        [title]="titGrid"
+        [dragEnabled]="true"
+        [resizeEnabled]="true"
+        [showCloseButton]="false"
+        [hideOnOutsideClick]="false"
+        [(visible)]="popupVisible"
+        (onShown)="onShown($event)"
+        (onHidden)="onHidden($event)"
+        (onInitialized)="onInitializedPopUp($event)" 
+        (onResizeEnd)="onResizeEnd($event)"
+    >
+      <div *dxTemplate="let data of 'content'">
+            <div class="flex-grow-1 min-h-0" style="height: 100%">
+        
+                <app-xc-grid
+                    [events]="eventsSubjectGrid.asObservable()" 
+                    (onSeleccRows)="onSeleccRows($event)"
+                    >
+                </app-xc-grid>
+
+                <div style="position: absolute; bottom: 10px">
+                    <dx-button
+                        id="btnAceptarPT"
+                        stylingMode="contained"
+                        text="Aceptar"
+                        type="default"
+                        [width]="100"
+                        (onClick)="cerrarLista($event, 'aceptar', popUpGrid.instance)"
+                        >
+                    </dx-button>
+                    <dx-button
+                        id="btnCancelarPT"
+                        stylingMode="contained"
+                        text="Cancelar"
+                        type="normal"
+                        [width]="100"
+                        [style.margin-left]="'20px'"
+                        (onClick)="cerrarLista($event, 'cancelar', popUpGrid.instance)"
+                        >
+                    </dx-button>
+                    <dx-check-box [value]="seleccActiva"
+                        text="Solo seleccionadas"
+                        (onValueChanged)="onSoloSelecc($event)"
+                        [style.margin-left]="'20px'"
+                    >
+                    </dx-check-box>
+                </div>
+
+            </div>
+        </div>
+    </dx-popup>
+</div>
+
+<div *ngIf="container=='tab'">
+    <dx-popup
+        #popUpGridTab
+        id="popUpGridTab"
+        [maxWidth]="725"
+        [minWidth]="680"
+        [height]="450"
+        [showTitle]="false"
+        [title]="titGrid"
+        [dragEnabled]="true"
+        [resizeEnabled]="true"
+        [showCloseButton]="false"
+        [hideOnOutsideClick]="false"
+        [(visible)]="popupVisible"
+        (onShown)="onShown($event)"
+        (onHidden)="onHidden($event)"
+        (onInitialized)="onInitializedPopUp($event)" 
+        (onResizeEnd)="onResizeEnd($event)"
+    >
+    <div *dxTemplate="let data of 'content'">
+
+        <mat-tab-group
+            id="tabsGrid"
+            #tabsGrid
+            mat-stretch-tabs="false"
+            mat-align-tabs="end"
+            (selectedIndex)="0"
+            (selectedTabChange)="onTabChanged($event)"
+        >
+            <mat-tab>
+                <ng-template mat-tab-label >
+                    <span style="margin-left: 5px;"> {{ titGrid }} </span>
+                </ng-template>
+                <div id="tabContaGrid">
+                    <app-xc-grid
+                        [events]="eventsSubjectGrid.asObservable()" 
+                        (onSeleccRows)="onSeleccRows($event)" >
+                    </app-xc-grid>
+                </div>
+            </mat-tab>
+            <mat-tab>
+                <ng-template mat-tab-label >
+                    <span style="margin-left: 5px;"> {{ titGrid2 }} </span>
+                </ng-template>
+                <div id="tabContaGrid2">
+                    <app-xc-grid
+                        [events]="eventsSubjectGridAlt.asObservable()" 
+                        (onSeleccRows)="onSeleccRowsAlt($event)" >
+                    </app-xc-grid>
+                </div>
+            </mat-tab>
+        </mat-tab-group>    
+
+        <div style="position: absolute; bottom: 10px">
+            <dx-button
+                id="btnAceptarPT"
+                stylingMode="contained"
+                text="Aceptar"
+                type="default"
+                [width]="100"
+                (onClick)="cerrarLista($event, 'aceptar', popUpGrid.instance)"
+                >
+            </dx-button>
+            <dx-button
+                id="btnCancelarPT"
+                stylingMode="contained"
+                text="Cancelar"
+                type="normal"
+                [width]="100"
+                [style.margin-left]="'20px'"
+                (onClick)="cerrarLista($event, 'cancelar', popUpGrid.instance)"
+                >
+            </dx-button>
+            <dx-check-box [value]="false"
+                text="Solo seleccionadas"
+                (onValueChanged)="onSoloSelecc($event)"
+                [style.margin-left]="'20px'"
+            >
+            </dx-check-box>
+        </div>
+
+    </div>
+    </dx-popup>
+</div>

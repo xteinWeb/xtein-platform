@@ -1,0 +1,545 @@
+<div class="row gx-3" id="splitterMain">
+  <as-split
+    direction="horizontal"
+    (dragEnd)="dragEnd('percent', $event)"
+    #split="asSplit"
+    class="col-12"
+  >
+    <as-split-area class="col-4" [size]="40" #area1="asSplitArea" (resized)="onResized($event)">
+      <div class="card-content-clean-alt">
+        <!-- <div id="constainer-expandir" class="dropdown-expand dpdown-p-absolute">
+          <dx-toolbar (click)="onExpanding($event)">
+            <dxi-item location="before">
+              <div class="accordion-item-group" >
+                <div>
+                  <span class="accordion-item-description" *ngIf="expandsecciones">
+                    <i class="icon-chevron-right-xs"></i>
+                  </span>
+                  <span class="accordion-item-description" *ngIf="!expandsecciones">
+                    <i class="icon-chevron-down-xs"></i>
+                  </span>
+                </div>
+                <span class="xt-dropdown-caption" >{{ btnContraer }}</span>
+              </div>
+            </dxi-item>
+          </dx-toolbar>
+        </div> -->
+
+        <dx-tree-list
+          #treeListSecciones
+          id="treeListSecciones"
+          width="auto"
+          height="100%"
+          keyExpr="ITEM"
+          parentIdExpr="ANTERIOR"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [dataSource]="DatosSecciones"
+          [(autoExpandAll)]="autoExpandAll"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          [focusedRowEnabled]="true"
+          [allowColumnResizing]="true"
+          [columnHidingEnabled]="true"
+          columnResizingMode="widget"
+          [(focusedRowKey)]="focusedSeccion"
+          (onRowPrepared)="onRowPrepared($event)"
+          (onToolbarPreparing)="onToolbarPreparing($event)"
+          (onFocusedRowChanged)="selectSeccion($event)"
+          (onRowClick)="onRowClickSeccion($event)"
+          (onInitialized)="onInitialized($event)"
+        >
+          <dxo-scrolling mode="standard"></dxo-scrolling>
+          <dxo-header-filter [visible]="true" [width]="300" [allowSearch]="true"></dxo-header-filter>
+          <dxo-search-panel class="xt-serch-box" [visible]="true" [width]="200"></dxo-search-panel>
+          
+          <dxi-column
+            dataField="ID_SECCION"
+            caption="Id Sección"
+            [width]="180"
+            cellTemplate="iconTipo"
+          ></dxi-column>
+          <dxi-column
+            dataField="DESCRIPCION"
+            caption="Descripción"
+            [hidingPriority]="0"
+          ></dxi-column>
+          <dxi-column
+            [width]="80"
+            cellTemplate="tempInvMoMat"
+            [hidingPriority]="1"
+          ></dxi-column>
+          <dxi-column dataField="IsActive" [visible]="false"></dxi-column>
+
+          <div *dxTemplate="let info of 'cfgEncabezado'">
+            <p style="font-size: 16px">{{ info.column.caption }}</p>
+          </div>
+      
+          <div *dxTemplate="let options of 'iconTipo'">
+            <div [ngSwitch]="options.data.TIPO">
+              <i class="icon-empresa-sl" *ngSwitchCase="'Planta'" style="font-size: 1.0rem; padding-right: 5px;" ></i>
+              <i class="icon-operaciones-sl" *ngSwitchCase="'PROCESO'" style="font-size: 1.0rem; padding-right: 5px; color: rgba(10,57,96,.85)" ></i>
+              <i class="icon-procesos-sl" *ngSwitchCase="'OPERATIVA'" style="font-size: 1.0rem; padding-right: 5px; color: rgba(10,57,96,.75)" ></i>
+              <span>{{ options.data.ID_SECCION }}</span>
+            </div>
+          </div>
+
+          <div *dxTemplate="let options of 'tempInvMoMat'">
+            <div class="container-icon-secc">
+              <div style="width: 10px;">
+                <i [style]="{'display':options.data.INVENTARIO===true?'block':'none'}"
+                  class="icon-productos"
+                  style="color: rgb(98, 121, 140, 1); padding-right: 3px;"
+                  matTooltip="Tiene manejo inventario"
+                ></i>
+              </div>
+              <div style="width: 10px;">
+                <i [style]="{'display':options.data.MANO_OBRA===true?'block':'none'}"
+                  class="icon-empleados-secciones"
+                  style="color: rgb(98, 121, 140, 0.8); padding-right: 3px;"
+                  matTooltip="Asignable mano de obra"
+                ></i>
+              </div>
+              <div style="width: 10px;">
+                <i [style]="{'display':options.data.ASIGNABLE===true?'block':'none'}"
+                  class="icon-matriz"
+                  style="color: rgb(98, 121, 140, 0.6); padding-right: 3px;"
+                  matTooltip="Asignable materiales"
+                ></i>
+              </div>
+            </div>
+          </div>
+
+          <dxo-export [enabled]="true"></dxo-export>
+
+        </dx-tree-list>
+      </div>
+    </as-split-area>
+
+    <as-split-area class="col-8 ml-0" [size]="60" #area2="asSplitArea">
+      <div class="card-content-secondary-alt" id="form-container" >
+
+        <dx-scroll-view 
+          #scrollViewBodySecciones
+          id="scrollViewBodySecciones"
+          width="100%"
+          height="100%"
+          style="border-radius: 15px; padding: 1.25rem 1rem;"
+        >
+
+          <dx-form
+            #formSecciones
+            id="formSecciones"
+            [(formData)]="FSecciones"
+            [readOnly]="readOnly"
+            labelLocation="left"
+            colCount="1"
+            [screenByWidth]="getSizeQualifier"
+            (onContentReady)="onContentReadyFSecc($event)"
+          >
+            <dxi-item itemType="group" class="group-switch" >
+              <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="2"></dxo-col-count-by-screen>
+              <dxi-item dataField="ID_SECCION" >
+                <dxo-label text="Id Sección"></dxo-label>
+                <div *dxTemplate>
+                  <dx-text-box
+                    placeholder="Id Sección"
+                    [readOnly]="readOnlyIdSeccion"
+                    [(value)]="FSecciones.ID_SECCION"
+                  >
+                    <dxi-validation-rule
+                      type="async"
+                      message="Ya existe esta sección"
+                      [validationCallback]="ValideExistencia"
+                    ></dxi-validation-rule>
+                  </dx-text-box>
+                </div>
+              </dxi-item>
+              <dxi-item
+                editorType="dxSelectBox"
+                dataField="ESTADO"
+                [editorOptions]="{ items: ['ACTIVO','INACTIVO'], placeholder:'Seleccione Estado' }"
+              >
+                <dxo-label text="Estado"></dxo-label>
+              </dxi-item>
+
+              <dxi-item dataField="DESCRIPCION" placeholder="Descripción de la Sección" >
+                <dxo-label text="Descripción"></dxo-label>
+                <div *dxTemplate>
+                  <dx-text-box
+                    placeholder="Descripción Sección"
+                    [readOnly]="readOnly"
+                    [(value)]="FSecciones.DESCRIPCION">
+                  </dx-text-box>
+                </div>
+              </dxi-item>
+
+              <dxi-item dataField="ANTERIOR" 
+                editorType="dxDropDownBox" 
+                [editorOptions]="{ dataSource: GDatosSecc, 
+                                    displayExpr: 'ID_SECCION',
+                                    valueExpr: 'ITEM', 
+                                    placeholder:'Anterior',
+                                    value: seleccSeccAnt,
+                                    dropDownOptions,
+                                    opened: isGridBoxOpened,
+                                    contentTemplate: 'contentAnt',
+                                    inputAttr: { id: 'dropSeccAnterior' },
+                                    elementAttr: { width:'100%', height:'100%'},
+                                    hideOnParentScroll: true, container:'#router-container' }"
+              >
+                <dxo-label text="Sección padre"></dxo-label>
+              </dxi-item>
+
+              <dxi-item dataField="NOMBRE_SECCION_PADRE">
+                <dxo-label text="Nombre Sec. padre"></dxo-label>
+                <div *dxTemplate>
+                  <dx-text-box
+                    placeholder="Nombre Sección padre"
+                    [readOnly]="true"
+                    [(value)]="NOMBRE_SECCION_PADRE"
+                  ></dx-text-box>
+                </div>
+              </dxi-item>
+
+              <dxi-item
+                dataField="TIPO"
+                editorType="dxSelectBox"
+                [editorOptions]="{ items: DTipoSeccion,
+                                    onValueChanged: onChangedTipo,
+                                    readOnly: objReadOnly.Tipo,
+                                    placeholder:'Seleccione Tipo',
+                                    hideOnParentScroll: true, container:'#router-container' }" >
+                <dxo-label text="Tipo"></dxo-label>
+              </dxi-item>
+
+              <dxi-item dataField="FACTOR_MOD"
+                editorType="dxNumberBox"
+                [editorOptions]="{format: '#0,00%', min:0, showSpinButtons:true, readOnly: objReadOnly.Factor}"
+              >
+                <dxo-label text="Factor Protección Mano de Obra"></dxo-label>
+              </dxi-item>
+
+              <dxi-item dataField="STOCK_SEGURIDAD"
+                editorType="dxNumberBox"
+                format='#0'
+                [editorOptions]="{format: '#0 días', min:0, showSpinButtons:true, readOnly: readOnly }"
+              >
+                <dxo-label text="Stock de seguridad"></dxo-label>
+              </dxi-item>
+
+            </dxi-item>
+            
+            <dxi-item itemType="group" class="group-switch" caption="Control Gestión" [colSpan]="2">
+              <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="3"></dxo-col-count-by-screen>
+              <dxi-item
+                dataField="INVENTARIO"
+                editorType="dxSwitch"
+                [visible]="visibleSwitchInventario"
+                [editorOptions]="{ onValueChanged: onChangedInv, 
+                                disabled: activarInv,
+                                inputAttr: { id: 'idCheckInventario' } }" >
+                <dxo-label text="Inventario Producto en Proceso" style="margin-left: -10px;"></dxo-label>
+              </dxi-item>
+              <dxi-item
+                dataField="MANO_OBRA"
+                editorType="dxSwitch"
+                [visible]="visibleSwitchMO"
+                [editorOptions]="{ onValueChanged: switchManoObra, disabled: activarMO,
+                                inputAttr: { id: 'idCheckMO' } }" >
+                <dxo-label text=" Asignable Mano de obra"></dxo-label>
+              </dxi-item>
+              <dxi-item
+                dataField="ASIGNABLE"
+                editorType="dxSwitch"
+                [visible]="visibleSwitchCostos"
+                [editorOptions]="{
+                    disabled: activarCostos,
+                    inputAttr: { id: 'idCheckCostos' } 
+                }"
+              >
+                <dxo-label text="Asignable Materiales"></dxo-label>
+              </dxi-item>
+            </dxi-item>
+
+            <div *dxTemplate="let data of 'tempSeccion'">
+              <dxo-label text="Id Sección"></dxo-label>
+              <dx-text-box
+                id="idSeccion"
+                placeholder="Id Seccion"
+                [(value)]="FSecciones.ID_SECCION"
+                [readOnly]="readOnlyIdSeccion"
+                (onFocusOut)="onValidarSeccion($event)"
+              ></dx-text-box>
+            </div>
+
+            <div *dxTemplate="let data of 'contentAnt'">
+              <dx-data-grid 
+                #gridSeccAnt
+                id="gridSeccAnt"
+                [dataSource]="GDatosSecc" 
+                [(selectedRowKeys)]="seleccSeccAnt"
+                keyExpr="ITEM"
+                displayExpr="ID_SECCION"
+                height="100%" 
+                [columnAutoWidth]="true"
+                [allowColumnResizing]="true" 
+                [focusedRowEnabled]="true"
+                [rowAlternationEnabled]="true"
+                [hoverStateEnabled]="true"
+                [(focusedRowKey)]="focusedRowKey"
+                [autoNavigateToFocusedRow]="true"
+                (onFocusedRowChanging)="onFocusedRowChanging($event)"
+                (onRowClick)="onSeleccRowSeccionAnt($event)"
+                [selection]="{ mode: 'single' }"
+              >
+                <dxo-search-panel [width]="250" [visible]="true"></dxo-search-panel>
+                <dxo-paging [pageSize]="10000"> </dxo-paging>
+                
+                <dxi-column dataField="ID_SECCION" caption="Id Seccion" [width]="200"></dxi-column>
+                <dxi-column dataField="DESCRIPCION" caption="Descripción" [width]="200"></dxi-column>
+              </dx-data-grid>
+            </div>
+
+          </dx-form>
+
+          <br>
+          <div *ngIf="(FSecciones.INVENTARIO && FSecciones.TIPO === 'PROCESO') ">
+            <span class="xt-caption" id="xs_empleados_secc">Capacidad instalada</span>
+            <br>
+            <dx-data-grid
+              #gridTurnosSeccion
+              id="gridTurnosSeccion"
+              width="100%"
+              height="230px"
+              keyExpr="ID_HORARIO"
+              [dataSource]="FSecciones.CAPACIDAD"
+              [showBorders]="true"
+              noDataText="No hay datos."
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [focusedRowEnabled]="true"
+              [rowAlternationEnabled]="true"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              (onContentReady)="onContentReady($event)"
+              (onInitNewRow)="onInitNewRowPro($event)"
+              (onRowValidating)="onRowValidating($event)"
+              (onSelectionChanged)="onSelectionTurnos($event)"
+            >
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+              <dxo-editing
+                mode="row"
+                [useIcons]="false"
+                [allowUpdating]="!readOnly"
+                [allowDeleting]="false"
+                [allowAdding]="!readOnly"
+              >
+                <dxo-texts
+                  confirmDeleteMessage="">
+                </dxo-texts>
+              </dxo-editing>
+
+              <dxo-selection
+                selectAllMode="allPages"
+                [showCheckBoxesMode]="esVisibleSelecc" 
+                mode="multiple">
+              </dxo-selection>
+    
+              <dxi-column dataField="ID_HORARIO" caption="Turno" class="clsEncabHis" [width]="200" editCellTemplate="editTurno" ></dxi-column>
+              <dxi-column dataField="DESCRIPCION" caption="Nombre" class="clsEncabHis" [width]="200" [editorOptions]="{ readOnly:true }" ></dxi-column>
+              <dxi-column dataField="CAPACIDAD" caption="N° Trabajadores" class="clsEncabHis" editorType="dxNumberBox" [editorOptions]="{min:0, showSpinButtons:true}" ></dxi-column>
+    
+              <div *dxTemplate="let cellInfo of 'editTurno'">
+                <dx-drop-down-box
+                  #ddBoxRol
+                  [dataSource]="DTurnos"
+                  [(value)]="cellInfo.data.ID_HORARIO"
+                  [(opened)]="openIdHorarios"
+                  [showClearButton]="true"
+                  displayExpr="DESCRIPCION"
+                  valueExpr="ID_HORARIO"
+                  placeholder="Seleccione turno..."
+                  [readOnly]="readOnly"
+                  [dropDownOptions]="{ width: 500, height: 300, hideOnParentScroll: true, container: '#gridTurnosSeccion'}"
+                >
+                  <div *dxTemplate="let data of 'content'">
+                    <dx-data-grid
+                      #gridTurnosPlanta
+                      id="gridTurnosPlanta"
+                      width="100%"
+                      height="100%"
+                      noDataText="No hay datos."
+                      keyExpr="ID_HORARIO"
+                      [dataSource]="DTurnos"
+                      [(selectedRowKeys)]="cellInfo.data.ID_HORARIO"
+                      [selection]="{ mode: 'single' }"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [columnMinWidth]="80"
+                      [rowAlternationEnabled]="true"
+                      [focusedRowEnabled]="true"
+                      [hoverStateEnabled]="true"
+                      (onSelectionChanged)="onSelectionTurno($event, cellInfo)"
+                    >
+                      <dxo-scrolling mode="virtual"></dxo-scrolling>
+                      <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+        
+                      <dxi-column dataField="ID_HORARIO"  caption="Id. Horario" class="clsEncabHis" [width]="130"></dxi-column>
+                      <dxi-column dataField="DESCRIPCION" caption="Nombre" cssClass="clsEncabHis" [width]="130"></dxi-column>
+                      <dxi-column dataField="ITM_TURNOS" caption="Jornadas" cssClass="clsEncabHis" cellTemplate="cellTempJornadas">
+                        <div *dxTemplate="let cellInfo of 'cellTempJornadas' ">
+                          <div *ngFor="let jornada of cellInfo.data.ITM_TURNOS" >
+                            <span> {{ jornada.ITEM }} - </span>
+                            <span>"{{ jornada.TIPO }}"</span>
+                            <span> De: {{ jornada.INICIO }} </span>
+                            <span> Hasta: {{ jornada.FINAL }} </span>
+                          </div>
+                        </div>
+                      </dxi-column>
+                    </dx-data-grid>
+                  </div>
+                </dx-drop-down-box>
+              </div>
+    
+              <dxo-toolbar *ngIf="!readOnly">
+                <dxi-item location="before">
+                  <div *dxTemplate>
+                    <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew"></dx-button>
+                  </div>
+                </dxi-item>
+                <dxi-item location="before">
+                  <div *dxTemplate>
+                    <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'edit')" *ngIf="rowEdit"></dx-button>
+                  </div>
+                </dxi-item>
+                <dxi-item location="before">
+                  <div *dxTemplate>
+                    <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete"></dx-button>
+                  </div>
+                </dxi-item>
+                <dxi-item location="before">
+                  <div *dxTemplate>
+                    <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges"></dx-button>
+                  </div>
+                </dxi-item>
+                <dxi-item location="before">
+                  <div *dxTemplate>
+                    <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges"></dx-button>
+                  </div>
+                </dxi-item>
+              </dxo-toolbar>
+            </dx-data-grid>
+          </div>
+          <br>
+
+          <!-- <div *ngIf="((FSecciones.MANO_OBRA && FSecciones.TIPO === 'OPERATIVA') || FSecciones.TIPO === 'Planta')" > -->
+          <div *ngIf="FSecciones.TIPO !== 'Planta' " >
+            <span class="xt-caption" id="xs_empleados_secc">Empleados asociados a la sección.</span>
+            <br>
+            <dx-data-grid
+              #gridDEmpleados
+              id="gridDEmpleados"
+              width="100%"
+              height="auto"
+              keyExpr="ID_EMPLEADO"
+              [dataSource]="DEmpleados"
+              [showBorders]="true"
+              noDataText="No hay datos."
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [focusedRowEnabled]="true"
+              [rowAlternationEnabled]="true"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+            >
+              <dxo-scrolling mode="virtual"></dxo-scrolling>
+              <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+  
+              <dxi-column 
+                dataField="ID_HORARIO"
+                [groupIndex]="0"
+                [visible]="visibleGrupoHorarios"
+                [groupCellTemplate]="DEmpleados.length > 0 ? 'grpHorarios' : ''"
+              ></dxi-column>
+              <dxi-column 
+                dataField="TIPO"
+                [groupIndex]="1"
+                [visible]="visibleGrupoHorarios"
+                [groupCellTemplate]="DEmpleados.length > 0 ? 'grpTipo' : ''"
+              ></dxi-column>
+              <dxi-column dataField="ID_EMPLEADO" caption="Id empleado" alignment="right"></dxi-column>
+              <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre" [width]="300"></dxi-column>
+              <dxi-column dataField="ID_ACTIVIDAD" caption="Actividad" ></dxi-column>
+  
+              <div *dxTemplate="let grupoObj of 'grpHorarios'">
+                <div class="tem-grpHorarios">
+                  <span>
+                    <b><p>Horario: </p></b>
+                    <span style="margin-left: 10px;">{{templateHtml(grupoObj, 'ID_HORARIO')}}</span>
+                  </span>
+                  <span>
+                    <span style="margin-left: 10px;">{{templateHtml(grupoObj, 'DESCRIPCION_HORARIO')}};</span>
+                  </span>
+                  <span style="margin-left: 10px;">
+                    <b><p>Empleados: </p></b>
+                    <span style="margin-left: 10px;">{{templateHtml(grupoObj, 'N_EMPLEADOS')}}</span>
+                  </span>
+                </div>
+              </div>
+  
+              <div *dxTemplate="let grupoObj of 'grpTipo'">
+                <div class="tem-grpHorarios">
+                  <span>
+                    <p>Tipo:</p>
+                    <span style="margin-left: 10px;">{{templateHtml(grupoObj, 'TIPO')}}</span>
+                  </span>
+                </div>
+              </div>
+  
+            </dx-data-grid>
+          </div>
+
+        </dx-scroll-view>
+      </div>
+    </as-split-area>
+  </as-split>
+</div>
+
+<app-menufloat 
+  [popupVisible]="activaMenuFloat" 
+  [popupVisible]="activaMenuFloat" 
+  [targetElem]="targetMenuFloat"
+  [data]="dataMenuFloat"
+  (cerrarMenu)="activaMenuFloat = false"
+  *ngIf="activaMenuFloat"
+  [events]="eventsSubject.asObservable()"
+></app-menufloat>
+
+
+<app-vistarapida id="vistapro008" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-tooltip
+  [target]="idTargetToolTip"
+  position="top"
+  [(visible)]="verToolTip"
+  showEvent="mouseenter"
+  hideEvent="mouseleave"
+  [wrapperAttr]="wrapperAttr"
+>
+  <div *dxTemplate="let data of 'content'">
+    {{ msgToolTip }}
+  </div>
+</dx-tooltip>
+
+<dx-load-panel
+  #loadPanelPro
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

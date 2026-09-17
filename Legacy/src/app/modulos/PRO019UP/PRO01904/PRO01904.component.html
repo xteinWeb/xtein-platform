@@ -1,0 +1,138 @@
+<div>
+  <div [ngStyle]="{'display': modoGrid!=='Consolidado' ? 'block':'none'}">
+    <dx-data-grid
+      #gridCifMatriz
+      id="gridCifMatriz"
+      [dataSource]="TipoCIF"
+      [keyExpr]="['ITEM','ID_PARTE']"
+      [columnAutoWidth]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [showBorders]="true"
+      [rowAlternationEnabled]="true"
+      [allowColumnResizing]="true"
+      columnResizingMode="nextColumn"
+      (onSelectionChanged)="selectionGrid($event)"
+    >
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+  
+      <dxi-column 
+        dataField="TIPO"
+        caption="Tipo CIF"
+        alignment="left"
+        cssClass="clsEncabHis"
+        width="150"
+      ></dxi-column>
+  
+      <dxi-column
+        dataField="TOTAL"
+        caption="Sub-Total"
+        alignment="right"
+        dataType="number"
+        format="#,##0.00"
+        [editorOptions]="{format: '#,##0.00', min:0, readOnly:true}"
+      ></dxi-column>
+  
+      <dxo-master-detail [enabled]="true" template="detail" > </dxo-master-detail>
+      <div *dxTemplate="let Cif of 'detail'">
+        <app-PRO0190401
+          [getData]="Cif.data"
+          (totalCIF)="getTotalesCIF($event)"
+        ></app-PRO0190401>
+      </div>
+      
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div *dxTemplate>
+            <dx-button icon="pulldown" matTooltip="Refrescar" (onClick)="operGrid($event,'refrescar')" >
+            </dx-button>
+          </div>
+        </dxi-item>
+      </dxo-toolbar>
+
+    </dx-data-grid>
+  </div>
+  <div [ngStyle]="{'display':modoGrid==='Consolidado' ? 'block':'none'}">
+    <dx-data-grid
+      #gridCifConsolidado
+      id="gridCifConsolidado"
+      class="xt-datagrid"
+      keyExpr="CODIGO"
+      width="100%"
+      columnResizingMode="widget"
+      [dataSource]="DGCifConsolidado"
+      [showBorders]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      [columnMinWidth]="130"
+    >
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-search-panel [visible]="true"  [width]="250" ></dxo-search-panel>
+    
+      <dxi-column
+        dataField="CODIGO"
+        caption="Código"
+        cssClass="clsEncabHis"
+        alignment="left"
+        [width]="150"
+      ></dxi-column>
+    
+      <dxi-column
+        dataField="DESCRIPCION"
+        caption="Nombre"
+        cssClass="clsEncabHis"
+        [width]="250"
+        [editorOptions]="{ readOnly: true }"
+      ></dxi-column>
+    
+      <dxi-column
+        dataField="CANTIDAD"
+        caption="Cantidad"
+        dataType="number"
+        alignment="right"
+        [width]="100"
+        format="#,##0.00"
+      ></dxi-column>
+    
+      <dxi-column
+        dataField="VALOR"
+        caption="Valor"
+        alignment="right"
+        dataType="number"
+        cssClass="clsEncabHis"
+        [width]="150"
+        cellTemplate="tempValorCif"
+      >
+        <div *dxTemplate="let cellInfo of 'tempValorCif'">
+          <dx-number-box
+            #valorCif
+            [min]="0"
+            [readOnly]="true"
+            [format]="cellInfo.data.formatValor"
+            [value]="cellInfo.data.VALOR"
+          ></dx-number-box>
+        </div>
+      </dxi-column>
+    
+      <dxi-column
+        dataField="BASE"
+        caption="Base CIF"
+        [width]="150"
+      ></dxi-column>
+    
+      <dxi-column
+        dataField="TOTAL"
+        caption="Total"
+        alignment="right"
+        dataType="number"
+        format="#,##0.0"
+        [width]="130"
+      ></dxi-column>
+
+    </dx-data-grid>
+  </div>
+</div>
+
+

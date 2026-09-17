@@ -1,0 +1,80 @@
+<div class="card-content">
+    <div class="form-content-data">
+        <!-- Fila 1: Selección y Fechas -->
+        <div class="row gx-3">
+            <div class="col-md-4 col-sm-12">
+                <div class="form-item-label-data">Plan de Producción</div>
+                <div class="form-input-box-data">
+                    <dx-drop-down-box placeholder="Seleccione Plan..." [readOnly]="false" valueExpr="CONSECUTIVO"
+                        displayExpr="NOMBRE" [dataSource]="DGplanes" [(value)]="planMaestro" [(opened)]="openPlanes"
+                        [dropDownOptions]="{ maxHeight: '350px' }"
+                        (onSelectionChanged)="onSelectionChangedPlan($event, 'DROP')">
+
+                        <div *dxTemplate="let data of 'content'">
+                            <dx-data-grid width="100%" height="100%" keyExpr="CONSECUTIVO"
+                                [selection]="{ mode: 'single' }" [focusedRowEnabled]="true" [hoverStateEnabled]="true"
+                                [dataSource]="DGplanes" [(selectedRowKeys)]="selectPlanes"
+                                (onSelectionChanged)="onSelectionChangedPlan($event, 'GRID')">
+                                <dxi-column dataField="CONSECUTIVO" caption="Consecutivo" width="100"></dxi-column>
+                                <dxi-column dataField="NOMBRE" caption="Nombre"></dxi-column>
+                            </dx-data-grid>
+                        </div>
+                    </dx-drop-down-box>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="form-item-label-data">Día de Programación</div>
+                <div class="form-input-box-data">
+                    <dx-date-box type="date" [readOnly]="readOnly || !planMaestro" [min]="planFechas.inicio"
+                        [max]="planFechas.final" [(value)]="fechaProgramacion"
+                        (onValueChanged)="onValueChangedFecha($event)" [inputAttr]="{ readonly: 'readonly' }">
+                    </dx-date-box>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-12">
+                <div class="form-item-label-data">Limites Plan</div>
+                <div class="form-input-box-data d-flex gap-2">
+                    <small class="d-block">{{ formatDate(planFechas.inicio) }}</small>
+                    <span> | </span>
+                    <small class="d-block">{{ formatDate(planFechas.final) }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila 2: Porcentajes -->
+        <div class="row gx-3 mt-3">
+            <div class="col-md-2 col-sm-4">
+                <div class="percentage-card sobredimensionado">
+                    <div class="label">Sobredimensionado</div>
+                    <div class="value">{{ porcentajes.sobredimensionado }}%</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4">
+                <div class="percentage-card programado">
+                    <div class="label">Programado</div>
+                    <div class="value">{{ porcentajes.programado }}%</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4">
+                <div class="percentage-card comprometido">
+                    <div class="label">Comprometido</div>
+                    <div class="value">{{ porcentajes.comprometido }}%</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <div class="percentage-card en-proceso">
+                    <div class="label">En Proceso</div>
+                    <div class="value">{{ porcentajes.enProceso }}%</div>
+                </div>
+            </div>
+
+            <div class="col-md-2 col-sm-6">
+                <div class="percentage-card finalizado">
+                    <div class="label">Finalizado</div>
+                    <div class="value">{{ porcentajes.finalizado }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

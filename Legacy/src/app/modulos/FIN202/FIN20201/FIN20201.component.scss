@@ -1,0 +1,134 @@
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(85vh - 110px);
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+// ── Fila de grupo ──────────────────────────────────────────────────
+.group-row-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.group-row-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+
+  i {
+    color: #0078d4;
+  }
+
+  strong {
+    color: #0078d4;
+    font-size: 14px;
+  }
+}
+
+.group-row-count {
+  color: #888;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.btn-pago-anticipado {
+  margin-left: auto;
+
+  .dx-button-content {
+    padding: 4px 12px;
+  }
+}
+
+// ── Celda VALOR_PAGADO con valor activo ────────────────────────────
+.valor-pagado-activo {
+  color: #2e7d32;
+  font-weight: 600;
+  background-color: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+// ── Totales del summary ────────────────────────────────────────────
+::ng-deep .dx-datagrid-summary-item {
+  font-weight: 600;
+  color: #1a237e;
+}
+
+// ── Filas seleccionadas ────────────────────────────────────────────
+::ng-deep .dx-selection td {
+  background-color: #e3f2fd !important;
+  color: #0d47a1 !important;
+}
+
+// ── Columna editable: indicador visual ────────────────────────────
+::ng-deep .col-editable .dx-datagrid-cell-updated-animation {
+  animation: none;
+}
+
+::ng-deep td.col-editable:not(.dx-editor-cell) {
+  background-color: #fffde7 !important;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #fff9c4 !important;
+  }
+}
+
+::ng-deep td.col-editable.dx-editor-cell {
+  background-color: #e3f2fd !important;
+  outline: 2px solid #1976d2 !important;
+  outline-offset: -2px;
+}
+
+// ── Celda VALOR_PAGADO ────────────────────────────────────────────
+.valor-pagado-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.valor-pagado-activo {
+  color: #2e7d32;
+  font-weight: 600;
+  background-color: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+// Estado de error: VALOR_PAGADO supera SALDO
+.valor-pagado-alerta {
+  color: #c62828 !important;
+  font-weight: 700 !important;
+  background-color: #ffebee !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.icono-ok {
+  color: #2e7d32;
+  font-size: 13px;
+}
+
+.icono-error {
+  color: #c62828;
+  font-size: 13px;
+}
+
+// ── Tooltip de error de validación DevExtreme ─────────────────────
+::ng-deep .dx-datagrid .dx-invalid-message {
+  .dx-overlay-content {
+    background-color: #c62828;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}

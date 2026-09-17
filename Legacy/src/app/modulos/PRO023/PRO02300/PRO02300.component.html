@@ -1,0 +1,555 @@
+<div class="row gx-3"  id="PRO02300" #PRO02300>
+  <div class="col-12">
+
+    <div class="form-content-data" >
+      <div class="form-item-column-data" >
+        <div  style="width: 21%;" >
+          <div class="form-item-label-data">Fecha</div>
+          <div class="form-input-box-data">
+            <dx-date-box
+              #DxtFechaFinal
+              type="date"
+              width="100%"
+              pickerType="calendar"
+              [min]="NOW"
+              [(value)]="FECHA_DIA"
+              [readOnly]="readOnly"
+              (onValueChanged)="onValueChangedFecha($event, 'DIA')"
+            ></dx-date-box>
+          </div>
+        </div>
+          
+        <div style="width: 21%;" >
+          <div class="form-item-label-data" >Fecha Inicio</div>
+          <div class="form-input-box-data" >
+            <dx-date-box
+              #DxtFechaInicio
+              type="date"
+              width="100%"
+              pickerType="calendar"
+              [(value)]="FECHA_INICIO"
+              [readOnly]="true"
+            ></dx-date-box>
+          </div>
+        </div>
+          
+        <div  style="width: 21%;" >
+          <div class="form-item-label-data">Fecha Final</div>
+          <div class="form-input-box-data">
+            <dx-date-box
+              #DxtFechaFinal
+              type="date"
+              width="100%"
+              pickerType="calendar"
+              [(value)]="FECHA_FIN"
+              [readOnly]="true"
+            ></dx-date-box>
+          </div>
+        </div>
+
+        <div  style="width: 21%;" >
+          <div class="form-item-label-data">Total</div>
+          <div class="form-input-box-data">
+            <dx-number-box
+              [width]="'100%'"
+              format="#,##0"
+              alignment="center"
+              [readOnly]="true"
+              [(value)]="TOTAL_PROGRAMADO"
+            ></dx-number-box>
+          </div>
+        </div>
+        
+        
+      </div>
+
+      <div style="width: 15%; text-align: center;">
+        <dx-button
+          stylingMode="contained"
+          text="Generar agenda"
+          type="success"
+          [width]="'auto'"
+          class="align-self-end"
+          [disabled]="!actBtn"
+          (onClick)="opPrepararGuardar('GUARDAR AGENDA', 'Manual')"
+        ></dx-button>
+      </div>
+
+    </div>
+
+    <br />
+  
+        
+    <div style="height: 100%; max-height: 700px;">
+      <dx-scroll-view width="100%" height="100%">
+        
+        <!-- <span><h3>Productos a programar</h3></span>
+         <div class="row gx-3">
+      
+          <dx-button
+            stylingMode="contained"
+            text="Calcular fechas"
+            type="success"
+            [width]="'auto'"
+            class="align-self-end"
+            style="margin-right: 5px;"
+            [disabled]="readOnly === false &&
+                        selectPedido.length > 0
+                        ? false : true"
+            (onClick)="calcularFechas($event)"
+          ></dx-button>
+        </div> 
+        <div style="margin: 1rem 0rem;">
+          <dx-button
+            stylingMode="contained"
+            text="Generar PMP"
+            type="success"
+            [width]="'auto'"
+            class="align-self-end"
+            [disabled]="readOnly === false &&
+                        conCambios > 0 && 
+                        filaSelecc.length > 0 
+                        ? false : true"
+            (onClick)="opPrepararGuardar('GUARDAR AGENDA', 'Manual')"
+          ></dx-button>
+        </div>
+        
+        <br /> -->
+  
+        
+        <div>
+          <dx-data-grid
+            #gridProductos
+            id="gridProductos"
+            height="450"
+            keyExpr="ITEM"
+            columnResizingMode="widget"
+            [dataSource]="DGproductos"
+            [showBorders]="true"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true"
+            [focusedRowEnabled]="true"
+            [allowColumnResizing]="true"
+            [columnHidingEnabled]="true"
+            [rowAlternationEnabled]="true"
+            (onContentReady)="onContentReady($event)"
+            (onRowDblClick)="operGrid($event,'edit', 'DGproductos')"
+            (onRowUpdated)="onRowUpdated($event, 'DGproductos')"
+          >
+            <dxo-scrolling mode="standard"></dxo-scrolling>
+            <dxo-paging [enabled]="true" [pageSize]="30"></dxo-paging>
+            <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[30, 50, 100]"></dxo-pager>
+            <dxo-header-filter [visible]="true" [allowSearch]="true" ></dxo-header-filter>
+            <dxo-filter-row [visible]="true"></dxo-filter-row>
+  
+            <dxo-editing
+              mode="row"
+              [useIcons]="false"
+              [allowUpdating]="!readOnly"
+              [allowDeleting]="false"
+              [allowAdding]="false"
+            >
+              <dxo-texts confirmDeleteMessage=""></dxo-texts>
+            </dxo-editing>
+  
+            <!-- <dxo-selection
+              selectAllMode="allPages"
+              showCheckBoxesMode="always"
+              mode="multiple"
+            ></dxo-selection> -->
+  
+            <!-- <dxo-row-dragging
+              [showDragIcons]="true"
+              [allowReordering]="true"
+              [onReorder]="onReorder"
+            ></dxo-row-dragging> -->
+  
+            <dxi-column 
+              dataField="DOCUMENTO_PEDIDO"
+              caption="Pedido"
+              [width]="100"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+      
+            <!-- <dxi-column 
+              dataField="FECHA_REGISTRO"
+              caption="Fecha"
+              dataType="date"
+              [width]="100"
+              alignment="right"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column> -->
+            
+            <dxi-column
+              dataField="NOMBRE_CLIENTE"
+              caption="Cliente"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+      
+            <!-- <dxi-column 
+              dataField="DESTINO"
+              caption="Destino"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column> -->
+      
+            <dxi-column
+              dataField="PRODUCTO"
+              caption="Cod. Produc."
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+      
+            <dxi-column
+              dataField="NOMBRE_PRODUCTO"
+              caption="Producto"
+              [width]="350"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+      
+            <!-- <dxi-column
+              caption="Atributos"
+              alignment="center"
+              [isBand]="true"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column> -->
+      
+            <!-- <dxi-column dataField="CANTIDAD" caption="Cantidad" dataType="number" format="#0.##" alignment="right" 
+              [editorOptions]="{ readOnly: true }">
+              <dxo-format
+                type="fixedPoint"
+                [precision]="2"
+              ></dxo-format>
+            </dxi-column> -->
+  
+            <dxi-column dataField="CANTIDAD_PROGRAMADA" caption="Cant. Programada" dataType="number" format="#0.##" alignment="right"
+            width="120" editCellTemplate="editCantidadPr1" >
+              <dxo-format
+                type="fixedPoint"
+                [precision]="2"
+              ></dxo-format>
+            </dxi-column>
+      
+            <!-- <dxi-column dataField="CANTIDAD_PENDIENTE" caption="Cant. Pendiente" dataType="number" format="#0.##" alignment="right" 
+              width="120" [editorOptions]="{ readOnly: true }">
+              <dxo-format
+                type="fixedPoint"
+                [precision]="2"
+              ></dxo-format>
+            </dxi-column> -->
+            
+            <dxi-column
+              caption="Plantas"
+              alignment="center"
+              [isBand]="true"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+
+            <dxi-column 
+              dataField="TOTAL"
+              caption="$ Total"
+              dataType="number"
+              format="#,##0"
+              alignment="right"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+      
+            <dxi-column 
+              dataField="ESTADO"
+              caption="Estado"
+              alignment="left"
+              [width]="90"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+            
+            <dxi-column 
+              dataField="FECHA_PROGRAMADA"
+              caption="Fecha Entrega"
+              dataType="date"
+              [width]="150"
+              alignment="right"
+              [groupIndex]="0"
+					    groupCellTemplate="grpTemplateFechaProg"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+            
+            <!-- <dxi-column 
+              dataField="FECHA_INICIO"
+              caption="Fecha Inicio"
+              dataType="datetime"
+              [width]="150"
+              alignment="right"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+            
+            <dxi-column 
+              dataField="FECHA_FINAL"
+              caption="Fecha Final"
+              dataType="datetime"
+              [width]="150"
+              alignment="right"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column> -->
+  
+            <!-- <dxo-master-detail [enabled]="masterDetails" template="detail" > </dxo-master-detail>
+            <div *dxTemplate="let datosDetalle of 'detail'">
+              <app-PRO02301 
+                [events]="events.asObservable()"
+              ></app-PRO02301>
+            </div> -->
+  
+            <div *dxTemplate="let cellInfo of 'editCantidadPr1' ">
+              <dx-number-box
+                format="#0.##"
+                [min]="0"
+                [max]="cellInfo.data.CANTIDAD"
+                [value]="cellInfo.data.CANTIDAD_PROGRAMADA"
+                (onValueChanged)="onValueChangedCP($event, cellInfo, 'DGproductos')"
+              ></dx-number-box>
+            </div>
+
+            <div *dxTemplate="let grupoObj of 'grpTemplateFechaProg'">
+              <div class="dx-datagrid-template">
+                <div class="col-12" style="display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                  <div>
+                    <span> Fecha de entrega: </span>
+                    <span>{{ templateHtml(grupoObj, 'FECHA_PROGRAMADA') }} </span>
+                  </div>
+                  <div>
+                    <b>
+                      <span> Total día: </span>
+                      <span>{{ templateHtml(grupoObj, 'TOTAL_DIA') | number:'1.0-0' }} </span>
+                    </b>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            <dxo-toolbar>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save','DGproductos')" *ngIf="rowApplyChanges"></dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel', 'DGproductos')" *ngIf="rowApplyChanges"></dx-button>
+                </div>
+              </dxi-item>
+            </dxo-toolbar>
+  
+          </dx-data-grid>
+        </div>
+  
+        <br />
+  
+        <div style="margin: 1rem 0rem;">
+          <dx-button
+            stylingMode="contained"
+            text="Subir"
+            type="success"
+            [width]="'auto'"
+            class="align-self-end"
+            [disabled]="readOnly === false &&
+                        filaSelecc.length > 0 
+                        ? false : true"
+
+            (onClick)="subirProductos(selectPedido, 'DGPMP')"
+          ></dx-button>
+        </div>
+  
+        <div>
+          <dx-data-grid
+            #gridProductosPMP
+            id="gridProductosPMP"
+            height="450"
+            keyExpr="ITEM"
+            columnResizingMode="widget"
+            [dataSource]="DGPMP"
+            [showBorders]="true"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true"
+            [focusedRowEnabled]="true"
+            [allowColumnResizing]="true"
+            [columnHidingEnabled]="true"
+            [rowAlternationEnabled]="true"
+            (onContentReady)="onContentReady($event)"
+            (onRowUpdated)="onRowUpdated($event, 'DGPMP')"
+            (onRowDblClick)="operGrid($event,'edit', 'DGPMP')"
+            (onSelectionChanged)="onSelectionChangedPedidos($event)"
+          >
+            <dxo-scrolling mode="standard"></dxo-scrolling>
+            <dxo-paging [enabled]="true" [pageSize]="30"></dxo-paging>
+            <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[30, 50, 100]"></dxo-pager>
+            <dxo-header-filter [visible]="true" [allowSearch]="true" ></dxo-header-filter>
+            <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+            <dxo-selection
+              selectAllMode="allPages"
+              [showCheckBoxesMode]="esVisibleSelecc"
+              mode="multiple"
+            ></dxo-selection>
+
+            <dxo-editing
+              mode="row"
+              [useIcons]="false"
+              [allowUpdating]="!readOnly"
+              [allowDeleting]="false"
+              [allowAdding]="false"
+            >
+              <dxo-texts confirmDeleteMessage=""></dxo-texts>
+            </dxo-editing>
+    
+            <dxi-column 
+              dataField="DOCUMENTO_PEDIDO"
+              caption="Pedido"
+              [width]="100"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+            
+            <dxi-column
+              dataField="NOMBRE_CLIENTE"
+              caption="Cliente"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+  
+            <dxi-column
+              dataField="PRODUCTO"
+              caption="Cod. Produc."
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+      
+            <dxi-column
+              dataField="NOMBRE_PRODUCTO"
+              caption="Producto"
+              [width]="350"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+  
+            <dxi-column dataField="CANTIDAD" caption="Cant. Requerida" dataType="number" format="#0.##" alignment="right" 
+              [editorOptions]="{ readOnly: true }">
+              <dxo-format
+                type="fixedPoint"
+                [precision]="2"
+              ></dxo-format>
+            </dxi-column>
+  
+            <dxi-column dataField="CANTIDAD_PROGRAMADA" caption="Cant. Programada" dataType="number" format="#0.##" alignment="right" 
+              width="120" editCellTemplate="editCantidadPr2">
+              <dxo-format
+                type="fixedPoint"
+                [precision]="2"
+              ></dxo-format>
+            </dxi-column>
+  
+            <dxi-column dataField="CANTIDAD_PENDIENTE" caption="Cant. Pendiente" dataType="number" format="#0.##" alignment="right" 
+              [editorOptions]="{ readOnly: true }">
+              <dxo-format
+                type="fixedPoint"
+                [precision]="2"
+              ></dxo-format>
+            </dxi-column>
+        
+            <dxi-column 
+              dataField="ESTADO"
+              caption="Estado"
+              alignment="left"
+              [width]="90"
+              [editorOptions]="{ readOnly: true }"
+            ></dxi-column>
+
+            <div *dxTemplate="let cellInfo of 'editCantidadPr2' ">
+              <dx-number-box
+                format="#0.##"
+                [min]="0"
+                [max]="cellInfo.data.CANTIDAD_PENDIENTE > 0 ? cellInfo.data.CANTIDAD_PENDIENTE : cellInfo.data.CANTIDAD"
+                [value]="cellInfo.data.CANTIDAD_PROGRAMADA"
+                (onValueChanged)="onValueChangedCP($event, cellInfo, 'DGPMP')"
+              ></dx-number-box>
+            </div>
+  
+            <dxo-toolbar>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save', 'DGPMP')" *ngIf="rowApplyChanges2"></dx-button>
+                </div>
+              </dxi-item>
+              <dxi-item location="before">
+                <div *dxTemplate>
+                  <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel', 'DGPMP')" *ngIf="rowApplyChanges2"></dx-button>
+                </div>
+              </dxi-item>
+            </dxo-toolbar>
+    
+          </dx-data-grid>
+        </div>
+
+      </dx-scroll-view>
+
+    </div>
+
+  </div>
+  
+  <dx-tooltip
+    position="bottom"
+  >
+    <div *dxTemplate="let data of 'content'"> 
+      <span><b>FECHA:</b> {{mesajeToas[0].FECHA}}</span> <br/>
+      <span>
+        <dx-number-box
+          format="$ #,##0.##"
+          [value]="mesajeToas[0].VALOR"
+          [width]="100"
+          [readOnly]="true"
+          alignment="center"
+          [elementAttr]="{style: 'height: 1rem; width: 130px;'}"
+        ></dx-number-box>
+      </span> 
+    </div>
+  </dx-tooltip>
+
+</div>
+
+
+<!-- <dx-popup
+  #popupSimulador
+  id="popupSimulador"
+  width="100%"
+  height="100%"
+  title="Simulador de Capacidad y Balanceo"
+  [showTitle]="true"
+  [dragEnabled]="true"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="false"
+  [(visible)]="visiblePopupSimulador"
+  (onHidden)="onHiddenPopupSimulador($event)"
+>
+  <dxo-position
+    my="center"
+    at="center"
+    of="#window"
+  ></dxo-position>
+  <div *dxTemplate="let data of 'content'">
+    <app-PRO02302
+      [eventProgramado]="eventsDatos.asObservable()"
+      (onRespuestaDatos)="onRespuestaComponent($event, 'SIMULADOR')"
+    ></app-PRO02302>
+  </div>
+</dx-popup> -->
+
+<!-- <app-vistarapida id="vistaPro023" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<app-geninformes
+  [events]="eventsSubjectInformes.asObservable()" 
+></app-geninformes> -->
+
+<dx-load-panel
+  #loadPanelPro
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>
+  

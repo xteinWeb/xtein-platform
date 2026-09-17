@@ -1,0 +1,6 @@
+::ng-deep .dx-form-group .dx-form-group-caption {
+    color: rgb(10 57 96 / 82%);
+}
+::ng-deep div.swal2-container.swal2-center.swal2-backdrop-show {
+    z-index: 10000 !important;
+}

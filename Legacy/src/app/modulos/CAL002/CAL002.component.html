@@ -1,0 +1,695 @@
+
+<div class="row gx-3">
+  <div id="contentAccion" class="col-12">
+    <div  class="card-content">
+
+      <dx-form
+        #formPlanAccion
+        id="formPlanAccion"
+        [formData]="FPlanAccion"
+        colCount="1"
+        [readOnly]="true"
+        [labelLocation]="labelLocation"
+        [screenByWidth]="getSizeQualifier"
+      >
+        <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="2" [lg]="2"></dxo-col-count-by-screen>
+        <dxi-item dataField="DOCUMENTO" >
+          <dxo-label text="Documento"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box
+              placeholder="Documento"
+              [readOnly]="true"
+              [value]="FPlanAccion.DOCUMENTO">
+            </dx-text-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="ESTADO" >
+          <dxo-label text="Estado"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box
+              placeholder="Estado"
+              [readOnly]="true"
+              [value]="FPlanAccion.ESTADO">
+            </dx-text-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="FECHA" >
+          <dxo-label text="Fecha"></dxo-label>
+          <div *dxTemplate>
+            <dx-date-box
+              [readOnly]="true"
+              [value]="FPlanAccion.FECHA"
+              placeholder="Fecha"
+              type="date"
+            ></dx-date-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="USUARIO" >
+          <dxo-label text="Usuario"></dxo-label>
+          <div *dxTemplate>
+            <dx-text-box
+              placeholder="Usuario"
+              [readOnly]="true"
+              [value]="FPlanAccion.USUARIO">
+            </dx-text-box>
+          </div>
+        </dxi-item>
+      </dx-form>
+
+      <div style="display: flex; width: 100%; height: 70px; margin-top: 20px;" >
+        <div style="display: flex; align-items: center; margin-left: 10px; width: max-content; height: 100%; " >
+          <div style="margin-right: 15px;">
+            Origen
+          </div>
+          <div>
+            <dx-select-box
+              width="120px"
+              [dataSource]="DAcciones"
+              [(value)]="selectAccion"
+              placeholder="Seleccione..."
+              valueExpr="DESCRIPCION"
+              displayExpr="DESCRIPCION"
+              [readOnly]="modoLectura"
+              [dropDownOptions]="{hideOnParentScroll: true, container:'#contentAccion'}"
+              (onValueChanged)="onValueChangedAccion($event)"
+            ></dx-select-box>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; margin-left: 15px; width: max-content; height: 100%; " >
+          <div style="min-width: 150px;">
+            Seleccione {{ selectAccion }}
+          </div>
+          <div>
+            <dx-drop-down-box
+              #dropAccion
+              id="dropAccion"
+              [(value)]="selectListaAccion"
+              [(valueExpr)]="valueExpr"
+              [(displayExpr)]="displayExpr"
+              [placeholder]="'Seleccione '+selectAccion"
+              [readOnly]="selectAccion.length <= 0 ? true : modoLectura"
+              [showClearButton]="true"
+              [(opened)]="openDropAccion"
+              [dataSource]="ListaAcciones"
+              [dropDownOptions]="{width: '500px', height: '500px', hideOnParentScroll: true, container:'#contentAccion'}"
+              (onValueChanged)="onValueChangedDropAccion($event)"
+            >
+              <div id="containerDropAccion" *dxTemplate="let data of 'content' ">
+
+                <dx-data-grid
+                  #FMCusasCliente
+                  *ngIf="selectAccion === 'Causal' "
+                  width="100%"
+                  height="100%"
+                  keyExpr="ID_CAUSA"
+                  [dataSource]="DGCausasClientes"
+                  [(selectedRowKeys)]="selectListaAccion"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  [columnMinWidth]="100"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  (onSelectionChanged)="onSelectionCausaCliente($event)"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+
+                  <dxi-column dataField="ID_CAUSA" caption="Id Causa" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                  <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis"></dxi-column>
+                </dx-data-grid>
+
+                <dx-data-grid
+                  #dataGridEmpleados
+                  *ngIf="selectAccion === 'Causante' "
+                  width="100%"
+                  height="100%"
+                  keyExpr="ID_EMPLEADO"
+                  [dataSource]="DGEmpleados"
+                  [(selectedRowKeys)]="selectListaAccion"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  [columnMinWidth]="100"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  (onSelectionChanged)="onSelectionCausante($event)"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+
+                  <dxi-column dataField="ID_EMPLEADO" caption="Cédula" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                  <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre" cssClass="clsEncabHis" [width]="225"></dxi-column>
+                  <dxi-column dataField="NOMBRE_SECCION" caption="Sección" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                </dx-data-grid>
+
+                <dx-data-grid
+                  #FMProductos
+                  *ngIf="selectAccion === 'Producto' "
+                  width="100%"
+                  height="100%"
+                  keyExpr="PRODUCTO"
+                  [dataSource]="DGProductos"
+                  [(selectedRowKeys)]="selectListaAccion"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  [columnMinWidth]="100"
+                  [rowAlternationEnabled]="true"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  (onSelectionChanged)="onSelectionProducto($event)"
+                >
+                  <dxo-scrolling mode="virtual"></dxo-scrolling>
+                  <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+
+                  <dxi-column dataField="PRODUCTO"  caption="Producto" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                  <dxi-column dataField="NOMBRE"  caption="Nombre" cssClass="clsEncabHis" [width]="200"></dxi-column>
+                  <dxi-column dataField="COD_ASOCIADO"  caption="Cod. Asociado" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                </dx-data-grid>
+                
+              </div>
+            </dx-drop-down-box>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; margin-left: 15px; width: max-content; height: 100%; flex-direction: column; justify-content: space-around; " >
+
+          <div style="display: flex; align-items: center;" *ngIf="selectAccion !== 'Causal' && selectAccion.length > 0 " >
+            <div style="min-width: 100px;" >
+              Causal
+            </div>
+            <div>
+              <dx-drop-down-box
+                #dropCausal
+                id="dropCausal"
+                [(value)]="selectListaCausal"
+                valueExpr="ID_CAUSA"
+                displayExpr="NOMBRE"
+                placeholder="Seleccione acción..."
+                [readOnly]="selectListaAccion.length <= 0 ? true : modoLectura"
+                [showClearButton]="true"
+                [(opened)]="openDropCausal"
+                [dataSource]="DGCausasClientes"
+                [dropDownOptions]="{width: '300px', height: '400px', hideOnParentScroll: true, container:'#contentAccion'}"
+                (onValueChanged)="onValueChangedDato($event, 'Causal')"
+              >
+                <div id="containerDropCausal" *dxTemplate="let data of 'content' ">
+                  <dx-data-grid
+                    #FMCusasCliente
+                    width="100%"
+                    height="100%"
+                    keyExpr="ID_CAUSA"
+                    [dataSource]="DGCausasClientes"
+                    [(selectedRowKeys)]="selectListaCausal"
+                    [selection]="{ mode: 'single' }"
+                    [columnAutoWidth]="true"
+                    [allowColumnResizing]="true"
+                    [columnMinWidth]="100"
+                    [rowAlternationEnabled]="true"
+                    [focusedRowEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    (onSelectionChanged)="onSelectionCausaCliente($event)"
+                  >
+                    <dxo-scrolling mode="virtual"></dxo-scrolling>
+                    <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+  
+                    <dxi-column dataField="ID_CAUSA" caption="Id Causa" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                    <dxi-column dataField="NOMBRE" caption="Nombre" cssClass="clsEncabHis"></dxi-column>
+                  </dx-data-grid>
+                </div>
+              </dx-drop-down-box>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center;" *ngIf="selectAccion !== 'Producto' && selectAccion.length > 0 " >
+            <div style="min-width: 100px;" >
+              Producto
+            </div>
+            <div>
+              <dx-drop-down-box
+                #dropProducto
+                id="dropProducto"
+                [(value)]="selectListaProducto"
+                valueExpr="PRODUCTO"
+                displayExpr="NOMBRE"
+                placeholder="Seleccione acción..."
+                [readOnly]="selectListaAccion.length <= 0 ? true : modoLectura"
+                [showClearButton]="true"
+                [(opened)]="openDropProducto"
+                [dataSource]="DGProductos"
+                [dropDownOptions]="{width: '500px', height: '500px', hideOnParentScroll: true, container:'#contentAccion'}"
+                (onValueChanged)="onValueChangedDato($event, 'Producto')"
+              >
+                <div id="containerDropProducto" *dxTemplate="let data of 'content' ">
+                  <dx-data-grid
+                    #FMProductos
+                    width="100%"
+                    height="100%"
+                    keyExpr="PRODUCTO"
+                    [dataSource]="DGProductos"
+                    [(selectedRowKeys)]="selectListaProducto"
+                    [selection]="{ mode: 'single' }"
+                    [columnAutoWidth]="true"
+                    [allowColumnResizing]="true"
+                    [columnMinWidth]="100"
+                    [rowAlternationEnabled]="true"
+                    [focusedRowEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    (onSelectionChanged)="onSelectionProducto($event)"
+                  >
+                    <dxo-scrolling mode="virtual"></dxo-scrolling>
+                    <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+  
+                    <dxi-column dataField="PRODUCTO"  caption="Producto" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                    <dxi-column dataField="NOMBRE"  caption="Nombre" cssClass="clsEncabHis" [width]="250"></dxi-column>
+                    <dxi-column dataField="COD_ASOCIADO"  caption="Cod. Asociado" cssClass="clsEncabHis" [width]="110"></dxi-column>
+                  </dx-data-grid>
+                </div>
+              </dx-drop-down-box>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center;" *ngIf="selectAccion !== 'Causante' && selectAccion.length > 0 " >
+            <div style="min-width: 100px;">
+              Causante
+            </div>
+            <div>
+              <dx-drop-down-box
+                #dropCausante
+                id="dropCausante"
+                [(value)]="selectListaCausante"
+                valueExpr="ID_EMPLEADO"
+                displayExpr="NOMBRE_COMPLETO"
+                placeholder="Seleccione acción..."
+                [readOnly]="selectListaAccion.length <= 0 ? true : modoLectura"
+                [showClearButton]="true"
+                [(opened)]="openDropCausante"
+                [dataSource]="DGEmpleados"
+                [dropDownOptions]="{width: '500px', height: '500px', hideOnParentScroll: true, container:'#contentAccion'}"
+                (onValueChanged)="onValueChangedDato($event, 'Causante')"
+              >
+                <div id="containerDropCausante" *dxTemplate="let data of 'content' ">
+                  <dx-data-grid
+                    #dataGridEmpleados
+                    width="100%"
+                    height="100%"
+                    keyExpr="ID_EMPLEADO"
+                    [dataSource]="DGEmpleados"
+                    [(selectedRowKeys)]="selectListaCausante"
+                    [selection]="{ mode: 'single' }"
+                    [columnAutoWidth]="true"
+                    [allowColumnResizing]="true"
+                    [columnMinWidth]="100"
+                    [rowAlternationEnabled]="true"
+                    [focusedRowEnabled]="true"
+                    [hoverStateEnabled]="true"
+                    (onSelectionChanged)="onSelectionCausante($event)"
+                  >
+                    <dxo-scrolling mode="virtual"></dxo-scrolling>
+                    <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+  
+                    <dxi-column dataField="ID_EMPLEADO" caption="Cédula" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                    <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre" cssClass="clsEncabHis" [width]="200"></dxi-column>
+                    <dxi-column dataField="NOMBRE_SECCION" caption="Sección" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                  </dx-data-grid>
+                </div>
+              </dx-drop-down-box>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display: flex; align-items: center; width: max-content; height: 100%; margin-left: 15px; " >
+          <dx-button
+            *ngIf="selectAccion.length > 0 "
+            id="btnCargarFiltro"
+            stylingMode="contained"
+            type="default"
+            text="Cargar"
+            matTooltip="Cargar Filtro"
+            style="width: 100px; height: 50px; display: flex; justify-content: center; align-items: center; "
+            [disabled]="activeBtnCargar"
+            (onClick)="getCargarFiltro($event)"
+          ></dx-button>
+        </div>
+
+      </div>
+
+      <div #accordionContainer id="accordionContainer">
+        <cdk-accordion class="accordion-container unbg-input" [multi]="true">
+          <cdk-accordion-item
+            *ngFor="let item of itemsAcodeon; let index = index;"
+            #accordionItem="cdkAccordionItem"
+            class="accordion-item"
+            role="button"
+            tabindex="0"
+            [expanded]="accordionExpand[index]"
+            [attr.id]="'accordion-header-' + index"
+            [attr.aria-expanded]="accordionItem.expanded"
+            [attr.aria-controls]="'accordion-body-' + index"
+          >
+            <div
+              (click)="accordionItem.toggle()"
+              class="accordion-item-header"
+              [ngStyle]="{'background-color': accordionItem.expanded ? 'transparent' : '', 'border-radius': accordionItem.expanded ? '10px 10px 0 0' : '' }"
+            >
+              <div class="accordion-item-group" >
+                <div>
+                  <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+                    <i class="icon-chevron-up-xs"></i>
+                  </span>
+                  <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+                    <i class="icon-chevron-down-xs"></i>
+                  </span>
+                </div>
+                <span class="accordion-caption"> {{ item }} </span>
+              </div>
+            </div>
+
+            <!-- PESTAÑAS/COMPONENTES SECCIONES -->
+            <div
+              class="accordion-item-body"
+              role="region"
+              [style.display]="accordionItem.expanded ? '' : 'none'"
+              [attr.id]="'accordion-body-' + index"
+              [attr.aria-labelledby]="'accordion-header-' + index"
+            >
+              <div *ngIf="item === 'No conformidades'">
+                <dx-data-grid
+                  #GplanesAccion
+                  id="GplanesAccion"
+                  width="100%"
+                  height="350px"
+                  keyExpr="ITEM"
+                  [dataSource]="DGplanesAccion"
+                  [selection]="{ mode: 'single' }"
+                  [columnAutoWidth]="true"
+                  columnResizingMode="widget"
+                  [allowColumnResizing]="true"
+                  [focusedRowEnabled]="true"
+                  [rowAlternationEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  noDataText="No hay datos"
+                  [showBorders]="true"
+                  [wordWrapEnabled]="false"
+                >
+                  <dxo-filter-row [visible]="true"></dxo-filter-row>
+                  <dxo-header-filter [visible]="true"></dxo-header-filter>
+
+                  <dxo-group-panel [visible]="false"></dxo-group-panel>
+                  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+                  <dxo-search-panel 
+                    [visible]="true" 
+                    [width]="300" 
+                    placeholder="Buscar...">
+                  </dxo-search-panel>
+
+                  <dxo-paging [pageSize]="20"></dxo-paging>
+                  <dxo-pager 
+                    [visible]="true" 
+                    [allowedPageSizes]="[5, 10, 20, 50, 100, 'all']" 
+                    displayMode="full"
+                    [showPageSizeSelector]="true" 
+                    [showInfo]="true" 
+                    [showNavigationButtons]="true"
+                  ></dxo-pager>
+
+                  <dxi-column dataField="FECHA_RECLAMO" dataType="date" format="yyyy-MM-dd" caption="Fecha reclamo"
+                    cssClass="clsEncabHis" alignment="right" width="150" editCellTemplate="editTemplateFechaReclamo"
+                  ></dxi-column>
+                  <dxi-column dataField="N_SERVICIO" caption="N° servicio" [allowEditing]="false" cssClass="clsEncabHis" width="150"></dxi-column>
+                  
+                  <dxi-column dataField="PRODUCTO" caption="Producto" cssClass="clsEncabHis" 
+                    [allowEditing]="false" width="100" *ngIf="selectAccion !== 'Producto'" 
+                    [groupIndex]="groupProducto"
+                  ></dxi-column>
+                  <dxi-column dataField="NOMBRE_PRODUCTO" caption="Nombre Producto" cssClass="clsEncabHis" [allowEditing]="false" width="230" *ngIf="selectAccion !== 'Producto'" ></dxi-column>
+
+                  <dxi-column dataField="ID_CAUSA_CLIENTE"  caption="Cod. Causa Cliente" cssClass="clsEncabHis" width="110" [allowEditing]="false" ></dxi-column>
+                  <dxi-column dataField="NOMBRE_CAUSA_CLIENTE" caption="Causal Cliente" cssClass="clsEncabHis" [allowEditing]="false" width="150" *ngIf="selectAccion !== 'Causal'" ></dxi-column>
+                  
+                  <dxi-column dataField="ID_CAUSA_INTERNA"  caption="Cod. Causa Interna" cssClass="clsEncabHis" width="110" 
+                    [allowEditing]="false" *ngIf="selectAccion !== 'Causal'" 
+                    [groupIndex]="groupIdCausa"
+                  ></dxi-column>
+                  <dxi-column dataField="NOMBRE_CAUSA_INTERNA" caption="Causal Interna" cssClass="clsEncabHis" [allowEditing]="false" width="150" *ngIf="selectAccion !== 'Causal'" ></dxi-column>
+                  
+                  <dxi-column dataField="ID_CAUSANTE" caption="Id. Causante" cssClass="clsEncabHis" width="230" 
+                    [allowEditing]="false" *ngIf="selectAccion !== 'Causante'"
+                    [groupIndex]="groupIdCausante"
+                  ></dxi-column>
+                  <dxi-column dataField="NOMBRE_CAUSANTE" caption="Nombre Causante" cssClass="clsEncabHis" width="230" [allowEditing]="false" *ngIf="selectAccion !== 'Causante'" ></dxi-column>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateFechaReclamo' " >
+                    <dx-date-box
+                      #fechaDesde
+                      placeholder="D/M/AA"
+                      [useMaskBehavior]="true"
+                      [inputAttr]="{ 'aria-label': 'Fecha' }"
+                      [(value)]="cellInfo.data.FECHA_RECLAMO"
+                      (onValueChanged)="onValueChangedFechaReclamo($event, cellInfo)"
+                    ></dx-date-box>
+                  </div>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateFuente' " >
+                    <dx-select-box
+                      [dataSource]="['LOGISTICA Y TRANSPORTE','PROCESO DE FABRICACIÓN','NO APLICA']"
+                      [(value)]="cellInfo.data.FUENTE"
+                      [readOnly]="readOnly"
+                      placeholder="Seleccione..."
+                      (onValueChanged)="onValueChangedFuente($event, cellInfo)"
+                    ></dx-select-box>
+                  </div>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateAnalisis' " >
+                    <dx-text-box
+                      placeholder="Analisis de la causa."
+                      [readOnly]="readOnly"
+                      [value]="cellInfo.data.ANALISIS_CAUSA"
+                      (onValueChanged)="onValueChangedAnalisis($event, cellInfo)"
+                    ></dx-text-box>
+                  </div>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateTipoAccion' " >
+                    <dx-select-box
+                      [dataSource]="['Material','Plano','Proceso','Producto']"
+                      [(value)]="cellInfo.data.TIPO_ACCION"
+                      [readOnly]="readOnly"
+                      placeholder="Seleccione..."
+                      (onValueChanged)="onValueChangedTipoAccion($event, cellInfo)"
+                    ></dx-select-box>
+                  </div>
+                  
+                  <div *dxTemplate="let cellInfo of 'editTemplateAccionCorrectiva' " >
+                    <dx-text-box
+                      placeholder="Acción correctiva."
+                      [readOnly]="readOnly"
+                      [value]="cellInfo.data.ACCION_CORRECTIVA"
+                      (onValueChanged)="onValueChangedCorrectiva($event, cellInfo)"
+                    ></dx-text-box>
+                  </div>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateEstado' " >
+                    <dx-select-box
+                      [dataSource]="['Sin Iniciar','En Proceso','Ejecutada']"
+                      [(value)]="cellInfo.data.ESTADO"
+                      [readOnly]="readOnly"
+                      placeholder="Seleccione..."
+                      (onValueChanged)="onValueChangedEstado($event, cellInfo)"
+                    ></dx-select-box>
+                  </div>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateAccionado' " >
+                    <dx-select-box
+                      [dataSource]="['Si','No']"
+                      [(value)]="cellInfo.data.ACCIONADO"
+                      [readOnly]="readOnly"
+                      placeholder="Seleccione..."
+                      (onValueChanged)="onValueChangedAccionado($event, cellInfo)"
+                    ></dx-select-box>
+                  </div>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateResponsable' " >
+                    <dx-drop-down-box 
+                      #dropSelectResponsable
+                      id="dropSelectResponsable"
+                      [(value)]="selectResponsable"
+                      valueExpr="ID_EMPLEADO"
+                      displayExpr="NOMBRE_COMPLETO"
+                      placeholder="Selecciones Responsable"
+                      [readOnly]="readOnly"
+                      [showClearButton]="true"
+                      [(opened)]="openDropResponsable"
+                      [dataSource]="DGEmpleados"
+                      columnResizingMode="widget"
+                      [dropDownOptions]="{width: '400px', height: '300px', hideOnParentScroll: true, container:'#GplanesAccion'}"
+                    >
+                      <div id="containerDgResponsable" *dxTemplate="let data of 'content'">
+                        <dx-data-grid
+                          #dataGridEmpleados
+                          width="100%"
+                          height="100%"
+                          keyExpr="ID_EMPLEADO"
+                          [dataSource]="DGEmpleados"
+                          [(selectedRowKeys)]="selectResponsable"
+                          [selection]="{ mode: 'single' }"
+                          [columnAutoWidth]="true"
+                          [allowColumnResizing]="true"
+                          [columnMinWidth]="100"
+                          [rowAlternationEnabled]="true"
+                          [focusedRowEnabled]="true"
+                          [hoverStateEnabled]="true"
+                          (onSelectionChanged)="onSelectionChangedResponsable($event, cellInfo)"
+                        >
+                          <dxo-scrolling mode="virtual"></dxo-scrolling>
+                          <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+
+                          <dxi-column dataField="ID_EMPLEADO" caption="Cédula" cssClass="clsEncabHis" [width]="100"></dxi-column>
+                          <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre" cssClass="clsEncabHis" ></dxi-column>
+                        </dx-data-grid>
+                      </div>
+                    </dx-drop-down-box>
+                  </div>
+
+                </dx-data-grid>
+              </div>
+              <div *ngIf="item === 'Analisis'">
+                <dx-tree-list
+                  #TreeListAnalisis
+                  id="TreeListAnalisis"
+                  width="100%"
+                  height="350px"
+                  keyExpr="ITEM"
+                  parentIdExpr="ITEM_PADRE"
+                  columnResizingMode="widget"
+                  noDataText="No hay datos"
+                  [rootValue]="-1"
+                  [showBorders]="true"
+                  [columnAutoWidth]="true"
+                  [wordWrapEnabled]="false"
+                  [focusedRowEnabled]="true"
+                  [hoverStateEnabled]="true"
+                  [allowColumnResizing]="true"
+                  [rowAlternationEnabled]="true"
+                  [dataSource]="FPlanAccion.ANALISIS"
+                  (onContentReady)="onContentReady($event)"
+                  (onInitNewRow)="initNewRowTreeList($event)"
+                  (onRowValidating)="onRowValidating($event)"
+                  (onSelectionChanged)="onSelectionChangedDato($event)"
+                >
+                  <dxo-editing
+                    mode="row"
+                    [useIcons]="false" 
+                    [allowUpdating]="!readOnly"
+                    [allowDeleting]="false"
+                    [allowAdding]="!readOnly">
+                    <dxo-texts
+                      confirmDeleteMessage="">
+                    </dxo-texts>
+                  </dxo-editing>
+
+                  <dxo-selection mode="multiple" [recursive]="false"></dxo-selection>
+                  <dxo-search-panel 
+                    [visible]="true" 
+                    [width]="300" 
+                    placeholder="Buscar...">
+                  </dxo-search-panel>
+
+                  <dxi-column dataField="ANALISIS_CAUSA" caption="Analisis de la causa" cssClass="clsEncabHis" width="50%" editCellTemplate="editTemplateAnalisis" ></dxi-column>
+                  <dxi-column dataField="TIPO_ACCION" caption="Tipo de acción" cssClass="clsEncabHis" width="30%" editCellTemplate="editTemplateTipoAccion" ></dxi-column>
+                  <dxi-column dataField="ACCIONADO" caption="Accionado" cssClass="clsEncabHis" width="20%" editCellTemplate="editTemplateAccionado" ></dxi-column>
+
+                  <div *dxTemplate="let cellInfo of 'editTemplateAnalisis' " >
+                    <dx-text-box
+                      placeholder="Analisis de la causa."
+                      [readOnly]="readOnly"
+                      [value]="cellInfo.data.ANALISIS_CAUSA"
+                      (onValueChanged)="onValueChangedAnalisis($event, cellInfo)"
+                    ></dx-text-box>
+                  </div>
+                  <div *dxTemplate="let cellInfo of 'editTemplateTipoAccion' " >
+                    <dx-select-box
+                      [dataSource]="['Material','Plano','Proceso','Producto']"
+                      [(value)]="cellInfo.data.TIPO_ACCION"
+                      [readOnly]="readOnly"
+                      placeholder="Seleccione..."
+                      (onValueChanged)="onValueChangedTipoAccion($event, cellInfo)"
+                    ></dx-select-box>
+                  </div>
+                  <div *dxTemplate="let cellInfo of 'editTemplateAccionado' " >
+                    <dx-select-box
+                      [dataSource]="['Si','No']"
+                      [(value)]="cellInfo.data.ACCIONADO"
+                      [readOnly]="readOnly"
+                      placeholder="Seleccione..."
+                      (onValueChanged)="onValueChangedAccionado($event, cellInfo)"
+                    ></dx-select-box>
+                  </div>
+
+                  <dxo-toolbar *ngIf="!readOnly">
+                    <dxi-item location="before">
+                      <div *dxTemplate>
+                        <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew"></dx-button>
+                      </div>
+                    </dxi-item>
+                    <dxi-item location="before" >
+                      <div *dxTemplate>
+                        <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'edit')" *ngIf="rowEdit"></dx-button>
+                      </div>
+                    </dxi-item>
+                    <dxi-item location="before">
+                      <div *dxTemplate>
+                        <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete"></dx-button>
+                      </div>
+                    </dxi-item>
+                    <dxi-item location="before" >
+                      <div *dxTemplate>
+                        <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges"></dx-button>
+                      </div>
+                    </dxi-item>
+                    <dxi-item location="before" >
+                      <div *dxTemplate>
+                        <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges"></dx-button>
+                      </div>
+                    </dxi-item>
+                  </dxo-toolbar>
+
+                </dx-tree-list>
+              </div>
+              <div *ngIf="item === 'Planes de Acción'">
+                <GES000-COMPONENT
+                  [events]="eventsSubjectDatos.asObservable()"
+                  [(datosEntrada)]="DATOS_CONFIG"
+                  [(readOnly)]="readOnly"
+                  (onRespuestaComponent)="onRespuestaComponent($event)"
+                ></GES000-COMPONENT>
+              </div>
+            </div>
+
+          </cdk-accordion-item>
+        </cdk-accordion>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<app-vistarapida id="vistaCAL002" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+
+<dx-load-panel
+  #loaderPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#contentAccion' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando datos..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>

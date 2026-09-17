@@ -1,0 +1,502 @@
+<div class="row gx-3">
+    <div class="col-12">
+
+      <div class="card-content row">
+        <div id="idrec" class="col">
+          
+          <dx-form
+            #formRecaudoBasico
+            id="formRecaudoBasico"
+            class="dx-form-group"
+            [formData]="DRecaudo"
+            [readOnly]="readOnly"
+            labelLocation="left"
+            [colCount]="1"
+            (onEditorEnterKey)="onEditorEnterKey($event)"
+          > 
+            <!-- Datos de la Recaudo -->
+            <dxi-item itemType="group">
+              <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="2"></dxo-col-count-by-screen>
+              <dxi-item itemType="group" cssClass="group-idrec">
+    
+                <dxi-item dataField="DOCUMENTO"
+                  editorType="dxSelectBox"
+                  [editorOptions]="{placeholder:'Id documento'}"
+                >
+                  <!-- <dxo-label text="Recaudo Numero" [style]="{'font-size': '18px', 'width': '40%'}"></dxo-label> -->
+                  <dxo-label template="labelDoc"></dxo-label>
+                  <div *dxTemplate>
+                    <dx-select-box
+                      id="xs__DOCUMENTO"
+                      [dataSource]="DDocumentos"
+                      displayExpr="DOCUMENTO"
+                      valueExpr="DOCUMENTO"
+                      [value]="sbDocumento"
+                      [inputAttr]="{ name: 'DOCUMENTO' }"
+                      [searchEnabled]="true"
+                      [readOnly]="readOnly"
+                      [stylingMode]="stylingMode"
+                      [acceptCustomValue]="true" 
+                      [dropDownOptions]="dropDownOptionsListBox"
+                      (onValueChanged)="onSeleccDocumento($event)"
+                      [inputAttr]="{'style': 'font-size: 18px; font-weight: 500; text-transform: uppercase; padding: 4px 11px 1px;'}"
+                      >
+                    </dx-select-box>
+                  </div>
+                </dxi-item>
+
+                <dxi-item dataField="FECHA" editorType="dxDateBox" >
+                  <dxo-label text="Fecha"></dxo-label>
+                </dxi-item>
+    
+                <dxi-item dataField="FECHA_REGISTRO"
+                  editorType="dxDateBox"
+                  [editorOptions]="{ readOnly: true }"
+                >
+                  <dxo-label text="Fecha de Registro"></dxo-label>
+                </dxi-item>
+
+              </dxi-item>
+      
+              <dxi-item itemType="group" >
+    
+                <dxi-item dataField="ESTADO"
+                  editorType="dxSelectBox"
+                  [editorOptions]="{ items: dSBEstados, value: '', readOnly: true, placeholder:'Estado'}">
+                  <dxo-label text="Estado"></dxo-label>
+                </dxi-item>
+
+                <dxi-item dataField="USUARIO" [editorOptions]="{ readOnly: true }" >
+                  <dxo-label text="Usuario"></dxo-label>
+                  <div *dxTemplate> 
+                    <dx-text-box
+                      #xs__USUARIO
+                      id="xs__USUARIO"
+                      placeholder="Usuario"
+                      [readOnly]="true"
+                      [value]="DRecaudo.USUARIO"
+                    ></dx-text-box>
+                  </div>
+                </dxi-item>
+
+                <dxi-item dataField="ID_ADC">
+                    <dxo-label text="ADC / Cobrador"></dxo-label>
+                    <div *dxTemplate> 
+                    <dx-drop-down-box
+                        #ddADC
+                        [(value)]="gridBoxADC"
+                        valueExpr="ID_ADC"
+                        displayExpr="NUM_NOMBRE"
+                        [readOnly]="readOnlyADC"
+                        [showClearButton]="true"
+                        [(opened)]="isGridBoxADCOpened"
+                        [dataSource]="DADC"
+                        [dropDownOptions]="{width:500, height: 400, hideOnParentScroll: true, container: '#router-container'}"
+                        columnResizingMode="widget">
+                        <div id="containerADC" *dxTemplate="let data of 'content'">
+                        <dx-data-grid
+                            #GADC
+                            height="100%"
+                            width="100%"
+                            keyExpr="ID_ADC"
+                            [dataSource]="DADC"
+                            [(selectedRowKeys)]="gridBoxADC"
+                            [selection]="{ mode: 'single' }"
+                            (onSelectionChanged)="onSelectionADC($event)" 
+                            [columnAutoWidth]="true"
+                            [allowColumnResizing]="true"
+                            [columnMinWidth]="100"
+                            [rowAlternationEnabled]="true"
+                            [focusedRowEnabled]="true"
+                            [hoverStateEnabled]="true">
+                            <dxo-scrolling mode="virtual"></dxo-scrolling>
+                            <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+                            <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+                            <dxi-column dataField="ID_ADC" caption="Código de Cobrador" cssClass="clsEncabHis" [width]="130"></dxi-column>
+                            <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre de Cobrador" cssClass="clsEncabHis"></dxi-column>
+                        </dx-data-grid>
+                        </div>
+                    </dx-drop-down-box>
+                    </div>  
+                </dxi-item>
+
+              </dxi-item>
+
+            </dxi-item>
+
+            <div *dxTemplate="let data of 'labelDoc'">
+                <span>Recaudo Numero</span>
+                <span class="help-icon material-icons" title="Ingrese el documento">!</span>
+            </div>                  
+
+
+            <!-- Datos del Cliente -->
+            <dxi-item caption="Cliente" itemType="group" cssClass="group-with-line group-cliente">
+
+              <dxi-item dataField="TIPO_PAGO" editorType="dxSelectBox" >
+                <dxo-label text="Tipo Pago"></dxo-label>
+                <div *dxTemplate> 
+                  <dx-select-box
+                    #ddTipoPago
+                    [dataSource]="DTiposPago"
+                    displayExpr="VALOR1"
+                    valueExpr="VALOR1"
+                    placeholder="Tipo Pago"
+                    [(value)]="sbTipoPago"
+                    [readOnly]="readOnly"
+                    [inputAttr]="{ name: 'VALOR1' }"
+                    [searchEnabled]="true"
+                    [readOnly]="readOnly"
+                    [stylingMode]="stylingMode"
+                    [dropDownOptions]="dropDownOptionsListBox"
+                    (onValueChanged)="onSeleccTipoPago($event)">
+                  </dx-select-box>
+                </div>  
+              </dxi-item>
+
+              <dxi-item dataField="ID_UN_ITEM" editorType="dxSelectBox">
+                <dxo-label text="Unidad de Negocio"></dxo-label>
+                <div *dxTemplate> 
+                  <dx-drop-down-box
+                    #ddProducto
+                    [(value)]="gridBoxUN"
+                    valueExpr="ID_UN"
+                    displayExpr="UN_NOMBRE"
+                    placeholder="Unidad de Negocio"
+                    [readOnly]="readOnly"
+                    [showClearButton]="true"
+                    [(opened)]="isGridBoxUNOpened"
+                    [dataSource]="DUnidadesNegocios"
+                    [dropDownOptions]="{width:400, height: 300, hideOnParentScroll: true, container: '#router-container'}"
+                    columnResizingMode="widget">
+                    <div id="containerUN" *dxTemplate="let data of 'content'">
+                      <dx-data-grid
+                        #GUnidadesNegocios
+                        height="100%"
+                        width="100%"
+                        keyExpr="ID_UN"
+                        [dataSource]="DUnidadesNegocios"
+                        [(selectedRowKeys)]="gridBoxUN"
+                        [selection]="{ mode: 'single' }"
+                        (onSelectionChanged)="onSelectionUN($event)" 
+                        [columnAutoWidth]="true"
+                        [allowColumnResizing]="true"
+                        [columnMinWidth]="100"
+                        [rowAlternationEnabled]="true"
+                        [focusedRowEnabled]="true"
+                        [hoverStateEnabled]="true">
+                        <dxo-scrolling mode="virtual"></dxo-scrolling>
+                        <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+                        <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+                        <dxi-column dataField="ID_UN" caption="Código" cssClass="clsEncabHis" [width]="130"></dxi-column>
+                        <dxi-column dataField="NOMBRE" caption="Nombre de Unidad de Negocio" cssClass="clsEncabHis"></dxi-column>
+                      </dx-data-grid>
+                    </div>
+                  </dx-drop-down-box>
+                </div>  
+              </dxi-item>
+
+              <dxo-col-count-by-screen [xs]="1" [sm]="1" [md]="1" [lg]="2"></dxo-col-count-by-screen>
+              <dxi-item dataField="ID_CLIENTE" >
+                <dxo-label text="Documento del Cliente"></dxo-label>
+                <div *dxTemplate> 
+                  <dx-drop-down-box
+                    #ddProducto
+                    [(value)]="gridBoxCliente"
+                    valueExpr="ID_CLIENTE"
+                    displayExpr="ID_CLIENTE"
+                    placeholder="Documento"
+                    [readOnly]="readOnly"
+                    [(opened)]="isGridBoxCliOpened"
+                    [dataSource]="DClientes"
+                    [dropDownOptions]="{width:600, height: 300, hideOnParentScroll: true, container: '#router-container'}"
+                    columnResizingMode="widget">
+                    <div id="containerClientes" *dxTemplate="let data of 'content'">
+                      <dx-data-grid
+                        #GClientes
+                        height="100%"
+                        width="100%"
+                        keyExpr="ID_CLIENTE"
+                        [dataSource]="DClientes"
+                        [(selectedRowKeys)]="gridBoxCliente"
+                        [selection]="{ mode: 'single' }"
+                        (onSelectionChanged)="onSelectionCliente($event)" 
+                        [columnAutoWidth]="true"
+                        [allowColumnResizing]="true"
+                        [columnMinWidth]="100"
+                        [rowAlternationEnabled]="true"
+                        [focusedRowEnabled]="true"
+                        [hoverStateEnabled]="true">
+                        <dxo-scrolling mode="virtual"></dxo-scrolling>
+                        <dxo-search-panel [visible]="true" [width]="150" ></dxo-search-panel>
+                        <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+                        <dxi-column dataField="ID_CLIENTE" caption="Documento del Cliente" cssClass="clsEncabHis" [width]="130"></dxi-column>
+                        <dxi-column dataField="NOMBRE_COMPLETO" caption="Nombre del Cliente" cssClass="clsEncabHis"></dxi-column>
+                      </dx-data-grid>
+                    </div>
+                  </dx-drop-down-box>
+                </div>  
+              </dxi-item>
+      
+              <dxi-item dataField="NOMBRE_CLIENTE" [editorOptions]="{ readOnly: true, placeholder:'Nombre' }" >
+                <dxo-label text="Nombre de Cliente"></dxo-label>
+              </dxi-item>
+
+                <dxi-item dataField="DESCRIPCION" [colSpan]="2">
+                <dxo-label text="Descripción Recaudo"></dxo-label>
+                <div *dxTemplate> 
+                    <dx-text-box
+                    placeholder="Descripción"
+                    [readOnly]="readOnly"
+                    [value]="DRecaudo.DESCRIPCION">
+                    </dx-text-box>
+                </div>
+                </dxi-item>
+
+            </dxi-item>
+
+          </dx-form>
+        </div>
+ 
+        <!-- Totales y Gravamenes -->
+        <div id="totrec" class="col">
+          <div class="tot-actions">
+            <button class="btn btn-light btn-sm" title="Configuración">
+              <i class="dx-icon-menu"></i>
+            </button>
+          </div>
+          <div class="tot-content">
+            <div>
+                <dx-data-grid
+                #gridSubTotales
+                id="gridSubTotales"
+                class="xt-totales"
+                [dataSource]="GridSubTotales"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                [allowColumnResizing]="true"
+                [showColumnHeaders]="false"
+                [focusedRowEnabled]="true"
+                >
+
+                <dxi-column dataField="key"
+                    caption="Código"
+                    [allowEditing]="false">
+                </dxi-column>
+
+                <dxi-column dataField="value"
+                    caption="Valor"
+                    [allowEditing]="false"
+                    alignment="right"
+                    dataType="number"
+                    [format]="MONEDA_FORMATO"
+                    [style]="{'font-size': '18px'}" 
+                    [editorOptions]="{format: MONEDA_FORMATO}">
+                </dxi-column>
+                </dx-data-grid>
+            </div>
+
+
+            <div class="xt-text-editor">
+                <span style="font-size: 18px; padding-top: 5px; padding-left: 5px; z-index: 100"> TOTAL </span>
+                <dx-number-box
+                  dataType="number"
+                  format="#,###.00"
+                  [readOnly]="true"
+                  [value]="DRecaudo.TOTAL"
+                  [format]="MONEDA_FORMATO"
+                  [inputAttr]="{ style: 'font-size:18px; font-weight:700;' }"
+                  [readOnly]="true"
+                ></dx-number-box>
+            </div>
+
+          </div>
+        </div>
+
+      </div> 
+
+
+    <div>
+      <!--Grid Items-->
+      <div>
+        <dx-data-grid
+          #gridRecaudoItems
+          id="gridRecaudoItems"
+          [columnAutoWidth]="true"
+          [dataSource]="DRecaudoAbonos"
+          [allowColumnResizing]="true"
+          [columnAutoWidth]="true"
+          columnResizingMode="widget"
+          [focusedRowEnabled]="true"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          keyExpr="ITEM"
+          noDataText=""
+          [showBorders]="true"
+          (onInitNewRow)="initNewRow($event)"
+          (onRowInserting)="insertingRow($event)"
+          (onRowInserted)="insertedRow($event)"
+          (onRowUpdating)="updatingRow($event)"
+          (onRowUpdated)="updatedRow($event)"
+          (onRowRemoved)="removedRow($event)"
+          (onEditingStart)="onEditingStart($event)"
+          (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+          (onRowPrepared)="onRowPrepared($event)"
+          (onRowValidating)="onRowValidating($event)"
+          (onSelectionChanged)="selectionGrid($event)"
+          (onFocusedRowChanged)="onFocusedRowChanged($event)"
+        >
+      
+          <dxo-editing
+            mode="cell"
+            [useIcons]="false" 
+            [allowUpdating]="esEdicion"
+            [allowDeleting]="false"
+            [allowAdding]="esEdicion">
+            <dxo-texts
+              confirmDeleteMessage="">
+            </dxo-texts>
+          </dxo-editing>      
+          <dxo-column-fixing [enabled]="true"></dxo-column-fixing>      
+          <dxo-selection
+              selectAllMode="allPages"
+              [showCheckBoxesMode]="esVisibleSelecc"
+              mode="multiple">
+          </dxo-selection>
+      
+          <dxi-column dataField="ITEM"
+            [visible]="false">
+          </dxi-column>
+      
+          <dxi-column dataField="FACTURA"
+            caption="Factura"
+            [allowEditing]="false"
+            calculateDisplayValue="FACTURA">
+          </dxi-column>
+
+          <dxi-column dataField="CUOTA"
+            caption="Cuota"
+            calculateDisplayValue="CUOTA">
+          </dxi-column>
+      
+          <dxi-column dataField="FECHA_VENCIMIENTO"
+            caption="Vencimiento"
+            calculateDisplayValue="FECHA_VENCIMIENTO">
+          </dxi-column>
+
+          <dxi-column dataField="VALOR_PAGADO"
+             caption="Valor Pagado"
+             [allowEditing]="false"
+             alignment="right"
+             dataType="number"
+             format="fixedPoint"
+             [editorOptions]="{format: MONEDA_FORMATO}">
+          </dxi-column> 
+      
+          <dxi-column dataField="INTERESES_MORA"
+            caption="Int Mora"
+            [allowEditing]="false"
+            alignment="right"
+            dataType="number"
+            format="fixedPoint"
+            [editorOptions]="{format: MONEDA_FORMATO}">
+          </dxi-column>
+      
+          <dxi-column dataField="VALOR_DESCUENTO"
+            caption="DPPP"
+            [allowEditing]="false"
+            alignment="right"
+            dataType="number"
+            format="fixedPoint"
+            [editorOptions]="{format: MONEDA_FORMATO}">
+          </dxi-column>
+
+          <dxi-column dataField="VALOR_TOTAL"
+            caption="Total"
+            [allowEditing]="false"
+            alignment="right"
+            dataType="number"
+            format="fixedPoint"
+            [editorOptions]="{format: MONEDA_FORMATO}">
+          </dxi-column>
+      
+          <dxo-toolbar *ngIf="esEdicion">
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+              </dx-button>
+                </div>
+            </dxi-item>
+          </dxo-toolbar>
+        </dx-data-grid>
+      </div>
+    </div>
+      
+  </div>
+
+</div>
+
+<!-- Recaudos Abonos -->
+<app-FIN20201
+  [events]="eventsSubjectAbonos.asObservable()" 
+  (onRespuestaAbonos)="onRespuestaAbonos($event)">
+</app-FIN20201>
+
+<!-- Recaudos Pagos -->
+<app-FIN20202
+  [events]="eventsSubjectPagos.asObservable()" 
+  (onRespuestaPagos)="onRespuestaPagos($event)">
+</app-FIN20202>
+
+<app-vistarapida id="vistaVen155" [aplicacion]="prmUsrAplBarReg.aplicacion"></app-vistarapida>
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false">
+</dx-load-panel>
+
+<app-xc-combo-grid
+  [events]="eventsSubjectSettings.asObservable()"
+  (onRespuestaSelecc)="onRespuestaSettings($event)"
+>
+</app-xc-combo-grid>
+
+<app-docelec
+  [events]="eventsSubjectDocElec.asObservable()"
+  (onRespuestaDocelec)="onRespuestaDocelec($event)">
+</app-docelec>
+
+<app-geninformes
+  [events]="eventsSubjectInformes.asObservable()" 
+  >
+</app-geninformes>

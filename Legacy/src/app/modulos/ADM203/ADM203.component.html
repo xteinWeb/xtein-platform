@@ -1,0 +1,404 @@
+<div class="row gx-3" id="splitterMain">
+  <as-split
+    direction="horizontal"
+    (dragEnd)="dragEnd('percent', $event)"
+    #split="asSplit"
+    class="col-12"
+  >
+    <as-split-area
+      class="col-4"
+      [size]="40"
+      #area1="asSplitArea"
+      (resized)="onResized($event)"
+    >
+      <div class="card-content-clean-alt">
+        <div id="constainer-expandir" class="dropdown-expand dpdown-p-absolute">
+          <dx-toolbar>
+            <dxi-item location="before" (click)="onExpanding($event)">
+              <div class="accordion-item-group">
+                <div>
+                  <span class="accordion-item-description" *ngIf="expandGrupos">
+                    <i class="icon-chevron-right-xs"></i>
+                  </span>
+                  <span
+                    class="accordion-item-description"
+                    *ngIf="!expandGrupos"
+                  >
+                    <i class="icon-chevron-down-xs"></i>
+                  </span>
+                </div>
+                <span class="xt-dropdown-caption">{{ btnContraer }}</span>
+              </div>
+            </dxi-item>
+          </dx-toolbar>
+        </div>
+
+        <dx-tree-list
+          #treeListGrupos
+          id="treeListGrupos"
+          [dataSource]="DListaGrupos"
+          keyExpr="ID_GRUPO"
+          parentIdExpr="ID_GRUPO_PADRE"
+          rootValue="RAIZ"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [(autoExpandAll)]="autoExpandAll"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          [focusedRowEnabled]="true"
+          [allowColumnResizing]="true"
+          [columnHidingEnabled]="true"
+          columnResizingMode="nextColumn"
+          [(focusedRowKey)]="focusedSeccion"
+          (onFocusedRowChanged)="selectGrupo($event)"
+          (onInitialized)="onInitialized($event)"
+          height="calc(100vh - 160px)"
+        >
+          <dxo-scrolling mode="standard"></dxo-scrolling>
+          <dxo-header-filter [visible]="true"></dxo-header-filter>
+          <dxo-search-panel
+            class="xt-serch-box"
+            [visible]="true"
+            [width]="widthSerchTreeList"
+          ></dxo-search-panel>
+
+          <dxi-column
+            dataField="ID_GRUPO"
+            caption="Id Grupo"
+            [width]="200"
+          ></dxi-column>
+          <dxi-column
+            dataField="NOMBRE"
+            caption="Nombre"
+            [width]="200"
+            [hidingPriority]="0"
+          ></dxi-column>
+
+          <div *dxTemplate="let info of 'cfgEncabezado'">
+            <p style="font-size: 16px">{{ info.column.caption }}</p>
+          </div>
+
+          <dxo-export [enabled]="true"></dxo-export>
+        </dx-tree-list>
+      </div>
+    </as-split-area>
+
+    <as-split-area class="col-8 ml-0" [size]="60" #area2="asSplitArea">
+      <div id="form-container" class="card-content-secondary-alt">
+        <dx-form
+          #formGrupos
+          id="formGrupos"
+          [(formData)]="FGrupos"
+          [readOnly]="readOnly"
+          labelLocation="left"
+          colCount="1"
+          [screenByWidth]="getSizeQualifier"
+        >
+          <dxi-item
+            itemType="group"
+            cssClass="first-group"
+            [colCount]="2"
+            [colSpan]="2"
+          >
+            <dxo-col-count-by-screen
+              [xs]="1"
+              [sm]="1"
+              [md]="1"
+              [lg]="2"
+            ></dxo-col-count-by-screen>
+            <dxi-item dataField="ID_GRUPO">
+              <dxo-label text="Grupo"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Id Grupo"
+                  [readOnly]="readOnlyIdGrupo"
+                  [(value)]="FGrupos.ID_GRUPO"
+                  (onValueChanged)="onValueChangedIdGrupo($event)"
+                >
+                  <dx-validator>
+                    <dxi-validation-rule
+                      type="required"
+                      message="El Id del Grupo es requerido"
+                    ></dxi-validation-rule>
+                  </dx-validator>
+                </dx-text-box>
+              </div>
+            </dxi-item>
+
+            <dxi-item dataField="NOMBRE" placeholder="Nombre del Grupo">
+              <dxo-label text="Nombre"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre Grupo"
+                  [readOnly]="readOnly"
+                  [(value)]="FGrupos.NOMBRE"
+                >
+                  <dx-validator>
+                    <dxi-validation-rule
+                      type="required"
+                      message="El Nombre del Grupo es requerido"
+                    ></dxi-validation-rule>
+                  </dx-validator>
+                </dx-text-box>
+              </div>
+            </dxi-item>
+
+            <dxi-item
+              dataField="ID_GRUPO_PADRE"
+              editorType="dxDropDownBox"
+              [editorOptions]="{
+                dataSource: LDatosGruposPadres,
+                displayExpr: 'ID_GRUPO',
+                valueExpr: 'ID_GRUPO',
+                placeholder: 'Grupo',
+                value: seleccSeccGrupo,
+                dropDownOptions: dropDownOptions,
+                searchEnabled: true,
+                opened: isGridBoxOpened,
+                contentTemplate: 'contentGrupo',
+                inputAttr: { id: 'dropGrupo' }
+              }"
+            >
+              <dxo-label text="Grupo padre"></dxo-label>
+            </dxi-item>
+            <dxi-item dataField="NOMBRE_GRUPO_PADRE">
+              <dxo-label text="Nombre grupo padre"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box
+                  placeholder="Nombre grupo padre"
+                  [readOnly]="true"
+                  [value]="FGrupos.NOMBRE_GRUPO_PADRE"
+                >
+                </dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ESTADO" editorType="dxSelectBox">
+              <dxo-label text="Estado"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box
+                  [dataSource]="['ACTIVO', 'INACTIVO']"
+                  [value]="FGrupos.ESTADO"
+                  [readOnly]="readOnlyEstado"
+                  placeholder="Seleccione Estado"
+                >
+                </dx-select-box>
+              </div>
+            </dxi-item>
+
+            <dxi-item
+              dataField="ASIGNABLE"
+              editorType="dxSwitch"
+              [editorOptions]="{
+                onValueChanged: onChangedAsignable,
+                disabled: readOnly,
+                inputAttr: { id: 'idCheckAsignable' }
+              }"
+            >
+              <dxo-label
+                text="Asignable"
+                style="margin-left: -10px"
+              ></dxo-label>
+            </dxi-item>
+          </dxi-item>
+
+          <div *dxTemplate="let data of 'contentGrupo'">
+            <dx-tree-list
+              #treeListSelectGrupo
+              id="treeListSelectGrupo"
+              height="100%"
+              keyExpr="ID_GRUPO"
+              parentIdExpr="ID_GRUPO_PADRE"
+              rootValue=""
+              [dataSource]="DListaGrupos"
+              [focusedRowEnabled]="true"
+              [hoverStateEnabled]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="nextColumn"
+              [(focusedRowKey)]="focusedRowKey"
+              [autoExpandAll]="true"
+              [(selectedRowKeys)]="seleccSeccGrupo"
+              (onSelectionChanged)="onSeleccRowSeccionGrupo($event)"
+            >
+              <dxo-selection mode="single"></dxo-selection>
+              <dxo-scrolling showScrollbar="onScroll"></dxo-scrolling>
+              <dxo-search-panel
+                [visible]="true"
+                [width]="250"
+              ></dxo-search-panel>
+              <dxi-column
+                dataField="ID_GRUPO"
+                caption="Id Grupo"
+                [width]="200"
+              ></dxi-column>
+              <dxi-column
+                dataField="NOMBRE"
+                caption="Nombre"
+                [width]="200"
+              ></dxi-column>
+            </dx-tree-list>
+          </div>
+        </dx-form>
+
+        <dx-data-grid
+          #gridGruposAsociados
+          id="gridGruposAsociados"
+          [dataSource]="DGruposAsociados"
+          keyExpr="ID_ASOCIADO"
+          keyExpr="ID_ASOCIADO"
+          [allowColumnResizing]="true"
+          [focusedRowEnabled]="true"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          columnResizingMode="nextColumn"
+          [paging]="{ enabled: true, pageSize: 10 }"
+          [allowColumnResizing]="true"
+          [columnAutoWidth]="true"
+          columnResizingMode="widget"
+          [focusedRowEnabled]="true"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          noDataText=""
+          [showBorders]="true"
+          (onContentReady)="onContentReady($event)"
+          (onRowValidating)="onRowValidating($event)"
+          (onInitNewRow)="onInitNewRowPro($event)"
+          (onSelectionChanged)="selectionGrid($event)"
+          (onEditingStart)="onEditingStart($event)"
+          (onEditingStart)="startEdit($event)"
+        >
+          <dxo-editing
+            mode="row"
+            [useIcons]="false"
+            [allowUpdating]="!readOnly"
+            [allowDeleting]="false"
+            [allowAdding]="!readOnly"
+          >
+            <dxo-texts confirmDeleteMessage=""> </dxo-texts>
+          </dxo-editing>
+          <dxo-selection
+            selectAllMode="allPages"
+            [showCheckBoxesMode]="esVisibleSelecc"
+            mode="multiple"
+          >
+          </dxo-selection>
+          <dxi-column
+            dataField="ID_ASOCIADO"
+            caption="Grupo Asociado"
+            editCellTemplate="editAsociadoList"
+          ></dxi-column>
+          <dxi-column
+            dataField="CLASE"
+            caption="Clase"
+            editCellTemplate="editClase"
+          >
+          </dxi-column>
+
+          <div *dxTemplate="let cellInfo of 'editAsociadoList'">
+            <dx-select-box
+              [dataSource]="DGruposAsociadosList"
+              displayExpr="VALOR1"
+              valueExpr="VALOR2"
+              [(value)]="cellInfo.data.ID_ASOCIADO"
+              [readOnly]="readOnly"
+              placeholder="Seleccione Grupo Asociado"
+              (onValueChanged)="
+                onValueChangedGridLista($event, cellInfo, 'ID_ASOCIADO')
+              "
+            >
+            </dx-select-box>
+          </div>
+
+          <div *dxTemplate="let cellInfo of 'editClase'">
+            <dx-text-box
+              placeholder="Clase"
+              [(value)]="cellInfo.data.CLASE"
+              [readOnly]="readOnly"
+              (onValueChanged)="
+                onValueChangedGridLista($event, cellInfo, 'CLASE')
+              "
+            >
+            </dx-text-box>
+          </div>
+
+          <dxo-toolbar *ngIf="!readOnly">
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button
+                  icon="plus"
+                  matTooltip="Nuevo"
+                  (onClick)="operGrid($event, 'new')"
+                  *ngIf="rowNew"
+                >
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button
+                  icon="edit"
+                  matTooltip="Actualizar"
+                  (onClick)="operGrid($event, 'edit')"
+                  *ngIf="rowEdit"
+                >
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button
+                  icon="trash"
+                  matTooltip="Eliminar"
+                  (onClick)="operGrid($event, 'delete')"
+                  *ngIf="rowDelete"
+                >
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button
+                  icon="todo"
+                  matTooltip="Guardar"
+                  (onClick)="operGrid($event, 'save')"
+                  *ngIf="rowApplyChanges"
+                >
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button
+                  icon="undo"
+                  matTooltip="Cancelar"
+                  (onClick)="operGrid($event, 'cancel')"
+                  *ngIf="rowApplyChanges"
+                >
+                </dx-button>
+              </div>
+            </dxi-item>
+          </dxo-toolbar>
+        </dx-data-grid>
+        <br />
+      </div>
+    </as-split-area>
+  </as-split>
+</div>
+
+<app-vistarapida
+  id="vistaadm203"
+  [aplicacion]="prmUsrAplBarReg.aplicacion"
+></app-vistarapida>
+
+<dx-load-panel
+  #loadPanelPro
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#router-container' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Un momento. Cargando consulta..."
+  [hideOnOutsideClick]="false"
+></dx-load-panel>
+<app-geninformes [events]="eventsSubjectInformes.asObservable()">
+</app-geninformes>

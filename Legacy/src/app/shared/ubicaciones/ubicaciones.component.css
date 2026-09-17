@@ -1,0 +1,32 @@
+::ng-deep .dx-switch-container {
+  border-radius: 100px;
+  background-color: #efefef !important;
+  border: 1px solid #9b9b9b !important;
+}
+
+::ng-deep .dx-switch-handle::before {
+  border-radius: 50%;
+  background-color: rgb(255 255 255);
+  margin-left: 38px;
+  height: 80%;
+  padding: 9px;
+}
+
+::ng-deep .dx-switch-off {
+  margin-right: 10px;
+  display: none;
+}
+
+::ng-deep .dx-switch-on {
+  margin-left: 10px;
+  background-color: #438ef1;
+  display: none;
+}
+
+::ng-deep .dx-switch-on-value .dx-switch-handle {
+  transform: translateX(-130%) !important;
+}
+
+::ng-deep .dx-switch-on-value .dx-switch-handle::before {
+  background-color: #438ef1;
+}
