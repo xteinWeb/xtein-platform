@@ -1,3 +1,5 @@
+import type { XteinGridColumn } from '@xtein/ui';
+import type { Ven230Lookup } from '../models/ven-230-business.model';
 import {
   RecordToolbarCapabilities
 } from '@xtein/sdk';
@@ -116,3 +118,8 @@ export const Ven230ToolbarCapabilities: Readonly<RecordToolbarCapabilities> = {
   print: true,
   configure: true
 };
+
+export const Ven230ClientColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_CLIENTE',caption:'Documento del Cliente',width:170},
+ {dataField:'NOMBRE_COMPLETO',caption:'Nombre del Cliente'}
+];

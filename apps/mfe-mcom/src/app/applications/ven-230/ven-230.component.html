@@ -91,7 +91,9 @@
                 Documento del Cliente
               </xtein-label>
               <div class="ven-230__control-inline">
-                <xtein-select id="ven-230-id-cliente" [items]="clients()" displayExpr="NOMBRE_COMPLETO" valueExpr="ID_CLIENTE" [searchEnabled]="true" formControlName="ID_CLIENTE" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
+                <xtein-lookup id="ven-230-id-cliente" ariaLabel="Documento del Cliente" [items]="clients()"
+                  valueExpr="ID_CLIENTE" displayExpr="ID_CLIENTE" searchPlaceholder="Buscar documento o nombre…" [columns]="clientColumns" [required]="true"
+                  formControlName="ID_CLIENTE" [readOnly]="readOnly() || headerLocked() || itemPending()" />
               </div>
             </div>
 

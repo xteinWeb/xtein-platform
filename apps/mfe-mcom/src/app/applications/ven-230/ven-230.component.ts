@@ -1,3 +1,5 @@
+import { XteinLookupComponent } from '@xtein/ui';
+import { Ven230ClientColumns } from './constants/ven-230-ui.constants';
 import { XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent } from '@xtein/ui';
 import { Ven230ElectronicQrEndpoint } from './constants/ven-230-electronic.constants';
 import { XteinVen230SelectionComponent } from './components/xtein-ven230-selection/xtein-ven230-selection.component';
@@ -99,7 +101,7 @@ import {
   standalone:
     true,
 
-  imports: [XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent,
+  imports: [XteinLookupComponent,XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent,
     CommonModule, XteinVen230SelectionComponent, XteinVen230ItemsComponent, XteinButtonComponent, ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
@@ -126,6 +128,8 @@ import {
 })
 export class Ven230Component
   implements OnInit, OnDestroy {
+  readonly clientColumns = Ven230ClientColumns;
+
 
   readonly applicationId =
     Ven230Application.Id;

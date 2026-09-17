@@ -47,3 +47,4 @@ export * from './lib/charts/xtein-bar-gauge/models/xtein-bar-gauge.model';
 export * from './lib/scheduling/xtein-scheduler/xtein-scheduler.component';
 export * from './lib/scheduling/xtein-scheduler/models/xtein-scheduler.model';
 export * from './lib/forms/xtein-html-editor/xtein-html-editor.component';
+export * from './lib/forms/xtein-lookup/xtein-lookup.component';
