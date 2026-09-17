@@ -188,6 +188,15 @@
             </span>
           </div>
 
+          @for (tax of taxes(); track $index) {
+            <div class="ven-230__totals-row">
+              <span class="ven-230__totals-label">{{ tax.CLASE }} {{ tax.POR_TASA }}%</span>
+              <span class="ven-230__totals-value">
+                {{ money(tax.VALOR) }}
+              </span>
+            </div>
+          }
+
           <div class="ven-230__totals-divider"></div>
 
           <div class="ven-230__totals-row ven-230__totals-row--grand">
@@ -412,24 +421,11 @@
           </div>
         </div>
 
-        <div class="ven-230__field-inline"><xtein-label class="ven-230__label-inline" for="ven-230-tasa-cambio">Tasa de cambio</xtein-label><div class="ven-230__control-inline"><xtein-number id="ven-230-tasa-cambio" formControlName="TASA_CAMBIO" /></div></div>
-        <!-- Tabla de Items -->
-        <div class="ven-230__section-divider">
-          <h3 class="ven-230__section-title">Detalle de Items</h3>
-        </div>
-
         <xtein-ven230-items [items]="items()" [products]="products()" [productsLoading]="productsLoading()" [onlyStock]="onlyStock"
           [recordKey]="itemRecordKey()" [header]="header()"
           [readOnly]="readOnly()" [ready]="itemsReady()" [busy]="loading()" [conditionType]="conditionType"
           [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'" [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'" [repeatItem]="enabledSpec('REPETIR ITEM')" [editPrice]="enabledSpec('MODIFICAR PRECIO')"
           [persist]="persistItem" (removed)="removeItem($event)" (removedMany)="removeItem($event)" (pending)="onItemPending($event)" (stockOnly)="loadProducts($event)" (refreshProducts)="loadProducts()" />
-        @if (form.controls.PLAZO.value) { <p>Valor cuota: {{form.controls.VALOR_CUOTA.value | number:'1.2-2'}}</p> }
-        <div class="ven-230__items-table-container"><table class="ven-230__items-table"><thead><tr><th>Gravamen</th><th>Porcentaje</th><th>Valor</th></tr></thead><tbody>
-          @for (tax of taxes(); track $index) { <tr><td>{{tax.CLASE}}</td><td>{{tax.POR_TASA}}</td><td>{{tax.VALOR | number:'1.2-2'}}</td></tr> }
-        </tbody></table></div>
-        @if (!readOnly() && enabledSpec('MODIFICAR GRAVAMENES')) {
-          <xtein-button text="Restablecer gravámenes originales" [disabled]="loading() || itemPending()" (clicked)="restoreTaxes()" />
-        }
 
       </div>
     </div>

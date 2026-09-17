@@ -1,14 +1,14 @@
-import { XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, XteinLabelComponent, XteinGridColumn } from '@xtein/ui';
+import { XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, XteinGridColumn } from '@xtein/ui';
 import { formatNumber } from 'devextreme/localization';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { XteinSelectComponent, XteinNumberComponent, XteinInputComponent, XteinDateComponent, XteinButtonComponent, XteinNotificationService } from '@xtein/ui';
+import { XteinSelectComponent, XteinNumberComponent, XteinDateComponent, XteinButtonComponent, XteinNotificationService } from '@xtein/ui';
 import { Ven230PrefacturaItem } from '../../models/ven-230.model';
 import { Ven230Header, Ven230Lookup } from '../../models/ven-230-business.model';
 import { Ven230BusinessService } from '../../services/ven-230-business.service';
 @Component({ selector: 'xtein-ven230-items', standalone: true,
- imports: [XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, XteinLabelComponent,CommonModule, FormsModule, XteinDateComponent, XteinSelectComponent, XteinNumberComponent, XteinInputComponent, XteinButtonComponent],
+ imports: [XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinDateComponent, XteinSelectComponent, XteinNumberComponent, XteinButtonComponent],
  templateUrl: './xtein-ven230-items.component.html', styleUrl: './xtein-ven230-items.component.scss',
  changeDetection: ChangeDetectionStrategy.OnPush })
 export class XteinVen230ItemsComponent implements OnChanges {
@@ -32,6 +32,16 @@ export class XteinVen230ItemsComponent implements OnChanges {
  readonly selected=signal<number[]>([]);
  @Output() removedMany=new EventEmitter<number[]>();
  toggle(item:number,checked:boolean):void{this.selected.update(rows=>checked?[...rows,item]:rows.filter(id=>id!==item));}
+ allItemsSelected(): boolean { return this.items.length > 0 && this.items.every(item => this.selected().includes(item.ITEM)); }
+ toggleAll(checked: boolean): void { this.selected.set(checked ? this.items.map(i => i.ITEM) : []); }
+ deleteSelected(): void { if (this.selected().length) this.removedMany.emit(this.selected()); }
+ onDraftQtyChange(): void {
+   const row = this.draft();
+   if (!row) return;
+   row.SUB_TOTAL = Number(row.CANTIDAD || 0) * Number(row.VALOR_UNITARIO || 0);
+   row.VALOR_IVA = row.SUB_TOTAL * Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
+   row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
+ }
  @Output() removed = new EventEmitter<number>();
  @Output() pending = new EventEmitter<boolean>();
  @Output() refreshProducts = new EventEmitter<void>();
