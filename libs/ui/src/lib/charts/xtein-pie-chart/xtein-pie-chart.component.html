@@ -1,0 +1,11 @@
+<dx-pie-chart [size]="$any(widgetSize)" [dataSource]="dataSource"
+ [animation]="$any(options.animation)"
+ [resolveLabelOverlapping]="$any(options.resolveLabelOverlapping)"
+ [type]="$any(options.type)"
+ [innerRadius]="$any(options.innerRadius)"
+ [series]="$any(options.series)"
+ [legend]="$any(options.legend)" [centerTemplate]="centerTemplate ? 'xteinCenter' : undefined">
+ <ng-container *dxTemplate="let data of 'xteinCenter'">
+ <ng-container [ngTemplateOutlet]="centerTemplate" [ngTemplateOutletContext]="{$implicit:data}" />
+ </ng-container>
+</dx-pie-chart>

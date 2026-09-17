@@ -1,25 +1,24 @@
 
 
-<dx-popup title="Aplicaciones favoritas" [width]="360" [height]="500" [showTitle]="true"
-  [showCloseButton]="true" [hideOnOutsideClick]="true" [(visible)]="visibleListaFav">
-  <div *dxTemplate="let data of 'content'">
-    <dx-list [dataSource]="available()" [height]="340" keyExpr="ID_APLICACION" displayExpr="NOMBRE"
-      selectionMode="multiple" [showSelectionControls]="true" [(selectedItemKeys)]="selectedFavorites"></dx-list>
-    <small>La selección se conserva durante esta apertura del Tablero.</small>
-    <dx-button text="Aplicar" type="success" (onClick)="applyFavorites()"></dx-button>
-  </div>
-</dx-popup>
+<xtein-popup title="Aplicaciones favoritas" [width]="360" [height]="500" [hideOnOutsideClick]="true" [(visible)]="visibleListaFav">
+ <div class="favorites-editor">
+  <xtein-data-grid [dataSource]="available()" keyExpr="ID_APLICACION" [columns]="favoriteColumns" selectionMode="multiple"
+   [selectedRowKeys]="selectedFavorites" (selectionChanged)="selectedFavorites=$event.selectedRowKeys" />
+  <small>La selección se conserva durante esta apertura del Tablero.</small>
+  <xtein-button text="Aplicar" variant="success" (clicked)="applyFavorites()" />
+ </div>
+</xtein-popup>
 <section class="application-shortcuts" aria-label="Accesos a aplicaciones" hidden>
   <article>
     <h2>Más usadas</h2>
     @for (app of frequent(); track app.ID_APLICACION) {
-      <button type="button" (click)="open(app)"><i [class]="app.icon || 'icon-aplicacion'"></i> {{ app.NOMBRE }}</button>
+      <xtein-button [text]="app.NOMBRE" [icon]="app.icon || 'icon-aplicacion'" variant="link" (clicked)="open(app)" />
     } @empty { <p>{{ loading() ? 'Cargando…' : 'No hay aplicaciones frecuentes.' }}</p> }
   </article>
   <article>
-    <h2>Favoritas <button type="button" (click)="editFavorites()" [disabled]="loading()">Configurar</button></h2>
+    <h2>Favoritas <xtein-button text="Configurar" variant="link" (clicked)="editFavorites()" [disabled]="loading()" /></h2>
     @for (app of favorites(); track app.ID_APLICACION) {
-      <button type="button" (click)="open(app)"><i [class]="app.icon || 'icon-aplicacion'"></i> {{ app.NOMBRE }}</button>
+      <xtein-button [text]="app.NOMBRE" [icon]="app.icon || 'icon-aplicacion'" variant="link" (clicked)="open(app)" />
     } @empty { <p>{{ loading() ? 'Cargando…' : 'No hay aplicaciones favoritas.' }}</p> }
   </article>
 </section>
@@ -32,22 +31,7 @@
         <div class="cards-home-header" draggable="true" (dragstart)="startCard(0, $event)" (dragend)="draggedCard = null">Notas rápidas</div>
         
         <div class="cards-home-body">
-          <dx-html-editor height="100%" [(value)]="valueContent">
-            <dxo-toolbar [multiline]="isMultiline" [container]="notesToolbar">
-              <dxi-item name="bold"></dxi-item>
-              <dxi-item name="italic"></dxi-item>
-              <dxi-item name="strike"></dxi-item>
-              <dxi-item name="bulletList"></dxi-item>
-              <dxi-item name="orderedList"></dxi-item>
-              <dxi-item name="link"></dxi-item>
-              <dxi-item name="separator"></dxi-item>
-              <dxi-item name="codeBlock"></dxi-item>
-              <dxi-item name="blockquote"></dxi-item>
-            </dxo-toolbar>
-            <dxo-media-resizing [enabled]="true"> </dxo-media-resizing>
-            <dxo-image-upload [tabs]="currentTab" fileUploadMode="base64">
-            </dxo-image-upload>
-          </dx-html-editor>
+          <xtein-html-editor height="100%" [(value)]="valueContent" [toolbarContainer]="notesToolbar" [multiline]="isMultiline" />
           <div #notesToolbar class="notes-toolbar"></div>
           <small class="notes-help">Las notas se conservan mientras esta pestaña permanezca abierta.</small>
         </div>
@@ -61,34 +45,8 @@
         <div class="cards-home-body">
           <div class="cards-home-content-row">
             <div class="card-col-8">
-              <dx-pie-chart
-                class="pie"
-                [animation]="true"
-                resolveLabelOverlapping="shift"
-                type="doughnut"
-                centerTemplate="centerTemplate"
-                [innerRadius]="0.7"
-                [dataSource]="populationByRegions"
-                >
-                <dxi-series argumentField="region">
-                  <dxo-label [visible]="false" backgroundColor="none"  format="fixedPoint" [customizeText]="customizeLabel">
-                    <dxo-connector [visible]="false" [width]="0.5"></dxo-connector>
-                  </dxo-label>
-                  <dxo-small-values-grouping
-                    mode="smallValueThreshold"
-                    [threshold]="4.5"
-                  ></dxo-small-values-grouping>
-                </dxi-series>
-                <dxo-legend
-                  [margin]="0"
-                  [visible]="true"
-                  horizontalAlignment="right"
-                  verticalAlignment="bottom"
-                  [paddingTopBottom]="2"
-                  [rowItemSpacing]="2"
-                  [markerSize]="10"
-                ></dxo-legend>
-                <svg *dxTemplate="let pieChart of 'centerTemplate'">
+              <xtein-pie-chart class="pie" [dataSource]="populationByRegions" [options]="controlOptions.pieChartOptions1" [centerTemplate]="pieChartOptions1Template" />
+<ng-template #pieChartOptions1Template let-pieChart><svg>
                   <circle
                     cx="100"
                     cy="100"
@@ -107,8 +65,7 @@
                     <tspan x="100" dy="20px" style="font-weight: 300; font-size: 12px;">Enero</tspan>
 
                   </text>
-                </svg>
-              </dx-pie-chart>
+                </svg></ng-template>
             </div>
             <div class="card-col-4 cards-home-content-column text-end">
               <span class="xt-caption-lite">Total</span>
@@ -139,45 +96,15 @@
               <span class="xt-text-sm-muted">Última actualización <strong>3:22 p.m.</strong></span>
             </div>
             <div class="card-col-5">
-              <dx-chart  class="table-chart" [dataSource]="populationData">
-                <dxo-legend [visible]="false"></dxo-legend>
-                <dxi-series
-                  type="bar"
-                  name="Population"
-                  argumentField="name"
-                  valueField="population"
-                  color="#2EADE5"
-                  
-                  >
-                </dxi-series>
-                <dxi-value-axis [visible]="false" [valueMarginsEnabled]="false">
-                  <dxo-grid [visible]="false"></dxo-grid>
-                  <dxo-label [visible]="false"></dxo-label>
-                  <dxo-tick [visible]="false"></dxo-tick>
-                </dxi-value-axis>
-                <dxo-argument-axis [visible]="false" [tickInterval]="1">
-                  <dxo-tick [visible]="false"></dxo-tick>
-                </dxo-argument-axis>
-                <dxo-common-annotation-settings
-                  type="custom"
-                  series="Population"
-                  template="template"
-                  [allowDragging]="true"
-                  >
-                </dxo-common-annotation-settings>
-                
-              <dxi-annotation color="#fff" [data]="populationData[2]" [argument]="populationData[2].name">
-                <dxo-border color="rgba(10,57,96,.25)" dashStyle="solid" [width]="1"></dxo-border>
-              </dxi-annotation>
-              <svg *dxTemplate="let annotation of 'template'" class="annotation">
+              <xtein-chart class="table-chart" [dataSource]="populationData" [options]="controlOptions.chartOptions1" [annotationTemplate]="chartOptions1Template" />
+<ng-template #chartOptions1Template let-annotation><svg class="annotation">
                 <text text-anchor="middle" style="font-size: 16px" x="100" y="100" fill="rgba(10,57,96,.75)">
                   <tspan x="100" style="font-weight: 300; font-size: 12px;">{{ annotation.argument }}</tspan>
                 </text>
                 <text text-anchor="middle" style="font-size: 16px" x="100" y="100" fill="rgba(10,57,96,.75)" stroke="none">
                   <tspan x="100" dy="15px" style="font-weight: 700">$120,873.099</tspan>
                 </text>
-              </svg>
-            </dx-chart>
+              </svg></ng-template>
           </div>
         </div>
       </div>
@@ -201,17 +128,8 @@
             <span class="xt-text-sm-muted">Última actualización <strong>3:14 p.m.</strong></span>
           </div>
           <div class="card-col-6 gauge-center-template-container gaugeresize">
-            <dx-bar-gauge id="gauge" [startValue]="0" [redrawOnResize]="true" [endValue]="100" backgroundColor="rgba(18,94,220,.075)"
-              [values]="[67.27]" [relativeInnerRadius]="0.6" centerTemplate="centerTemplate" class="table-gauge">
-              <dxo-geometry [startAngle]="180" [endAngle]="360"> </dxo-geometry>
-              
-              <dxo-legend [visible]="false"></dxo-legend>
-              <dxo-label [indent]="0" connectorColor="rgba(10,57,96,.75)" [visible]="true">
-                <dxo-font color="transparent" opacity="0"></dxo-font>
-                <dxo-format type="fixedPoint" [precision]="1"></dxo-format>
-              </dxo-label>
-              <dxo-animation easing="easeOutCubic" [duration]="500"></dxo-animation>
-            </dx-bar-gauge>
+            <xtein-bar-gauge class="table-gauge"  [options]="controlOptions.barGaugeOptions1"  />
+
             <div class="gauge-center-template">
               <h3 class="gauge-center-text m-0">67,3</h3>
               <span class="gauge-center-last-text">Productos</span>
@@ -267,33 +185,8 @@
       
       <div class="cards-home-body">
         <div class="cards-home-content-row column-reverse">
-          <dx-scheduler
-            #schedulerAgenda
-            timeZone="America/Bogota"
-            [dataSource]="appointmentsData"
-            [views]="['agenda']"
-            currentView="agenda"
-            [currentDate]="currentDate"
-            [firstDayOfWeek]="1"
-            [startDayHour]="6"
-            [showAllDayPanel]="false"
-            [editing]="true"
-            >
-            <dxi-resource
-              fieldExpr="assigneeId"
-              label="Responsable"
-              [allowMultiple]="true"
-              [dataSource]="assignees"
-              [useColorAsDefault]="true"
-              >
-            </dxi-resource>
-            <dxi-resource
-              fieldExpr="priorityId"
-              label="Prioridad"
-              [dataSource]="priorities"
-              >
-            </dxi-resource>
-          </dx-scheduler>
+          <xtein-scheduler  [dataSource]="appointmentsData" [options]="controlOptions.schedulerOptions1"  />
+
         </div>
       </div>
     </div>
@@ -391,24 +284,8 @@
       <div class="cards-home-body">
         <div class="cards-home-content-row">
           <div class="card-col-8">
-            <dx-chart  [dataSource]="populationData" class="dottedline-chart">
-              <dxo-legend [visible]="false"></dxo-legend>
-              <dxo-margin [top]="6"></dxo-margin>
-              <dxi-value-axis [visible]="false" [valueMarginsEnabled]="false">
-                <dxo-grid [visible]="false" color="rgba(10,57,96,.05)"></dxo-grid>
-                <dxo-label [visible]="false"></dxo-label>
-                <dxo-tick [visible]="false"></dxo-tick>
-              </dxi-value-axis>
-              <dxo-argument-axis [visible]="false" [tickInterval]="10" discreteAxisDivisionMode="crossLabels" color="rgba(10,57,96,.05)">
-                <dxo-tick [visible]="false"></dxo-tick>
-                <dxo-grid  [visible]="true" [width]="3" dashStyle="dot" color="rgba(10,57,96,.075)"></dxo-grid>
-              </dxo-argument-axis>
-              <dxi-series type="line" name="Population" argumentField="name" valueField="population" color="#2EADE5" [width]="5">
-                <dxo-point [size]="16"></dxo-point>
-                <dxo-hover-style [width]="6"></dxo-hover-style>
-              </dxi-series>
-              
-            </dx-chart>
+            <xtein-chart class="dottedline-chart" [dataSource]="populationData" [options]="controlOptions.chartOptions2"  />
+
           </div>
           <div class="card-col-4 cards-home-content-column text-end">
             <span class="xt-caption-lite">Total</span>

@@ -1,8 +1,9 @@
+import {createTableroControlOptions} from './constants/tablero-controls.constants';
+import { XteinPopupComponent,XteinDataGridComponent,XteinButtonComponent,XteinHtmlEditorComponent,XteinChartComponent,XteinPieChartComponent,XteinBarGaugeComponent,XteinSchedulerComponent, XteinGridColumn } from '@xtein/ui';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription, catchError, forkJoin, of } from 'rxjs';
-import { DxBarGaugeModule, DxButtonModule, DxListModule, DxPopupModule, DxHtmlEditorModule,
-  DxChartModule, DxPieChartModule, DxSchedulerModule } from 'devextreme-angular';
+
 import { ApplicationRegistryService, WorkspaceRuntimeService, ToolbarRuntimeService,
   RecordToolbarPermissionsService } from '@xtein/runtime';
 import { createRecordToolbarState, DeniedRecordToolbarPermissions, RecordToolbarMode,
@@ -14,8 +15,7 @@ import { TableroPurchase } from './models/tablero-purchase.model';
 @Component({
   selector: 'xtein-adm-300', standalone: true,
   providers: [TableroDataService],
-  imports: [CommonModule, DxBarGaugeModule, DxButtonModule, DxListModule, DxPopupModule,
-    DxHtmlEditorModule, DxChartModule, DxPieChartModule, DxSchedulerModule],
+  imports: [CommonModule, XteinPopupComponent,XteinDataGridComponent,XteinButtonComponent,XteinHtmlEditorComponent,XteinChartComponent,XteinPieChartComponent,XteinBarGaugeComponent,XteinSchedulerComponent],
   templateUrl: './adm-300.component.html', styleUrl: './adm-300.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -51,6 +51,15 @@ export class Adm300Component implements OnInit, OnDestroy {
   readonly DCompras: TableroPurchase[] = [];
   readonly customizeLabel = (event: { argumentText?: string; valueText?: string }): string =>
     `${event.argumentText ?? ''}\n${event.valueText ?? ''}`;
+
+  readonly favoriteColumns: XteinGridColumn<TableroApplication,string>[] = [{dataField:'NOMBRE',caption:'Aplicación'}];
+
+
+
+
+
+
+  readonly controlOptions = createTableroControlOptions(this);
 
   ngOnInit(): void {
     this.publishToolbar(DeniedRecordToolbarPermissions);

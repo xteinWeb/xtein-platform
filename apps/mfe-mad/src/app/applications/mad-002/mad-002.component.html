@@ -33,28 +33,7 @@
       }
 
 
-      <button
-        type="button"
-        class="mad-002__tree-toggle"
-        [attr.title]="
-          treePanelCollapsed()
-            ? 'Mostrar árbol'
-            : 'Ocultar árbol'
-        "
-        [attr.aria-label]="
-          treePanelCollapsed()
-            ? 'Mostrar árbol'
-            : 'Ocultar árbol'
-        "
-        (click)="toggleTreePanel()">
-
-        {{
-          treePanelCollapsed()
-            ? '›'
-            : '‹'
-        }}
-
-      </button>
+      <xtein-button class="mad-002__tree-toggle" variant="link" [text]="treePanelCollapsed() ? '›' : '‹'" [ariaLabel]="treePanelCollapsed() ? 'Mostrar árbol' : 'Ocultar árbol'" [pressed]="!treePanelCollapsed()" (clicked)="toggleTreePanel()" />
 
     </aside>
 

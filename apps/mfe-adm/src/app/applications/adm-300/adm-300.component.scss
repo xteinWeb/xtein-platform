@@ -28,16 +28,11 @@ h3 { margin: 0; font-size: 22px; line-height: 1.05; }
 .gauge-center-template { pointer-events: none; top: 75%; }
 .gauge-center-text { font-size: 22px; }
 .gauge-center-last-text { font-size: 10px; }
-.cards-home dx-chart, .cards-home dx-pie-chart, .cards-home dx-bar-gauge,
-.cards-home dx-scheduler { display: block; width: 100%; height: 100%; min-height: 0; }
+.cards-home xtein-chart, .cards-home xtein-pie-chart, .cards-home xtein-bar-gauge,
+.cards-home xtein-scheduler { display: block; width: 100%; height: 100%; min-height: 0; }
 .notes .cards-home-body { display: flex; flex-direction: column; }
-.notes dx-html-editor { flex: 1; min-height: 0; }
+.notes xtein-html-editor { flex: 1; min-height: 0; }
 .notes-toolbar { flex: 0 0 auto; min-height: 22px; }
-:host ::ng-deep .notes .dx-htmleditor { border: 0; background: transparent; }
-:host ::ng-deep .notes-toolbar .dx-toolbar { background: transparent; }
-:host ::ng-deep .notes-toolbar .dx-button { min-width: 22px; height: 22px; }
-:host ::ng-deep .notes-toolbar .dx-button-content { padding: 3px; }
-:host ::ng-deep .notes-toolbar .dx-icon { font-size: 10px; }
 @media (max-width: 760px) {
   .ajuste-row-tables { height: auto; min-height: 100%; }
   .row { height: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 250px; }
@@ -46,3 +41,7 @@ h3 { margin: 0; font-size: 22px; line-height: 1.05; }
   .row { grid-template-columns: minmax(0, 1fr); }
   .tables.col-xl-8 { grid-column: auto; }
 }
+
+.favorites-editor { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: .5rem; }
+.favorites-editor xtein-data-grid { flex: 1; min-height: 0; }
+.favorites-editor small, .favorites-editor xtein-button { flex: 0 0 auto; }

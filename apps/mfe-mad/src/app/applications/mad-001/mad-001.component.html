@@ -32,28 +32,7 @@
         }
 
 
-        <button
-          type="button"
-          class="mad-001__tree-toggle"
-          [attr.title]="
-            treePanelCollapsed()
-              ? 'Mostrar árbol'
-              : 'Ocultar árbol'
-          "
-          [attr.aria-label]="
-            treePanelCollapsed()
-              ? 'Mostrar árbol'
-              : 'Ocultar árbol'
-          "
-          (click)="toggleTreePanel()">
-
-          {{
-            treePanelCollapsed()
-              ? '›'
-              : '‹'
-          }}
-
-        </button>
+        <xtein-button class="mad-001__tree-toggle" variant="link" [text]="treePanelCollapsed() ? '›' : '‹'" [ariaLabel]="treePanelCollapsed() ? 'Mostrar árbol' : 'Ocultar árbol'" [pressed]="!treePanelCollapsed()" (clicked)="toggleTreePanel()" />
 
       </aside>
 
@@ -189,13 +168,13 @@
             <div
               class="mad-001__field">
 
-              <label
+              <xtein-label
                 class="form-label"
                 for="mad-001-min-target">
 
                 Meta Inferior
 
-              </label>
+              </xtein-label>
 
               <xtein-number
                 id="mad-001-min-target"
@@ -212,13 +191,13 @@
             <div
               class="mad-001__field">
 
-              <label
+              <xtein-label
                 class="form-label"
                 for="mad-001-max-target">
 
                 Meta Superior
 
-              </label>
+              </xtein-label>
 
               <xtein-number
                 id="mad-001-max-target"

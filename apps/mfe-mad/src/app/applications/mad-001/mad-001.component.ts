@@ -1,3 +1,4 @@
+import {XteinLabelComponent,XteinButtonComponent} from '@xtein/ui';
 import {
   untracked,
   computed,
@@ -90,7 +91,7 @@ import {
   standalone:
     true,
 
-  imports: [
+  imports: [XteinLabelComponent,XteinButtonComponent,
     ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
