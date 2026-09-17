@@ -1,40 +1,34 @@
 <div class="actions"><xtein-button text="Eliminar seleccionados" variant="danger" [disabled]="readOnly || busy || !!draft() || !selected().length" (clicked)="removedMany.emit(selected())" />
  <xtein-button text="Agregar producto" icon="add" [disabled]="readOnly || !ready || busy || !!draft()" (clicked)="begin()" />
- <label><input type="checkbox" [disabled]="readOnly || busy || productsLoading" [checked]="onlyStock" (change)="stockOnly.emit($any($event.target).checked)" /> Solo con existencias</label>
+ <xtein-checkbox label="Solo con existencias" [disabled]="readOnly || busy || productsLoading" [checked]="onlyStock" (checkedChange)="stockOnly.emit($event)" />
 </div>
 @if (draft(); as row) {
  <div class="editor" aria-label="Editar producto">
   <xtein-select label="Producto" [items]="products" displayExpr="PRODUCTO" valueExpr="PRODUCTO" [searchEnabled]="true" [ngModel]="row.PRODUCTO" (ngModelChange)="product($event)" [disabled]="working() || busy" />
   <xtein-button text="Buscar producto" icon="search" [disabled]="working() || busy" (clicked)="productsVisible.set(true)" />
   <xtein-input label="Nombre" [ngModel]="row.NOMBRE_PRODUCTO" [readOnly]="true" />
-  <label>Cantidad<xtein-number ariaLabel="Cantidad" [(ngModel)]="row.CANTIDAD" [disabled]="working() || busy"  /></label>
+  <div><xtein-label for="ven230-item-quantity">Cantidad</xtein-label><xtein-number id="ven230-item-quantity" ariaLabel="Cantidad" [(ngModel)]="row.CANTIDAD" [disabled]="working() || busy"  /></div>
   <xtein-select label="Unidad de venta" [items]="presentationOptions()" displayExpr="LABEL" valueExpr="UDM_VENTA" [ngModel]="row.UDM_VENTA" (ngModelChange)="unit($event)" [disabled]="working() || busy" />
-  <label>Valor unitario<xtein-number ariaLabel="Valor unitario" [(ngModel)]="row.VALOR_UNITARIO" [disabled]="!editPrice || working() || busy"  /></label>
+  <div><xtein-label for="ven230-item-price">Valor unitario</xtein-label><xtein-number id="ven230-item-price" ariaLabel="Valor unitario" [(ngModel)]="row.VALOR_UNITARIO" [disabled]="!editPrice || working() || busy"  /></div>
   <xtein-select label="IVA" [items]="taxOptions()" displayExpr="LABEL" valueExpr="ID_TASA" [ngModel]="selectedTaxId()" (ngModelChange)="tax($event)" [disabled]="working() || busy" />
   <xtein-date label="Fecha entrega" [min]="minimumDeliveryDate" [(ngModel)]="row.FECHA_ENTREGA" [disabled]="working() || busy" />
   <div class="actions"><xtein-button text="Aplicar ítem" [disabled]="working() || busy" (clicked)="commit()" /><xtein-button text="Cancelar ítem" variant="secondary" [disabled]="working() || busy" (clicked)="cancel()" /></div>
  </div>
 }
 <div class="table-scroll"><table><thead><tr><th>Seleccionar</th><th>Producto</th><th>Nombre</th><th>Soporte</th><th>Cantidad</th><th>UM</th><th>Vr. unitario</th><th>Subtotal</th><th>IVA</th><th>Total</th><th>Entrega</th><th>Estado</th><th>Acciones</th></tr></thead>
-<tbody>@for(row of items; track row.ITEM){<tr><td><input type="checkbox" aria-label="Seleccionar producto" [disabled]="readOnly || busy || !!draft()" [checked]="selected().includes(row.ITEM)" (change)="toggle(row.ITEM,$any($event.target).checked)" /></td><td>{{row.PRODUCTO}}</td><td>{{row.NOMBRE_PRODUCTO}}</td><td>{{row.SOPORTE}}</td><td>{{quantity(row.CANTIDAD)}}</td><td>{{row.UDM_VENTA}}</td><td>{{money(row.VALOR_UNITARIO)}}</td><td>{{money(row.SUB_TOTAL)}}</td><td>{{money(row.VALOR_IVA)}}</td><td>{{money(row.TOTAL)}}</td><td>{{row.FECHA_ENTREGA | date:'dd/MM/yyyy'}}</td><td>{{row.ESTADO}}</td><td><div class="actions"><xtein-button text="Editar" variant="secondary" [disabled]="readOnly || busy || !!draft()" (clicked)="begin(row)" /><xtein-button text="Eliminar" variant="danger" [disabled]="readOnly || busy || !!draft()" (clicked)="removed.emit(row.ITEM)" /></div></td></tr>}
+<tbody>@for(row of items; track row.ITEM){<tr><td><xtein-checkbox ariaLabel="Seleccionar producto" [disabled]="readOnly || busy || !!draft()" [checked]="selected().includes(row.ITEM)" (checkedChange)="toggle(row.ITEM,$event)" /></td><td>{{row.PRODUCTO}}</td><td>{{row.NOMBRE_PRODUCTO}}</td><td>{{row.SOPORTE}}</td><td>{{quantity(row.CANTIDAD)}}</td><td>{{row.UDM_VENTA}}</td><td>{{money(row.VALOR_UNITARIO)}}</td><td>{{money(row.SUB_TOTAL)}}</td><td>{{money(row.VALOR_IVA)}}</td><td>{{money(row.TOTAL)}}</td><td>{{row.FECHA_ENTREGA | date:'dd/MM/yyyy'}}</td><td>{{row.ESTADO}}</td><td><div class="actions"><xtein-button text="Editar" variant="secondary" [disabled]="readOnly || busy || !!draft()" (clicked)="begin(row)" /><xtein-button text="Eliminar" variant="danger" [disabled]="readOnly || busy || !!draft()" (clicked)="removed.emit(row.ITEM)" /></div></td></tr>}
 @empty{<tr><td colspan="13">No hay productos asociados.</td></tr>}</tbody></table></div>
 
-<dx-popup [visible]="productsVisible()" (visibleChange)="productsVisible.set($event)" title="Buscar producto"
+<xtein-popup [visible]="productsVisible()" (visibleChange)="productsVisible.set($event)" title="Buscar producto"
   width="min(1000px, 95vw)" height="min(650px, 90dvh)" [showCloseButton]="true">
   <div class="product-search">
     <div class="actions">
       <xtein-button text="Refrescar productos" icon="refresh" [disabled]="productsLoading || working()" (clicked)="refreshProducts.emit()" />
-      <label><input type="checkbox" [checked]="onlyStock" [disabled]="productsLoading || working()" (change)="stockOnly.emit($any($event.target).checked)" /> Solo con existencias</label>
+      <xtein-checkbox label="Solo con existencias" [checked]="onlyStock" [disabled]="productsLoading || working()" (checkedChange)="stockOnly.emit($event)" />
       @if(productsLoading){<span role="status">Cargando productos…</span>}
     </div>
-    <dx-data-grid [dataSource]="products" keyExpr="PRODUCTO" height="100%" [columnAutoWidth]="true" [hoverStateEnabled]="true"
-      (onRowClick)="$event.rowType === 'data' && chooseProduct($event.data)" (onKeyDown)="$event.event?.key === 'Enter' && $event.component.getSelectedRowsData().length && chooseProduct($event.component.getSelectedRowsData()[0])">
-      <dxo-selection mode="single" /><dxo-search-panel [visible]="true" placeholder="Código o nombre" />
-      <dxo-filter-row [visible]="true" /><dxo-header-filter [visible]="true" />
-      <dxo-paging [pageSize]="50" /><dxo-pager [visible]="true" [allowedPageSizes]="[50,100,'all']" [showPageSizeSelector]="true" [showInfo]="true" [showNavigationButtons]="true" />
-      <dxi-column dataField="PRODUCTO" caption="Producto" /><dxi-column dataField="NOMBRE" caption="Nombre" />
-      <dxi-column dataField="PRECIO" caption="Precio" dataType="number" [format]="moneyFormat" />
-      <dxi-column dataField="CAN_INV" caption="Inventario" dataType="number" [format]="quantityFormat" [visible]="onlyStock" />
-    </dx-data-grid>
+    <xtein-data-grid [dataSource]="products" keyExpr="PRODUCTO" height="100%"
+      (rowClick)="$event.rowType === 'data' && chooseProduct($event.data)" (rowActivated)="chooseProduct($event)" [columns]="productColumns" selectionMode="single" [pageSize]="50" searchPlaceholder="Código o nombre">
+    </xtein-data-grid>
   </div>
-</dx-popup>
+</xtein-popup>

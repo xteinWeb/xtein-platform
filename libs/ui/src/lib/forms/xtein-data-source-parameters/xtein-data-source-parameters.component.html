@@ -27,21 +27,7 @@
 
         <div class="xt-data-source-parameters__field">
 
-          <label
-            class="xt-data-source-parameters__label"
-            [attr.for]="field.name">
-
-            {{ field.label }}
-
-            @if (field.required) {
-              <span
-                class="xt-data-source-parameters__required"
-                aria-hidden="true">
-                *
-              </span>
-            }
-
-          </label>
+          <xtein-label class="xt-data-source-parameters__label" [for]="field.name" [required]="field.required || false">{{field.label}}</xtein-label>
 
           @switch (field.type) {
 

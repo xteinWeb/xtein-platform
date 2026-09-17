@@ -1,3 +1,4 @@
+import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -34,7 +35,7 @@ import type {
   selector: 'xtein-input',
   standalone: true,
 
-  imports: [
+  imports: [XteinLabelComponent,
     DxTextBoxModule
   ],
 
@@ -45,6 +46,7 @@ import type {
     ChangeDetectionStrategy.OnPush,
 
   host: {
+    '[attr.id]': 'null',
     class: 'd-block w-100'
   },
 

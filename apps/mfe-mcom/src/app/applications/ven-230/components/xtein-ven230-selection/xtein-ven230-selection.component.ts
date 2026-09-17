@@ -1,13 +1,12 @@
+import { XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, XteinGridColumn, XteinGridSelectionEvent, XteinGridEditingEvent } from '@xtein/ui';
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewChild, inject } from '@angular/core';
-import { DxPopupModule, DxDataGridModule, DxDataGridComponent, DxTemplateModule } from 'devextreme-angular';
-import type { Column, EditingStartEvent, SelectionChangedEvent } from 'devextreme/ui/data_grid';
 import { XteinButtonComponent, XteinNotificationService } from '@xtein/ui';
 import { Ven230Lookup, Ven230SettingResult } from '../../models/ven-230-business.model';
 import { Ven230SelectionService } from '../../services/ven-230-selection.service';
 
 @Component({
   selector: 'xtein-ven230-selection', standalone: true,
-  imports: [DxPopupModule, DxDataGridModule, DxTemplateModule, XteinButtonComponent],
+  imports: [XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent,XteinButtonComponent],
   providers: [Ven230SelectionService],
   templateUrl: './xtein-ven230-selection.component.html',
   styleUrl: './xtein-ven230-selection.component.scss'
@@ -19,11 +18,11 @@ export class XteinVen230SelectionComponent implements OnChanges {
   @Input() initialKeys: unknown[] = [];
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() accepted = new EventEmitter<Ven230Lookup[]>();
-  @ViewChild(DxDataGridComponent) grid?: DxDataGridComponent;
+  @ViewChild(XteinDataGridComponent) grid?: XteinDataGridComponent<Ven230Lookup, number>;
   private readonly configuration = inject(Ven230SelectionService);
   private readonly notification = inject(XteinNotificationService);
   rows: Ven230Lookup[] = [];
-  columns: Column<Ven230Lookup, number>[] = [];
+  columns: XteinGridColumn<Ven230Lookup, number>[] = [];
   keys: number[] = [];
   onlySelected = false;
   error = '';
@@ -32,7 +31,7 @@ export class XteinVen230SelectionComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['config'] && !(changes['visible'] && this.visible)) return;
-    this.grid?.instance.cancelEditData();
+    this.grid?.cancelEditData();
     this.error = '';
     this.onlySelected = false;
     this.rows = structuredClone(this.config?.dataSource ?? []);
@@ -45,17 +44,17 @@ export class XteinVen230SelectionComponent implements OnChanges {
     const fallback = dimension === 'width' ? 600 : 400;
     return `min(${value > 0 && Number.isFinite(value) ? value : fallback}px, ${dimension === 'width' ? '95vw' : '90dvh'})`;
   }
-  selectionChanged(event: SelectionChangedEvent<Ven230Lookup, number>): void {
+  selectionChanged(event: XteinGridSelectionEvent<Ven230Lookup, number>): void {
     this.keys = event.selectedRowKeys;
   }
-  editingStart(event: EditingStartEvent<Ven230Lookup, number>): void {
+  editingStart(event: XteinGridEditingEvent<Ven230Lookup, number>): void {
     event.cancel = this.busy || !this.keys.includes(event.key);
   }
   async filterSelected(value: boolean): Promise<void> {
     if (!await this.commitEdits()) return;
     this.onlySelected = value;
-    if (value) this.grid?.instance.filter(['ITEM', 'anyof', this.keys]);
-    else this.grid?.instance.clearFilter('dataSource');
+    if (value) this.grid?.filter(['ITEM', 'anyof', this.keys]);
+    else this.grid?.clearDataFilter();
   }
   groupRows(path: unknown): Ven230Lookup[] {
     const keys = Array.isArray(path) ? path : [path];
@@ -77,15 +76,15 @@ export class XteinVen230SelectionComponent implements OnChanges {
   async toggleGroup(path: unknown, checked: boolean): Promise<void> {
     if (!await this.commitEdits()) return;
     const group = this.groupRows(path).map(row => row['ITEM'] as number);
-    if (checked) await this.grid?.instance.selectRows(group, true);
-    else await this.grid?.instance.deselectRows(group);
+    if (checked) await this.grid?.selectRows(group, true);
+    else await this.grid?.deselectRows(group);
   }
   private async commitEdits(): Promise<boolean> {
     if (this.busy || this.saving || this.error) return false;
     this.saving = true;
     try {
-      await this.grid?.instance.saveEditData();
-      return !this.grid?.instance.hasEditData();
+      await this.grid?.saveEditData();
+      return !this.grid?.hasEditData();
     } catch (error) {
       this.notification.error(error instanceof Error ? error.message : 'No se pudieron validar los datos.');
       return false;

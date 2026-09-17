@@ -1,3 +1,4 @@
+import { XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent } from '@xtein/ui';
 import { Ven230ElectronicQrEndpoint } from './constants/ven-230-electronic.constants';
 import { XteinVen230SelectionComponent } from './components/xtein-ven230-selection/xtein-ven230-selection.component';
 import { formatNumber } from 'devextreme/localization';
@@ -8,7 +9,6 @@ import { Ven230Lookup, Ven230Details, Ven230SettingResult, Ven230TaxResult } fro
 import { Ven230PrefacturaGrav, Ven230PrefacturaPago } from './models/ven-230.model';
 import { XteinVen230ItemsComponent } from './components/xtein-ven230-items/xtein-ven230-items.component';
 import { XteinButtonComponent } from '@xtein/ui';
-import { DxPopupModule, DxDataGridModule } from 'devextreme-angular';
 import {
   untracked,
   computed,
@@ -99,9 +99,8 @@ import {
   standalone:
     true,
 
-  imports: [
-    CommonModule, XteinVen230SelectionComponent, XteinVen230ItemsComponent, XteinButtonComponent, DxPopupModule, DxDataGridModule,
-    ReactiveFormsModule,
+  imports: [XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent,
+    CommonModule, XteinVen230SelectionComponent, XteinVen230ItemsComponent, XteinButtonComponent, ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinRecordReportsComponent,

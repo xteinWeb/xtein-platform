@@ -1,3 +1,4 @@
+import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
   Component,
   EventEmitter,
@@ -78,7 +79,7 @@ export interface DataSourceConnectionTestResult {
 
   standalone: true,
 
-  imports: [
+  imports: [XteinLabelComponent,
     ReactiveFormsModule,
     XteinInputComponent,
     XteinPasswordComponent,

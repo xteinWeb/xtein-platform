@@ -1,0 +1,15 @@
+<dx-data-grid [dataSource]="dataSource" [keyExpr]="keyExpr" [columns]="resolvedColumns" [height]="height" [disabled]="disabled"
+  [columnAutoWidth]="true" [hoverStateEnabled]="true" [showBorders]="true" [selectedRowKeys]="selectedRowKeys"
+  noDataText="Sin datos" (onSelectionChanged)="selectionChanged.emit($event)" (onEditingStart)="editingStart.emit($event)"
+  (onRowClick)="rowClick.emit($event)" (onKeyDown)="keyDown($event)">
+  <dxo-selection [mode]="selectionMode" selectAllMode="allPages" />
+  <dxo-editing mode="cell" [allowUpdating]="allowUpdating" />
+  <dxo-search-panel [visible]="searchEnabled" [placeholder]="searchPlaceholder" />
+  <dxo-filter-row [visible]="filterEnabled" /><dxo-header-filter [visible]="filterEnabled" />
+  <dxo-paging [pageSize]="pageSize" />
+  <dxo-pager [visible]="true" [showPageSizeSelector]="true" [allowedPageSizes]="allowedPageSizes" [showInfo]="true" [showNavigationButtons]="true" />
+  <div *dxTemplate="let cell of 'xteinGroup'">
+    @if (groupTemplate) { <ng-container [ngTemplateOutlet]="groupTemplate" [ngTemplateOutletContext]="{$implicit:cell}" /> }
+    @else { {{cell.text}} }
+  </div>
+</dx-data-grid>

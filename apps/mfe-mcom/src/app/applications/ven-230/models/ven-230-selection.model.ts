@@ -1,9 +1,9 @@
-import type { Column } from 'devextreme/ui/data_grid';
-import type { ValidationRule } from 'devextreme/common';
+import type { XteinGridColumn } from '@xtein/ui';
+import type { XteinValidationRule } from '@xtein/ui';
 import { Ven230Lookup } from './ven-230-business.model';
-export type Ven230SelectionColumn = Omit<Column<Ven230Lookup, number>, 'validationRules'> & {
+export type Ven230SelectionColumn = Omit<XteinGridColumn<Ven230Lookup, number>, 'validationRules'> & {
   editable?: boolean;
   templateGroup?: string | string[];
-  validationRules?: string | ValidationRule[];
+  validationRules?: string | XteinValidationRule[];
   msgError?: string;
 };

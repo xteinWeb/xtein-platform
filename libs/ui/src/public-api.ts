@@ -32,3 +32,9 @@ export * from './lib/components/xtein-dashboard-page/xtein-dashboard-page.compon
 export * from './lib/components/xtein-dashboard-frame/xtein-dashboard-frame.component';
 
 export * from './lib/forms/xtein-date/xtein-date.component';
+
+export * from './lib/overlays/xtein-popup/xtein-popup.component';
+export * from './lib/forms/xtein-checkbox/xtein-checkbox.component';
+export * from './lib/data/xtein-data-grid/xtein-data-grid.component';
+export * from './lib/data/xtein-data-grid/models/xtein-data-grid.model';
+export * from './lib/forms/xtein-label/xtein-label.component';

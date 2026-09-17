@@ -1,4 +1,4 @@
-@if (label) { <label class="form-label" [attr.for]="id">{{ label }} @if(required){<span aria-hidden="true">*</span>}</label> }
+@if (label) { <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" >{{label}}</xtein-label> }
 <dx-date-box type="date" pickerType="calendar" stylingMode="filled" displayFormat="dd/MM/yyyy"
   dateSerializationFormat="yyyy-MM-dd" [value]="value" [min]="min" [max]="max"
   [readOnly]="readOnly" [disabled]="isDisabled" [placeholder]="placeholder" [inputAttr]="inputAttributes"

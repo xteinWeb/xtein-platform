@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import type { Column } from 'devextreme/ui/data_grid';
+import type { XteinGridColumn } from '@xtein/ui';
 import { Ven230Lookup } from '../models/ven-230-business.model';
 import { Ven230SelectionColumn } from '../models/ven-230-selection.model';
 import { compileValidation } from '../utils/ven-230-validation-expression';
 
 @Injectable()
 export class Ven230SelectionService {
-  columns(config: string | undefined): Column<Ven230Lookup, number>[] {
+  columns(config: string | undefined): XteinGridColumn<Ven230Lookup, number>[] {
     const values: Ven230SelectionColumn[] = config ? JSON.parse(config) : [];
     if (!Array.isArray(values)) throw new Error('La configuración de columnas no es válida.');
     return values.map(column => {
       const {editable, templateGroup, validationRules, msgError, ...options} = column;
-      const result: Column<Ven230Lookup, number> = {...options, visible: column.visible !== false, allowEditing: !!editable};
+      const result: XteinGridColumn<Ven230Lookup, number> = {...options, visible: column.visible !== false, allowEditing: !!editable};
       if (typeof validationRules === 'string' && validationRules.trim()) {
         const validate = compileValidation(validationRules);
         result.validationRules = [{type:'custom', reevaluate:true, ignoreEmptyValue:false,
@@ -19,7 +19,7 @@ export class Ven230SelectionService {
             try { return validate(event); } catch { return false; }
           }}];
       } else if (Array.isArray(validationRules)) result.validationRules = validationRules;
-      if (templateGroup || column.groupIndex != null) result.groupCellTemplate = 'groupSelection';
+      if (templateGroup || column.groupIndex != null) result.groupCellTemplate = 'xteinGroup';
       return result;
     });
   }

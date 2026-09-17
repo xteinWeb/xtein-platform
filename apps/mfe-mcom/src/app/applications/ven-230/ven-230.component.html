@@ -8,18 +8,18 @@
         <div class="ven-230__header-grid">
           <div class="ven-230__header-col">
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-documento">
+              <xtein-label class="ven-230__label-inline" for="ven-230-documento">
                 Prefactura Número
-              </label>
+              </xtein-label>
               <div class="ven-230__control-inline">
                 <xtein-select id="ven-230-documento" [items]="documents()" displayExpr="DOCUMENTO" valueExpr="DOCUMENTO" [searchEnabled]="true" formControlName="DOCUMENTO" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
               </div>
             </div>
 
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-fecha">
+              <xtein-label class="ven-230__label-inline" for="ven-230-fecha">
                 Fecha
-              </label>
+              </xtein-label>
               <div class="ven-230__control-inline">
                 <xtein-date
                   id="ven-230-fecha"
@@ -34,9 +34,9 @@
             </div>
 
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-fecha-registro">
+              <xtein-label class="ven-230__label-inline" for="ven-230-fecha-registro">
                 Fecha de Registro
-              </label>
+              </xtein-label>
               <div
                 class="ven-230__control-inline ven-230__control-inline--shaded"
               >
@@ -53,16 +53,16 @@
 
           <div class="ven-230__header-col">
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline"> Estado </label>
+              <xtein-label class="ven-230__label-inline"> Estado </xtein-label>
               <div class="ven-230__control-inline">
                 <span class="ven-230__badge-status" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
               </div>
             </div>
 
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-usuario">
+              <xtein-label class="ven-230__label-inline" for="ven-230-usuario">
                 Usuario
-              </label>
+              </xtein-label>
               <div
                 class="ven-230__control-inline ven-230__control-inline--shaded"
               >
@@ -87,27 +87,27 @@
         <div class="ven-230__client-grid">
           <div class="ven-230__client-col">
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-id-cliente">
+              <xtein-label class="ven-230__label-inline" for="ven-230-id-cliente">
                 Documento del Cliente
-              </label>
+              </xtein-label>
               <div class="ven-230__control-inline">
                 <xtein-select id="ven-230-id-cliente" [items]="clients()" displayExpr="NOMBRE_COMPLETO" valueExpr="ID_CLIENTE" [searchEnabled]="true" formControlName="ID_CLIENTE" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
               </div>
             </div>
 
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-direccion">
+              <xtein-label class="ven-230__label-inline" for="ven-230-direccion">
                 Dirección
-              </label>
+              </xtein-label>
               <div class="ven-230__control-inline">
                 <xtein-select id="ven-230-direccion" [items]="addresses()" displayExpr="DIRECCION" valueExpr="DIRECCION" [searchEnabled]="true" formControlName="DIRECCION" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
               </div>
             </div>
 
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-fecha-oc">
+              <xtein-label class="ven-230__label-inline" for="ven-230-fecha-oc">
                 Fecha Orden de Compra
-              </label>
+              </xtein-label>
               <div class="ven-230__control-inline">
                 <xtein-date
                   id="ven-230-fecha-oc"
@@ -122,9 +122,9 @@
 
           <div class="ven-230__client-col">
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-nombre-cliente">
+              <xtein-label class="ven-230__label-inline" for="ven-230-nombre-cliente">
                 Nombre de Cliente
-              </label>
+              </xtein-label>
               <div
                 class="ven-230__control-inline ven-230__control-inline--shaded"
               >
@@ -140,9 +140,9 @@
             </div>
 
             <div class="ven-230__field-inline">
-              <label class="ven-230__label-inline" for="ven-230-doc-soporte">
+              <xtein-label class="ven-230__label-inline" for="ven-230-doc-soporte">
                 Orden de Compra
-              </label>
+              </xtein-label>
               <div class="ven-230__control-inline">
                 <xtein-input
                   id="ven-230-doc-soporte"
@@ -210,9 +210,9 @@
             </div>
             <div class="ven-230__params-grid">
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-id-un">
+                <xtein-label class="ven-230__label-inline" for="ven-230-id-un">
                   Unidad de Negocio
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select
                     id="ven-230-id-un"
@@ -229,9 +229,9 @@
               </div>
 
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-moneda">
+                <xtein-label class="ven-230__label-inline" for="ven-230-moneda">
                   Moneda
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select
                     id="ven-230-moneda"
@@ -247,18 +247,18 @@
               </div>
 
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-id-adc">
+                <xtein-label class="ven-230__label-inline" for="ven-230-id-adc">
                   ADC / Vendedor
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select id="ven-230-id-adc" [items]="sellers()" displayExpr="NOMBRE_COMPLETO" valueExpr="ID_ADC" [searchEnabled]="true" formControlName="ID_ADC" [readOnly]="readOnly() || headerLocked() || itemPending()"  />
                 </div>
               </div>
 
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-tipo-venta">
+                <xtein-label class="ven-230__label-inline" for="ven-230-tipo-venta">
                   Tipo de Venta
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select
                     id="ven-230-tipo-venta"
@@ -273,9 +273,9 @@
               </div>
 
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-bodega">
+                <xtein-label class="ven-230__label-inline" for="ven-230-bodega">
                   Bodega
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select
                     id="ven-230-bodega"
@@ -291,9 +291,9 @@
               </div>
 
               <div class="ven-230__field-inline ven-230__field-inline--wide">
-                <label class="ven-230__label-inline" for="ven-230-descripcion">
+                <xtein-label class="ven-230__label-inline" for="ven-230-descripcion">
                   Descripción
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-input
                     id="ven-230-descripcion"
@@ -315,9 +315,9 @@
             </div>
             <div class="ven-230__params-grid">
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-condicion">
+                <xtein-label class="ven-230__label-inline" for="ven-230-condicion">
                   Condición / Lista
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select
                     id="ven-230-condicion"
@@ -333,18 +333,18 @@
               </div>
 
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-plazo">
+                <xtein-label class="ven-230__label-inline" for="ven-230-plazo">
                   Plazo
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-select id="ven-230-plazo" [items]="terms()" displayExpr="PLAZO" valueExpr="PLAZO" formControlName="PLAZO" [readOnly]="readOnly() || headerLocked() || itemPending()" />
                 </div>
               </div>
 
               <div class="ven-230__field-inline">
-                <label class="ven-230__label-inline" for="ven-230-vencimiento">
+                <xtein-label class="ven-230__label-inline" for="ven-230-vencimiento">
                   Vencimiento
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-date
                     id="ven-230-vencimiento"
@@ -357,12 +357,12 @@
               </div>
 
               <div class="ven-230__field-inline">
-                <label
+                <xtein-label
                   class="ven-230__label-inline"
                   for="ven-230-cuota-inicial"
                 >
                   Cuota Inicial
-                </label>
+                </xtein-label>
                 <div class="ven-230__control-inline">
                   <xtein-number
                     id="ven-230-cuota-inicial"
@@ -376,7 +376,7 @@
           </div>
         </div>
 
-        <div class="ven-230__field-inline"><label class="ven-230__label-inline" for="ven-230-tasa-cambio">Tasa de cambio</label><div class="ven-230__control-inline"><xtein-number id="ven-230-tasa-cambio" formControlName="TASA_CAMBIO" /></div></div>
+        <div class="ven-230__field-inline"><xtein-label class="ven-230__label-inline" for="ven-230-tasa-cambio">Tasa de cambio</xtein-label><div class="ven-230__control-inline"><xtein-number id="ven-230-tasa-cambio" formControlName="TASA_CAMBIO" /></div></div>
         <!-- Tabla de Items -->
         <div class="ven-230__section-divider">
           <h3 class="ven-230__section-title">Detalle de Items</h3>
@@ -443,13 +443,13 @@
   </xtein-record-reports>
 }
 
-<dx-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
+<xtein-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
   <div class="ven-230__options">@for(option of settings();track $index){<xtein-button [text]="option.VALOR || ''" [disabled]="loading()" (clicked)="executeSetting(option)" />}</div>
-</dx-popup>
+</xtein-popup>
 <xtein-ven230-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
   [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="loading()" (accepted)="applySelection($event)" />
 
-<dx-popup [visible]="electronicVisible()" (visibleChange)="electronicVisible.set($event)" title="Prefactura electrónica" width="min(900px, 95vw)" height="min(600px, 90dvh)" [showCloseButton]="!electronicBusy()" [hideOnOutsideClick]="false">
+<xtein-popup [visible]="electronicVisible()" (visibleChange)="electronicVisible.set($event)" title="Prefactura electrónica" width="min(900px, 95vw)" height="min(600px, 90dvh)" [showCloseButton]="!electronicBusy()" [hideOnOutsideClick]="false">
  <div class="ven-230__selection">
  @if (electronicView(); as document) {
    <div class="ven-230__electronic-summary">
@@ -461,6 +461,6 @@
    </div>
  }
  @if (electronicBusy()) { <p role="status" aria-live="polite">{{electronicOperation()}}</p> }
- <dx-data-grid [dataSource]="electronicEvents()" [columnAutoWidth]="true" height="100%" />
+ <xtein-data-grid [dataSource]="electronicEvents()" height="100%" />
  <div class="ven-230__selection-footer"><xtein-button text="Enviar DIAN" [disabled]="electronicBusy()" (clicked)="sendElectronic()" /><xtein-button text="PDF" [disabled]="electronicBusy()" (clicked)="downloadElectronic()" /></div></div>
-</dx-popup>
+</xtein-popup>

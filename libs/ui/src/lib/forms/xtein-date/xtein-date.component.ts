@@ -1,10 +1,12 @@
+import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DxDateBoxModule } from 'devextreme-angular';
 import type { ValueChangedEvent } from 'devextreme/ui/date_box';
 
 @Component({
-  selector: 'xtein-date', standalone: true, imports: [DxDateBoxModule],
+  host: {'[attr.id]': 'null'},
+  selector: 'xtein-date', standalone: true, imports: [XteinLabelComponent,DxDateBoxModule],
   templateUrl: './xtein-date.component.html', styleUrl: './xtein-date.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => XteinDateComponent), multi: true }]

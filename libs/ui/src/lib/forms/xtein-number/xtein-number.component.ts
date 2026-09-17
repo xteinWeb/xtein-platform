@@ -22,6 +22,7 @@ import {
  * directly on DevExtreme controls.
  */
 @Component({
+  host: {'[attr.id]': 'null'},
   selector: 'xtein-number',
 
   standalone: true,
