@@ -163,7 +163,13 @@
       <!-- Tarjeta de Totales -->
       <div class="ven-230__card-totals">
         <div class="ven-230__totals-header">
-          <span class="ven-230__totals-header-icon">☰</span>
+          <button type="button" class="ven-230__totals-menu-btn" title="Configuración" aria-label="Configuración">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <line x1="4" y1="7" x2="20" y2="7"></line>
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <line x1="4" y1="17" x2="20" y2="17"></line>
+            </svg>
+          </button>
         </div>
 
         <div class="ven-230__totals-body">
@@ -329,22 +335,6 @@
                   </xtein-lookup>
                 </div>
               </div>
-
-              <div class="ven-230__field-inline ven-230__field-inline--wide">
-                <xtein-label class="ven-230__label-inline" for="ven-230-descripcion">
-                  Descripción
-                </xtein-label>
-                <div class="ven-230__control-inline">
-                  <xtein-input
-                    id="ven-230-descripcion"
-                    name="DESCRIPCION"
-                    placeholder="Descripción de la prefactura..."
-                    formControlName="DESCRIPCION"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
-                  >
-                  </xtein-input>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -417,6 +407,25 @@
                   </xtein-number>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción hasta el final (ancho completo) -->
+        <div class="ven-230__full-row">
+          <div class="ven-230__field-inline ven-230__field-inline--full">
+            <xtein-label class="ven-230__label-inline" for="ven-230-descripcion">
+              Descripción
+            </xtein-label>
+            <div class="ven-230__control-inline">
+              <xtein-input
+                id="ven-230-descripcion"
+                name="DESCRIPCION"
+                placeholder="Descripción de la prefactura..."
+                formControlName="DESCRIPCION"
+                [readOnly]="readOnly() || headerLocked() || itemPending()"
+              >
+              </xtein-input>
             </div>
           </div>
         </div>

@@ -1,14 +1,15 @@
-import { XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, XteinGridColumn } from '@xtein/ui';
+import { XteinDataGridComponent, XteinCheckboxComponent, XteinGridColumn } from '@xtein/ui';
 import { formatNumber } from 'devextreme/localization';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { XteinSelectComponent, XteinNumberComponent, XteinDateComponent, XteinButtonComponent, XteinNotificationService } from '@xtein/ui';
+import { DxDropDownBoxModule, DxTemplateModule } from 'devextreme-angular';
+import { XteinSelectComponent, XteinNumberComponent, XteinDateComponent, XteinNotificationService } from '@xtein/ui';
 import { Ven230PrefacturaItem } from '../../models/ven-230.model';
 import { Ven230Header, Ven230Lookup } from '../../models/ven-230-business.model';
 import { Ven230BusinessService } from '../../services/ven-230-business.service';
 @Component({ selector: 'xtein-ven230-items', standalone: true,
- imports: [XteinPopupComponent, XteinDataGridComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinDateComponent, XteinSelectComponent, XteinNumberComponent, XteinButtonComponent],
+ imports: [DxDropDownBoxModule, DxTemplateModule, XteinDataGridComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinDateComponent, XteinSelectComponent, XteinNumberComponent],
  templateUrl: './xtein-ven230-items.component.html', styleUrl: './xtein-ven230-items.component.scss',
  changeDetection: ChangeDetectionStrategy.OnPush })
 export class XteinVen230ItemsComponent implements OnChanges {
@@ -135,21 +136,31 @@ export class XteinVen230ItemsComponent implements OnChanges {
    finally{this.working.set(false);}
  }
 
+  productDropdownOpened = false;
+  readonly productDropDownOptions = {
+    width: 'min(750px, 95vw)',
+    height: 'min(420px, 70dvh)',
+    hideOnParentScroll: true,
+  };
+
   private productColumnKey = '';
   private cachedProductColumns: XteinGridColumn<Ven230Lookup>[] = [];
   get productColumns(): XteinGridColumn<Ven230Lookup>[] {
     const key = JSON.stringify([this.moneyFormat, this.quantityFormat, this.onlyStock]);
     if (key === this.productColumnKey) return this.cachedProductColumns;
     this.productColumnKey = key;
-    return this.cachedProductColumns = [{dataField:'PRODUCTO',caption:'Producto'},{dataField:'NOMBRE',caption:'Nombre'},
-      {dataField:'PRECIO',caption:'Precio',dataType:'number',format:this.moneyFormat},
-      {dataField:'CAN_INV',caption:'Inventario',dataType:'number',format:this.quantityFormat,visible:this.onlyStock}];
+    return this.cachedProductColumns = [
+      { dataField: 'PRODUCTO', caption: 'Producto', width: 130 },
+      { dataField: 'NOMBRE', caption: 'Nombre' },
+      { dataField: 'PRECIO', caption: 'Precio', dataType: 'number', format: this.moneyFormat, alignment: 'right', width: 140 },
+      { dataField: 'CAN_INV', caption: 'Inventario', dataType: 'number', format: this.quantityFormat, visible: this.onlyStock, alignment: 'right', width: 120 }
+    ];
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['recordKey'] || (changes['readOnly'] && this.readOnly)) {
       this.selected.set([]);
       this.draft.set(null);
-      this.productsVisible.set(false);
+      this.productDropdownOpened = false;
     } else if (changes['items']) {
       const keys = new Set(this.items.map(item => item.ITEM));
       this.selected.update(selected => selected.filter(key => keys.has(key)));
@@ -171,10 +182,12 @@ export class XteinVen230ItemsComponent implements OnChanges {
     return (this.draft()?.PRESENTACION ?? []).map(unit => ({...unit, UDM_VENTA: unit.UDM_VENTA ?? unit.UDM_COMPRA,
       LABEL: [unit.UDM_VENTA ?? unit.UDM_COMPRA, String(unit.CANTIDAD_PRES ?? ''), 'Equiv: '+String(unit.CANTIDAD_EQUIV ?? '')+' '+String(unit.UDM_EQUIV ?? ''), this.money(Number(unit.PRECIO ?? 0))].join(' · ')}));
   }
-  async chooseProduct(row: Ven230Lookup): Promise<void> {
+  selectProductFromDropdown(row: Ven230Lookup): void {
     if (!row.PRODUCTO || this.working() || this.busy) return;
-    this.productsVisible.set(false);
-    await this.product(row.PRODUCTO);
+    this.productDropdownOpened = false;
+    void this.product(row.PRODUCTO);
   }
-  closeProductSearch(): void { this.productsVisible.set(false); }
+  closeProductSearch(): void {
+    this.productDropdownOpened = false;
+  }
 }

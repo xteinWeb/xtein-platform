@@ -114,7 +114,10 @@
 
 .ven-230__card-totals {
   flex:
-    0 0 260px;
+    0 0 250px;
+
+  align-self:
+    flex-start;
 
   display:
     flex;
@@ -127,13 +130,16 @@
 
   border:
     1px solid
-    #dfe6ef;
+    #d1e5ec;
 
   border-radius:
     10px;
 
   background:
-    #ffffff;
+    azure;
+
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08);
 
   box-sizing:
     border-box;
@@ -279,6 +285,61 @@
     1 / -1;
 }
 
+.ven-230__full-row {
+  width:
+    100%;
+
+  margin-top:
+    10px;
+
+  margin-bottom:
+    6px;
+}
+
+.ven-230__field-inline--full {
+  width:
+    100%;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+
+  .ven-230__label-inline {
+    flex:
+      0 0 140px;
+
+    margin:
+      0;
+
+    white-space:
+      nowrap;
+  }
+
+  .ven-230__control-inline {
+    flex:
+      1 1 0;
+
+    min-width:
+      0;
+
+    width:
+      100%;
+
+    xtein-input {
+      display:
+        block;
+
+      width:
+        100%;
+    }
+  }
+}
+
 
 /*======================================================================
 = CLIENT GRID
@@ -328,28 +389,52 @@
     flex-end;
 
   padding:
+    8px
     12px
-    16px
-    0;
+    2px;
 }
 
 
-.ven-230__totals-header-icon {
+.ven-230__totals-menu-btn {
+  background:
+    transparent;
+
+  border:
+    none;
+
+  padding:
+    2px;
+
   cursor:
     pointer;
 
   color:
-    #8898aa;
-
-  font-size:
-    18px;
+    #4a6a84;
 
   line-height:
     1;
 
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    4px;
+
+  transition:
+    color 0.15s, background-color 0.15s;
+
   &:hover {
     color:
-      #244d73;
+      #1b506f;
+
+    background-color:
+      rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -362,18 +447,18 @@
     column;
 
   gap:
-    10px;
+    6px;
 
   padding:
+    4px
     16px
-    20px
-    24px;
+    14px;
 
   flex:
     1;
 
   justify-content:
-    center;
+    flex-start;
 }
 
 
@@ -391,7 +476,7 @@
     13px;
 
   color:
-    #4a6a84;
+    #2b4c63;
 }
 
 
@@ -418,23 +503,26 @@
     1px;
 
   margin:
-    4px
+    6px
     0;
 
   background:
-    #dfe6ef;
+    #cbe2ea;
 }
 
 
 .ven-230__totals-row--grand {
   font-size:
-    20px;
+    17px;
 
   font-weight:
     700;
 
   color:
     #1b506f;
+
+  margin-top:
+    2px;
 
   .ven-230__totals-label {
     font-weight:
@@ -446,7 +534,7 @@
       700;
 
     font-size:
-      22px;
+      18px;
   }
 }
 

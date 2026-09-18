@@ -1,48 +1,69 @@
 <div class="grid-toolbar">
   <!-- Botón Nuevo Item (+) -->
-  <xtein-button
-    icon="plus"
-    ariaLabel="Nuevo"
-    variant="secondary"
-    width="34px"
+  <button
+    type="button"
+    class="grid-btn grid-btn--primary"
+    aria-label="Nuevo ítem"
+    title="Agregar nuevo producto"
     [disabled]="readOnly || !ready || busy || !!draft()"
-    (clicked)="begin()"
-  />
+    (click)="begin()"
+  >
+    <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
 
   <!-- Botón Guardar Item (✓) -->
   @if (!!draft()) {
-    <xtein-button
-      icon="check"
-      ariaLabel="Guardar"
-      variant="secondary"
-      width="34px"
+    <button
+      type="button"
+      class="grid-btn grid-btn--success"
+      aria-label="Guardar ítem"
+      title="Guardar cambios del ítem"
       [disabled]="working() || busy"
-      (clicked)="commit()"
-    />
+      (click)="commit()"
+    >
+      <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </button>
   }
 
   <!-- Botón Cancelar Item (↩) -->
   @if (!!draft()) {
-    <xtein-button
-      icon="undo"
-      ariaLabel="Cancelar"
-      variant="secondary"
-      width="34px"
+    <button
+      type="button"
+      class="grid-btn grid-btn--cancel"
+      aria-label="Cancelar ítem"
+      title="Cancelar edición"
       [disabled]="working() || busy"
-      (clicked)="cancel()"
-    />
+      (click)="cancel()"
+    >
+      <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7v6h6"></path>
+        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+      </svg>
+    </button>
   }
 
   <!-- Botón Eliminar Seleccionados (🗑) -->
   @if (!readOnly && selected().length > 0 && !draft()) {
-    <xtein-button
-      icon="trash"
-      ariaLabel="Eliminar"
-      variant="danger"
-      width="34px"
+    <button
+      type="button"
+      class="grid-btn grid-btn--danger"
+      aria-label="Eliminar seleccionados"
+      title="Eliminar productos seleccionados"
       [disabled]="busy"
-      (clicked)="deleteSelected()"
-    />
+      (click)="deleteSelected()"
+    >
+      <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+      </svg>
+    </button>
   }
 </div>
 
@@ -79,26 +100,63 @@
           <td class="col-product">
             <div class="product-cell-box">
               <div class="product-select-wrap">
-                <xtein-select
-                  [items]="products"
-                  displayExpr="PRODUCTO"
+                <dx-drop-down-box
+                  [(value)]="row.PRODUCTO"
                   valueExpr="PRODUCTO"
-                  [searchEnabled]="true"
+                  displayExpr="PRODUCTO"
                   placeholder="Producto"
-                  [ngModel]="row.PRODUCTO"
-                  (ngModelChange)="product($event)"
+                  [dataSource]="products"
+                  [showClearButton]="true"
+                  [dropDownOptions]="productDropDownOptions"
+                  [(opened)]="productDropdownOpened"
                   [disabled]="working() || busy"
-                />
+                >
+                  <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
+                    <div class="product-dropdown-toolbar">
+                      <div class="product-dropdown-toolbar-left">
+                        <button
+                          type="button"
+                          class="btn-product-refresh"
+                          title="Refrescar productos"
+                          [disabled]="productsLoading || working()"
+                          (click)="refreshProducts.emit()"
+                        >
+                          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                          </svg>
+                        </button>
+                        <xtein-checkbox
+                          label="Solo con Existencias"
+                          [checked]="onlyStock"
+                          [disabled]="productsLoading || working()"
+                          (checkedChange)="stockOnly.emit($event)"
+                        />
+                        @if (productsLoading) {
+                          <span class="product-loading-indicator" role="status">Cargando…</span>
+                        }
+                      </div>
+                    </div>
+
+                    <xtein-data-grid
+                      [dataSource]="products"
+                      keyExpr="PRODUCTO"
+                      height="calc(100% - 46px)"
+                      (rowClick)="$event.rowType === 'data' && selectProductFromDropdown($event.data)"
+                      (rowActivated)="selectProductFromDropdown($event)"
+                      [columns]="productColumns"
+                      selectionMode="single"
+                      [pageSize]="100"
+                      [allowedPageSizes]="[50, 100, 200]"
+                      [showPager]="true"
+                      searchPlaceholder="Search"
+                      [searchWidth]="240"
+                    />
+                  </div>
+                </dx-drop-down-box>
               </div>
-              <button
-                type="button"
-                class="btn-cell-search"
-                title="Buscar en catálogo de productos"
-                [disabled]="working() || busy"
-                (click)="productsVisible.set(true)"
-              >
-                🔍
-              </button>
+
               <button
                 type="button"
                 class="btn-cell-cancel"
@@ -106,7 +164,10 @@
                 [disabled]="working() || busy"
                 (click)="cancel()"
               >
-                ↩
+                <svg class="cell-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 7v6h6"></path>
+                  <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                </svg>
               </button>
             </div>
           </td>
@@ -220,44 +281,3 @@
     </tbody>
   </table>
 </div>
-
-<xtein-popup
-  [visible]="productsVisible()"
-  (visibleChange)="productsVisible.set($event)"
-  title="Buscar producto"
-  width="min(1000px, 95vw)"
-  height="min(650px, 90dvh)"
-  [showCloseButton]="true"
->
-  <div class="product-search">
-    <div class="actions">
-      <xtein-button
-        text="Refrescar productos"
-        icon="refresh"
-        [disabled]="productsLoading || working()"
-        (clicked)="refreshProducts.emit()"
-      />
-      <xtein-checkbox
-        label="Solo con existencias"
-        [checked]="onlyStock"
-        [disabled]="productsLoading || working()"
-        (checkedChange)="stockOnly.emit($event)"
-      />
-      @if (productsLoading) {
-        <span role="status">Cargando productos…</span>
-      }
-    </div>
-    <xtein-data-grid
-      [dataSource]="products"
-      keyExpr="PRODUCTO"
-      height="100%"
-      (rowClick)="$event.rowType === 'data' && chooseProduct($event.data)"
-      (rowActivated)="chooseProduct($event)"
-      [columns]="productColumns"
-      selectionMode="single"
-      [pageSize]="50"
-      searchPlaceholder="Código o nombre"
-    >
-    </xtein-data-grid>
-  </div>
-</xtein-popup>
