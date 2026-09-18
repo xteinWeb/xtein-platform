@@ -290,7 +290,7 @@ export class Ven230Component
     CONSECUTIVO: new FormControl<number>(0),
     SUFIJO: new FormControl<string>(''),
     FECHA: new FormControl<string>(this.localDate(), { nonNullable: true, validators: [Validators.required] }),
-    FECHA_REGISTRO: new FormControl<string | null>(null),
+    FECHA_REGISTRO: new FormControl<string | null>(this.localDate()),
     ESTADO: new FormControl<string>('REGISTRADO', { nonNullable: true, validators: [Validators.required] }),
     USUARIO: new FormControl<string>(''),
     ID_CLIENTE: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
@@ -493,7 +493,7 @@ export class Ven230Component
       const documents=await this.business.catalog('documents',this.business.identity);
       this.documents.set(documents);
       this.detailsReady.set(true);this.mode.set(RecordToolbarMode.Creating);
-      this.form.reset({...Ven230DefaultRecord, FECHA:this.localDate(), FECHA_PRIMER_VENC:this.localDate(),
+      this.form.reset({...Ven230DefaultRecord, FECHA:this.localDate(), FECHA_REGISTRO:this.localDate(), FECHA_PRIMER_VENC:this.localDate(),
         USUARIO:this.business.identity.USUARIO,ID_UN_ITEM:this.defaultUnit,ID_MONEDA:this.defaultCurrency}, {emitEvent:false});
       this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.headerLocked.set(false);this.previousCondition="";this.products.set([]);this.conditions.set([]);this.terms.set([]);
       this.enableFormControls();

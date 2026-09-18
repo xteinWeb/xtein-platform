@@ -112,37 +112,24 @@
                   [disabled]="working() || busy"
                 >
                   <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
-                    <div class="product-dropdown-toolbar">
-                      <div class="product-dropdown-toolbar-left">
-                        <button
-                          type="button"
-                          class="btn-product-refresh"
-                          title="Refrescar productos"
-                          [disabled]="productsLoading || working()"
-                          (click)="refreshProducts.emit()"
-                        >
-                          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <polyline points="1 20 1 14 7 14"></polyline>
-                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                          </svg>
-                        </button>
-                        <xtein-checkbox
-                          label="Solo con Existencias"
-                          [checked]="onlyStock"
-                          [disabled]="productsLoading || working()"
-                          (checkedChange)="stockOnly.emit($event)"
-                        />
-                        @if (productsLoading) {
-                          <span class="product-loading-indicator" role="status">Cargando…</span>
-                        }
-                      </div>
-                    </div>
+                    <ng-template #productToolbarExtra>
+                      <xtein-checkbox
+                        label="Solo con Existencias"
+                        [checked]="onlyStock"
+                        [disabled]="productsLoading || working()"
+                        (checkedChange)="stockOnly.emit($event)"
+                      />
+                      @if (productsLoading) {
+                        <span class="product-loading-indicator" role="status">Cargando…</span>
+                      }
+                    </ng-template>
 
                     <xtein-data-grid
                       [dataSource]="products"
                       keyExpr="PRODUCTO"
-                      height="calc(100% - 46px)"
+                      height="100%"
+                      [toolbarActions]="productToolbarActions()"
+                      [toolbarTemplate]="productToolbarExtra"
                       (rowClick)="$event.rowType === 'data' && selectProductFromDropdown($event.data)"
                       (rowActivated)="selectProductFromDropdown($event)"
                       [columns]="productColumns"

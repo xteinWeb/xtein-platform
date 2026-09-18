@@ -1,9 +1,9 @@
 import { Component, Input, Output, EventEmitter, TemplateRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { DxDataGridModule, DxDataGridComponent, DxTemplateModule } from 'devextreme-angular';
 import type { KeyDownEvent } from 'devextreme/ui/data_grid';
-import { XteinGridColumn, XteinGridSelectionEvent, XteinGridEditingEvent, XteinGridRowEvent } from './models/xtein-data-grid.model';
-@Component({selector:'xtein-data-grid',standalone:true,imports:[DxDataGridModule,DxTemplateModule,NgTemplateOutlet],
+import { XteinGridColumn, XteinGridSelectionEvent, XteinGridEditingEvent, XteinGridRowEvent, XteinGridToolbarAction } from './models/xtein-data-grid.model';
+@Component({selector:'xtein-data-grid',standalone:true,imports:[DxDataGridModule,DxTemplateModule,NgTemplateOutlet,CommonModule],
   templateUrl:'./xtein-data-grid.component.html',styleUrl:'./xtein-data-grid.component.scss'})
 export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChanges {
   @Input() dataSource: T[] = [];
@@ -30,6 +30,18 @@ export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChang
   @Input() scrollingMode: 'standard' | 'virtual' | 'infinite' = 'standard';
   @Input() allowedPageSizes: (number|string)[] = [5,10,20,50,100,'all'];
   @Input() groupTemplate: TemplateRef<unknown> | null = null;
+  @Input() toolbarVisible: boolean | null = null;
+  @Input() toolbarActions: XteinGridToolbarAction[] = [];
+  @Input() toolbarTemplate: TemplateRef<unknown> | null = null;
+  @Output() readonly toolbarAction = new EventEmitter<string>();
+  get hasToolbar(): boolean {
+    return this.toolbarVisible ?? (this.toolbarActions.length > 0 || !!this.toolbarTemplate || this.searchEnabled);
+  }
+  handleToolbarAction(action: XteinGridToolbarAction): void {
+    if (action.disabled || this.disabled) return;
+    this.toolbarAction.emit(action.id);
+    if (action.action) action.action();
+  }
   @Output() selectionChanged = new EventEmitter<XteinGridSelectionEvent<T,K>>();
   @Output() editingStart = new EventEmitter<XteinGridEditingEvent<T,K>>();
   @Output() rowClick = new EventEmitter<XteinGridRowEvent<T,K>>();

@@ -1,4 +1,4 @@
-import { XteinDataGridComponent, XteinCheckboxComponent, XteinGridColumn } from '@xtein/ui';
+import { XteinDataGridComponent, XteinCheckboxComponent, XteinGridColumn, XteinGridToolbarAction } from '@xtein/ui';
 import { formatNumber } from 'devextreme/localization';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -189,5 +189,17 @@ export class XteinVen230ItemsComponent implements OnChanges {
   }
   closeProductSearch(): void {
     this.productDropdownOpened = false;
+  }
+  productToolbarActions(): XteinGridToolbarAction[] {
+    return [
+      {
+        id: 'refresh',
+        icon: 'refresh',
+        title: 'Refrescar productos',
+        variant: 'secondary',
+        disabled: this.productsLoading || this.working(),
+        action: () => this.refreshProducts.emit()
+      }
+    ];
   }
 }

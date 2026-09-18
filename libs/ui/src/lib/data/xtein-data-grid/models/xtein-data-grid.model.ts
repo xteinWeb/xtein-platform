@@ -5,3 +5,18 @@ export type XteinGridSelectionEvent<T = unknown, K = unknown> = SelectionChanged
 export type XteinGridEditingEvent<T = unknown, K = unknown> = EditingStartEvent<T, K>;
 export type XteinGridRowEvent<T = unknown, K = unknown> = RowClickEvent<T, K>;
 export type XteinValidationRule = ValidationRule;
+
+export type XteinGridActionVariant = 'primary' | 'success' | 'cancel' | 'danger' | 'secondary';
+
+export interface XteinGridToolbarAction {
+  id: string;
+  text?: string;
+  title?: string;
+  icon?: 'plus' | 'check' | 'undo' | 'trash' | 'refresh' | 'edit' | string;
+  variant?: XteinGridActionVariant;
+  disabled?: boolean;
+  visible?: boolean;
+  location?: 'before' | 'center' | 'after';
+  action?: () => void;
+}
+
