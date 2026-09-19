@@ -126,10 +126,73 @@
     xtein-input,
     xtein-select,
     xtein-date,
-    xtein-lookup {
+    xtein-lookup,
+    dx-tag-box {
       display: block;
       width: 100%;
     }
+
+    &--with-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      xtein-input {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+    }
+  }
+
+  &__perfil-arrow-btn {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #0f4c81;
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(15, 76, 129, 0.3);
+    transition: all 0.15s ease-in-out;
+
+    &:hover {
+      background-color: #0a355c;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(15, 76, 129, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &__rt-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 2px 0;
+  }
+
+  &__rt-code {
+    width: 25%;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+  }
+
+  &__rt-desc {
+    width: 75%;
+    color: #475569;
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__comentarios-section {
@@ -221,3 +284,37 @@
     opacity: 1;
   }
 }
+
+::ng-deep .dx-tagbox {
+  .dx-texteditor-input::placeholder {
+    color: transparent !important;
+  }
+
+  &.dx-tagbox-empty .dx-placeholder,
+  &.dx-texteditor-empty .dx-placeholder {
+    display: block !important;
+
+    &::before {
+      content: attr(data-dx_placeholder) !important;
+      display: block !important;
+      color: #94a3b8 !important;
+      font-size: 13px !important;
+      position: absolute !important;
+      left: 10px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      pointer-events: none !important;
+      white-space: nowrap !important;
+    }
+  }
+
+  &:not(.dx-tagbox-empty):not(.dx-texteditor-empty) .dx-placeholder {
+    display: none !important;
+
+    &::before {
+      display: none !important;
+    }
+  }
+}
+
+

@@ -45,7 +45,11 @@ import {
   XteinRecordFilterComponent,
   XteinRecordReportsComponent,
   XteinNotificationService,
-  XteinRecordFilterResult
+  XteinRecordFilterResult,
+  XteinPerfilTributarioComponent,
+  XteinPerfilGridColumn,
+  XteinPerfilTasaRecord,
+  XteinTagBoxComponent
 } from '@xtein/ui';
 
 import {
@@ -90,6 +94,8 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinRecordViewComponent,
     XteinRecordFilterComponent,
     XteinRecordReportsComponent,
+    XteinPerfilTributarioComponent,
+    XteinTagBoxComponent,
     XteinVen209UbicacionesComponent,
     XteinVen209FinancierosComponent
   ],
@@ -129,6 +135,12 @@ export class Ven209Component implements OnInit, OnDestroy {
   readonly statuses = signal<Ven209Lookup[]>([]);
   readonly rts = signal<Ven209Lookup[]>([]);
   readonly availableCondiciones = signal<Ven209Lookup[]>([]);
+
+  // Perfil Tributario
+  readonly perfilesTributarios = signal<Record<string, unknown>[]>([]);
+  readonly listaTasas = signal<XteinPerfilTasaRecord[]>([]);
+  readonly perfilColumns = signal<XteinPerfilGridColumn[]>([]);
+  readonly perfilTasas = signal<Array<{ ID_TASA: string; APLICA_BASE: boolean }>>([]);
 
   // Modals
   readonly filterVisible = signal(false);
@@ -176,7 +188,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     ID_GRUPO: new FormControl<string>('', [Validators.required]),
     CLASE: new FormControl<string>('CLIENTES', [Validators.required]),
     PERFIL_TRIBUTARIO: new FormControl<string>('', [Validators.required]),
-    RT: new FormControl<string>(''),
+    RT: new FormControl<string[]>([], [Validators.required]),
     CONTACTO: new FormControl<string>(''),
     COMENTARIOS: new FormControl<string>(''),
     ZONA: new FormControl<string>(''),
@@ -302,10 +314,11 @@ export class Ven209Component implements OnInit, OnDestroy {
         this.business.catalog('adc', { ESTADO: 'ACTIVO' }),
         this.business.catalog('status', { STATUS: {} }),
         this.business.catalog('rt', {}),
-        this.business.catalog('condiciones', { TIPO: 'VENTAS' })
+        this.business.catalog('condiciones', { TIPO: 'VENTAS' }),
+        this.business.loadPerfilesTributarios()
       ]);
 
-      const [legalRes, gruposRes, zonasRes, adcsRes, statusesRes, rtsRes, condRes] = results;
+      const [legalRes, gruposRes, zonasRes, adcsRes, statusesRes, rtsRes, condRes, perfilesRes] = results;
 
       if (legalRes.status === 'fulfilled') {
         const legalData = legalRes.value;
@@ -340,6 +353,13 @@ export class Ven209Component implements OnInit, OnDestroy {
 
       if (condRes.status === 'fulfilled') {
         this.availableCondiciones.set(condRes.value);
+      }
+
+      if (perfilesRes.status === 'fulfilled') {
+        const pData = perfilesRes.value;
+        this.perfilesTributarios.set(pData.perfilTributario);
+        this.listaTasas.set(pData.listaTasas);
+        this.perfilColumns.set(pData.columnas);
       }
 
       // If a record is currently loaded, re-populate to resolve lookups and selects
@@ -419,7 +439,7 @@ export class Ven209Component implements OnInit, OnDestroy {
       TIPO_ID: 'NIT',
       PERSONA: 'JURIDICA',
       PERFIL_TRIBUTARIO: '',
-      RT: '',
+      RT: [],
       CONTACTO: '',
       COMENTARIOS: '',
       ZONA: '',
@@ -433,6 +453,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.emails.set([]);
     this.condiciones.set([]);
     this.contactoAdicional.set({ URL: '', CIIU: '' });
+    this.perfilTasas.set([]);
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
   }
@@ -690,9 +711,25 @@ export class Ven209Component implements OnInit, OnDestroy {
       this.personas.set([...this.personas(), rawPersona]);
     }
 
-    const rtVal = Array.isArray(record.RT)
-      ? (record.RT[0]?.trim() || '')
-      : (record.RT != null ? String(record.RT).trim() : '');
+    let rtVal: string[] = [];
+    if (Array.isArray(record.RT)) {
+      rtVal = record.RT.map(r => String(r).trim()).filter(Boolean);
+    } else if (record.RT) {
+      rtVal = String(record.RT).split(',').map(r => r.trim()).filter(Boolean);
+    }
+
+    const rawPerfil = record.PERFIL_TRIBUTARIO ? String(record.PERFIL_TRIBUTARIO).trim() : '';
+    const [, tasasPart] = rawPerfil.split('~');
+    let parsedTasas: Array<{ ID_TASA: string; APLICA_BASE: boolean }> = [];
+    if (tasasPart) {
+      parsedTasas = tasasPart.split('|').map(t => {
+        const [id, aplica] = t.split('^');
+        return { ID_TASA: id, APLICA_BASE: aplica === '1' };
+      });
+    } else if (Array.isArray(record.PERFIL_TASAS)) {
+      parsedTasas = record.PERFIL_TASAS as Array<{ ID_TASA: string; APLICA_BASE: boolean }>;
+    }
+    this.perfilTasas.set(parsedTasas);
 
     this.form.reset({
       ...Ven209DefaultRecord,
@@ -708,7 +745,7 @@ export class Ven209Component implements OnInit, OnDestroy {
       PERSONA: rawPersona,
       ID_GRUPO: resolvedGrupo,
       CLASE: rawClase,
-      PERFIL_TRIBUTARIO: record.PERFIL_TRIBUTARIO ? String(record.PERFIL_TRIBUTARIO).trim() : '',
+      PERFIL_TRIBUTARIO: rawPerfil,
       RT: rtVal,
       CONTACTO: record.CONTACTO ? String(record.CONTACTO).trim() : '',
       COMENTARIOS: record.COMENTARIOS ? String(record.COMENTARIOS).trim() : '',
@@ -760,6 +797,19 @@ export class Ven209Component implements OnInit, OnDestroy {
         PERSONA: match.PERSONA ? String(match.PERSONA) : 'JURIDICA',
         CONTACTO: String(match.ID_LEGAL || '')
       });
+    }
+  }
+
+
+
+  onPerfilTributarioSaved(result: {
+    perfilTributario: string;
+    perfilTasas: Array<{ ID_TASA: string; APLICA_BASE: boolean }>;
+  }): void {
+    this.perfilTasas.set(result.perfilTasas);
+    this.form.controls.PERFIL_TRIBUTARIO.setValue(result.perfilTributario);
+    if (!this.readOnly()) {
+      this.workspace.setDirty(this.applicationId, true);
     }
   }
 }

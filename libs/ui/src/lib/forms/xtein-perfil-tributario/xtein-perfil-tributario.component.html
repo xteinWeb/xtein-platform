@@ -1,0 +1,245 @@
+@if (label) {
+  <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="invalid">{{ label }}</xtein-label>
+}
+
+<div class="xtein-perfil-tributario-wrapper">
+  <dx-text-box
+    class="w-100"
+    stylingMode="filled"
+    valueChangeEvent="input"
+    [value]="value"
+    [placeholder]="placeholder"
+    [readOnly]="true"
+    [inputAttr]="inputAttributes"
+    (onValueChanged)="handleValueChanged($event)"
+    (onFocusOut)="handleFocusOut()"
+  >
+    <dxi-button
+      name="btnPerfil"
+      location="after"
+      [options]="buttonOptions"
+    ></dxi-button>
+  </dx-text-box>
+</div>
+
+@if (invalid && errorMessage) {
+  <div class="invalid-feedback d-block" role="alert">
+    {{ errorMessage }}
+  </div>
+}
+
+<!-- Modal Perfil Tributario Integrado -->
+<dx-popup
+  [visible]="modalVisible()"
+  [width]="840"
+  [height]="540"
+  [showTitle]="false"
+  [dragEnabled]="true"
+  [resizeEnabled]="true"
+  [hideOnOutsideClick]="false"
+  (onHiding)="closeModal()"
+  [wrapperAttr]="popupWrapperAttr"
+>
+  <div *dxTemplate="let data of 'content'" class="xtein-perfil-modal" [class.xtein-perfil-modal--readonly]="readOnly">
+    <!-- Encabezado con Pestañas alineadas a la derecha y Barra Indicadora Deslizante -->
+    <div class="xtein-perfil-modal__header">
+      <div class="xtein-perfil-modal__tabs-container">
+        <div class="xtein-perfil-modal__tabs">
+          <button
+            type="button"
+            class="xtein-perfil-modal__tab"
+            [class.xtein-perfil-modal__tab--active]="activeTab() === 'perfiles'"
+            (click)="setActiveTab('perfiles')"
+          >
+            Asociación de Perfiles Tributarios
+          </button>
+          <button
+            type="button"
+            class="xtein-perfil-modal__tab"
+            [class.xtein-perfil-modal__tab--active]="activeTab() === 'tasas'"
+            (click)="setActiveTab('tasas')"
+          >
+            Asociación de Tasas
+          </button>
+          <div
+            class="xtein-perfil-modal__tab-indicator"
+            [class.xtein-perfil-modal__tab-indicator--tasas]="activeTab() === 'tasas'"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Viewport Deslizante para Transición Fluida de Pestañas -->
+    <div class="xtein-perfil-modal__body-viewport">
+      <div
+        class="xtein-perfil-modal__body-track"
+        [style.transform]="activeTab() === 'perfiles' ? 'translateX(0%)' : 'translateX(-50%)'"
+      >
+        <!-- Panel 1: Perfiles Tributarios -->
+        <div class="xtein-perfil-modal__pane">
+          <dx-data-grid
+            #gridPerfiles
+            id="gridPerfiles"
+            width="100%"
+            height="100%"
+            [dataSource]="displayedPerfiles()"
+            keyExpr="ITEM"
+            [hoverStateEnabled]="true"
+            [allowColumnResizing]="true"
+            columnResizingMode="nextColumn"
+            [rowAlternationEnabled]="true"
+            [focusedRowEnabled]="true"
+            [wordWrapEnabled]="true"
+            [selectedRowKeys]="selectedPerfilKeys()"
+            (onSelectionChanged)="onPerfilSelectionChanged($event)"
+          >
+            <dxo-search-panel [visible]="true" [width]="250" placeholder="Buscar..."></dxo-search-panel>
+            <dxo-selection mode="single"></dxo-selection>
+            <dxo-scrolling mode="standard" showScrollbar="always" [useNative]="true"></dxo-scrolling>
+            <dxo-paging [pageSize]="10"></dxo-paging>
+            <dxo-pager
+              [visible]="true"
+              [allowedPageSizes]="allowedPageSizes"
+              displayMode="full"
+              [showPageSizeSelector]="true"
+              [showInfo]="true"
+              [showNavigationButtons]="true"
+              infoText="Página {0} de {1} ({2} ítems)"
+            ></dxo-pager>
+
+            <!-- Columnas dinámicas ordenadas y rotuladas según Legacy -->
+            <dxi-column
+              *ngFor="let col of resolvedPerfilColumns()"
+              [dataField]="col.dataField"
+              [caption]="col.caption"
+              [width]="col.width || undefined"
+              [alignment]="$any(col.alignment || 'left')"
+              [format]="col.format || undefined"
+            ></dxi-column>
+          </dx-data-grid>
+        </div>
+
+        <!-- Panel 2: Asociación de Tasas -->
+        <div class="xtein-perfil-modal__pane">
+          <dx-data-grid
+            #gridTasas
+            id="gridTasas"
+            width="100%"
+            height="100%"
+            [dataSource]="displayedTasas()"
+            keyExpr="ID_TASA"
+            [hoverStateEnabled]="true"
+            [allowColumnResizing]="true"
+            columnResizingMode="nextColumn"
+            [rowAlternationEnabled]="true"
+            [wordWrapEnabled]="true"
+            [selectedRowKeys]="selectedTasaKeys()"
+            (onSelectionChanged)="onTasasSelectionChanged($event)"
+          >
+            <dxo-search-panel [visible]="true" [width]="250" placeholder="Buscar..."></dxo-search-panel>
+            <dxo-selection mode="multiple" showCheckBoxesMode="always" selectAllMode="allPages"></dxo-selection>
+            <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+            <dxo-scrolling mode="standard" showScrollbar="always" [useNative]="true"></dxo-scrolling>
+            <dxo-paging [pageSize]="10"></dxo-paging>
+            <dxo-pager
+              [visible]="true"
+              [allowedPageSizes]="allowedPageSizes"
+              displayMode="full"
+              [showPageSizeSelector]="true"
+              [showInfo]="true"
+              [showNavigationButtons]="true"
+              infoText="Página {0} de {1} ({2} ítems)"
+            ></dxo-pager>
+
+            <!-- Columna de Agrupación por Clase (ICA) con plantilla limpia sin prefijo 'Clase:' -->
+            <dxi-column
+              dataField="CLASE"
+              caption="Clase"
+              [groupIndex]="0"
+              groupCellTemplate="grupoColumna"
+            ></dxi-column>
+
+            <div *dxTemplate="let grupoObj of 'grupoColumna'">
+              <span class="xtein-group-header-text">{{ grupoObj.value }}</span>
+            </div>
+
+            <!-- Columnas de Tasas -->
+            <dxi-column
+              dataField="ID_TASA"
+              caption="Id Tasa"
+              [width]="160"
+            ></dxi-column>
+
+            <dxi-column
+              dataField="DESCRIPCION"
+              caption="Nombre"
+            ></dxi-column>
+
+            <dxi-column
+              dataField="PORCENTAJE"
+              caption="%"
+              alignment="right"
+              format="0.00"
+              [width]="100"
+            ></dxi-column>
+
+            <dxi-column
+              dataField="VALOR_BASE"
+              caption="Base"
+              alignment="right"
+              format="#,##0"
+              [width]="120"
+            ></dxi-column>
+
+            <dxi-column
+              dataField="APLICA_BASE"
+              caption="Aplica Base"
+              alignment="center"
+              [width]="110"
+              cellTemplate="aplicaBaseCell"
+            ></dxi-column>
+
+            <div *dxTemplate="let cell of 'aplicaBaseCell'">
+              <dx-check-box
+                [value]="cell.data.APLICA_BASE"
+                [disabled]="readOnly"
+                (onValueChanged)="onAplicaBaseChanged(cell.data, $event.value)"
+              ></dx-check-box>
+            </div>
+          </dx-data-grid>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie de Ventana Modal con Acciones y Filtro alineados a la izquierda -->
+    <div class="xtein-perfil-modal__footer">
+      <div class="xtein-perfil-modal__footer-left">
+        <dx-button
+          *ngIf="!readOnly"
+          id="btnAceptarPT"
+          stylingMode="contained"
+          text="ACEPTAR"
+          type="default"
+          [width]="110"
+          (onClick)="accept()"
+        ></dx-button>
+
+        <dx-button
+          id="btnCancelarPT"
+          stylingMode="outlined"
+          [text]="readOnly ? 'CERRAR' : 'CANCELAR'"
+          type="normal"
+          [width]="110"
+          (onClick)="closeModal()"
+        ></dx-button>
+
+        <dx-check-box
+          [value]="soloSeleccionadas()"
+          text="Solo seleccionadas"
+          (onValueChanged)="onSoloSeleccChanged($event.value)"
+          class="xtein-perfil-modal__solo-selecc"
+        ></dx-check-box>
+      </div>
+    </div>
+  </div>
+</dx-popup>

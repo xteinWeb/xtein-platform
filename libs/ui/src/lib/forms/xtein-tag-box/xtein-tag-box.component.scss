@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.xtein-tag-box-wrapper {
+  position: relative;
+  width: 100%;
+
+  ::ng-deep .dx-tagbox {
+    // Hide the input's internal truncated HTML5 placeholder so S... never shows
+    .dx-texteditor-input::placeholder {
+      color: transparent !important;
+    }
+
+    // Clean, full-width placeholder positioning matching Image 2
+    .dx-placeholder {
+      position: absolute !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      left: 10px !important;
+      right: 32px !important;
+      width: auto !important;
+      overflow: visible !important;
+      white-space: nowrap !important;
+      color: #94a3b8 !important;
+      font-size: 13px !important;
+      pointer-events: none !important;
+
+      &::before {
+        display: none !important;
+      }
+    }
+
+    .dx-tag-container {
+      min-height: 34px !important;
+      align-items: center !important;
+    }
+  }
+
+  // When value is present (tags exist), completely hide the placeholder
+  &.xtein-tag-box--has-value {
+    ::ng-deep .dx-tagbox {
+      .dx-placeholder {
+        display: none !important;
+      }
+    }
+  }
+}

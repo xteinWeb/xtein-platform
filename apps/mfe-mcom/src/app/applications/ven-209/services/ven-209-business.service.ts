@@ -106,6 +106,50 @@ export class Ven209BusinessService {
     return { idLegales, tiposId, personas };
   }
 
+  async loadPerfilesTributarios(): Promise<{
+    perfilTributario: Record<string, unknown>[];
+    listaTasas: Array<{
+      ID_TASA: string;
+      DESCRIPCION?: string;
+      PORCENTAJE?: number;
+      VALOR_BASE?: number;
+      APLICA_BASE?: boolean;
+      CLASE?: string;
+    }>;
+    columnas: Array<{ dataField: string; caption: string }>;
+  }> {
+    const [endpoint, action] = Ven209Catalog.perfilesTributarios;
+    const decoded = this.decode<Record<string, unknown>>(await firstValueFrom(this.api.request(endpoint, action, {})));
+    const first = decoded[0] || {};
+    const perfilTributario = (first['PERFIL_TRIBUTARIO'] as Record<string, unknown>[]) || [];
+    const rawTasas = (first['LISTA_TASAS'] as Array<Record<string, unknown>>) || [];
+    const listaTasas = rawTasas.map(t => ({
+      ...t,
+      ID_TASA: String(t['ID_TASA'] || ''),
+      DESCRIPCION: String(t['DESCRIPCION'] || ''),
+      CLASE: String(t['CLASE'] || ''),
+      PORCENTAJE: typeof t['PORCENTAJE'] === 'number' ? Number(t['PORCENTAJE']) * 100 : Number(t['PORCENTAJE'] || 0),
+      VALOR_BASE: Number(t['VALOR_BASE'] || 0),
+      APLICA_BASE: Boolean(t['APLICA_BASE'])
+    }));
+
+    let columnas: Array<{ dataField: string; caption: string }> = [];
+    const rawCols = perfilTributario.length > 0 ? (perfilTributario[0]['COLUMNAS'] || (perfilTributario[0] as any)['columnas']) : null;
+    if (rawCols) {
+      try {
+        const jsonStr = String(rawCols).replace(/'/g, '"');
+        columnas = JSON.parse(jsonStr);
+      } catch {
+        try {
+          columnas = JSON.parse(String(rawCols));
+        } catch {
+          columnas = [];
+        }
+      }
+    }
+    return { perfilTributario, listaTasas, columnas };
+  }
+
   validate(
     record: Partial<Ven209ClienteRecord>,
     emails: Ven209Email[] = [],
@@ -122,6 +166,7 @@ export class Ven209BusinessService {
     if (!record.ID_GRUPO?.trim()) missing.push('Grupo');
     if (!record.CLASE?.trim()) missing.push('Clase');
     if (!record.PERFIL_TRIBUTARIO?.trim()) missing.push('Perfil Tributario');
+    if (!record.RT || (Array.isArray(record.RT) && record.RT.length === 0)) missing.push('Representación Tributaria');
 
     if (missing.length > 0) {
       return 'Faltan campos obligatorios: ' + missing.join(', ');

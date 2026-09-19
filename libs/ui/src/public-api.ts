@@ -48,3 +48,5 @@ export * from './lib/scheduling/xtein-scheduler/xtein-scheduler.component';
 export * from './lib/scheduling/xtein-scheduler/models/xtein-scheduler.model';
 export * from './lib/forms/xtein-html-editor/xtein-html-editor.component';
 export * from './lib/forms/xtein-lookup/xtein-lookup.component';
+export * from './lib/forms/xtein-perfil-tributario/xtein-perfil-tributario.component';
+export * from './lib/forms/xtein-tag-box/xtein-tag-box.component';

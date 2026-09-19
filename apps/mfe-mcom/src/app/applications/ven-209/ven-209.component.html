@@ -292,12 +292,17 @@
                   Perfil Tributario
                 </xtein-label>
                 <div class="ven-209__control-inline">
-                  <xtein-input
+                  <xtein-perfil-tributario
                     id="ven-209-perfil"
                     formControlName="PERFIL_TRIBUTARIO"
                     placeholder="Perfil tributario"
                     [readOnly]="readOnly()"
-                  ></xtein-input>
+                    [perfilesTributarios]="perfilesTributarios()"
+                    [listaTasas]="listaTasas()"
+                    [perfilColumns]="perfilColumns()"
+                    [perfilTasas]="perfilTasas()"
+                    (saved)="onPerfilTributarioSaved($event)"
+                  ></xtein-perfil-tributario>
                 </div>
               </div>
             </div>
@@ -305,21 +310,37 @@
             <!-- Columna Derecha: Rep. Tributaria, Contacto -->
             <div class="ven-209__col">
               <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-rt">
+                <xtein-label class="ven-209__label-inline" for="ven-209-rt" [required]="true">
                   Rep. Tributaria
                 </xtein-label>
                 <div class="ven-209__control-inline">
-                  <xtein-lookup
+                  <xtein-tag-box
                     id="ven-209-rt"
+                    [items]="rts()"
                     placeholder="Seleccione RT"
-                    searchPlaceholder="Buscar representación…"
-                    [items]="$any(rts())"
-                    valueExpr="ID_RT"
-                    displayExpr="DESCRIPCION"
-                    [columns]="lookupCols.rt"
-                    formControlName="RT"
+                    [dropDownOptions]="{
+                      width: 480,
+                      height: 'auto',
+                      hideOnParentScroll: true
+                    }"
+                    [showMultiTagOnly]="false"
+                    [showSelectionControls]="true"
+                    [maxDisplayedTags]="5"
+                    applyValueMode="useButtons"
                     [readOnly]="readOnly()"
-                  ></xtein-lookup>
+                    formControlName="RT"
+                    [searchEnabled]="true"
+                    searchMode="contains"
+                    displayExpr="ID_RT"
+                    valueExpr="ID_RT"
+                  >
+                    <ng-template #itemTemplate let-data>
+                      <div class="ven-209__rt-item">
+                        <span class="ven-209__rt-code">{{ data.ID_RT }}</span>
+                        <span class="ven-209__rt-desc">{{ data.DESCRIPCION }}</span>
+                      </div>
+                    </ng-template>
+                  </xtein-tag-box>
                 </div>
               </div>
 
@@ -489,4 +510,6 @@
     >
     </xtein-record-reports>
   }
+
+
 </div>
