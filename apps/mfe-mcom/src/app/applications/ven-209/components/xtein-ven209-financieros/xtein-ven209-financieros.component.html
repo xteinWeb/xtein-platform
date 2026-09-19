@@ -1,0 +1,103 @@
+<div class="xtein-financieros">
+  <!-- Acordeón 1: Cupo -->
+  <div class="xtein-accordion-item">
+    <div class="xtein-accordion-header" (click)="toggleSection('cupo')">
+      <div class="xtein-accordion-icon">
+        <svg *ngIf="expanded.cupo()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg *ngIf="!expanded.cupo()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <span class="xtein-accordion-title">Cupo</span>
+    </div>
+    <div class="xtein-accordion-body" *ngIf="expanded.cupo()">
+      <div class="xtein-financieros__form-grid">
+        <div class="xtein-financieros__field-inline">
+          <xtein-label class="xtein-financieros__label-inline" for="fin-cupo">Cupo crédito</xtein-label>
+          <div class="xtein-financieros__control-inline">
+            <xtein-input
+              id="fin-cupo"
+              type="number"
+              [ngModel]="cupoCredito"
+              (ngModelChange)="onCupoChange($event)"
+              [readOnly]="readOnly"
+              placeholder="0"
+            ></xtein-input>
+          </div>
+        </div>
+
+        <div class="xtein-financieros__field-inline">
+          <xtein-label class="xtein-financieros__label-inline" for="fin-tiempo">Días entrega</xtein-label>
+          <div class="xtein-financieros__control-inline">
+            <xtein-input
+              id="fin-tiempo"
+              type="number"
+              [ngModel]="tiempoEntrega"
+              (ngModelChange)="onTiempoChange($event)"
+              [readOnly]="readOnly"
+              placeholder="0"
+            ></xtein-input>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acordeón 2: Condiciones -->
+  <div class="xtein-accordion-item">
+    <div class="xtein-accordion-header" (click)="toggleSection('condiciones')">
+      <div class="xtein-accordion-icon">
+        <svg *ngIf="expanded.condiciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg *ngIf="!expanded.condiciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <span class="xtein-accordion-title">Condiciones</span>
+    </div>
+    <div class="xtein-accordion-body" *ngIf="expanded.condiciones()">
+      <xtein-data-grid
+        id="grid-condiciones-prov"
+        [dataSource]="condiciones"
+        [columns]="condicionColumns"
+        [toolbarVisible]="!readOnly"
+        [toolbarActions]="gridToolbarActions"
+        searchPlaceholder="Buscar condición…"
+      >
+      </xtein-data-grid>
+    </div>
+  </div>
+
+  <!-- Modal para asociar condición comercial -->
+  <div class="xtein-modal-backdrop" *ngIf="addModalOpen()">
+    <div class="xtein-modal-card">
+      <div class="xtein-modal-header">
+        <h4 class="xtein-modal-title">Asociar Condición Comercial</h4>
+        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="xtein-modal-body">
+        <div class="xtein-modal-field">
+          <xtein-label for="modal-cond-id">Condición *</xtein-label>
+          <xtein-lookup
+            id="modal-cond-id"
+            placeholder="Seleccione condición"
+            searchPlaceholder="Buscar condición…"
+            [items]="$any(availableCondiciones)"
+            valueExpr="ID_CONDICION"
+            displayExpr="DESCRIPCION"
+            [columns]="lookupColumns"
+            [(ngModel)]="selectedCondicionId"
+          >
+          </xtein-lookup>
+        </div>
+      </div>
+      <div class="xtein-modal-footer">
+        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
+        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveCondicion()">Asociar</button>
+      </div>
+    </div>
+  </div>
+</div>

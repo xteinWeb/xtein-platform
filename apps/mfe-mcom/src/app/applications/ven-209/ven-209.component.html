@@ -1,0 +1,492 @@
+<div class="ven-209" [class.ven-209--loading]="loading()">
+  <form [formGroup]="form" class="ven-209__form" autocomplete="off">
+    <!-- ===== TARJETA SUPERIOR: Cabecera, Identificación y Detalle Cliente ===== -->
+    <div class="ven-209__card-main">
+      <!-- Fila 1: Grupos Identificación y Fecha/Estado (2 columnas) -->
+      <div class="ven-209__top-groups">
+        <!-- Grupo 1: Identificación -->
+        <fieldset class="ven-209__fieldset">
+          <legend class="ven-209__legend">Identificación</legend>
+          <div class="ven-209__fieldset-content">
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-id-cliente" [required]="true">
+                Código
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-input
+                  id="ven-209-id-cliente"
+                  formControlName="ID_CLIENTE"
+                  placeholder="Código de cliente"
+                  [readOnly]="readOnly() || isEditing()"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-id-legal" [required]="true">
+                Id Legal
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-lookup
+                  id="ven-209-id-legal"
+                  placeholder="Seleccione Id Legal"
+                  searchPlaceholder="Buscar por documento o nombre…"
+                  [items]="$any(idLegales())"
+                  valueExpr="ID_LEGAL"
+                  displayExpr="ID_LEGAL"
+                  [columns]="lookupCols.idLegal"
+                  formControlName="ID_LEGAL"
+                  [readOnly]="readOnly()"
+                ></xtein-lookup>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Grupo 2: Fecha de registro y estado -->
+        <fieldset class="ven-209__fieldset">
+          <legend class="ven-209__legend">Fecha de registro y estado</legend>
+          <div class="ven-209__fieldset-content">
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-estado">
+                Estado
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-select
+                  id="ven-209-estado"
+                  [items]="$any(estados)"
+                  formControlName="ESTADO"
+                  [readOnly]="true"
+                ></xtein-select>
+              </div>
+            </div>
+
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-fecha-reg">
+                Fecha de Registro
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-date
+                  id="ven-209-fecha-reg"
+                  formControlName="FECHA_REGISTRO"
+                  [readOnly]="true"
+                ></xtein-date>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- Fila 2: Grupo Detalle Cliente (Ancho Completo, 2 Columnas) -->
+      <fieldset class="ven-209__fieldset ven-209__fieldset--full">
+        <legend class="ven-209__legend">Detalle Cliente</legend>
+        <div class="ven-209__detail-grid">
+          <!-- Columna Izquierda: Primer Nombre, Primer Apellido, Tipo Identificación -->
+          <div class="ven-209__col">
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-nombre" [required]="true">
+                Primer Nombre
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-input
+                  id="ven-209-nombre"
+                  formControlName="NOMBRE"
+                  placeholder="Primer nombre"
+                  [readOnly]="readOnly()"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-apellido" [required]="true">
+                Primer Apellido
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-input
+                  id="ven-209-apellido"
+                  formControlName="APELLIDO"
+                  placeholder="Primer apellido"
+                  [readOnly]="readOnly()"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-tipo-id" [required]="true">
+                Tipo Identificación
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-select
+                  id="ven-209-tipo-id"
+                  [items]="$any(tiposId())"
+                  formControlName="TIPO_ID"
+                  [readOnly]="readOnly()"
+                ></xtein-select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Segundo Nombre, Segundo Apellido, Nat/Jur -->
+          <div class="ven-209__col">
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-nombre2">
+                Segundo Nombre
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-input
+                  id="ven-209-nombre2"
+                  formControlName="NOMBRE2"
+                  placeholder="Segundo nombre (opcional)"
+                  [readOnly]="readOnly()"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-apellido2">
+                Segundo Apellido
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-input
+                  id="ven-209-apellido2"
+                  formControlName="APELLIDO2"
+                  placeholder="Segundo apellido"
+                  [readOnly]="readOnly()"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <div class="ven-209__field-inline">
+              <xtein-label class="ven-209__label-inline" for="ven-209-persona" [required]="true">
+                Nat/Jur
+              </xtein-label>
+              <div class="ven-209__control-inline">
+                <xtein-select
+                  id="ven-209-persona"
+                  [items]="$any(personas())"
+                  formControlName="PERSONA"
+                  [readOnly]="readOnly()"
+                ></xtein-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- ===== TARJETA INFERIOR: Pestañas de Gestión (5 Pestañas) ===== -->
+    <div class="ven-209__card-tabs">
+      <!-- Barra de Navegación de Pestañas -->
+      <div class="ven-209__tabs-header">
+        <button
+          type="button"
+          class="ven-209__tab-btn"
+          [class.ven-209__tab-btn--active]="activeMainTab() === 'general'"
+          (click)="activeMainTab.set('general')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>General</span>
+        </button>
+
+        <button
+          type="button"
+          class="ven-209__tab-btn"
+          [class.ven-209__tab-btn--active]="activeMainTab() === 'ubicaciones'"
+          (click)="activeMainTab.set('ubicaciones')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>Ubicaciones</span>
+        </button>
+
+        <button
+          type="button"
+          class="ven-209__tab-btn"
+          [class.ven-209__tab-btn--active]="activeMainTab() === 'financieros'"
+          (click)="activeMainTab.set('financieros')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Financieros</span>
+        </button>
+
+        <button
+          type="button"
+          class="ven-209__tab-btn"
+          [class.ven-209__tab-btn--active]="activeMainTab() === 'ventas'"
+          (click)="activeMainTab.set('ventas')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>Datos Ventas</span>
+        </button>
+
+        <button
+          type="button"
+          class="ven-209__tab-btn"
+          [class.ven-209__tab-btn--active]="activeMainTab() === 'historico'"
+          (click)="activeMainTab.set('historico')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Histórico</span>
+        </button>
+      </div>
+
+      <!-- Contenido de Pestañas -->
+      <div class="ven-209__tabs-body">
+        <!-- Pestaña 1: General -->
+        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'general'">
+          <div class="ven-209__general-grid">
+            <!-- Columna Izquierda: Grupo, Clase, Perfil Tributario -->
+            <div class="ven-209__col">
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-grupo" [required]="true">
+                  Grupo
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-lookup
+                    id="ven-209-grupo"
+                    placeholder="Seleccione Grupo"
+                    searchPlaceholder="Buscar grupo…"
+                    [items]="$any(grupos())"
+                    valueExpr="ID_GRUPO"
+                    displayExpr="NOMBRE"
+                    [columns]="lookupCols.grupos"
+                    formControlName="ID_GRUPO"
+                    [readOnly]="readOnly()"
+                  ></xtein-lookup>
+                </div>
+              </div>
+
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-clase" [required]="true">
+                  Clase
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-select
+                    id="ven-209-clase"
+                    [items]="$any(clasesCliente())"
+                    formControlName="CLASE"
+                    [readOnly]="readOnly()"
+                  ></xtein-select>
+                </div>
+              </div>
+
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-perfil" [required]="true">
+                  Perfil Tributario
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-input
+                    id="ven-209-perfil"
+                    formControlName="PERFIL_TRIBUTARIO"
+                    placeholder="Perfil tributario"
+                    [readOnly]="readOnly()"
+                  ></xtein-input>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Rep. Tributaria, Contacto -->
+            <div class="ven-209__col">
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-rt">
+                  Rep. Tributaria
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-lookup
+                    id="ven-209-rt"
+                    placeholder="Seleccione RT"
+                    searchPlaceholder="Buscar representación…"
+                    [items]="$any(rts())"
+                    valueExpr="ID_RT"
+                    displayExpr="DESCRIPCION"
+                    [columns]="lookupCols.rt"
+                    formControlName="RT"
+                    [readOnly]="readOnly()"
+                  ></xtein-lookup>
+                </div>
+              </div>
+
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-contacto">
+                  Contacto
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-input
+                    id="ven-209-contacto"
+                    formControlName="CONTACTO"
+                    placeholder="Nombre del contacto"
+                    [readOnly]="readOnly()"
+                  ></xtein-input>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comentarios (Ancho completo) -->
+          <div class="ven-209__comentarios-section">
+            <xtein-label for="ven-209-comentarios">Comentarios</xtein-label>
+            <xtein-textarea
+              id="ven-209-comentarios"
+              formControlName="COMENTARIOS"
+              placeholder="Observaciones generales sobre el cliente…"
+            ></xtein-textarea>
+          </div>
+        </div>
+
+        <!-- Pestaña 2: Ubicaciones -->
+        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'ubicaciones'">
+          <xtein-ven209-ubicaciones
+            [readOnly]="readOnly()"
+            [direcciones]="direcciones()"
+            [telefonos]="telefonos()"
+            [emails]="emails()"
+            [contactoAdicional]="contactoAdicional()"
+            (direccionesChange)="direcciones.set($event)"
+            (telefonosChange)="telefonos.set($event)"
+            (emailsChange)="emails.set($event)"
+            (contactoAdicionalChange)="contactoAdicional.set($event)"
+          ></xtein-ven209-ubicaciones>
+        </div>
+
+        <!-- Pestaña 3: Financieros -->
+        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'financieros'">
+          <xtein-ven209-financieros
+            [readOnly]="readOnly()"
+            [cupoCredito]="form.controls.CUPO_CREDITO.value || 0"
+            [tiempoEntrega]="form.controls.TIEMPO_ENTREGA.value || 0"
+            [condiciones]="condiciones()"
+            [availableCondiciones]="availableCondiciones()"
+            (cupoCreditoChange)="form.controls.CUPO_CREDITO.setValue($event)"
+            (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event)"
+            (condicionesChange)="condiciones.set($event)"
+          ></xtein-ven209-financieros>
+        </div>
+
+        <!-- Pestaña 4: Datos Ventas -->
+        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'ventas'">
+          <div class="ven-209__general-grid">
+            <div class="ven-209__col">
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-zona">
+                  Zona
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-lookup
+                    id="ven-209-zona"
+                    placeholder="Seleccione Zona"
+                    searchPlaceholder="Buscar zona…"
+                    [items]="$any(zonas())"
+                    valueExpr="ID_UBICACION"
+                    displayExpr="NOMBRE"
+                    [columns]="lookupCols.zonas"
+                    formControlName="ZONA"
+                    [readOnly]="readOnly()"
+                  ></xtein-lookup>
+                </div>
+              </div>
+
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-adc">
+                  ADC
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-lookup
+                    id="ven-209-adc"
+                    placeholder="Seleccione Vendedor"
+                    searchPlaceholder="Buscar vendedor…"
+                    [items]="$any(adcs())"
+                    valueExpr="ID_ADC"
+                    displayExpr="NOMBRE_COMPLETO"
+                    [columns]="lookupCols.adc"
+                    formControlName="ID_ADC"
+                    [readOnly]="readOnly()"
+                  ></xtein-lookup>
+                </div>
+              </div>
+            </div>
+
+            <div class="ven-209__col">
+              <div class="ven-209__field-inline">
+                <xtein-label class="ven-209__label-inline" for="ven-209-status">
+                  Status
+                </xtein-label>
+                <div class="ven-209__control-inline">
+                  <xtein-lookup
+                    id="ven-209-status"
+                    placeholder="Seleccione Status"
+                    searchPlaceholder="Buscar status…"
+                    [items]="$any(statuses())"
+                    valueExpr="STATUS"
+                    displayExpr="STATUS"
+                    [columns]="lookupCols.status"
+                    formControlName="STATUS"
+                    [readOnly]="readOnly()"
+                  ></xtein-lookup>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pestaña 5: Histórico -->
+        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'historico'">
+          <div class="ven-209__historico-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9bb3c7" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <p>No hay registros históricos disponibles para este cliente.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Modales del Sistema Estándar -->
+  <xtein-record-filter
+    [visible]="filterVisible()"
+    (visibleChange)="filterVisible.set($event)"
+    [tableBase]="tableBase"
+    (search)="searchRecords($event)"
+  >
+  </xtein-record-filter>
+
+  <xtein-record-view
+    [visible]="viewVisible()"
+    (visibleChange)="viewVisible.set($event)"
+    [records]="records()"
+    [columns]="viewColumns"
+    keyField="ID_CLIENTE"
+    (selected)="selectViewedRecord($event)"
+  >
+  </xtein-record-view>
+
+  @if (reportsVisible()) {
+    <xtein-record-reports
+      [visible]="reportsVisible()"
+      (visibleChange)="reportsVisible.set($event)"
+      [applicationId]="applicationId"
+      [table]="tableBase"
+      [currentFilter]="currentReportFilter()"
+      [allFilter]="queryFilter()"
+    >
+    </xtein-record-reports>
+  }
+</div>

@@ -1,0 +1,223 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.ven-209 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  background-color: #f2f5f9;
+  min-height: 100%;
+
+  &--loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Tarjeta Principal Superior */
+  &__card-main {
+    background: #ffffff;
+    border: 1px solid #dfe6ef;
+    border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__top-groups {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+
+    @media (max-width: 860px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Fieldsets estilo Legacy / Xtein */
+  &__fieldset {
+    border: 1px solid #dfe6ef;
+    border-radius: 8px;
+    padding: 12px 16px 14px;
+    background: #ffffff;
+    margin: 0;
+    min-width: 0;
+
+    &--full {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  &__legend {
+    color: #557d9e;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &__fieldset-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  /* Disposición en 2 columnas */
+  &__detail-grid,
+  &__general-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+    width: 100%;
+
+    @media (max-width: 860px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* Campos con etiqueta a la izquierda (Inline Fields) */
+  &__field-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 34px;
+    width: 100%;
+  }
+
+  &__label-inline {
+    flex: 0 0 140px;
+    margin: 0;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__control-inline {
+    flex: 1 1 0;
+    min-width: 0;
+
+    xtein-input,
+    xtein-select,
+    xtein-date,
+    xtein-lookup {
+      display: block;
+      width: 100%;
+    }
+  }
+
+  &__comentarios-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eef3f8;
+  }
+
+  /* Tarjeta Inferior de Pestañas */
+  &__card-tabs {
+    background: #ffffff;
+    border: 1px solid #dfe6ef;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__tabs-header {
+    display: flex;
+    background: #f8fafc;
+    border-bottom: 1px solid #dfe6ef;
+    padding: 0 12px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  &__tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    white-space: nowrap;
+
+    &:hover {
+      color: #1e293b;
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    &--active {
+      color: #0284c7;
+      border-bottom-color: #0284c7;
+      font-weight: 600;
+      background: #ffffff;
+    }
+  }
+
+  &__tabs-body {
+    padding: 20px 24px;
+    min-height: 280px;
+  }
+
+  &__tab-pane {
+    animation: fadeInTab 0.15s ease-out;
+    width: 100%;
+  }
+
+  /* Placeholder de Histórico */
+  &__historico-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 20px;
+    color: #8da4b8;
+    font-size: 14px;
+    text-align: center;
+  }
+}
+
+@keyframes fadeInTab {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 1;
+  }
+}
