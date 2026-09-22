@@ -1,0 +1,41 @@
+<div class="xtein-adm015-cfg">
+  <dx-data-grid
+    #gridSettings
+    keyExpr="ITEM"
+    [dataSource]="settings"
+    [showBorders]="true"
+    [columnAutoWidth]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    noDataText="No hay configuraciones avanzadas registradas"
+  >
+    <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
+    <dxo-group-panel [visible]="false"></dxo-group-panel>
+    <dxo-paging [pageSize]="15"></dxo-paging>
+
+    <dxi-column
+      dataField="ID_APLICACION"
+      caption="Aplicación"
+      [groupIndex]="0"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="DESCRIPCION"
+      caption="Parámetro / Ajuste"
+      [minWidth]="300"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="ASIGNAR"
+      caption="Habilitar"
+      dataType="boolean"
+      [width]="120"
+      alignment="center"
+      [allowEditing]="!readOnly"
+    ></dxi-column>
+  </dx-data-grid>
+</div>

@@ -85,8 +85,18 @@ export class XteinButtonComponent {
     string | number =
       '100%';
 
+  @Input('stylingMode')
+  customStylingMode?:
+    'contained' |
+    'outlined' |
+    'text';
+
   @Output()
   readonly clicked =
+    new EventEmitter<void>();
+
+  @Output()
+  readonly onClick =
     new EventEmitter<void>();
 
   /**
@@ -124,6 +134,10 @@ export class XteinButtonComponent {
     'outlined' |
     'text' {
 
+    if (this.customStylingMode) {
+      return this.customStylingMode;
+    }
+
     switch (this.variant) {
 
       case 'secondary':
@@ -150,5 +164,6 @@ export class XteinButtonComponent {
     }
 
     this.clicked.emit();
+    this.onClick.emit();
   }
 }

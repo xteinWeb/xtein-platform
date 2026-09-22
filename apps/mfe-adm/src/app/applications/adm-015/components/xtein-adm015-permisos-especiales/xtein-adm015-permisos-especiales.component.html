@@ -1,0 +1,51 @@
+<div class="xtein-adm015-permisos">
+  <dx-data-grid
+    #gridPermisosEspeciales
+    keyExpr="ITEM"
+    [dataSource]="permisosEspeciales"
+    [showBorders]="true"
+    [columnAutoWidth]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    noDataText="No hay permisos especiales configurados para este usuario"
+  >
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-paging [pageSize]="15"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 30, 50]" [showInfo]="true"></dxo-pager>
+
+    <dxi-column
+      dataField="TRANSACCION"
+      caption="Código Transacción"
+      [width]="180"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="NOMBRE"
+      caption="Descripción de la Transacción"
+      [minWidth]="260"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="PERMISO"
+      caption="Permiso"
+      dataType="boolean"
+      [width]="120"
+      alignment="center"
+      [allowEditing]="!readOnly"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="APROBACION"
+      caption="Aprobación"
+      dataType="boolean"
+      [width]="120"
+      alignment="center"
+      [allowEditing]="!readOnly"
+    ></dxi-column>
+  </dx-data-grid>
+</div>

@@ -1,0 +1,71 @@
+<div class="xtein-adm015-un">
+  @if (!readOnly) {
+    <div class="xtein-adm015-un__toolbar">
+      <xtein-button
+        text="Asociar Unidad de Negocio"
+        icon="add"
+        variant="secondary"
+        width="auto"
+        (clicked)="onAddUN()"
+      ></xtein-button>
+    </div>
+  }
+
+  <dx-data-grid
+    #gridUNAsociadas
+    keyExpr="ITEM"
+    [dataSource]="unAsociadas"
+    [showBorders]="true"
+    [columnAutoWidth]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    noDataText="No hay Unidades de Negocio asociadas al usuario"
+  >
+    <dxo-paging [pageSize]="10"></dxo-paging>
+
+    <dxi-column
+      dataField="ID_UN_ASOCIADA"
+      caption="Código UN"
+      [width]="160"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="NOMBRE"
+      caption="Nombre de la Unidad de Negocio"
+      [minWidth]="260"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="VALOR_DEFECTO"
+      caption="UN Operativa (Defecto)"
+      dataType="boolean"
+      [width]="180"
+      alignment="center"
+      [allowEditing]="!readOnly"
+    ></dxi-column>
+
+    @if (!readOnly) {
+      <dxi-column
+        caption="Acciones"
+        [width]="90"
+        alignment="center"
+        cellTemplate="actionsTemplate"
+      >
+        <div *dxTemplate="let row of 'actionsTemplate'">
+          <xtein-button
+            icon="trash"
+            variant="danger"
+            width="32px"
+            ariaLabel="Quitar asociación"
+            (clicked)="onRemoveUN(row.data)"
+          ></xtein-button>
+        </div>
+      </dxi-column>
+    }
+  </dx-data-grid>
+</div>

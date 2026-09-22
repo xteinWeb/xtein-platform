@@ -1,0 +1,15 @@
+<div class="xtein-switch-container">
+  @if (label) {
+    <xtein-label [for]="id" [disabled]="isDisabled">{{ label }}</xtein-label>
+  }
+  <dx-switch
+    [value]="value"
+    [disabled]="isDisabled"
+    [readOnly]="readOnly"
+    [switchedOnText]="switchedOnText"
+    [switchedOffText]="switchedOffText"
+    [elementAttr]="{ 'aria-label': ariaLabel || label, id: id }"
+    (onValueChanged)="handleValueChanged($event)"
+    (onFocusOut)="handleFocusOut()"
+  ></dx-switch>
+</div>

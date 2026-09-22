@@ -1,0 +1,148 @@
+<div class="xtein-adm015-apps">
+  @if (!readOnly) {
+    <div class="xtein-adm015-apps__toolbar">
+      <div class="xtein-adm015-apps__actions-left">
+        <xtein-button
+          text="Copiar del Rol"
+          icon="copy"
+          variant="secondary"
+          width="auto"
+          ariaLabel="Copiar permisos predeterminados del Rol"
+          (clicked)="copyFromRole.emit()"
+        ></xtein-button>
+
+        <xtein-button
+          text="Asignar Todas"
+          icon="check"
+          variant="secondary"
+          width="auto"
+          ariaLabel="Asignar todas las aplicaciones activas"
+          (clicked)="assignAllApps()"
+        ></xtein-button>
+      </div>
+
+      <div class="xtein-adm015-apps__actions-right">
+        <span class="xtein-adm015-apps__batch-label">Marcar todos:</span>
+        <xtein-button text="+C" variant="secondary" width="44px" ariaLabel="Marcar Crear (C)" (clicked)="markAllColumn('CREAR', true)"></xtein-button>
+        <xtein-button text="+M" variant="secondary" width="44px" ariaLabel="Marcar Modificar (M)" (clicked)="markAllColumn('MODIFICAR', true)"></xtein-button>
+        <xtein-button text="+E" variant="secondary" width="44px" ariaLabel="Marcar Eliminar (E)" (clicked)="markAllColumn('ELIMINAR', true)"></xtein-button>
+        <xtein-button text="+B" variant="secondary" width="44px" ariaLabel="Marcar Buscar (B)" (clicked)="markAllColumn('BUSCAR', true)"></xtein-button>
+        <xtein-button text="+L" variant="secondary" width="44px" ariaLabel="Marcar Listar (L)" (clicked)="markAllColumn('LISTAR', true)"></xtein-button>
+      </div>
+    </div>
+  }
+
+  <div class="xtein-adm015-apps__grid-wrapper">
+    <dx-data-grid
+      #gridAutorizaciones
+      keyExpr="ITEM"
+      [dataSource]="autorizaciones"
+      [showBorders]="true"
+      [columnAutoWidth]="true"
+      [focusedRowEnabled]="true"
+      [hoverStateEnabled]="true"
+      [rowAlternationEnabled]="true"
+      [allowColumnResizing]="true"
+      columnResizingMode="nextColumn"
+      noDataText="No hay autorizaciones asignadas para este usuario"
+    >
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-paging [pageSize]="15"></dxo-paging>
+      <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 30, 50]" [showInfo]="true"></dxo-pager>
+
+      <!-- Grupo: Aplicación -->
+      <dxi-column caption="Aplicación" alignment="center">
+        <dxi-column
+          dataField="ID_APLICACION"
+          caption="Código"
+          [width]="120"
+          [allowEditing]="false"
+        ></dxi-column>
+        <dxi-column
+          dataField="NOMBRE"
+          caption="Nombre de la Aplicación"
+          [minWidth]="200"
+          [allowEditing]="false"
+        ></dxi-column>
+      </dxi-column>
+
+      <!-- Grupo: Operaciones Básicas -->
+      <dxi-column caption="Operaciones Básicas" alignment="center">
+        <dxi-column
+          dataField="CREAR"
+          caption="Crear (C)"
+          dataType="boolean"
+          [width]="80"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+        <dxi-column
+          dataField="MODIFICAR"
+          caption="Modificar (M)"
+          dataType="boolean"
+          [width]="95"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+        <dxi-column
+          dataField="ELIMINAR"
+          caption="Eliminar (E)"
+          dataType="boolean"
+          [width]="90"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+        <dxi-column
+          dataField="BUSCAR"
+          caption="Buscar (B)"
+          dataType="boolean"
+          [width]="85"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+        <dxi-column
+          dataField="LISTAR"
+          caption="Listar (L)"
+          dataType="boolean"
+          [width]="80"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+        <dxi-column
+          dataField="EXCLUSIVA"
+          caption="Exclusiva"
+          dataType="boolean"
+          [width]="85"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+        <dxi-column
+          dataField="CONFIGURAR"
+          caption="Configurar"
+          dataType="boolean"
+          [width]="90"
+          alignment="center"
+          [allowEditing]="!readOnly"
+        ></dxi-column>
+      </dxi-column>
+
+      <!-- Grupo: Supervisor -->
+      <dxi-column caption="Permisos Supervisor" alignment="center">
+        <dxi-column dataField="S_ABRIR" caption="S.Abrir" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="S_CREAR" caption="S.Crear" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="S_MODIFICAR" caption="S.Modif" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="S_ELIMINAR" caption="S.Elim" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="S_APROBAR" caption="S.Aprob" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+      </dxi-column>
+
+      <!-- Grupo: Administrador -->
+      <dxi-column caption="Permisos Administrador" alignment="center">
+        <dxi-column dataField="A_ABRIR" caption="A.Abrir" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="A_CREAR" caption="A.Crear" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="A_MODIFICAR" caption="A.Modif" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="A_ELIMINAR" caption="A.Elim" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+        <dxi-column dataField="A_APROBAR" caption="A.Aprob" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
+      </dxi-column>
+    </dx-data-grid>
+  </div>
+</div>

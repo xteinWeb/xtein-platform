@@ -1,0 +1,368 @@
+<div class="adm-015">
+  <div class="adm-015__container">
+    <!-- Formulario Principal: Datos del Usuario -->
+    <div class="adm-015__card">
+      <div class="adm-015__card-header">
+        <div class="adm-015__card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Información del Usuario</span>
+        </div>
+        <span
+          class="adm-015__status-badge"
+          [class.adm-015__status-badge--active]="form.controls.ESTADO.value === 'ACTIVO'"
+        >
+          {{ form.controls.ESTADO.value }}
+        </span>
+      </div>
+
+      <form [formGroup]="form" class="adm-015__form">
+        <div class="adm-015__grid">
+          <div class="adm-015__field">
+            <xtein-label for="adm-015-usuario" [required]="true">Usuario</xtein-label>
+            <xtein-input
+              id="adm-015-usuario"
+              formControlName="USUARIO"
+              placeholder="Identificador del usuario"
+              [readOnly]="readOnly() || !isNew()"
+            ></xtein-input>
+          </div>
+
+          <div class="adm-015__field">
+            <xtein-label for="adm-015-estado" [required]="true">Estado</xtein-label>
+            <xtein-select
+              id="adm-015-estado"
+              [items]="$any(estados)"
+              formControlName="ESTADO"
+              [readOnly]="readOnly()"
+            ></xtein-select>
+          </div>
+
+          <div class="adm-015__field adm-015__field--wide">
+            <xtein-label for="adm-015-nombre" [required]="true">Nombre Completo</xtein-label>
+            <xtein-input
+              id="adm-015-nombre"
+              formControlName="NOMBRE"
+              placeholder="Nombre y apellidos"
+              [readOnly]="readOnly()"
+            ></xtein-input>
+          </div>
+
+          <div class="adm-015__field">
+            <xtein-label for="adm-015-rol" [required]="true">Rol de Usuario</xtein-label>
+            <xtein-select
+              id="adm-015-rol"
+              [items]="roles()"
+              displayExpr="DESCRIPCION"
+              valueExpr="ID_ROL"
+              placeholder="Seleccione un Rol"
+              formControlName="ID_ROL"
+              [readOnly]="readOnly()"
+            ></xtein-select>
+          </div>
+
+          <div class="adm-015__field adm-015__field--wide">
+            <xtein-label for="adm-015-email" [required]="true">Correo Electrónico</xtein-label>
+            <xtein-input
+              id="adm-015-email"
+              formControlName="EMAIL"
+              placeholder="usuario@empresa.com"
+              [readOnly]="readOnly()"
+            ></xtein-input>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Pestañas de Detalle y Permisos -->
+    <div class="adm-015__card adm-015__card--tabs">
+      <div class="adm-015__tabs-nav">
+        <button
+          type="button"
+          class="adm-015__tab-btn"
+          [class.adm-015__tab-btn--active]="activeTab() === 'contrasenas'"
+          (click)="activeTab.set('contrasenas')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Contraseñas</span>
+        </button>
+
+        <button
+          type="button"
+          class="adm-015__tab-btn"
+          [class.adm-015__tab-btn--active]="activeTab() === 'aplicaciones'"
+          (click)="activeTab.set('aplicaciones')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Aplicaciones ({{ autorizaciones().length }})</span>
+        </button>
+
+        <button
+          type="button"
+          class="adm-015__tab-btn"
+          [class.adm-015__tab-btn--active]="activeTab() === 'permisos'"
+          (click)="activeTab.set('permisos')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Permisos Especiales</span>
+        </button>
+
+        <button
+          type="button"
+          class="adm-015__tab-btn"
+          [class.adm-015__tab-btn--active]="activeTab() === 'un'"
+          (click)="activeTab.set('un')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>UN Asociadas</span>
+        </button>
+
+        <button
+          type="button"
+          class="adm-015__tab-btn"
+          [class.adm-015__tab-btn--active]="activeTab() === 'conexiones'"
+          (click)="activeTab.set('conexiones')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+          </svg>
+          <span>Conexiones</span>
+        </button>
+
+        <button
+          type="button"
+          class="adm-015__tab-btn"
+          [class.adm-015__tab-btn--active]="activeTab() === 'configuraciones'"
+          (click)="activeTab.set('configuraciones')"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Configuraciones Avanzadas</span>
+        </button>
+      </div>
+
+      <div class="adm-015__tab-content">
+        <!-- Pestaña 1: Contraseñas -->
+        @if (activeTab() === 'contrasenas') {
+          <div class="adm-015__tab-pane">
+            <form [formGroup]="form" class="adm-015__passwords-form">
+              <div class="adm-015__passwords-grid">
+                <div class="adm-015__field">
+                  <xtein-label>Forzar cambio de Contraseña</xtein-label>
+                  <xtein-switch
+                    formControlName="CAMBIAR_CLAVE"
+                    [readOnly]="readOnly()"
+                  ></xtein-switch>
+                </div>
+
+                <div class="adm-015__field">
+                  <xtein-label for="adm-015-expirar">Expiración de Contraseña</xtein-label>
+                  <xtein-select
+                    id="adm-015-expirar"
+                    [items]="$any(expirarOptions)"
+                    formControlName="EXPIRARstr"
+                    [readOnly]="readOnly()"
+                  ></xtein-select>
+                </div>
+
+                @if (form.controls.EXPIRARstr.value === 'Expirar cada') {
+                  <div class="adm-015__field">
+                    <xtein-label for="adm-015-tiempo">Expira en</xtein-label>
+                    <xtein-number
+                      id="adm-015-tiempo"
+                      formControlName="TIEMPO_INTERVALO"
+                      placeholder="Número de unidades"
+                      [min]="1"
+                    ></xtein-number>
+                  </div>
+
+                  <div class="adm-015__field">
+                    <xtein-label for="adm-015-intervalo">Unidad de Tiempo</xtein-label>
+                    <xtein-select
+                      id="adm-015-intervalo"
+                      [items]="$any(intervalos)"
+                      displayExpr="label"
+                      valueExpr="value"
+                      formControlName="INTERVALO"
+                      [readOnly]="readOnly()"
+                    ></xtein-select>
+                  </div>
+                }
+              </div>
+
+              <div class="adm-015__passwords-action">
+                <xtein-button
+                  text="Cambiar Contraseña…"
+                  icon="key"
+                  variant="secondary"
+                  [disabled]="isNew()"
+                  (clicked)="openPasswordModal()"
+                ></xtein-button>
+              </div>
+            </form>
+          </div>
+        }
+
+        <!-- Pestaña 2: Aplicaciones -->
+        @if (activeTab() === 'aplicaciones') {
+          <div class="adm-015__tab-pane">
+            <xtein-adm015-aplicaciones
+              [autorizaciones]="autorizaciones()"
+              [readOnly]="readOnly()"
+              [availableApps]="availableApps()"
+              (autorizacionesChange)="autorizaciones.set($event)"
+              (copyFromRole)="copyPermissionsFromRole()"
+            ></xtein-adm015-aplicaciones>
+          </div>
+        }
+
+        <!-- Pestaña 3: Permisos Especiales -->
+        @if (activeTab() === 'permisos') {
+          <div class="adm-015__tab-pane">
+            <xtein-adm015-permisos-especiales
+              [permisosEspeciales]="permisosEspeciales()"
+              [readOnly]="readOnly()"
+              (permisosEspecialesChange)="permisosEspeciales.set($event)"
+            ></xtein-adm015-permisos-especiales>
+          </div>
+        }
+
+        <!-- Pestaña 4: UN Asociadas -->
+        @if (activeTab() === 'un') {
+          <div class="adm-015__tab-pane">
+            <xtein-adm015-un-asociadas
+              [unAsociadas]="unAsociadas()"
+              [readOnly]="readOnly()"
+              [availableUNs]="availableUNs()"
+              (unAsociadasChange)="unAsociadas.set($event)"
+            ></xtein-adm015-un-asociadas>
+          </div>
+        }
+
+        <!-- Pestaña 5: Conexiones -->
+        @if (activeTab() === 'conexiones') {
+          <div class="adm-015__tab-pane">
+            <xtein-adm015-conexiones
+              [conexiones]="conexiones()"
+              [readOnly]="readOnly()"
+              [availableConexiones]="availableConexiones()"
+              (conexionesChange)="conexiones.set($event)"
+            ></xtein-adm015-conexiones>
+          </div>
+        }
+
+        <!-- Pestaña 6: Configuraciones Avanzadas -->
+        @if (activeTab() === 'configuraciones') {
+          <div class="adm-015__tab-pane">
+            <xtein-adm015-configuraciones
+              [settings]="settings()"
+              [readOnly]="readOnly()"
+              (settingsChange)="settings.set($event)"
+            ></xtein-adm015-configuraciones>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Emergente: Cambiar Contraseña -->
+  <xtein-popup
+    title="Cambiar Contraseña de Usuario"
+    [visible]="passwordModalVisible()"
+    [width]="420"
+    [height]="'auto'"
+    [showCloseButton]="true"
+    (closed)="closePasswordModal()"
+  >
+    <div class="adm-015__modal-body">
+      <p class="adm-015__modal-desc">
+        Ingrese y confirme la nueva contraseña para el usuario
+        <b>{{ form.controls.USUARIO.value || currentRecord()?.USUARIO }}</b>.
+      </p>
+
+      <form [formGroup]="passwordForm" class="adm-015__modal-form">
+        <div class="adm-015__field">
+          <xtein-label for="adm-015-new-pass" [required]="true">Nueva Contraseña</xtein-label>
+          <xtein-password
+            id="adm-015-new-pass"
+            formControlName="NUEVA_CLAVE"
+            placeholder="Mínimo 6 caracteres"
+          ></xtein-password>
+        </div>
+
+        <div class="adm-015__field">
+          <xtein-label for="adm-015-confirm-pass" [required]="true">Confirmar Contraseña</xtein-label>
+          <xtein-password
+            id="adm-015-confirm-pass"
+            formControlName="CONFIRMAR_CLAVE"
+            placeholder="Repita la nueva contraseña"
+          ></xtein-password>
+        </div>
+
+        <div class="adm-015__modal-actions">
+          <xtein-button
+            text="Cancelar"
+            variant="secondary"
+            width="120px"
+            (clicked)="closePasswordModal()"
+          ></xtein-button>
+          <xtein-button
+            text="Guardar Contraseña"
+            variant="success"
+            width="180px"
+            (clicked)="submitChangePassword()"
+          ></xtein-button>
+        </div>
+      </form>
+    </div>
+  </xtein-popup>
+
+  <!-- Overlay de Búsqueda y Filtros -->
+  <xtein-record-filter
+    [visible]="filterVisible()"
+    (visibleChange)="filterVisible.set($event)"
+    [tableBase]="tableBase"
+    (search)="onFilterApplied($event)"
+  ></xtein-record-filter>
+
+  <!-- Overlay de Vista Rápida (Lista de Usuarios) -->
+  <xtein-record-view
+    [visible]="viewVisible()"
+    (visibleChange)="viewVisible.set($event)"
+    [records]="records()"
+    [columns]="viewColumns"
+    keyField="USUARIO"
+    (selected)="onRecordSelectedFromView($event)"
+  ></xtein-record-view>
+
+  <!-- Overlay de Reportes -->
+  @if (reportsVisible()) {
+    <xtein-record-reports
+      [visible]="reportsVisible()"
+      (visibleChange)="reportsVisible.set($event)"
+      [applicationId]="applicationId"
+      [table]="tableBase"
+      [currentFilter]="queryFilter()"
+      [allFilter]="queryFilter()"
+    ></xtein-record-reports>
+  }
+</div>

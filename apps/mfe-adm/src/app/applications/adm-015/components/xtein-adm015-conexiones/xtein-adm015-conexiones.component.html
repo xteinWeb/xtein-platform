@@ -1,0 +1,71 @@
+<div class="xtein-adm015-conn">
+  @if (!readOnly) {
+    <div class="xtein-adm015-conn__toolbar">
+      <xtein-button
+        text="Asociar Conexión"
+        icon="add"
+        variant="secondary"
+        width="auto"
+        (clicked)="onAddConexion()"
+      ></xtein-button>
+    </div>
+  }
+
+  <dx-data-grid
+    #gridConexiones
+    keyExpr="ITEM"
+    [dataSource]="conexiones"
+    [showBorders]="true"
+    [columnAutoWidth]="true"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    noDataText="No hay conexiones configuradas para este usuario"
+  >
+    <dxo-paging [pageSize]="10"></dxo-paging>
+
+    <dxi-column
+      dataField="ID_CONEXION"
+      caption="Conexión / Empresa"
+      [minWidth]="200"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="ULTIMA"
+      caption="Defecto"
+      dataType="boolean"
+      [width]="120"
+      alignment="center"
+      [allowEditing]="!readOnly"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="ULTIMA_UN"
+      caption="Última UN Utilizada"
+      [width]="180"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    @if (!readOnly) {
+      <dxi-column
+        caption="Acciones"
+        [width]="90"
+        alignment="center"
+        cellTemplate="actionsTemplate"
+      >
+        <div *dxTemplate="let row of 'actionsTemplate'">
+          <xtein-button
+            icon="trash"
+            variant="danger"
+            width="32px"
+            ariaLabel="Quitar conexión"
+            (clicked)="onRemoveConexion(row.data)"
+          ></xtein-button>
+        </div>
+      </dxi-column>
+    }
+  </dx-data-grid>
+</div>
