@@ -1,0 +1,551 @@
+<section class="ven-212">
+  <div class="ven-212__form" [formGroup]="form">
+    <!-- ===== FILA SUPERIOR: Tarjeta Principal + Tarjeta Totales ===== -->
+    <div class="ven-212__top-row">
+      <!-- Tarjeta Principal -->
+      <div class="ven-212__card-main">
+        <!-- Cabecera de Factura -->
+        <div class="ven-212__header-grid">
+          <div class="ven-212__header-col">
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-documento">
+                Factura Número
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-select
+                  id="ven-212-documento"
+                  [items]="documents()"
+                  displayExpr="DOCUMENTO"
+                  valueExpr="DOCUMENTO"
+                  [searchEnabled]="true"
+                  formControlName="DOCUMENTO"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-fecha">
+                Fecha
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-date
+                  id="ven-212-fecha"
+                  name="FECHA"
+                  placeholder="YYYY-MM-DD"
+                  formControlName="FECHA"
+                  [required]="true"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-fecha-registro">
+                Fecha de Registro
+              </xtein-label>
+              <div class="ven-212__control-inline ven-212__control-inline--shaded">
+                <xtein-date
+                  id="ven-212-fecha-registro"
+                  name="FECHA_REGISTRO"
+                  formControlName="FECHA_REGISTRO"
+                  [readOnly]="true"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="ven-212__header-col">
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline">Estado</xtein-label>
+              <div class="ven-212__control-inline">
+                <span class="ven-212__badge-status" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-usuario">
+                Usuario
+              </xtein-label>
+              <div class="ven-212__control-inline ven-212__control-inline--shaded">
+                <xtein-input
+                  id="ven-212-usuario"
+                  name="USUARIO"
+                  placeholder="Usuario"
+                  formControlName="USUARIO"
+                  [readOnly]="true"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-cufe">
+                CUFE
+              </xtein-label>
+              <div class="ven-212__control-inline ven-212__control-inline--shaded">
+                <xtein-input
+                  id="ven-212-cufe"
+                  name="CUFE"
+                  placeholder="CUFE"
+                  formControlName="CUFE"
+                  [readOnly]="true"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Cliente -->
+        <div class="ven-212__section-divider">
+          <h3 class="ven-212__section-title">Cliente</h3>
+        </div>
+
+        <div class="ven-212__client-grid">
+          <div class="ven-212__client-col">
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-id-cliente">
+                Documento del Cliente
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-lookup
+                  id="ven-212-id-cliente"
+                  ariaLabel="Documento del Cliente"
+                  placeholder="Documento"
+                  [items]="clients()"
+                  valueExpr="ID_CLIENTE"
+                  displayExpr="ID_CLIENTE"
+                  searchPlaceholder="Buscar…"
+                  [columns]="clientColumns"
+                  [required]="true"
+                  formControlName="ID_CLIENTE"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-direccion">
+                Dirección
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-select
+                  id="ven-212-direccion"
+                  [items]="addresses()"
+                  displayExpr="DIRECCION"
+                  valueExpr="DIRECCION"
+                  [searchEnabled]="true"
+                  formControlName="DIRECCION"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-banco">
+                Banco
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-lookup
+                  id="ven-212-banco"
+                  ariaLabel="Banco"
+                  placeholder="Banco"
+                  searchPlaceholder="Buscar…"
+                  [items]="banks()"
+                  valueExpr="BANCO"
+                  displayExpr="DESCRIPCION"
+                  [columns]="bankColumns"
+                  [showClearButton]="true"
+                  formControlName="BANCO"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="ven-212__client-col">
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-nombre-cliente">
+                Nombre de Cliente
+              </xtein-label>
+              <div class="ven-212__control-inline ven-212__control-inline--shaded">
+                <xtein-input
+                  id="ven-212-nombre-cliente"
+                  name="NOMBRE_CLIENTE"
+                  placeholder="Nombre"
+                  formControlName="NOMBRE_CLIENTE"
+                  [readOnly]="true"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-doc-soporte">
+                Orden de Compra
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-input
+                  id="ven-212-doc-soporte"
+                  name="ID_DOC_SOPORTE"
+                  placeholder="Orden de compra"
+                  formControlName="ID_DOC_SOPORTE"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+
+            <div class="ven-212__field-inline">
+              <xtein-label class="ven-212__label-inline" for="ven-212-fecha-oc">
+                Fecha Orden de Compra
+              </xtein-label>
+              <div class="ven-212__control-inline">
+                <xtein-date
+                  id="ven-212-fecha-oc"
+                  name="FECHA_OC"
+                  formControlName="FECHA_OC"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Totales -->
+      <div class="ven-212__card-totals">
+        <div class="ven-212__totals-header">
+          <span class="ven-212__totals-card-title">Resumen Financiero</span>
+        </div>
+
+        <div class="ven-212__totals-body">
+          <div class="ven-212__totals-row">
+            <span class="ven-212__totals-label">Subtotal</span>
+            <span class="ven-212__totals-value">
+              {{ money(form.get("SUB_TOTAL")?.value) }}
+            </span>
+          </div>
+
+          <div class="ven-212__totals-row">
+            <span class="ven-212__totals-label">Descuentos</span>
+            <span class="ven-212__totals-value">
+              {{ money(form.get("VALOR_DESCUENTO")?.value) }}
+            </span>
+          </div>
+
+          <div class="ven-212__totals-row">
+            <span class="ven-212__totals-label">Anticipos</span>
+            <span class="ven-212__totals-value">
+              {{ money(advances()) }}
+            </span>
+          </div>
+
+          @for (tax of taxes(); track $index) {
+            <div class="ven-212__totals-row">
+              <span class="ven-212__totals-label">{{ tax.CLASE }} {{ tax.POR_TASA }}%</span>
+              <span class="ven-212__totals-value">
+                {{ money(tax.VALOR) }}
+              </span>
+            </div>
+          }
+
+          <div class="ven-212__totals-divider"></div>
+
+          <div class="ven-212__totals-row ven-212__totals-row--grand">
+            <span class="ven-212__totals-label">TOTAL</span>
+            <span class="ven-212__totals-value">
+              {{ money(form.get("TOTAL")?.value) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FILA INFERIOR: Parámetros + Items ===== -->
+    <div class="ven-212__bottom-row">
+      <div class="ven-212__card-bottom">
+        <!-- Secciones de parámetros comerciales -->
+        <div class="ven-212__params-row">
+          <!-- Datos de la Venta -->
+          <div class="ven-212__params-section">
+            <div class="ven-212__section-divider">
+              <h3 class="ven-212__section-title">Datos de la venta</h3>
+            </div>
+            <div class="ven-212__params-grid">
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-id-un">
+                  Unidad de Negocio
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-lookup
+                    id="ven-212-id-un"
+                    ariaLabel="Unidad de Negocio"
+                    placeholder="Unidad de Negocio"
+                    searchPlaceholder="Buscar…"
+                    [items]="units()"
+                    valueExpr="ID_UN"
+                    displayExpr="NOMBRE"
+                    [columns]="unitColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(480px, 95vw)"
+                    formControlName="ID_UN_ITEM"
+                    [required]="true"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-moneda">
+                  Moneda
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-lookup
+                    id="ven-212-moneda"
+                    ariaLabel="Moneda"
+                    placeholder="Moneda"
+                    searchPlaceholder="Buscar…"
+                    [items]="currencies()"
+                    valueExpr="ID_MONEDA"
+                    displayExpr="DESCRIPCION"
+                    [columns]="currencyColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(450px, 95vw)"
+                    formControlName="ID_MONEDA"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-id-adc">
+                  ADC / Vendedor
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-lookup
+                    id="ven-212-id-adc"
+                    ariaLabel="ADC / Vendedor"
+                    placeholder="ADC / Vendedor"
+                    searchPlaceholder="Buscar…"
+                    [items]="sellers()"
+                    valueExpr="ID_ADC"
+                    displayExpr="NOMBRE_COMPLETO"
+                    [columns]="sellerColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(500px, 95vw)"
+                    formControlName="ID_ADC"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-tipo-venta">
+                  Tipo de Venta
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-select
+                    id="ven-212-tipo-venta"
+                    [items]="saleTypes()"
+                    placeholder="Tipo Venta"
+                    formControlName="TIPO_VENTA"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-bodega">
+                  Bodega
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-lookup
+                    id="ven-212-bodega"
+                    ariaLabel="Bodega"
+                    placeholder="Bodega"
+                    searchPlaceholder="Buscar…"
+                    [items]="warehouses()"
+                    valueExpr="ID_UN_BODEGA"
+                    displayExpr="DESCRIPCION"
+                    [columns]="warehouseColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(650px, 95vw)"
+                    formControlName="ID_UN_BODEGA"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liquidación -->
+          <div class="ven-212__params-section">
+            <div class="ven-212__section-divider">
+              <h3 class="ven-212__section-title">Liquidación</h3>
+            </div>
+            <div class="ven-212__params-grid">
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-condicion">
+                  Condición / Lista
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-lookup
+                    id="ven-212-condicion"
+                    ariaLabel="Condición / Lista"
+                    placeholder="Condición/Lista"
+                    searchPlaceholder="Buscar…"
+                    [items]="conditions()"
+                    valueExpr="ID_CONDICION"
+                    displayExpr="ID_CONDICION"
+                    [columns]="conditionColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(450px, 95vw)"
+                    formControlName="ID_CONDICION"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-plazo">
+                  Plazo
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-select
+                    id="ven-212-plazo"
+                    [items]="terms()"
+                    displayExpr="PLAZO"
+                    valueExpr="PLAZO"
+                    formControlName="PLAZO"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-vencimiento">
+                  Vencimiento
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-date
+                    id="ven-212-vencimiento"
+                    name="FECHA_PRIMER_VENC"
+                    [min]="form.controls.FECHA.value || null"
+                    formControlName="FECHA_PRIMER_VENC"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-cuota-inicial">
+                  Cuota Inicial
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-number
+                    id="ven-212-cuota-inicial"
+                    placeholder="0.00"
+                    formControlName="CUOTA_INICIAL"
+                  />
+                </div>
+              </div>
+
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-cliente-padre">
+                  Cliente Padre
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-input
+                    id="ven-212-cliente-padre"
+                    name="CLIENTE_PADRE"
+                    placeholder="Cliente Padre"
+                    formControlName="CLIENTE_PADRE"
+                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción hasta el final (ancho completo) -->
+        <div class="ven-212__full-row">
+          <div class="ven-212__field-inline ven-212__field-inline--full">
+            <xtein-label class="ven-212__label-inline" for="ven-212-descripcion">
+              Descripción
+            </xtein-label>
+            <div class="ven-212__control-inline">
+              <xtein-input
+                id="ven-212-descripcion"
+                name="DESCRIPCION"
+                placeholder="Descripción de la factura..."
+                formControlName="DESCRIPCION"
+                [readOnly]="readOnly() || headerLocked() || itemPending()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Componente de Ítems de Factura -->
+        <xtein-ven212-items
+          [items]="items()"
+          [products]="products()"
+          [productsLoading]="productsLoading()"
+          [onlyStock]="onlyStock()"
+          [recordKey]="itemRecordKey()"
+          [header]="header()"
+          [readOnly]="readOnly()"
+          [ready]="itemsReady()"
+          [busy]="busy()"
+          [conditionType]="conditionType()"
+          [moneyFormat]="'#,##0.00'"
+          [quantityFormat]="'#,##0.00'"
+          [repeatItem]="true"
+          [editPrice]="true"
+          [persist]="persistItemBind"
+          (removed)="removeItem($event)"
+          (removedMany)="removeItems($event)"
+          (pending)="onItemPending($event)"
+          (stockOnly)="onlyStock.set($event); loadProducts()"
+          (refreshProducts)="loadProducts()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <xtein-loading
+    [visible]="busy()"
+    message="Procesando datos de la factura..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false"
+  />
+</section>
+
+<!-- Modales estándar de la plataforma -->
+<xtein-record-filter
+  [visible]="filterVisible()"
+  (visibleChange)="filterVisible.set($event)"
+  [tableBase]="tableBase"
+  (search)="searchRecords($event)"
+/>
+
+<xtein-record-view
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="DOCUMENTO"
+  (selected)="selectViewedRecord($event)"
+/>
+
+@if (reportsVisible()) {
+  <xtein-record-reports
+    [visible]="reportsVisible()"
+    (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId"
+    [table]="tableBase"
+    [currentFilter]="currentReportFilter()"
+    [allFilter]="queryFilter()"
+    [emailContext]="reportEmailContext()"
+  />
+}

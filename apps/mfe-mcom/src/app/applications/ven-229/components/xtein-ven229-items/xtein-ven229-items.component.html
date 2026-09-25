@@ -1,0 +1,245 @@
+<div class="grid-toolbar">
+  <!-- Botón Nuevo Item (+) -->
+  <xtein-button
+    icon="add"
+    variant="primary"
+    width="34px"
+    ariaLabel="Nuevo ítem"
+    [disabled]="readOnly || !ready || busy || !!draft()"
+    (clicked)="begin()"
+  ></xtein-button>
+
+  <!-- Botón Guardar Item (✓) -->
+  @if (!!draft()) {
+    <xtein-button
+      icon="check"
+      variant="success"
+      width="34px"
+      ariaLabel="Guardar ítem"
+      [disabled]="working() || busy"
+      (clicked)="commit()"
+    ></xtein-button>
+  }
+
+  <!-- Botón Cancelar Item (↩) -->
+  @if (!!draft()) {
+    <xtein-button
+      icon="undo"
+      variant="secondary"
+      width="34px"
+      ariaLabel="Cancelar ítem"
+      [disabled]="working() || busy"
+      (clicked)="cancel()"
+    ></xtein-button>
+  }
+
+  <!-- Botón Eliminar Seleccionados (🗑) -->
+  @if (!readOnly && selected().length > 0 && !draft()) {
+    <xtein-button
+      icon="trash"
+      variant="danger"
+      width="34px"
+      ariaLabel="Eliminar seleccionados"
+      [disabled]="busy"
+      (clicked)="deleteSelected()"
+    ></xtein-button>
+  }
+</div>
+
+<div class="table-scroll">
+  <table class="items-grid-table">
+    <thead>
+      <tr>
+        <th class="col-select">
+          <xtein-checkbox
+            ariaLabel="Seleccionar todos"
+            [disabled]="readOnly || busy || !!draft() || items.length === 0"
+            [checked]="allItemsSelected()"
+            (checkedChange)="toggleAll($event)"
+          />
+        </th>
+        <th class="col-product">Producto</th>
+        <th class="col-name">Nombre del Producto</th>
+        <th class="col-qty text-end">Cantidad</th>
+        <th class="col-um">UM</th>
+        <th class="col-price text-end">Valor Unitario</th>
+        <th class="col-subtotal text-end">Subtotal</th>
+        <th class="col-iva text-end">IVA</th>
+        <th class="col-pct text-end">%</th>
+        <th class="col-total text-end">Total</th>
+        <th class="col-date text-end">Fecha entrega</th>
+        <th class="col-status">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Fila editable en línea (cuando draft() está activo) -->
+      @if (draft(); as row) {
+        <tr class="row-editing">
+          <td class="col-select"></td>
+          <td class="col-product">
+            <div class="product-cell-box">
+              <div class="product-select-wrap">
+                <dx-drop-down-box
+                  [(value)]="row.PRODUCTO"
+                  valueExpr="PRODUCTO"
+                  displayExpr="PRODUCTO"
+                  placeholder="Producto"
+                  [dataSource]="products"
+                  [showClearButton]="true"
+                  [dropDownOptions]="productDropDownOptions"
+                  [(opened)]="productDropdownOpened"
+                  [disabled]="working() || busy"
+                >
+                  <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
+                    <ng-template #productToolbarExtra>
+                      <xtein-checkbox
+                        label="Solo con Existencias"
+                        [checked]="onlyStock"
+                        [disabled]="productsLoading || working()"
+                        (checkedChange)="stockOnly.emit($event)"
+                      />
+                      @if (productsLoading) {
+                        <span class="product-loading-indicator" role="status">Cargando…</span>
+                      }
+                    </ng-template>
+
+                    <xtein-data-grid
+                      [dataSource]="products"
+                      keyExpr="PRODUCTO"
+                      height="100%"
+                      [toolbarActions]="productToolbarActions()"
+                      [toolbarTemplate]="productToolbarExtra"
+                      (rowClick)="$event.rowType === 'data' && selectProductFromDropdown($event.data)"
+                      (rowActivated)="selectProductFromDropdown($event)"
+                      [columns]="productColumns"
+                      selectionMode="single"
+                      [pageSize]="100"
+                      [allowedPageSizes]="[50, 100, 200]"
+                      [showPager]="true"
+                      searchPlaceholder="Buscar producto…"
+                      [searchWidth]="240"
+                    />
+                  </div>
+                </dx-drop-down-box>
+              </div>
+
+              <xtein-button
+                icon="close"
+                variant="secondary"
+                width="28px"
+                ariaLabel="Cancelar ítem"
+                [disabled]="working() || busy"
+                (clicked)="cancel()"
+              ></xtein-button>
+            </div>
+          </td>
+          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td class="col-qty">
+            <xtein-number
+              class="cell-editor"
+              ariaLabel="Cantidad"
+              [(ngModel)]="row.CANTIDAD"
+              (ngModelChange)="onDraftQtyChange()"
+              [disabled]="working() || busy"
+            />
+          </td>
+          <td class="col-um">
+            @if (row.PRESENTACION?.length) {
+              <xtein-select
+                class="cell-editor"
+                [items]="presentationOptions()"
+                displayExpr="UDM_VENTA"
+                valueExpr="UDM_VENTA"
+                [ngModel]="row.UDM_VENTA"
+                (ngModelChange)="unit($event)"
+                [disabled]="working() || busy"
+              />
+            } @else {
+              <span>{{ row.UDM_VENTA }}</span>
+            }
+          </td>
+          <td class="col-price">
+            <xtein-number
+              class="cell-editor"
+              ariaLabel="Valor unitario"
+              [(ngModel)]="row.VALOR_UNITARIO"
+              (ngModelChange)="onDraftQtyChange()"
+              [disabled]="!editPrice || working() || busy"
+            />
+          </td>
+          <td class="col-subtotal text-end">
+            {{ money(row.CANTIDAD * row.VALOR_UNITARIO) }}
+          </td>
+          <td class="col-iva text-end">
+            @if ((row.IVAS?.length ?? 0) > 1) {
+              <xtein-select
+                class="cell-editor"
+                [items]="taxOptions()"
+                displayExpr="LABEL"
+                valueExpr="ID_TASA"
+                [ngModel]="selectedTaxId()"
+                (ngModelChange)="tax($event)"
+                [disabled]="working() || busy"
+              />
+            } @else {
+              <span>{{ money(row.VALOR_IVA) }}</span>
+            }
+          </td>
+          <td class="col-pct text-end">
+            {{ row.POR_IVA || 0 }}
+          </td>
+          <td class="col-total text-end">
+            {{ money((row.CANTIDAD * row.VALOR_UNITARIO) + (row.VALOR_IVA || 0)) }}
+          </td>
+          <td class="col-date">
+            <xtein-date
+              class="cell-editor"
+              [min]="minimumDeliveryDate"
+              [(ngModel)]="row.FECHA_ENTREGA"
+              [disabled]="working() || busy"
+            />
+          </td>
+          <td class="col-status">
+            <span class="cell-badge">{{ row.ESTADO || 'REGISTRADO' }}</span>
+          </td>
+        </tr>
+      }
+
+      <!-- Filas de datos existentes -->
+      @for (row of items; track row.ITEM) {
+        <tr
+          [class.row-selected]="selected().includes(row.ITEM)"
+          (dblclick)="!readOnly && !draft() && begin(row)"
+        >
+          <td class="col-select">
+            <xtein-checkbox
+              ariaLabel="Seleccionar producto"
+              [disabled]="readOnly || busy || !!draft()"
+              [checked]="selected().includes(row.ITEM)"
+              (checkedChange)="toggle(row.ITEM, $event)"
+            />
+          </td>
+          <td class="col-product">{{ row.PRODUCTO }}</td>
+          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
+          <td class="col-um">{{ row.UDM_VENTA }}</td>
+          <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
+          <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
+          <td class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
+          <td class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
+          <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
+          <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
+          <td class="col-status">
+            <span class="cell-badge">{{ row.ESTADO }}</span>
+          </td>
+        </tr>
+      } @empty {
+        @if (!draft()) {
+          <tr>
+            <td colspan="12" class="empty-message">No hay productos asociados al pedido.</td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
