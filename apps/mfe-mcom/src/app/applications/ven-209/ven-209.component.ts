@@ -44,6 +44,8 @@ import {
   XteinRecordViewComponent,
   XteinRecordFilterComponent,
   XteinRecordReportsComponent,
+  XteinRecordSettingsComponent,
+  XteinApplicationSetting,
   XteinNotificationService,
   XteinRecordFilterResult,
   XteinPerfilTributarioComponent,
@@ -94,6 +96,7 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinRecordViewComponent,
     XteinRecordFilterComponent,
     XteinRecordReportsComponent,
+    XteinRecordSettingsComponent,
     XteinPerfilTributarioComponent,
     XteinTagBoxComponent,
     XteinVen209UbicacionesComponent,
@@ -146,6 +149,7 @@ export class Ven209Component implements OnInit, OnDestroy {
   readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
+  readonly settingsVisible = signal(false);
 
   // Constants for UI
   readonly tableBase = Ven209Application.Table;
@@ -217,6 +221,7 @@ export class Ven209Component implements OnInit, OnDestroy {
         this.filterVisible.set(false);
         this.viewVisible.set(false);
         this.reportsVisible.set(false);
+        this.settingsVisible.set(false);
       }
     });
   }
@@ -420,6 +425,9 @@ export class Ven209Component implements OnInit, OnDestroy {
         break;
       case ToolbarAction.Print:
         this.reportsVisible.set(true);
+        break;
+      case ToolbarAction.Configure:
+        this.settingsVisible.set(true);
         break;
       default:
         break;

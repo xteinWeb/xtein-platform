@@ -139,5 +139,5 @@ export const Mad005ToolbarCapabilities:
       true,
 
     configure:
-      false
+      true
   };

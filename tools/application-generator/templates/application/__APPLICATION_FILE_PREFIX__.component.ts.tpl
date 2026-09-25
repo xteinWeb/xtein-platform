@@ -36,7 +36,8 @@ import {
 } from '@xtein/runtime';
 
 import {
-  XteinNotificationService
+  XteinNotificationService,
+  XteinRecordSettingsComponent
 } from '@xtein/ui';
 
 import {
@@ -66,6 +67,10 @@ import {
 
   standalone:
     true,
+
+  imports: [
+    XteinRecordSettingsComponent
+  ],
 
   providers: [
     __APPLICATION_CLASS_PREFIX__Service
@@ -124,6 +129,15 @@ export class __APPLICATION_CLASS_PREFIX__Component
   readonly readOnly =
     signal(
       true
+    );
+
+
+  /**
+   * Visibility state for the application settings modal.
+   */
+  readonly settingsVisible =
+    signal(
+      false
     );
 
 
@@ -1327,7 +1341,9 @@ export class __APPLICATION_CLASS_PREFIX__Component
   private configureApplication():
     void {
 
-    // Implement application configuration when required.
+    this.settingsVisible.set(
+      true
+    );
   }
 
 

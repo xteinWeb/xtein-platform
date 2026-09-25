@@ -1,0 +1,120 @@
+:host {
+  display: contents;
+}
+
+.xtein-record-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  color: var(--xt-control-text, #1e293b);
+
+  &__loading,
+  &__empty,
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+
+  &__loading {
+    color: var(--xt-color-text-secondary, #64748b);
+  }
+
+  &__spinner {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid var(--xt-color-brand-light, #cbd5e1);
+    border-top-color: var(--xt-color-brand, #0f4c81);
+    border-radius: 50%;
+    animation: xt-spin 0.8s linear infinite;
+  }
+
+  &__empty {
+    color: var(--xt-color-text-secondary, #64748b);
+
+    i {
+      font-size: 2rem;
+      opacity: 0.5;
+    }
+  }
+
+  &__error {
+    color: var(--bs-danger, #b02a37);
+    background: var(--bs-danger-bg-subtle, #f8d7da);
+
+    i {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--xt-control-border, #e2e8f0);
+    background: var(--xt-control-background, #ffffff);
+    color: var(--xt-control-text, #1e293b);
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    outline: none;
+
+    &:hover {
+      background: var(--xt-control-hover-background, #f1f5f9);
+      border-color: var(--xt-color-brand-light, #94a3b8);
+      transform: translateX(2px);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--xt-color-brand, #0f4c81);
+    }
+
+    &-icon {
+      font-size: 1.125rem;
+      color: var(--xt-color-brand, #0f4c81);
+      flex-shrink: 0;
+    }
+
+    &-text {
+      flex: 1;
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    &-arrow {
+      font-size: 0.75rem;
+      color: var(--xt-color-text-secondary, #94a3b8);
+      flex-shrink: 0;
+      transition: transform 0.15s ease-in-out;
+    }
+
+    &:hover &-arrow {
+      transform: translateX(2px);
+      color: var(--xt-color-brand, #0f4c81);
+    }
+  }
+}
+
+@keyframes xt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

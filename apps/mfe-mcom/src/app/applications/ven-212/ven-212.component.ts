@@ -45,6 +45,8 @@ import {
   XteinRecordViewComponent,
   XteinRecordFilterComponent,
   XteinRecordReportsComponent,
+  XteinRecordSettingsComponent,
+  XteinApplicationSetting,
   XteinReportEmailContext,
   XteinLoadingComponent,
   XteinNotificationService,
@@ -101,6 +103,7 @@ import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein
     XteinRecordViewComponent,
     XteinRecordFilterComponent,
     XteinRecordReportsComponent,
+    XteinRecordSettingsComponent,
     XteinLoadingComponent,
     XteinVen212ItemsComponent
   ],
@@ -161,6 +164,7 @@ export class Ven212Component implements OnInit, OnDestroy {
   readonly filterVisible = signal<boolean>(false);
   readonly viewVisible = signal<boolean>(false);
   readonly reportsVisible = signal<boolean>(false);
+  readonly settingsVisible = signal<boolean>(false);
 
   // Computed state
   readonly readOnly = computed(() => {
@@ -310,6 +314,7 @@ export class Ven212Component implements OnInit, OnDestroy {
         this.filterVisible.set(false);
         this.viewVisible.set(false);
         this.reportsVisible.set(false);
+        this.settingsVisible.set(false);
       }
     });
   }
@@ -469,6 +474,9 @@ export class Ven212Component implements OnInit, OnDestroy {
         break;
       case ToolbarAction.Print:
         this.reportsVisible.set(true);
+        break;
+      case ToolbarAction.Configure:
+        this.settingsVisible.set(true);
         break;
       case ToolbarAction.GoTo:
         if (typeof command.payload === 'number' && Number.isInteger(command.payload)) {
@@ -986,5 +994,10 @@ export class Ven212Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.taxes.set([]);
     this.payments.set([]);
+  }
+
+  onSettingSelected(setting: XteinApplicationSetting): void {
+    const optionName = setting.VALOR || setting.text || '';
+    this.notification.info(`Opción seleccionada: ${optionName}`);
   }
 }

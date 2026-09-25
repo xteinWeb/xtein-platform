@@ -1,0 +1,47 @@
+<xtein-popup
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+  [title]="title"
+  [width]="width"
+  height="auto"
+  [showCloseButton]="true"
+  [hideOnOutsideClick]="true"
+>
+  <div class="xtein-record-settings">
+    @if (loading()) {
+      <div class="xtein-record-settings__loading">
+        <span class="xtein-record-settings__spinner"></span>
+        <span>Cargando opciones...</span>
+      </div>
+    } @else if (error()) {
+      <div class="xtein-record-settings__error">
+        <i class="icon-cancelar-ol"></i>
+        <span>{{ error() }}</span>
+      </div>
+    } @else if (settings().length === 0) {
+      <div class="xtein-record-settings__empty">
+        <i class="icon-configurar-ol"></i>
+        <span>No hay opciones de configuración disponibles para esta aplicación.</span>
+      </div>
+    } @else {
+      <div class="xtein-record-settings__list">
+        @for (item of settings(); track $index) {
+          <div
+            role="button"
+            tabindex="0"
+            class="xtein-record-settings__item"
+            (click)="selectOption(item)"
+            (keydown.enter)="selectOption(item)"
+            (keydown.space)="selectOption(item)"
+          >
+            <i class="xtein-record-settings__item-icon {{ item.FUENTE || 'icon-configurar-ol' }}"></i>
+            <span class="xtein-record-settings__item-text">
+              {{ item.VALOR || item.text || 'Opción ' + ($index + 1) }}
+            </span>
+            <i class="xtein-record-settings__item-arrow icon-siguiente"></i>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</xtein-popup>

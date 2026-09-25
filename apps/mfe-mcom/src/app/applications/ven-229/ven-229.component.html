@@ -498,3 +498,10 @@
     [emailContext]="reportEmailContext()"
   />
 }
+
+<xtein-record-settings
+  [visible]="settingsVisible()"
+  (visibleChange)="settingsVisible.set($event)"
+  [applicationId]="applicationId"
+  (optionSelected)="onSettingSelected($event)"
+/>

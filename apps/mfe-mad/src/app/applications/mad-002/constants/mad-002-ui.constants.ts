@@ -49,7 +49,7 @@ export const Mad002ToolbarCapabilities:
       false,
 
     configure:
-      false
+      true
   };
 
 

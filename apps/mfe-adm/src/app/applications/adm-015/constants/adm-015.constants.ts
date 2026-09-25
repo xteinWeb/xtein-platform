@@ -42,5 +42,5 @@ export const Adm015ToolbarCapabilities: Readonly<RecordToolbarCapabilities> = {
   navigation: true,
   download: false,
   print: true,
-  configure: false
+  configure: true
 };

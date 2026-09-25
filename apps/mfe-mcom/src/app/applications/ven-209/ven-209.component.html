@@ -511,5 +511,10 @@
     </xtein-record-reports>
   }
 
+  <xtein-record-settings
+    [visible]="settingsVisible()"
+    (visibleChange)="settingsVisible.set($event)"
+    [applicationId]="applicationId"
+  />
 
 </div>

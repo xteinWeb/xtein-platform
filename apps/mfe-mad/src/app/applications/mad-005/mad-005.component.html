@@ -167,3 +167,4 @@
     [applicationId]="applicationId" table="CONFIG_ORIGEN_DATO"
     [currentFilter]="currentReportFilter()" [allFilter]="queryFilter()"></xtein-record-reports>
 }
+<xtein-record-settings [visible]="settingsVisible()" [applicationId]="applicationId" (closed)="settingsVisible.set(false)" />

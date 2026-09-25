@@ -39,5 +39,5 @@ export const Ven209ToolbarCapabilities: Readonly<RecordToolbarCapabilities> = {
   navigation: true,
   download: false,
   print: true,
-  configure: false
+  configure: true
 };

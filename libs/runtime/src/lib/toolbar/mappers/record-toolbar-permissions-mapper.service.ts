@@ -89,7 +89,9 @@ export class RecordToolbarPermissionsMapperService {
       configure:
         this.getBoolean(
           record,
-          LegacyRecordToolbarPermissionField.Configure
+          LegacyRecordToolbarPermissionField.Configure,
+          'CONFIGURAR',
+          'configurar'
         )
     };
   }
@@ -197,70 +199,52 @@ export class RecordToolbarPermissionsMapperService {
       >,
 
     fieldName:
-      string
+      string,
+
+    ...fallbackNames:
+      string[]
   ): boolean {
 
-    const value =
-      record[fieldName];
+    const candidateNames =
+      [fieldName, ...fallbackNames];
 
-
-    if (
-      value === true ||
-      value === 1
-    ) {
-
-      return true;
-    }
-
-
-    if (
-      value === false ||
-      value === 0 ||
-      value === null ||
-      value === undefined
-    ) {
-
-      return false;
-    }
-
-
-    if (
-      typeof value ===
-        'string'
-    ) {
-
-      const normalizedValue =
-        value
-          .trim()
-          .toLowerCase();
+    for (const name of candidateNames) {
+      const value =
+        record[name];
 
       if (
-        normalizedValue ===
-          'true' ||
-        normalizedValue ===
-          '1'
+        value === true ||
+        value === 1
       ) {
-
         return true;
       }
 
       if (
-        normalizedValue ===
-          'false' ||
-        normalizedValue ===
-          '0' ||
-        normalizedValue ===
-          ''
+        typeof value ===
+          'string'
       ) {
+        const normalizedValue =
+          value
+            .trim()
+            .toLowerCase();
 
-        return false;
+        if (
+          normalizedValue ===
+            'true' ||
+          normalizedValue ===
+            '1' ||
+          normalizedValue ===
+            'si' ||
+          normalizedValue ===
+            's' ||
+          normalizedValue ===
+            't'
+        ) {
+          return true;
+        }
       }
     }
 
-
-    /*
-     * Permissions use a deny-by-default strategy.
-     */
     return false;
   }
 

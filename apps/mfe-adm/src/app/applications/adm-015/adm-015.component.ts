@@ -314,6 +314,9 @@ export class Adm015Component implements OnInit, OnDestroy {
       case ToolbarAction.Print:
         this.reportsVisible.set(true);
         break;
+      case ToolbarAction.Configure:
+        this.openPasswordModal();
+        break;
       case ToolbarAction.GoTo:
         if (typeof command.payload === 'number' && Number.isInteger(command.payload)) {
           this.navigate(command.payload - 1);
