@@ -288,6 +288,7 @@
   <xtein-popup
     title="Cambiar Contraseña de Usuario"
     [visible]="passwordModalVisible()"
+    (visibleChange)="passwordModalVisible.set($event)"
     [width]="420"
     [height]="'auto'"
     [showCloseButton]="true"
@@ -296,7 +297,7 @@
     <div class="adm-015__modal-body">
       <p class="adm-015__modal-desc">
         Ingrese y confirme la nueva contraseña para el usuario
-        <b>{{ form.controls.USUARIO.value || currentRecord()?.USUARIO }}</b>.
+        <b>{{ form.controls.USUARIO.value || currentRecord()?.USUARIO || 'seleccionado' }}</b>.
       </p>
 
       <form [formGroup]="passwordForm" class="adm-015__modal-form">
@@ -326,9 +327,9 @@
             (clicked)="closePasswordModal()"
           ></xtein-button>
           <xtein-button
-            text="Guardar Contraseña"
+            text="Guardar"
             variant="success"
-            width="180px"
+            width="120px"
             (clicked)="submitChangePassword()"
           ></xtein-button>
         </div>

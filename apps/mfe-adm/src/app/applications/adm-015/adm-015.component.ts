@@ -613,6 +613,11 @@ export class Adm015Component implements OnInit, OnDestroy {
   // ================= Password Modal =================
 
   openPasswordModal(): void {
+    const usuario = this.form.controls.USUARIO.value || this.currentRecord()?.USUARIO;
+    if (!usuario) {
+      this.notification.warning('Debe consultar o seleccionar un usuario primero.');
+      return;
+    }
     this.passwordForm.reset();
     this.passwordModalVisible.set(true);
   }
