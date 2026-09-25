@@ -69,6 +69,11 @@ export class SessionService {
   constructor(
     private readonly sessionStorage: SessionStorageService
   ) {
+    const initial = this.sessionState();
+    if (initial) {
+      this.idState.set(crypto.randomUUID());
+      this.activityAt = Date.now();
+    }
   }
 
   /**
