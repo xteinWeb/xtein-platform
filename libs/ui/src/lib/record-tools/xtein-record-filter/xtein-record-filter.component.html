@@ -38,11 +38,15 @@
         [height]="gridHeight()"
         [scrolling]="scrolling"
         keyExpr="CAMPO"
+        [focusedRowEnabled]="true"
+        (onContentReady)="handleGridContentReady($event)"
         [showBorders]="true"
         [columnAutoWidth]="true"
         [allowColumnResizing]="true"
         columnResizingMode="nextColumn"
-        [rowAlternationEnabled]="true"
+        [rowAlternationEnabled]="false"
+        [showRowLines]="true"
+        [showColumnLines]="true"
         [hoverStateEnabled]="true">
 
         <dxo-paging
@@ -68,6 +72,7 @@
 
         <dxi-column
           caption="Valor"
+          cssClass="xtein-record-filter__value-cell"
           [allowSorting]="false"
           [allowFiltering]="false"
           cellTemplate="valueTemplate">
@@ -135,6 +140,7 @@
           ) {
 
             <dx-select-box
+              placeholder=""
               [items]="getInlineItems(cell.data)"
               displayExpr="KEY_COL"
               valueExpr="KEY_COL"
@@ -155,6 +161,7 @@
           ) {
 
             <dx-tag-box
+              placeholder=""
               [dataSource]="getListDataSource(cell.data)"
               displayExpr="KEY_COL"
               valueExpr="KEY_COL"

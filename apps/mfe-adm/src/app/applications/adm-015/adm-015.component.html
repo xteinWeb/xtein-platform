@@ -2,22 +2,6 @@
   <div class="adm-015__container">
     <!-- Formulario Principal: Datos del Usuario -->
     <div class="adm-015__card">
-      <div class="adm-015__card-header">
-        <div class="adm-015__card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span>Información del Usuario</span>
-        </div>
-        <span
-          class="adm-015__status-badge"
-          [class.adm-015__status-badge--active]="form.controls.ESTADO.value === 'ACTIVO'"
-        >
-          {{ form.controls.ESTADO.value }}
-        </span>
-      </div>
-
       <form [formGroup]="form" class="adm-015__form">
         <div class="adm-015__grid">
           <div class="adm-015__field">
@@ -40,7 +24,7 @@
             ></xtein-select>
           </div>
 
-          <div class="adm-015__field adm-015__field--wide">
+          <div class="adm-015__field">
             <xtein-label for="adm-015-nombre" [required]="true">Nombre Completo</xtein-label>
             <xtein-input
               id="adm-015-nombre"
@@ -63,7 +47,7 @@
             ></xtein-select>
           </div>
 
-          <div class="adm-015__field adm-015__field--wide">
+          <div class="adm-015__field">
             <xtein-label for="adm-015-email" [required]="true">Correo Electrónico</xtein-label>
             <xtein-input
               id="adm-015-email"

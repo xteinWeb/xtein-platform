@@ -27,6 +27,129 @@
   min-width: 0;
 }
 
+// The popup is rendered in an overlay. Scope generated DevExtreme markup
+// to this grid rather than the host, which is outside the overlay tree.
+::ng-deep .xtein-record-filter__grid {
+  .dx-datagrid-headers {
+    background: #eef2f6;
+    color: #244d73;
+    border: 1px solid #eef2f6;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+  }
+
+  .dx-datagrid-headers .dx-header-row > td {
+    background: #eef2f6;
+    color: #244d73;
+    font-weight: 500;
+    border-color: #f7f9fc;
+  }
+
+  .dx-datagrid-rowsview {
+    border-color: #f0f5fb;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+  }
+
+  .dx-datagrid-headers .dx-header-row > td,
+  .dx-datagrid-rowsview .dx-data-row > td {
+    height: 37px;
+    padding: 8px 11px;
+    font-size: 13px;
+    line-height: 20px;
+    vertical-align: middle;
+  }
+
+  .dx-datagrid-rowsview .dx-data-row > td {
+    background: #fff;
+    border-color: #f6f9fd;
+  }
+
+  // DevExtreme fills the remaining height with an empty row. Its column
+  // borders should not extend the field/value separator below the records.
+  .dx-datagrid-rowsview .dx-freespace-row > td {
+    border-left: 0;
+    border-right: 0;
+  }
+
+  // Override theme state rules only inside this filter. Editors must inherit
+  // the cell background so the highlight spans both columns without gaps.
+  .dx-datagrid-rowsview .dx-data-row:hover > td,
+  .dx-datagrid-rowsview .dx-data-row.dx-state-hover > td {
+    background: #eaf3ff !important;
+  }
+
+  .dx-datagrid-rowsview .dx-data-row.dx-row-focused > td,
+  .dx-datagrid-rowsview .dx-data-row:focus-within > td {
+    background: #cfe8ff !important;
+    color: inherit !important;
+    border-color: #f6f9fd;
+  }
+
+  .dx-datagrid-rowsview .dx-data-row > .xtein-record-filter__value-cell:focus-within {
+    background: #edf4ff !important;
+    box-shadow: inset 0 0 0 1px #c5ddff;
+  }
+
+  .dx-datagrid-rowsview .dx-data-row > .xtein-record-filter__value-cell {
+    padding: 0;
+    white-space: normal;
+  }
+
+  .xtein-record-filter__value-cell {
+    // The global editable-control rule uses this token with !important.
+    // Override its value locally so load order cannot restore a white editor.
+    --xt-control-background: transparent;
+    --xt-control-focus-border: transparent;
+
+    .dx-texteditor,
+    .xtein-autosearch__input {
+      width: 100%;
+      min-width: 0;
+      min-height: 36px;
+      // Override the shared standalone-control borders for in-cell editors.
+      border: 1px solid transparent !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      font-size: 13px;
+    }
+
+    .dx-texteditor-container {
+      border-radius: 0;
+      background: transparent !important;
+    }
+
+    .dx-texteditor-input,
+    .dx-dropdowneditor-button {
+      background: transparent !important;
+    }
+
+    .dx-texteditor-input,
+    .xtein-autosearch__input {
+      min-height: 34px;
+      padding: 7px 11px;
+      line-height: 20px;
+    }
+
+    .dx-placeholder::before {
+      padding: 7px 11px;
+    }
+
+    .dx-texteditor.dx-state-focused,
+    .xtein-autosearch__input:focus {
+      --xt-control-focus-border: #b9d8ff;
+      border-color: #b9d8ff !important;
+      background: transparent;
+      outline: none;
+    }
+
+    .dx-checkbox {
+      margin: 8px 11px;
+    }
+  }
+}
+
 
 .xtein-record-filter__status,
 .xtein-record-filter__error {
@@ -69,7 +192,7 @@
     minmax(0, 1fr);
 
   gap:
-    0.75rem;
+    0;
 }
 
 

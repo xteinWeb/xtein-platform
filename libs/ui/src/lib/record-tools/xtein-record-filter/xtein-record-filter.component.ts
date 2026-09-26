@@ -29,6 +29,7 @@ import DataSource
 
 import CustomStore
   from 'devextreme/data/custom_store';
+import type dxDataGrid from 'devextreme/ui/data_grid';
 
 import {
   lastValueFrom
@@ -94,8 +95,49 @@ export class XteinRecordFilterComponent
   readonly gridHeight = signal(200);
   readonly scrolling = { mode: 'standard', useNative: false, showScrollbar: 'always' } as const;
   private layoutObserver?: ResizeObserver;
+  private filterGrid?: dxDataGrid;
+  private popupShown = false;
+  private initialFocusPending = true;
+  private focusFrame?: number;
+
+  handleGridContentReady(event: { component: dxDataGrid }): void {
+    this.filterGrid = event.component;
+    this.scheduleInitialFocus();
+  }
+
+  private scheduleInitialFocus(): void {
+    if (!this.popupShown || !this.initialFocusPending || this.loading ||
+        !this.fields.length || !this.filterGrid || this.focusFrame !== undefined) return;
+
+    // Wait for Angular's cell templates and the popup animation to finish.
+    this.focusFrame = requestAnimationFrame(() => {
+      this.focusFrame = undefined;
+      if (!this.popupShown || !this.initialFocusPending || this.loading) return;
+      const grid = this.filterGrid;
+      const cell = grid?.getCellElement(0, 1) as HTMLElement | undefined;
+      const editor = cell?.querySelector<HTMLElement>(
+        'input:not([type="hidden"]):not([disabled]), [role="checkbox"][tabindex]'
+      );
+      if (!grid || !editor || !this.fields.length) return;
+
+      // Consume once per opening: subsequent renders must not steal focus.
+      this.initialFocusPending = false;
+      grid.option('focusedRowKey', this.fields[0].CAMPO);
+      grid.option('focusedColumnIndex', 1);
+      editor.focus({ preventScroll: true });
+    });
+  }
+
+  private clearInitialFocus(): void {
+    this.popupShown = false;
+    this.initialFocusPending = true;
+    if (this.focusFrame !== undefined) cancelAnimationFrame(this.focusFrame);
+    this.focusFrame = undefined;
+  }
 
   handleShown(): void {
+    this.popupShown = true;
+    this.scheduleInitialFocus();
     this.layoutObserver?.disconnect();
     const content = this.popup?.instance.content() as HTMLElement | undefined;
     if (!content) return;
@@ -118,11 +160,13 @@ export class XteinRecordFilterComponent
   }
 
   handleHidden(): void {
+    this.clearInitialFocus();
     this.layoutObserver?.disconnect();
     this.contentHeight.set(null);
   }
 
   ngOnDestroy(): void {
+    this.clearInitialFocus();
     this.layoutObserver?.disconnect();
     this.listSources.forEach(source => source.dispose());
   }
@@ -548,6 +592,8 @@ export class XteinRecordFilterComponent
 
 
   private loadFields(): void {
+    this.initialFocusPending = true;
+    this.filterGrid = undefined;
 
     if (
       !this.tableBase
