@@ -153,6 +153,7 @@
                 <div class="adm-015__field">
                   <xtein-label>Forzar cambio de Contraseña</xtein-label>
                   <xtein-switch
+                    ariaLabel="Forzar cambio de contraseña"
                     formControlName="CAMBIAR_CLAVE"
                     [readOnly]="readOnly()"
                   ></xtein-switch>
@@ -160,12 +161,14 @@
 
                 <div class="adm-015__field">
                   <xtein-label for="adm-015-expirar">Expiración de Contraseña</xtein-label>
-                  <xtein-select
+                  <xtein-radio-group
                     id="adm-015-expirar"
-                    [items]="$any(expirarOptions)"
+                    layout="horizontal"
+                    ariaLabel="Expiración de contraseña"
+                    [items]="expirarOptions"
                     formControlName="EXPIRARstr"
                     [readOnly]="readOnly()"
-                  ></xtein-select>
+                  ></xtein-radio-group>
                 </div>
 
                 @if (form.controls.EXPIRARstr.value === 'Expirar cada') {
@@ -193,15 +196,7 @@
                 }
               </div>
 
-              <div class="adm-015__passwords-action">
-                <xtein-button
-                  text="Cambiar Contraseña…"
-                  icon="key"
-                  variant="secondary"
-                  [disabled]="isNew()"
-                  (clicked)="openPasswordModal()"
-                ></xtein-button>
-              </div>
+
             </form>
           </div>
         }
