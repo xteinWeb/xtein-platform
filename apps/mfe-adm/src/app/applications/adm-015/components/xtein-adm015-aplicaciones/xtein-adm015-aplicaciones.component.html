@@ -1,148 +1,68 @@
 <div class="xtein-adm015-apps">
-  @if (!readOnly) {
-    <div class="xtein-adm015-apps__toolbar">
-      <div class="xtein-adm015-apps__actions-left">
-        <xtein-button
-          text="Copiar del Rol"
-          icon="copy"
-          variant="secondary"
-          width="auto"
-          ariaLabel="Copiar permisos predeterminados del Rol"
-          (clicked)="copyFromRole.emit()"
-        ></xtein-button>
-
-        <xtein-button
-          text="Asignar Todas"
-          icon="check"
-          variant="secondary"
-          width="auto"
-          ariaLabel="Asignar todas las aplicaciones activas"
-          (clicked)="assignAllApps()"
-        ></xtein-button>
-      </div>
-
-      <div class="xtein-adm015-apps__actions-right">
-        <span class="xtein-adm015-apps__batch-label">Marcar todos:</span>
-        <xtein-button text="+C" variant="secondary" width="44px" ariaLabel="Marcar Crear (C)" (clicked)="markAllColumn('CREAR', true)"></xtein-button>
-        <xtein-button text="+M" variant="secondary" width="44px" ariaLabel="Marcar Modificar (M)" (clicked)="markAllColumn('MODIFICAR', true)"></xtein-button>
-        <xtein-button text="+E" variant="secondary" width="44px" ariaLabel="Marcar Eliminar (E)" (clicked)="markAllColumn('ELIMINAR', true)"></xtein-button>
-        <xtein-button text="+B" variant="secondary" width="44px" ariaLabel="Marcar Buscar (B)" (clicked)="markAllColumn('BUSCAR', true)"></xtein-button>
-        <xtein-button text="+L" variant="secondary" width="44px" ariaLabel="Marcar Listar (L)" (clicked)="markAllColumn('LISTAR', true)"></xtein-button>
-      </div>
-    </div>
-  }
-
-  <div class="xtein-adm015-apps__grid-wrapper">
-    <dx-data-grid
-      #gridAutorizaciones
-      keyExpr="ITEM"
-      [dataSource]="autorizaciones"
-      [showBorders]="true"
-      [columnAutoWidth]="true"
-      [focusedRowEnabled]="true"
-      [hoverStateEnabled]="true"
-      [rowAlternationEnabled]="true"
-      [allowColumnResizing]="true"
-      columnResizingMode="nextColumn"
-      noDataText="No hay autorizaciones asignadas para este usuario"
-    >
-      <dxo-filter-row [visible]="true"></dxo-filter-row>
-      <dxo-paging [pageSize]="15"></dxo-paging>
-      <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 30, 50]" [showInfo]="true"></dxo-pager>
-
-      <!-- Grupo: Aplicación -->
-      <dxi-column caption="Aplicación" alignment="center">
-        <dxi-column
-          dataField="ID_APLICACION"
-          caption="Código"
-          [width]="120"
-          [allowEditing]="false"
-        ></dxi-column>
-        <dxi-column
-          dataField="NOMBRE"
-          caption="Nombre de la Aplicación"
-          [minWidth]="200"
-          [allowEditing]="false"
-        ></dxi-column>
-      </dxi-column>
-
-      <!-- Grupo: Operaciones Básicas -->
-      <dxi-column caption="Operaciones Básicas" alignment="center">
-        <dxi-column
-          dataField="CREAR"
-          caption="Crear (C)"
-          dataType="boolean"
-          [width]="80"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-        <dxi-column
-          dataField="MODIFICAR"
-          caption="Modificar (M)"
-          dataType="boolean"
-          [width]="95"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-        <dxi-column
-          dataField="ELIMINAR"
-          caption="Eliminar (E)"
-          dataType="boolean"
-          [width]="90"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-        <dxi-column
-          dataField="BUSCAR"
-          caption="Buscar (B)"
-          dataType="boolean"
-          [width]="85"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-        <dxi-column
-          dataField="LISTAR"
-          caption="Listar (L)"
-          dataType="boolean"
-          [width]="80"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-        <dxi-column
-          dataField="EXCLUSIVA"
-          caption="Exclusiva"
-          dataType="boolean"
-          [width]="85"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-        <dxi-column
-          dataField="CONFIGURAR"
-          caption="Configurar"
-          dataType="boolean"
-          [width]="90"
-          alignment="center"
-          [allowEditing]="!readOnly"
-        ></dxi-column>
-      </dxi-column>
-
-      <!-- Grupo: Supervisor -->
-      <dxi-column caption="Permisos Supervisor" alignment="center">
-        <dxi-column dataField="S_ABRIR" caption="S.Abrir" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="S_CREAR" caption="S.Crear" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="S_MODIFICAR" caption="S.Modif" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="S_ELIMINAR" caption="S.Elim" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="S_APROBAR" caption="S.Aprob" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-      </dxi-column>
-
-      <!-- Grupo: Administrador -->
-      <dxi-column caption="Permisos Administrador" alignment="center">
-        <dxi-column dataField="A_ABRIR" caption="A.Abrir" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="A_CREAR" caption="A.Crear" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="A_MODIFICAR" caption="A.Modif" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="A_ELIMINAR" caption="A.Elim" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-        <dxi-column dataField="A_APROBAR" caption="A.Aprob" dataType="boolean" [width]="75" alignment="center" [allowEditing]="!readOnly"></dxi-column>
-      </dxi-column>
-    </dx-data-grid>
-  </div>
+  <xtein-data-grid #applicationsGrid class="xtein-adm015-apps__grid" [dataSource]="rows" keyExpr="ID_APLICACION"
+    [columns]="columns" height="auto" [searchEnabled]="false" [filterEnabled]="true"
+    [selectionMode]="readOnly ? 'none' : 'multiple'" [selectedRowKeys]="selected"
+    showCheckBoxesMode="always"
+    (selectionChanged)="selectionChanged($event.selectedRowKeys)" [disabled]="busy"
+    [toolbarVisible]="!readOnly" [toolbarActions]="toolbarActions" [toolbarTemplate]="listTrigger"
+    [groupTemplate]="permissionCell" [pageSize]="20" />
 </div>
+
+<ng-template #listTrigger>
+  @if (!readOnly) {
+    <xtein-drop-down-panel class="xtein-adm015-apps__list-trigger" placeholder="Lista de Aplicaciones"
+      [opened]="listOpened" (openedChange)="openList($event)" [disabled]="busy || !!draft"
+      [contentTemplate]="applicationList" />
+  }
+</ng-template>
+
+<ng-template #permissionCell let-cell>
+  @if (cell.column.name?.startsWith('mark-')) {
+    <xtein-checkbox [ariaLabel]="'Marcar todos: ' + cell.column.caption"
+      [checked]="columnChecked(fieldFromHeader(cell.column.name))"
+      [indeterminate]="columnMixed(fieldFromHeader(cell.column.name))" [disabled]="busy || rows.length === 0"
+      (checkedChange)="markAllColumn(fieldFromHeader(cell.column.name), $event)" />
+  } @else if (cell.column.dataField === 'ID_APLICACION') {
+    @if (draft && cell.data === draft) {
+      <xtein-lookup [items]="selectableApps" [columns]="lookupColumns" valueExpr="ID_APLICACION"
+        displayExpr="ID_APLICACION" placeholder="Aplicaci?n" ariaLabel="Aplicaci?n a agregar"
+        [ngModel]="draft.ID_APLICACION" (ngModelChange)="chooseApplication($event)" [disabled]="busy" />
+    } @else if (!readOnly) {
+      <button type="button" class="xtein-adm015-apps__application-code" [disabled]="busy || !!draft"
+        [attr.aria-label]="'Editar aplicación ' + cell.value" (click)="beginEdit(cell.data)">{{ cell.value }}</button>
+    } @else { {{ cell.value }} }
+  } @else {
+    <xtein-checkbox [ariaLabel]="cell.data.ID_APLICACION + ': ' + cell.column.dataField"
+      [checked]="!!cell.value" [readOnly]="readOnly" [disabled]="busy"
+      (checkedChange)="changePermission(cell.data, cell.column.dataField, $event)" />
+  }
+</ng-template>
+
+<ng-template #applicationList>
+  <div class="xtein-adm015-apps__list-grid">
+    <xtein-data-grid [dataSource]="choices" keyExpr="ID_APLICACION" [columns]="choiceColumns"
+      selectionMode="multiple" [selectedRowKeys]="choiceKeys" (selectionChanged)="choiceKeys = $event.selectedRowKeys"
+      showCheckBoxesMode="always"
+      [filterEnabled]="false" [searchWidth]="300" [pageSize]="10" [allowedPageSizes]="[5, 10, 20]"
+      [groupTemplate]="choiceCell" [disabled]="busy || readOnly" />
+  </div>
+  <div class="xtein-adm015-apps__list-actions">
+    <xtein-button text="Aceptar" [disabled]="!choiceKeys.length || busy || readOnly" (clicked)="acceptList()" />
+    <xtein-button text="Cancelar" variant="secondary" (clicked)="openList(false)" />
+  </div>
+</ng-template>
+
+<ng-template #choiceCell let-cell>
+  @if (!cell.data) {
+    <span class="xtein-adm015-apps__choice-header">
+      {{ cell.column.caption }}
+      <xtein-checkbox [ariaLabel]="'Marcar seleccionadas: ' + cell.column.dataField"
+        [checked]="choicesChecked(cell.column.dataField)" [disabled]="!choiceKeys.length || busy || readOnly"
+        (checkedChange)="markChoices(cell.column.dataField, $event)" />
+    </span>
+  } @else {
+    <xtein-checkbox [ariaLabel]="cell.data.ID_APLICACION + ': ' + cell.column.dataField"
+      [checked]="!!cell.value" [disabled]="busy || readOnly"
+      (checkedChange)="changeChoice(cell.data.ID_APLICACION, cell.column.dataField, $event)" />
+  }
+</ng-template>

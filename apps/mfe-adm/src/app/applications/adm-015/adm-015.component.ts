@@ -73,6 +73,7 @@ import {
 } from './models/adm-015.model';
 import { Adm015Service } from './services/adm-015.service';
 import { Adm015BusinessService } from './services/adm-015-business.service';
+import { Adm015AuthorizationDraft } from './models/adm-015-application-permissions.model';
 
 import { XteinAdm015AplicacionesComponent } from './components/xtein-adm015-aplicaciones/xtein-adm015-aplicaciones.component';
 import { XteinAdm015PermisosEspecialesComponent } from './components/xtein-adm015-permisos-especiales/xtein-adm015-permisos-especiales.component';
@@ -140,6 +141,8 @@ export class Adm015Component implements OnInit, OnDestroy {
 
   // Child data signals
   readonly autorizaciones = signal<Adm015AutorizacionRecord[]>([]);
+  readonly applicationDraft = signal<Adm015AuthorizationDraft | null>(null);
+  readonly applicationsBusy = signal(false);
   readonly permisosEspeciales = signal<Adm015PermisoEspecialRecord[]>([]);
   readonly unAsociadas = signal<Adm015UNAsociadaRecord[]>([]);
   readonly conexiones = signal<Adm015ConexionRecord[]>([]);
@@ -332,6 +335,7 @@ export class Adm015Component implements OnInit, OnDestroy {
   // ================= CRUD Operations =================
 
   private onNew(): void {
+    this.applicationDraft.set(null);
     this.mode.set(RecordToolbarMode.Editing);
     this.currentIndex.set(-1);
 
@@ -372,6 +376,7 @@ export class Adm015Component implements OnInit, OnDestroy {
     });
 
     if (result.isConfirmed) {
+      this.applicationDraft.set(null);
       this.mode.set(this.records().length > 0 ? RecordToolbarMode.Browsing : RecordToolbarMode.Initial);
       this.disableFormControls();
       this.workspace.setDirty(this.applicationId, false);
@@ -386,6 +391,10 @@ export class Adm015Component implements OnInit, OnDestroy {
   }
 
   private async onSave(): Promise<void> {
+    if (this.applicationDraft() || this.applicationsBusy()) {
+      this.notification.warning('Confirme o cancele la aplicación pendiente y espere a que termine la carga.');
+      return;
+    }
     this.form.markAllAsTouched();
     if (this.form.invalid) {
       this.notification.warning('Complete todos los campos obligatorios del formulario.');
@@ -512,6 +521,7 @@ export class Adm015Component implements OnInit, OnDestroy {
   }
 
   private loadRecordData(record: Adm015UsuarioRecord): void {
+    this.applicationDraft.set(null);
     this.form.patchValue({
       USUARIO: record.USUARIO,
       NOMBRE: record.NOMBRE,
@@ -592,6 +602,41 @@ export class Adm015Component implements OnInit, OnDestroy {
       this.availableConexiones.set(connData as { ID_CONEXION: string; NOMBRE?: string }[]);
     } catch {
       // Catalogs fallback
+    }
+  }
+
+  updateAuthorizations(rows: Adm015AutorizacionRecord[]): void {
+    if (this.readOnly()) return;
+    this.autorizaciones.set(rows);
+    this.workspace.setDirty(this.applicationId, true);
+  }
+
+  updateApplicationDraft(draft: Adm015AuthorizationDraft | null): void {
+    if (this.readOnly()) return;
+    this.applicationDraft.set(draft);
+    if (draft) this.workspace.setDirty(this.applicationId, true);
+  }
+
+  async refreshAuthorizations(): Promise<void> {
+    if (this.readOnly() || this.applicationsBusy()) return;
+    const usuario = this.form.controls.USUARIO.value;
+    const rol = this.form.controls.ID_ROL.value;
+    const mode = this.mode();
+    const result = await Swal.fire({
+      text: '¿Recargar las autorizaciones? Se descartarán los cambios de esta lista.',
+      icon: 'warning', showCancelButton: true, confirmButtonText: 'Recargar', cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed || this.readOnly() || this.applicationsBusy() || this.form.controls.USUARIO.value !== usuario) return;
+    this.applicationsBusy.set(true);
+    try {
+      const rows = await this.business.loadAutorizaciones(usuario, rol, this.isNew() ? 'new' : 'update');
+      if (this.readOnly() || this.mode() !== mode || this.form.controls.USUARIO.value !== usuario || this.form.controls.ID_ROL.value !== rol) return;
+      this.applicationDraft.set(null);
+      this.updateAuthorizations(rows);
+    } catch (error) {
+      this.notification.error(error instanceof Error ? error.message : 'No fue posible recargar las autorizaciones.');
+    } finally {
+      this.applicationsBusy.set(false);
     }
   }
 

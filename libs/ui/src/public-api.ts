@@ -55,3 +55,4 @@ export * from './lib/forms/xtein-perfil-tributario/xtein-perfil-tributario.compo
 export * from './lib/forms/xtein-tag-box/xtein-tag-box.component';
 export * from './lib/forms/xtein-switch/xtein-switch.component';
 export * from './lib/forms/xtein-radio-group/xtein-radio-group.component';
+export * from './lib/overlays/xtein-drop-down-panel/xtein-drop-down-panel.component';

@@ -208,8 +208,11 @@
               [autorizaciones]="autorizaciones()"
               [readOnly]="readOnly()"
               [availableApps]="availableApps()"
-              (autorizacionesChange)="autorizaciones.set($event)"
-              (copyFromRole)="copyPermissionsFromRole()"
+              [busy]="applicationsBusy()"
+              [draft]="applicationDraft()"
+              (draftChange)="updateApplicationDraft($event)"
+              (autorizacionesChange)="updateAuthorizations($event)"
+              (refresh)="refreshAuthorizations()"
             ></xtein-adm015-aplicaciones>
           </div>
         }
