@@ -31,7 +31,7 @@ export class Adm015ApplicationPermissionsState {
     { dataField: 'ID_APLICACION', caption: 'Aplicación', width: 105 },
     { dataField: 'NOMBRE', caption: 'Nombre', minWidth: 180 },
     { caption: 'Operaciones', alignment: 'center', columns: Adm015ListOperations.map(col => ({
-      name: `choice-${col.field}`, dataField: col.field, caption: col.caption, width: 44,
+      name: `choice-${col.field}`, dataField: col.field, caption: col.caption, width: 60,
       alignment: 'center', allowFiltering: false, allowSorting: false,
       headerCellTemplate: 'xteinGroup', cellTemplate: 'xteinGroup'
     })) }

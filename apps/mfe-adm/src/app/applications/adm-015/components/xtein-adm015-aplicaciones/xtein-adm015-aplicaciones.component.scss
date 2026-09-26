@@ -7,16 +7,12 @@
   &:focus-visible { outline: 1px solid #86b7fe; outline-offset: 2px; }
 }
 .xtein-adm015-apps__list-trigger { width: 300px; max-width: 60vw; }
-.xtein-adm015-apps__list-grid { flex: 1; min-height: 0; }
-.xtein-adm015-apps__list-actions { display: flex; justify-content: center; gap: 16px; padding-top: 10px; }
+.xtein-adm015-apps__list-grid { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.xtein-adm015-apps__list-actions { flex: 0 0 auto; display: flex; justify-content: center; gap: 16px; padding-top: 10px; }
 .xtein-adm015-apps__choice-header { display: flex; align-items: center; justify-content: center; gap: 4px; }
 :host ::ng-deep .xtein-adm015-apps__grid {
   .dx-datagrid-headers .dx-header-row > td { padding: 8px 5px; border-color: #dbe4ef; }
   .dx-datagrid-rowsview .dx-data-row > td { padding: 7px 9px; border-color: #f0f5fb; }
   .dx-datagrid-filter-row { background: #e9f2ff; }
   .dx-datagrid-filter-row .dx-texteditor { --xt-control-background: transparent; border-color: transparent !important; }
-  // Match Prefactura's item buttons, including size, SVGs and semantic colors.
-  .xtein-grid-btn { width: 32px; height: 32px; padding: 0; }
-  .xtein-grid-btn-icon { width: 17px; height: 17px; }
-  .xtein-grid-toolbar-actions { gap: .35rem; padding: .25rem .35rem; }
 }

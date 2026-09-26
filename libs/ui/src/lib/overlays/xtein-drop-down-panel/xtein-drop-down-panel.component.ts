@@ -10,13 +10,16 @@ import { DxDropDownBoxModule, DxTemplateModule } from 'devextreme-angular';
     <dx-drop-down-box [opened]="opened" (openedChange)="changeOpened($event)"
       [disabled]="disabled" [readOnly]="readOnly" [placeholder]="placeholder"
       [inputAttr]="{ 'aria-label': ariaLabel || placeholder }"
-      [dropDownOptions]="{ width: panelWidth, height: panelHeight, hideOnParentScroll: true }">
-      <div *dxTemplate="let data of 'content'" class="xtein-drop-down-panel__content">
-        <ng-container [ngTemplateOutlet]="contentTemplate" />
+      [dropDownOptions]="{ width: panelWidth, height: panelHeight, maxHeight: panelHeight, hideOnParentScroll: true }">
+      <div *dxTemplate="let data of 'content'">
+        <!-- DevExtreme forces its template root to display: flow-root. Keep flex layout inside it. -->
+        <div class="xtein-drop-down-panel__content">
+          <ng-container [ngTemplateOutlet]="contentTemplate" />
+        </div>
       </div>
     </dx-drop-down-box>`,
   styles: [`:host { display: block; min-width: 0; }
-    .xtein-drop-down-panel__content { height: 100%; min-height: 0; display: flex; flex-direction: column; }`]
+    .xtein-drop-down-panel__content { height: 100%; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }`]
 })
 export class XteinDropDownPanelComponent implements OnChanges {
   @Input() opened = false;
