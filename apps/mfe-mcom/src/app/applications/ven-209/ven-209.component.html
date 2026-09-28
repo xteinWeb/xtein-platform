@@ -379,10 +379,10 @@
             [telefonos]="telefonos()"
             [emails]="emails()"
             [contactoAdicional]="contactoAdicional()"
-            (direccionesChange)="direcciones.set($event)"
-            (telefonosChange)="telefonos.set($event)"
-            (emailsChange)="emails.set($event)"
-            (contactoAdicionalChange)="contactoAdicional.set($event)"
+            (direccionesChange)="direcciones.set($event); markPendingChanges()"
+            (telefonosChange)="telefonos.set($event); markPendingChanges()"
+            (emailsChange)="emails.set($event); markPendingChanges()"
+            (contactoAdicionalChange)="contactoAdicional.set($event); markPendingChanges()"
           ></xtein-ven209-ubicaciones>
         </div>
 
@@ -396,7 +396,7 @@
             [availableCondiciones]="availableCondiciones()"
             (cupoCreditoChange)="form.controls.CUPO_CREDITO.setValue($event)"
             (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event)"
-            (condicionesChange)="condiciones.set($event)"
+            (condicionesChange)="condiciones.set($event); markPendingChanges()"
           ></xtein-ven209-financieros>
         </div>
 

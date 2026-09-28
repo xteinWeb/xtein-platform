@@ -26,7 +26,7 @@ export class Adm015BusinessService {
     };
   }
 
-  decode<T>(response: unknown): T[] {
+  decode<T>(response: unknown, allowExistingUser = false): T[] {
     let data = response;
     for (let depth = 0; depth < 4; depth++) {
       if (typeof data === 'string') {
@@ -44,7 +44,8 @@ export class Adm015BusinessService {
       break;
     }
     const rows = Array.isArray(data) ? data : data == null ? [] : [data];
-    const error = rows.find(row => row && typeof row === 'object' && 'ErrMensaje' in row && (row as { ErrMensaje: unknown }).ErrMensaje);
+    const error = rows.find(row => row && typeof row === 'object' && 'ErrMensaje' in row && (row as { ErrMensaje: unknown }).ErrMensaje
+      && !(allowExistingUser && 'EXISTE' in row && row.EXISTE === true));
     if (error) {
       throw new Error(String((error as { ErrMensaje: unknown }).ErrMensaje));
     }
@@ -56,9 +57,13 @@ export class Adm015BusinessService {
     return this.decode<unknown>(await firstValueFrom(this.api.request(endpoint, action, data)));
   }
 
-  async queryUsers(filterCriteria: unknown = {}): Promise<Adm015UsuarioRecord[]> {
+  async queryUsers(filterCriteria: { CAMPO: string; EXPRESION: string; TABLA: string }[] = []): Promise<Adm015UsuarioRecord[]> {
     const prm = { USUARIOS: filterCriteria };
     return this.decode<Adm015UsuarioRecord>(await firstValueFrom(this.api.query('consulta', prm)));
+  }
+
+  async queryUser(username: string): Promise<Adm015UsuarioRecord[]> {
+    return this.queryUsers([{ CAMPO: 'USUARIO', EXPRESION: username, TABLA: Adm015Application.Table }]);
   }
 
   async loadAutorizaciones(usuario: string, rol: string, accion = 'r_refrescar'): Promise<Adm015AutorizacionRecord[]> {
@@ -86,8 +91,11 @@ export class Adm015BusinessService {
     return this.decode<Adm015SettingAplicacionRecord>(await firstValueFrom(this.api.query('settings_aplicacion', prm)));
   }
 
-  async saveUser(action: string, payload: Adm015SavePayload): Promise<void> {
-    await firstValueFrom(this.api.save(action, payload));
+  async saveUser(action: 'new' | 'update', payload: Adm015SavePayload): Promise<void> {
+    const result = this.decode<{ ErrMensaje?: string }>(await firstValueFrom(this.api.save(action, payload)));
+    if (!result.length || result[0]?.ErrMensaje !== '') {
+      throw new Error('El servidor no confirmó el guardado del usuario.');
+    }
   }
 
   async deleteUser(usuario: string): Promise<void> {
@@ -99,13 +107,10 @@ export class Adm015BusinessService {
   }
 
   async checkUserExists(username: string, action: string): Promise<boolean> {
-    try {
-      const res = this.decode<{ EXISTE?: boolean; ErrMensaje?: string }>(
-        await firstValueFrom(this.api.checkUserExists(username, action))
-      );
-      return Boolean(res[0]?.EXISTE);
-    } catch {
-      return false;
-    }
+    const res = this.decode<{ EXISTE?: boolean; ErrMensaje?: string }>(
+      await firstValueFrom(this.api.checkUserExists(username, action)), true
+    );
+    if (typeof res[0]?.EXISTE !== 'boolean') throw new Error('No fue posible validar la existencia del usuario.');
+    return res[0].EXISTE;
   }
 }

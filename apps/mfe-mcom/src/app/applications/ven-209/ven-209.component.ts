@@ -270,6 +270,10 @@ export class Ven209Component implements OnInit, OnDestroy {
     void this.loadCatalogs();
   }
 
+  markPendingChanges(): void {
+    if (!this.readOnly()) this.workspace.setDirty(this.applicationId, true);
+  }
+
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
     this.toolbar.removeApplication(this.applicationId);

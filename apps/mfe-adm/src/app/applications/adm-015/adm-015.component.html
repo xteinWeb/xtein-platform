@@ -223,7 +223,7 @@
             <xtein-adm015-permisos-especiales
               [permisosEspeciales]="permisosEspeciales()"
               [readOnly]="readOnly()"
-              (permisosEspecialesChange)="permisosEspeciales.set($event)"
+              (permisosEspecialesChange)="permisosEspeciales.set($event); markPendingChanges()"
             ></xtein-adm015-permisos-especiales>
           </div>
         }
@@ -235,7 +235,7 @@
               [unAsociadas]="unAsociadas()"
               [readOnly]="readOnly()"
               [availableUNs]="availableUNs()"
-              (unAsociadasChange)="unAsociadas.set($event)"
+              (unAsociadasChange)="unAsociadas.set($event); markPendingChanges()"
             ></xtein-adm015-un-asociadas>
           </div>
         }
@@ -247,7 +247,7 @@
               [conexiones]="conexiones()"
               [readOnly]="readOnly()"
               [availableConexiones]="availableConexiones()"
-              (conexionesChange)="conexiones.set($event)"
+              (conexionesChange)="conexiones.set($event); markPendingChanges()"
             ></xtein-adm015-conexiones>
           </div>
         }
@@ -258,7 +258,7 @@
             <xtein-adm015-configuraciones
               [settings]="settings()"
               [readOnly]="readOnly()"
-              (settingsChange)="settings.set($event)"
+              (settingsChange)="settings.set($event); markPendingChanges()"
             ></xtein-adm015-configuraciones>
           </div>
         }

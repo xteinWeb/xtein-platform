@@ -352,7 +352,7 @@ export class Adm015Component implements OnInit, OnDestroy {
     this.settings.set([]);
 
     this.activeTab.set('contrasenas');
-    this.workspace.setDirty(this.applicationId, true);
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   private onEdit(): void {
@@ -360,8 +360,8 @@ export class Adm015Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Editing);
     this.enableFormControls();
     // Username cannot be edited once created
-    this.form.controls.USUARIO.disable();
-    this.workspace.setDirty(this.applicationId, true);
+    this.form.controls.USUARIO.disable({ emitEvent: false });
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   private async onUndo(): Promise<void> {
@@ -391,6 +391,7 @@ export class Adm015Component implements OnInit, OnDestroy {
   }
 
   private async onSave(): Promise<void> {
+    if (this.loading() || this.readOnly()) return;
     if (this.applicationDraft() || this.applicationsBusy()) {
       this.notification.warning('Confirme o cancele la aplicación pendiente y espere a que termine la carga.');
       return;
@@ -408,15 +409,6 @@ export class Adm015Component implements OnInit, OnDestroy {
     if (val.EXPIRARstr === 'Expirar cada' && (!val.TIEMPO_INTERVALO || val.TIEMPO_INTERVALO <= 0)) {
       this.notification.warning('Debe especificar un tiempo de intervalo mayor a 0 para la expiración.');
       return;
-    }
-
-    // Check unique username for new records
-    if (isNewRecord) {
-      const exists = await this.business.checkUserExists(val.USUARIO, 'new');
-      if (exists) {
-        this.notification.error(`El usuario "${val.USUARIO}" ya existe en el sistema.`);
-        return;
-      }
     }
 
     const usuarioRecord: Adm015UsuarioRecord = {
@@ -441,22 +433,42 @@ export class Adm015Component implements OnInit, OnDestroy {
       SETTINGS: this.settings()
     };
 
+    this.loading.set(true);
     try {
+      if (isNewRecord && await this.business.checkUserExists(usuarioRecord.USUARIO, 'new')) {
+        this.notification.error(`El usuario "${usuarioRecord.USUARIO}" ya existe en el sistema.`);
+        return;
+      }
       await this.business.saveUser(isNewRecord ? 'new' : 'update', payload);
+      // Keep the confirmed record locally even if the subsequent reload fails.
+      const savedRecord = { ...this.currentRecord(), ...usuarioRecord };
+      if (isNewRecord) {
+        this.records.set([savedRecord]);
+        this.currentIndex.set(0);
+      } else {
+        this.records.update(rows => rows.map((row, index) => index === this.currentIndex() ? savedRecord : row));
+      }
       this.notification.success('Usuario guardado exitosamente.');
       this.workspace.setDirty(this.applicationId, false);
       this.mode.set(RecordToolbarMode.Browsing);
       this.disableFormControls();
 
-      // Refresh records to navigate to saved user
-      const users = await this.business.queryUsers(`USUARIO='${usuarioRecord.USUARIO}'`);
-      if (users.length > 0) {
+      try {
+        const users = await this.business.queryUser(usuarioRecord.USUARIO);
+        const index = users.findIndex(row => row.USUARIO === usuarioRecord.USUARIO);
+        if (index < 0) throw new Error('El usuario no aparece en la consulta posterior.');
         this.records.set(users);
-        this.navigate(0);
+        this.navigate(index);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error de consulta.';
+        this.notification.warning(`El servidor confirmó el guardado, pero no fue posible recargar el usuario. ${message}`);
       }
     } catch (err: unknown) {
+      this.workspace.setDirty(this.applicationId, true);
       const msg = err instanceof Error ? err.message : 'Error al guardar el usuario.';
       this.notification.error(msg);
+    } finally {
+      this.loading.set(false);
     }
   }
 
@@ -609,6 +621,10 @@ export class Adm015Component implements OnInit, OnDestroy {
     if (this.readOnly()) return;
     this.autorizaciones.set(rows);
     this.workspace.setDirty(this.applicationId, true);
+  }
+
+  markPendingChanges(): void {
+    if (!this.readOnly()) this.workspace.setDirty(this.applicationId, true);
   }
 
   updateApplicationDraft(draft: Adm015AuthorizationDraft | null): void {

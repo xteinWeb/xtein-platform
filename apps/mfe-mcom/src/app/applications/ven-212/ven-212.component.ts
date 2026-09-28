@@ -509,7 +509,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     });
 
     this.enableFormControls(true);
-    this.workspace.setDirty(this.applicationId, true);
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   editRecord(): void {
@@ -522,7 +522,7 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     this.mode.set(RecordToolbarMode.Editing);
     this.enableFormControls(false);
-    this.workspace.setDirty(this.applicationId, true);
+    this.workspace.setDirty(this.applicationId, false);
   }
 
   async cancelEdit(): Promise<void> {
@@ -815,6 +815,7 @@ export class Ven212Component implements OnInit, OnDestroy {
       this.taxes.set(tax?.ENCAB ?? []);
       this.taxItems.set(tax?.ITEMS ?? []);
       this.recalculate();
+      if (!this.readOnly()) this.workspace.setDirty(this.applicationId, true);
     } finally {
       this.busy.set(false);
     }

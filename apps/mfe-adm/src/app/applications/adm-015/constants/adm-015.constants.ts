@@ -17,8 +17,8 @@ export type Adm015Application = typeof Adm015Application[keyof typeof Adm015Appl
  */
 export const Adm015Endpoint = {
   Query: `/${Adm015Application.BackendId}/consulta`,
-  Save: `/${Adm015Application.BackendId}/save`,
-  Create: `/${Adm015Application.BackendId}/create`,
+  Save: `/${Adm015Application.BackendId}/new`,
+  Create: `/${Adm015Application.BackendId}/new`,
   Update: `/${Adm015Application.BackendId}/update`,
   Delete: `/${Adm015Application.BackendId}/delete`,
   ChangePassword: `/${Adm015Application.BackendId}/generatePassword`,

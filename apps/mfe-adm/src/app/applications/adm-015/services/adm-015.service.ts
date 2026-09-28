@@ -43,9 +43,9 @@ export class Adm015Service {
     });
   }
 
-  save(action: string, data: unknown): Observable<XteinDataApiResponse<string>> {
+  save(action: 'new' | 'update', data: unknown): Observable<XteinDataApiResponse<string>> {
     return this.apiClient.execute<XteinDataApiResponse<string>>({
-      endpoint: Adm015Endpoint.Save,
+      endpoint: action === 'new' ? Adm015Endpoint.Create : Adm015Endpoint.Update,
       action,
       data,
       logContext: this.log.Save,
