@@ -1,1 +1,39 @@
-:host { display: inline-block; max-width: 100%; vertical-align: middle; }
+:host {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+
+  ::ng-deep {
+    .dx-checkbox-icon {
+      width: 16px !important;
+      height: 16px !important;
+      border: 1px solid #b4bfcc !important;
+      border-radius: 4px !important;
+      background-color: #ffffff;
+      box-shadow: none !important;
+      transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .dx-checkbox-checked .dx-checkbox-icon,
+    .dx-checkbox-indeterminate .dx-checkbox-icon {
+      background-color: #2b6cb0 !important;
+      border-color: #2b6cb0 !important;
+      color: #ffffff !important;
+    }
+
+    .dx-checkbox.dx-state-hover:not(.dx-state-disabled) .dx-checkbox-icon {
+      border-color: #7b94ad !important;
+    }
+
+    .dx-checkbox.dx-state-focused:not(.dx-state-disabled) .dx-checkbox-icon {
+      border-color: #2b6cb0 !important;
+      box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2) !important;
+    }
+
+    .dx-checkbox.dx-state-disabled .dx-checkbox-icon {
+      opacity: 0.6 !important;
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+}

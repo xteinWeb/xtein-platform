@@ -1,71 +1,107 @@
 <div class="xtein-adm015-conn">
-  @if (!readOnly) {
-    <div class="xtein-adm015-conn__toolbar">
-      <xtein-button
-        text="Asociar Conexión"
-        icon="add"
-        variant="secondary"
-        width="auto"
-        (clicked)="onAddConexion()"
-      ></xtein-button>
-    </div>
-  }
-
-  <dx-data-grid
-    #gridConexiones
-    keyExpr="ITEM"
-    [dataSource]="conexiones"
-    [showBorders]="true"
-    [columnAutoWidth]="true"
-    [focusedRowEnabled]="true"
-    [hoverStateEnabled]="true"
-    [rowAlternationEnabled]="true"
-    [allowColumnResizing]="true"
-    columnResizingMode="nextColumn"
-    noDataText="No hay conexiones configuradas para este usuario"
-  >
-    <dxo-paging [pageSize]="10"></dxo-paging>
-
-    <dxi-column
-      dataField="ID_CONEXION"
-      caption="Conexión / Empresa"
-      [minWidth]="200"
-      [allowEditing]="false"
-    ></dxi-column>
-
-    <dxi-column
-      dataField="ULTIMA"
-      caption="Defecto"
-      dataType="boolean"
-      [width]="120"
-      alignment="center"
-      [allowEditing]="!readOnly"
-    ></dxi-column>
-
-    <dxi-column
-      dataField="ULTIMA_UN"
-      caption="Última UN Utilizada"
-      [width]="180"
-      [allowEditing]="false"
-    ></dxi-column>
-
-    @if (!readOnly) {
-      <dxi-column
-        caption="Acciones"
-        [width]="90"
-        alignment="center"
-        cellTemplate="actionsTemplate"
-      >
-        <div *dxTemplate="let row of 'actionsTemplate'">
-          <xtein-button
-            icon="trash"
-            variant="danger"
-            width="32px"
-            ariaLabel="Quitar conexión"
-            (clicked)="onRemoveConexion(row.data)"
-          ></xtein-button>
-        </div>
-      </dxi-column>
-    }
-  </dx-data-grid>
+  <xtein-data-grid
+    #connGrid
+    class="xtein-adm015-conn__grid"
+    [dataSource]="rows"
+    keyExpr="ID_CONEXION"
+    [columns]="columns"
+    height="auto"
+    [searchEnabled]="false"
+    [filterEnabled]="false"
+    [selectionMode]="readOnly ? 'none' : 'multiple'"
+    [selectedRowKeys]="selected"
+    showCheckBoxesMode="always"
+    (selectionChanged)="onSelectionChanged($event.selectedRowKeys)"
+    [disabled]="busy"
+    [toolbarVisible]="!readOnly"
+    [toolbarActions]="toolbarActions"
+    [toolbarTemplate]="listTrigger"
+    [groupTemplate]="connCell"
+    [pageSize]="20"
+  />
 </div>
+
+<ng-template #listTrigger>
+  @if (!readOnly) {
+    <xtein-drop-down-panel
+      class="xtein-adm015-conn__list-trigger"
+      placeholder="Lista de Conexiones"
+      [opened]="listOpened"
+      (openedChange)="openList($event)"
+      [disabled]="busy || !!draft"
+      [contentTemplate]="connList"
+    />
+  }
+</ng-template>
+
+<ng-template #connCell let-cell>
+  @if (cell.column.dataField === 'ULTIMA') {
+    <div class="xtein-adm015-conn__switch-cell">
+      <dx-switch
+        [value]="!!cell.value"
+        [disabled]="readOnly || busy"
+        (onValueChanged)="onToggleDefault(cell.data, $event.value)"
+      ></dx-switch>
+    </div>
+  } @else if (cell.column.dataField === 'ID_CONEXION') {
+    @if (draft && cell.data === draft) {
+      <xtein-lookup
+        [items]="selectableConexiones"
+        [columns]="lookupColumns"
+        valueExpr="ID_CONEXION"
+        displayExpr="ID_CONEXION"
+        placeholder="Conexión"
+        ariaLabel="Conexión a asociar"
+        dropDownWidth="300px"
+        [autoFocus]="!draft.originalConexionId"
+        [ngModel]="draft.ID_CONEXION === '__draft__' ? null : draft.ID_CONEXION"
+        (ngModelChange)="chooseConexion($event)"
+        [disabled]="busy"
+      />
+    } @else if (!readOnly) {
+      <button
+        type="button"
+        class="xtein-adm015-conn__code-btn"
+        [disabled]="busy || !!draft"
+        [attr.aria-label]="'Editar conexión ' + cell.value"
+        (click)="beginEdit(cell.data)"
+      >
+        {{ cell.value }}
+      </button>
+    } @else {
+      {{ cell.value }}
+    }
+  }
+</ng-template>
+
+<ng-template #connList>
+  <div class="xtein-adm015-conn__list-grid">
+    <xtein-data-grid
+      [dataSource]="choices"
+      keyExpr="ID_CONEXION"
+      [columns]="choiceColumns"
+      selectionMode="multiple"
+      [selectedRowKeys]="choiceKeys"
+      (selectionChanged)="choiceKeys = $event.selectedRowKeys"
+      showCheckBoxesMode="always"
+      [searchEnabled]="true"
+      [filterEnabled]="false"
+      [searchWidth]="300"
+      [pageSize]="10"
+      [allowedPageSizes]="[5, 10, 20]"
+      [disabled]="busy || readOnly"
+    />
+  </div>
+  <div class="xtein-adm015-conn__list-actions">
+    <xtein-button
+      text="Aceptar"
+      [disabled]="!choiceKeys.length || busy || readOnly"
+      (clicked)="acceptList()"
+    />
+    <xtein-button
+      text="Cancelar"
+      variant="secondary"
+      (clicked)="openList(false)"
+    />
+  </div>
+</ng-template>

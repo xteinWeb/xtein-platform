@@ -248,6 +248,7 @@
               [conexiones]="conexiones()"
               [readOnly]="readOnly()"
               [availableConexiones]="availableConexiones()"
+              [busy]="loading()"
               (conexionesChange)="conexiones.set($event); markPendingChanges()"
             ></xtein-adm015-conexiones>
           </div>
