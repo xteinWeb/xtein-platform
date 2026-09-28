@@ -2,40 +2,61 @@
   <dx-data-grid
     #gridSettings
     keyExpr="ITEM"
-    [dataSource]="settings"
-    [showBorders]="true"
+    [dataSource]="dataSource"
+    [showBorders]="false"
+    [showRowLines]="false"
+    [showColumnLines]="false"
     [columnAutoWidth]="true"
     [focusedRowEnabled]="true"
     [hoverStateEnabled]="true"
-    [rowAlternationEnabled]="true"
+    [rowAlternationEnabled]="false"
     [allowColumnResizing]="true"
-    columnResizingMode="nextColumn"
-    noDataText="No hay configuraciones avanzadas registradas"
+    columnResizingMode="widget"
+    noDataText=""
   >
-    <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
+    <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
     <dxo-group-panel [visible]="false"></dxo-group-panel>
-    <dxo-paging [pageSize]="15"></dxo-paging>
+    <dxo-paging [pageSize]="100"></dxo-paging>
+
+    <dxi-column dataField="ITEM" [visible]="false"></dxi-column>
 
     <dxi-column
       dataField="ID_APLICACION"
       caption="Aplicación"
       [groupIndex]="0"
+      groupCellTemplate="nameAplicaciones"
     ></dxi-column>
 
     <dxi-column
       dataField="DESCRIPCION"
-      caption="Parámetro / Ajuste"
+      caption="DESCRIPCION"
       [minWidth]="300"
-      [allowEditing]="false"
     ></dxi-column>
 
     <dxi-column
       dataField="ASIGNAR"
-      caption="Habilitar"
-      dataType="boolean"
-      [width]="120"
+      caption="Autorizar"
+      [width]="140"
       alignment="center"
-      [allowEditing]="!readOnly"
+      cellTemplate="checkTemplate"
     ></dxi-column>
+
+    <div *dxTemplate="let grupoObj of 'nameAplicaciones'">
+      <div class="xtein-adm015-cfg__group-cell">
+        <span class="xtein-adm015-cfg__group-label">APLICACIÓN:</span>
+        <span class="xtein-adm015-cfg__group-text">{{ getGroupTitle(grupoObj) }}</span>
+      </div>
+    </div>
+
+    <div *dxTemplate="let cell of 'checkTemplate'">
+      <div class="xtein-adm015-cfg__check-cell">
+        <dx-check-box
+          [value]="!!cell.value"
+          [disabled]="readOnly"
+          [readOnly]="readOnly"
+          (onValueChanged)="onToggleAssign(cell.data, $event.value)"
+        ></dx-check-box>
+      </div>
+    </div>
   </dx-data-grid>
 </div>

@@ -86,8 +86,8 @@ export class Adm015BusinessService {
     return this.decode<Adm015ConexionRecord>(await firstValueFrom(this.api.query('CONEXIONES', prm)));
   }
 
-  async loadSettings(usuario: string): Promise<Adm015SettingAplicacionRecord[]> {
-    const prm = { USUARIO: usuario };
+  async loadSettings(usuario?: string): Promise<Adm015SettingAplicacionRecord[]> {
+    const prm = usuario ? { USUARIO: usuario } : {};
     return this.decode<Adm015SettingAplicacionRecord>(await firstValueFrom(this.api.query('settings_aplicacion', prm)));
   }
 

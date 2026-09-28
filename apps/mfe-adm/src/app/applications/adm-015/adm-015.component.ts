@@ -151,6 +151,7 @@ export class Adm015Component implements OnInit, OnDestroy {
   // Token para evitar condiciones de carrera en cargas asíncronas
   private currentChildLoadToken = 0;
   private specialTransactionsTemplate: Adm015PermisoEspecialRecord[] = [];
+  private settingsTemplate: Adm015SettingAplicacionRecord[] = [];
 
   // Catalogs
   readonly roles = signal<{ ID_ROL: string; DESCRIPCION: string }[]>([]);
@@ -365,6 +366,16 @@ export class Adm015Component implements OnInit, OnDestroy {
       })));
     } else {
       void this.loadDefaultSpecialPermissions();
+    }
+
+    if (this.settingsTemplate.length > 0) {
+      this.settings.set(this.settingsTemplate.map(s => ({
+        ...s,
+        ASIGNAR: false,
+        isEdit: true
+      })));
+    } else {
+      void this.loadDefaultSettings();
     }
 
     this.activeTab.set('contrasenas');
@@ -609,7 +620,30 @@ export class Adm015Component implements OnInit, OnDestroy {
       }
       this.unAsociadas.set(unRes.status === 'fulfilled' ? unRes.value : []);
       this.conexiones.set(connRes.status === 'fulfilled' ? connRes.value : []);
-      this.settings.set(settRes.status === 'fulfilled' ? settRes.value : []);
+      const settData = settRes.status === 'fulfilled' ? settRes.value : [];
+      const validUserSett = (settData || []).filter(s => s && s.ID_APLICACION);
+
+      if (this.settingsTemplate.length > 0) {
+        const merged = this.settingsTemplate.map((tmpl, idx) => {
+          const match = validUserSett.find(
+            u => u.ID_APLICACION === tmpl.ID_APLICACION && u.DESCRIPCION === tmpl.DESCRIPCION
+          );
+          return {
+            ...tmpl,
+            ITEM: tmpl.ITEM ?? (idx + 1),
+            ASIGNAR: match ? Boolean(match.ASIGNAR) : false
+          };
+        });
+        this.settings.set(merged);
+      } else if (validUserSett.length > 0) {
+        this.settings.set(validUserSett.map((s, idx) => ({
+          ...s,
+          ITEM: s.ITEM ?? (idx + 1),
+          ASIGNAR: Boolean(s.ASIGNAR)
+        })));
+      } else {
+        this.settings.set([]);
+      }
     } finally {
       if (token === this.currentChildLoadToken) {
         this.applicationsBusy.set(false);
@@ -664,6 +698,7 @@ export class Adm015Component implements OnInit, OnDestroy {
     }
 
     void this.loadDefaultSpecialPermissions();
+    void this.loadDefaultSettings();
   }
 
   private async loadDefaultSpecialPermissions(): Promise<void> {
@@ -681,6 +716,41 @@ export class Adm015Component implements OnInit, OnDestroy {
       }
     } catch {
       // Ignorar si el backend no admite usuario vacío inicialmente
+    }
+  }
+
+  private async loadDefaultSettings(): Promise<void> {
+    try {
+      const settData = await this.business.loadSettings('');
+      const valid = (settData || []).filter(s => s && s.ID_APLICACION);
+      if (valid.length > 0) {
+        this.settingsTemplate = valid.map((s, index) => ({
+          ...s,
+          ITEM: s.ITEM ?? (index + 1),
+          ASIGNAR: false
+        }));
+
+        if (this.isNew() && this.settings().length === 0) {
+          this.settings.set(this.settingsTemplate.map(s => ({ ...s, isEdit: true })));
+        } else if (this.settings().length === 0 && this.currentRecord()) {
+          const current = this.currentRecord()!;
+          const userSett = await this.business.loadSettings(current.USUARIO);
+          const validUserSett = (userSett || []).filter(u => u && u.ID_APLICACION);
+          const merged = this.settingsTemplate.map((tmpl, idx) => {
+            const match = validUserSett.find(
+              u => u.ID_APLICACION === tmpl.ID_APLICACION && u.DESCRIPCION === tmpl.DESCRIPCION
+            );
+            return {
+              ...tmpl,
+              ITEM: tmpl.ITEM ?? (idx + 1),
+              ASIGNAR: match ? Boolean(match.ASIGNAR) : false
+            };
+          });
+          this.settings.set(merged);
+        }
+      }
+    } catch {
+      // Ignorar si el backend falla al consultar sin usuario
     }
   }
 
