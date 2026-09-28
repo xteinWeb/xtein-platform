@@ -334,8 +334,12 @@ export class Adm015Component implements OnInit, OnDestroy {
 
   // ================= CRUD Operations =================
 
+  private indexBeforeNew = -1;
+
   private onNew(): void {
+    if (this.loading() || !this.readOnly()) return;
     this.applicationDraft.set(null);
+    this.indexBeforeNew = this.currentIndex();
     this.mode.set(RecordToolbarMode.Editing);
     this.currentIndex.set(-1);
 
@@ -376,16 +380,24 @@ export class Adm015Component implements OnInit, OnDestroy {
     });
 
     if (result.isConfirmed) {
+      const previousIndex = this.isNew() ? this.indexBeforeNew : this.currentIndex();
+      const idx = this.records().length ? Math.min(Math.max(previousIndex, 0), this.records().length - 1) : -1;
+      this.currentIndex.set(idx);
+      this.indexBeforeNew = -1;
       this.applicationDraft.set(null);
       this.mode.set(this.records().length > 0 ? RecordToolbarMode.Browsing : RecordToolbarMode.Initial);
       this.disableFormControls();
       this.workspace.setDirty(this.applicationId, false);
 
-      const idx = this.currentIndex();
       if (idx >= 0 && idx < this.records().length) {
         this.loadRecordData(this.records()[idx]);
       } else {
-        this.form.reset({ ...Adm015DefaultRecord });
+        this.form.reset({ ...Adm015DefaultRecord }, { emitEvent: false });
+        this.autorizaciones.set([]);
+        this.permisosEspeciales.set([]);
+        this.unAsociadas.set([]);
+        this.conexiones.set([]);
+        this.settings.set([]);
       }
     }
   }

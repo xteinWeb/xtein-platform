@@ -490,8 +490,11 @@ export class Ven212Component implements OnInit, OnDestroy {
 
   // ================= CRUD Operations =================
 
+  private indexBeforeNew = -1;
+
   newRecord(): void {
     if (this.busy() || !this.readOnly() || !this.permissions().create) return;
+    this.indexBeforeNew = this.currentIndex();
     this.mode.set(RecordToolbarMode.Editing);
     this.currentIndex.set(-1);
 
@@ -537,11 +540,16 @@ export class Ven212Component implements OnInit, OnDestroy {
     });
 
     if (result.isConfirmed) {
+      const previousIndex = this.isNew() ? this.indexBeforeNew : this.currentIndex();
+      const idx = this.records().length ? Math.min(Math.max(previousIndex, 0), this.records().length - 1) : -1;
+      this.currentIndex.set(idx);
+      this.indexBeforeNew = -1;
       this.mode.set(this.records().length > 0 ? RecordToolbarMode.Browsing : RecordToolbarMode.Initial);
       this.disableFormControls();
+      this.itemPending.set(false);
+      this.taxItems.set([]);
       this.workspace.setDirty(this.applicationId, false);
 
-      const idx = this.currentIndex();
       if (idx >= 0 && idx < this.records().length) {
         this.selectRecordIndex(idx);
       } else {
@@ -682,9 +690,10 @@ export class Ven212Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
 
-    this.form.patchValue(
+    this.form.reset(
       {
-        ...record,
+        ...Ven212DefaultRecord,
+      ...record,
         FECHA: record.FECHA ? String(record.FECHA).slice(0, 10) : null,
         FECHA_REGISTRO: record.FECHA_REGISTRO ? String(record.FECHA_REGISTRO).slice(0, 10) : null,
         FECHA_OC: record.FECHA_OC ? String(record.FECHA_OC).slice(0, 10) : null,
