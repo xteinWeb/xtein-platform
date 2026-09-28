@@ -1,3 +1,101 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .xtein-adm015-permisos {
   width: 100%;
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+
+  ::ng-deep {
+    // Encabezado con color de fondo Legacy y texto azul
+    .dx-datagrid-headers {
+      background-color: #eef2f6 !important;
+      border: none !important;
+      border-radius: 6px 6px 0 0;
+      color: rgba(10, 57, 96, 0.95);
+
+      .dx-datagrid-table .dx-row > td {
+        background-color: #eef2f6 !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(98, 112, 144, 0.08) !important;
+        color: rgba(10, 57, 96, 0.95) !important;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+    }
+
+    // Filas sin líneas, sin colores de alternancia, fondo blanco
+    .dx-datagrid-rowsview {
+      border: none !important;
+
+      .dx-datagrid-table {
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      .dx-row {
+        background-color: #ffffff !important;
+        border: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+
+        > td {
+          border: none !important;
+          border-top: none !important;
+          border-bottom: none !important;
+          padding: 8px 12px;
+          font-size: 13px;
+          color: #333333;
+        }
+
+        // Hover suave
+        &.dx-state-hover:not(.dx-selection) {
+          background-color: #f2f7fc !important;
+          > td {
+            background-color: #f2f7fc !important;
+          }
+        }
+
+        // Fila seleccionada o enfocada (como en la captura de Legacy: fondo azul claro)
+        &.dx-selection,
+        &.dx-row-focused {
+          background-color: #dbebfb !important;
+          > td {
+            background-color: #dbebfb !important;
+          }
+        }
+      }
+    }
+
+    // Checkboxes con borde suave, tamaño 16x16 y radio de 4px idéntico a Legacy
+    .dx-checkbox-icon {
+      width: 16px !important;
+      height: 16px !important;
+      border: 1px solid #b4bfcc !important;
+      border-radius: 4px !important;
+      background-color: #ffffff;
+      box-shadow: none !important;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .dx-checkbox-checked .dx-checkbox-icon {
+      background-color: #2b6cb0 !important;
+      border-color: #2b6cb0 !important;
+      color: #ffffff;
+    }
+
+    .dx-checkbox.dx-state-hover .dx-checkbox-icon {
+      border-color: #7b94ad !important;
+    }
+
+    // Paginador limpio
+    .dx-datagrid-pager {
+      border-top: 1px solid #eef2f6;
+      padding-top: 10px;
+    }
+  }
 }

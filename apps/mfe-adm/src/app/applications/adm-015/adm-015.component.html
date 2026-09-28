@@ -235,6 +235,7 @@
               [unAsociadas]="unAsociadas()"
               [readOnly]="readOnly()"
               [availableUNs]="availableUNs()"
+              [busy]="loading()"
               (unAsociadasChange)="unAsociadas.set($event); markPendingChanges()"
             ></xtein-adm015-un-asociadas>
           </div>

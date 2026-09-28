@@ -1,51 +1,63 @@
 <div class="xtein-adm015-permisos">
   <dx-data-grid
     #gridPermisosEspeciales
-    keyExpr="ITEM"
+    keyExpr="TRANSACCION"
     [dataSource]="permisosEspeciales"
-    [showBorders]="true"
-    [columnAutoWidth]="true"
+    [showBorders]="false"
+    [showRowLines]="false"
+    [showColumnLines]="false"
+    [rowAlternationEnabled]="false"
     [focusedRowEnabled]="true"
     [hoverStateEnabled]="true"
-    [rowAlternationEnabled]="true"
     [allowColumnResizing]="true"
     columnResizingMode="nextColumn"
-    noDataText="No hay permisos especiales configurados para este usuario"
+    noDataText=""
   >
-    <dxo-filter-row [visible]="true"></dxo-filter-row>
-    <dxo-paging [pageSize]="15"></dxo-paging>
-    <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 30, 50]" [showInfo]="true"></dxo-pager>
+    <dxo-paging [pageSize]="20"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 20, 30, 50]" [showInfo]="true"></dxo-pager>
 
     <dxi-column
       dataField="TRANSACCION"
-      caption="Código Transacción"
-      [width]="180"
-      [allowEditing]="false"
-    ></dxi-column>
-
-    <dxi-column
-      dataField="NOMBRE"
-      caption="Descripción de la Transacción"
-      [minWidth]="260"
+      caption="Nombre Transacción"
       [allowEditing]="false"
     ></dxi-column>
 
     <dxi-column
       dataField="PERMISO"
-      caption="Permiso"
-      dataType="boolean"
+      caption="Permisos"
       [width]="120"
       alignment="center"
-      [allowEditing]="!readOnly"
+      cellTemplate="permisoCell"
     ></dxi-column>
 
     <dxi-column
       dataField="APROBACION"
-      caption="Aprobación"
-      dataType="boolean"
-      [width]="120"
+      caption="Apro. Permisos"
+      [width]="130"
       alignment="center"
-      [allowEditing]="!readOnly"
+      cellTemplate="aprobacionCell"
     ></dxi-column>
+
+    <dxi-column
+      dataField="NOMBRE"
+      caption="Descripción de la Transacción"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <div *dxTemplate="let cell of 'permisoCell'">
+      <dx-check-box
+        [value]="!!cell.value"
+        [readOnly]="readOnly"
+        (onValueChanged)="onPermisoChanged(cell.data, $event.value)"
+      ></dx-check-box>
+    </div>
+
+    <div *dxTemplate="let cell of 'aprobacionCell'">
+      <dx-check-box
+        [value]="!!cell.value"
+        [readOnly]="readOnly"
+        (onValueChanged)="onAprobacionChanged(cell.data, $event.value)"
+      ></dx-check-box>
+    </div>
   </dx-data-grid>
 </div>

@@ -1,47 +1,131 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .xtein-adm015-un {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  width: 100%;
+  min-width: 0;
 
-  &__toolbar {
+  &__grid {
+    width: 100%;
+  }
+
+  &__code-btn {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &:focus-visible {
+      outline: 1px solid #86b7fe;
+      outline-offset: 2px;
+    }
+  }
+
+  &__switch-cell {
     display: flex;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__list-trigger {
+    width: 300px;
+    max-width: 60vw;
+  }
+
+  &__list-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__list-actions {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding-top: 10px;
   }
 }
 
-.xtein-adm015-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid #cbd5e1;
-  background-color: #ffffff;
-  color: #334155;
-  transition: all 0.2s ease;
+:host ::ng-deep {
+  .xtein-adm015-un__grid {
+    // Header palette: soft blue #eef2f6, navy text rgba(10, 57, 96, 0.95), soft borders #dbe4ef
+    .dx-datagrid-headers {
+      background-color: #eef2f6 !important;
+      border-color: #dbe4ef !important;
 
-  &:hover {
-    background-color: #f1f5f9;
-    border-color: #94a3b8;
+      .dx-datagrid-table .dx-header-row > td {
+        background-color: #eef2f6 !important;
+        color: rgba(10, 57, 96, 0.95) !important;
+        font-weight: 500 !important;
+        padding: 8px 10px;
+        border-color: #dbe4ef !important;
+      }
+    }
+
+    // Data rows: clean white background #ffffff, no zebra striping, no row lines
+    .dx-datagrid-rowsview {
+      .dx-row {
+        background-color: #ffffff !important;
+        border-bottom: none !important;
+        border-top: none !important;
+
+        & > td {
+          background-color: #ffffff !important;
+          border-color: transparent !important;
+          padding: 8px 10px;
+        }
+
+        &.dx-row-alt {
+          background-color: #ffffff !important;
+          & > td {
+            background-color: #ffffff !important;
+          }
+        }
+
+        &:hover > td {
+          background-color: #f8fafc !important;
+        }
+
+        &.dx-selection > td {
+          background-color: #edf5ff !important;
+        }
+      }
+    }
   }
-}
 
-.xtein-adm015-action-del {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 4px;
+  // Checkboxes con borde suave, 16x16 y radio de 4px idénticos a Legacy
+  .dx-checkbox-icon {
+    width: 16px !important;
+    height: 16px !important;
+    border: 1px solid #b4bfcc !important;
+    border-radius: 4px !important;
+    background-color: #ffffff;
+    box-shadow: none !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
 
-  &:hover {
-    background: #fee2e2;
+  .dx-checkbox-checked .dx-checkbox-icon {
+    background-color: #2b6cb0 !important;
+    border-color: #2b6cb0 !important;
+    color: #ffffff;
+  }
+
+  .dx-checkbox.dx-state-hover .dx-checkbox-icon {
+    border-color: #7b94ad !important;
+  }
+
+  // Centering and styling for dx-switch inside the grid
+  .dx-switch {
+    margin: 0 auto;
   }
 }

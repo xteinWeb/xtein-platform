@@ -148,6 +148,10 @@ export class Adm015Component implements OnInit, OnDestroy {
   readonly conexiones = signal<Adm015ConexionRecord[]>([]);
   readonly settings = signal<Adm015SettingAplicacionRecord[]>([]);
 
+  // Token para evitar condiciones de carrera en cargas asíncronas
+  private currentChildLoadToken = 0;
+  private specialTransactionsTemplate: Adm015PermisoEspecialRecord[] = [];
+
   // Catalogs
   readonly roles = signal<{ ID_ROL: string; DESCRIPCION: string }[]>([]);
   readonly availableApps = signal<{ ID_APLICACION: string; NOMBRE: string }[]>([]);
@@ -349,11 +353,19 @@ export class Adm015Component implements OnInit, OnDestroy {
     this.enableFormControls();
 
     // Clear child lists for new user
-    this.autorizaciones.set([]);
-    this.permisosEspeciales.set([]);
-    this.unAsociadas.set([]);
-    this.conexiones.set([]);
-    this.settings.set([]);
+    this.clearChildCollections();
+
+    // Cargar permisos especiales por defecto para nuevo registro
+    if (this.specialTransactionsTemplate.length > 0) {
+      this.permisosEspeciales.set(this.specialTransactionsTemplate.map(p => ({
+        ...p,
+        PERMISO: false,
+        APROBACION: false,
+        isEdit: true
+      })));
+    } else {
+      void this.loadDefaultSpecialPermissions();
+    }
 
     this.activeTab.set('contrasenas');
     this.workspace.setDirty(this.applicationId, false);
@@ -393,11 +405,7 @@ export class Adm015Component implements OnInit, OnDestroy {
         this.loadRecordData(this.records()[idx]);
       } else {
         this.form.reset({ ...Adm015DefaultRecord }, { emitEvent: false });
-        this.autorizaciones.set([]);
-        this.permisosEspeciales.set([]);
-        this.unAsociadas.set([]);
-        this.conexiones.set([]);
-        this.settings.set([]);
+        this.clearChildCollections();
       }
     }
   }
@@ -544,6 +552,14 @@ export class Adm015Component implements OnInit, OnDestroy {
     this.loadRecordData(record);
   }
 
+  private clearChildCollections(): void {
+    this.autorizaciones.set([]);
+    this.permisosEspeciales.set([]);
+    this.unAsociadas.set([]);
+    this.conexiones.set([]);
+    this.settings.set([]);
+  }
+
   private loadRecordData(record: Adm015UsuarioRecord): void {
     this.applicationDraft.set(null);
     this.form.patchValue({
@@ -558,26 +574,46 @@ export class Adm015Component implements OnInit, OnDestroy {
       INTERVALO: record.INTERVALO || 0
     });
 
-    this.loadChildData(record.USUARIO, record.ID_ROL);
+    // Blanquear de inmediato los datos del registro anterior
+    this.clearChildCollections();
+    void this.loadChildData(record.USUARIO, record.ID_ROL);
   }
 
   private async loadChildData(usuario: string, rol: string): Promise<void> {
+    const token = ++this.currentChildLoadToken;
+    this.applicationsBusy.set(true);
+
     try {
-      const [auths, perm, un, conn, sett] = await Promise.all([
-        this.business.loadAutorizaciones(usuario, rol),
+      const [authsRes, permRes, unRes, connRes, settRes] = await Promise.allSettled([
+        this.business.loadAutorizaciones(usuario, rol, this.isNew() ? 'new' : 'r_refrescar'),
         this.business.loadPermisosEspeciales(usuario),
         this.business.loadUNAsociadas(usuario),
         this.business.loadConexiones(usuario),
         this.business.loadSettings(usuario)
       ]);
 
-      this.autorizaciones.set(auths);
-      this.permisosEspeciales.set(perm);
-      this.unAsociadas.set(un);
-      this.conexiones.set(conn);
-      this.settings.set(sett);
-    } catch {
-      // Non-critical child loads
+      // Si se navegó a otro registro mientras estas llamadas estaban en vuelo, descartar respuesta tardía
+      if (token !== this.currentChildLoadToken) {
+        return;
+      }
+
+      this.autorizaciones.set(authsRes.status === 'fulfilled' ? authsRes.value : []);
+      const perms = permRes.status === 'fulfilled' ? permRes.value : [];
+      this.permisosEspeciales.set(perms);
+      if (perms.length > 0) {
+        this.specialTransactionsTemplate = perms.map(p => ({
+          ...p,
+          PERMISO: false,
+          APROBACION: false
+        }));
+      }
+      this.unAsociadas.set(unRes.status === 'fulfilled' ? unRes.value : []);
+      this.conexiones.set(connRes.status === 'fulfilled' ? connRes.value : []);
+      this.settings.set(settRes.status === 'fulfilled' ? settRes.value : []);
+    } finally {
+      if (token === this.currentChildLoadToken) {
+        this.applicationsBusy.set(false);
+      }
     }
   }
 
@@ -626,6 +662,26 @@ export class Adm015Component implements OnInit, OnDestroy {
     } catch {
       // Catalogs fallback
     }
+
+    void this.loadDefaultSpecialPermissions();
+  }
+
+  private async loadDefaultSpecialPermissions(): Promise<void> {
+    try {
+      const specialData = await this.business.loadPermisosEspeciales('');
+      if (specialData && specialData.length > 0) {
+        this.specialTransactionsTemplate = specialData.map(p => ({
+          ...p,
+          PERMISO: false,
+          APROBACION: false
+        }));
+        if (this.isNew() && this.permisosEspeciales().length === 0) {
+          this.permisosEspeciales.set(this.specialTransactionsTemplate.map(p => ({ ...p, isEdit: true })));
+        }
+      }
+    } catch {
+      // Ignorar si el backend no admite usuario vacío inicialmente
+    }
   }
 
   updateAuthorizations(rows: Adm015AutorizacionRecord[]): void {
@@ -645,23 +701,34 @@ export class Adm015Component implements OnInit, OnDestroy {
   }
 
   async refreshAuthorizations(): Promise<void> {
-    if (this.readOnly() || this.applicationsBusy()) return;
-    const usuario = this.form.controls.USUARIO.value;
-    const rol = this.form.controls.ID_ROL.value;
-    const mode = this.mode();
-    const result = await Swal.fire({
-      text: '¿Recargar las autorizaciones? Se descartarán los cambios de esta lista.',
-      icon: 'warning', showCancelButton: true, confirmButtonText: 'Recargar', cancelButtonText: 'Cancelar'
-    });
-    if (!result.isConfirmed || this.readOnly() || this.applicationsBusy() || this.form.controls.USUARIO.value !== usuario) return;
+    if (this.applicationsBusy()) return;
+    const usuario = this.form.controls.USUARIO.value || this.currentRecord()?.USUARIO;
+    const rol = this.form.controls.ID_ROL.value || this.currentRecord()?.ID_ROL;
+    if (!usuario) return;
+
+    const isReadOnly = this.readOnly();
+    if (!isReadOnly) {
+      const result = await Swal.fire({
+        text: '¿Recargar las autorizaciones? Se descartarán los cambios de esta lista.',
+        icon: 'warning', showCancelButton: true, confirmButtonText: 'Recargar', cancelButtonText: 'Cancelar'
+      });
+      if (!result.isConfirmed || this.applicationsBusy() || this.form.controls.USUARIO.value !== usuario) return;
+    }
+
     this.applicationsBusy.set(true);
     try {
-      const rows = await this.business.loadAutorizaciones(usuario, rol, this.isNew() ? 'new' : 'update');
-      if (this.readOnly() || this.mode() !== mode || this.form.controls.USUARIO.value !== usuario || this.form.controls.ID_ROL.value !== rol) return;
+      const rows = await this.business.loadAutorizaciones(usuario, rol || '', this.isNew() ? 'new' : 'r_refrescar');
+      if (this.form.controls.USUARIO.value !== usuario) return;
       this.applicationDraft.set(null);
-      this.updateAuthorizations(rows);
+      if (isReadOnly) {
+        this.autorizaciones.set(rows);
+      } else {
+        this.updateAuthorizations(rows);
+      }
     } catch (error) {
-      this.notification.error(error instanceof Error ? error.message : 'No fue posible recargar las autorizaciones.');
+      this.autorizaciones.set([]);
+      const msg = error instanceof Error ? error.message : 'No se encontraron autorizaciones para el usuario.';
+      this.notification.warning(msg);
     } finally {
       this.applicationsBusy.set(false);
     }
