@@ -25,7 +25,8 @@
   } @else if (cell.column.dataField === 'ID_APLICACION') {
     @if (draft && cell.data === draft) {
       <xtein-lookup [items]="selectableApps" [columns]="lookupColumns" valueExpr="ID_APLICACION"
-        displayExpr="ID_APLICACION" placeholder="Aplicaci?n" ariaLabel="Aplicaci?n a agregar"
+        [autoFocus]="!draft.originalApplicationId"
+        displayExpr="ID_APLICACION" placeholder="Aplicación" ariaLabel="Aplicación a agregar"
         [ngModel]="draft.ID_APLICACION" (ngModelChange)="chooseApplication($event)" [disabled]="busy" />
     } @else if (!readOnly) {
       <button type="button" class="xtein-adm015-apps__application-code" [disabled]="busy || !!draft"

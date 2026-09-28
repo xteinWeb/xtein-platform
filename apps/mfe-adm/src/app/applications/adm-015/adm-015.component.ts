@@ -578,7 +578,6 @@ export class Adm015Component implements OnInit, OnDestroy {
       if (users.length > 0) {
         this.records.set(users);
         this.navigate(0);
-        this.notification.success(`Se encontraron ${users.length} usuario(s).`);
       } else {
         this.notification.warning('No se encontraron registros con el criterio especificado.');
       }

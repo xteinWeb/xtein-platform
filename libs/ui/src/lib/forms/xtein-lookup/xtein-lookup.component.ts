@@ -1,6 +1,6 @@
-import { Component, Input, forwardRef, ChangeDetectorRef, OnChanges } from '@angular/core';
+import { Component, Input, forwardRef, ChangeDetectorRef, OnChanges, AfterViewInit, ViewChild, DestroyRef, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { DxDropDownBoxModule, DxTemplateModule } from 'devextreme-angular';
+import { DxDropDownBoxComponent, DxDropDownBoxModule, DxTemplateModule } from 'devextreme-angular';
 import type { ValueChangedEvent } from 'devextreme/ui/drop_down_box';
 import { XteinDataGridComponent } from '../../data/xtein-data-grid/xtein-data-grid.component';
 import { XteinGridColumn } from '../../data/xtein-data-grid/models/xtein-data-grid.model';
@@ -9,7 +9,16 @@ import { XteinGridColumn } from '../../data/xtein-data-grid/models/xtein-data-gr
  templateUrl:'./xtein-lookup.component.html',styleUrl:'./xtein-lookup.component.scss',
  host:{'[attr.id]':'null'},
  providers:[{provide:NG_VALUE_ACCESSOR,useExisting:forwardRef(()=>XteinLookupComponent),multi:true}]})
-export class XteinLookupComponent<T extends object = Record<string,unknown>> implements ControlValueAccessor, OnChanges {
+export class XteinLookupComponent<T extends object = Record<string,unknown>> implements ControlValueAccessor, OnChanges, AfterViewInit {
+ @Input() autoFocus = false;
+ @ViewChild(DxDropDownBoxComponent) private editor?: DxDropDownBoxComponent;
+ private readonly destroyRef = inject(DestroyRef);
+ ngAfterViewInit(): void {
+  if (this.autoFocus) queueMicrotask(() => this.focus());
+ }
+ focus(): void {
+  if (!this.destroyRef.destroyed && !this.isDisabled && !this.readOnly) this.editor?.instance.focus();
+ }
  @Input() id = '';
  @Input() ariaLabel = '';
  @Input() placeholder = 'Seleccionar…';
