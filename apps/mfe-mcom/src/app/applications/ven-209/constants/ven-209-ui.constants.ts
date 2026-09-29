@@ -119,20 +119,20 @@ export const Ven209LookupColumns: Ven209LookupColumnsConfig = {
 
 export const Ven209GridColumns: Ven209GridColumnsConfig = {
   direcciones: [
-    { dataField: 'TIPO_DIRECCION', caption: 'Tipo', width: 110 },
-    { dataField: 'DOMICILIO', caption: 'Dirección Principal' },
-    { dataField: 'BARRIO', caption: 'Barrio', width: 150 },
-    { dataField: 'NOMBRE_UBICACION', caption: 'Ciudad / Municipio', width: 180 },
-    { dataField: 'CODIGO_POSTAL', caption: 'C.P.', width: 90 }
+    { dataField: 'TIPO_DIRECCION', caption: 'Tipo', width: 140, cellTemplate: 'xteinGroup' },
+    { dataField: 'DOMICILIO', caption: 'Dirección / Domicilio', minWidth: 200, cellTemplate: 'xteinGroup' },
+    { dataField: 'BARRIO', caption: 'Barrio', width: 150, cellTemplate: 'xteinGroup' },
+    { dataField: 'NOMBRE_UBICACION', caption: 'Ciudad / Municipio', width: 180, cellTemplate: 'xteinGroup' },
+    { dataField: 'CODIGO_POSTAL', caption: 'C.P.', width: 100, cellTemplate: 'xteinGroup' }
   ],
   telefonos: [
-    { dataField: 'TIPO_TELEFONO', caption: 'Tipo', width: 120 },
-    { dataField: 'TELEFONO', caption: 'Número Telefónico' },
-    { dataField: 'EXTENSION', caption: 'Ext.', width: 100 }
+    { dataField: 'TIPO_TELEFONO', caption: 'Tipo', width: 140, cellTemplate: 'xteinGroup' },
+    { dataField: 'TELEFONO', caption: 'Número Telefónico', minWidth: 180, cellTemplate: 'xteinGroup' },
+    { dataField: 'EXTENSION', caption: 'Ext.', width: 110, cellTemplate: 'xteinGroup' }
   ],
   emails: [
-    { dataField: 'EMAIL', caption: 'Correo Electrónico' },
-    { dataField: 'ETIQUETA', caption: 'Etiqueta / Uso', width: 160 }
+    { dataField: 'EMAIL', caption: 'Correo Electrónico', minWidth: 220, cellTemplate: 'xteinGroup' },
+    { dataField: 'ETIQUETA', caption: 'Tipo / Etiqueta', width: 180, cellTemplate: 'xteinGroup' }
   ],
   condiciones: [
     { dataField: 'ID_CONDICION', caption: 'Código', width: 130 },

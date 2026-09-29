@@ -58,14 +58,23 @@
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.correos()">
       <xtein-data-grid
-        id="grid-emails"
-        [dataSource]="emails"
+        #emailsGrid
+        class="xtein-ubicaciones__grid"
+        [dataSource]="emailRows"
+        keyExpr="ITEM"
         [columns]="emailColumns"
+        height="auto"
+        [searchEnabled]="false"
+        [filterEnabled]="false"
+        [selectionMode]="readOnly ? 'none' : 'multiple'"
+        [selectedRowKeys]="selectedEmails"
+        showCheckBoxesMode="always"
+        (selectionChanged)="onEmailSelectionChanged($event.selectedRowKeys)"
         [toolbarVisible]="!readOnly"
         [toolbarActions]="emailToolbarActions"
-        searchPlaceholder="Buscar en correos…"
-      >
-      </xtein-data-grid>
+        [groupTemplate]="emailCell"
+        [pageSize]="10"
+      />
     </div>
   </div>
 
@@ -84,14 +93,23 @@
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.direcciones()">
       <xtein-data-grid
-        id="grid-direcciones"
-        [dataSource]="direcciones"
+        #dirGrid
+        class="xtein-ubicaciones__grid"
+        [dataSource]="dirRows"
+        keyExpr="ID_DIRECCION"
         [columns]="direccionColumns"
+        height="auto"
+        [searchEnabled]="false"
+        [filterEnabled]="false"
+        [selectionMode]="readOnly ? 'none' : 'multiple'"
+        [selectedRowKeys]="selectedDirecciones"
+        showCheckBoxesMode="always"
+        (selectionChanged)="onDireccionSelectionChanged($event.selectedRowKeys)"
         [toolbarVisible]="!readOnly"
         [toolbarActions]="dirToolbarActions"
-        searchPlaceholder="Buscar en direcciones…"
-      >
-      </xtein-data-grid>
+        [groupTemplate]="dirCell"
+        [pageSize]="10"
+      />
     </div>
   </div>
 
@@ -110,102 +128,159 @@
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.telefonos()">
       <xtein-data-grid
-        id="grid-telefonos"
-        [dataSource]="telefonos"
+        #telGrid
+        class="xtein-ubicaciones__grid"
+        [dataSource]="telRows"
+        keyExpr="ID_TELEFONO"
         [columns]="telefonoColumns"
+        height="auto"
+        [searchEnabled]="false"
+        [filterEnabled]="false"
+        [selectionMode]="readOnly ? 'none' : 'multiple'"
+        [selectedRowKeys]="selectedTelefonos"
+        showCheckBoxesMode="always"
+        (selectionChanged)="onTelefonoSelectionChanged($event.selectedRowKeys)"
         [toolbarVisible]="!readOnly"
         [toolbarActions]="telToolbarActions"
-        searchPlaceholder="Buscar en teléfonos…"
-      >
-      </xtein-data-grid>
-    </div>
-  </div>
-
-  <!-- Modal para Agregar Dirección -->
-  <div class="xtein-modal-backdrop" *ngIf="modalVisible() === 'direccion'">
-    <div class="xtein-modal-card">
-      <div class="xtein-modal-header">
-        <h4 class="xtein-modal-title">Agregar Nueva Dirección</h4>
-        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
-      </div>
-      <div class="xtein-modal-body">
-        <div class="xtein-modal-field">
-          <xtein-label for="dir-tipo">Tipo Dirección</xtein-label>
-          <xtein-input id="dir-tipo" [(ngModel)]="newDir.TIPO_DIRECCION" placeholder="PRINCIPAL / SUCURSAL / ENTREGA"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="dir-dom">Dirección Completa *</xtein-label>
-          <xtein-input id="dir-dom" [(ngModel)]="newDir.DOMICILIO" placeholder="Calle / Carrera / Avenida / Edificio"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="dir-barrio">Barrio</xtein-label>
-          <xtein-input id="dir-barrio" [(ngModel)]="newDir.BARRIO" placeholder="Nombre del barrio"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="dir-ciudad">Ciudad / Municipio</xtein-label>
-          <xtein-input id="dir-ciudad" [(ngModel)]="newDir.NOMBRE_UBICACION" placeholder="Ciudad"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="dir-cp">Código Postal</xtein-label>
-          <xtein-input id="dir-cp" [(ngModel)]="newDir.CODIGO_POSTAL" placeholder="080001"></xtein-input>
-        </div>
-      </div>
-      <div class="xtein-modal-footer">
-        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
-        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveNewDireccion()">Guardar Dirección</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para Agregar Teléfono -->
-  <div class="xtein-modal-backdrop" *ngIf="modalVisible() === 'telefono'">
-    <div class="xtein-modal-card">
-      <div class="xtein-modal-header">
-        <h4 class="xtein-modal-title">Agregar Nuevo Teléfono</h4>
-        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
-      </div>
-      <div class="xtein-modal-body">
-        <div class="xtein-modal-field">
-          <xtein-label for="tel-tipo">Tipo Teléfono</xtein-label>
-          <xtein-input id="tel-tipo" [(ngModel)]="newTel.TIPO_TELEFONO" placeholder="CELULAR / FIJO / PBX"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="tel-num">Número Telefónico *</xtein-label>
-          <xtein-input id="tel-num" [(ngModel)]="newTel.TELEFONO" placeholder="3001234567"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="tel-ext">Extensión</xtein-label>
-          <xtein-input id="tel-ext" [(ngModel)]="newTel.EXTENSION" placeholder="Opcional"></xtein-input>
-        </div>
-      </div>
-      <div class="xtein-modal-footer">
-        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
-        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveNewTelefono()">Guardar Teléfono</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para Agregar Email -->
-  <div class="xtein-modal-backdrop" *ngIf="modalVisible() === 'email'">
-    <div class="xtein-modal-card">
-      <div class="xtein-modal-header">
-        <h4 class="xtein-modal-title">Agregar Correo Electrónico</h4>
-        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
-      </div>
-      <div class="xtein-modal-body">
-        <div class="xtein-modal-field">
-          <xtein-label for="em-addr">Correo Electrónico *</xtein-label>
-          <xtein-input id="em-addr" [(ngModel)]="newEmail.EMAIL" placeholder="cliente@dominio.com"></xtein-input>
-        </div>
-        <div class="xtein-modal-field">
-          <xtein-label for="em-etiq">Etiqueta / Uso</xtein-label>
-          <xtein-input id="em-etiq" [(ngModel)]="newEmail.ETIQUETA" placeholder="FACTURACION / COBRANZAS / GENERAL"></xtein-input>
-        </div>
-      </div>
-      <div class="xtein-modal-footer">
-        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
-        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveNewEmail()">Guardar Correo</button>
-      </div>
+        [groupTemplate]="telCell"
+        [pageSize]="10"
+      />
     </div>
   </div>
 </div>
+
+<!-- ======================================================== -->
+<!-- CELL TEMPLATES                                           -->
+<!-- ======================================================== -->
+
+<!-- Template para Celdas de Correos -->
+<ng-template #emailCell let-cell>
+  @if (emailDraft && cell.data.ITEM === emailDraft.ITEM) {
+    @if (cell.column.dataField === 'EMAIL') {
+      <xtein-input
+        [(ngModel)]="emailDraft.EMAIL"
+        placeholder="ejemplo@correo.com"
+        ariaLabel="Correo electrónico"
+      />
+    } @else if (cell.column.dataField === 'ETIQUETA') {
+      <xtein-select
+        [(ngModel)]="emailDraft.ETIQUETA"
+        [items]="etiquetasEmail"
+        placeholder="Tipo"
+        ariaLabel="Tipo de correo"
+      />
+    } @else {
+      {{ cell.value }}
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'EMAIL') {
+      <button
+        type="button"
+        class="xtein-ubicaciones__code-btn"
+        [disabled]="!!emailDraft"
+        [attr.aria-label]="'Editar correo ' + cell.value"
+        (click)="beginEditEmail(cell.data)"
+      >
+        {{ cell.value || '(Editar)' }}
+      </button>
+    } @else {
+      {{ cell.value }}
+    }
+  }
+</ng-template>
+
+<!-- Template para Celdas de Direcciones -->
+<ng-template #dirCell let-cell>
+  @if (dirDraft && cell.data.ID_DIRECCION === dirDraft.ID_DIRECCION) {
+    @if (cell.column.dataField === 'TIPO_DIRECCION') {
+      <xtein-select
+        [(ngModel)]="dirDraft.TIPO_DIRECCION"
+        [items]="tiposDireccion"
+        placeholder="Tipo"
+        ariaLabel="Tipo de dirección"
+      />
+    } @else if (cell.column.dataField === 'DOMICILIO') {
+      <xtein-input
+        [(ngModel)]="dirDraft.DOMICILIO"
+        placeholder="Dirección / Domicilio"
+        ariaLabel="Dirección"
+      />
+    } @else if (cell.column.dataField === 'BARRIO') {
+      <xtein-input
+        [(ngModel)]="dirDraft.BARRIO"
+        placeholder="Barrio"
+        ariaLabel="Barrio"
+      />
+    } @else if (cell.column.dataField === 'NOMBRE_UBICACION') {
+      <xtein-input
+        [(ngModel)]="dirDraft.NOMBRE_UBICACION"
+        placeholder="Ciudad / Municipio"
+        ariaLabel="Ciudad o municipio"
+      />
+    } @else if (cell.column.dataField === 'CODIGO_POSTAL') {
+      <xtein-input
+        [(ngModel)]="dirDraft.CODIGO_POSTAL"
+        placeholder="C.P."
+        ariaLabel="Código postal"
+      />
+    } @else {
+      {{ cell.value }}
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'DOMICILIO') {
+      <button
+        type="button"
+        class="xtein-ubicaciones__code-btn"
+        [disabled]="!!dirDraft"
+        [attr.aria-label]="'Editar dirección ' + cell.value"
+        (click)="beginEditDireccion(cell.data)"
+      >
+        {{ cell.value || '(Editar)' }}
+      </button>
+    } @else {
+      {{ cell.value }}
+    }
+  }
+</ng-template>
+
+<!-- Template para Celdas de Teléfonos -->
+<ng-template #telCell let-cell>
+  @if (telDraft && cell.data.ID_TELEFONO === telDraft.ID_TELEFONO) {
+    @if (cell.column.dataField === 'TIPO_TELEFONO') {
+      <xtein-select
+        [(ngModel)]="telDraft.TIPO_TELEFONO"
+        [items]="tiposTelefono"
+        placeholder="Tipo"
+        ariaLabel="Tipo de teléfono"
+      />
+    } @else if (cell.column.dataField === 'TELEFONO') {
+      <xtein-input
+        [(ngModel)]="telDraft.TELEFONO"
+        placeholder="Número telefónico"
+        ariaLabel="Número telefónico"
+      />
+    } @else if (cell.column.dataField === 'EXTENSION') {
+      <xtein-input
+        [(ngModel)]="telDraft.EXTENSION"
+        placeholder="Ext."
+        ariaLabel="Extensión"
+      />
+    } @else {
+      {{ cell.value }}
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'TELEFONO') {
+      <button
+        type="button"
+        class="xtein-ubicaciones__code-btn"
+        [disabled]="!!telDraft"
+        [attr.aria-label]="'Editar teléfono ' + cell.value"
+        (click)="beginEditTelefono(cell.data)"
+      >
+        {{ cell.value || '(Editar)' }}
+      </button>
+    } @else {
+      {{ cell.value }}
+    }
+  }
+</ng-template>
