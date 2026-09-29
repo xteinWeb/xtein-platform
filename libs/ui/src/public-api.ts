@@ -26,6 +26,9 @@ export * from './lib/record-tools/xtein-record-reports/models/xtein-record-repor
 export * from './lib/record-tools/xtein-record-reports/configuration/xtein-record-reports.config';
 export * from './lib/record-tools/xtein-record-reports/services/xtein-record-reports.service';
 export * from './lib/record-tools/xtein-record-reports/xtein-record-reports.component';
+export * from './lib/record-tools/xtein-record-settings/models/xtein-record-settings.model';
+export * from './lib/record-tools/xtein-record-settings/services/xtein-record-settings.service';
+export * from './lib/record-tools/xtein-record-settings/xtein-record-settings.component';
 
 export * from './lib/components/xtein-dashboard-viewer/xtein-dashboard-viewer.component';
 export * from './lib/components/xtein-dashboard-page/xtein-dashboard-page.component';
@@ -48,3 +51,8 @@ export * from './lib/scheduling/xtein-scheduler/xtein-scheduler.component';
 export * from './lib/scheduling/xtein-scheduler/models/xtein-scheduler.model';
 export * from './lib/forms/xtein-html-editor/xtein-html-editor.component';
 export * from './lib/forms/xtein-lookup/xtein-lookup.component';
+export * from './lib/forms/xtein-perfil-tributario/xtein-perfil-tributario.component';
+export * from './lib/forms/xtein-tag-box/xtein-tag-box.component';
+export * from './lib/forms/xtein-switch/xtein-switch.component';
+export * from './lib/forms/xtein-radio-group/xtein-radio-group.component';
+export * from './lib/overlays/xtein-drop-down-panel/xtein-drop-down-panel.component';

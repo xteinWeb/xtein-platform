@@ -1,0 +1,12 @@
+:host {
+  display: inline-block;
+}
+
+.xtein-switch-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  // Track and handle appearance come from the shared XTEIN theme,
+  // matching the DevExtreme switch used by Legacy.
+}

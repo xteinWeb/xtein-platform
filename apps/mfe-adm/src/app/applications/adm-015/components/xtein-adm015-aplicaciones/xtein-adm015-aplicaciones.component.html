@@ -1,0 +1,69 @@
+<div class="xtein-adm015-apps">
+  <xtein-data-grid #applicationsGrid class="xtein-adm015-apps__grid" [dataSource]="rows" keyExpr="ID_APLICACION"
+    [columns]="columns" height="auto" [searchEnabled]="false" [filterEnabled]="true"
+    [selectionMode]="readOnly ? 'none' : 'multiple'" [selectedRowKeys]="selected"
+    showCheckBoxesMode="always"
+    (selectionChanged)="selectionChanged($event.selectedRowKeys)" [disabled]="busy"
+    [toolbarVisible]="!readOnly" [toolbarActions]="toolbarActions" [toolbarTemplate]="listTrigger"
+    [groupTemplate]="permissionCell" [pageSize]="20" />
+</div>
+
+<ng-template #listTrigger>
+  @if (!readOnly) {
+    <xtein-drop-down-panel class="xtein-adm015-apps__list-trigger" placeholder="Lista de Aplicaciones"
+      [opened]="listOpened" (openedChange)="openList($event)" [disabled]="busy || !!draft"
+      [contentTemplate]="applicationList" />
+  }
+</ng-template>
+
+<ng-template #permissionCell let-cell>
+  @if (cell.column.name?.startsWith('mark-')) {
+    <xtein-checkbox [ariaLabel]="'Marcar todos: ' + cell.column.caption"
+      [checked]="columnChecked(fieldFromHeader(cell.column.name))"
+      [indeterminate]="columnMixed(fieldFromHeader(cell.column.name))" [disabled]="busy || rows.length === 0"
+      (checkedChange)="markAllColumn(fieldFromHeader(cell.column.name), $event)" />
+  } @else if (cell.column.dataField === 'ID_APLICACION') {
+    @if (draft && cell.data === draft) {
+      <xtein-lookup [items]="selectableApps" [columns]="lookupColumns" valueExpr="ID_APLICACION"
+        [autoFocus]="!draft.originalApplicationId"
+        displayExpr="ID_APLICACION" placeholder="Aplicación" ariaLabel="Aplicación a agregar"
+        [ngModel]="draft.ID_APLICACION" (ngModelChange)="chooseApplication($event)" [disabled]="busy" />
+    } @else if (!readOnly) {
+      <button type="button" class="xtein-adm015-apps__application-code" [disabled]="busy || !!draft"
+        [attr.aria-label]="'Editar aplicación ' + cell.value" (click)="beginEdit(cell.data)">{{ cell.value }}</button>
+    } @else { {{ cell.value }} }
+  } @else {
+    <xtein-checkbox [ariaLabel]="cell.data.ID_APLICACION + ': ' + cell.column.dataField"
+      [checked]="!!cell.value" [readOnly]="readOnly" [disabled]="busy"
+      (checkedChange)="changePermission(cell.data, cell.column.dataField, $event)" />
+  }
+</ng-template>
+
+<ng-template #applicationList>
+  <div class="xtein-adm015-apps__list-grid">
+    <xtein-data-grid [dataSource]="choices" keyExpr="ID_APLICACION" [columns]="choiceColumns"
+      selectionMode="multiple" [selectedRowKeys]="choiceKeys" (selectionChanged)="choiceKeys = $event.selectedRowKeys"
+      showCheckBoxesMode="always"
+      [filterEnabled]="false" [searchWidth]="300" [pageSize]="10" [allowedPageSizes]="[5, 10, 20]"
+      [groupTemplate]="choiceCell" [disabled]="busy || readOnly" />
+  </div>
+  <div class="xtein-adm015-apps__list-actions">
+    <xtein-button text="Aceptar" [disabled]="!choiceKeys.length || busy || readOnly" (clicked)="acceptList()" />
+    <xtein-button text="Cancelar" variant="secondary" (clicked)="openList(false)" />
+  </div>
+</ng-template>
+
+<ng-template #choiceCell let-cell>
+  @if (!cell.data) {
+    <span class="xtein-adm015-apps__choice-header">
+      {{ cell.column.caption }}
+      <xtein-checkbox [ariaLabel]="'Marcar seleccionadas: ' + cell.column.dataField"
+        [checked]="choicesChecked(cell.column.dataField)" [disabled]="!choiceKeys.length || busy || readOnly"
+        (checkedChange)="markChoices(cell.column.dataField, $event)" />
+    </span>
+  } @else {
+    <xtein-checkbox [ariaLabel]="cell.data.ID_APLICACION + ': ' + cell.column.dataField"
+      [checked]="!!cell.value" [disabled]="busy || readOnly"
+      (checkedChange)="changeChoice(cell.data.ID_APLICACION, cell.column.dataField, $event)" />
+  }
+</ng-template>

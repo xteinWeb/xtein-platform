@@ -1,0 +1,221 @@
+<div class="xtein-ven212-items">
+  <!-- Barra de herramientas superior -->
+  <div class="xtein-ven212-items__toolbar">
+    <div class="xtein-ven212-items__toolbar-left">
+      <xtein-button
+        text="Agregar Producto"
+        variant="primary"
+        [disabled]="readOnly || busy || working() || !ready || draft() !== null"
+        (clicked)="begin()"
+      />
+
+      @if (selected().length > 0 && !readOnly) {
+        <xtein-button
+          [text]="'Eliminar (' + selected().length + ')'"
+          variant="danger"
+          [disabled]="busy || working() || draft() !== null"
+          (clicked)="deleteSelected()"
+        />
+      }
+    </div>
+
+    <div class="xtein-ven212-items__toolbar-right">
+      <xtein-checkbox
+        [checked]="onlyStock"
+        label="Sólo existencias"
+        (checkedChange)="stockOnly.emit($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Formulario de borrador / edición de ítem -->
+  @if (draft(); as row) {
+    <div class="xtein-ven212-items__draft-card">
+      <div class="xtein-ven212-items__draft-header">
+        <span class="xtein-ven212-items__draft-title">
+          {{ row.ITEM ? 'Ítem #' + row.ITEM : 'Nuevo Ítem' }}
+        </span>
+      </div>
+
+      <div class="xtein-ven212-items__draft-grid">
+        <!-- Selector de Producto -->
+        <div class="xtein-ven212-items__draft-field xtein-ven212-items__draft-field--wide">
+          <label class="xtein-ven212-items__draft-label">Producto</label>
+          <dx-drop-down-box
+            [(value)]="row.PRODUCTO"
+            valueExpr="PRODUCTO"
+            displayExpr="NOMBRE"
+            placeholder="Seleccione un producto…"
+            [dataSource]="products"
+            [(opened)]="productDropdownOpened"
+            [dropDownOptions]="productDropDownOptions"
+            (onValueChanged)="product($event.value)"
+          >
+            <div *dxTemplate="let data of 'content'">
+              <xtein-data-grid
+                [dataSource]="products"
+                [columns]="productColumns"
+                [selectedRowKeys]="row.PRODUCTO ? [row.PRODUCTO] : []"
+                [toolbarActions]="productToolbarActions()"
+                (rowClick)="selectProductFromDropdown($event.data)"
+              />
+            </div>
+          </dx-drop-down-box>
+        </div>
+
+        <!-- Presentación / Unidad de Medida -->
+        <div class="xtein-ven212-items__draft-field">
+          <label class="xtein-ven212-items__draft-label">Presentación</label>
+          <xtein-select
+            [items]="presentationOptions()"
+            displayExpr="UDM_VENTA"
+            valueExpr="UDM_VENTA"
+            [ngModel]="row.UDM_VENTA"
+            placeholder="Presentación"
+            (ngModelChange)="unit($event)"
+          />
+        </div>
+
+        <!-- Tasa de IVA -->
+        <div class="xtein-ven212-items__draft-field">
+          <label class="xtein-ven212-items__draft-label">IVA</label>
+          <xtein-select
+            [items]="taxOptions()"
+            displayExpr="LABEL"
+            valueExpr="ID_TASA"
+            [ngModel]="selectedTaxId()"
+            placeholder="IVA"
+            (ngModelChange)="tax($event)"
+          />
+        </div>
+
+        <!-- Cantidad -->
+        <div class="xtein-ven212-items__draft-field">
+          <label class="xtein-ven212-items__draft-label">Cantidad</label>
+          <xtein-number
+            [(ngModel)]="row.CANTIDAD"
+            [min]="0.01"
+            (ngModelChange)="onDraftQtyChange()"
+          />
+        </div>
+
+        <!-- Valor Unitario -->
+        <div class="xtein-ven212-items__draft-field">
+          <label class="xtein-ven212-items__draft-label">Precio Unitario</label>
+          <xtein-number
+            [(ngModel)]="row.VALOR_UNITARIO"
+            [disabled]="!editPrice"
+            (ngModelChange)="onDraftQtyChange()"
+          />
+        </div>
+
+        <!-- Subtotal Calculado -->
+        <div class="xtein-ven212-items__draft-field">
+          <label class="xtein-ven212-items__draft-label">Subtotal</label>
+          <span class="xtein-ven212-items__draft-readonly-value">{{ money(row.SUB_TOTAL) }}</span>
+        </div>
+
+        <!-- Total Calculado -->
+        <div class="xtein-ven212-items__draft-field">
+          <label class="xtein-ven212-items__draft-label">Total</label>
+          <span class="xtein-ven212-items__draft-readonly-value xtein-ven212-items__draft-readonly-value--bold">
+            {{ money(row.TOTAL) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Acciones de borrador estrictamente con xtein-button -->
+      <div class="xtein-ven212-items__draft-actions">
+        <xtein-button
+          text="Aceptar"
+          variant="success"
+          [disabled]="working() || busy"
+          (clicked)="commit()"
+        />
+        <xtein-button
+          text="Cancelar"
+          variant="secondary"
+          [disabled]="working() || busy"
+          (clicked)="cancel()"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Grilla / Tabla de Ítems -->
+  <div class="xtein-ven212-items__table-container">
+    <table class="xtein-ven212-items__table">
+      <thead>
+        <tr>
+          @if (!readOnly) {
+            <th class="xtein-ven212-items__th--check">
+              <xtein-checkbox
+                [checked]="allItemsSelected()"
+                (checkedChange)="toggleAll($event)"
+              />
+            </th>
+          }
+          <th class="xtein-ven212-items__th--num">#</th>
+          <th>Producto</th>
+          <th>Descripción</th>
+          <th>UDM</th>
+          <th class="xtein-ven212-items__th--right">Cantidad</th>
+          <th class="xtein-ven212-items__th--right">Precio Unit.</th>
+          <th class="xtein-ven212-items__th--right">Subtotal</th>
+          <th class="xtein-ven212-items__th--right">IVA</th>
+          <th class="xtein-ven212-items__th--right">Total</th>
+          @if (!readOnly) {
+            <th class="xtein-ven212-items__th--actions">Acciones</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.ITEM) {
+          <tr [class.xtein-ven212-items__tr--selected]="selected().includes(item.ITEM)">
+            @if (!readOnly) {
+              <td class="xtein-ven212-items__td--check">
+                <xtein-checkbox
+                  [checked]="selected().includes(item.ITEM)"
+                  (checkedChange)="toggle(item.ITEM, $event)"
+                />
+              </td>
+            }
+            <td class="xtein-ven212-items__td--num">{{ item.ITEM }}</td>
+            <td class="xtein-ven212-items__td--code">{{ item.PRODUCTO }}</td>
+            <td>{{ item.NOMBRE_PRODUCTO }}</td>
+            <td>{{ item.UDM_VENTA || item.UDM_COMPRA || 'UND' }}</td>
+            <td class="xtein-ven212-items__td--right">{{ quantity(item.CANTIDAD) }}</td>
+            <td class="xtein-ven212-items__td--right">{{ money(item.VALOR_UNITARIO) }}</td>
+            <td class="xtein-ven212-items__td--right">{{ money(item.SUB_TOTAL) }}</td>
+            <td class="xtein-ven212-items__td--right">{{ money(item.VALOR_IVA) }}</td>
+            <td class="xtein-ven212-items__td--right xtein-ven212-items__td--bold">{{ money(item.TOTAL) }}</td>
+            @if (!readOnly) {
+              <td class="xtein-ven212-items__td--actions">
+                <div class="xtein-ven212-items__row-buttons">
+                  <xtein-button
+                    text="Editar"
+                    variant="secondary"
+                    [disabled]="busy || working() || draft() !== null"
+                    (clicked)="begin(item)"
+                  />
+                  <xtein-button
+                    text="Borrar"
+                    variant="danger"
+                    [disabled]="busy || working() || draft() !== null"
+                    (clicked)="remove(item.ITEM)"
+                  />
+                </div>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="readOnly ? 9 : 11" class="xtein-ven212-items__empty">
+              No hay productos registrados en esta factura.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

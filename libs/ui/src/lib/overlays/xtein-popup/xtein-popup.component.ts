@@ -10,4 +10,21 @@ export class XteinPopupComponent {
   @Input() showCloseButton = true;
   @Input() hideOnOutsideClick = false;
   @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() closed = new EventEmitter<void>();
+
+  onVisibleChange(value: boolean): void {
+    this.visible = value;
+    this.visibleChange.emit(value);
+    if (!value) {
+      this.closed.emit();
+    }
+  }
+
+  onHiding(): void {
+    if (this.visible) {
+      this.visible = false;
+      this.visibleChange.emit(false);
+      this.closed.emit();
+    }
+  }
 }

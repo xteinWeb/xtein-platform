@@ -1,0 +1,15 @@
+@if (label) {
+  <xtein-label [for]="id" [disabled]="isDisabled">{{ label }}</xtein-label>
+}
+<dx-radio-group
+  [items]="options"
+  [value]="value"
+  [displayExpr]="displayExpr"
+  [valueExpr]="valueExpr"
+  [layout]="layout"
+  [readOnly]="readOnly"
+  [disabled]="isDisabled"
+  [elementAttr]="{ id: id, 'aria-label': ariaLabel || label }"
+  (onValueChanged)="handleValueChanged($event)"
+  (onFocusOut)="handleFocusOut()">
+</dx-radio-group>

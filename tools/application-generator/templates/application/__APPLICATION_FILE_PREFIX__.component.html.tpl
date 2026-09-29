@@ -3,3 +3,9 @@
     __APPLICATION_DESCRIPTION__
   </p>
 </section>
+
+<xtein-record-settings
+  [visible]="settingsVisible()"
+  (visibleChange)="settingsVisible.set($event)"
+  [applicationId]="applicationId"
+/>

@@ -1,0 +1,40 @@
+@if (label) {
+  <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="invalid">{{ label }}</xtein-label>
+}
+
+<div class="xtein-tag-box-wrapper" [class.xtein-tag-box--has-value]="hasValue">
+  <dx-tag-box
+    class="w-100"
+    stylingMode="filled"
+    [items]="items"
+    [displayExpr]="displayExpr"
+    [valueExpr]="valueExpr"
+    [value]="value"
+    [placeholder]="hasValue ? '' : placeholder"
+    [disabled]="isDisabled"
+    [readOnly]="readOnly"
+    [searchEnabled]="searchEnabled"
+    [searchMode]="searchMode"
+    [showSelectionControls]="showSelectionControls"
+    [maxDisplayedTags]="maxDisplayedTags"
+    [showMultiTagOnly]="showMultiTagOnly"
+    [applyValueMode]="applyValueMode"
+    [dropDownOptions]="dropDownOptions"
+    [inputAttr]="inputAttributes"
+    [itemTemplate]="(itemTemplate || contentItemTemplate) ? 'xteinTagBoxItem' : undefined"
+    (onValueChanged)="handleValueChanged($event)"
+    (onFocusOut)="handleFocusOut()"
+  >
+    <div *dxTemplate="let data of 'xteinTagBoxItem'">
+      @if (itemTemplate || contentItemTemplate) {
+        <ng-container *ngTemplateOutlet="itemTemplate || contentItemTemplate; context: { $implicit: data }"></ng-container>
+      }
+    </div>
+  </dx-tag-box>
+</div>
+
+@if (invalid && errorMessage) {
+  <div class="invalid-feedback d-block" role="alert">
+    {{ errorMessage }}
+  </div>
+}

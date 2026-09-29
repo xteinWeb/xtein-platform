@@ -485,7 +485,14 @@
 }
 
 <xtein-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
-  <div class="ven-230__options">@for(option of settings();track $index){<xtein-button [text]="option.VALOR || ''" [disabled]="loading()" (clicked)="executeSetting(option)" />}</div>
+  <div class="ven-230__options">
+    @if (settings().length === 0) {
+      <div style="padding: 1rem; text-align: center; color: var(--xt-color-text-secondary, #64748b);">
+        No hay opciones de configuración disponibles para esta aplicación.
+      </div>
+    }
+    @for(option of settings();track $index){<xtein-button [text]="option.VALOR || ''" [disabled]="loading()" (clicked)="executeSetting(option)" />}
+  </div>
 </xtein-popup>
 <xtein-ven230-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
   [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="loading()" (accepted)="applySelection($event)" />

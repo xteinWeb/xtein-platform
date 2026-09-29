@@ -6,7 +6,7 @@ import { SessionTabMessage, SharedSession } from '../models/shared-session.model
 import { SESSION_CHANNEL_NAME, SESSION_DISCOVERY_TIMEOUT_MS } from '../constants/session-tabs.constants';
 import { sessionTimeoutMilliseconds } from './session-timeout';
 
-/** Exchanges credentials only with living tabs of this origin; nothing is persisted. */
+/** Synchronizes live session state across tabs using BroadcastChannel. */
 @Injectable({ providedIn: 'root' })
 export class SessionTabsService {
   private readonly document = inject(DOCUMENT);
@@ -48,6 +48,11 @@ export class SessionTabsService {
         this.channel.onmessage = event => this.receive(event.data);
       });
     } catch { return Promise.resolve(); }
+
+    if (this.session.current) {
+      return Promise.resolve();
+    }
+
     this.requestId = crypto.randomUUID();
     this.ready = new Promise<void>(resolve => {
       const timer = setTimeout(() => this.finishDiscovery?.(), SESSION_DISCOVERY_TIMEOUT_MS);
@@ -55,6 +60,9 @@ export class SessionTabsService {
         clearTimeout(timer);
         this.requestId = '';
         this.finishDiscovery = undefined;
+        if (!this.session.current) {
+          this.session.clearSession(false);
+        }
         resolve();
       };
       this.post({ type: 'request', requestId: this.requestId });
@@ -71,8 +79,6 @@ export class SessionTabsService {
     this.channel = undefined;
     this.finishDiscovery?.();
     this.ready = undefined;
-    // Closing one tab must not log out the remaining tabs.
-    this.zone.run(() => this.session.clearSession(false));
   }
 
   private receive(raw: unknown): void {

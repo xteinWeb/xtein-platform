@@ -1,0 +1,302 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.xtein-perfil-tributario-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+::ng-deep .xtein-perfil-action-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  border-radius: 50% !important;
+  background-color: #0f4c81 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 2px 4px 2px 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 3px rgba(15, 76, 129, 0.3) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: all 0.15s ease-in-out !important;
+
+  &.dx-state-disabled {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  .dx-button-content {
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .dx-icon {
+    font-size: 14px !important;
+    color: #ffffff !important;
+    line-height: 1 !important;
+  }
+
+  &:hover {
+    background-color: #0a355c !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(15, 76, 129, 0.4) !important;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Modal Styles with Pinned Header, Footer and Sliding Body
+.xtein-perfil-modal {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  &__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    z-index: 5;
+  }
+
+  &__tabs-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  &__tabs {
+    position: relative;
+    display: flex;
+    gap: 32px;
+    padding-right: 12px;
+  }
+
+  &__tab {
+    background: none;
+    border: none;
+    padding: 8px 6px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #1e293b;
+    }
+
+    &--active {
+      color: #0f4c81;
+      font-weight: 600;
+    }
+  }
+
+  &__tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 236px;
+    height: 2.5px;
+    background-color: #0f4c81;
+    border-radius: 2px;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &--tasas {
+      transform: translateX(268px);
+      width: 140px;
+    }
+  }
+
+  // Sliding Body Viewport pinned between header (44px) and footer (54px)
+  &__body-viewport {
+    position: absolute;
+    top: 44px;
+    bottom: 54px;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+  }
+
+  &__body-track {
+    display: flex;
+    width: 200%;
+    height: 100%;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &__pane {
+    width: 50%;
+    height: 100%;
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0 2px;
+  }
+
+  // Footer permanently pinned at bottom: 0, ALWAYS visible!
+  &__footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+    z-index: 10;
+    padding: 6px 4px 0 4px;
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  &__solo-selecc {
+    margin-left: 8px;
+    font-size: 12.5px;
+    color: #475569;
+  }
+
+  &--readonly {
+    // Solo deshabilitar los checkboxes de selección sin bloquear el scroll ni la navegación de la grilla
+    .dx-select-checkbox {
+      pointer-events: none !important;
+      opacity: 0.75 !important;
+    }
+
+    .dx-header-row .dx-select-checkbox {
+      pointer-events: none !important;
+      opacity: 0.5 !important;
+    }
+
+    #gridPerfiles .dx-datagrid-rowsview .dx-data-row {
+      cursor: default !important;
+    }
+  }
+}
+
+// DevExtreme Grid Customization within the Modal
+::ng-deep .xtein-perfil-popup {
+  .dx-popup-content {
+    padding: 12px 18px 10px 18px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .dx-datagrid {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .dx-datagrid-search-panel {
+    margin-bottom: 4px !important;
+  }
+
+  // Encabezados con soporte multilinea completo como en el Legacy
+  .dx-datagrid-headers {
+    flex: 0 0 auto !important;
+    background-color: #eef3f8 !important;
+    color: #0f4c81 !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+
+    .dx-header-row > td {
+      vertical-align: middle !important;
+      padding: 8px 10px !important;
+      border-right: 1px solid #e2e8f0 !important;
+      background-color: #eef3f8 !important;
+
+      .dx-datagrid-text-content {
+        white-space: normal !important;
+        line-height: 1.25 !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        font-weight: 600 !important;
+        color: #0f4c81 !important;
+        text-align: inherit !important;
+      }
+    }
+  }
+
+  .dx-datagrid-nowrap.dx-datagrid-headers .dx-header-row > td > .dx-datagrid-text-content {
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .dx-datagrid-rowsview {
+    flex: 1 1 auto !important;
+    min-height: 120px !important;
+    overflow: hidden !important;
+
+    .dx-scrollable-container {
+      overflow-y: auto !important;
+      scrollbar-width: thin !important;
+      scrollbar-color: #94a3b8 #f1f5f9 !important;
+
+      &::-webkit-scrollbar {
+        width: 8px !important;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f5f9 !important;
+        border-radius: 4px !important;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #94a3b8 !important;
+        border-radius: 4px !important;
+        border: 2px solid #f1f5f9 !important;
+
+        &:hover {
+          background-color: #64748b !important;
+        }
+      }
+    }
+
+    .dx-row-focused.dx-data-row,
+    .dx-selection.dx-data-row {
+      background-color: #e0f2fe !important;
+      color: #0369a1 !important;
+    }
+  }
+
+  .dx-datagrid-pager {
+    flex: 0 0 auto !important;
+    padding: 6px 0 2px !important;
+    border-top: 1px solid #e2e8f0 !important;
+  }
+
+  .xtein-group-header-text {
+    font-weight: 700;
+    color: #0f4c81;
+    font-size: 13px;
+  }
+}

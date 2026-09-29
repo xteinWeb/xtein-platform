@@ -58,12 +58,6 @@ export const Mad001DefaultRecord:
 /**
  * Toolbar capabilities implemented by MAD-001
  * in the current migration stage.
- *
- * Search, quick view and reports use shared UI components.
- * Configuration remains disabled: the legacy form has no handler.
- *
- * Copy remains disabled because the legacy MAD-001 copy action
- * does not contain a functional implementation.
  */
 export const Mad001ToolbarCapabilities:
   Partial<RecordToolbarCapabilities> = {
@@ -102,7 +96,7 @@ export const Mad001ToolbarCapabilities:
       true,
 
     configure:
-      false
+      true
   };
 
 

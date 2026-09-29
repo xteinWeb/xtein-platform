@@ -1,0 +1,211 @@
+<div class="xtein-ubicaciones">
+  <!-- Acordeón 1: Contacto -->
+  <div class="xtein-accordion-item">
+    <div class="xtein-accordion-header" (click)="toggleSection('contacto')">
+      <div class="xtein-accordion-icon">
+        <svg *ngIf="expanded.contacto()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg *ngIf="!expanded.contacto()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <span class="xtein-accordion-title">Contacto</span>
+    </div>
+    <div class="xtein-accordion-body" *ngIf="expanded.contacto()">
+      <div class="xtein-ubicaciones__form-grid">
+        <div class="xtein-ubicaciones__field-inline">
+          <xtein-label class="xtein-ubicaciones__label-inline" for="cli-url">Url/Website</xtein-label>
+          <div class="xtein-ubicaciones__control-inline">
+            <xtein-input
+              id="cli-url"
+              [(ngModel)]="contactoAdicional.URL"
+              (ngModelChange)="updateContacto()"
+              [readOnly]="readOnly"
+              placeholder="https://www.ejemplo.com"
+            ></xtein-input>
+          </div>
+        </div>
+
+        <div class="xtein-ubicaciones__field-inline">
+          <xtein-label class="xtein-ubicaciones__label-inline" for="cli-ciiu">Actividad económica</xtein-label>
+          <div class="xtein-ubicaciones__control-inline">
+            <xtein-input
+              id="cli-ciiu"
+              [(ngModel)]="contactoAdicional.CIIU"
+              (ngModelChange)="updateContacto()"
+              [readOnly]="readOnly"
+              placeholder="Código CIIU"
+            ></xtein-input>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acordeón 2: Correos -->
+  <div class="xtein-accordion-item">
+    <div class="xtein-accordion-header" (click)="toggleSection('correos')">
+      <div class="xtein-accordion-icon">
+        <svg *ngIf="expanded.correos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg *ngIf="!expanded.correos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <span class="xtein-accordion-title">Correos ({{ emails.length }})</span>
+    </div>
+    <div class="xtein-accordion-body" *ngIf="expanded.correos()">
+      <xtein-data-grid
+        id="grid-emails"
+        [dataSource]="emails"
+        [columns]="emailColumns"
+        [toolbarVisible]="!readOnly"
+        [toolbarActions]="emailToolbarActions"
+        searchPlaceholder="Buscar en correos…"
+      >
+      </xtein-data-grid>
+    </div>
+  </div>
+
+  <!-- Acordeón 3: Direcciones -->
+  <div class="xtein-accordion-item">
+    <div class="xtein-accordion-header" (click)="toggleSection('direcciones')">
+      <div class="xtein-accordion-icon">
+        <svg *ngIf="expanded.direcciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg *ngIf="!expanded.direcciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <span class="xtein-accordion-title">Direcciones ({{ direcciones.length }})</span>
+    </div>
+    <div class="xtein-accordion-body" *ngIf="expanded.direcciones()">
+      <xtein-data-grid
+        id="grid-direcciones"
+        [dataSource]="direcciones"
+        [columns]="direccionColumns"
+        [toolbarVisible]="!readOnly"
+        [toolbarActions]="dirToolbarActions"
+        searchPlaceholder="Buscar en direcciones…"
+      >
+      </xtein-data-grid>
+    </div>
+  </div>
+
+  <!-- Acordeón 4: Teléfonos -->
+  <div class="xtein-accordion-item">
+    <div class="xtein-accordion-header" (click)="toggleSection('telefonos')">
+      <div class="xtein-accordion-icon">
+        <svg *ngIf="expanded.telefonos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg *ngIf="!expanded.telefonos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <span class="xtein-accordion-title">Teléfonos ({{ telefonos.length }})</span>
+    </div>
+    <div class="xtein-accordion-body" *ngIf="expanded.telefonos()">
+      <xtein-data-grid
+        id="grid-telefonos"
+        [dataSource]="telefonos"
+        [columns]="telefonoColumns"
+        [toolbarVisible]="!readOnly"
+        [toolbarActions]="telToolbarActions"
+        searchPlaceholder="Buscar en teléfonos…"
+      >
+      </xtein-data-grid>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Dirección -->
+  <div class="xtein-modal-backdrop" *ngIf="modalVisible() === 'direccion'">
+    <div class="xtein-modal-card">
+      <div class="xtein-modal-header">
+        <h4 class="xtein-modal-title">Agregar Nueva Dirección</h4>
+        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="xtein-modal-body">
+        <div class="xtein-modal-field">
+          <xtein-label for="dir-tipo">Tipo Dirección</xtein-label>
+          <xtein-input id="dir-tipo" [(ngModel)]="newDir.TIPO_DIRECCION" placeholder="PRINCIPAL / SUCURSAL / ENTREGA"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="dir-dom">Dirección Completa *</xtein-label>
+          <xtein-input id="dir-dom" [(ngModel)]="newDir.DOMICILIO" placeholder="Calle / Carrera / Avenida / Edificio"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="dir-barrio">Barrio</xtein-label>
+          <xtein-input id="dir-barrio" [(ngModel)]="newDir.BARRIO" placeholder="Nombre del barrio"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="dir-ciudad">Ciudad / Municipio</xtein-label>
+          <xtein-input id="dir-ciudad" [(ngModel)]="newDir.NOMBRE_UBICACION" placeholder="Ciudad"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="dir-cp">Código Postal</xtein-label>
+          <xtein-input id="dir-cp" [(ngModel)]="newDir.CODIGO_POSTAL" placeholder="080001"></xtein-input>
+        </div>
+      </div>
+      <div class="xtein-modal-footer">
+        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
+        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveNewDireccion()">Guardar Dirección</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Teléfono -->
+  <div class="xtein-modal-backdrop" *ngIf="modalVisible() === 'telefono'">
+    <div class="xtein-modal-card">
+      <div class="xtein-modal-header">
+        <h4 class="xtein-modal-title">Agregar Nuevo Teléfono</h4>
+        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="xtein-modal-body">
+        <div class="xtein-modal-field">
+          <xtein-label for="tel-tipo">Tipo Teléfono</xtein-label>
+          <xtein-input id="tel-tipo" [(ngModel)]="newTel.TIPO_TELEFONO" placeholder="CELULAR / FIJO / PBX"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="tel-num">Número Telefónico *</xtein-label>
+          <xtein-input id="tel-num" [(ngModel)]="newTel.TELEFONO" placeholder="3001234567"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="tel-ext">Extensión</xtein-label>
+          <xtein-input id="tel-ext" [(ngModel)]="newTel.EXTENSION" placeholder="Opcional"></xtein-input>
+        </div>
+      </div>
+      <div class="xtein-modal-footer">
+        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
+        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveNewTelefono()">Guardar Teléfono</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Email -->
+  <div class="xtein-modal-backdrop" *ngIf="modalVisible() === 'email'">
+    <div class="xtein-modal-card">
+      <div class="xtein-modal-header">
+        <h4 class="xtein-modal-title">Agregar Correo Electrónico</h4>
+        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="xtein-modal-body">
+        <div class="xtein-modal-field">
+          <xtein-label for="em-addr">Correo Electrónico *</xtein-label>
+          <xtein-input id="em-addr" [(ngModel)]="newEmail.EMAIL" placeholder="cliente@dominio.com"></xtein-input>
+        </div>
+        <div class="xtein-modal-field">
+          <xtein-label for="em-etiq">Etiqueta / Uso</xtein-label>
+          <xtein-input id="em-etiq" [(ngModel)]="newEmail.ETIQUETA" placeholder="FACTURACION / COBRANZAS / GENERAL"></xtein-input>
+        </div>
+      </div>
+      <div class="xtein-modal-footer">
+        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
+        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveNewEmail()">Guardar Correo</button>
+      </div>
+    </div>
+  </div>
+</div>

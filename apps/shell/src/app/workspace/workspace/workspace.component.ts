@@ -21,6 +21,7 @@ import {
 import {
   WorkspaceTabHostComponent
 } from '../workspace-tab-host/workspace-tab-host.component';
+import { WorkspaceCloseGuard } from './workspace-close.guard';
 
 
 /**
@@ -55,6 +56,7 @@ export class Workspace
   implements
     AfterViewInit,
     OnDestroy {
+  private readonly closeGuard = new WorkspaceCloseGuard(this.workspaceRuntime);
 
   /**
    * Same default application icon used by Sidebar.
@@ -517,13 +519,13 @@ export class Workspace
    * @param event Mouse event.
    * @param tab Workspace tab.
    */
-  closeTab(
+  async closeTab(
     event:
       MouseEvent,
 
     tab:
       WorkspaceTab
-  ): void {
+  ): Promise<void> {
 
     event.stopPropagation();
 
@@ -536,10 +538,7 @@ export class Workspace
     }
 
 
-    this.workspaceRuntime
-      .closeApplication(
-        tab.applicationId
-      );
+    await this.closeGuard.close(tab.applicationId);
 
 
     if (

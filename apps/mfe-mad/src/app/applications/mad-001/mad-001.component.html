@@ -281,3 +281,4 @@
     [applicationId]="applicationId" table="APLICACIONES_ASOCIADAS"
     [currentFilter]="currentReportFilter()" [allFilter]="queryFilter()"></xtein-record-reports>
 }
+<xtein-record-settings [visible]="settingsVisible()" [applicationId]="applicationId" (closed)="settingsVisible.set(false)" />

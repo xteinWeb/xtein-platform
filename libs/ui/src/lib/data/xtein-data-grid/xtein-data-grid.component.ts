@@ -19,6 +19,7 @@ export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChang
   @Input() height: string | number = '100%';
   @Input() disabled = false;
   @Input() selectionMode: 'none' | 'single' | 'multiple' = 'none';
+  @Input() showCheckBoxesMode: 'none' | 'onClick' | 'onLongTap' | 'always' = 'onClick';
   @Input() selectedRowKeys: K[] = [];
   @Input() allowUpdating = false;
   @Input() searchEnabled = true;
@@ -52,6 +53,11 @@ export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChang
   hasEditData():boolean {return this.grid?.instance.hasEditData() ?? false;}
   filter(expression:unknown[]):void {this.grid?.instance.filter(expression);}
   clearDataFilter():void {this.grid?.instance.clearFilter('dataSource');}
+  resetView():void {
+    this.grid?.instance.clearFilter();
+    this.grid?.instance.clearSorting();
+    this.grid?.instance.pageIndex(0);
+  }
   async selectRows(keys:K[],preserve=true):Promise<void> {await this.grid?.instance.selectRows(keys,preserve);}
   async deselectRows(keys:K[]):Promise<void> {await this.grid?.instance.deselectRows(keys);}
   async keyDown(event:KeyDownEvent<T,K>):Promise<void> {

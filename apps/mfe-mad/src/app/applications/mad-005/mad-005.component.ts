@@ -54,7 +54,8 @@ import {
   XteinLoadingComponent,
   XteinNotificationService,
   XteinSelectComponent,
-  XteinTextareaComponent
+  XteinTextareaComponent,
+  XteinRecordSettingsComponent
 } from '@xtein/ui';
 
 import {
@@ -101,7 +102,8 @@ import {
     XteinSelectComponent,
     XteinTextareaComponent,
     XteinDataSourceParametersComponent,
-    XteinLoadingComponent
+    XteinLoadingComponent,
+    XteinRecordSettingsComponent
   ],
 
   providers: [
@@ -130,6 +132,7 @@ export class Mad005Component
   readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
+  readonly settingsVisible = signal(false);
   readonly queryFilter = computed(() => buildReportRecordFilter(
     Mad005Application.Table, 'ID_ORIGEN_DATO', this.records().map(record => record.ID_ORIGEN_DATO)));
   readonly viewColumns = Mad005RecordViewColumns;
@@ -180,6 +183,7 @@ export class Mad005Component
       this.filterVisible.set(false);
       this.viewVisible.set(false);
       this.reportsVisible.set(false);
+      this.settingsVisible.set(false);
     }
   });
   readonly applicationId =
@@ -673,6 +677,9 @@ export class Mad005Component
         break;
       case ToolbarAction.View:
         this.viewVisible.set(true);
+        break;
+      case ToolbarAction.Configure:
+        this.settingsVisible.set(true);
         break;
       case ToolbarAction.Print:
         this.reportsVisible.set(true);

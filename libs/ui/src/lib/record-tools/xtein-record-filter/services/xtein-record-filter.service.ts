@@ -45,10 +45,6 @@ export class XteinRecordFilterService {
 
     const normalizedTableBase =
       tableBase?.trim();
-console.log(
-    'TABLA QUE SE ENVIA AL BACKEND:',
-    normalizedTableBase
-  );
     if (!normalizedTableBase) {
 
       throw new Error(

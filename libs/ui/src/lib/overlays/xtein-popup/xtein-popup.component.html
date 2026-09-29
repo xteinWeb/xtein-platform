@@ -1,4 +1,4 @@
-<dx-popup [visible]="visible" (visibleChange)="visibleChange.emit($event)" [title]="title"
+<dx-popup [visible]="visible" (visibleChange)="onVisibleChange($event)" (onHiding)="onHiding()" [title]="title"
   [width]="width" [height]="height" maxWidth="95vw" maxHeight="90dvh"
   [showCloseButton]="showCloseButton" [hideOnOutsideClick]="hideOnOutsideClick" [dragEnabled]="true">
   <div class="xtein-popup__content"><ng-content /></div>

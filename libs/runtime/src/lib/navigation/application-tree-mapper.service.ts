@@ -140,8 +140,14 @@ export class ApplicationTreeMapperService {
       );
 
 
-    return this.removeDuplicateApplications(
-      mappedItems
+    const uniqueItems =
+      this.removeDuplicateApplications(
+        mappedItems
+      );
+
+
+    return this.sortApplicationsByName(
+      uniqueItems
     );
   }
 
@@ -574,6 +580,77 @@ export class ApplicationTreeMapperService {
     return Array.from(
       applications.values()
     );
+  }
+
+
+  /**
+   * Sorts the application tree nodes alphabetically by name within each hierarchical level.
+   *
+   * Root modules (parent: XTEIN) and all child applications within each module or folder
+   * are ordered alphabetically using Spanish locale comparison.
+   *
+   * @param items Unsorted application tree nodes.
+   * @returns Hierarchically sorted application tree nodes.
+   */
+  private sortApplicationsByName(
+    items: readonly ApplicationTreeNode[]
+  ): readonly ApplicationTreeNode[] {
+
+    if (!items || items.length === 0) {
+      return [];
+    }
+
+    const byParent = new Map<string, ApplicationTreeNode[]>();
+
+    for (const item of items) {
+      const parentKey = (item.parentApplicationId ?? '').trim().toUpperCase();
+      let list = byParent.get(parentKey);
+      if (!list) {
+        list = [];
+        byParent.set(parentKey, list);
+      }
+      list.push(item);
+    }
+
+    // Sort siblings alphabetically by name
+    for (const list of byParent.values()) {
+      list.sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' })
+      );
+    }
+
+    const result: ApplicationTreeNode[] = [];
+    const visited = new Set<string>();
+
+    const traverse = (parentKey: string): void => {
+      const children = byParent.get(parentKey);
+      if (!children) return;
+
+      for (const child of children) {
+        const id = child.applicationId.trim().toUpperCase();
+        if (visited.has(id)) continue;
+
+        visited.add(id);
+        result.push(child);
+        traverse(id);
+      }
+    };
+
+    // Traverse root nodes first
+    traverse('XTEIN');
+    traverse('');
+
+    // Append any remaining or disconnected nodes maintaining their sorted order
+    for (const item of items) {
+      const id = item.applicationId.trim().toUpperCase();
+      if (!visited.has(id)) {
+        visited.add(id);
+        result.push(item);
+        traverse(id);
+      }
+    }
+
+    return result;
   }
 
 

@@ -67,6 +67,18 @@ export interface LegacyRecordToolbarPermissionsResponse {
     boolean | number | string | null;
 
   /**
+   * Database column CONFIGURE permission alias.
+   */
+  CONFIGURAR?:
+    boolean | number | string | null;
+
+  /**
+   * Lowercase CONFIGURE permission alias.
+   */
+  configurar?:
+    boolean | number | string | null;
+
+  /**
    * Existing backend error message.
    */
   ErrMensaje?:
