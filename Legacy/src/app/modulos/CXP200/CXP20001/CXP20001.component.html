@@ -1,0 +1,231 @@
+<cdk-accordion class="accordion-container" [multi]="true">
+  <cdk-accordion-item
+      *ngFor="let item of itemsAco; let index = index;"
+      #accordionItem="cdkAccordionItem"
+      class="accordion-item"
+      role="button"
+      tabindex="0"
+      [expanded]="accordionExpand[index]"
+      [attr.id]="'accordion-header-' + index"
+      [attr.aria-expanded]="accordionItem.expanded"
+      [attr.aria-controls]="'accordion-body-' + index"
+  >
+    <!-- PESTAÑAS -->
+    <div
+        class="accordion-item-header"
+        (click)="accordionItem.toggle()"
+    >
+      <div>
+          <span class="accordion-item-description" *ngIf="accordionItem.expanded">
+              <i class="icon-chevron-up-xs"></i>
+          </span>
+          <span class="accordion-item-description" *ngIf="!accordionItem.expanded">
+              <i class="icon-chevron-down-xs"></i>
+          </span>
+      </div>
+      <span class="accordion-caption"> {{ item }} </span>
+  </div>
+
+  <!-- GRUPO DE DATOS -->
+  <div
+    class="accordion-item-body"
+    role="region"
+    [style.display]="accordionItem.expanded ? '' : 'none'"
+    [attr.id]="'accordion-body-' + index"
+    [attr.aria-labelledby]="'accordion-header-' + index"
+  >
+    <div *ngIf="item === 'Cupo'">
+        <div>
+          <dx-form
+            #formIdentificacion
+            id="formIdentificacion"
+            labelLocation="top"
+            [formData]="FAdicAcreedor"
+            [readOnly]="readOnly"
+            [colCount]="2"
+            labelLocation="left"
+            >
+
+          <dxi-item itemType="group" cssClass="first-group" [colCount]="1" [editorOptions]="{ width: '70%' }">
+              <dxi-item dataField="CUPO_CREDITO" >
+                  <dxo-label text="Cupo crédito"></dxo-label>
+                  <div *dxTemplate>
+                      <dx-number-box 
+                          format="#,##0" 
+                          [readOnly]="readOnly"
+                          [(value)]="FAdicAcreedor.CUPO_CREDITO" 
+                          (onValueChanged)="onValueChanged($event, 'cupo')" >
+                      </dx-number-box>
+                  </div>
+              </dxi-item>
+              <dxi-item dataField="TIEMPO_ENTREGA" >
+                  <dxo-label text="Días entrega"></dxo-label>
+                  <div *dxTemplate>
+                      <dx-number-box 
+                          format="#,##0" 
+                          [readOnly]="readOnly"
+                          [(value)]="FAdicAcreedor.TIEMPO_ENTREGA"
+                          (onValueChanged)="onValueChanged($event, 'tiempo')"  >
+                      </dx-number-box>
+                  </div>
+              </dxi-item>
+            </dxi-item>
+          </dx-form>
+        </div>
+    </div>
+
+    <div *ngIf="item === 'Evaluación'">
+      <CXP20002
+        [events]="eventsSubjectProvPro.asObservable()"
+        (onGuardarCambios)="onRespuestaProvPro($event)">
+      </CXP20002>
+    </div>
+
+    <div *ngIf="item === 'Bancos'">
+      <app-bancoscuentas
+        [events]="eventsSubjectBancos.asObservable()"
+        (onRespuestaSelecc)="onRespuestaBancos($event)"
+        >
+      </app-bancoscuentas>
+    </div>
+
+    <div *ngIf="item === 'Condiciones'">
+      <div class="hm-dx-data">
+        <dx-data-grid
+          #gridCondProv
+          id="gridCondProv"
+          [dataSource]="DCondiciones"
+          [allowColumnResizing]="true"
+          columnResizingMode="nextColumn"
+          [focusedRowEnabled]="true"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          keyExpr="ITEM"
+          noDataText=""
+          [showBorders]="true"
+          (onInitNewRow)="initNewRow($event)"
+          (onRowInserting)="insertingRow($event)"
+          (onRowInserted)="insertedRow($event)"
+          (onRowUpdating)="updatingRow($event)"
+          (onRowUpdated)="updatedRow($event)"
+          (onRowRemoved)="removedRow($event)"
+          (onEditingStart)="onEditingStart($event)"
+          (onEditorPreparing)="onEditorPreparing($event)"
+          (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+          (onRowPrepared)="onRowPrepared($event)"
+          (onRowValidating)="onRowValidating($event)"
+          (onFocusedRowChanged)="onFocusedRowChanged($event)"
+          (onEditCanceled)="onEditCanceled($event)"
+          (onCellClick)="onCellClick($event)"
+          (onCellPrepared)="onCellPrepared($event)"
+        >
+      
+          <dxo-editing
+            mode="cell"
+            [useIcons]="false" 
+            [allowUpdating]="esEdicion"
+            [allowDeleting]="false"
+            [allowAdding]="esEdicion"
+            >
+            <dxo-texts
+              confirmDeleteMessage="">
+            </dxo-texts>
+          </dxo-editing>      
+          <dxo-selection
+              selectAllMode="allPages"
+              [showCheckBoxesMode]="esVisibleSelecc"
+              mode="multiple">
+          </dxo-selection>
+      
+          <dxi-column dataField="ITEM"
+            [visible]="false">
+          </dxi-column>
+      
+          <dxi-column dataField="ID_CONDICION"
+            caption="Condición"
+            calculateDisplayValue="ID_CONDICION"
+            editCellTemplate="listaCondiciones">
+          </dxi-column>
+      
+          <dxi-column dataField="NOMBRE_CONDICION"
+            caption="Nombre condición"
+            [allowEditing]="false">
+          </dxi-column>
+      
+          <div *dxTemplate="let cellInfo of 'listaCondiciones'">
+            <dx-select-box 
+                #xs_ID_CONDICION
+                id="xs_ID_CONDICION"
+                [dataSource]="DListaCond" 
+                [(value)]="cellInfo.data.ID_CONDICION" 
+                valueExpr="ID_CONDICION"
+                displayExpr="ID_CONDICION"
+                [searchEnabled]="true"
+                searchMode="contains"
+                [searchExpr]="['ID_CONDICION', 'DESCRIPCION']"
+                [dropDownOptions]="dropDownOptions"
+                (onOpened)="onOpenedUbic($event)"
+                (onValueChanged)="onSeleccRowCond($event, cellInfo)">
+    
+                <div *dxTemplate="let data of 'item'">
+                    <div style="width: 20%; float:left">
+                        {{ data.ID_CONDICION }}
+                    </div>
+    
+                    <div style="width: 60%; float:right; 
+                                white-space: nowrap; 
+                                overflow: hidden;
+                                text-overflow: ellipsis; "
+                    >
+                        {{ data.DESCRIPCION }}
+                    </div>
+                </div>
+                <div *dxTemplate="let data of 'tempEncab'" style="width: 100%;">
+                    <div id="btnCompoRefreshSbox">
+                        <dx-button icon="refresh" (onClick)="refreshClick('condiciones')"></dx-button>
+                    </div>
+                </div>
+    
+            </dx-select-box>
+    
+        </div>
+      
+          <dxo-toolbar *ngIf="esEdicion">
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="plus" matTooltip="Nuevo" (onClick)="operGrid($event,'new')" *ngIf="rowNew">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="edit" matTooltip="Actualizar" (onClick)="operGrid($event,'update')" *ngIf="rowEdit">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="trash" matTooltip="Eliminar" (onClick)="operGrid($event,'delete')" *ngIf="rowDelete">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="todo" matTooltip="Guardar" (onClick)="operGrid($event,'save')" *ngIf="rowApplyChanges">
+                </dx-button>
+              </div>
+            </dxi-item>
+            <dxi-item location="before">
+              <div *dxTemplate>
+                <dx-button icon="undo" matTooltip="Cancelar" (onClick)="operGrid($event,'cancel')" *ngIf="rowApplyChanges">
+              </dx-button>
+                </div>
+            </dxi-item>
+          </dxo-toolbar>
+        </dx-data-grid>
+      </div>
+    
+    </div>
+  </div>
+  </cdk-accordion-item>
+</cdk-accordion>

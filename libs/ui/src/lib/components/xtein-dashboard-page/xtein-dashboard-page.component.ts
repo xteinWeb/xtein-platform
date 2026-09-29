@@ -5,6 +5,7 @@ import { XteinDashboardViewerComponent } from '../xtein-dashboard-viewer/xtein-d
 import { XteinDashboardFrameComponent } from '../xtein-dashboard-frame/xtein-dashboard-frame.component';
 
 @Component({
+  providers: [XteinDashboardDataService],
   selector: 'xtein-dashboard-page', standalone: true,
   imports: [XteinDashboardViewerComponent, XteinDashboardFrameComponent],
   templateUrl: './xtein-dashboard-page.component.html',

@@ -30,3 +30,21 @@ export * from './lib/record-tools/xtein-record-reports/xtein-record-reports.comp
 export * from './lib/components/xtein-dashboard-viewer/xtein-dashboard-viewer.component';
 export * from './lib/components/xtein-dashboard-page/xtein-dashboard-page.component';
 export * from './lib/components/xtein-dashboard-frame/xtein-dashboard-frame.component';
+
+export * from './lib/forms/xtein-date/xtein-date.component';
+
+export * from './lib/overlays/xtein-popup/xtein-popup.component';
+export * from './lib/forms/xtein-checkbox/xtein-checkbox.component';
+export * from './lib/data/xtein-data-grid/xtein-data-grid.component';
+export * from './lib/data/xtein-data-grid/models/xtein-data-grid.model';
+export * from './lib/forms/xtein-label/xtein-label.component';
+export * from './lib/charts/xtein-chart/xtein-chart.component';
+export * from './lib/charts/xtein-chart/models/xtein-chart.model';
+export * from './lib/charts/xtein-pie-chart/xtein-pie-chart.component';
+export * from './lib/charts/xtein-pie-chart/models/xtein-pie-chart.model';
+export * from './lib/charts/xtein-bar-gauge/xtein-bar-gauge.component';
+export * from './lib/charts/xtein-bar-gauge/models/xtein-bar-gauge.model';
+export * from './lib/scheduling/xtein-scheduler/xtein-scheduler.component';
+export * from './lib/scheduling/xtein-scheduler/models/xtein-scheduler.model';
+export * from './lib/forms/xtein-html-editor/xtein-html-editor.component';
+export * from './lib/forms/xtein-lookup/xtein-lookup.component';

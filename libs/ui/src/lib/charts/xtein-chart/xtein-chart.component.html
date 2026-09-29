@@ -1,0 +1,12 @@
+<dx-chart [size]="$any(widgetSize)" [dataSource]="dataSource"
+ [legend]="$any(options.legend)"
+ [series]="$any(options.series)"
+ [valueAxis]="$any(options.valueAxis)"
+ [argumentAxis]="$any(options.argumentAxis)"
+ [margin]="$any(options.margin)"
+ [annotations]="$any(options.annotations)"
+ [commonAnnotationSettings]="$any(annotationSettings)" >
+ <ng-container *dxTemplate="let data of 'xteinAnnotation'">
+ <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{$implicit:data}" />
+ </ng-container>
+</dx-chart>

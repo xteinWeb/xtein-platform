@@ -15,6 +15,9 @@ export interface XteinApiConfig {
    * http://localhost:3000
    */
   baseUrl: string;
+
+  /** Existing electronic-document service, configured by the Shell. */
+  electronicDocumentBaseUrl?: string;
 }
 
 /**

@@ -54,6 +54,7 @@ module.exports =
      * the Shell and the loaded microfrontends.
      */
     sharedMappings: [
+      '@xtein/logging',
 
       '@xtein/api-client',
 

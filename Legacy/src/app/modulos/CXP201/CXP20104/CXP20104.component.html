@@ -1,0 +1,110 @@
+<!-- Sub-Menú de opciones -->
+<dx-popup
+    #popGenElec
+    id="popGenElec"
+    width="1000"
+    [height]="'90%'"
+    [showTitle]="true"
+    [title]="titEgresos"
+    [hideOnOutsideClick]="false"
+    [showCloseButton]="true"
+    (onShown)="onShown($event)"
+    (onHidden)="onHidden($event)"
+    (onInitialized)="onInitializedPopUp($event)" 
+    (onResizeEnd)="onResizeEnd($event)"
+    [(visible)]="visiblePopup">
+
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonAceptar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxButton"
+      toolbar="bottom"
+      location="after"
+      [options]="configBotonCancelar"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      toolbar="bottom"
+      location="before"
+      text="Total pago electrónico:"
+    >
+    </dxi-toolbar-item>
+    <dxi-toolbar-item
+      widget="dxTextBox"
+      toolbar="bottom"
+      location="before"
+      [options]="configSeleccFacturas"
+    >
+    </dxi-toolbar-item>
+
+    <div *dxTemplate="let data of 'content'">
+        <dx-data-grid
+            #gridGenElec
+            id="gridGenElec"
+            class="xt-datagrid"
+            height="78%"
+            noDataText="" 
+            [dataSource]="DPreEgresos"
+            keyExpr="EGRESO"
+            [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+            [selectedRowKeys]="seleccPreEgresos"
+            [allowColumnResizing]="true"
+            columnResizingMode="nextColumn"
+            [showBorders]="true"
+            [focusedRowEnabled]="true"
+            (onCellPrepared)="onCellPrepared($event)"
+            (onEditingStart)="onEditingStart($event)"
+            (onSelectionChanged)="onSelectionFact($event)"
+        >   
+          <dxi-column 
+              dataField="EGRESO"
+              caption="Egreso" 
+              [allowEditing]="false"
+          >
+          </dxi-column>
+          <dxi-column 
+              dataField="FECHA"
+              caption="Fecha" 
+              [allowEditing]="false"
+          >
+          </dxi-column>
+          <dxi-column 
+              dataField="ID_PROVEEDOR"
+              caption="ID Proveedor" 
+              [allowEditing]="false"
+              [groupIndex]="0"
+          >
+          </dxi-column>
+          <dxi-column 
+              dataField="NOMBRE_PROVEEDOR"
+              caption="Nombre Proveedor" 
+              [allowEditing]="false"
+          >
+          </dxi-column>
+          <dxi-column 
+              dataField="TOTAL"
+              caption="Total" 
+              alignment="right"
+              dataType="number"
+              format="#,###.00"
+              [allowEditing]="false"
+          >
+          </dxi-column>
+          <dxi-column 
+              dataField="EMAILS" 
+              caption="Correos electrónicos" 
+              [allowEditing]="false"
+          >
+          </dxi-column>
+
+        </dx-data-grid>
+
+    </div>
+
+</dx-popup>
+

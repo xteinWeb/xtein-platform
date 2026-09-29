@@ -1,0 +1,150 @@
+.card-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.premium-card {
+    border-top: 4px solid #125edc;
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.program-button {
+    height: 32px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.matriz-info-icon {
+    color: #ff9800;
+    cursor: help;
+    font-size: 18px;
+}
+
+.tooltip-text {
+    margin: 0;
+    padding: 5px;
+    font-size: 13px;
+    color: #fff;
+    max-width: 250px;
+}
+
+/* Summary Boxes in Header */
+.summary-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    min-width: 80px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.summary-box .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #666;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.summary-box .value {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.summary-box.total {
+    border-color: #125edc;
+    background-color: rgba(18, 94, 220, 0.05);
+}
+
+.summary-box.total .value {
+    color: #125edc;
+}
+
+.summary-box.pendientes {
+    border-color: #ff9800;
+    background-color: rgba(255, 152, 0, 0.05);
+}
+
+.summary-box.pendientes .value {
+    color: #ff9800;
+}
+
+.summary-box.programado {
+    border-color: #2e7d32;
+    background-color: rgba(46, 125, 50, 0.05);
+}
+
+.summary-box.programado .value {
+    color: #2e7d32;
+}
+
+.premium-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.expand-button {
+    background: #f0f4f8;
+    border: 1px solid #d1d9e6;
+    border-radius: 20px;
+    padding: 5px 15px;
+    color: #125edc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.expand-button:hover {
+    background: #125edc;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(18, 94, 220, 0.3);
+}
+
+.grid-container {
+    margin-top: 5px;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: height 0.3s ease-out;
+}
+
+::ng-deep .dx-datagrid-header-panel {
+    padding: 8px;
+    background-color: #f8f9fa;
+}
+
+::ng-deep .dx-datagrid-headers {
+    background-color: #f1f3f5;
+    color: #495057;
+    font-weight: 600;
+}
+
+::ng-deep .dx-datagrid-rows-view .dx-selection.dx-row>td {
+    background-color: rgba(67, 142, 241, 0.1);
+}

@@ -67,6 +67,7 @@ module.exports =
      * XteinDashboardRuntimeService use the same runtime instance.
      */
     sharedMappings: [
+      '@xtein/logging',
 
       '@xtein/api-client',
 

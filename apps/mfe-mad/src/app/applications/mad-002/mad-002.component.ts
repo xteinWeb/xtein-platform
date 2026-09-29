@@ -1,3 +1,4 @@
+import {XteinButtonComponent} from '@xtein/ui';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -75,7 +76,7 @@ import {
   standalone:
     true,
 
-  imports: [
+  imports: [XteinButtonComponent,
     XteinTreeComponent,
     XteinDashboardComponent,
     XteinDashboardFrameComponent,

@@ -1,0 +1,107 @@
+Your global Angular CLI version (15.2.9) is greater than your local version (15.0.5). The local Angular CLI version is used.
+
+To disable this warning use "ng config -g cli.warnings.versionMismatch false".
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+
+Initial Chunk Files   | Names         |  Raw Size
+vendor.js             | vendor        |  40.51 MB |
+main.js               | main          |   9.67 MB |
+styles.css, styles.js | styles        |   2.10 MB |
+polyfills.js          | polyfills     | 314.33 kB |
+scripts.js            | scripts       | 144.48 kB |
+runtime.js            | runtime       |   7.07 kB |
+
+| Initial Total |  52.73 MB
+
+Build at: 2023-07-28T17:19:05.008Z - Hash: 187ec5d1bb908910 - Time: 111678ms
+
+./src/app/modulos/GES001/GES00101/GES00101.component.css?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(135:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+./src/app/modulos/PRO019/PRO01902/PRO01902.component.css?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(10:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+./src/app/modulos/PRO019/PRO01903/PRO01903.component.css?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(30:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+./src/app/shared/Tareas/Principal/GES00.component.css?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(165:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+./src/app/containers/default-layout/default-layout.component.scss?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(52:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+./src/app/containers/default-layout/leftvar/leftvar.component.scss?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(141:3) autoprefixer: start value has mixed support, consider using flex-start instead
+
+./src/app/shared/pasos/pasos.component.scss?ngResource - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+Warning
+
+(13:3) autoprefixer: start value has mixed support, consider using flex-start instead
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/@devexpress/analytics-core/widgets/ace/_binding.js depends on 'ace-builds/src-noconflict/ext-language_tools'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/@devexpress/analytics-core/widgets/ace/_binding.js depends on 'ace-builds/src-noconflict/mode-json'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/@devexpress/analytics-core/widgets/ace/_binding.js depends on 'ace-builds/src-noconflict/mode-sql'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/@devexpress/analytics-core/widgets/ace/_binding.js depends on 'ace-builds/src-noconflict/mode-text'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/@devexpress/analytics-core/widgets/ace/_binding.js depends on 'ace-builds/src-noconflict/theme-ambiance'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/@devexpress/analytics-core/widgets/ace/_binding.js depends on 'ace-builds/src-noconflict/theme-dreamweaver'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devexpress-reporting/designer/internal/scripting/_languageHelper.js depends on 'ace-builds/src-noconflict/ace'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devexpress-reporting/designer/internal/scripting/_languageHelper.js depends on 'ace-builds/src-noconflict/mode-csharp'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devexpress-reporting/designer/internal/scripting/_languageHelper.js depends on 'ace-builds/src-noconflict/mode-vbscript'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devextreme/esm/file_management/object_provider.js depends on 'jszip'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devextreme/esm/ui/diagram/diagram.importer.js depends on 'devexpress-diagram'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devextreme/esm/ui/gantt/gantt_importer.js depends on 'devexpress-gantt'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/node_modules/devextreme/esm/ui/html_editor/quill_importer.js depends on 'devextreme-quill'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/src/app/modulos/COM01/COM01.component.ts depends on 'exceljs'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/src/app/modulos/COM01/COM01.component.ts depends on 'file-saver'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /media/part1/director/xtein2.0/xtein-web-2.0/src/app/views/login/login.component.ts depends on 'sweetalert2'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+
+
+** Angular Live Development Server is listening on localhost:4900, open your browser on http://localhost:4900/ **
+
+
+✔ Compiled successfully.

@@ -1,0 +1,253 @@
+<div class="xt-gesptreelist xt-gespdatagrid" id="allInfo">
+
+  <!-- Toolbar superior -->
+  <dx-toolbar style="position: absolute; z-index: 1000; width:max-content; margin-left: 10px;">
+    <dxi-item location="before">
+      <div *dxTemplate style="margin-left: 10px; display: flex; gap: 15px; align-items: center; width:max-content">
+        <!-- Selector de tipo de vista -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-weight: 500; color: #333;">Tipo de Vista:</span>
+          <dx-select-box
+            [dataSource]="opcionesTipoVista"
+            displayExpr="texto"
+            valueExpr="valor"
+            [(value)]="tipoVistaSeleccionado"
+            [width]="150"
+            [showClearButton]="false"
+            (onValueChanged)="onTipoVistaChanged($event)">
+          </dx-select-box>
+        </div>
+        
+        <!-- Botón Generar OP -->
+        <dx-button
+          text="Generar OP"
+          icon="plus"
+          type="success"
+          stylingMode="contained"
+          class="align-self-end"
+          [width]="'auto'"
+          [disabled]="selectedRowKeys.length > 0 ? false : true"
+          (onClick)="generarOrdenOP($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+
+  <!-- Tree List Principal -->
+  <dx-tree-list
+    #treeListProduccion
+    id="treeListProduccion"
+    width="100%"
+    style="min-height: 600px; max-height: 750px; padding: 20px 10px;"
+    columnResizingMode="widget"
+    rootValue="RAIZ"
+    keyExpr="id"
+    parentIdExpr="parent"
+    [dataSource]="datosProduccionTree"
+    [selectedRowKeys]="selectedRowKeys"
+    [showBorders]="true"
+    [autoExpandAll]="false"
+    [columnAutoWidth]="true"
+    [hoverStateEnabled]="true"
+    [focusedRowEnabled]="true"
+    [allowColumnResizing]="true"
+    [columnHidingEnabled]="true"
+    [rowAlternationEnabled]="true"
+    [allowColumnReordering]="false"
+    [showRowLines]="true"
+    [wordWrapEnabled]="false"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onSelectionChanged)="onSelectionChanged($event)"
+  >
+    <dxo-scrolling mode="standard"></dxo-scrolling>
+    <dxo-search-panel [visible]="true" [width]="250"></dxo-search-panel>
+    <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+    <dxo-pager 
+      [visible]="true"
+      [showPageSizeSelector]="true" 
+      [allowedPageSizes]="[10, 25, 50, 100]"
+      [showInfo]="true"
+      [showNavigationButtons]="true"
+      [displayMode]="'full'">
+    </dxo-pager>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+    <dxo-column-chooser [enabled]="true" mode="select" [allowSearch]="true"></dxo-column-chooser>
+
+    <!-- Configuración de selección -->
+    <dxo-selection
+      mode="multiple"
+      selectAllMode="allPages"
+      showCheckBoxesMode="onClick"
+    ></dxo-selection>
+
+
+
+    <!-- Columna Pedido Cliente OP -->
+    <dxi-column 
+      dataField="pedidoClienteOp"
+      caption="Pedido - Cliente - OP"
+      [width]="300"
+      [minWidth]="250"
+    ></dxi-column>
+
+    <!-- Columna Producto -->
+    <dxi-column
+      dataField="producto"
+      caption="Producto"
+      [width]="120"
+      [minWidth]="100"
+    ></dxi-column>
+
+    <!-- Columna Nombre del Producto -->
+    <dxi-column
+      dataField="nombreProducto"
+      caption="Nombre del Producto"
+      [width]="250"
+      [minWidth]="200"
+    ></dxi-column>
+
+    <!-- Columna Fecha de entrega -->
+    <dxi-column 
+      dataField="fechaEntrega"
+      caption="Fecha de entrega"
+      dataType="datetime"
+      [width]="150"
+      [minWidth]="130"
+      format="dd/MM/yyyy"
+    ></dxi-column>
+
+    <!-- Columna Cantidad -->
+    <dxi-column
+      dataField="cantidad"
+      caption="Cantidad"
+      [width]="100"
+      [minWidth]="80"
+      dataType="number"
+      format="#,##0"
+    ></dxi-column>
+
+    <!-- Columna Fecha/Hora -->
+    <dxi-column 
+      dataField="fechaHoraProduccion"
+      caption="Fecha/Hora producción"
+      dataType="datetime"
+      [width]="180"
+      [minWidth]="160"
+      format="dd/MM/yyyy HH:mm"
+    ></dxi-column>
+
+    <!-- Columna Planta -->
+    <!-- <dxi-column 
+      dataField="planta"
+      caption="Planta"
+      [width]="150"
+      [minWidth]="120"
+    ></dxi-column> -->
+
+
+    <!-- Columna Flujo de Producción -->
+    <dxi-column 
+      dataField="seccion"
+      caption="{{ tipoVistaSeleccionado === 'Básica' ? 'Sección' : 'Flujo de Producción' }}"
+      [minWidth]="200"
+      alignment="left"
+      [allowGrouping]="false"
+      [allowFiltering]="false"
+      cellTemplate="flujoTemplate">
+    </dxi-column>
+
+    <!-- Template para flujo de producción -->
+    <div *dxTemplate="let cellInfo of 'flujoTemplate'">
+      <ng-container *ngIf="tipoVistaSeleccionado === 'Básica'">
+        <!-- Vista Básica: mostrar tarjeta de la primera sección -->
+        <div style="display: flex; align-items: center; padding: 5px;" *ngIf="cellInfo.data.primeraSeccion">
+          <div 
+            style="display: flex; flex-direction: column; text-align: left; padding: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+            [ngStyle]="{
+              'background-color': getSectionColor(cellInfo.data.primeraSeccion.estado, 'background'),
+              'color': getSectionColor(cellInfo.data.primeraSeccion.estado, 'color'),
+              'min-width': '160px',
+              'border': '1px solid #707070'
+            }"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; column-gap:10px;">
+              <span style="font-weight: bold; font-size: 12px;">
+                {{ cellInfo.data.primeraSeccion.nombre }}
+              </span>
+            </div>
+            <div style="font-size: 10px; margin-bottom: 2px;">
+              <div style="color: #666;">
+                ⏱️ {{ cellInfo.data.primeraSeccion.tiempoProduccion }}h
+                | 📦 {{ cellInfo.data.primeraSeccion.cantidad }}
+                | 📊 {{ cellInfo.data.primeraSeccion.cantidadProducida }}/{{ cellInfo.data.primeraSeccion.cantidadPendiente }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Fallback si no hay primeraSeccion -->
+        <span *ngIf="!cellInfo.data.primeraSeccion">{{ cellInfo.data.seccion }}</span>
+      </ng-container>
+      
+      <ng-container *ngIf="tipoVistaSeleccionado === 'Estandar'">
+        <!-- Vista Estándar: mostrar flujo horizontal -->
+        <div style="display: flex; gap: 10px; align-items: center; padding: 5px;">
+          
+          <ng-container *ngFor="let seccion of obtenerSeccionesProducto(cellInfo.data); let i = index">
+            
+            <div 
+              style="display: flex; flex-direction: column; text-align: left; padding: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+              [ngStyle]="{
+                'background-color': getSectionColor(seccion.estado, 'background'),
+                'color': getSectionColor(seccion.estado, 'color'),
+                'min-width': '160px',
+                'border': '1px solid #707070'
+              }"
+            >
+            
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; column-gap:10px;">
+                <span style="font-weight: bold; font-size: 12px;">
+                  {{ seccion.nombre }}
+                </span>
+              </div>
+
+              <div style="font-size: 10px; margin-bottom: 2px;">
+                <div style="color: #666;">
+                  ⏱️ {{ seccion.tiempoProduccion }}h
+                  | 📦 {{ seccion.cantidad }}
+                  | 📊 {{ seccion.cantidadProducida }}/{{ seccion.cantidadPendiente }}
+                </div>
+              </div>
+            </div>
+            
+            <span 
+              *ngIf="i < obtenerSeccionesProducto(cellInfo.data).length - 1" 
+              class="flow-arrow"
+              style="font-size: 20px; color: #999; margin: 0 5px;"
+            >
+              &#10145; 
+            </span>
+
+          </ng-container>
+        </div>
+      </ng-container>
+    </div>
+
+  </dx-tree-list>
+
+  <!-- Panel de carga -->
+  <dx-load-panel
+    #loaderPanel
+    shadingColor="rgba(0,0,0,0.6)"
+    [position]="{ of: '#allInfo' }"
+    [visible]="loadingVisible"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    message="Un momento. Cargando datos..."
+    [hideOnOutsideClick]="false"
+    [height]="90"
+    [width]="300"
+  ></dx-load-panel>
+
+</div>

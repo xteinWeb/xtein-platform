@@ -1,3 +1,4 @@
+import { create__APPLICATION_CLASS_PREFIX__Log } from '../constants/__APPLICATION_FILE_PREFIX__-logging.constants';
 import {
   Injectable
 } from '@angular/core';
@@ -27,6 +28,7 @@ import {
  */
 @Injectable()
 export class __APPLICATION_CLASS_PREFIX__Service {
+  private readonly log = create__APPLICATION_CLASS_PREFIX__Log();
 
   constructor(
     private readonly apiClient:
@@ -71,6 +73,7 @@ export class __APPLICATION_CLASS_PREFIX__Service {
 
         data,
 
+        logContext: this.log.Query,
         accessMode:
           XteinApiAccessMode.Authenticated
       });
@@ -184,6 +187,7 @@ export class __APPLICATION_CLASS_PREFIX__Service {
 
         data,
 
+        logContext: this.log.Delete,
         accessMode:
           XteinApiAccessMode.Authenticated
       });
@@ -216,6 +220,7 @@ export class __APPLICATION_CLASS_PREFIX__Service {
 
         data,
 
+        logContext: this.log.Save,
         accessMode:
           XteinApiAccessMode.Authenticated
       });

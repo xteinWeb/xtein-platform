@@ -29,6 +29,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 #
 
 npx ng build session
+npx ng build logging
 npx ng build api-client
 npx ng build auth
 npx ng build sdk

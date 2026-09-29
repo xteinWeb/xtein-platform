@@ -1,0 +1,6 @@
+<dx-html-editor [height]="height" [value]="value" [readOnly]="readOnly" [disabled]="disabled || formDisabled"
+ (onValueChanged)="changed($event)" (onFocusOut)="touched()">
+ <dxo-toolbar [multiline]="multiline" [container]="$any(toolbarContainer)" [items]="$any(toolbarItems)" />
+ <dxo-media-resizing [enabled]="true" />
+ <dxo-image-upload [tabs]="['file','url']" fileUploadMode="base64" />
+</dx-html-editor>

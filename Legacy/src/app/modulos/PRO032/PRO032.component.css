@@ -1,0 +1,31 @@
+
+.form-item-data-MDP {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.form-item-data-MDP > div {
+  width: 100%;
+}
+
+.form-item-data-MDP > div > div {
+  width: 100%;
+}
+
+::ng-deep .dx-datagrid-header-panel {
+  padding: 0px 0px 10px !important;
+}
+
+
+.estado {
+  border-radius: 20px;
+  min-width: 97px;
+  height: 2.5vh;
+  display: flex;
+  place-content: center;
+  align-items: center;
+  font-size: 13px !important;
+}

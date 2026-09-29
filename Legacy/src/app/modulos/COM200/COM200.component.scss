@@ -1,0 +1,56 @@
+::ng-deep .dx-button-text {
+    text-transform: capitalize;
+}
+::ng-deep .tooltipContent div {
+    text-align: left;
+  }
+// ::ng-deep  #container-tabs-principal > app-com200 > div > div.col-12.col-md-7.col-xl-9 > div > div:nth-child(6) {
+//     height: 29vh;
+// }
+::ng-deep #container-tabs-principal > app-com200 > div > div.col-12.col-md-7.col-xl-9 > div  {
+    // height: 88vh;
+}
+::ng-deep .xt-total-editor {
+    font-size: 16px;
+    font-weight: bold;
+}
+.tabIvas {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  trxxx:nth-child(even) {
+    background-color: #dddddd;
+  }
+
+::ng-deep .dx-loadpanel-message {
+    display: block;
+}
+::ng-deep div.dx-overlay-content.dx-loadpanel-content {
+    max-height: 160px !important;
+    max-width: 160px !important;
+    height: 160px !important;
+    width: 160px !important;
+}
+::ng-deep div.dx-loadpanel-indicator.dx-loadindicator.dx-widget {
+    margin-top: -100px;
+}
+
+::ng-deep .highlighted {
+  color: #fff;
+  background-color: #337ab7;
+}
+
+/* Alto de fila */
+::ng-deep #gridProLista .dx-row > td {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  height: 30px;
+}

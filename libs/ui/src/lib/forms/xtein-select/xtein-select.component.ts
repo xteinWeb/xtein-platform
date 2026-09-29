@@ -1,3 +1,4 @@
+import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -31,7 +32,7 @@ import type {
   selector: 'xtein-select',
   standalone: true,
 
-  imports: [
+  imports: [XteinLabelComponent,
     DxSelectBoxModule
   ],
 
@@ -42,6 +43,7 @@ import type {
     ChangeDetectionStrategy.OnPush,
 
   host: {
+    '[attr.id]': 'null',
     class: 'd-block w-100'
   },
 

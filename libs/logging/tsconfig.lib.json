@@ -1,0 +1,1 @@
+{"extends":"../../tsconfig.json","compilerOptions":{"outDir":"../../out-tsc/logging","declaration":true,"declarationMap":true,"types":[]},"include":["src/**/*.ts"],"exclude":["**/*.spec.ts"]}

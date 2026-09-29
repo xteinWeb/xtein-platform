@@ -1,0 +1,66 @@
+.percentage-card {
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.percentage-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #666;
+}
+
+.percentage-card .value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Color schemes for percentages */
+.sobredimensionado {
+    background-color: rgba(223, 62, 62, 0.1);
+    border-color: #df3e3e;
+}
+
+.sobredimensionado .value {
+    color: #df3e3e;
+}
+
+.comprometido {
+    background-color: rgba(255, 152, 0, 0.1);
+    border-color: #ff9800;
+}
+
+.comprometido .value {
+    color: #ff9800;
+}
+
+.programado {
+    background-color: rgba(18, 94, 220, 0.1);
+    border-color: #125edc;
+}
+
+.programado .value {
+    color: #125edc;
+}
+
+.en-proceso {
+    background-color: rgba(53, 204, 172, 0.1);
+    border-color: #35ccac;
+}
+
+.en-proceso .value {
+    color: #35ccac;
+}
+
+.finalizado {
+    background-color: rgba(46, 125, 50, 0.1);
+    border-color: #2e7d32;
+}
+
+.finalizado .value {
+    color: #2e7d32;
+}

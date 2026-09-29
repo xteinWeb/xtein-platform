@@ -1,0 +1,33 @@
+export const environment = {
+  production: true,
+  apiUrlNode: "/e",
+  apinet: "/api",
+  apiDocElec: "http://190.85.54.78:8770",
+  apiUrl: "https://api.prod.colchonessunmoon.com/api",
+  apiWebSocket: "wss://api.prod.colchonessunmoon.com/ws/",
+  URL_XTEIN: "https://xteinweb.colchonessunmoon.com/home",
+  reportes: "https://reportes.colchonessunmoon.com",
+  files: "https://reportes.colchonessunmoon.com",
+  dashboard: "https://dashboard.colchonessunmoon.com",
+  userDiseno: "administratos",
+  passUserDiseno: "2022.Admin",
+  apiDiseno: "https://apidiseno.colchonessunmoon.com/files?command=GetDirContents&arguments=",
+
+};
+
+
+// export const environment = {
+//   production: false,
+//   apiUrlNode: "http://localhost:5000",
+//   apinet: "/api",
+//   apiUrl: "https://api.dev.colchonessunmoon.com/api",
+//   apiWebSocket: "wss://api.dev.colchonessunmoon.com/ws/",
+//   URL_XTEIN: "https://xteinweb.dev.colchonessunmoon.com/home",
+//   reportes: "https://reportes.colchonessunmoon.com",
+//   files: "https://reportes.colchonessunmoon.com",
+//   dashboard: "https://dashboard.colchonessunmoon.com",
+//   userDiseno: "administratos",
+//   passUserDiseno: "2022.Admin",
+//   apiDiseno: "https://apidiseno.colchonessunmoon.com/files?command=GetDirContents&arguments=",
+//   apiDocElec: "http://190.85.54.78:8770",
+// };

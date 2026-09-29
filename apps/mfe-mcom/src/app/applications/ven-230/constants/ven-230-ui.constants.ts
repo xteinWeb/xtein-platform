@@ -1,3 +1,5 @@
+import type { XteinGridColumn } from '@xtein/ui';
+import type { Ven230Lookup } from '../models/ven-230-business.model';
 import {
   RecordToolbarCapabilities
 } from '@xtein/sdk';
@@ -50,24 +52,24 @@ export const Ven230TipoVentaOptions: readonly Ven230Option[] = [
  * Initial empty record for new prefacturas.
  */
 export const Ven230DefaultRecord: Readonly<Ven230PrefacturaRecord> = {
-  ID_UN: '00',
+  ID_UN: '',
   ID_UN_ITEM: '',
-  ID_DOCUMENTO: 'PRE',
+  ID_DOCUMENTO: '',
   NOMBRE_DOCUMENTO: 'Prefactura',
-  PREFIJO: 'PF',
-  CONSECUTIVO: 44,
+  PREFIJO: '',
+  CONSECUTIVO: 0,
   SUFIJO: '',
-  DOCUMENTO: 'PF-44',
+  DOCUMENTO: '',
   DOCUMENTO_FAC: '',
-  FECHA_REGISTRO: new Date().toISOString().substring(0, 10),
-  FECHA: new Date().toISOString().substring(0, 10),
+  FECHA_REGISTRO: null,
+  FECHA: null,
   HORA: null,
   ID_CLIENTE: '',
   NOMBRE_CLIENTE: '',
   ID_ADC: '',
   ID_CONDICION: '',
   DESCRIPCION: '',
-  ID_MONEDA: 'PESOS',
+  ID_MONEDA: '',
   TASA_CAMBIO: 1,
   VIGENCIA: null,
   ID_DOC_SOPORTE: '',
@@ -81,13 +83,13 @@ export const Ven230DefaultRecord: Readonly<Ven230PrefacturaRecord> = {
   GRAVAMENES: '',
   VALOR_COSTOS: 0,
   TOTAL: 0,
-  TIPO_VENTA: 'CONTADO',
+  TIPO_VENTA: '',
   VALOR_CUOTA: 0,
   VALOR_PRIMER_CUOTA: 0,
   FECHA_PRIMER_VENC: null,
   DIAS_CUOTA: 0,
   UM_DIAS_CUOTA: 'DIAS',
-  USUARIO: 'XTEIN',
+  USUARIO: '',
   ESTADO: 'REGISTRADO',
   VALOR_FIN_COSTOS: 0,
   FECHA_OC: null,
@@ -114,5 +116,36 @@ export const Ven230ToolbarCapabilities: Readonly<RecordToolbarCapabilities> = {
   navigation: true,
   download: false,
   print: true,
-  configure: false
+  configure: true
 };
+
+export const Ven230ClientColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_CLIENTE',caption:'Documento del Cliente',width:130},
+ {dataField:'NOMBRE_COMPLETO',caption:'Nombre del Cliente'}
+];
+
+export const Ven230UnitColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_UN',caption:'Código',width:110},
+ {dataField:'NOMBRE',caption:'Nombre de Unidad de Negocio'}
+];
+
+export const Ven230CurrencyColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_MONEDA',caption:'Código',width:130},
+ {dataField:'DESCRIPCION',caption:'Nombre de Moneda'}
+];
+
+export const Ven230SellerColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_ADC',caption:'Código de Vendedor',width:130},
+ {dataField:'NOMBRE_COMPLETO',caption:'Nombre de Vendedor'}
+];
+
+export const Ven230WarehouseColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_UN_BODEGA',caption:'Bodega',width:130},
+ {dataField:'DESCRIPCION',caption:'Descripción'},
+ {dataField:'NOMBRE_UN',caption:'Unidad de Negocio'}
+];
+
+export const Ven230ConditionColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
+ {dataField:'ID_CONDICION',caption:'Código',width:130},
+ {dataField:'CONDICION',caption:'Nombre de Condición/Lista'}
+];

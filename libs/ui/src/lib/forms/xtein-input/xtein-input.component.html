@@ -1,25 +1,4 @@
-@if (label) {
-
-  <label
-    class="form-label"
-    [attr.for]="id || null">
-
-    {{ label }}
-
-    @if (required) {
-
-      <span
-        class="text-danger ms-1"
-        aria-hidden="true">
-        *
-      </span>
-
-    }
-
-  </label>
-
-}
-
+@if (label) { <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="invalid">{{label}}</xtein-label> }
 <dx-text-box
   class="w-100"
   stylingMode="filled"

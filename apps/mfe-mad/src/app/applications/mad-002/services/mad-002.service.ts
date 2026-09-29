@@ -1,3 +1,4 @@
+import { createMad002Log } from '../constants/mad-002-logging.constants';
 import {
   Injectable
 } from '@angular/core';
@@ -26,6 +27,7 @@ import {
  */
 @Injectable()
 export class Mad002Service {
+  private readonly log = createMad002Log();
 
   constructor(
     private readonly apiClient:
@@ -58,6 +60,7 @@ export class Mad002Service {
         data:
           {},
 
+        logContext: this.log.GetApplicationTree,
         accessMode:
           XteinApiAccessMode.Authenticated
       });

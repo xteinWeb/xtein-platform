@@ -1,0 +1,61 @@
+<dx-data-grid
+  #gridPermisosEspeciales
+  [columnAutoWidth]="true"
+  [dataSource]="DPermisosEspeciales"
+  [allowColumnResizing]="true"
+  [columnAutoWidth]="true"
+  columnResizingMode="nextColumn"
+  [focusedRowEnabled]="true"
+  [rowAlternationEnabled]="true"
+  [hoverStateEnabled]="true"
+  keyExpr="ITEM"
+  noDataText=""
+  [showBorders]="true"
+  (onInitNewRow)="initNewRow($event)"
+  (onRowInserting)="insertingRow($event)"
+  (onRowInserted)="insertedRow($event)"
+  (onRowUpdating)="updatingRow($event)"
+  (onRowRemoved)="removedRow($event)"
+  (onToolbarPreparing)="onToolbarPreparingGrid($event)"
+  (onRowPrepared)="onRowPrepared($event)"
+  (onRowValidating)="onRowValidating($event)"
+  (onSelectionChanged)="selectionGrid($event)">
+
+  <dxo-editing
+    mode="cell"
+    [useIcons]="false" 
+    [allowUpdating]="esEdicion"
+    [allowDeleting]="false"
+    [allowAdding]="false">
+    <dxo-texts
+      confirmDeleteMessage="">
+    </dxo-texts>
+  </dxo-editing>
+
+  <dxi-column dataField="ITEM" [visible]="false"></dxi-column>
+
+  <dxi-column dataField="TRANSACCION"
+    caption="Nombre Transacción" [allowEditing]="false"></dxi-column>
+
+  <dxi-column dataField="PERMISO"
+    caption="Permisos">
+  </dxi-column>
+
+  <dxi-column dataField="APROBACION"
+    caption="Apro. Permisos">
+  </dxi-column>
+
+  <dxi-column dataField="NOMBRE"
+    caption="Descripción de la Transacción"
+    [allowEditing]="false"></dxi-column>
+
+  <dxo-toolbar>
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button icon="icon-refrescar" (onClick)="valoresObjetos('permisosEspeciales')">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dxo-toolbar>
+
+  </dx-data-grid>

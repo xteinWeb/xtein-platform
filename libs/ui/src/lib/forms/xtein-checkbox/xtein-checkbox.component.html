@@ -1,0 +1,2 @@
+<dx-check-box [text]="label" [value]="indeterminate ? null : checked" [disabled]="isDisabled" [readOnly]="readOnly"
+  [elementAttr]="{'aria-label': ariaLabel || label}" (onValueChanged)="changed($event.value, $event.event)" (onFocusOut)="touched()" />

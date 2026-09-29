@@ -1,0 +1,9 @@
+:host { display: inline-block; max-width: 100%; }
+label {
+  color: var(--xt-control-text, #33587b);
+  font-size: var(--xt-label-font-size, 12.5px);
+  font-weight: var(--xt-label-font-weight, 500);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.xtein-label--disabled { color: var(--xt-control-disabled-text, #5e748c); }

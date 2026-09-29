@@ -5,15 +5,18 @@ import { SessionService } from '@xtein/session';
 import { XteinDashboardDefinition, XteinDashboardTypeRow } from '../models/xtein-dashboard-definition.model';
 import { XteinDashboardKpiOption } from '../models/xtein-dashboard-editor.model';
 import { formatDashboardUpdateDate } from '../utils/dashboard-update-date';
+import { createDashboardDataLog } from '../constants/dashboard-data-logging.constants';
 
 @Injectable({ providedIn: 'root' })
 export class XteinDashboardDataService {
+  private readonly log = createDashboardDataLog();
   private readonly api = inject(XteinApiClientService);
   private readonly session = inject(SessionService);
 
   loadKpis(): Observable<XteinDashboardKpiOption[]> {
     return this.api.execute<{ data: string | { ID_APLICACION?: string; NOMBRE?: string; ErrMensaje?: string }[] }>({
       endpoint: 'dashboard-data/consulta', action: 'KpiList', data: {}, accessMode: XteinApiAccessMode.Authenticated
+      , logContext: this.log.LoadKpis
     }).pipe(map(response => {
       const rows: { ID_APLICACION?: string; NOMBRE?: string; ErrMensaje?: string }[] =
         typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
@@ -30,6 +33,7 @@ export class XteinDashboardDataService {
     return this.api.execute<{ data: string | XteinDashboardTypeRow[] }>({
       endpoint: 'dashboard-data/consulta', action: 'DashboardType',
       data: { ID_APLICACION: applicationId }, accessMode: XteinApiAccessMode.Authenticated
+      , logContext: { ...this.log.Load, ID_APLICACION: applicationId }
     }).pipe(map(response => {
       const rows: XteinDashboardTypeRow[] = typeof response.data === 'string'
         ? JSON.parse(response.data) : response.data;
