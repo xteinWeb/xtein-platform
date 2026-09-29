@@ -3,10 +3,10 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('contacto')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.contacto()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.contacto()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.contacto()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.contacto()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
@@ -47,14 +47,14 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('correos')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.correos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.correos()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.correos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.correos()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Correos ({{ emails.length }})</span>
+      <span class="xtein-accordion-title">Correos</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.correos()">
       <xtein-data-grid
@@ -66,6 +66,8 @@
         height="auto"
         [searchEnabled]="false"
         [filterEnabled]="false"
+        [showPager]="false"
+        [pageSize]="100"
         [selectionMode]="readOnly ? 'none' : 'multiple'"
         [selectedRowKeys]="selectedEmails"
         showCheckBoxesMode="always"
@@ -73,7 +75,6 @@
         [toolbarVisible]="!readOnly"
         [toolbarActions]="emailToolbarActions"
         [groupTemplate]="emailCell"
-        [pageSize]="10"
       />
     </div>
   </div>
@@ -82,14 +83,14 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('direcciones')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.direcciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.direcciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.direcciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.direcciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Direcciones ({{ direcciones.length }})</span>
+      <span class="xtein-accordion-title">Direcciones</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.direcciones()">
       <xtein-data-grid
@@ -101,6 +102,8 @@
         height="auto"
         [searchEnabled]="false"
         [filterEnabled]="false"
+        [showPager]="false"
+        [pageSize]="100"
         [selectionMode]="readOnly ? 'none' : 'multiple'"
         [selectedRowKeys]="selectedDirecciones"
         showCheckBoxesMode="always"
@@ -108,7 +111,6 @@
         [toolbarVisible]="!readOnly"
         [toolbarActions]="dirToolbarActions"
         [groupTemplate]="dirCell"
-        [pageSize]="10"
       />
     </div>
   </div>
@@ -117,14 +119,14 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('telefonos')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.telefonos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.telefonos()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.telefonos()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.telefonos()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Teléfonos ({{ telefonos.length }})</span>
+      <span class="xtein-accordion-title">Teléfonos</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.telefonos()">
       <xtein-data-grid
@@ -136,6 +138,8 @@
         height="auto"
         [searchEnabled]="false"
         [filterEnabled]="false"
+        [showPager]="false"
+        [pageSize]="100"
         [selectionMode]="readOnly ? 'none' : 'multiple'"
         [selectedRowKeys]="selectedTelefonos"
         showCheckBoxesMode="always"
@@ -143,7 +147,6 @@
         [toolbarVisible]="!readOnly"
         [toolbarActions]="telToolbarActions"
         [groupTemplate]="telCell"
-        [pageSize]="10"
       />
     </div>
   </div>

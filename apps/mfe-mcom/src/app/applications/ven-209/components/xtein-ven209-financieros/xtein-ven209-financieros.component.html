@@ -3,10 +3,10 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('cupo')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.cupo()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.cupo()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.cupo()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.cupo()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
@@ -49,10 +49,10 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('condiciones')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.condiciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.condiciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.condiciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.condiciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
@@ -63,6 +63,8 @@
         id="grid-condiciones-prov"
         [dataSource]="condiciones"
         [columns]="condicionColumns"
+        [showPager]="false"
+        [pageSize]="100"
         [toolbarVisible]="!readOnly"
         [toolbarActions]="gridToolbarActions"
         searchPlaceholder="Buscar condición…"

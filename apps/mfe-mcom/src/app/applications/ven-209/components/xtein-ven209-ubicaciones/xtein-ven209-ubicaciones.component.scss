@@ -7,49 +7,75 @@
 .xtein-ubicaciones {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   width: 100%;
 
-  /* Acordeón */
+  /* Acordeón idéntico al Legacy */
   .xtein-accordion-item {
-    border: 1px solid #dfe6ef;
-    border-radius: 8px;
-    background: #ffffff;
-    overflow: hidden;
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    margin-bottom: 2px;
+    background: transparent;
   }
 
   .xtein-accordion-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    background: #f8fafc;
-    border-bottom: 1px solid #dfe6ef;
+    justify-content: flex-start;
+    height: 36px;
+    padding: 0 4px;
+    border-radius: 0;
+    font-size: 12px;
+    font-weight: 500;
+    border: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    color: rgba(10, 57, 96, 0.75);
+    background: transparent;
+    background-image: linear-gradient(to right, rgba(18, 94, 220, 0.5) 20%, rgba(255, 255, 255, 0) 0%);
+    background-position: bottom;
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
     cursor: pointer;
     user-select: none;
-    transition: background 0.15s ease;
+    transition: color 0.15s ease;
 
     &:hover {
-      background: #f1f5f9;
+      color: rgba(10, 57, 96, 1);
     }
   }
 
   .xtein-accordion-icon {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #0284c7;
+    color: rgba(18, 94, 220, 1);
+    margin-right: 14px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+
+    svg {
+      width: 12px;
+      height: 12px;
+      display: block;
+      stroke: currentColor;
+    }
   }
 
   .xtein-accordion-title {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: #334155;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(10, 57, 96, 0.75);
+    letter-spacing: 0.1px;
   }
 
   .xtein-accordion-body {
-    padding: 14px 16px;
-    background: #ffffff;
+    padding: 12px 4px 16px 4px;
+    background: transparent;
   }
 
   /* Formulario Contacto */
@@ -167,7 +193,6 @@
       }
     }
 
-    // Input cells during draft mode
     xtein-input,
     xtein-select {
       display: block;
