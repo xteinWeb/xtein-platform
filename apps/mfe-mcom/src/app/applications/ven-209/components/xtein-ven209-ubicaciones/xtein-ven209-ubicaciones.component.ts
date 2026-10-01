@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import {
+  XteinCorreosComponent,
   XteinDataGridComponent,
   XteinGridToolbarAction,
   XteinInputComponent,
@@ -25,11 +26,6 @@ import {
   Ven209Telefono
 } from '../../models/ven-209.model';
 import { Ven209GridColumns } from '../../constants/ven-209-ui.constants';
-
-export interface Ven209EmailDraft extends Ven209Email {
-  originalItem?: number;
-  isNew?: boolean;
-}
 
 export interface Ven209DireccionDraft extends Ven209Direccion {
   originalId?: number;
@@ -47,6 +43,7 @@ export interface Ven209TelefonoDraft extends Ven209Telefono {
   imports: [
     CommonModule,
     FormsModule,
+    XteinCorreosComponent,
     XteinDataGridComponent,
     XteinInputComponent,
     XteinLabelComponent,
@@ -67,17 +64,14 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
   @Output() readonly emailsChange = new EventEmitter<Ven209Email[]>();
   @Output() readonly contactoAdicionalChange = new EventEmitter<Ven209ContactoAdicional>();
 
-  @ViewChild('emailsGrid') private emailsGrid?: XteinDataGridComponent;
   @ViewChild('dirGrid') private dirGrid?: XteinDataGridComponent;
   @ViewChild('telGrid') private telGrid?: XteinDataGridComponent;
 
   readonly direccionColumns = Ven209GridColumns.direcciones;
   readonly telefonoColumns = Ven209GridColumns.telefonos;
-  readonly emailColumns = Ven209GridColumns.emails;
 
   readonly tiposDireccion = ['PRINCIPAL', 'SUCURSAL', 'ENTREGA', 'COBRO', 'DESPACHO', 'OTRO'];
   readonly tiposTelefono = ['CELULAR', 'FIJO', 'OFICINA', 'FAX', 'OTRO'];
-  readonly etiquetasEmail = ['FACTURACION', 'COMERCIAL', 'CONTACTO', 'COBRANZA', 'PERSONAL', 'OTRO'];
 
   // Accordion state
   readonly expanded = {
@@ -88,22 +82,18 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
   };
 
   // Grid rows
-  emailRows: Ven209Email[] = [];
   dirRows: Ven209Direccion[] = [];
   telRows: Ven209Telefono[] = [];
 
   // Selections
-  selectedEmails: number[] = [];
   selectedDirecciones: number[] = [];
   selectedTelefonos: number[] = [];
 
   // Drafts
-  emailDraft: Ven209EmailDraft | null = null;
   dirDraft: Ven209DireccionDraft | null = null;
   telDraft: Ven209TelefonoDraft | null = null;
 
   // Toolbars
-  emailToolbarActions: XteinGridToolbarAction[] = [];
   dirToolbarActions: XteinGridToolbarAction[] = [];
   telToolbarActions: XteinGridToolbarAction[] = [];
 
@@ -111,14 +101,11 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
 
   ngOnChanges(): void {
     if (this.readOnly) {
-      this.cancelEmailDraft();
       this.cancelDireccionDraft();
       this.cancelTelefonoDraft();
-      this.selectedEmails = [];
       this.selectedDirecciones = [];
       this.selectedTelefonos = [];
     }
-    this.rebuildEmails();
     this.rebuildDirecciones();
     this.rebuildTelefonos();
   }
@@ -130,186 +117,6 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
 
   updateContacto(): void {
     this.contactoAdicionalChange.emit({ ...this.contactoAdicional });
-  }
-
-  // ==========================================
-  // CORREOS
-  // ==========================================
-  private ensureEmailKeys(list: Ven209Email[]): Ven209Email[] {
-    let max = 0;
-    for (const e of list) {
-      if (e.ITEM && e.ITEM > max) max = e.ITEM;
-    }
-    return list.map(e => {
-      if (!e.ITEM) {
-        max++;
-        return { ...e, ITEM: max };
-      }
-      return e;
-    });
-  }
-
-  rebuildEmails(): void {
-    const list = this.ensureEmailKeys(this.emails);
-    this.selectedEmails = this.selectedEmails.filter(key => list.some(e => e.ITEM === key));
-    this.emailRows = this.emailDraft
-      ? [this.emailDraft, ...list.filter(e => e.ITEM !== this.emailDraft?.originalItem)]
-      : [...list];
-    this.updateEmailToolbar();
-  }
-
-  onEmailSelectionChanged(keys: unknown[]): void {
-    this.selectedEmails = (keys as number[]).filter(
-      id => id !== -9999 && this.emails.some(e => e.ITEM === id)
-    );
-    this.updateEmailToolbar();
-  }
-
-  private updateEmailToolbar(): void {
-    this.emailToolbarActions = this.readOnly
-      ? []
-      : [
-          {
-            id: 'add-email',
-            icon: 'plus',
-            variant: 'primary',
-            title: 'Nuevo Correo',
-            disabled: !!this.emailDraft,
-            action: () => this.beginAddEmail()
-          },
-          {
-            id: 'edit-email',
-            icon: 'edit',
-            variant: 'secondary',
-            title: 'Editar correo seleccionado',
-            visible: this.selectedEmails.length === 1 && !this.emailDraft,
-            action: () => {
-              const found = this.emails.find(e => e.ITEM === this.selectedEmails[0]);
-              if (found) this.beginEditEmail(found);
-            }
-          },
-          {
-            id: 'save-email',
-            icon: 'check',
-            variant: 'success',
-            title: 'Guardar Correo',
-            visible: !!this.emailDraft,
-            action: () => this.commitEmail()
-          },
-          {
-            id: 'cancel-email',
-            icon: 'undo',
-            variant: 'cancel',
-            title: 'Cancelar',
-            visible: !!this.emailDraft,
-            action: () => this.cancelEmailDraft()
-          },
-          {
-            id: 'delete-email',
-            icon: 'trash',
-            variant: 'danger',
-            title: 'Eliminar correos seleccionados',
-            visible: this.selectedEmails.length > 0 && !this.emailDraft,
-            action: () => {
-              void this.removeSelectedEmails();
-            }
-          }
-        ];
-  }
-
-  beginAddEmail(): void {
-    if (this.readOnly || this.emailDraft) return;
-    this.emailDraft = {
-      ITEM: -9999,
-      EMAIL: '',
-      ETIQUETA: 'FACTURACION',
-      isNew: true
-    };
-    this.rebuildEmails();
-    this.emailsGrid?.resetView();
-  }
-
-  beginEditEmail(row: Ven209Email): void {
-    if (this.readOnly || this.emailDraft) return;
-    this.emailDraft = {
-      ...row,
-      originalItem: row.ITEM,
-      isNew: false
-    };
-    this.rebuildEmails();
-  }
-
-  commitEmail(): void {
-    if (this.readOnly || !this.emailDraft) return;
-    const emailStr = (this.emailDraft.EMAIL || '').trim();
-    if (!emailStr) {
-      this.notification.warning('Ingrese una dirección de correo electrónico.');
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailStr)) {
-      this.notification.warning('El formato del correo electrónico no es válido.');
-      return;
-    }
-
-    const etiqueta = this.emailDraft.ETIQUETA || 'FACTURACION';
-    const isNew = this.emailDraft.isNew;
-    const originalItem = this.emailDraft.originalItem;
-
-    let updatedList = [...this.emails];
-    if (isNew) {
-      let max = Math.max(0, ...updatedList.map(e => e.ITEM || 0));
-      updatedList.push({
-        ITEM: max + 1,
-        EMAIL: emailStr,
-        ETIQUETA: etiqueta
-      });
-    } else {
-      updatedList = updatedList.map(e => {
-        if (e.ITEM === originalItem) {
-          return {
-            ...e,
-            EMAIL: emailStr,
-            ETIQUETA: etiqueta
-          };
-        }
-        return e;
-      });
-    }
-
-    this.emailDraft = null;
-    this.emails = updatedList;
-    this.emailsChange.emit(this.emails);
-    this.rebuildEmails();
-  }
-
-  cancelEmailDraft(): void {
-    this.emailDraft = null;
-    this.rebuildEmails();
-  }
-
-  async removeSelectedEmails(): Promise<void> {
-    if (this.readOnly || !this.selectedEmails.length) return;
-    const confirm = await Swal.fire({
-      title: '¿Eliminar correos?',
-      text:
-        this.selectedEmails.length === 1
-          ? '¿Desea eliminar el correo seleccionado?'
-          : `¿Desea eliminar los ${this.selectedEmails.length} correos seleccionados?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#DF3E3E',
-      cancelButtonColor: '#438ef1',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'No'
-    });
-    if (!confirm.isConfirmed || this.readOnly) return;
-
-    const toDelete = new Set(this.selectedEmails);
-    this.emails = this.emails.filter(e => !toDelete.has(e.ITEM!));
-    this.selectedEmails = [];
-    this.emailsChange.emit(this.emails);
-    this.rebuildEmails();
   }
 
   // ==========================================

@@ -1,0 +1,58 @@
+@if (catalogError) {
+  <div role="alert">No se pudieron cargar los tipos de correo. <button type="button" (click)="loadTypes()">Reintentar</button></div>
+}
+      <xtein-data-grid
+        #emailsGrid
+        class="xtein-correos__grid"
+        [dataSource]="emailRows"
+        keyExpr="ITEM"
+        [columns]="emailColumns"
+        height="auto"
+        [searchEnabled]="false"
+        [filterEnabled]="false"
+        [showPager]="false"
+        [pageSize]="100"
+        [selectionMode]="readOnly ? 'none' : 'multiple'"
+        [selectedRowKeys]="selectedEmails"
+        showCheckBoxesMode="always"
+        (selectionChanged)="onEmailSelectionChanged($event.selectedRowKeys)"
+        [toolbarVisible]="!readOnly"
+        [toolbarActions]="emailToolbarActions"
+        [groupTemplate]="emailCell"
+      />
+<!-- Template para Celdas de Correos -->
+<ng-template #emailCell let-cell>
+  @if (emailDraft && cell.data.ITEM === emailDraft.ITEM) {
+    @if (cell.column.dataField === 'EMAIL') {
+      <xtein-input
+        [(ngModel)]="emailDraft.EMAIL"
+        placeholder="ejemplo@correo.com"
+        ariaLabel="Correo electrónico"
+      />
+    } @else if (cell.column.dataField === 'ETIQUETA') {
+      <xtein-select
+        [(ngModel)]="emailDraft.ETIQUETA"
+        [items]="etiquetasEmail"
+        placeholder="Tipo"
+        ariaLabel="Tipo de correo"
+      />
+    } @else {
+      {{ cell.value }}
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'EMAIL') {
+      <button
+        type="button"
+        class="xtein-correos__code-btn"
+        [disabled]="!!emailDraft"
+        [attr.aria-label]="'Editar correo ' + cell.value"
+        (click)="beginEditEmail(cell.data)"
+      >
+        {{ cell.value || '(Editar)' }}
+      </button>
+    } @else {
+      {{ cell.value }}
+    }
+  }
+</ng-template>
+

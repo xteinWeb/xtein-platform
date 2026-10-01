@@ -57,25 +57,7 @@
       <span class="xtein-accordion-title">Correos</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.correos()">
-      <xtein-data-grid
-        #emailsGrid
-        class="xtein-ubicaciones__grid"
-        [dataSource]="emailRows"
-        keyExpr="ITEM"
-        [columns]="emailColumns"
-        height="auto"
-        [searchEnabled]="false"
-        [filterEnabled]="false"
-        [showPager]="false"
-        [pageSize]="100"
-        [selectionMode]="readOnly ? 'none' : 'multiple'"
-        [selectedRowKeys]="selectedEmails"
-        showCheckBoxesMode="always"
-        (selectionChanged)="onEmailSelectionChanged($event.selectedRowKeys)"
-        [toolbarVisible]="!readOnly"
-        [toolbarActions]="emailToolbarActions"
-        [groupTemplate]="emailCell"
-      />
+      <xtein-correos [emails]="emails" [readOnly]="readOnly" (emailsChange)="emailsChange.emit($event)" />
     </div>
   </div>
 
@@ -155,42 +137,6 @@
 <!-- ======================================================== -->
 <!-- CELL TEMPLATES                                           -->
 <!-- ======================================================== -->
-
-<!-- Template para Celdas de Correos -->
-<ng-template #emailCell let-cell>
-  @if (emailDraft && cell.data.ITEM === emailDraft.ITEM) {
-    @if (cell.column.dataField === 'EMAIL') {
-      <xtein-input
-        [(ngModel)]="emailDraft.EMAIL"
-        placeholder="ejemplo@correo.com"
-        ariaLabel="Correo electrónico"
-      />
-    } @else if (cell.column.dataField === 'ETIQUETA') {
-      <xtein-select
-        [(ngModel)]="emailDraft.ETIQUETA"
-        [items]="etiquetasEmail"
-        placeholder="Tipo"
-        ariaLabel="Tipo de correo"
-      />
-    } @else {
-      {{ cell.value }}
-    }
-  } @else {
-    @if (!readOnly && cell.column.dataField === 'EMAIL') {
-      <button
-        type="button"
-        class="xtein-ubicaciones__code-btn"
-        [disabled]="!!emailDraft"
-        [attr.aria-label]="'Editar correo ' + cell.value"
-        (click)="beginEditEmail(cell.data)"
-      >
-        {{ cell.value || '(Editar)' }}
-      </button>
-    } @else {
-      {{ cell.value }}
-    }
-  }
-</ng-template>
 
 <!-- Template para Celdas de Direcciones -->
 <ng-template #dirCell let-cell>
