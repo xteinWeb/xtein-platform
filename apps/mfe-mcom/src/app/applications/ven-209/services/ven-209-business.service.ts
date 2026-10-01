@@ -52,23 +52,62 @@ export class Ven209BusinessService {
     return rows as T[];
   }
 
-  async catalog(name: keyof typeof Ven209Catalog, data: unknown): Promise<Ven209Lookup[]> {
+  // Static in-memory cache to make catalog retrieval instantaneous across tab navigations
+  private static idLegalesCache: {
+    idLegales: Ven209Lookup[];
+    tiposId: string[];
+    personas: string[];
+  } | null = null;
+
+  private static readonly catalogCache = new Map<string, Ven209Lookup[]>();
+
+  private static perfilesCache: {
+    perfilTributario: Record<string, unknown>[];
+    listaTasas: Array<{
+      ID_TASA: string;
+      DESCRIPCION?: string;
+      PORCENTAJE?: number;
+      VALOR_BASE?: number;
+      APLICA_BASE?: boolean;
+      CLASE?: string;
+    }>;
+    columnas: Array<{ dataField: string; caption: string }>;
+  } | null = null;
+
+  clearCache(): void {
+    Ven209BusinessService.idLegalesCache = null;
+    Ven209BusinessService.catalogCache.clear();
+    Ven209BusinessService.perfilesCache = null;
+  }
+
+  async catalog(name: keyof typeof Ven209Catalog, data: unknown, forceRefresh = false): Promise<Ven209Lookup[]> {
+    const cacheKey = `${String(name)}_${JSON.stringify(data ?? {})}`;
+    if (!forceRefresh && Ven209BusinessService.catalogCache.has(cacheKey)) {
+      return Ven209BusinessService.catalogCache.get(cacheKey)!;
+    }
+
     const [endpoint, action] = Ven209Catalog[name];
     const decoded = this.decode<unknown>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    let result = decoded as Ven209Lookup[];
     if (name === 'idLegales' && decoded.length > 0) {
       const first = decoded[0] as Record<string, unknown>;
       if (first && typeof first === 'object' && 'ID_LEGALES' in first && Array.isArray(first['ID_LEGALES'])) {
-        return first['ID_LEGALES'] as Ven209Lookup[];
+        result = first['ID_LEGALES'] as Ven209Lookup[];
       }
     }
-    return decoded as Ven209Lookup[];
+    Ven209BusinessService.catalogCache.set(cacheKey, result);
+    return result;
   }
 
-  async loadIdLegalesWithTypes(): Promise<{
+  async loadIdLegalesWithTypes(forceRefresh = false): Promise<{
     idLegales: Ven209Lookup[];
     tiposId: string[];
     personas: string[];
   }> {
+    if (!forceRefresh && Ven209BusinessService.idLegalesCache) {
+      return Ven209BusinessService.idLegalesCache;
+    }
+
     const [endpoint, action] = Ven209Catalog.idLegales;
     const decoded = this.decode<unknown>(await firstValueFrom(this.api.request(endpoint, action, {})));
     const first = decoded[0] as Record<string, unknown> | undefined;
@@ -103,10 +142,12 @@ export class Ven209BusinessService {
     } else {
       idLegales = decoded as Ven209Lookup[];
     }
-    return { idLegales, tiposId, personas };
+    const result = { idLegales, tiposId, personas };
+    Ven209BusinessService.idLegalesCache = result;
+    return result;
   }
 
-  async loadPerfilesTributarios(): Promise<{
+  async loadPerfilesTributarios(forceRefresh = false): Promise<{
     perfilTributario: Record<string, unknown>[];
     listaTasas: Array<{
       ID_TASA: string;
@@ -118,6 +159,10 @@ export class Ven209BusinessService {
     }>;
     columnas: Array<{ dataField: string; caption: string }>;
   }> {
+    if (!forceRefresh && Ven209BusinessService.perfilesCache) {
+      return Ven209BusinessService.perfilesCache;
+    }
+
     const [endpoint, action] = Ven209Catalog.perfilesTributarios;
     const decoded = this.decode<Record<string, unknown>>(await firstValueFrom(this.api.request(endpoint, action, {})));
     const first = decoded[0] || {};
@@ -147,7 +192,9 @@ export class Ven209BusinessService {
         }
       }
     }
-    return { perfilTributario, listaTasas, columnas };
+    const result = { perfilTributario, listaTasas, columnas };
+    Ven209BusinessService.perfilesCache = result;
+    return result;
   }
 
   validate(

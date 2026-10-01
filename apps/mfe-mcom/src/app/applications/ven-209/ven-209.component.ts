@@ -51,7 +51,8 @@ import {
   XteinPerfilTributarioComponent,
   XteinPerfilGridColumn,
   XteinPerfilTasaRecord,
-  XteinTagBoxComponent
+  XteinTagBoxComponent,
+  XteinLoadingComponent
 } from '@xtein/ui';
 
 import {
@@ -99,6 +100,7 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinRecordSettingsComponent,
     XteinPerfilTributarioComponent,
     XteinTagBoxComponent,
+    XteinLoadingComponent,
     XteinVen209UbicacionesComponent,
     XteinVen209FinancierosComponent
   ],
@@ -115,6 +117,7 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   // State signals
   readonly loading = signal(false);
+  readonly loadingMessage = signal('Un momento. Cargando datos...');
   readonly mode = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
   readonly permissions = signal<RecordToolbarPermissions>(DeniedRecordToolbarPermissions);
   readonly records = signal<Ven209ClienteRecord[]>([]);
@@ -313,24 +316,14 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
   }
 
-  private async loadCatalogs(): Promise<void> {
+  private async loadCatalogs(forceRefresh = false): Promise<void> {
+    if (forceRefresh) {
+      this.business.clearCache();
+    }
+    this.loadingMessage.set('Un momento. Cargando datos...');
     this.loading.set(true);
     try {
-      const results = await Promise.allSettled([
-        this.business.loadIdLegalesWithTypes(),
-        this.business.catalog('grupos', { ID_GRUPO_PADRE: 'DEUDORES' }),
-        this.business.catalog('zonas', { TIPO_UBICACION: 'ZONA' }),
-        this.business.catalog('adc', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('status', { STATUS: {} }),
-        this.business.catalog('rt', {}),
-        this.business.catalog('condiciones', { TIPO: 'VENTAS' }),
-        this.business.loadPerfilesTributarios()
-      ]);
-
-      const [legalRes, gruposRes, zonasRes, adcsRes, statusesRes, rtsRes, condRes, perfilesRes] = results;
-
-      if (legalRes.status === 'fulfilled') {
-        const legalData = legalRes.value;
+      const pLegal = this.business.loadIdLegalesWithTypes(forceRefresh).then(legalData => {
         this.idLegales.set(legalData.idLegales);
         if (legalData.tiposId?.length) {
           this.tiposId.set([...new Set([...this.tiposId(), ...legalData.tiposId])]);
@@ -338,38 +331,48 @@ export class Ven209Component implements OnInit, OnDestroy {
         if (legalData.personas?.length) {
           this.personas.set(legalData.personas);
         }
-      }
+      });
 
-      if (gruposRes.status === 'fulfilled') {
-        this.grupos.set(gruposRes.value);
-      }
+      const pGrupos = this.business.catalog('grupos', { ID_GRUPO_PADRE: 'DEUDORES' }, forceRefresh).then(g => {
+        this.grupos.set(g);
+      });
 
-      if (zonasRes.status === 'fulfilled') {
-        this.zonas.set(zonasRes.value);
-      }
+      const pZonas = this.business.catalog('zonas', { TIPO_UBICACION: 'ZONA' }, forceRefresh).then(z => {
+        this.zonas.set(z);
+      });
 
-      if (adcsRes.status === 'fulfilled') {
-        this.adcs.set(adcsRes.value);
-      }
+      const pAdcs = this.business.catalog('adc', { ESTADO: 'ACTIVO' }, forceRefresh).then(a => {
+        this.adcs.set(a);
+      });
 
-      if (statusesRes.status === 'fulfilled') {
-        this.statuses.set(statusesRes.value);
-      }
+      const pStatus = this.business.catalog('status', { STATUS: {} }, forceRefresh).then(s => {
+        this.statuses.set(s);
+      });
 
-      if (rtsRes.status === 'fulfilled') {
-        this.rts.set(rtsRes.value);
-      }
+      const pRt = this.business.catalog('rt', {}, forceRefresh).then(r => {
+        this.rts.set(r);
+      });
 
-      if (condRes.status === 'fulfilled') {
-        this.availableCondiciones.set(condRes.value);
-      }
+      const pCond = this.business.catalog('condiciones', { TIPO: 'VENTAS' }, forceRefresh).then(c => {
+        this.availableCondiciones.set(c);
+      });
 
-      if (perfilesRes.status === 'fulfilled') {
-        const pData = perfilesRes.value;
+      const pPerfiles = this.business.loadPerfilesTributarios(forceRefresh).then(pData => {
         this.perfilesTributarios.set(pData.perfilTributario);
         this.listaTasas.set(pData.listaTasas);
         this.perfilColumns.set(pData.columnas);
-      }
+      });
+
+      await Promise.allSettled([
+        pLegal,
+        pGrupos,
+        pZonas,
+        pAdcs,
+        pStatus,
+        pRt,
+        pCond,
+        pPerfiles
+      ]);
 
       // If a record is currently loaded, re-populate to resolve lookups and selects
       const current = this.currentRecord();
@@ -487,6 +490,7 @@ export class Ven209Component implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadingMessage.set('Guardando cliente...');
     this.loading.set(true);
     try {
       const isNew = this.mode() === RecordToolbarMode.Creating;
@@ -579,6 +583,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     });
     if (!confirm.isConfirmed) return;
 
+    this.loadingMessage.set('Eliminando cliente...');
     this.loading.set(true);
     try {
       const response = await firstValueFrom(this.service.delete({ CLIENTES: { ID_CLIENTE: record.ID_CLIENTE } }));
@@ -602,12 +607,13 @@ export class Ven209Component implements OnInit, OnDestroy {
   refresh(): void {
     if (this.loading() || !this.readOnly()) return;
     const current = this.currentRecord();
-    void this.loadCatalogs().then(() => this.searchRecords(current?.ID_CLIENTE || ''));
+    void this.loadCatalogs(true).then(() => this.searchRecords(current?.ID_CLIENTE || ''));
   }
 
   async searchRecords(filter: string | XteinRecordFilterResult): Promise<void> {
     if (typeof filter !== 'string' && (this.loading() || !this.readOnly())) return;
     this.filterVisible.set(false);
+    this.loadingMessage.set('Buscando clientes...');
     this.loading.set(true);
     try {
       const criteria = typeof filter === 'string'
