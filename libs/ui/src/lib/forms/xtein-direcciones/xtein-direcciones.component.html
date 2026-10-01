@@ -1,0 +1,46 @@
+@if (errors.length) {
+  <div role="alert">No se pudieron cargar: {{ errors.join(', ') }}. <button type="button" (click)="reloadCatalogs()">Reintentar</button></div>
+}
+<xtein-data-grid class="xtein-direcciones__grid" [dataSource]="rows" keyExpr="ID_DIRECCION" [columns]="columns" height="auto"
+  [searchEnabled]="false" [filterEnabled]="false" [showPager]="false" [pageSize]="100"
+  [selectionMode]="readOnly || draft ? 'none' : 'multiple'" [selectedRowKeys]="selected" showCheckBoxesMode="always"
+  (selectionChanged)="select($event.selectedRowKeys)" [toolbarVisible]="!readOnly" [toolbarActions]="toolbar" [groupTemplate]="cellTemplate" />
+<ng-template #locationItem let-item><span class="catalog-item"><span>{{item.ID_UBICACION}}</span><span>{{item.NOMBRE}}</span></span></ng-template>
+<ng-template #postalItem let-item><span class="catalog-item"><span>{{item.CODIGO_POSTAL}}</span><span>{{item.DETALLE}}</span></span></ng-template>
+<ng-template #cellTemplate let-cell>
+  @if (draft && cell.data.ID_DIRECCION === draft.ID_DIRECCION) {
+    @switch (cell.column.dataField) {
+      @case ('TIPO_DIRECCION') {
+        <xtein-lookup [(ngModel)]="draft.TIPO_DIRECCION" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
+          selectionMode="multiple" valueExpr="TIPO" displayExpr="TIPO" placeholder="Tipo..." ariaLabel="Tipo dirección"
+          [autoFocus]="true" [showClearButton]="true" [dropDownWidth]="400" />
+      }
+      @case ('DOMICILIO') { <xtein-input [(ngModel)]="draft.DOMICILIO" (ngModelChange)="pendingChange.emit()" ariaLabel="Dirección/Domicilio" /> }
+      @case ('REFERENCIA') { <xtein-input [(ngModel)]="draft.REFERENCIA" (ngModelChange)="pendingChange.emit()" ariaLabel="Referencia" /> }
+      @case ('ID_UBICACION') {
+        <xtein-select [ngModel]="draft.ID_UBICACION" (ngModelChange)="changeCity($event)" [items]="cities" valueExpr="ID_UBICACION" displayExpr="ID_UBICACION"
+          [searchEnabled]="true" [searchExpr]="locationSearch" [itemTemplate]="locationItem" [dropDownOptions]="popupOptions" [refreshEnabled]="true" (refreshRequested)="refreshList(cell.column.dataField)"
+          [showClearButton]="true" [disabled]="false" [ariaLabel]="cell.column.caption" />
+      }
+      @case ('BARRIO') {
+        <xtein-select [ngModel]="draft.BARRIO" (ngModelChange)="changeNeighborhood($event)" [items]="neighborhoods" valueExpr="ID_UBICACION" displayExpr="ID_UBICACION"
+          [searchEnabled]="true" [searchExpr]="locationSearch" [itemTemplate]="locationItem" [dropDownOptions]="popupOptions" [refreshEnabled]="true" (refreshRequested)="refreshList(cell.column.dataField)"
+          [showClearButton]="true" [disabled]="!draft.ID_UBICACION" [ariaLabel]="cell.column.caption" />
+      }
+      @case ('DEPENDIENTE') {
+        <xtein-select [(ngModel)]="draft.DEPENDIENTE" (ngModelChange)="pendingChange.emit()" [items]="zones" valueExpr="ID_UBICACION" displayExpr="ID_UBICACION"
+          [searchEnabled]="true" [searchExpr]="locationSearch" [itemTemplate]="locationItem" [dropDownOptions]="popupOptions" [refreshEnabled]="true" (refreshRequested)="refreshList(cell.column.dataField)"
+          [showClearButton]="true" [disabled]="!draft.BARRIO" [ariaLabel]="cell.column.caption" />
+      }
+      @case ('CODIGO_POSTAL') {
+        <xtein-select [(ngModel)]="draft.CODIGO_POSTAL" (ngModelChange)="pendingChange.emit()" [items]="postalCodes" valueExpr="CODIGO_POSTAL" displayExpr="CODIGO_POSTAL"
+          [searchEnabled]="true" [searchExpr]="postalSearch" [itemTemplate]="postalItem" [dropDownOptions]="popupOptions" [refreshEnabled]="true" (refreshRequested)="refreshList(cell.column.dataField)"
+          [showClearButton]="true" [disabled]="!draft.ID_UBICACION" [ariaLabel]="cell.column.caption" />
+      }
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'DOMICILIO') {
+      <button type="button" class="xtein-direcciones__code-btn" [disabled]="!!draft" (click)="edit(cell.data)" [attr.aria-label]="'Editar dirección ' + cell.value">{{cell.value || '(Editar)'}}</button>
+    } @else { {{ display(cell.data, cell.column.dataField) }} }
+  }
+</ng-template>

@@ -480,8 +480,14 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.workspace.setDirty(this.applicationId, false);
   }
 
+  @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
+
   async saveRecord(): Promise<void> {
     if (this.loading() || this.readOnly()) return;
+    if (this.locations && !this.locations.commitPendingAddresses()) {
+      this.activeMainTab.set('ubicaciones');
+      return;
+    }
     const raw = this.form.getRawValue();
     const validationMessage = this.business.validate(raw as unknown as Partial<Ven209ClienteRecord>, this.emails(), this.direcciones());
     if (validationMessage) {

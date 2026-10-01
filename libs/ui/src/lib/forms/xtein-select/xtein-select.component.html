@@ -3,6 +3,7 @@
   class="w-100"
   stylingMode="filled"
   [items]="items"
+  [itemTemplate]="itemTemplate ? 'xteinSelectItem' : 'item'"
   [displayExpr]="displayExpr"
   [valueExpr]="valueExpr"
   [value]="value"
@@ -10,11 +11,18 @@
   [disabled]="isDisabled"
   [readOnly]="readOnly"
   [searchEnabled]="searchEnabled"
+  [searchExpr]="searchExpr || displayExpr || searchIdentity"
+  [dropDownOptions]="resolvedDropDownOptions"
   [showClearButton]="showClearButton"
   [noDataText]="noDataText"
   [inputAttr]="inputAttributes"
   (onValueChanged)="handleValueChanged($event)"
   (onFocusOut)="handleFocusOut()">
+  @if (itemTemplate) {
+    <div *dxTemplate="let item of 'xteinSelectItem'">
+      <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </div>
+  }
 </dx-select-box>
 
 @if (invalid && errorMessage) {

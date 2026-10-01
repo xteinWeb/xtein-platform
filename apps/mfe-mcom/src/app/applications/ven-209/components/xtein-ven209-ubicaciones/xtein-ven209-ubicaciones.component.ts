@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import {
+  XteinDireccionesComponent,
   XteinCorreosComponent,
   XteinDataGridComponent,
   XteinGridToolbarAction,
@@ -27,11 +28,6 @@ import {
 } from '../../models/ven-209.model';
 import { Ven209GridColumns } from '../../constants/ven-209-ui.constants';
 
-export interface Ven209DireccionDraft extends Ven209Direccion {
-  originalId?: number;
-  isNew?: boolean;
-}
-
 export interface Ven209TelefonoDraft extends Ven209Telefono {
   originalId?: number;
   isNew?: boolean;
@@ -43,6 +39,7 @@ export interface Ven209TelefonoDraft extends Ven209Telefono {
   imports: [
     CommonModule,
     FormsModule,
+    XteinDireccionesComponent,
     XteinCorreosComponent,
     XteinDataGridComponent,
     XteinInputComponent,
@@ -64,13 +61,17 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
   @Output() readonly emailsChange = new EventEmitter<Ven209Email[]>();
   @Output() readonly contactoAdicionalChange = new EventEmitter<Ven209ContactoAdicional>();
 
-  @ViewChild('dirGrid') private dirGrid?: XteinDataGridComponent;
+  @Output() readonly pendingChange = new EventEmitter<void>();
+  @ViewChild(XteinDireccionesComponent) private addresses?: XteinDireccionesComponent;
+  commitPendingAddresses(): boolean {
+    const committed = this.addresses?.commit() ?? true;
+    if (!committed) this.expanded.direcciones.set(true);
+    return committed;
+  }
   @ViewChild('telGrid') private telGrid?: XteinDataGridComponent;
 
-  readonly direccionColumns = Ven209GridColumns.direcciones;
   readonly telefonoColumns = Ven209GridColumns.telefonos;
 
-  readonly tiposDireccion = ['PRINCIPAL', 'SUCURSAL', 'ENTREGA', 'COBRO', 'DESPACHO', 'OTRO'];
   readonly tiposTelefono = ['CELULAR', 'FIJO', 'OFICINA', 'FAX', 'OTRO'];
 
   // Accordion state
@@ -82,31 +83,24 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
   };
 
   // Grid rows
-  dirRows: Ven209Direccion[] = [];
   telRows: Ven209Telefono[] = [];
 
   // Selections
-  selectedDirecciones: number[] = [];
   selectedTelefonos: number[] = [];
 
   // Drafts
-  dirDraft: Ven209DireccionDraft | null = null;
   telDraft: Ven209TelefonoDraft | null = null;
 
   // Toolbars
-  dirToolbarActions: XteinGridToolbarAction[] = [];
   telToolbarActions: XteinGridToolbarAction[] = [];
 
   constructor(private readonly notification: XteinNotificationService) {}
 
   ngOnChanges(): void {
     if (this.readOnly) {
-      this.cancelDireccionDraft();
       this.cancelTelefonoDraft();
-      this.selectedDirecciones = [];
       this.selectedTelefonos = [];
     }
-    this.rebuildDirecciones();
     this.rebuildTelefonos();
   }
 
@@ -119,192 +113,6 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
     this.contactoAdicionalChange.emit({ ...this.contactoAdicional });
   }
 
-  // ==========================================
-  // DIRECCIONES
-  // ==========================================
-  private ensureDirKeys(list: Ven209Direccion[]): Ven209Direccion[] {
-    let max = 0;
-    for (const d of list) {
-      if (d.ID_DIRECCION && d.ID_DIRECCION > max) max = d.ID_DIRECCION;
-    }
-    return list.map(d => {
-      if (!d.ID_DIRECCION) {
-        max++;
-        return { ...d, ID_DIRECCION: max };
-      }
-      return d;
-    });
-  }
-
-  rebuildDirecciones(): void {
-    const list = this.ensureDirKeys(this.direcciones);
-    this.selectedDirecciones = this.selectedDirecciones.filter(key => list.some(d => d.ID_DIRECCION === key));
-    this.dirRows = this.dirDraft
-      ? [this.dirDraft, ...list.filter(d => d.ID_DIRECCION !== this.dirDraft?.originalId)]
-      : [...list];
-    this.updateDirToolbar();
-  }
-
-  onDireccionSelectionChanged(keys: unknown[]): void {
-    this.selectedDirecciones = (keys as number[]).filter(
-      id => id !== -9999 && this.direcciones.some(d => d.ID_DIRECCION === id)
-    );
-    this.updateDirToolbar();
-  }
-
-  private updateDirToolbar(): void {
-    this.dirToolbarActions = this.readOnly
-      ? []
-      : [
-          {
-            id: 'add-dir',
-            icon: 'plus',
-            variant: 'primary',
-            title: 'Nueva Dirección',
-            disabled: !!this.dirDraft,
-            action: () => this.beginAddDireccion()
-          },
-          {
-            id: 'edit-dir',
-            icon: 'edit',
-            variant: 'secondary',
-            title: 'Editar dirección seleccionada',
-            visible: this.selectedDirecciones.length === 1 && !this.dirDraft,
-            action: () => {
-              const found = this.direcciones.find(d => d.ID_DIRECCION === this.selectedDirecciones[0]);
-              if (found) this.beginEditDireccion(found);
-            }
-          },
-          {
-            id: 'save-dir',
-            icon: 'check',
-            variant: 'success',
-            title: 'Guardar Dirección',
-            visible: !!this.dirDraft,
-            action: () => this.commitDireccion()
-          },
-          {
-            id: 'cancel-dir',
-            icon: 'undo',
-            variant: 'cancel',
-            title: 'Cancelar',
-            visible: !!this.dirDraft,
-            action: () => this.cancelDireccionDraft()
-          },
-          {
-            id: 'delete-dir',
-            icon: 'trash',
-            variant: 'danger',
-            title: 'Eliminar direcciones seleccionadas',
-            visible: this.selectedDirecciones.length > 0 && !this.dirDraft,
-            action: () => {
-              void this.removeSelectedDirecciones();
-            }
-          }
-        ];
-  }
-
-  beginAddDireccion(): void {
-    if (this.readOnly || this.dirDraft) return;
-    this.dirDraft = {
-      ID_DIRECCION: -9999,
-      TIPO_DIRECCION: 'PRINCIPAL',
-      DOMICILIO: '',
-      BARRIO: '',
-      NOMBRE_UBICACION: '',
-      CODIGO_POSTAL: '',
-      isNew: true
-    };
-    this.rebuildDirecciones();
-    this.dirGrid?.resetView();
-  }
-
-  beginEditDireccion(row: Ven209Direccion): void {
-    if (this.readOnly || this.dirDraft) return;
-    this.dirDraft = {
-      ...row,
-      originalId: row.ID_DIRECCION,
-      isNew: false
-    };
-    this.rebuildDirecciones();
-  }
-
-  commitDireccion(): void {
-    if (this.readOnly || !this.dirDraft) return;
-    const domicilio = (this.dirDraft.DOMICILIO || '').trim();
-    if (!domicilio) {
-      this.notification.warning('La dirección / domicilio es obligatoria.');
-      return;
-    }
-
-    const isNew = this.dirDraft.isNew;
-    const originalId = this.dirDraft.originalId;
-
-    let updatedList = [...this.direcciones];
-    if (isNew) {
-      let max = Math.max(0, ...updatedList.map(d => d.ID_DIRECCION || 0));
-      updatedList.push({
-        ID_DIRECCION: max + 1,
-        TIPO_DIRECCION: this.dirDraft.TIPO_DIRECCION || 'PRINCIPAL',
-        DOMICILIO: domicilio,
-        BARRIO: (this.dirDraft.BARRIO || '').trim(),
-        NOMBRE_UBICACION: (this.dirDraft.NOMBRE_UBICACION || '').trim(),
-        CODIGO_POSTAL: (this.dirDraft.CODIGO_POSTAL || '').trim()
-      });
-    } else {
-      updatedList = updatedList.map(d => {
-        if (d.ID_DIRECCION === originalId) {
-          return {
-            ...d,
-            TIPO_DIRECCION: this.dirDraft!.TIPO_DIRECCION || 'PRINCIPAL',
-            DOMICILIO: domicilio,
-            BARRIO: (this.dirDraft!.BARRIO || '').trim(),
-            NOMBRE_UBICACION: (this.dirDraft!.NOMBRE_UBICACION || '').trim(),
-            CODIGO_POSTAL: (this.dirDraft!.CODIGO_POSTAL || '').trim()
-          };
-        }
-        return d;
-      });
-    }
-
-    this.dirDraft = null;
-    this.direcciones = updatedList;
-    this.direccionesChange.emit(this.direcciones);
-    this.rebuildDirecciones();
-  }
-
-  cancelDireccionDraft(): void {
-    this.dirDraft = null;
-    this.rebuildDirecciones();
-  }
-
-  async removeSelectedDirecciones(): Promise<void> {
-    if (this.readOnly || !this.selectedDirecciones.length) return;
-    const confirm = await Swal.fire({
-      title: '¿Eliminar direcciones?',
-      text:
-        this.selectedDirecciones.length === 1
-          ? '¿Desea eliminar la dirección seleccionada?'
-          : `¿Desea eliminar las ${this.selectedDirecciones.length} direcciones seleccionadas?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#DF3E3E',
-      cancelButtonColor: '#438ef1',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'No'
-    });
-    if (!confirm.isConfirmed || this.readOnly) return;
-
-    const toDelete = new Set(this.selectedDirecciones);
-    this.direcciones = this.direcciones.filter(d => !toDelete.has(d.ID_DIRECCION!));
-    this.selectedDirecciones = [];
-    this.direccionesChange.emit(this.direcciones);
-    this.rebuildDirecciones();
-  }
-
-  // ==========================================
-  // TELÉFONOS
-  // ==========================================
   private ensureTelKeys(list: Ven209Telefono[]): Ven209Telefono[] {
     let max = 0;
     for (const t of list) {

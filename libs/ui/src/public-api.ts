@@ -58,3 +58,6 @@ export * from './lib/forms/xtein-radio-group/xtein-radio-group.component';
 export * from './lib/overlays/xtein-drop-down-panel/xtein-drop-down-panel.component';
 
 export * from './lib/forms/xtein-correos/xtein-correos.component';
+
+export * from './lib/forms/xtein-direcciones/xtein-direcciones.component';
+export * from './lib/forms/xtein-direcciones/xtein-direcciones.model';

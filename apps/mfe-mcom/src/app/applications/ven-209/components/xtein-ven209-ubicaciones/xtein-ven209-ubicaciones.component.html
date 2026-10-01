@@ -74,26 +74,8 @@
       </div>
       <span class="xtein-accordion-title">Direcciones</span>
     </div>
-    <div class="xtein-accordion-body" *ngIf="expanded.direcciones()">
-      <xtein-data-grid
-        #dirGrid
-        class="xtein-ubicaciones__grid"
-        [dataSource]="dirRows"
-        keyExpr="ID_DIRECCION"
-        [columns]="direccionColumns"
-        height="auto"
-        [searchEnabled]="false"
-        [filterEnabled]="false"
-        [showPager]="false"
-        [pageSize]="100"
-        [selectionMode]="readOnly ? 'none' : 'multiple'"
-        [selectedRowKeys]="selectedDirecciones"
-        showCheckBoxesMode="always"
-        (selectionChanged)="onDireccionSelectionChanged($event.selectedRowKeys)"
-        [toolbarVisible]="!readOnly"
-        [toolbarActions]="dirToolbarActions"
-        [groupTemplate]="dirCell"
-      />
+    <div class="xtein-accordion-body" [hidden]="!expanded.direcciones()">
+      <xtein-direcciones [direcciones]="direcciones" [readOnly]="readOnly" (direccionesChange)="direccionesChange.emit($event)" (pendingChange)="pendingChange.emit()" />
     </div>
   </div>
 
@@ -137,60 +119,6 @@
 <!-- ======================================================== -->
 <!-- CELL TEMPLATES                                           -->
 <!-- ======================================================== -->
-
-<!-- Template para Celdas de Direcciones -->
-<ng-template #dirCell let-cell>
-  @if (dirDraft && cell.data.ID_DIRECCION === dirDraft.ID_DIRECCION) {
-    @if (cell.column.dataField === 'TIPO_DIRECCION') {
-      <xtein-select
-        [(ngModel)]="dirDraft.TIPO_DIRECCION"
-        [items]="tiposDireccion"
-        placeholder="Tipo"
-        ariaLabel="Tipo de dirección"
-      />
-    } @else if (cell.column.dataField === 'DOMICILIO') {
-      <xtein-input
-        [(ngModel)]="dirDraft.DOMICILIO"
-        placeholder="Dirección / Domicilio"
-        ariaLabel="Dirección"
-      />
-    } @else if (cell.column.dataField === 'BARRIO') {
-      <xtein-input
-        [(ngModel)]="dirDraft.BARRIO"
-        placeholder="Barrio"
-        ariaLabel="Barrio"
-      />
-    } @else if (cell.column.dataField === 'NOMBRE_UBICACION') {
-      <xtein-input
-        [(ngModel)]="dirDraft.NOMBRE_UBICACION"
-        placeholder="Ciudad / Municipio"
-        ariaLabel="Ciudad o municipio"
-      />
-    } @else if (cell.column.dataField === 'CODIGO_POSTAL') {
-      <xtein-input
-        [(ngModel)]="dirDraft.CODIGO_POSTAL"
-        placeholder="C.P."
-        ariaLabel="Código postal"
-      />
-    } @else {
-      {{ cell.value }}
-    }
-  } @else {
-    @if (!readOnly && cell.column.dataField === 'DOMICILIO') {
-      <button
-        type="button"
-        class="xtein-ubicaciones__code-btn"
-        [disabled]="!!dirDraft"
-        [attr.aria-label]="'Editar dirección ' + cell.value"
-        (click)="beginEditDireccion(cell.data)"
-      >
-        {{ cell.value || '(Editar)' }}
-      </button>
-    } @else {
-      {{ cell.value }}
-    }
-  }
-</ng-template>
 
 <!-- Template para Celdas de Teléfonos -->
 <ng-template #telCell let-cell>

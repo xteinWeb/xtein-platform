@@ -1,20 +1,6 @@
-export interface Ven209Direccion {
-  ID_DIRECCION?: number;
-  TIPO_DIRECCION?: string;
-  TIPO_NOMENCLATURA?: string;
-  NOMENCLATURA?: string;
-  NUMERO1?: string;
-  NUMERO2?: string;
-  DOMICILIO?: string;
-  BARRIO?: string;
-  DEPENDIENTE?: string;
-  REFERENCIA?: string;
-  ID_UBICACION?: string;
-  CODIGO_POSTAL?: string;
-  NOMBRE_UBICACION?: string;
-  NOMBRE_BARRIO?: string;
-  isEdit?: boolean;
-}
+import type { XteinDireccion } from '@xtein/ui';
+
+export interface Ven209Direccion extends XteinDireccion {}
 
 export interface Ven209Telefono {
   ID_TELEFONO?: number;

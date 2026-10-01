@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
   ChangeDetectionStrategy,
@@ -6,7 +7,7 @@ import {
   EventEmitter,
   forwardRef,
   Input,
-  Output
+  Output, TemplateRef
 } from '@angular/core';
 
 import {
@@ -15,7 +16,7 @@ import {
 } from '@angular/forms';
 
 import {
-  DxSelectBoxModule
+  DxSelectBoxModule, DxTemplateModule, DxButtonModule
 } from 'devextreme-angular';
 
 import type {
@@ -33,7 +34,7 @@ import type {
   standalone: true,
 
   imports: [XteinLabelComponent,
-    DxSelectBoxModule
+    DxSelectBoxModule, DxTemplateModule, DxButtonModule, NgTemplateOutlet
   ],
 
   templateUrl:
@@ -58,6 +59,28 @@ import type {
 })
 export class XteinSelectComponent
   implements ControlValueAccessor {
+  @Input() searchExpr: string | string[] = '';
+  readonly searchIdentity = (item: unknown): unknown => item;
+  @Input() itemTemplate: TemplateRef<any> | null = null;
+  @Input() dropDownOptions: Record<string, unknown> = {};
+  @Input() refreshEnabled = false;
+  @Output() readonly refreshRequested = new EventEmitter<void>();
+  private readonly refreshToolbar = [{
+    widget: 'dxButton', location: 'before', toolbar: 'top',
+    options: { icon: 'refresh', hint: 'Actualizar lista', onClick: () => this.refreshRequested.emit() }
+  }];
+  private lastPopupOptions?: Record<string, unknown>;
+  private lastRefreshEnabled?: boolean;
+  private popupOptions: Record<string, unknown> = {};
+  get resolvedDropDownOptions(): Record<string, unknown> {
+    if (this.lastPopupOptions !== this.dropDownOptions || this.lastRefreshEnabled !== this.refreshEnabled) {
+      this.lastPopupOptions = this.dropDownOptions;
+      this.lastRefreshEnabled = this.refreshEnabled;
+      this.popupOptions = this.refreshEnabled ? { ...this.dropDownOptions, toolbarItems: this.refreshToolbar } : this.dropDownOptions;
+    }
+    return this.popupOptions;
+  }
+
 
   @Input()
   id = '';

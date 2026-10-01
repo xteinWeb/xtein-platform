@@ -372,8 +372,9 @@
         </div>
 
         <!-- Pestaña 2: Ubicaciones -->
-        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'ubicaciones'">
+        <div class="ven-209__tab-pane" [hidden]="activeMainTab() !== 'ubicaciones'">
           <xtein-ven209-ubicaciones
+            (pendingChange)="markPendingChanges()"
             [readOnly]="readOnly()"
             [direcciones]="direcciones()"
             [telefonos]="telefonos()"
