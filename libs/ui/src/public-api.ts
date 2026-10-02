@@ -61,3 +61,6 @@ export * from './lib/forms/xtein-correos/xtein-correos.component';
 
 export * from './lib/forms/xtein-direcciones/xtein-direcciones.component';
 export * from './lib/forms/xtein-direcciones/xtein-direcciones.model';
+
+export * from './lib/forms/xtein-telefonos/xtein-telefonos.component';
+export * from './lib/forms/xtein-telefonos/xtein-telefonos.model';

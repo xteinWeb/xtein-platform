@@ -1,14 +1,9 @@
-import type { XteinDireccion } from '@xtein/ui';
+import type { XteinDireccion, XteinTelefono } from '@xtein/ui';
 
 export interface Ven209Direccion extends XteinDireccion {}
 
-export interface Ven209Telefono {
-  ID_TELEFONO?: number;
+export interface Ven209Telefono extends XteinTelefono {
   ID_DIRECCION?: number;
-  TIPO_TELEFONO?: string;
-  TELEFONO?: string;
-  EXTENSION?: string;
-  isEdit?: boolean;
 }
 
 export interface Ven209Email {

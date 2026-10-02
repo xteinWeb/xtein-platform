@@ -1,0 +1,34 @@
+@if (errors.length) {
+  <div role="alert">No se pudieron cargar: {{ errors.join(', ') }}. <button type="button" (click)="reloadCatalogs()">Reintentar</button></div>
+}
+<xtein-data-grid class="xtein-telefonos__grid" [dataSource]="rows" keyExpr="ID_TELEFONO" [columns]="columns" height="auto"
+  [searchEnabled]="false" [filterEnabled]="false" [showPager]="false" [pageSize]="100"
+  [selectionMode]="readOnly || draft ? 'none' : 'multiple'" [selectedRowKeys]="selected" showCheckBoxesMode="always"
+  (selectionChanged)="select($event.selectedRowKeys)" [toolbarVisible]="!readOnly" [toolbarActions]="toolbar" [groupTemplate]="cellTemplate" />
+
+<ng-template #cellTemplate let-cell>
+  @if (draft && cell.data.ID_TELEFONO === draft.ID_TELEFONO) {
+    @switch (cell.column.dataField) {
+      @case ('TIPO_TELEFONO') {
+        <xtein-lookup [(ngModel)]="draft.TIPO_TELEFONO" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
+          selectionMode="multiple" valueExpr="TIPO" displayExpr="TIPO" placeholder="Tipo..." ariaLabel="Tipo teléfono"
+          [autoFocus]="true" [showClearButton]="true" [dropDownWidth]="400" />
+      }
+      @case ('TELEFONO') {
+        <xtein-input [(ngModel)]="draft.TELEFONO" (ngModelChange)="pendingChange.emit()" ariaLabel="Teléfono" placeholder="Número telefónico" />
+      }
+      @case ('EXTENSION') {
+        <xtein-input [(ngModel)]="draft.EXTENSION" (ngModelChange)="pendingChange.emit()" ariaLabel="Extensión" placeholder="Extensión" />
+      }
+      @default {
+        {{ cell.value }}
+      }
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'TELEFONO') {
+      <button type="button" class="xtein-telefonos__code-btn" [disabled]="!!draft" (click)="edit(cell.data)" [attr.aria-label]="'Editar teléfono ' + cell.value">{{cell.value || '(Editar)'}}</button>
+    } @else {
+      {{ display(cell.data, cell.column.dataField) }}
+    }
+  }
+</ng-template>

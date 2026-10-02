@@ -92,72 +92,8 @@
       </div>
       <span class="xtein-accordion-title">Teléfonos</span>
     </div>
-    <div class="xtein-accordion-body" *ngIf="expanded.telefonos()">
-      <xtein-data-grid
-        #telGrid
-        class="xtein-ubicaciones__grid"
-        [dataSource]="telRows"
-        keyExpr="ID_TELEFONO"
-        [columns]="telefonoColumns"
-        height="auto"
-        [searchEnabled]="false"
-        [filterEnabled]="false"
-        [showPager]="false"
-        [pageSize]="100"
-        [selectionMode]="readOnly ? 'none' : 'multiple'"
-        [selectedRowKeys]="selectedTelefonos"
-        showCheckBoxesMode="always"
-        (selectionChanged)="onTelefonoSelectionChanged($event.selectedRowKeys)"
-        [toolbarVisible]="!readOnly"
-        [toolbarActions]="telToolbarActions"
-        [groupTemplate]="telCell"
-      />
+    <div class="xtein-accordion-body" [hidden]="!expanded.telefonos()">
+      <xtein-telefonos [telefonos]="telefonos" [readOnly]="readOnly" (telefonosChange)="telefonosChange.emit($event)" (pendingChange)="pendingChange.emit()" />
     </div>
   </div>
 </div>
-
-<!-- ======================================================== -->
-<!-- CELL TEMPLATES                                           -->
-<!-- ======================================================== -->
-
-<!-- Template para Celdas de Teléfonos -->
-<ng-template #telCell let-cell>
-  @if (telDraft && cell.data.ID_TELEFONO === telDraft.ID_TELEFONO) {
-    @if (cell.column.dataField === 'TIPO_TELEFONO') {
-      <xtein-select
-        [(ngModel)]="telDraft.TIPO_TELEFONO"
-        [items]="tiposTelefono"
-        placeholder="Tipo"
-        ariaLabel="Tipo de teléfono"
-      />
-    } @else if (cell.column.dataField === 'TELEFONO') {
-      <xtein-input
-        [(ngModel)]="telDraft.TELEFONO"
-        placeholder="Número telefónico"
-        ariaLabel="Número telefónico"
-      />
-    } @else if (cell.column.dataField === 'EXTENSION') {
-      <xtein-input
-        [(ngModel)]="telDraft.EXTENSION"
-        placeholder="Ext."
-        ariaLabel="Extensión"
-      />
-    } @else {
-      {{ cell.value }}
-    }
-  } @else {
-    @if (!readOnly && cell.column.dataField === 'TELEFONO') {
-      <button
-        type="button"
-        class="xtein-ubicaciones__code-btn"
-        [disabled]="!!telDraft"
-        [attr.aria-label]="'Editar teléfono ' + cell.value"
-        (click)="beginEditTelefono(cell.data)"
-      >
-        {{ cell.value || '(Editar)' }}
-      </button>
-    } @else {
-      {{ cell.value }}
-    }
-  }
-</ng-template>
