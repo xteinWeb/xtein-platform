@@ -129,6 +129,7 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
 
   rebuildTelefonos(): void {
     const list = this.ensureTelKeys(this.telefonos);
+    this.telefonos = list;
     this.selectedTelefonos = this.selectedTelefonos.filter(key => list.some(t => t.ID_TELEFONO === key));
     this.telRows = this.telDraft
       ? [this.telDraft, ...list.filter(t => t.ID_TELEFONO !== this.telDraft?.originalId)]
@@ -159,8 +160,9 @@ export class XteinVen209UbicacionesComponent implements OnChanges {
             id: 'edit-tel',
             icon: 'edit',
             variant: 'secondary',
-            title: 'Editar teléfono seleccionado',
-            visible: this.selectedTelefonos.length === 1 && !this.telDraft,
+            title: this.selectedTelefonos.length === 1 ? 'Editar teléfono seleccionado' : 'Seleccione un teléfono para editar',
+            visible: !this.telDraft,
+            disabled: this.selectedTelefonos.length !== 1,
             action: () => {
               const found = this.telefonos.find(t => t.ID_TELEFONO === this.selectedTelefonos[0]);
               if (found) this.beginEditTelefono(found);

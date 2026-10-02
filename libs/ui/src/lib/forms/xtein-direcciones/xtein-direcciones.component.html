@@ -12,7 +12,7 @@
     @switch (cell.column.dataField) {
       @case ('TIPO_DIRECCION') {
         <xtein-lookup [(ngModel)]="draft.TIPO_DIRECCION" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
-          selectionMode="multiple" valueExpr="TIPO" displayExpr="TIPO" placeholder="Tipo..." ariaLabel="Tipo dirección"
+          selectionMode="multiple" valueExpr="TIPO" displayExpr="TIPO" placeholder="" ariaLabel="Tipo dirección"
           [autoFocus]="true" [showClearButton]="true" [dropDownWidth]="400" />
       }
       @case ('DOMICILIO') { <xtein-input [(ngModel)]="draft.DOMICILIO" (ngModelChange)="pendingChange.emit()" ariaLabel="Dirección/Domicilio" /> }

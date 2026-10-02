@@ -129,7 +129,7 @@ export class XteinDireccionesComponent implements OnChanges, OnInit {
     this.rows = this.draft ? [{ ...this.draft, TIPO_DIRECCION: direccionTipos(this.draft.TIPO_DIRECCION) }, ...this.direcciones.filter(row => row.ID_DIRECCION !== this.draft!.ID_DIRECCION)] : [...this.direcciones];
     this.toolbar = this.readOnly ? [] : [
       { id: 'add-dir', icon: 'plus', title: 'Nueva dirección', variant: 'primary', disabled: !!this.draft, action: () => this.add() },
-      { id: 'edit-dir', icon: 'edit', title: 'Editar dirección', variant: 'secondary', visible: this.selected.length === 1 && !this.draft, action: () => this.edit(this.direcciones.find(row => row.ID_DIRECCION === this.selected[0])!) },
+      { id: 'edit-dir', icon: 'edit', title: this.selected.length === 1 ? 'Editar dirección' : 'Seleccione una dirección para editar', variant: 'secondary', visible: !this.draft, disabled: this.selected.length !== 1, action: () => this.edit(this.direcciones.find(row => row.ID_DIRECCION === this.selected[0])!) },
       { id: 'save-dir', icon: 'check', title: 'Guardar dirección', variant: 'success', visible: !!this.draft, action: () => { this.commit(); } },
       { id: 'cancel-dir', icon: 'undo', title: 'Cancelar', variant: 'cancel', visible: !!this.draft, action: () => this.cancel() },
       { id: 'delete-dir', icon: 'trash', title: 'Eliminar direcciones', variant: 'danger', visible: !!this.selected.length && !this.draft, action: () => { void this.remove(); } }
