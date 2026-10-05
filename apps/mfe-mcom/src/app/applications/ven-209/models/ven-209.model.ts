@@ -1,4 +1,4 @@
-import type { XteinDireccion, XteinTelefono } from '@xtein/ui';
+import type { XteinCondicion, XteinDireccion, XteinTelefono } from '@xtein/ui';
 
 export interface Ven209Direccion extends XteinDireccion {}
 
@@ -20,14 +20,7 @@ export interface Ven209ContactoAdicional {
   CIIU?: string;
 }
 
-export interface Ven209Condicion {
-  ID_CONDICION: string;
-  DESCRIPCION?: string;
-  PLAZO?: number;
-  DIAS_ENTREGA?: number;
-  TIPO_CONDICION?: string;
-  VALOR?: number;
-}
+export interface Ven209Condicion extends XteinCondicion {}
 
 export interface Ven209Lookup {
   ID_LEGAL?: number | string;

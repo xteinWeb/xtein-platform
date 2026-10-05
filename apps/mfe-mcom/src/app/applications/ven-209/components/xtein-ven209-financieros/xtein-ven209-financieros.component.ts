@@ -3,20 +3,17 @@ import {
   EventEmitter,
   Input,
   Output,
+  ViewChild,
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  XteinDataGridComponent,
-  XteinGridColumn,
-  XteinGridToolbarAction,
+  XteinCondicionesComponent,
   XteinInputComponent,
-  XteinLabelComponent,
-  XteinLookupComponent
+  XteinLabelComponent
 } from '@xtein/ui';
 import { Ven209Condicion, Ven209Lookup } from '../../models/ven-209.model';
-import { Ven209GridColumns } from '../../constants/ven-209-ui.constants';
 
 @Component({
   selector: 'xtein-ven209-financieros',
@@ -24,10 +21,9 @@ import { Ven209GridColumns } from '../../constants/ven-209-ui.constants';
   imports: [
     CommonModule,
     FormsModule,
-    XteinDataGridComponent,
+    XteinCondicionesComponent,
     XteinInputComponent,
-    XteinLabelComponent,
-    XteinLookupComponent
+    XteinLabelComponent
   ],
   templateUrl: './xtein-ven209-financieros.component.html',
   styleUrls: ['./xtein-ven209-financieros.component.scss']
@@ -42,8 +38,9 @@ export class XteinVen209FinancierosComponent {
   @Output() readonly cupoCreditoChange = new EventEmitter<number>();
   @Output() readonly tiempoEntregaChange = new EventEmitter<number>();
   @Output() readonly condicionesChange = new EventEmitter<Ven209Condicion[]>();
+  @Output() readonly pendingChange = new EventEmitter<void>();
 
-  readonly condicionColumns = Ven209GridColumns.condiciones;
+  @ViewChild(XteinCondicionesComponent) private conditionsComp?: XteinCondicionesComponent;
 
   // Accordion state (matches Legacy VEN20901)
   readonly expanded = {
@@ -51,50 +48,15 @@ export class XteinVen209FinancierosComponent {
     condiciones: signal(true)
   };
 
+  commitPending(): boolean {
+    const committed = this.conditionsComp?.commit() ?? true;
+    if (!committed) this.expanded.condiciones.set(true);
+    return committed;
+  }
+
   toggleSection(section: keyof typeof this.expanded): void {
     const sig = this.expanded[section];
     sig.set(!sig());
-  }
-
-  readonly addModalOpen = signal(false);
-  selectedCondicionId = '';
-
-  readonly lookupColumns: XteinGridColumn<Ven209Lookup, unknown>[] = [
-    { dataField: 'ID_CONDICION', caption: 'Código', width: 130 },
-    { dataField: 'DESCRIPCION', caption: 'Descripción' }
-  ];
-
-  readonly gridToolbarActions: XteinGridToolbarAction[] = [
-    {
-      id: 'add-cond',
-      text: 'Asociar Condición',
-      title: 'Asociar condición comercial',
-      icon: 'plus',
-      variant: 'primary',
-      action: () => this.openModal()
-    }
-  ];
-
-  openModal(): void {
-    if (this.readOnly) return;
-    this.selectedCondicionId = '';
-    this.addModalOpen.set(true);
-  }
-
-  closeModal(): void {
-    this.addModalOpen.set(false);
-  }
-
-  saveCondicion(): void {
-    if (!this.selectedCondicionId) return;
-    const itemInfo = this.availableCondiciones.find(c => c.ID_CONDICION === this.selectedCondicionId);
-    const item: Ven209Condicion = {
-      ID_CONDICION: this.selectedCondicionId,
-      DESCRIPCION: String(itemInfo?.DESCRIPCION ?? this.selectedCondicionId)
-    };
-    const updated = [...this.condiciones.filter(c => c.ID_CONDICION !== item.ID_CONDICION), item];
-    this.condicionesChange.emit(updated);
-    this.closeModal();
   }
 
   onCupoChange(value: number): void {

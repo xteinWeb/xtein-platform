@@ -388,8 +388,8 @@
         </div>
 
         <!-- Pestaña 3: Financieros -->
-        <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'financieros'">
-          <xtein-ven209-financieros
+        <div class="ven-209__tab-pane" [hidden]="activeMainTab() !== 'financieros'">
+          <xtein-ven209-financieros (pendingChange)="markPendingChanges()"
             [readOnly]="readOnly()"
             [cupoCredito]="form.controls.CUPO_CREDITO.value || 0"
             [tiempoEntrega]="form.controls.TIEMPO_ENTREGA.value || 0"

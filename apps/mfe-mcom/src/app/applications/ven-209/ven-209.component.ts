@@ -481,11 +481,16 @@ export class Ven209Component implements OnInit, OnDestroy {
   }
 
   @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
+  @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
 
   async saveRecord(): Promise<void> {
     if (this.loading() || this.readOnly()) return;
     if (this.locations && !this.locations.commitPendingAddresses()) {
       this.activeMainTab.set('ubicaciones');
+      return;
+    }
+    if (this.financials && !this.financials.commitPending()) {
+      this.activeMainTab.set('financieros');
       return;
     }
     const raw = this.form.getRawValue();

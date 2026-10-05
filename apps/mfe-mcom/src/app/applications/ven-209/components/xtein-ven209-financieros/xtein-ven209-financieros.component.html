@@ -58,48 +58,14 @@
       </div>
       <span class="xtein-accordion-title">Condiciones</span>
     </div>
-    <div class="xtein-accordion-body" *ngIf="expanded.condiciones()">
-      <xtein-data-grid
-        id="grid-condiciones-prov"
-        [dataSource]="condiciones"
-        [columns]="condicionColumns"
-        [showPager]="false"
-        [pageSize]="100"
-        [toolbarVisible]="!readOnly"
-        [toolbarActions]="gridToolbarActions"
-        searchPlaceholder="Buscar condición…"
-      >
-      </xtein-data-grid>
-    </div>
-  </div>
-
-  <!-- Modal para asociar condición comercial -->
-  <div class="xtein-modal-backdrop" *ngIf="addModalOpen()">
-    <div class="xtein-modal-card">
-      <div class="xtein-modal-header">
-        <h4 class="xtein-modal-title">Asociar Condición Comercial</h4>
-        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
-      </div>
-      <div class="xtein-modal-body">
-        <div class="xtein-modal-field">
-          <xtein-label for="modal-cond-id">Condición *</xtein-label>
-          <xtein-lookup
-            id="modal-cond-id"
-            placeholder="Seleccione condición"
-            searchPlaceholder="Buscar condición…"
-            [items]="$any(availableCondiciones)"
-            valueExpr="ID_CONDICION"
-            displayExpr="DESCRIPCION"
-            [columns]="lookupColumns"
-            [(ngModel)]="selectedCondicionId"
-          >
-          </xtein-lookup>
-        </div>
-      </div>
-      <div class="xtein-modal-footer">
-        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
-        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveCondicion()">Asociar</button>
-      </div>
+    <div class="xtein-accordion-body" [hidden]="!expanded.condiciones()">
+      <xtein-condiciones
+        [condiciones]="condiciones"
+        [availableCondiciones]="$any(availableCondiciones)"
+        [readOnly]="readOnly"
+        (condicionesChange)="condicionesChange.emit($event)"
+        (pendingChange)="pendingChange.emit()"
+      />
     </div>
   </div>
 </div>
