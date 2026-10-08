@@ -52,7 +52,8 @@ import {
   XteinPerfilGridColumn,
   XteinPerfilTasaRecord,
   XteinTagBoxComponent,
-  XteinLoadingComponent
+  XteinLoadingComponent,
+  XteinGroupLabelComponent
 } from '@xtein/ui';
 
 import {
@@ -101,6 +102,7 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinPerfilTributarioComponent,
     XteinTagBoxComponent,
     XteinLoadingComponent,
+    XteinGroupLabelComponent,
     XteinVen209UbicacionesComponent,
     XteinVen209FinancierosComponent
   ],

@@ -1,4 +1,4 @@
-import {XteinLabelComponent} from '@xtein/ui';
+import {XteinLabelComponent, XteinGroupLabelComponent} from '@xtein/ui';
 import {
   untracked,
   computed,
@@ -94,6 +94,7 @@ import {
     true,
 
   imports: [XteinLabelComponent,
+    XteinGroupLabelComponent,
     ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,

@@ -157,54 +157,32 @@
 ======================================================================*/
 
 .mad-005__connection {
-  min-width:
-    0;
+  min-width: 0;
+  margin: 0;
+  padding: 16px 20px 20px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-sizing: border-box;
 
-  margin:
-    0;
-
-  padding:
-    12px
-    16px
-    14px;
-
-  border:
-    1px solid
-    #dfe6ef;
-
-  border-radius:
-    8px;
-
-  background:
-    #ffffff;
+  xtein-data-source-parameters {
+    display: block;
+    padding-top: 14px;
+    padding-left: 14px;
+    box-sizing: border-box;
+  }
 }
 
-
 .mad-005__section-title {
-  width:
-    auto;
-
-  padding:
-    0
-    8px;
-
-  color:
-    rgba(10, 57, 96, 0.55);
-
-  font-size:
-    0.95rem;
-
-  font-weight:
-    400;
-
-  text-transform:
-    none;
-
-  letter-spacing:
-    normal;
-
-  font-family:
-    inherit;
+  width: auto;
+  padding: 0 8px;
+  margin-left: 4px;
+  color: rgba(10, 57, 96, 0.55);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: inherit;
 }
 
 

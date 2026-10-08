@@ -51,7 +51,8 @@ import {
   XteinLoadingComponent,
   XteinNotificationService,
   XteinRecordFilterResult,
-  XteinRecordViewColumn
+  XteinRecordViewColumn,
+  XteinGroupLabelComponent
 } from '@xtein/ui';
 
 import {
@@ -105,6 +106,7 @@ import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein
     XteinRecordReportsComponent,
     XteinRecordSettingsComponent,
     XteinLoadingComponent,
+    XteinGroupLabelComponent,
     XteinVen212ItemsComponent
   ],
   providers: [

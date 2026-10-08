@@ -11,7 +11,11 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   standalone: true,
   template: `
     <span class="xtein-group-label" [class.xtein-group-label--required]="required">
-      <ng-content>{{ label }}</ng-content>
+      @if (label) {
+        {{ label }}
+      } @else {
+        <ng-content></ng-content>
+      }
       @if (required) {
         <span class="xtein-group-label__required" aria-hidden="true">*</span>
       }
