@@ -606,6 +606,7 @@ fieldset.xtein-group {
 
 /* Títulos de grupo (Texto de identificación, fecha de registro y estado, detalle cliente, etc.) */
 .xtein-group-label,
+.xtein-group-label-host,
 legend.xtein-group-label,
 legend.xtein-legend,
 .xtein-legend,
@@ -618,10 +619,11 @@ legend.xtein-legend,
   letter-spacing: normal !important;
   font-family: inherit !important;
   width: auto !important;
-  padding: 0 8px !important;
-  margin-left: 4px !important;
+  padding: 0 !important;
+  margin: 0 !important;
   margin-bottom: 0 !important;
   border: none !important;
+  text-align: left !important;
 }
 
 .xtein-fieldset-content {

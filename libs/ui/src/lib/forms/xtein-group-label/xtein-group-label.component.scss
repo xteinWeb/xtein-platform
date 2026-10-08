@@ -1,5 +1,7 @@
 :host {
   display: inline-block;
+  margin: 0;
+  padding: 0;
 }
 
 .xtein-group-label {
@@ -12,6 +14,8 @@
   letter-spacing: normal;
   text-transform: none;
   font-family: inherit;
+  margin: 0;
+  padding: 0;
 
   &__required {
     color: #df3e3e;
