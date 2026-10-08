@@ -72,6 +72,7 @@ export class XteinSelectComponent
   @Input() minSearchLength = 0;
   @Input() paginate = true;
   @Input() pageSize = 20;
+  @Input() tabIndex = 0;
   @Output() readonly refreshRequested = new EventEmitter<void>();
 
   private readonly refreshToolbar = [{

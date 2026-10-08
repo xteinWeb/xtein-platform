@@ -65,6 +65,9 @@ export class XteinNumberComponent
   @Input()
   name = '';
 
+  @Input()
+  tabIndex = 0;
+
   /**
    * Placeholder displayed when no value is entered.
    */
