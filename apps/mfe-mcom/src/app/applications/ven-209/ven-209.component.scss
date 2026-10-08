@@ -316,28 +316,5 @@
   }
 }
 
-.xtein-id-legal-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 24px;
-  padding: 3px 0;
-  font-size: 13px;
-  color: #33587b;
-
-  &__id {
-    flex: 0 0 120px;
-    font-weight: 500;
-    color: #33587b;
-  }
-
-  &__nombre {
-    flex: 1 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #33587b;
-  }
-}
 
 

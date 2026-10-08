@@ -38,24 +38,16 @@
                   [items]="$any(idLegales())"
                   valueExpr="ID_LEGAL"
                   displayExpr="ID_LEGAL"
+                  [columns]="['ID_LEGAL', 'NOMBRE_COMPLETO']"
                   [searchEnabled]="true"
                   searchMode="contains"
-                  [searchExpr]="['ID_LEGAL', 'NOMBRE_COMPLETO']"
                   [acceptCustomValue]="true"
                   [refreshEnabled]="true"
                   (refreshRequested)="refreshIdLegales()"
                   (customItemCreating)="onIdLegalCustomItem($event)"
-                  [itemTemplate]="idLegalItemTpl"
                   formControlName="ID_LEGAL"
                   [readOnly]="readOnly()"
                 ></xtein-select>
-
-                <ng-template #idLegalItemTpl let-item>
-                  <div class="xtein-id-legal-item">
-                    <span class="xtein-id-legal-item__id">{{ item.ID_LEGAL }}</span>
-                    <span class="xtein-id-legal-item__nombre">{{ item.NOMBRE_COMPLETO || item.NOMBRE }}</span>
-                  </div>
-                </ng-template>
               </div>
             </div>
           </div>

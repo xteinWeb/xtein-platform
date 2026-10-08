@@ -2,8 +2,8 @@
 <dx-select-box
   class="w-100"
   stylingMode="filled"
-  [items]="items"
-  [itemTemplate]="itemTemplate ? 'xteinSelectItem' : 'item'"
+  [dataSource]="dataSource"
+  [itemTemplate]="itemTemplate ? 'customItem' : (columns && columns.length ? 'columnsItem' : 'item')"
   [displayExpr]="displayExpr"
   [valueExpr]="valueExpr"
   [value]="value"
@@ -15,7 +15,7 @@
   [searchTimeout]="searchTimeout"
   [minSearchLength]="minSearchLength"
   [acceptCustomValue]="acceptCustomValue"
-  [searchExpr]="searchExpr || displayExpr || searchIdentity"
+  [searchExpr]="resolvedSearchExpr"
   [dropDownOptions]="resolvedDropDownOptions"
   [showClearButton]="showClearButton"
   [noDataText]="noDataText"
@@ -24,8 +24,22 @@
   (onCustomItemCreating)="handleCustomItemCreating($event)"
   (onFocusOut)="handleFocusOut()">
   @if (itemTemplate) {
-    <div *dxTemplate="let item of 'xteinSelectItem'">
+    <div *dxTemplate="let item of 'customItem'">
       <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </div>
+  }
+  @if (columns && columns.length) {
+    <div *dxTemplate="let item of 'columnsItem'">
+      <div class="xtein-select-columns-item">
+        @for (col of columns; track col; let i = $index) {
+          <span
+            class="xtein-select-col"
+            [class.xtein-select-col--first]="i === 0"
+            [style.width]="getColumnWidth(i)">
+            {{ item?.[col] ?? item }}
+          </span>
+        }
+      </div>
     </div>
   }
 </dx-select-box>

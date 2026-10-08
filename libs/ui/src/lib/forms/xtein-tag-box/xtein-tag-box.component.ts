@@ -12,6 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { DxTagBoxModule, DxTemplateModule } from 'devextreme-angular';
+import DataSource from 'devextreme/data/data_source';
 import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 
 /**
@@ -49,9 +50,69 @@ export class XteinTagBoxComponent implements ControlValueAccessor {
   @Input() label = '';
   @Input() ariaLabel = '';
   @Input() placeholder = '';
-  @Input() items: unknown[] = [];
+  @Input() paginate = true;
+  @Input() pageSize = 20;
+
+  private _items: unknown[] = [];
+  private _dataSource: any = [];
+
+  get dataSource(): any {
+    return this._dataSource;
+  }
+
+  @Input()
+  set dataSource(val: unknown) {
+    this.items = val;
+  }
+
+  @Input()
+  set items(val: unknown) {
+    if (val instanceof DataSource) {
+      this._dataSource = val;
+      this._items = [];
+    } else {
+      this._items = Array.isArray(val) ? val : [];
+      this.updateDataSource();
+    }
+  }
+  get items(): unknown[] {
+    return this._items;
+  }
+
+  private _valueExpr = '';
+  @Input()
+  set valueExpr(val: string) {
+    this._valueExpr = val || '';
+    this.updateDataSource();
+  }
+  get valueExpr(): string {
+    return this._valueExpr;
+  }
+
+  private updateDataSource(): void {
+    if (this._items && this._items.length > 0) {
+      if (this.paginate) {
+        const isObjectArray = typeof this._items[0] === 'object' && this._items[0] !== null;
+        const key = (isObjectArray && this._valueExpr) ? this._valueExpr : undefined;
+        this._dataSource = new DataSource({
+          store: {
+            type: 'array',
+            data: this._items,
+            key: key
+          },
+          paginate: true,
+          pageSize: this.pageSize
+        });
+      } else {
+        this._dataSource = this._items;
+      }
+    } else {
+      this._dataSource = [];
+    }
+    this.changeDetector?.markForCheck();
+  }
+
   @Input() displayExpr = '';
-  @Input() valueExpr = '';
   @Input() searchEnabled = true;
   @Input() searchMode: 'contains' | 'startswith' = 'contains';
   @Input() showSelectionControls = true;

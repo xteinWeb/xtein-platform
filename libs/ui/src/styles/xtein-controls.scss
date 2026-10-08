@@ -546,4 +546,31 @@
   }
 }
 
+.xtein-select-columns-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+  color: var(--xt-control-text, #33587b);
+  font-size: 13px;
+  line-height: 1.4;
+
+  .xtein-select-col {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--xt-control-text, #33587b);
+  }
+
+  .xtein-select-col--first {
+    flex: 0 0 120px;
+    width: 120px;
+  }
+
+  .xtein-select-col:not(.xtein-select-col--first) {
+    flex: 1 1 auto;
+  }
+}
+
+
 
