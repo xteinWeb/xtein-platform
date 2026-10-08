@@ -11,12 +11,17 @@
   [disabled]="isDisabled"
   [readOnly]="readOnly"
   [searchEnabled]="searchEnabled"
+  [searchMode]="searchMode"
+  [searchTimeout]="searchTimeout"
+  [minSearchLength]="minSearchLength"
+  [acceptCustomValue]="acceptCustomValue"
   [searchExpr]="searchExpr || displayExpr || searchIdentity"
   [dropDownOptions]="resolvedDropDownOptions"
   [showClearButton]="showClearButton"
   [noDataText]="noDataText"
   [inputAttr]="inputAttributes"
   (onValueChanged)="handleValueChanged($event)"
+  (onCustomItemCreating)="handleCustomItemCreating($event)"
   (onFocusOut)="handleFocusOut()">
   @if (itemTemplate) {
     <div *dxTemplate="let item of 'xteinSelectItem'">

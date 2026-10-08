@@ -17,28 +17,32 @@
         <div class="xtein-financieros__field-inline">
           <xtein-label class="xtein-financieros__label-inline" for="fin-cupo">Cupo crédito</xtein-label>
           <div class="xtein-financieros__control-inline">
-            <xtein-input
+            <xtein-number
               id="fin-cupo"
-              type="number"
               [ngModel]="cupoCredito"
               (ngModelChange)="onCupoChange($event)"
+              [disabled]="readOnly"
               [readOnly]="readOnly"
+              [min]="0"
+              [showSpinButtons]="false"
               placeholder="0"
-            ></xtein-input>
+            ></xtein-number>
           </div>
         </div>
 
         <div class="xtein-financieros__field-inline">
           <xtein-label class="xtein-financieros__label-inline" for="fin-tiempo">Días entrega</xtein-label>
           <div class="xtein-financieros__control-inline">
-            <xtein-input
+            <xtein-number
               id="fin-tiempo"
-              type="number"
               [ngModel]="tiempoEntrega"
               (ngModelChange)="onTiempoChange($event)"
+              [disabled]="readOnly"
               [readOnly]="readOnly"
+              [min]="0"
+              [showSpinButtons]="false"
               placeholder="0"
-            ></xtein-input>
+            ></xtein-number>
           </div>
         </div>
       </div>
@@ -60,6 +64,7 @@
     </div>
     <div class="xtein-accordion-body" [hidden]="!expanded.condiciones()">
       <xtein-condiciones
+        [columns]="condicionColumns"
         [condiciones]="condiciones"
         [availableCondiciones]="$any(availableCondiciones)"
         [readOnly]="readOnly"

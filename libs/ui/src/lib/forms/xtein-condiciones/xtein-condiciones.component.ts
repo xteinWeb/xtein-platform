@@ -36,9 +36,7 @@ export class XteinCondicionesComponent implements OnChanges, OnInit {
   @Input() tipo = 'VENTAS';
   @Input() columns: XteinGridColumn<XteinCondicion, unknown>[] = [
     { dataField: 'ID_CONDICION', caption: 'Condición', width: 140, cellTemplate: 'xteinGroup' },
-    { dataField: 'NOMBRE_CONDICION', caption: 'Nombre condición', minWidth: 220, cellTemplate: 'xteinGroup' },
-    { dataField: 'PLAZO', caption: 'Plazo (Días)', width: 110, alignment: 'right', cellTemplate: 'xteinGroup' },
-    { dataField: 'DIAS_ENTREGA', caption: 'Días Entrega', width: 110, alignment: 'right', cellTemplate: 'xteinGroup' }
+    { dataField: 'NOMBRE_CONDICION', caption: 'Nombre condición', minWidth: 220, cellTemplate: 'xteinGroup' }
   ];
 
   @Output() readonly condicionesChange = new EventEmitter<XteinCondicion[]>();

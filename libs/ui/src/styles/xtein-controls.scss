@@ -131,6 +131,12 @@
 }
 
 
+.dx-state-readonly .dx-clear-button-area,
+.dx-state-disabled .dx-clear-button-area {
+  display: none !important;
+}
+
+
 /*======================================================================
 = 4. DISABLED EDITORS
 ======================================================================*/
@@ -515,6 +521,29 @@
 .xtein-accordion-body {
   padding: 12px 4px 16px 4px;
   background: transparent;
+}
+
+.xtein-select-refresh-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #5e748c !important;
+
+  .dx-button-content {
+    padding: 4px !important;
+  }
+
+  .dx-icon {
+    font-size: 16px !important;
+    color: #5e748c !important;
+  }
+
+  &:hover {
+    background: rgba(15, 76, 129, 0.08) !important;
+    .dx-icon {
+      color: #0f4c81 !important;
+    }
+  }
 }
 
 

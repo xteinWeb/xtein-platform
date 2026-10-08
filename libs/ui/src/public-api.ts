@@ -67,3 +67,4 @@ export * from './lib/forms/xtein-telefonos/xtein-telefonos.model';
 
 export * from './lib/forms/xtein-condiciones/xtein-condiciones.component';
 export * from './lib/forms/xtein-condiciones/xtein-condiciones.model';
+export * from './lib/forms/xtein-group-label/xtein-group-label.component';

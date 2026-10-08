@@ -10,8 +10,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   XteinCondicionesComponent,
-  XteinInputComponent,
-  XteinLabelComponent
+  XteinNumberComponent,
+  XteinLabelComponent,
+  XteinGridColumn
 } from '@xtein/ui';
 import { Ven209Condicion, Ven209Lookup } from '../../models/ven-209.model';
 
@@ -22,7 +23,7 @@ import { Ven209Condicion, Ven209Lookup } from '../../models/ven-209.model';
     CommonModule,
     FormsModule,
     XteinCondicionesComponent,
-    XteinInputComponent,
+    XteinNumberComponent,
     XteinLabelComponent
   ],
   templateUrl: './xtein-ven209-financieros.component.html',
@@ -41,6 +42,11 @@ export class XteinVen209FinancierosComponent {
   @Output() readonly pendingChange = new EventEmitter<void>();
 
   @ViewChild(XteinCondicionesComponent) private conditionsComp?: XteinCondicionesComponent;
+
+  readonly condicionColumns: XteinGridColumn<Ven209Condicion, unknown>[] = [
+    { dataField: 'ID_CONDICION', caption: 'Condición', width: 140, cellTemplate: 'xteinGroup' },
+    { dataField: 'NOMBRE_CONDICION', caption: 'Nombre condición', minWidth: 220, cellTemplate: 'xteinGroup' }
+  ];
 
   // Accordion state (matches Legacy VEN20901)
   readonly expanded = {

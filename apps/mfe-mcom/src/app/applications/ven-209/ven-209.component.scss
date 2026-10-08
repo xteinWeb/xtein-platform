@@ -65,12 +65,12 @@
   }
 
   &__legend {
-    color: #557d9e;
-    font-size: 12.5px;
-    font-weight: 700;
+    color: rgba(10, 57, 96, 0.55);
+    font-size: 0.95rem;
+    font-weight: 400;
     padding: 0 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    text-transform: none;
+    letter-spacing: normal;
   }
 
   &__fieldset-content {
@@ -313,6 +313,30 @@
     &::before {
       display: none !important;
     }
+  }
+}
+
+.xtein-id-legal-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 24px;
+  padding: 3px 0;
+  font-size: 13px;
+  color: #33587b;
+
+  &__id {
+    flex: 0 0 120px;
+    font-weight: 500;
+    color: #33587b;
+  }
+
+  &__nombre {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #33587b;
   }
 }
 

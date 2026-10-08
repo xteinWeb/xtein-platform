@@ -77,6 +77,15 @@ export class XteinNumberComponent
   @Input()
   required = false;
 
+  @Input()
+  readOnly = false;
+
+  @Input()
+  format = '';
+
+  @Input()
+  stylingMode: 'filled' | 'outlined' | 'underlined' = 'filled';
+
   /**
    * Accessible label for the numeric input.
    */
@@ -105,7 +114,7 @@ export class XteinNumberComponent
    * Determines whether spin buttons are displayed.
    */
   @Input()
-  showSpinButtons = true;
+  showSpinButtons = false;
 
   /**
    * Current numeric value.

@@ -8867,3 +8867,19 @@ div.dx-dashboard-item {
   font-weight: 500;
   line-height: 1.4;
 }
+
+/* ==========================================================================
+   ESTANDAR PARA TITULOS DE GRUPOS DE DATOS (LEGACY ALIGNED)
+   ========================================================================== */
+.xtein-group-label,
+legend.xtein-group-label,
+.dx-form-group-caption,
+.dx-form-group .dx-form-group-caption {
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  color: rgba(10, 57, 96, 0.55) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-family: inherit !important;
+}
+

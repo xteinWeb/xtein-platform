@@ -1,4 +1,5 @@
 <dx-number-box
+  class="w-100"
   [inputAttr]="{
     id: id,
     name: name,
@@ -6,13 +7,15 @@
   }"
   [value]="$any(value)"
   [placeholder]="placeholder"
-  [disabled]="disabled"
+  [disabled]="disabled || readOnly"
+  [readOnly]="readOnly"
   [min]="min"
   [max]="max"
   [step]="step"
+  [format]="format"
   [showSpinButtons]="showSpinButtons"
-  [showClearButton]="!required"
-  stylingMode="outlined"
+  [showClearButton]="!required && !readOnly && !disabled"
+  [stylingMode]="stylingMode"
   (onValueChanged)="onValueChanged($event)"
   (onFocusOut)="onFocusOut()">
 </dx-number-box>

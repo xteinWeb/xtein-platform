@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
+  ViewChild,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -16,7 +17,7 @@ import {
 } from '@angular/forms';
 
 import {
-  DxSelectBoxModule, DxTemplateModule, DxButtonModule
+  DxSelectBoxComponent, DxSelectBoxModule, DxTemplateModule, DxButtonModule
 } from 'devextreme-angular';
 
 import type {
@@ -64,10 +65,21 @@ export class XteinSelectComponent
   @Input() itemTemplate: TemplateRef<any> | null = null;
   @Input() dropDownOptions: Record<string, unknown> = {};
   @Input() refreshEnabled = false;
+  @Input() searchTimeout = 200;
+  @Input() minSearchLength = 0;
   @Output() readonly refreshRequested = new EventEmitter<void>();
   private readonly refreshToolbar = [{
-    widget: 'dxButton', location: 'before', toolbar: 'top',
-    options: { icon: 'refresh', hint: 'Actualizar lista', onClick: () => this.refreshRequested.emit() }
+    widget: 'dxButton',
+    location: 'after',
+    toolbar: 'top',
+    options: {
+      icon: 'refresh',
+      stylingMode: 'text',
+      type: 'normal',
+      hint: 'Actualizar lista',
+      elementAttr: { class: 'xtein-select-refresh-btn' },
+      onClick: () => this.refreshRequested.emit()
+    }
   }];
   private lastPopupOptions?: Record<string, unknown>;
   private lastRefreshEnabled?: boolean;
@@ -105,6 +117,21 @@ export class XteinSelectComponent
 
   @Input()
   searchEnabled = false;
+
+  @Input()
+  searchMode: 'contains' | 'startswith' = 'contains';
+
+  @Input()
+  acceptCustomValue = false;
+
+  @Output()
+  readonly customItemCreating = new EventEmitter<any>();
+
+  @ViewChild(DxSelectBoxComponent) private editor?: DxSelectBoxComponent;
+
+  focus(): void {
+    this.editor?.instance.focus();
+  }
 
   @Input()
   showClearButton = false;
@@ -233,6 +260,14 @@ export class XteinSelectComponent
     this.onChange(
       this.value
     );
+  }
+
+  handleCustomItemCreating(event: any): void {
+    if (this.customItemCreating.observed) {
+      this.customItemCreating.emit(event);
+    } else {
+      event.customItem = event.text;
+    }
   }
 
   handleFocusOut(): void {

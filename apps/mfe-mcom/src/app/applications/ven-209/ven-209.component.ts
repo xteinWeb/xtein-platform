@@ -501,6 +501,7 @@ export class Ven209Component implements OnInit, OnDestroy {
   }
 
   @ViewChild('clienteInput') private clienteInput?: XteinInputComponent;
+  @ViewChild('idLegalSelect') private idLegalSelect?: XteinSelectComponent;
   @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
   @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
 
@@ -702,8 +703,8 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.isAlertOpenOrValidating = false;
     this.idClienteValidationStatus.set(null);
     this.mode.set(RecordToolbarMode.Browsing);
-    this.disableFormControls();
     this.populateForm(record);
+    this.disableFormControls();
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -837,6 +838,10 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.emails.set(record.ITM_EMAIL ?? []);
     this.condiciones.set(record.CONDICIONES ?? []);
     this.contactoAdicional.set(record.ADIC_ACREEDORES ?? { URL: '', CIIU: '' });
+
+    if (this.readOnly()) {
+      this.disableFormControls();
+    }
   }
 
   private clearForm(): void {
@@ -865,6 +870,7 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   onIdLegalChanged(selectedId: number | string): void {
     if (this.readOnly()) return;
+    if (selectedId === '' || selectedId === null || selectedId === undefined) return;
     const match = this.idLegales().find(l => String(l.ID_LEGAL) === String(selectedId));
     if (match) {
       this.form.patchValue({
@@ -879,7 +885,24 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
   }
 
+  onIdLegalCustomItem(event: any): void {
+    const text = typeof event.text === 'string' ? event.text.trim() : '';
+    if (!text) {
+      event.customItem = null;
+      return;
+    }
+    const syntheticId = isNaN(Number(text)) ? text : Number(text);
+    const newItem: Ven209Lookup = {
+      ID_LEGAL: syntheticId,
+      NOMBRE_COMPLETO: text
+    };
+    event.customItem = newItem;
+    this.form.controls.ID_LEGAL.setValue(syntheticId);
+  }
 
+  refreshIdLegales(): void {
+    void this.loadCatalogs(true);
+  }
 
   async validateIdCliente(showAlert = true): Promise<boolean> {
     if (this.readOnly() || this.mode() !== RecordToolbarMode.Creating) {

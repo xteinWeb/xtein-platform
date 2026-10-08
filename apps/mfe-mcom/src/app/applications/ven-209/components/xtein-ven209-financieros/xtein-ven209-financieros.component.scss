@@ -105,9 +105,34 @@
     flex: 1 1 0;
     min-width: 0;
 
-    xtein-input {
+    xtein-input,
+    xtein-number {
       display: block;
       width: 100%;
+    }
+
+    ::ng-deep {
+      .dx-numberbox {
+        border-radius: 8px !important;
+        background-color: var(--xt-control-background, #ffffff);
+        border: 1px solid var(--xt-control-border, #c9d8ea) !important;
+
+        &.dx-state-disabled,
+        &.dx-state-readonly {
+          background-color: var(--xt-control-disabled-background, #f4f7fb) !important;
+          border-color: var(--xt-control-disabled-border, #d7e4f2) !important;
+          opacity: 1 !important;
+
+          .dx-texteditor-input {
+            color: var(--xt-control-disabled-text, #5e748c) !important;
+            -webkit-text-fill-color: var(--xt-control-disabled-text, #5e748c) !important;
+          }
+
+          .dx-clear-button-area {
+            display: none !important;
+          }
+        }
+      }
     }
   }
 }
