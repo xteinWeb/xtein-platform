@@ -1,7 +1,7 @@
 <dx-drop-down-box [items]="items" [valueExpr]="valueExpr" [displayExpr]="displayExpr || valueExpr"
-  [(value)]="value" [(opened)]="opened" [disabled]="isDisabled" [readOnly]="readOnly" [showClearButton]="showClearButton"
+  [value]="value" [(opened)]="opened" [disabled]="isDisabled" [readOnly]="readOnly" [showClearButton]="showClearButton"
   [placeholder]="placeholder" stylingMode="filled" [dropDownOptions]="dropDownOptions"
-  [displayValueFormatter]="displayValueFormatter"
+  [displayValueFormatter]="displayValueFormatter" [deferRendering]="false"
   [fieldTemplate]="selectionMode === 'multiple' ? 'xteinLookupSelection' : null"
   [inputAttr]="{id:id,'aria-label':ariaLabel,'aria-required':required.toString()}"
   (onValueChanged)="changed($event)" (onFocusOut)="touched()">
@@ -12,7 +12,7 @@
   <div *dxTemplate="let data of 'content'" class="lookup-content">
     <xtein-data-grid [dataSource]="items" [keyExpr]="valueExpr" [columns]="columns" [selectionMode]="selectionMode"
       [showCheckBoxesMode]="selectionMode === 'multiple' ? 'always' : 'none'"
-      (selectionChanged)="selectMultiple($event.selectedRowKeys)"
+      (selectionChanged)="onGridSelectionChanged($event)"
       [selectedRowKeys]="selectedKeys" [filterEnabled]="false" [pageSize]="10" [searchPlaceholder]="searchPlaceholder"
       [searchWidth]="160" scrollingMode="virtual" [showPager]="false"
       (rowClick)="$event.rowType === 'data' && choose($event.data)" (rowActivated)="choose($event)" />

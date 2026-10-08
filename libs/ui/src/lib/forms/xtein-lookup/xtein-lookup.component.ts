@@ -15,7 +15,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DxDropDownBoxComponent, DxDropDownBoxModule, DxTemplateModule, DxTextBoxModule } from 'devextreme-angular';
 import type { ValueChangedEvent } from 'devextreme/ui/drop_down_box';
 import { XteinDataGridComponent } from '../../data/xtein-data-grid/xtein-data-grid.component';
-import { XteinGridColumn } from '../../data/xtein-data-grid/models/xtein-data-grid.model';
+import { XteinGridColumn, XteinGridSelectionEvent } from '../../data/xtein-data-grid/models/xtein-data-grid.model';
 
 @Component({
   selector: 'xtein-lookup',
@@ -117,27 +117,65 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   };
 
   private setValue(value: unknown): void {
-    this.value =
-      this.selectionMode === 'multiple'
-        ? Array.isArray(value)
-          ? [...value]
-          : value == null || value === ''
-            ? []
-            : typeof value === 'string'
-              ? value.split(',').map(s => s.trim()).filter(Boolean)
-              : [value]
-        : value;
-    this.selectedKeys =
-      this.selectionMode === 'multiple'
-        ? [...(this.value as unknown[])]
-        : value == null || value === ''
-          ? []
-          : [value];
+    const extractKeys = (val: unknown): unknown[] => {
+      if (!val) return [];
+      if (Array.isArray(val)) {
+        return val
+          .map(k => (typeof k === 'object' && k !== null && this.valueExpr && this.valueExpr in k ? (k as Record<string, unknown>)[this.valueExpr] : k))
+          .map(k => (typeof k === 'string' ? k.trim() : k))
+          .filter(k => k != null && k !== '');
+      }
+      if (typeof val === 'string') {
+        if (val.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed)) return extractKeys(parsed);
+          } catch { /* ignore */ }
+        }
+        return val.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      if (typeof val === 'object' && this.valueExpr && this.valueExpr in val) {
+        return [(val as Record<string, unknown>)[this.valueExpr]];
+      }
+      return [val];
+    };
+
+    if (this.selectionMode === 'multiple') {
+      const keys = extractKeys(value);
+      this.value = keys;
+      this.selectedKeys = [...keys];
+    } else {
+      this.value = value;
+      this.selectedKeys = value == null || value === '' ? [] : [value];
+    }
+  }
+
+  onGridSelectionChanged(event: XteinGridSelectionEvent<T, unknown>): void {
+    if (this.selectionMode !== 'multiple' || this.isDisabled || this.readOnly) return;
+
+    // Ignore programmatic events with empty selection (e.g. grid initialization or popup close/destruction)
+    if (!event.selectedRowKeys || !event.selectedRowKeys.length) {
+      // If the dropdown is closed or closing, definitely ignore
+      if (!this.opened) return;
+      // Only allow clearing if user actively deselected rows
+      if (!event.currentDeselectedRowKeys?.length) return;
+    }
+
+    this.selectMultiple(event.selectedRowKeys ?? []);
   }
 
   selectMultiple(keys: unknown[]): void {
     if (this.selectionMode !== 'multiple' || this.isDisabled || this.readOnly) return;
-    const newKeys = Array.isArray(keys) ? [...keys] : [];
+    const rawKeys = Array.isArray(keys) ? [...keys] : [];
+    const newKeys = rawKeys
+      .map(k => (typeof k === 'object' && k !== null && this.valueExpr && this.valueExpr in k ? (k as Record<string, unknown>)[this.valueExpr] : k))
+      .map(k => (typeof k === 'string' ? k.trim() : k))
+      .filter(k => k != null && k !== '');
+
+    if (!newKeys.length && !this.selectedKeys.length) {
+      return;
+    }
+
     if (newKeys.length === this.selectedKeys.length && newKeys.every(key => this.selectedKeys.includes(key))) {
       return;
     }
@@ -145,6 +183,19 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
       this.setValue(newKeys);
       if (this.editor?.instance) {
         this.editor.instance.option('value', [...newKeys]);
+      }
+      this.change(this.value);
+      this.touched();
+      this.detector.markForCheck();
+    });
+  }
+
+  clear(): void {
+    if (this.isDisabled || this.readOnly) return;
+    this.zone.run(() => {
+      this.setValue([]);
+      if (this.editor?.instance) {
+        this.editor.instance.option('value', []);
       }
       this.change(this.value);
       this.touched();
@@ -206,7 +257,7 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
       const target = event.event?.target as HTMLElement | undefined;
       const isClearButton = target?.closest('.dx-clear-button') != null;
       if (isClearButton) {
-        this.selectMultiple([]);
+        this.clear();
       }
       return;
     }
