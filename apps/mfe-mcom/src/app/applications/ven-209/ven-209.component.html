@@ -407,12 +407,12 @@
         <div class="ven-209__tab-pane" [hidden]="activeMainTab() !== 'financieros'">
           <xtein-ven209-financieros (pendingChange)="markPendingChanges()"
             [readOnly]="readOnly()"
-            [cupoCredito]="form.controls.CUPO_CREDITO.value || 0"
-            [tiempoEntrega]="form.controls.TIEMPO_ENTREGA.value || 0"
+            [cupoCredito]="form.controls.CUPO_CREDITO.value ?? 0"
+            [tiempoEntrega]="form.controls.TIEMPO_ENTREGA.value ?? 0"
             [condiciones]="condiciones()"
             [availableCondiciones]="availableCondiciones()"
-            (cupoCreditoChange)="form.controls.CUPO_CREDITO.setValue($event)"
-            (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event)"
+            (cupoCreditoChange)="form.controls.CUPO_CREDITO.setValue($event); markPendingChanges()"
+            (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event); markPendingChanges()"
             (condicionesChange)="condiciones.set($event); markPendingChanges()"
           ></xtein-ven209-financieros>
         </div>

@@ -66,10 +66,16 @@ export class XteinVen209FinancierosComponent {
   }
 
   onCupoChange(value: number): void {
-    this.cupoCreditoChange.emit(value);
+    const val = Number(value ?? 0);
+    this.cupoCredito = val;
+    this.cupoCreditoChange.emit(val);
+    this.pendingChange.emit();
   }
 
   onTiempoChange(value: number): void {
-    this.tiempoEntregaChange.emit(value);
+    const val = Number(value ?? 0);
+    this.tiempoEntrega = val;
+    this.tiempoEntregaChange.emit(val);
+    this.pendingChange.emit();
   }
 }

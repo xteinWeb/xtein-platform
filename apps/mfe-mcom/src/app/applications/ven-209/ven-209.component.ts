@@ -563,15 +563,26 @@ export class Ven209Component implements OnInit, OnDestroy {
       );
       this.business.decode(response);
 
+      const cupoCreditoVal = Number(raw.CUPO_CREDITO ?? 0) || 0;
+      const tiempoEntregaVal = Number(raw.TIEMPO_ENTREGA ?? (raw as Record<string, unknown>)['DIAS_ENTREGA'] ?? 0) || 0;
+
       const savedRecord: Ven209ClienteRecord = {
         ...raw,
         ID_CLIENTE: String(raw.ID_CLIENTE ?? ''),
         ID_LEGAL: String(raw.ID_LEGAL ?? ''),
         RT: raw.RT ? (Array.isArray(raw.RT) ? raw.RT : [raw.RT]) : [],
+        CUPO_CREDITO: cupoCreditoVal,
+        TIEMPO_ENTREGA: tiempoEntregaVal,
+        DIAS_ENTREGA: tiempoEntregaVal,
         DIRECCIONES: this.direcciones(),
         TELEFONOS: this.telefonos(),
         ITM_EMAIL: this.emails(),
         CONDICIONES: this.condiciones(),
+        CONDICIONES_ADIC: {
+          CUPO_CREDITO: cupoCreditoVal,
+          TIEMPO_ENTREGA: tiempoEntregaVal,
+          DIAS_ENTREGA: tiempoEntregaVal
+        },
         ADIC_ACREEDORES: this.contactoAdicional()
       };
 
@@ -736,6 +747,72 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
   }
 
+  private extractFinancials(record: Ven209ClienteRecord): {
+    cupoCredito: number;
+    tiempoEntrega: number;
+    condiciones: Ven209Condicion[];
+  } {
+    const parseIfString = (val: unknown): unknown => {
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch {
+          return val;
+        }
+      }
+      return val;
+    };
+
+    const condRaw = parseIfString(record.CONDICIONES);
+    let rawCondList: unknown[] = [];
+    if (Array.isArray(condRaw)) {
+      rawCondList = condRaw;
+    } else if (condRaw && typeof condRaw === 'object' && Array.isArray((condRaw as Record<string, unknown>)['CONDICIONES'])) {
+      rawCondList = (condRaw as Record<string, unknown>)['CONDICIONES'] as unknown[];
+    }
+
+    const adicSource = parseIfString(
+      record.CONDICIONES_ADIC ?? (condRaw && typeof condRaw === 'object' ? (condRaw as Record<string, unknown>)['ADICIONALES'] : undefined)
+    );
+    const adicObj: Record<string, unknown> = (
+      Array.isArray(adicSource) && adicSource.length > 0
+        ? ((parseIfString(adicSource[0]) as Record<string, unknown>) || {})
+        : (adicSource && typeof adicSource === 'object' ? (adicSource as Record<string, unknown>) : {})
+    );
+
+    const cupoCredito = Number(adicObj['CUPO_CREDITO'] ?? record.CUPO_CREDITO ?? 0) || 0;
+    const tiempoEntrega = Number(
+      adicObj['TIEMPO_ENTREGA'] ??
+      adicObj['DIAS_ENTREGA'] ??
+      record.TIEMPO_ENTREGA ??
+      record.DIAS_ENTREGA ??
+      (record as Record<string, unknown>)['DIAS_ENTREGA'] ??
+      0
+    ) || 0;
+
+    const matchedCondiciones: Ven209Condicion[] = rawCondList.map((item, index) => {
+      const c = (typeof item === 'object' && item !== null ? item : {}) as Record<string, unknown>;
+      const idCond = String(c['ID_CONDICION'] ?? c['CODIGO'] ?? '').trim();
+      const match = this.availableCondiciones().find(
+        ac => String(ac.ID_CONDICION ?? ac.CODIGO ?? '').trim() === idCond
+      );
+      const nombre = String(c['NOMBRE_CONDICION'] ?? c['DESCRIPCION'] ?? match?.DESCRIPCION ?? match?.NOMBRE ?? '').trim();
+      return {
+        ...c,
+        ITEM: Number(c['ITEM'] ?? index + 1),
+        ID_CONDICION: idCond,
+        NOMBRE_CONDICION: nombre,
+        DESCRIPCION: nombre
+      };
+    });
+
+    return {
+      cupoCredito,
+      tiempoEntrega,
+      condiciones: matchedCondiciones
+    };
+  }
+
   private populateForm(record: Ven209ClienteRecord): void {
     const rawIdLegal = record.ID_LEGAL != null ? String(record.ID_LEGAL).trim() : '';
     const currentLegales = this.idLegales();
@@ -810,6 +887,8 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
     this.perfilTasas.set(parsedTasas);
 
+    const financials = this.extractFinancials(record);
+
     this.form.reset({
       ...Ven209DefaultRecord,
       ID_CLIENTE: record.ID_CLIENTE ? String(record.ID_CLIENTE).trim() : '',
@@ -831,14 +910,14 @@ export class Ven209Component implements OnInit, OnDestroy {
       ZONA: record.ZONA ? String(record.ZONA).trim() : '',
       ID_ADC: record.ID_ADC ? String(record.ID_ADC).trim() : '',
       STATUS: record.STATUS ? String(record.STATUS).trim() : '',
-      CUPO_CREDITO: record.CUPO_CREDITO || 0,
-      TIEMPO_ENTREGA: record.TIEMPO_ENTREGA || 0
+      CUPO_CREDITO: financials.cupoCredito,
+      TIEMPO_ENTREGA: financials.tiempoEntrega
     }, { emitEvent: false });
 
     this.direcciones.set(record.DIRECCIONES ?? []);
     this.telefonos.set(record.TELEFONOS ?? []);
     this.emails.set(record.ITM_EMAIL ?? []);
-    this.condiciones.set(record.CONDICIONES ?? []);
+    this.condiciones.set(financials.condiciones);
     this.contactoAdicional.set(record.ADIC_ACREEDORES ?? { URL: '', CIIU: '' });
 
     if (this.readOnly()) {

@@ -75,6 +75,7 @@ export interface Ven209ClienteRecord {
   PERSONA?: string | null;
   FECHA_REGISTRO?: string | null;
   TIEMPO_ENTREGA?: number | null;
+  DIAS_ENTREGA?: number | null;
   DIRECCIONES?: Ven209Direccion[];
   TELEFONOS?: Ven209Telefono[];
   ITM_EMAIL?: Ven209Email[];
