@@ -123,6 +123,7 @@ export class Ven209Component implements OnInit, OnDestroy {
   readonly records = signal<Ven209ClienteRecord[]>([]);
   readonly currentIndex = signal<number>(-1);
   readonly activeMainTab = signal<'general' | 'ubicaciones' | 'financieros' | 'ventas' | 'historico'>('general');
+  readonly idClienteValidationStatus = signal<'valid' | 'invalid' | 'pending' | null>(null);
 
   // Sub-items signals
   readonly direcciones = signal<Ven209Direccion[]>([]);
@@ -179,6 +180,8 @@ export class Ven209Component implements OnInit, OnDestroy {
   readonly queryFilter = computed(() => this.records()[0]?.QFILTRO || this.records().map(r => `(ID_CLIENTE='${r.ID_CLIENTE}')`).join(' OR '));
 
   private lastCriteria: unknown[] = [];
+  private lastValidatedIdCliente: string | null = null;
+  private isAlertOpenOrValidating = false;
 
   // Reactive Form Definition
   readonly form = new FormGroup({
@@ -236,6 +239,20 @@ export class Ven209Component implements OnInit, OnDestroy {
       this.form.valueChanges.subscribe(() => {
         if (!this.readOnly()) {
           this.workspace.setDirty(this.applicationId, true);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.form.controls.ID_CLIENTE.valueChanges.subscribe(val => {
+        if (this.mode() === RecordToolbarMode.Creating) {
+          const trimmed = typeof val === 'string' ? val.trim() : '';
+          if (trimmed !== this.lastValidatedIdCliente) {
+            this.lastValidatedIdCliente = null;
+            if (this.idClienteValidationStatus() !== null) {
+              this.idClienteValidationStatus.set(null);
+            }
+          }
         }
       })
     );
@@ -469,6 +486,9 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.condiciones.set([]);
     this.contactoAdicional.set({ URL: '', CIIU: '' });
     this.perfilTasas.set([]);
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
   }
@@ -480,6 +500,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.workspace.setDirty(this.applicationId, false);
   }
 
+  @ViewChild('clienteInput') private clienteInput?: XteinInputComponent;
   @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
   @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
 
@@ -499,6 +520,26 @@ export class Ven209Component implements OnInit, OnDestroy {
       this.form.markAllAsTouched();
       this.notification.warning(validationMessage);
       return;
+    }
+
+    if (this.mode() === RecordToolbarMode.Creating) {
+      if (this.idClienteValidationStatus() === 'invalid') {
+        const idCliente = String(this.form.controls.ID_CLIENTE.value ?? '').trim();
+        await Swal.fire({
+          title: 'Cliente ya existe',
+          text: `El cliente con identificación ${idCliente} ya está registrado en el sistema. No se puede usar esta identificación.`,
+          iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
+          confirmButtonColor: '#0F4C81',
+          confirmButtonText: 'Entendido',
+          allowOutsideClick: false
+        });
+        setTimeout(() => this.clienteInput?.focus(), 50);
+        return;
+      }
+      if (this.idClienteValidationStatus() !== 'valid') {
+        const isValidCliente = await this.validateIdCliente();
+        if (!isValidCliente) return;
+      }
     }
 
     this.loadingMessage.set('Guardando cliente...');
@@ -567,6 +608,9 @@ export class Ven209Component implements OnInit, OnDestroy {
     });
     if (!confirm.isConfirmed) return;
 
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.mode.set(this.records().length ? RecordToolbarMode.Browsing : RecordToolbarMode.Initial);
     this.disableFormControls();
     const current = this.currentRecord();
@@ -654,6 +698,9 @@ export class Ven209Component implements OnInit, OnDestroy {
     if (index < 0 || index >= list.length) return;
     const record = list[index];
     this.currentIndex.set(index);
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
     this.populateForm(record);
@@ -796,6 +843,9 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.currentIndex.set(-1);
     this.mode.set(RecordToolbarMode.Initial);
     this.form.reset({}, { emitEvent: false });
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.disableFormControls();
     this.direcciones.set([]);
     this.telefonos.set([]);
@@ -830,6 +880,77 @@ export class Ven209Component implements OnInit, OnDestroy {
   }
 
 
+
+  async validateIdCliente(showAlert = true): Promise<boolean> {
+    if (this.readOnly() || this.mode() !== RecordToolbarMode.Creating) {
+      return true;
+    }
+    if (this.isAlertOpenOrValidating) {
+      return false;
+    }
+    const rawValue = this.form.controls.ID_CLIENTE.value;
+    const idCliente = typeof rawValue === 'string' ? rawValue.trim() : '';
+    if (!idCliente) {
+      this.lastValidatedIdCliente = null;
+      this.idClienteValidationStatus.set(null);
+      return false;
+    }
+
+    if (this.lastValidatedIdCliente === idCliente) {
+      return this.idClienteValidationStatus() === 'valid';
+    }
+
+    this.isAlertOpenOrValidating = true;
+    this.idClienteValidationStatus.set('pending');
+    try {
+      const result = await this.business.validarExisteCliente(idCliente, 'new');
+      this.lastValidatedIdCliente = idCliente;
+      if (!result.existe) {
+        this.idClienteValidationStatus.set('valid');
+        return true;
+      } else {
+        this.idClienteValidationStatus.set('invalid');
+        if (showAlert) {
+          await Swal.fire({
+            title: 'Cliente ya existe',
+            text: `El cliente con identificación ${idCliente} ya está registrado en el sistema. No se puede usar esta identificación.`,
+            iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
+            confirmButtonColor: '#0F4C81',
+            confirmButtonText: 'Entendido',
+            allowOutsideClick: false,
+            returnFocus: false
+          });
+          setTimeout(() => {
+            this.clienteInput?.focus();
+          }, 100);
+        }
+        return false;
+      }
+    } catch {
+      this.idClienteValidationStatus.set(null);
+      return true;
+    } finally {
+      this.isAlertOpenOrValidating = false;
+    }
+  }
+
+  onIdClienteBlurred(): void {
+    if (this.isAlertOpenOrValidating) return;
+    const val = String(this.form.controls.ID_CLIENTE.value ?? '').trim();
+    if (val && this.lastValidatedIdCliente === val) {
+      return;
+    }
+    void this.validateIdCliente(true);
+  }
+
+  onIdClienteEnter(): void {
+    if (this.isAlertOpenOrValidating) return;
+    const val = String(this.form.controls.ID_CLIENTE.value ?? '').trim();
+    if (val && this.lastValidatedIdCliente === val && this.idClienteValidationStatus() === 'invalid') {
+      return;
+    }
+    void this.validateIdCliente(true);
+  }
 
   onPerfilTributarioSaved(result: {
     perfilTributario: string;

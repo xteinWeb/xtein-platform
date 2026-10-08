@@ -142,6 +142,24 @@ export class XteinInputComponent
   invalid = false;
 
   /**
+   * Validation status: 'valid', 'invalid', 'pending', or null.
+   */
+  @Input()
+  validationStatus: 'valid' | 'invalid' | 'pending' | null = null;
+
+  /**
+   * Explicit valid flag for DevExtreme text box.
+   */
+  @Input()
+  isValid?: boolean;
+
+  /**
+   * Optional DevExtreme validation errors.
+   */
+  @Input()
+  validationErrors: any[] = [];
+
+  /**
    * Optional validation message.
    */
   @Input()
@@ -152,6 +170,13 @@ export class XteinInputComponent
    */
   @Output()
   readonly blurred =
+    new EventEmitter<void>();
+
+  /**
+   * Fired when the user presses Enter in the editor.
+   */
+  @Output()
+  readonly enterKey =
     new EventEmitter<void>();
 
   /**
@@ -205,7 +230,15 @@ export class XteinInputComponent
    * consuming applications.
    */
   focus(): void {
-    this.editor?.instance.focus();
+    if (this.editor?.instance) {
+      this.editor.instance.focus();
+      try {
+        const input = (this.editor.instance.element() as HTMLElement).querySelector('input');
+        input?.select();
+      } catch {
+        // ignore
+      }
+    }
   }
 
   /**
@@ -250,7 +283,7 @@ export class XteinInputComponent
         'true';
     }
 
-    if (this.invalid) {
+    if (this.isInvalidField) {
       attributes['aria-invalid'] =
         'true';
     }
@@ -341,6 +374,34 @@ export class XteinInputComponent
   /**
    * Handles focus loss.
    */
+  get isInvalidField(): boolean {
+    return this.validationStatus === 'invalid' || this.invalid;
+  }
+
+  get computedIsValid(): boolean {
+    if (this.isValid !== undefined) {
+      return this.isValid;
+    }
+    if (this.validationStatus === 'invalid' || this.invalid) {
+      return false;
+    }
+    return true;
+  }
+
+  get computedValidationStatus(): 'valid' | 'invalid' | 'pending' {
+    if (this.validationStatus === 'invalid' || this.invalid) {
+      return 'invalid';
+    }
+    if (this.validationStatus === 'pending') {
+      return 'pending';
+    }
+    return 'valid';
+  }
+
+  handleEnterKey(): void {
+    this.enterKey.emit();
+  }
+
   handleFocusOut(): void {
 
     this.onTouched();

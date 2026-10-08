@@ -1,4 +1,4 @@
-@if (label) { <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="invalid">{{label}}</xtein-label> }
+@if (label) { <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="isInvalidField">{{label}}</xtein-label> }
 <dx-text-box
   class="w-100"
   stylingMode="filled"
@@ -9,11 +9,18 @@
   [readOnly]="readOnly"
   [maxLength]="maxLength ?? ''"
   [inputAttr]="inputAttributes"
+  [isValid]="computedIsValid"
+  [validationStatus]="computedValidationStatus"
+  [validationErrors]="validationErrors"
+  [class.dx-valid]="validationStatus === 'valid'"
+  [class.dx-invalid]="computedValidationStatus === 'invalid'"
+  [class.dx-show-invalid-badge]="computedValidationStatus === 'invalid'"
   (onValueChanged)="handleValueChanged($event)"
-  (onFocusOut)="handleFocusOut()">
+  (onFocusOut)="handleFocusOut()"
+  (onEnterKey)="handleEnterKey()">
 </dx-text-box>
 
-@if (invalid && errorMessage) {
+@if (isInvalidField && errorMessage) {
 
   <div
     class="invalid-feedback d-block"

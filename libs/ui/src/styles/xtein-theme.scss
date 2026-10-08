@@ -513,6 +513,28 @@ tr.dx-row.dx-data-row.dx-row-lines.dx-selection {
    POPUPS, OVERLAYS, MENSAJES Y CARGA
    ========================================================================== */
 
+.dx-invalid-message {
+  display: none !important;
+}
+
+.dx-texteditor.dx-valid .dx-texteditor-input-container::after {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-family: 'DXIcons', sans-serif !important;
+  color: #35CCAC !important;
+  content: "\f005" !important;
+}
+
+.dx-texteditor.dx-invalid.dx-show-invalid-badge .dx-texteditor-input-container::after {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  content: "!" !important;
+  background-color: #DF3E3E !important;
+  color: #fff !important;
+}
+
 .swal2-styled.swal2-default-outline:focus {
   box-shadow: 0 0 0 3px rgba(13, 110, 253, .25) !important;
 }

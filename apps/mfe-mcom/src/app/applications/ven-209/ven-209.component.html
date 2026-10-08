@@ -17,7 +17,11 @@
                   id="ven-209-id-cliente"
                   formControlName="ID_CLIENTE"
                   placeholder="Código de cliente"
+                  #clienteInput
                   [readOnly]="readOnly() || isEditing()"
+                  [validationStatus]="idClienteValidationStatus()"
+                  (blurred)="onIdClienteBlurred()"
+                  (enterKey)="onIdClienteEnter()"
                 ></xtein-input>
               </div>
             </div>

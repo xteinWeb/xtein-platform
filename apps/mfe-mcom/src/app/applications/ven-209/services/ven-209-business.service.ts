@@ -99,6 +99,37 @@ export class Ven209BusinessService {
     return result;
   }
 
+  async validarExisteCliente(idCliente: string, accion = 'new'): Promise<{ existe: boolean; mensaje: string }> {
+    const [endpoint, action] = Ven209Catalog.validarExiste;
+    const response = await firstValueFrom(
+      this.api.request(endpoint, action, { ID_CLIENTE: idCliente, accion })
+    );
+    let data: unknown = response;
+    for (let depth = 0; depth < 4; depth++) {
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+          continue;
+        } catch {
+          break;
+        }
+      }
+      if (data && typeof data === 'object' && !Array.isArray(data) && 'data' in data) {
+        data = (data as { data: unknown }).data;
+        continue;
+      }
+      break;
+    }
+    const rows = Array.isArray(data) ? data : data == null ? [] : [data];
+    const firstRow = (rows[0] && typeof rows[0] === 'object') ? rows[0] as Record<string, unknown> : {};
+    const errMensaje = typeof firstRow['ErrMensaje'] === 'string' ? firstRow['ErrMensaje'] : '';
+    const existe = errMensaje !== '';
+    return {
+      existe,
+      mensaje: errMensaje
+    };
+  }
+
   async loadIdLegalesWithTypes(forceRefresh = false): Promise<{
     idLegales: Ven209Lookup[];
     tiposId: string[];
