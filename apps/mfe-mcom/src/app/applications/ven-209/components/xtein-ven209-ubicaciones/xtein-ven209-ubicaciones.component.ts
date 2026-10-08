@@ -51,6 +51,7 @@ export class XteinVen209UbicacionesComponent {
 
   @Output() readonly pendingChange = new EventEmitter<void>();
 
+  @ViewChild(XteinCorreosComponent) private correos?: XteinCorreosComponent;
   @ViewChild(XteinDireccionesComponent) private addresses?: XteinDireccionesComponent;
   @ViewChild(XteinTelefonosComponent) private phones?: XteinTelefonosComponent;
 
@@ -63,13 +64,16 @@ export class XteinVen209UbicacionesComponent {
   };
 
   commitPendingAddresses(): boolean {
+    const committedEmails = this.correos?.commit() ?? true;
+    if (!committedEmails) this.expanded.correos.set(true);
+
     const committedAddresses = this.addresses?.commit() ?? true;
     if (!committedAddresses) this.expanded.direcciones.set(true);
 
     const committedPhones = this.phones?.commit() ?? true;
     if (!committedPhones) this.expanded.telefonos.set(true);
 
-    return committedAddresses && committedPhones;
+    return committedEmails && committedAddresses && committedPhones;
   }
 
   toggleSection(section: keyof typeof this.expanded): void {

@@ -223,7 +223,7 @@ export class XteinCondicionesComponent implements OnChanges, OnInit {
     if (this.readOnly) return false;
 
     if (!this.draft.ID_CONDICION?.trim()) {
-      this.notification.warning('Falta seleccionar la condición.');
+      this.notification.warning('Seleccione la condición.');
       return false;
     }
 

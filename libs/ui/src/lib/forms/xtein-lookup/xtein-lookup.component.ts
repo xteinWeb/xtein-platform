@@ -42,6 +42,9 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
 
   ngAfterViewInit(): void {
     if (this.autoFocus) queueMicrotask(() => this.focus());
+    if (this.editor?.instance && this.value != null && this.selectionMode === 'multiple') {
+      this.editor.instance.option('value', [...(this.value as unknown[])]);
+    }
   }
 
   focus(): void {
@@ -140,6 +143,9 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     }
     this.zone.run(() => {
       this.setValue(newKeys);
+      if (this.editor?.instance) {
+        this.editor.instance.option('value', [...newKeys]);
+      }
       this.change(this.value);
       this.touched();
       this.detector.markForCheck();
@@ -196,6 +202,15 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   }
 
   changed(event: ValueChangedEvent): void {
+    if (this.selectionMode === 'multiple') {
+      const target = event.event?.target as HTMLElement | undefined;
+      const isClearButton = target?.closest('.dx-clear-button') != null;
+      if (isClearButton) {
+        this.selectMultiple([]);
+      }
+      return;
+    }
+
     if (
       event.event &&
       (event.value == null || (Array.isArray(event.value) && !event.value.length)) &&
