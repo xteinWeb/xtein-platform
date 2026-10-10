@@ -207,6 +207,13 @@ export class Ven209Component implements OnInit, OnDestroy {
     ID_ADC: new FormControl<string>(''),
     STATUS: new FormControl<string>(''),
     CUPO_CREDITO: new FormControl<number>(0),
+    CUPO_DISPONIBLE: new FormControl<number>(0),
+    CUPO_UTILIZADO: new FormControl<number>(0),
+    ESTADO_CUPO: new FormControl<string>('ACTIVO'),
+    CUPO_CUOTA: new FormControl<number>(0),
+    CUPO_DIS_CUOTA: new FormControl<number>(0),
+    CUPO_UTI_CUOTA: new FormControl<number>(0),
+    ESTADO_CUOTA: new FormControl<string>('ACTIVO'),
     TIEMPO_ENTREGA: new FormControl<number>(0)
   });
 
@@ -330,6 +337,12 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.form.enable({ emitEvent: false });
     this.form.controls.ESTADO.disable({ emitEvent: false });
     this.form.controls.FECHA_REGISTRO.disable({ emitEvent: false });
+    this.form.controls.CUPO_DISPONIBLE.disable({ emitEvent: false });
+    this.form.controls.CUPO_UTILIZADO.disable({ emitEvent: false });
+    this.form.controls.ESTADO_CUPO.disable({ emitEvent: false });
+    this.form.controls.CUPO_DIS_CUOTA.disable({ emitEvent: false });
+    this.form.controls.CUPO_UTI_CUOTA.disable({ emitEvent: false });
+    this.form.controls.ESTADO_CUOTA.disable({ emitEvent: false });
     if (!isNew) {
       this.form.controls.ID_CLIENTE.disable({ emitEvent: false });
     }
@@ -480,6 +493,13 @@ export class Ven209Component implements OnInit, OnDestroy {
       ID_ADC: '',
       STATUS: '',
       CUPO_CREDITO: 0,
+      CUPO_DISPONIBLE: 0,
+      CUPO_UTILIZADO: 0,
+      ESTADO_CUPO: 'ACTIVO',
+      CUPO_CUOTA: 0,
+      CUPO_DIS_CUOTA: 0,
+      CUPO_UTI_CUOTA: 0,
+      ESTADO_CUOTA: 'ACTIVO',
       TIEMPO_ENTREGA: 0
     }, { emitEvent: false });
     this.direcciones.set([]);
@@ -564,14 +584,23 @@ export class Ven209Component implements OnInit, OnDestroy {
       this.business.decode(response);
 
       const cupoCreditoVal = Number(raw.CUPO_CREDITO ?? 0) || 0;
+      const cupoCuotaVal = Number(raw.CUPO_CUOTA ?? 0) || 0;
       const tiempoEntregaVal = Number(raw.TIEMPO_ENTREGA ?? (raw as Record<string, unknown>)['DIAS_ENTREGA'] ?? 0) || 0;
 
       const savedRecord: Ven209ClienteRecord = {
+        ...this.currentRecord(),
         ...raw,
         ID_CLIENTE: String(raw.ID_CLIENTE ?? ''),
         ID_LEGAL: String(raw.ID_LEGAL ?? ''),
         RT: raw.RT ? (Array.isArray(raw.RT) ? raw.RT : [raw.RT]) : [],
         CUPO_CREDITO: cupoCreditoVal,
+        CUPO_CUOTA: cupoCuotaVal,
+        CUPO_DISPONIBLE: isNew ? cupoCreditoVal : (this.currentRecord()?.CUPO_DISPONIBLE ?? cupoCreditoVal),
+        CUPO_UTILIZADO: this.currentRecord()?.CUPO_UTILIZADO ?? 0,
+        ESTADO_CUPO: this.currentRecord()?.ESTADO_CUPO ?? 'ACTIVO',
+        CUPO_DIS_CUOTA: isNew ? cupoCuotaVal : (this.currentRecord()?.CUPO_DIS_CUOTA ?? cupoCuotaVal),
+        CUPO_UTI_CUOTA: this.currentRecord()?.CUPO_UTI_CUOTA ?? 0,
+        ESTADO_CUOTA: this.currentRecord()?.ESTADO_CUOTA ?? 'ACTIVO',
         TIEMPO_ENTREGA: tiempoEntregaVal,
         DIAS_ENTREGA: tiempoEntregaVal,
         DIRECCIONES: this.direcciones(),
@@ -580,6 +609,7 @@ export class Ven209Component implements OnInit, OnDestroy {
         CONDICIONES: this.condiciones(),
         CONDICIONES_ADIC: {
           CUPO_CREDITO: cupoCreditoVal,
+          CUPO_CUOTA: cupoCuotaVal,
           TIEMPO_ENTREGA: tiempoEntregaVal,
           DIAS_ENTREGA: tiempoEntregaVal
         },
@@ -749,6 +779,13 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   private extractFinancials(record: Ven209ClienteRecord): {
     cupoCredito: number;
+    cupoDisponible: number;
+    cupoUtilizado: number;
+    estadoCupo: string;
+    cupoCuota: number;
+    cupoDisCuota: number;
+    cupoUtiCuota: number;
+    estadoCuota: string;
     tiempoEntrega: number;
     condiciones: Ven209Condicion[];
   } {
@@ -781,6 +818,15 @@ export class Ven209Component implements OnInit, OnDestroy {
     );
 
     const cupoCredito = Number(adicObj['CUPO_CREDITO'] ?? record.CUPO_CREDITO ?? 0) || 0;
+    const cupoDisponible = Number(record.CUPO_DISPONIBLE ?? 0) || 0;
+    const cupoUtilizado = Number(record.CUPO_UTILIZADO ?? 0) || 0;
+    const estadoCupo = String(record.ESTADO_CUPO ?? 'ACTIVO').trim();
+
+    const cupoCuota = Number(adicObj['CUPO_CUOTA'] ?? record.CUPO_CUOTA ?? 0) || 0;
+    const cupoDisCuota = Number(record.CUPO_DIS_CUOTA ?? 0) || 0;
+    const cupoUtiCuota = Number(record.CUPO_UTI_CUOTA ?? 0) || 0;
+    const estadoCuota = String(record.ESTADO_CUOTA ?? 'ACTIVO').trim();
+
     const tiempoEntrega = Number(
       adicObj['TIEMPO_ENTREGA'] ??
       adicObj['DIAS_ENTREGA'] ??
@@ -808,6 +854,13 @@ export class Ven209Component implements OnInit, OnDestroy {
 
     return {
       cupoCredito,
+      cupoDisponible,
+      cupoUtilizado,
+      estadoCupo,
+      cupoCuota,
+      cupoDisCuota,
+      cupoUtiCuota,
+      estadoCuota,
       tiempoEntrega,
       condiciones: matchedCondiciones
     };
@@ -911,6 +964,13 @@ export class Ven209Component implements OnInit, OnDestroy {
       ID_ADC: record.ID_ADC ? String(record.ID_ADC).trim() : '',
       STATUS: record.STATUS ? String(record.STATUS).trim() : '',
       CUPO_CREDITO: financials.cupoCredito,
+      CUPO_DISPONIBLE: financials.cupoDisponible,
+      CUPO_UTILIZADO: financials.cupoUtilizado,
+      ESTADO_CUPO: financials.estadoCupo,
+      CUPO_CUOTA: financials.cupoCuota,
+      CUPO_DIS_CUOTA: financials.cupoDisCuota,
+      CUPO_UTI_CUOTA: financials.cupoUtiCuota,
+      ESTADO_CUOTA: financials.estadoCuota,
       TIEMPO_ENTREGA: financials.tiempoEntrega
     }, { emitEvent: false });
 

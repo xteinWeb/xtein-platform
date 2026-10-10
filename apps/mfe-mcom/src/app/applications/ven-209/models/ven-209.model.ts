@@ -58,10 +58,12 @@ export interface Ven209ClienteRecord {
   STATUS?: string | null;
   CUPO_CREDITO?: number | null;
   CUPO_DISPONIBLE?: number | null;
+  CUPO_UTILIZADO?: number | null;
   FRECUENCIA?: number | null;
   ESTADO?: string | null;
   CUPO_CUOTA?: number | null;
   CUPO_DIS_CUOTA?: number | null;
+  CUPO_UTI_CUOTA?: number | null;
   ESTADO_CUPO?: string | null;
   ESTADO_CUOTA?: string | null;
   DESCRIPCION_CUPO?: string | null;

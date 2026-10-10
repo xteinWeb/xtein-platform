@@ -11,6 +11,7 @@ export interface Ven209CondicionesWrapper {
   CONDICIONES: Ven209Condicion[];
   ADICIONALES: {
     CUPO_CREDITO: number;
+    CUPO_CUOTA?: number;
     TIEMPO_ENTREGA: number;
     DIAS_ENTREGA?: number;
   };

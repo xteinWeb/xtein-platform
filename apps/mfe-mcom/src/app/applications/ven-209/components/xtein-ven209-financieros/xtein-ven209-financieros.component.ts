@@ -11,7 +11,9 @@ import { FormsModule } from '@angular/forms';
 import {
   XteinCondicionesComponent,
   XteinNumberComponent,
+  XteinInputComponent,
   XteinLabelComponent,
+  XteinGroupLabelComponent,
   XteinGridColumn
 } from '@xtein/ui';
 import { Ven209Condicion, Ven209Lookup } from '../../models/ven-209.model';
@@ -24,19 +26,34 @@ import { Ven209Condicion, Ven209Lookup } from '../../models/ven-209.model';
     FormsModule,
     XteinCondicionesComponent,
     XteinNumberComponent,
-    XteinLabelComponent
+    XteinInputComponent,
+    XteinLabelComponent,
+    XteinGroupLabelComponent
   ],
   templateUrl: './xtein-ven209-financieros.component.html',
   styleUrls: ['./xtein-ven209-financieros.component.scss']
 })
 export class XteinVen209FinancierosComponent {
   @Input() readOnly = false;
+
+  // Global
   @Input() cupoCredito = 0;
+  @Input() estadoCupo = '';
+  @Input() cupoUtilizado = 0;
+  @Input() cupoDisponible = 0;
+
+  // Cuota
+  @Input() cupoCuota = 0;
+  @Input() estadoCuota = '';
+  @Input() cupoUtiCuota = 0;
+  @Input() cupoDisCuota = 0;
+
   @Input() tiempoEntrega = 0;
   @Input() condiciones: Ven209Condicion[] = [];
   @Input() availableCondiciones: Ven209Lookup[] = [];
 
   @Output() readonly cupoCreditoChange = new EventEmitter<number>();
+  @Output() readonly cupoCuotaChange = new EventEmitter<number>();
   @Output() readonly tiempoEntregaChange = new EventEmitter<number>();
   @Output() readonly condicionesChange = new EventEmitter<Ven209Condicion[]>();
   @Output() readonly pendingChange = new EventEmitter<void>();
@@ -65,10 +82,17 @@ export class XteinVen209FinancierosComponent {
     sig.set(!sig());
   }
 
-  onCupoChange(value: number): void {
+  onCupoCreditoChange(value: number): void {
     const val = Number(value ?? 0);
     this.cupoCredito = val;
     this.cupoCreditoChange.emit(val);
+    this.pendingChange.emit();
+  }
+
+  onCupoCuotaChange(value: number): void {
+    const val = Number(value ?? 0);
+    this.cupoCuota = val;
+    this.cupoCuotaChange.emit(val);
     this.pendingChange.emit();
   }
 

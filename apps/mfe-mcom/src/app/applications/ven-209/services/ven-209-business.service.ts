@@ -276,13 +276,23 @@ export class Ven209BusinessService {
         : [];
 
     const cupoCredito = Number(record.CUPO_CREDITO ?? 0) || 0;
+    const cupoCuota = Number(record.CUPO_CUOTA ?? 0) || 0;
     const tiempoEntrega = Number(record.TIEMPO_ENTREGA ?? record.DIAS_ENTREGA ?? 0) || 0;
+
+    const acreedorClean = { ...record };
+    delete acreedorClean.CUPO_DISPONIBLE;
+    delete acreedorClean.CUPO_UTILIZADO;
+    delete acreedorClean.ESTADO_CUPO;
+    delete acreedorClean.CUPO_DIS_CUOTA;
+    delete acreedorClean.CUPO_UTI_CUOTA;
+    delete acreedorClean.ESTADO_CUOTA;
 
     return {
       ACREEDOR: {
-        ...record,
+        ...acreedorClean,
         RT: rtVal,
         CUPO_CREDITO: cupoCredito,
+        CUPO_CUOTA: cupoCuota,
         TIEMPO_ENTREGA: tiempoEntrega,
         DIAS_ENTREGA: tiempoEntrega,
         NOMBRE_COMPLETO: [record.NOMBRE, record.NOMBRE2, record.APELLIDO, record.APELLIDO2]
@@ -297,6 +307,7 @@ export class Ven209BusinessService {
         CONDICIONES: condiciones,
         ADICIONALES: {
           CUPO_CREDITO: cupoCredito,
+          CUPO_CUOTA: cupoCuota,
           TIEMPO_ENTREGA: tiempoEntrega,
           DIAS_ENTREGA: tiempoEntrega
         }

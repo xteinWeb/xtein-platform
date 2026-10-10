@@ -72,7 +72,77 @@
     background: transparent;
   }
 
-  /* Formulario Cupo */
+  /* Frecuencia / Días entrega */
+  &__top-row {
+    margin-bottom: 12px;
+  }
+
+  &__field-inline--frecuencia {
+    max-width: 280px;
+  }
+
+  &__control-frecuencia {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 0;
+
+    xtein-number {
+      width: 90px;
+      flex: 0 0 90px;
+    }
+  }
+
+  &__suffix-text {
+    font-size: 13px;
+    color: #4a5d73;
+    font-weight: 500;
+  }
+
+  /* Cards Cupos (Global y Cuota) */
+  &__cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    max-width: 900px;
+    width: 100%;
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__fieldset {
+    border: 1px solid #dfe6ef;
+    border-radius: 8px;
+    padding: 14px 18px 18px;
+    background: #ffffff;
+    margin: 0;
+    min-width: 0;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  &__legend {
+    color: rgba(10, 57, 96, 0.7);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0 6px;
+    margin: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  &__fieldset-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 10px;
+    box-sizing: border-box;
+  }
+
+  /* Formulario Cupo legacy fallback */
   &__form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -93,7 +163,7 @@
   }
 
   &__label-inline {
-    flex: 0 0 130px;
+    flex: 0 0 110px;
     margin: 0;
     font-size: 13px;
     white-space: nowrap;
