@@ -613,7 +613,7 @@ export class Ven209Component implements OnInit, OnDestroy {
           TIEMPO_ENTREGA: tiempoEntregaVal,
           DIAS_ENTREGA: tiempoEntregaVal
         },
-        ADIC_ACREEDORES: this.contactoAdicional()
+        ADIC_CLIENTES: this.contactoAdicional()
       };
 
       const list = [...this.records()];
@@ -978,7 +978,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.telefonos.set(record.TELEFONOS ?? []);
     this.emails.set(record.ITM_EMAIL ?? []);
     this.condiciones.set(financials.condiciones);
-    this.contactoAdicional.set(record.ADIC_ACREEDORES ?? { URL: '', CIIU: '' });
+    this.contactoAdicional.set(record.ADIC_CLIENTES ?? { URL: '', CIIU: '' });
 
     if (this.readOnly()) {
       this.disableFormControls();

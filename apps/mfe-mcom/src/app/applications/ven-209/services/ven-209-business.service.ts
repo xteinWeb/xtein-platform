@@ -279,17 +279,18 @@ export class Ven209BusinessService {
     const cupoCuota = Number(record.CUPO_CUOTA ?? 0) || 0;
     const tiempoEntrega = Number(record.TIEMPO_ENTREGA ?? record.DIAS_ENTREGA ?? 0) || 0;
 
-    const acreedorClean = { ...record };
-    delete acreedorClean.CUPO_DISPONIBLE;
-    delete acreedorClean.CUPO_UTILIZADO;
-    delete acreedorClean.ESTADO_CUPO;
-    delete acreedorClean.CUPO_DIS_CUOTA;
-    delete acreedorClean.CUPO_UTI_CUOTA;
-    delete acreedorClean.ESTADO_CUOTA;
+    const clienteClean = { ...record };
+    delete clienteClean.CUPO_DISPONIBLE;
+    delete clienteClean.CUPO_UTILIZADO;
+    delete clienteClean.ESTADO_CUPO;
+    delete clienteClean.CUPO_DIS_CUOTA;
+    delete clienteClean.CUPO_UTI_CUOTA;
+    delete clienteClean.ESTADO_CUOTA;
+    delete clienteClean.DESCRIPCION_CUPO;
 
     return {
-      ACREEDOR: {
-        ...acreedorClean,
+      CLIENTE: {
+        ...clienteClean,
         RT: rtVal,
         CUPO_CREDITO: cupoCredito,
         CUPO_CUOTA: cupoCuota,
@@ -299,7 +300,7 @@ export class Ven209BusinessService {
           .filter(Boolean)
           .join(' ')
       },
-      ADIC_ACREEDORES: contactoAdic ?? { URL: '', CIIU: '' },
+      ADIC_CLIENTES: contactoAdic ?? { URL: '', CIIU: '' },
       EMAIL: emails,
       DIRECCIONES: direcciones,
       TELEFONOS: telefonos,

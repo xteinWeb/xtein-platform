@@ -81,7 +81,7 @@ export interface Ven209ClienteRecord {
   DIRECCIONES?: Ven209Direccion[];
   TELEFONOS?: Ven209Telefono[];
   ITM_EMAIL?: Ven209Email[];
-  ADIC_ACREEDORES?: Ven209ContactoAdicional | null;
+  ADIC_CLIENTES?: Ven209ContactoAdicional | null;
   CONDICIONES?: Ven209Condicion[];
   CONDICIONES_ADIC?: unknown;
   CLIENTES_PRO?: unknown[];

@@ -18,8 +18,8 @@ export interface Ven209CondicionesWrapper {
 }
 
 export interface Ven209SavePayload {
-  ACREEDOR: Ven209ClienteRecord;
-  ADIC_ACREEDORES?: Ven209ContactoAdicional;
+  CLIENTE: Ven209ClienteRecord;
+  ADIC_CLIENTES?: Ven209ContactoAdicional;
   EMAIL?: Ven209Email[];
   DIRECCIONES?: Ven209Direccion[];
   TELEFONOS?: Ven209Telefono[];

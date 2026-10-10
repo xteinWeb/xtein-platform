@@ -49,7 +49,7 @@ export const Ven209DefaultRecord: Readonly<Ven209ClienteRecord> = {
   DIRECCIONES: [],
   TELEFONOS: [],
   ITM_EMAIL: [],
-  ADIC_ACREEDORES: { URL: '', CIIU: '' },
+  ADIC_CLIENTES: { URL: '', CIIU: '' },
   CONDICIONES: [],
   CONDICIONES_ADIC: {},
   CLIENTES_PRO: [],
