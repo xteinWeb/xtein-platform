@@ -16,7 +16,7 @@ apps/
   mfe-mcpr/              Infraestructura con registro vacío
   mfe-men/               Infraestructura con registro vacío
   mfe-mfin/              Infraestructura con registro vacío
-  mfe-mthu/              Infraestructura con registro vacío
+  mfe-mthu/              GHU-250 (liquidación de prestaciones)
 libs/                    Ocho bibliotecas compartidas
 Legacy/                  Aplicación anterior con configuración propia
 tools/application-generator/  Generador de aplicaciones y plantillas
