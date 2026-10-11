@@ -52,23 +52,93 @@ export class Ven209BusinessService {
     return rows as T[];
   }
 
-  async catalog(name: keyof typeof Ven209Catalog, data: unknown): Promise<Ven209Lookup[]> {
+  // Static in-memory cache to make catalog retrieval instantaneous across tab navigations
+  private static idLegalesCache: {
+    idLegales: Ven209Lookup[];
+    tiposId: string[];
+    personas: string[];
+  } | null = null;
+
+  private static readonly catalogCache = new Map<string, Ven209Lookup[]>();
+
+  private static perfilesCache: {
+    perfilTributario: Record<string, unknown>[];
+    listaTasas: Array<{
+      ID_TASA: string;
+      DESCRIPCION?: string;
+      PORCENTAJE?: number;
+      VALOR_BASE?: number;
+      APLICA_BASE?: boolean;
+      CLASE?: string;
+    }>;
+    columnas: Array<{ dataField: string; caption: string }>;
+  } | null = null;
+
+  clearCache(): void {
+    Ven209BusinessService.idLegalesCache = null;
+    Ven209BusinessService.catalogCache.clear();
+    Ven209BusinessService.perfilesCache = null;
+  }
+
+  async catalog(name: keyof typeof Ven209Catalog, data: unknown, forceRefresh = false): Promise<Ven209Lookup[]> {
+    const cacheKey = `${String(name)}_${JSON.stringify(data ?? {})}`;
+    if (!forceRefresh && Ven209BusinessService.catalogCache.has(cacheKey)) {
+      return Ven209BusinessService.catalogCache.get(cacheKey)!;
+    }
+
     const [endpoint, action] = Ven209Catalog[name];
     const decoded = this.decode<unknown>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    let result = decoded as Ven209Lookup[];
     if (name === 'idLegales' && decoded.length > 0) {
       const first = decoded[0] as Record<string, unknown>;
       if (first && typeof first === 'object' && 'ID_LEGALES' in first && Array.isArray(first['ID_LEGALES'])) {
-        return first['ID_LEGALES'] as Ven209Lookup[];
+        result = first['ID_LEGALES'] as Ven209Lookup[];
       }
     }
-    return decoded as Ven209Lookup[];
+    Ven209BusinessService.catalogCache.set(cacheKey, result);
+    return result;
   }
 
-  async loadIdLegalesWithTypes(): Promise<{
+  async validarExisteCliente(idCliente: string, accion = 'new'): Promise<{ existe: boolean; mensaje: string }> {
+    const [endpoint, action] = Ven209Catalog.validarExiste;
+    const response = await firstValueFrom(
+      this.api.request(endpoint, action, { ID_CLIENTE: idCliente, accion })
+    );
+    let data: unknown = response;
+    for (let depth = 0; depth < 4; depth++) {
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+          continue;
+        } catch {
+          break;
+        }
+      }
+      if (data && typeof data === 'object' && !Array.isArray(data) && 'data' in data) {
+        data = (data as { data: unknown }).data;
+        continue;
+      }
+      break;
+    }
+    const rows = Array.isArray(data) ? data : data == null ? [] : [data];
+    const firstRow = (rows[0] && typeof rows[0] === 'object') ? rows[0] as Record<string, unknown> : {};
+    const errMensaje = typeof firstRow['ErrMensaje'] === 'string' ? firstRow['ErrMensaje'] : '';
+    const existe = errMensaje !== '';
+    return {
+      existe,
+      mensaje: errMensaje
+    };
+  }
+
+  async loadIdLegalesWithTypes(forceRefresh = false): Promise<{
     idLegales: Ven209Lookup[];
     tiposId: string[];
     personas: string[];
   }> {
+    if (!forceRefresh && Ven209BusinessService.idLegalesCache) {
+      return Ven209BusinessService.idLegalesCache;
+    }
+
     const [endpoint, action] = Ven209Catalog.idLegales;
     const decoded = this.decode<unknown>(await firstValueFrom(this.api.request(endpoint, action, {})));
     const first = decoded[0] as Record<string, unknown> | undefined;
@@ -103,10 +173,12 @@ export class Ven209BusinessService {
     } else {
       idLegales = decoded as Ven209Lookup[];
     }
-    return { idLegales, tiposId, personas };
+    const result = { idLegales, tiposId, personas };
+    Ven209BusinessService.idLegalesCache = result;
+    return result;
   }
 
-  async loadPerfilesTributarios(): Promise<{
+  async loadPerfilesTributarios(forceRefresh = false): Promise<{
     perfilTributario: Record<string, unknown>[];
     listaTasas: Array<{
       ID_TASA: string;
@@ -118,6 +190,10 @@ export class Ven209BusinessService {
     }>;
     columnas: Array<{ dataField: string; caption: string }>;
   }> {
+    if (!forceRefresh && Ven209BusinessService.perfilesCache) {
+      return Ven209BusinessService.perfilesCache;
+    }
+
     const [endpoint, action] = Ven209Catalog.perfilesTributarios;
     const decoded = this.decode<Record<string, unknown>>(await firstValueFrom(this.api.request(endpoint, action, {})));
     const first = decoded[0] || {};
@@ -147,7 +223,9 @@ export class Ven209BusinessService {
         }
       }
     }
-    return { perfilTributario, listaTasas, columnas };
+    const result = { perfilTributario, listaTasas, columnas };
+    Ven209BusinessService.perfilesCache = result;
+    return result;
   }
 
   validate(
@@ -197,19 +275,44 @@ export class Ven209BusinessService {
         ? [record.RT]
         : [];
 
+    const cupoCredito = Number(record.CUPO_CREDITO ?? 0) || 0;
+    const cupoCuota = Number(record.CUPO_CUOTA ?? 0) || 0;
+    const tiempoEntrega = Number(record.TIEMPO_ENTREGA ?? record.DIAS_ENTREGA ?? 0) || 0;
+
+    const clienteClean = { ...record };
+    delete clienteClean.CUPO_DISPONIBLE;
+    delete clienteClean.CUPO_UTILIZADO;
+    delete clienteClean.ESTADO_CUPO;
+    delete clienteClean.CUPO_DIS_CUOTA;
+    delete clienteClean.CUPO_UTI_CUOTA;
+    delete clienteClean.ESTADO_CUOTA;
+    delete clienteClean.DESCRIPCION_CUPO;
+
     return {
-      ACREEDOR: {
-        ...record,
+      CLIENTE: {
+        ...clienteClean,
         RT: rtVal,
+        CUPO_CREDITO: cupoCredito,
+        CUPO_CUOTA: cupoCuota,
+        TIEMPO_ENTREGA: tiempoEntrega,
+        DIAS_ENTREGA: tiempoEntrega,
         NOMBRE_COMPLETO: [record.NOMBRE, record.NOMBRE2, record.APELLIDO, record.APELLIDO2]
           .filter(Boolean)
           .join(' ')
       },
-      ADIC_ACREEDORES: contactoAdic ?? { URL: '', CIIU: '' },
+      ADIC_CLIENTES: contactoAdic ?? { URL: '', CIIU: '' },
       EMAIL: emails,
       DIRECCIONES: direcciones,
       TELEFONOS: telefonos,
-      CONDICIONES: condiciones,
+      CONDICIONES: {
+        CONDICIONES: condiciones,
+        ADICIONALES: {
+          CUPO_CREDITO: cupoCredito,
+          CUPO_CUOTA: cupoCuota,
+          TIEMPO_ENTREGA: tiempoEntrega,
+          DIAS_ENTREGA: tiempoEntrega
+        }
+      },
       CLIENTES_EVAL: record.CLIENTES_PRO ?? [],
       BANCOS: record.BANCOS ?? [],
       USUARIO: this.identity.USUARIO,

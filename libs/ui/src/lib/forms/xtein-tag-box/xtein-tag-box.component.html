@@ -1,12 +1,12 @@
 @if (label) {
-  <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="invalid">{{ label }}</xtein-label>
+  <xtein-label [for]="id" [required]="required" [invalid]="invalid">{{ label }}</xtein-label>
 }
 
 <div class="xtein-tag-box-wrapper" [class.xtein-tag-box--has-value]="hasValue">
   <dx-tag-box
     class="w-100"
     stylingMode="filled"
-    [items]="items"
+    [dataSource]="dataSource"
     [displayExpr]="displayExpr"
     [valueExpr]="valueExpr"
     [value]="value"

@@ -68,7 +68,7 @@
 
   margin: 0;
 
-  color: #244d73;
+  color: var(--xt-control-text, #33587b);
 
   font-size: 13px;
   font-weight: 500;
@@ -78,7 +78,7 @@
 .xt-data-source-parameters__required {
   margin-left: 2px;
 
-  color: #dc3545;
+  color: #df3e3e;
 }
 
 

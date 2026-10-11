@@ -1,28 +1,9 @@
-export interface Ven209Direccion {
-  ID_DIRECCION?: number;
-  TIPO_DIRECCION?: string;
-  TIPO_NOMENCLATURA?: string;
-  NOMENCLATURA?: string;
-  NUMERO1?: string;
-  NUMERO2?: string;
-  DOMICILIO?: string;
-  BARRIO?: string;
-  DEPENDIENTE?: string;
-  REFERENCIA?: string;
-  ID_UBICACION?: string;
-  CODIGO_POSTAL?: string;
-  NOMBRE_UBICACION?: string;
-  NOMBRE_BARRIO?: string;
-  isEdit?: boolean;
-}
+import type { XteinCondicion, XteinDireccion, XteinTelefono } from '@xtein/ui';
 
-export interface Ven209Telefono {
-  ID_TELEFONO?: number;
+export interface Ven209Direccion extends XteinDireccion {}
+
+export interface Ven209Telefono extends XteinTelefono {
   ID_DIRECCION?: number;
-  TIPO_TELEFONO?: string;
-  TELEFONO?: string;
-  EXTENSION?: string;
-  isEdit?: boolean;
 }
 
 export interface Ven209Email {
@@ -39,14 +20,7 @@ export interface Ven209ContactoAdicional {
   CIIU?: string;
 }
 
-export interface Ven209Condicion {
-  ID_CONDICION: string;
-  DESCRIPCION?: string;
-  PLAZO?: number;
-  DIAS_ENTREGA?: number;
-  TIPO_CONDICION?: string;
-  VALOR?: number;
-}
+export interface Ven209Condicion extends XteinCondicion {}
 
 export interface Ven209Lookup {
   ID_LEGAL?: number | string;
@@ -84,10 +58,12 @@ export interface Ven209ClienteRecord {
   STATUS?: string | null;
   CUPO_CREDITO?: number | null;
   CUPO_DISPONIBLE?: number | null;
+  CUPO_UTILIZADO?: number | null;
   FRECUENCIA?: number | null;
   ESTADO?: string | null;
   CUPO_CUOTA?: number | null;
   CUPO_DIS_CUOTA?: number | null;
+  CUPO_UTI_CUOTA?: number | null;
   ESTADO_CUPO?: string | null;
   ESTADO_CUOTA?: string | null;
   DESCRIPCION_CUPO?: string | null;
@@ -101,10 +77,11 @@ export interface Ven209ClienteRecord {
   PERSONA?: string | null;
   FECHA_REGISTRO?: string | null;
   TIEMPO_ENTREGA?: number | null;
+  DIAS_ENTREGA?: number | null;
   DIRECCIONES?: Ven209Direccion[];
   TELEFONOS?: Ven209Telefono[];
   ITM_EMAIL?: Ven209Email[];
-  ADIC_ACREEDORES?: Ven209ContactoAdicional | null;
+  ADIC_CLIENTES?: Ven209ContactoAdicional | null;
   CONDICIONES?: Ven209Condicion[];
   CONDICIONES_ADIC?: unknown;
   CLIENTES_PRO?: unknown[];

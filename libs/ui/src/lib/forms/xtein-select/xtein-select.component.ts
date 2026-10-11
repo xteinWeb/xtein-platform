@@ -1,12 +1,14 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
+  ViewChild,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   EventEmitter,
   forwardRef,
   Input,
-  Output
+  Output, TemplateRef
 } from '@angular/core';
 
 import {
@@ -15,8 +17,9 @@ import {
 } from '@angular/forms';
 
 import {
-  DxSelectBoxModule
+  DxSelectBoxComponent, DxSelectBoxModule, DxTemplateModule, DxButtonModule
 } from 'devextreme-angular';
+import DataSource from 'devextreme/data/data_source';
 
 import type {
   ValueChangedEvent
@@ -33,7 +36,7 @@ import type {
   standalone: true,
 
   imports: [XteinLabelComponent,
-    DxSelectBoxModule
+    DxSelectBoxModule, DxTemplateModule, DxButtonModule, NgTemplateOutlet
   ],
 
   templateUrl:
@@ -58,6 +61,70 @@ import type {
 })
 export class XteinSelectComponent
   implements ControlValueAccessor {
+  @Input() searchExpr: string | string[] = '';
+  @Input() columns?: string[];
+  @Input() columnWidths?: (string | number)[];
+  readonly searchIdentity = (item: unknown): unknown => item;
+  @Input() itemTemplate: TemplateRef<any> | null = null;
+  @Input() dropDownOptions: Record<string, unknown> = {};
+  @Input() refreshEnabled = false;
+  @Input() searchTimeout = 200;
+  @Input() minSearchLength = 0;
+  @Input() paginate = true;
+  @Input() pageSize = 20;
+  @Input() tabIndex = 0;
+  @Output() readonly refreshRequested = new EventEmitter<void>();
+
+  private readonly refreshToolbar = [{
+    widget: 'dxButton',
+    location: 'after',
+    toolbar: 'top',
+    options: {
+      icon: 'refresh',
+      stylingMode: 'text',
+      type: 'normal',
+      hint: 'Actualizar lista',
+      elementAttr: { class: 'xtein-select-refresh-btn' },
+      onClick: () => this.refreshRequested.emit()
+    }
+  }];
+
+  private lastPopupOptions?: Record<string, unknown>;
+  private lastRefreshEnabled?: boolean;
+  private popupOptions: Record<string, unknown> = {};
+
+  get resolvedDropDownOptions(): Record<string, unknown> {
+    if (this.lastPopupOptions !== this.dropDownOptions || this.lastRefreshEnabled !== this.refreshEnabled) {
+      this.lastPopupOptions = this.dropDownOptions;
+      this.lastRefreshEnabled = this.refreshEnabled;
+      this.popupOptions = this.refreshEnabled ? { ...this.dropDownOptions, toolbarItems: this.refreshToolbar } : this.dropDownOptions;
+    }
+    return this.popupOptions;
+  }
+
+  get resolvedSearchExpr(): string | string[] | ((item: unknown) => unknown) {
+    if (this.searchExpr) {
+      return this.searchExpr;
+    }
+    if (this.columns && this.columns.length > 0) {
+      return this.columns;
+    }
+    if (this.displayExpr) {
+      return this.displayExpr;
+    }
+    return this.searchIdentity;
+  }
+
+  getColumnWidth(index: number): string {
+    if (this.columnWidths && this.columnWidths[index] !== undefined) {
+      const w = this.columnWidths[index];
+      return typeof w === 'number' ? `${w}px` : String(w);
+    }
+    if (index === 0 && (this.columns?.length ?? 0) > 1) {
+      return '120px';
+    }
+    return 'auto';
+  }
 
   @Input()
   id = '';
@@ -71,17 +138,85 @@ export class XteinSelectComponent
   @Input()
   placeholder = '';
 
+  private _items: unknown[] = [];
+  private _valueExpr = '';
+  private _dataSource: any = [];
+
+  get dataSource(): any {
+    return this._dataSource;
+  }
+
   @Input()
-  items: unknown[] = [];
+  set dataSource(val: unknown) {
+    this.items = val;
+  }
+
+  @Input()
+  set items(val: unknown) {
+    if (val instanceof DataSource) {
+      this._dataSource = val;
+      this._items = [];
+    } else {
+      this._items = Array.isArray(val) ? val : [];
+      this.updateDataSource();
+    }
+  }
+  get items(): unknown[] {
+    return this._items;
+  }
 
   @Input()
   displayExpr = '';
 
   @Input()
-  valueExpr = '';
+  set valueExpr(val: string) {
+    this._valueExpr = val || '';
+    this.updateDataSource();
+  }
+  get valueExpr(): string {
+    return this._valueExpr;
+  }
+
+  private updateDataSource(): void {
+    if (this._items && this._items.length > 0) {
+      if (this.paginate) {
+        const isObjectArray = typeof this._items[0] === 'object' && this._items[0] !== null;
+        const key = (isObjectArray && this._valueExpr) ? this._valueExpr : undefined;
+        this._dataSource = new DataSource({
+          store: {
+            type: 'array',
+            data: this._items,
+            key: key
+          },
+          paginate: true,
+          pageSize: this.pageSize
+        });
+      } else {
+        this._dataSource = this._items;
+      }
+    } else {
+      this._dataSource = [];
+    }
+    this.changeDetector?.markForCheck();
+  }
 
   @Input()
   searchEnabled = false;
+
+  @Input()
+  searchMode: 'contains' | 'startswith' = 'contains';
+
+  @Input()
+  acceptCustomValue = false;
+
+  @Output()
+  readonly customItemCreating = new EventEmitter<any>();
+
+  @ViewChild(DxSelectBoxComponent) private editor?: DxSelectBoxComponent;
+
+  focus(): void {
+    this.editor?.instance.focus();
+  }
 
   @Input()
   showClearButton = false;
@@ -210,6 +345,14 @@ export class XteinSelectComponent
     this.onChange(
       this.value
     );
+  }
+
+  handleCustomItemCreating(event: any): void {
+    if (this.customItemCreating.observed) {
+      this.customItemCreating.emit(event);
+    } else {
+      event.customItem = event.text;
+    }
   }
 
   handleFocusOut(): void {

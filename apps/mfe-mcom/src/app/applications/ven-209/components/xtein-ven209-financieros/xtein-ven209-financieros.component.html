@@ -1,46 +1,184 @@
 <div class="xtein-financieros">
-  <!-- Acordeón 1: Cupo -->
+  <!-- Acordeón 1: Cupos -->
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('cupo')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.cupo()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.cupo()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.cupo()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.cupo()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Cupo</span>
+      <span class="xtein-accordion-title">Cupos</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.cupo()">
-      <div class="xtein-financieros__form-grid">
-        <div class="xtein-financieros__field-inline">
-          <xtein-label class="xtein-financieros__label-inline" for="fin-cupo">Cupo crédito</xtein-label>
-          <div class="xtein-financieros__control-inline">
-            <xtein-input
-              id="fin-cupo"
-              type="number"
-              [ngModel]="cupoCredito"
-              (ngModelChange)="onCupoChange($event)"
-              [readOnly]="readOnly"
-              placeholder="0"
-            ></xtein-input>
-          </div>
-        </div>
-
-        <div class="xtein-financieros__field-inline">
-          <xtein-label class="xtein-financieros__label-inline" for="fin-tiempo">Días entrega</xtein-label>
-          <div class="xtein-financieros__control-inline">
-            <xtein-input
+      <!-- Frecuencia / Días de entrega -->
+      <div class="xtein-financieros__top-row">
+        <div class="xtein-financieros__field-inline xtein-financieros__field-inline--frecuencia">
+          <xtein-label class="xtein-financieros__label-inline" for="fin-tiempo">Frecuencia</xtein-label>
+          <div class="xtein-financieros__control-frecuencia">
+            <xtein-number
               id="fin-tiempo"
-              type="number"
               [ngModel]="tiempoEntrega"
               (ngModelChange)="onTiempoChange($event)"
+              [disabled]="readOnly"
               [readOnly]="readOnly"
+              [min]="0"
+              [showSpinButtons]="false"
               placeholder="0"
-            ></xtein-input>
+            ></xtein-number>
+            <span class="xtein-financieros__suffix-text">Días</span>
           </div>
         </div>
+      </div>
+
+      <div class="xtein-financieros__cards-grid">
+        <!-- Card 1: Global -->
+        <fieldset class="xtein-financieros__fieldset">
+          <legend class="xtein-financieros__legend">
+            <xtein-group-label label="Global"></xtein-group-label>
+          </legend>
+          <div class="xtein-financieros__fieldset-content">
+            <!-- Autorizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-credito">Autorizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-credito"
+                  [ngModel]="cupoCredito"
+                  (ngModelChange)="onCupoCreditoChange($event)"
+                  [disabled]="readOnly"
+                  [readOnly]="readOnly"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-estado-cupo">Estado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-input
+                  id="fin-estado-cupo"
+                  [ngModel]="estadoCupo"
+                  [readOnly]="true"
+                  [disabled]="true"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <!-- Utilizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-utilizado">Utilizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-utilizado"
+                  [ngModel]="cupoUtilizado"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Disponible -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-disponible">Disponible</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-disponible"
+                  [ngModel]="cupoDisponible"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Card 2: Cuota -->
+        <fieldset class="xtein-financieros__fieldset">
+          <legend class="xtein-financieros__legend">
+            <xtein-group-label label="Cuota"></xtein-group-label>
+          </legend>
+          <div class="xtein-financieros__fieldset-content">
+            <!-- Autorizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-cuota">Autorizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-cuota"
+                  [ngModel]="cupoCuota"
+                  (ngModelChange)="onCupoCuotaChange($event)"
+                  [disabled]="readOnly"
+                  [readOnly]="readOnly"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-estado-cuota">Estado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-input
+                  id="fin-estado-cuota"
+                  [ngModel]="estadoCuota"
+                  [readOnly]="true"
+                  [disabled]="true"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <!-- Utilizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-uti-cuota">Utilizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-uti-cuota"
+                  [ngModel]="cupoUtiCuota"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Disponible -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-dis-cuota">Disponible</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-dis-cuota"
+                  [ngModel]="cupoDisCuota"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+          </div>
+        </fieldset>
       </div>
     </div>
   </div>
@@ -49,55 +187,24 @@
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('condiciones')">
       <div class="xtein-accordion-icon">
-        <svg *ngIf="expanded.condiciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="expanded.condiciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <svg *ngIf="!expanded.condiciones()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg *ngIf="!expanded.condiciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
       <span class="xtein-accordion-title">Condiciones</span>
     </div>
-    <div class="xtein-accordion-body" *ngIf="expanded.condiciones()">
-      <xtein-data-grid
-        id="grid-condiciones-prov"
-        [dataSource]="condiciones"
+    <div class="xtein-accordion-body" [hidden]="!expanded.condiciones()">
+      <xtein-condiciones
         [columns]="condicionColumns"
-        [toolbarVisible]="!readOnly"
-        [toolbarActions]="gridToolbarActions"
-        searchPlaceholder="Buscar condición…"
-      >
-      </xtein-data-grid>
-    </div>
-  </div>
-
-  <!-- Modal para asociar condición comercial -->
-  <div class="xtein-modal-backdrop" *ngIf="addModalOpen()">
-    <div class="xtein-modal-card">
-      <div class="xtein-modal-header">
-        <h4 class="xtein-modal-title">Asociar Condición Comercial</h4>
-        <button type="button" class="xtein-modal-close" (click)="closeModal()">×</button>
-      </div>
-      <div class="xtein-modal-body">
-        <div class="xtein-modal-field">
-          <xtein-label for="modal-cond-id">Condición *</xtein-label>
-          <xtein-lookup
-            id="modal-cond-id"
-            placeholder="Seleccione condición"
-            searchPlaceholder="Buscar condición…"
-            [items]="$any(availableCondiciones)"
-            valueExpr="ID_CONDICION"
-            displayExpr="DESCRIPCION"
-            [columns]="lookupColumns"
-            [(ngModel)]="selectedCondicionId"
-          >
-          </xtein-lookup>
-        </div>
-      </div>
-      <div class="xtein-modal-footer">
-        <button type="button" class="xtein-btn xtein-btn--secondary" (click)="closeModal()">Cancelar</button>
-        <button type="button" class="xtein-btn xtein-btn--primary" (click)="saveCondicion()">Asociar</button>
-      </div>
+        [condiciones]="condiciones"
+        [availableCondiciones]="$any(availableCondiciones)"
+        [readOnly]="readOnly"
+        (condicionesChange)="condicionesChange.emit($event)"
+        (pendingChange)="pendingChange.emit()"
+      />
     </div>
   </div>
 </div>

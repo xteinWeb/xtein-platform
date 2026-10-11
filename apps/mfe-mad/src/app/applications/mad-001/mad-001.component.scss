@@ -275,54 +275,43 @@
   margin:
     0;
 
-  padding:
-    16px;
+  padding: 16px 20px 20px;
+  box-sizing: border-box;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #ffffff;
 
-  box-sizing:
-    border-box;
-
-  border:
-    1px solid #dfe6ef;
-
-  border-radius:
-    9px;
-
-  background:
-    #ffffff;
+  xtein-textarea {
+    display: block;
+    padding-top: 14px;
+    padding-left: 14px;
+    box-sizing: border-box;
+  }
 }
-
 
 .mad-001__group-title {
-  padding:
-    0 6px;
-
-  color:
-    #244d73;
-
-  font-size:
-    13px;
-
-  font-weight:
-    600;
+  padding: 0;
+  margin: 0;
+  color: rgba(10, 57, 96, 0.55);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: inherit;
 }
-
 
 /*======================================================================
 = GRID
 ======================================================================*/
 
 .mad-001__grid {
-  display:
-    grid;
-
-  width:
-    100%;
-
-  min-width:
-    0;
-
-  gap:
-    16px 18px;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 16px 18px;
+  padding-top: 14px;
+  padding-left: 14px;
+  box-sizing: border-box;
 }
 
 

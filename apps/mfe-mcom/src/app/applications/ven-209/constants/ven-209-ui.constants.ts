@@ -2,7 +2,6 @@ import type { XteinGridColumn, XteinRecordViewColumn } from '@xtein/ui';
 import type {
   Ven209ClienteRecord,
   Ven209Condicion,
-  Ven209Direccion,
   Ven209Email,
   Ven209Lookup,
   Ven209Telefono
@@ -28,12 +27,14 @@ export const Ven209DefaultRecord: Readonly<Ven209ClienteRecord> = {
   STATUS: '',
   CUPO_CREDITO: 0,
   CUPO_DISPONIBLE: 0,
+  CUPO_UTILIZADO: 0,
   FRECUENCIA: 0,
   ESTADO: 'ACTIVO',
   CUPO_CUOTA: 0,
   CUPO_DIS_CUOTA: 0,
-  ESTADO_CUPO: '',
-  ESTADO_CUOTA: '',
+  CUPO_UTI_CUOTA: 0,
+  ESTADO_CUPO: 'ACTIVO',
+  ESTADO_CUOTA: 'ACTIVO',
   DESCRIPCION_CUPO: '',
   NOMBRE_COMPLETO: '',
   APELLIDO_COMPLETO: '',
@@ -48,7 +49,7 @@ export const Ven209DefaultRecord: Readonly<Ven209ClienteRecord> = {
   DIRECCIONES: [],
   TELEFONOS: [],
   ITM_EMAIL: [],
-  ADIC_ACREEDORES: { URL: '', CIIU: '' },
+  ADIC_CLIENTES: { URL: '', CIIU: '' },
   CONDICIONES: [],
   CONDICIONES_ADIC: {},
   CLIENTES_PRO: [],
@@ -85,7 +86,6 @@ export interface Ven209LookupColumnsConfig {
 }
 
 export interface Ven209GridColumnsConfig {
-  direcciones: XteinGridColumn<Ven209Direccion, unknown>[];
   telefonos: XteinGridColumn<Ven209Telefono, unknown>[];
   emails: XteinGridColumn<Ven209Email, unknown>[];
   condiciones: XteinGridColumn<Ven209Condicion, unknown>[];
@@ -118,21 +118,14 @@ export const Ven209LookupColumns: Ven209LookupColumnsConfig = {
 };
 
 export const Ven209GridColumns: Ven209GridColumnsConfig = {
-  direcciones: [
-    { dataField: 'TIPO_DIRECCION', caption: 'Tipo', width: 110 },
-    { dataField: 'DOMICILIO', caption: 'Dirección Principal' },
-    { dataField: 'BARRIO', caption: 'Barrio', width: 150 },
-    { dataField: 'NOMBRE_UBICACION', caption: 'Ciudad / Municipio', width: 180 },
-    { dataField: 'CODIGO_POSTAL', caption: 'C.P.', width: 90 }
-  ],
   telefonos: [
-    { dataField: 'TIPO_TELEFONO', caption: 'Tipo', width: 120 },
-    { dataField: 'TELEFONO', caption: 'Número Telefónico' },
-    { dataField: 'EXTENSION', caption: 'Ext.', width: 100 }
+    { dataField: 'TIPO_TELEFONO', caption: 'Tipo', width: 140, cellTemplate: 'xteinGroup' },
+    { dataField: 'TELEFONO', caption: 'Número Telefónico', minWidth: 180, cellTemplate: 'xteinGroup' },
+    { dataField: 'EXTENSION', caption: 'Ext.', width: 110, cellTemplate: 'xteinGroup' }
   ],
   emails: [
-    { dataField: 'EMAIL', caption: 'Correo Electrónico' },
-    { dataField: 'ETIQUETA', caption: 'Etiqueta / Uso', width: 160 }
+    { dataField: 'EMAIL', caption: 'Correo Electrónico', minWidth: 220, cellTemplate: 'xteinGroup' },
+    { dataField: 'ETIQUETA', caption: 'Tipo / Etiqueta', width: 180, cellTemplate: 'xteinGroup' }
   ],
   condiciones: [
     { dataField: 'ID_CONDICION', caption: 'Código', width: 130 },

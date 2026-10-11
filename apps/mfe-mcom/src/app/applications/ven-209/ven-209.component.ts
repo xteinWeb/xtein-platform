@@ -51,7 +51,9 @@ import {
   XteinPerfilTributarioComponent,
   XteinPerfilGridColumn,
   XteinPerfilTasaRecord,
-  XteinTagBoxComponent
+  XteinTagBoxComponent,
+  XteinLoadingComponent,
+  XteinGroupLabelComponent
 } from '@xtein/ui';
 
 import {
@@ -99,6 +101,8 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinRecordSettingsComponent,
     XteinPerfilTributarioComponent,
     XteinTagBoxComponent,
+    XteinLoadingComponent,
+    XteinGroupLabelComponent,
     XteinVen209UbicacionesComponent,
     XteinVen209FinancierosComponent
   ],
@@ -115,11 +119,13 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   // State signals
   readonly loading = signal(false);
+  readonly loadingMessage = signal('Un momento. Cargando datos...');
   readonly mode = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
   readonly permissions = signal<RecordToolbarPermissions>(DeniedRecordToolbarPermissions);
   readonly records = signal<Ven209ClienteRecord[]>([]);
   readonly currentIndex = signal<number>(-1);
   readonly activeMainTab = signal<'general' | 'ubicaciones' | 'financieros' | 'ventas' | 'historico'>('general');
+  readonly idClienteValidationStatus = signal<'valid' | 'invalid' | 'pending' | null>(null);
 
   // Sub-items signals
   readonly direcciones = signal<Ven209Direccion[]>([]);
@@ -176,6 +182,8 @@ export class Ven209Component implements OnInit, OnDestroy {
   readonly queryFilter = computed(() => this.records()[0]?.QFILTRO || this.records().map(r => `(ID_CLIENTE='${r.ID_CLIENTE}')`).join(' OR '));
 
   private lastCriteria: unknown[] = [];
+  private lastValidatedIdCliente: string | null = null;
+  private isAlertOpenOrValidating = false;
 
   // Reactive Form Definition
   readonly form = new FormGroup({
@@ -199,6 +207,13 @@ export class Ven209Component implements OnInit, OnDestroy {
     ID_ADC: new FormControl<string>(''),
     STATUS: new FormControl<string>(''),
     CUPO_CREDITO: new FormControl<number>(0),
+    CUPO_DISPONIBLE: new FormControl<number>(0),
+    CUPO_UTILIZADO: new FormControl<number>(0),
+    ESTADO_CUPO: new FormControl<string>('ACTIVO'),
+    CUPO_CUOTA: new FormControl<number>(0),
+    CUPO_DIS_CUOTA: new FormControl<number>(0),
+    CUPO_UTI_CUOTA: new FormControl<number>(0),
+    ESTADO_CUOTA: new FormControl<string>('ACTIVO'),
     TIEMPO_ENTREGA: new FormControl<number>(0)
   });
 
@@ -233,6 +248,20 @@ export class Ven209Component implements OnInit, OnDestroy {
       this.form.valueChanges.subscribe(() => {
         if (!this.readOnly()) {
           this.workspace.setDirty(this.applicationId, true);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.form.controls.ID_CLIENTE.valueChanges.subscribe(val => {
+        if (this.mode() === RecordToolbarMode.Creating) {
+          const trimmed = typeof val === 'string' ? val.trim() : '';
+          if (trimmed !== this.lastValidatedIdCliente) {
+            this.lastValidatedIdCliente = null;
+            if (this.idClienteValidationStatus() !== null) {
+              this.idClienteValidationStatus.set(null);
+            }
+          }
         }
       })
     );
@@ -308,29 +337,25 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.form.enable({ emitEvent: false });
     this.form.controls.ESTADO.disable({ emitEvent: false });
     this.form.controls.FECHA_REGISTRO.disable({ emitEvent: false });
+    this.form.controls.CUPO_DISPONIBLE.disable({ emitEvent: false });
+    this.form.controls.CUPO_UTILIZADO.disable({ emitEvent: false });
+    this.form.controls.ESTADO_CUPO.disable({ emitEvent: false });
+    this.form.controls.CUPO_DIS_CUOTA.disable({ emitEvent: false });
+    this.form.controls.CUPO_UTI_CUOTA.disable({ emitEvent: false });
+    this.form.controls.ESTADO_CUOTA.disable({ emitEvent: false });
     if (!isNew) {
       this.form.controls.ID_CLIENTE.disable({ emitEvent: false });
     }
   }
 
-  private async loadCatalogs(): Promise<void> {
+  private async loadCatalogs(forceRefresh = false): Promise<void> {
+    if (forceRefresh) {
+      this.business.clearCache();
+    }
+    this.loadingMessage.set('Un momento. Cargando datos...');
     this.loading.set(true);
     try {
-      const results = await Promise.allSettled([
-        this.business.loadIdLegalesWithTypes(),
-        this.business.catalog('grupos', { ID_GRUPO_PADRE: 'DEUDORES' }),
-        this.business.catalog('zonas', { TIPO_UBICACION: 'ZONA' }),
-        this.business.catalog('adc', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('status', { STATUS: {} }),
-        this.business.catalog('rt', {}),
-        this.business.catalog('condiciones', { TIPO: 'VENTAS' }),
-        this.business.loadPerfilesTributarios()
-      ]);
-
-      const [legalRes, gruposRes, zonasRes, adcsRes, statusesRes, rtsRes, condRes, perfilesRes] = results;
-
-      if (legalRes.status === 'fulfilled') {
-        const legalData = legalRes.value;
+      const pLegal = this.business.loadIdLegalesWithTypes(forceRefresh).then(legalData => {
         this.idLegales.set(legalData.idLegales);
         if (legalData.tiposId?.length) {
           this.tiposId.set([...new Set([...this.tiposId(), ...legalData.tiposId])]);
@@ -338,38 +363,48 @@ export class Ven209Component implements OnInit, OnDestroy {
         if (legalData.personas?.length) {
           this.personas.set(legalData.personas);
         }
-      }
+      });
 
-      if (gruposRes.status === 'fulfilled') {
-        this.grupos.set(gruposRes.value);
-      }
+      const pGrupos = this.business.catalog('grupos', { ID_GRUPO_PADRE: 'DEUDORES' }, forceRefresh).then(g => {
+        this.grupos.set(g);
+      });
 
-      if (zonasRes.status === 'fulfilled') {
-        this.zonas.set(zonasRes.value);
-      }
+      const pZonas = this.business.catalog('zonas', { TIPO_UBICACION: 'ZONA' }, forceRefresh).then(z => {
+        this.zonas.set(z);
+      });
 
-      if (adcsRes.status === 'fulfilled') {
-        this.adcs.set(adcsRes.value);
-      }
+      const pAdcs = this.business.catalog('adc', { ESTADO: 'ACTIVO' }, forceRefresh).then(a => {
+        this.adcs.set(a);
+      });
 
-      if (statusesRes.status === 'fulfilled') {
-        this.statuses.set(statusesRes.value);
-      }
+      const pStatus = this.business.catalog('status', { STATUS: {} }, forceRefresh).then(s => {
+        this.statuses.set(s);
+      });
 
-      if (rtsRes.status === 'fulfilled') {
-        this.rts.set(rtsRes.value);
-      }
+      const pRt = this.business.catalog('rt', {}, forceRefresh).then(r => {
+        this.rts.set(r);
+      });
 
-      if (condRes.status === 'fulfilled') {
-        this.availableCondiciones.set(condRes.value);
-      }
+      const pCond = this.business.catalog('condiciones', { TIPO: 'VENTAS' }, forceRefresh).then(c => {
+        this.availableCondiciones.set(c);
+      });
 
-      if (perfilesRes.status === 'fulfilled') {
-        const pData = perfilesRes.value;
+      const pPerfiles = this.business.loadPerfilesTributarios(forceRefresh).then(pData => {
         this.perfilesTributarios.set(pData.perfilTributario);
         this.listaTasas.set(pData.listaTasas);
         this.perfilColumns.set(pData.columnas);
-      }
+      });
+
+      await Promise.allSettled([
+        pLegal,
+        pGrupos,
+        pZonas,
+        pAdcs,
+        pStatus,
+        pRt,
+        pCond,
+        pPerfiles
+      ]);
 
       // If a record is currently loaded, re-populate to resolve lookups and selects
       const current = this.currentRecord();
@@ -458,6 +493,13 @@ export class Ven209Component implements OnInit, OnDestroy {
       ID_ADC: '',
       STATUS: '',
       CUPO_CREDITO: 0,
+      CUPO_DISPONIBLE: 0,
+      CUPO_UTILIZADO: 0,
+      ESTADO_CUPO: 'ACTIVO',
+      CUPO_CUOTA: 0,
+      CUPO_DIS_CUOTA: 0,
+      CUPO_UTI_CUOTA: 0,
+      ESTADO_CUOTA: 'ACTIVO',
       TIEMPO_ENTREGA: 0
     }, { emitEvent: false });
     this.direcciones.set([]);
@@ -466,6 +508,9 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.condiciones.set([]);
     this.contactoAdicional.set({ URL: '', CIIU: '' });
     this.perfilTasas.set([]);
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
   }
@@ -477,8 +522,21 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.workspace.setDirty(this.applicationId, false);
   }
 
+  @ViewChild('clienteInput') private clienteInput?: XteinInputComponent;
+  @ViewChild('idLegalSelect') private idLegalSelect?: XteinSelectComponent;
+  @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
+  @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
+
   async saveRecord(): Promise<void> {
     if (this.loading() || this.readOnly()) return;
+    if (this.locations && !this.locations.commitPendingAddresses()) {
+      this.activeMainTab.set('ubicaciones');
+      return;
+    }
+    if (this.financials && !this.financials.commitPending()) {
+      this.activeMainTab.set('financieros');
+      return;
+    }
     const raw = this.form.getRawValue();
     const validationMessage = this.business.validate(raw as unknown as Partial<Ven209ClienteRecord>, this.emails(), this.direcciones());
     if (validationMessage) {
@@ -487,6 +545,27 @@ export class Ven209Component implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.mode() === RecordToolbarMode.Creating) {
+      if (this.idClienteValidationStatus() === 'invalid') {
+        const idCliente = String(this.form.controls.ID_CLIENTE.value ?? '').trim();
+        await Swal.fire({
+          title: 'Cliente ya existe',
+          text: `El cliente con identificación ${idCliente} ya está registrado en el sistema. No se puede usar esta identificación.`,
+          iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
+          confirmButtonColor: '#0F4C81',
+          confirmButtonText: 'Entendido',
+          allowOutsideClick: false
+        });
+        setTimeout(() => this.clienteInput?.focus(), 50);
+        return;
+      }
+      if (this.idClienteValidationStatus() !== 'valid') {
+        const isValidCliente = await this.validateIdCliente();
+        if (!isValidCliente) return;
+      }
+    }
+
+    this.loadingMessage.set('Guardando cliente...');
     this.loading.set(true);
     try {
       const isNew = this.mode() === RecordToolbarMode.Creating;
@@ -504,16 +583,37 @@ export class Ven209Component implements OnInit, OnDestroy {
       );
       this.business.decode(response);
 
+      const cupoCreditoVal = Number(raw.CUPO_CREDITO ?? 0) || 0;
+      const cupoCuotaVal = Number(raw.CUPO_CUOTA ?? 0) || 0;
+      const tiempoEntregaVal = Number(raw.TIEMPO_ENTREGA ?? (raw as Record<string, unknown>)['DIAS_ENTREGA'] ?? 0) || 0;
+
       const savedRecord: Ven209ClienteRecord = {
+        ...this.currentRecord(),
         ...raw,
         ID_CLIENTE: String(raw.ID_CLIENTE ?? ''),
         ID_LEGAL: String(raw.ID_LEGAL ?? ''),
         RT: raw.RT ? (Array.isArray(raw.RT) ? raw.RT : [raw.RT]) : [],
+        CUPO_CREDITO: cupoCreditoVal,
+        CUPO_CUOTA: cupoCuotaVal,
+        CUPO_DISPONIBLE: isNew ? cupoCreditoVal : (this.currentRecord()?.CUPO_DISPONIBLE ?? cupoCreditoVal),
+        CUPO_UTILIZADO: this.currentRecord()?.CUPO_UTILIZADO ?? 0,
+        ESTADO_CUPO: this.currentRecord()?.ESTADO_CUPO ?? 'ACTIVO',
+        CUPO_DIS_CUOTA: isNew ? cupoCuotaVal : (this.currentRecord()?.CUPO_DIS_CUOTA ?? cupoCuotaVal),
+        CUPO_UTI_CUOTA: this.currentRecord()?.CUPO_UTI_CUOTA ?? 0,
+        ESTADO_CUOTA: this.currentRecord()?.ESTADO_CUOTA ?? 'ACTIVO',
+        TIEMPO_ENTREGA: tiempoEntregaVal,
+        DIAS_ENTREGA: tiempoEntregaVal,
         DIRECCIONES: this.direcciones(),
         TELEFONOS: this.telefonos(),
         ITM_EMAIL: this.emails(),
         CONDICIONES: this.condiciones(),
-        ADIC_ACREEDORES: this.contactoAdicional()
+        CONDICIONES_ADIC: {
+          CUPO_CREDITO: cupoCreditoVal,
+          CUPO_CUOTA: cupoCuotaVal,
+          TIEMPO_ENTREGA: tiempoEntregaVal,
+          DIAS_ENTREGA: tiempoEntregaVal
+        },
+        ADIC_CLIENTES: this.contactoAdicional()
       };
 
       const list = [...this.records()];
@@ -552,6 +652,9 @@ export class Ven209Component implements OnInit, OnDestroy {
     });
     if (!confirm.isConfirmed) return;
 
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.mode.set(this.records().length ? RecordToolbarMode.Browsing : RecordToolbarMode.Initial);
     this.disableFormControls();
     const current = this.currentRecord();
@@ -579,6 +682,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     });
     if (!confirm.isConfirmed) return;
 
+    this.loadingMessage.set('Eliminando cliente...');
     this.loading.set(true);
     try {
       const response = await firstValueFrom(this.service.delete({ CLIENTES: { ID_CLIENTE: record.ID_CLIENTE } }));
@@ -602,12 +706,13 @@ export class Ven209Component implements OnInit, OnDestroy {
   refresh(): void {
     if (this.loading() || !this.readOnly()) return;
     const current = this.currentRecord();
-    void this.loadCatalogs().then(() => this.searchRecords(current?.ID_CLIENTE || ''));
+    void this.loadCatalogs(true).then(() => this.searchRecords(current?.ID_CLIENTE || ''));
   }
 
   async searchRecords(filter: string | XteinRecordFilterResult): Promise<void> {
     if (typeof filter !== 'string' && (this.loading() || !this.readOnly())) return;
     this.filterVisible.set(false);
+    this.loadingMessage.set('Buscando clientes...');
     this.loading.set(true);
     try {
       const criteria = typeof filter === 'string'
@@ -637,9 +742,12 @@ export class Ven209Component implements OnInit, OnDestroy {
     if (index < 0 || index >= list.length) return;
     const record = list[index];
     this.currentIndex.set(index);
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.mode.set(RecordToolbarMode.Browsing);
-    this.disableFormControls();
     this.populateForm(record);
+    this.disableFormControls();
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -667,6 +775,95 @@ export class Ven209Component implements OnInit, OnDestroy {
     if (target !== this.currentIndex()) {
       this.selectRecordIndex(target);
     }
+  }
+
+  private extractFinancials(record: Ven209ClienteRecord): {
+    cupoCredito: number;
+    cupoDisponible: number;
+    cupoUtilizado: number;
+    estadoCupo: string;
+    cupoCuota: number;
+    cupoDisCuota: number;
+    cupoUtiCuota: number;
+    estadoCuota: string;
+    tiempoEntrega: number;
+    condiciones: Ven209Condicion[];
+  } {
+    const parseIfString = (val: unknown): unknown => {
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch {
+          return val;
+        }
+      }
+      return val;
+    };
+
+    const condRaw = parseIfString(record.CONDICIONES);
+    let rawCondList: unknown[] = [];
+    if (Array.isArray(condRaw)) {
+      rawCondList = condRaw;
+    } else if (condRaw && typeof condRaw === 'object' && Array.isArray((condRaw as Record<string, unknown>)['CONDICIONES'])) {
+      rawCondList = (condRaw as Record<string, unknown>)['CONDICIONES'] as unknown[];
+    }
+
+    const adicSource = parseIfString(
+      record.CONDICIONES_ADIC ?? (condRaw && typeof condRaw === 'object' ? (condRaw as Record<string, unknown>)['ADICIONALES'] : undefined)
+    );
+    const adicObj: Record<string, unknown> = (
+      Array.isArray(adicSource) && adicSource.length > 0
+        ? ((parseIfString(adicSource[0]) as Record<string, unknown>) || {})
+        : (adicSource && typeof adicSource === 'object' ? (adicSource as Record<string, unknown>) : {})
+    );
+
+    const cupoCredito = Number(adicObj['CUPO_CREDITO'] ?? record.CUPO_CREDITO ?? 0) || 0;
+    const cupoDisponible = Number(record.CUPO_DISPONIBLE ?? 0) || 0;
+    const cupoUtilizado = Number(record.CUPO_UTILIZADO ?? 0) || 0;
+    const estadoCupo = String(record.ESTADO_CUPO ?? 'ACTIVO').trim();
+
+    const cupoCuota = Number(adicObj['CUPO_CUOTA'] ?? record.CUPO_CUOTA ?? 0) || 0;
+    const cupoDisCuota = Number(record.CUPO_DIS_CUOTA ?? 0) || 0;
+    const cupoUtiCuota = Number(record.CUPO_UTI_CUOTA ?? 0) || 0;
+    const estadoCuota = String(record.ESTADO_CUOTA ?? 'ACTIVO').trim();
+
+    const tiempoEntrega = Number(
+      adicObj['TIEMPO_ENTREGA'] ??
+      adicObj['DIAS_ENTREGA'] ??
+      record.TIEMPO_ENTREGA ??
+      record.DIAS_ENTREGA ??
+      (record as Record<string, unknown>)['DIAS_ENTREGA'] ??
+      0
+    ) || 0;
+
+    const matchedCondiciones: Ven209Condicion[] = rawCondList.map((item, index) => {
+      const c = (typeof item === 'object' && item !== null ? item : {}) as Record<string, unknown>;
+      const idCond = String(c['ID_CONDICION'] ?? c['CODIGO'] ?? '').trim();
+      const match = this.availableCondiciones().find(
+        ac => String(ac.ID_CONDICION ?? ac.CODIGO ?? '').trim() === idCond
+      );
+      const nombre = String(c['NOMBRE_CONDICION'] ?? c['DESCRIPCION'] ?? match?.DESCRIPCION ?? match?.NOMBRE ?? '').trim();
+      return {
+        ...c,
+        ITEM: Number(c['ITEM'] ?? index + 1),
+        ID_CONDICION: idCond,
+        NOMBRE_CONDICION: nombre,
+        DESCRIPCION: nombre
+      };
+    });
+
+    return {
+      cupoCredito,
+      cupoDisponible,
+      cupoUtilizado,
+      estadoCupo,
+      cupoCuota,
+      cupoDisCuota,
+      cupoUtiCuota,
+      estadoCuota,
+      tiempoEntrega,
+      condiciones: matchedCondiciones
+    };
   }
 
   private populateForm(record: Ven209ClienteRecord): void {
@@ -743,6 +940,8 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
     this.perfilTasas.set(parsedTasas);
 
+    const financials = this.extractFinancials(record);
+
     this.form.reset({
       ...Ven209DefaultRecord,
       ID_CLIENTE: record.ID_CLIENTE ? String(record.ID_CLIENTE).trim() : '',
@@ -764,21 +963,35 @@ export class Ven209Component implements OnInit, OnDestroy {
       ZONA: record.ZONA ? String(record.ZONA).trim() : '',
       ID_ADC: record.ID_ADC ? String(record.ID_ADC).trim() : '',
       STATUS: record.STATUS ? String(record.STATUS).trim() : '',
-      CUPO_CREDITO: record.CUPO_CREDITO || 0,
-      TIEMPO_ENTREGA: record.TIEMPO_ENTREGA || 0
+      CUPO_CREDITO: financials.cupoCredito,
+      CUPO_DISPONIBLE: financials.cupoDisponible,
+      CUPO_UTILIZADO: financials.cupoUtilizado,
+      ESTADO_CUPO: financials.estadoCupo,
+      CUPO_CUOTA: financials.cupoCuota,
+      CUPO_DIS_CUOTA: financials.cupoDisCuota,
+      CUPO_UTI_CUOTA: financials.cupoUtiCuota,
+      ESTADO_CUOTA: financials.estadoCuota,
+      TIEMPO_ENTREGA: financials.tiempoEntrega
     }, { emitEvent: false });
 
     this.direcciones.set(record.DIRECCIONES ?? []);
     this.telefonos.set(record.TELEFONOS ?? []);
     this.emails.set(record.ITM_EMAIL ?? []);
-    this.condiciones.set(record.CONDICIONES ?? []);
-    this.contactoAdicional.set(record.ADIC_ACREEDORES ?? { URL: '', CIIU: '' });
+    this.condiciones.set(financials.condiciones);
+    this.contactoAdicional.set(record.ADIC_CLIENTES ?? { URL: '', CIIU: '' });
+
+    if (this.readOnly()) {
+      this.disableFormControls();
+    }
   }
 
   private clearForm(): void {
     this.currentIndex.set(-1);
     this.mode.set(RecordToolbarMode.Initial);
     this.form.reset({}, { emitEvent: false });
+    this.lastValidatedIdCliente = null;
+    this.isAlertOpenOrValidating = false;
+    this.idClienteValidationStatus.set(null);
     this.disableFormControls();
     this.direcciones.set([]);
     this.telefonos.set([]);
@@ -798,6 +1011,7 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   onIdLegalChanged(selectedId: number | string): void {
     if (this.readOnly()) return;
+    if (selectedId === '' || selectedId === null || selectedId === undefined) return;
     const match = this.idLegales().find(l => String(l.ID_LEGAL) === String(selectedId));
     if (match) {
       this.form.patchValue({
@@ -812,7 +1026,95 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
   }
 
+  onIdLegalCustomItem(event: any): void {
+    const text = typeof event.text === 'string' ? event.text.trim() : '';
+    if (!text) {
+      event.customItem = null;
+      return;
+    }
+    const syntheticId = isNaN(Number(text)) ? text : Number(text);
+    const newItem: Ven209Lookup = {
+      ID_LEGAL: syntheticId,
+      NOMBRE_COMPLETO: text
+    };
+    event.customItem = newItem;
+    this.form.controls.ID_LEGAL.setValue(syntheticId);
+  }
 
+  refreshIdLegales(): void {
+    void this.loadCatalogs(true);
+  }
+
+  async validateIdCliente(showAlert = true): Promise<boolean> {
+    if (this.readOnly() || this.mode() !== RecordToolbarMode.Creating) {
+      return true;
+    }
+    if (this.isAlertOpenOrValidating) {
+      return false;
+    }
+    const rawValue = this.form.controls.ID_CLIENTE.value;
+    const idCliente = typeof rawValue === 'string' ? rawValue.trim() : '';
+    if (!idCliente) {
+      this.lastValidatedIdCliente = null;
+      this.idClienteValidationStatus.set(null);
+      return false;
+    }
+
+    if (this.lastValidatedIdCliente === idCliente) {
+      return this.idClienteValidationStatus() === 'valid';
+    }
+
+    this.isAlertOpenOrValidating = true;
+    this.idClienteValidationStatus.set('pending');
+    try {
+      const result = await this.business.validarExisteCliente(idCliente, 'new');
+      this.lastValidatedIdCliente = idCliente;
+      if (!result.existe) {
+        this.idClienteValidationStatus.set('valid');
+        return true;
+      } else {
+        this.idClienteValidationStatus.set('invalid');
+        if (showAlert) {
+          await Swal.fire({
+            title: 'Cliente ya existe',
+            text: `El cliente con identificación ${idCliente} ya está registrado en el sistema. No se puede usar esta identificación.`,
+            iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
+            confirmButtonColor: '#0F4C81',
+            confirmButtonText: 'Entendido',
+            allowOutsideClick: false,
+            returnFocus: false
+          });
+          setTimeout(() => {
+            this.clienteInput?.focus();
+          }, 100);
+        }
+        return false;
+      }
+    } catch {
+      this.idClienteValidationStatus.set(null);
+      return true;
+    } finally {
+      this.isAlertOpenOrValidating = false;
+    }
+  }
+
+  onIdClienteBlurred(): void {
+    if (this.isAlertOpenOrValidating) return;
+    const val = String(this.form.controls.ID_CLIENTE.value ?? '').trim();
+    if (val && this.lastValidatedIdCliente === val) {
+      return;
+    }
+    void this.validateIdCliente(true);
+  }
+
+  onIdClienteEnter(): void {
+    if (this.isAlertOpenOrValidating) return;
+    const val = String(this.form.controls.ID_CLIENTE.value ?? '').trim();
+    if (val && this.lastValidatedIdCliente === val && this.idClienteValidationStatus() === 'invalid') {
+      return;
+    }
+    void this.validateIdCliente(true);
+  }
 
   onPerfilTributarioSaved(result: {
     perfilTributario: string;

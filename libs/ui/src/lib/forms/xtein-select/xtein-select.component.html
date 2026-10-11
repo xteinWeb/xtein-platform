@@ -1,8 +1,10 @@
-@if (label) { <xtein-label [for]="id" [required]="required" [disabled]="isDisabled" [invalid]="invalid">{{label}}</xtein-label> }
+@if (label) { <xtein-label [for]="id" [required]="required" [invalid]="invalid">{{label}}</xtein-label> }
 <dx-select-box
   class="w-100"
   stylingMode="filled"
-  [items]="items"
+  [tabIndex]="tabIndex"
+  [dataSource]="dataSource"
+  [itemTemplate]="itemTemplate ? 'customItem' : (columns && columns.length ? 'columnsItem' : 'item')"
   [displayExpr]="displayExpr"
   [valueExpr]="valueExpr"
   [value]="value"
@@ -10,11 +12,37 @@
   [disabled]="isDisabled"
   [readOnly]="readOnly"
   [searchEnabled]="searchEnabled"
+  [searchMode]="searchMode"
+  [searchTimeout]="searchTimeout"
+  [minSearchLength]="minSearchLength"
+  [acceptCustomValue]="acceptCustomValue"
+  [searchExpr]="resolvedSearchExpr"
+  [dropDownOptions]="resolvedDropDownOptions"
   [showClearButton]="showClearButton"
   [noDataText]="noDataText"
   [inputAttr]="inputAttributes"
   (onValueChanged)="handleValueChanged($event)"
+  (onCustomItemCreating)="handleCustomItemCreating($event)"
   (onFocusOut)="handleFocusOut()">
+  @if (itemTemplate) {
+    <div *dxTemplate="let item of 'customItem'">
+      <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </div>
+  }
+  @if (columns && columns.length) {
+    <div *dxTemplate="let item of 'columnsItem'">
+      <div class="xtein-select-columns-item">
+        @for (col of columns; track col; let i = $index) {
+          <span
+            class="xtein-select-col"
+            [class.xtein-select-col--first]="i === 0"
+            [style.width]="getColumnWidth(i)">
+            {{ item?.[col] ?? item }}
+          </span>
+        }
+      </div>
+    </div>
+  }
 </dx-select-box>
 
 @if (invalid && errorMessage) {

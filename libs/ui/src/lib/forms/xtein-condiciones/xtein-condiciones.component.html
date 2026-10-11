@@ -1,0 +1,40 @@
+@if (errors.length) {
+  <div role="alert">No se pudieron cargar: {{ errors.join(', ') }}. <button type="button" (click)="reloadCatalogs()">Reintentar</button></div>
+}
+<xtein-data-grid class="xtein-condiciones__grid" [dataSource]="rows" keyExpr="ITEM" [columns]="columns" height="auto"
+  [searchEnabled]="false" [filterEnabled]="false" [showPager]="false" [pageSize]="100"
+  [selectionMode]="readOnly || draft ? 'none' : 'multiple'" [selectedRowKeys]="selected" showCheckBoxesMode="always"
+  (selectionChanged)="select($event.selectedRowKeys)" [toolbarVisible]="!readOnly" [toolbarActions]="toolbar" [groupTemplate]="cellTemplate" />
+
+<ng-template #cellTemplate let-cell>
+  @if (draft && cell.data.ITEM === draft.ITEM) {
+    @switch (cell.column.dataField) {
+      @case ('ID_CONDICION') {
+        <xtein-lookup [(ngModel)]="draft.ID_CONDICION" (ngModelChange)="onSelectCondition($event)" [items]="conditionsList" [columns]="lookupColumns"
+          valueExpr="ID_CONDICION" displayExpr="ID_CONDICION" placeholder="Condición..." ariaLabel="Condición"
+          [autoFocus]="true" [showClearButton]="true" [dropDownWidth]="500" />
+      }
+      @case ('NOMBRE_CONDICION') {
+        {{ draft.NOMBRE_CONDICION || draft.DESCRIPCION }}
+      }
+      @case ('DESCRIPCION') {
+        {{ draft.DESCRIPCION || draft.NOMBRE_CONDICION }}
+      }
+      @case ('PLAZO') {
+        <xtein-input type="number" [(ngModel)]="draft.PLAZO" (ngModelChange)="pendingChange.emit()" ariaLabel="Plazo" placeholder="Plazo" />
+      }
+      @case ('DIAS_ENTREGA') {
+        <xtein-input type="number" [(ngModel)]="draft.DIAS_ENTREGA" (ngModelChange)="pendingChange.emit()" ariaLabel="Días entrega" placeholder="Días entrega" />
+      }
+      @default {
+        {{ cell.value }}
+      }
+    }
+  } @else {
+    @if (!readOnly && cell.column.dataField === 'ID_CONDICION') {
+      <button type="button" class="xtein-condiciones__code-btn" [disabled]="!!draft" (click)="edit(cell.data)" [attr.aria-label]="'Editar condición ' + cell.value">{{cell.value || '(Editar)'}}</button>
+    } @else {
+      {{ display(cell.data, cell.column.dataField) }}
+    }
+  }
+</ng-template>
