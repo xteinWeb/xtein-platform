@@ -10,6 +10,8 @@ export const Mad001RecordViewColumns: XteinRecordViewColumn[] = [
   { dataField: 'ID_APLICACION', caption: 'Aplicación' },
   { dataField: 'NOMBRE', caption: 'Nombre' },
   { dataField: 'TIPO', caption: 'Tipo' },
+  { dataField: 'TIPO_SISTEMA', caption: 'Sistema' },
+  { dataField: 'MICROFRONTEND_ID', caption: 'MFE' },
   { dataField: 'ESTADO', caption: 'Estado' }
 ];
 
@@ -51,7 +53,37 @@ export const Mad001DefaultRecord:
       null,
 
     NIVEL:
-      null
+      null,
+
+    DIRECTORIO:
+      null,
+
+    PROGRAMA:
+      null,
+
+    FECHA_VIGENCIA:
+      null,
+
+    PARAMETROS:
+      null,
+
+    TABLA_APLICACION:
+      null,
+
+    GENERA:
+      false,
+
+    IMAGEN_URL:
+      null,
+
+    TIPO_SISTEMA:
+      'WEB',
+
+    MICROFRONTEND_ID:
+      null,
+
+    DEFECTO:
+      false
   };
 
 

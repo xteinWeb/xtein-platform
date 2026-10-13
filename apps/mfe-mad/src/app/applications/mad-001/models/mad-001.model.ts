@@ -39,6 +39,36 @@ export interface Mad001ApplicationRecord {
   NIVEL:
     string | null;
 
+  DIRECTORIO?:
+    string | null;
+
+  PROGRAMA?:
+    string | null;
+
+  FECHA_VIGENCIA?:
+    string | null;
+
+  PARAMETROS?:
+    string | null;
+
+  TABLA_APLICACION?:
+    string | null;
+
+  GENERA?:
+    boolean | null;
+
+  IMAGEN_URL?:
+    string | null;
+
+  TIPO_SISTEMA?:
+    string | null;
+
+  MICROFRONTEND_ID?:
+    string | null;
+
+  DEFECTO?:
+    boolean | null;
+
   ErrMensaje?:
     string;
 

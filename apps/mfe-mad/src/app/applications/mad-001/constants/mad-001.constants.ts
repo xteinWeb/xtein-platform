@@ -10,7 +10,7 @@ export const Mad001Application = {
     'MAD001',
 
   Table:
-    'APLICACIONES_ASOCIADAS'
+    'APLICACIONES'
 
 } as const;
 
