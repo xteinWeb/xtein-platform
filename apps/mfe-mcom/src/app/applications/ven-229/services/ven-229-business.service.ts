@@ -44,9 +44,21 @@ export class Ven229BusinessService {
     return rows as T[];
   }
 
-  async catalog(name: keyof typeof Ven229Catalog, data: unknown = {}): Promise<Ven229Lookup[]> {
+  private static readonly catalogCache = new Map<string, Ven229Lookup[]>();
+
+  clearCache(): void {
+    Ven229BusinessService.catalogCache.clear();
+  }
+
+  async catalog(name: keyof typeof Ven229Catalog, data: unknown = {}, forceRefresh = false): Promise<Ven229Lookup[]> {
+    const cacheKey = `${String(name)}_${JSON.stringify(data ?? {})}`;
+    if (!forceRefresh && Ven229BusinessService.catalogCache.has(cacheKey)) {
+      return Ven229BusinessService.catalogCache.get(cacheKey)!;
+    }
     const [endpoint, action] = Ven229Catalog[name];
-    return this.decode<Ven229Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    const decoded = this.decode<Ven229Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    Ven229BusinessService.catalogCache.set(cacheKey, decoded);
+    return decoded;
   }
 
   async action<T>(name: keyof typeof Ven229BusinessAction, data: unknown): Promise<T[]> {

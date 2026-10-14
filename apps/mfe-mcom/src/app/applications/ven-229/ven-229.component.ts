@@ -46,8 +46,7 @@ import {
   XteinRecordViewComponent,
   XteinRecordFilterComponent,
   XteinRecordReportsComponent,
-  XteinRecordSettingsComponent,
-  XteinApplicationSetting,
+  XteinPopupComponent,
   XteinReportEmailContext,
   XteinLoadingComponent,
   XteinNotificationService,
@@ -81,12 +80,15 @@ import {
 
 import {
   Ven229Header,
-  Ven229Lookup
+  Ven229Lookup,
+  Ven229SettingResult
 } from './models/ven-229-business.model';
 
 import { Ven229Service } from './services/ven-229.service';
 import { Ven229BusinessService } from './services/ven-229-business.service';
+import { Ven229SelectionService } from './services/ven-229-selection.service';
 import { XteinVen229ItemsComponent } from './components/xtein-ven229-items/xtein-ven229-items.component';
+import { XteinVen229SelectionComponent } from './components/xtein-ven229-selection/xtein-ven229-selection.component';
 
 @Component({
   selector: 'xtein-ven-229',
@@ -99,18 +101,21 @@ import { XteinVen229ItemsComponent } from './components/xtein-ven229-items/xtein
     XteinSelectComponent,
     XteinNumberComponent,
     XteinDateComponent,
+    XteinButtonComponent,
     XteinLookupComponent,
     XteinRecordViewComponent,
     XteinRecordFilterComponent,
     XteinRecordReportsComponent,
-    XteinRecordSettingsComponent,
+    XteinPopupComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinVen229ItemsComponent
+    XteinVen229ItemsComponent,
+    XteinVen229SelectionComponent
   ],
   providers: [
     Ven229Service,
-    Ven229BusinessService
+    Ven229BusinessService,
+    Ven229SelectionService
   ],
   templateUrl: './ven-229.component.html',
   styleUrls: ['./ven-229.component.scss'],
@@ -157,12 +162,29 @@ export class Ven229Component implements OnInit, OnDestroy {
   readonly products = signal<Ven229Lookup[]>([]);
   readonly productsLoading = signal<boolean>(false);
   readonly onlyStock = signal<boolean>(false);
+  defaultUnit = '';
+  defaultCurrency = '';
 
-  // Overlays
+  // Overlays & Settings
+  readonly specifications = signal<Ven229Lookup[]>([]);
+  readonly settings = signal<Ven229Lookup[]>([]);
   readonly filterVisible = signal<boolean>(false);
   readonly viewVisible = signal<boolean>(false);
   readonly reportsVisible = signal<boolean>(false);
   readonly settingsVisible = signal<boolean>(false);
+  readonly selectionVisible = signal<boolean>(false);
+  readonly selection = signal<Ven229SettingResult | null>(null);
+  selectedSettingsRows: Ven229Lookup[] = [];
+  selectedSettingsKeys: unknown[] = [];
+
+  spec(name: string): Ven229Lookup | undefined {
+    return this.specifications().find(s => s.NOMBRE_OBJETO === name);
+  }
+
+  enabledSpec(name: string): boolean {
+    const value = this.spec(name)?.ACTIVADO;
+    return value === true || value === 1;
+  }
 
   // Computed state
   readonly readOnly = computed(() => {
@@ -190,6 +212,12 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   readonly stateStyle = computed(() => {
     const estado = this.form.controls.ESTADO.value || 'REGISTRADO';
+    try {
+      const styles = JSON.parse(this.spec('ESTILOS ESTADO')?.VALOR_DEFECTO || '[]');
+      const match = styles.find((s: Record<string, string>) => s['ESTADO'] === estado);
+      if (match) return { background: match['BG'], color: match['COLOR'], border: `1px solid ${match['BORDER']}` };
+    } catch {}
+
     switch (estado) {
       case 'ANULADO':
         return { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' };
@@ -277,6 +305,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     PLAZO: new FormControl<number>(0),
     FECHA_PRIMER_VENC: new FormControl<string | null>(this.todayDate(), [Validators.required]),
     CUOTA_INICIAL: new FormControl<number>(0),
+    VALOR_CUOTA: new FormControl<number>(0),
     ID_UN_BODEGA: new FormControl<string>(''),
     SUB_TOTAL: new FormControl<number>(0),
     VALOR_DESCUENTO: new FormControl<number>(0),
@@ -308,6 +337,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         this.viewVisible.set(false);
         this.reportsVisible.set(false);
         this.settingsVisible.set(false);
+        this.selectionVisible.set(false);
       }
     });
   }
@@ -430,7 +460,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     if (this.busy()) return;
     switch (command.action) {
       case ToolbarAction.New:
-        this.newRecord();
+        await this.newRecord();
         break;
       case ToolbarAction.Edit:
         this.editRecord();
@@ -469,7 +499,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         this.reportsVisible.set(true);
         break;
       case ToolbarAction.Configure:
-        this.settingsVisible.set(true);
+        void this.showSettings();
         break;
       case ToolbarAction.GoTo:
         if (typeof command.payload === 'number' && Number.isInteger(command.payload)) {
@@ -485,7 +515,20 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   private indexBeforeNew = -1;
 
-  newRecord(): void {
+  selectDocument(value: string): void {
+    const row = this.documents().find(d => d.DOCUMENTO === value);
+    if (!row) return;
+    this.form.patchValue({
+      DOCUMENTO: value,
+      ID_DOCUMENTO: String(row.ID_DOCUMENTO || ''),
+      CONSECUTIVO: Number(row.CONSECUTIVO || 0),
+      PREFIJO: String(row.PREFIJO || ''),
+      SUFIJO: String(row.SUFIJO || ''),
+      DOCUMENTO_FAC: value
+    }, { emitEvent: false });
+  }
+
+  async newRecord(): Promise<void> {
     if (this.busy() || !this.readOnly() || !this.permissions().create) return;
     this.indexBeforeNew = this.currentIndex();
     this.mode.set(RecordToolbarMode.Editing);
@@ -496,13 +539,31 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.taxItems.set([]);
     this.payments.set([]);
 
+    // Query fresh document consecutive from backend on new record
+    try {
+      const docs = await this.business.catalog('documents', this.business.identity, true);
+      this.documents.set(docs);
+    } catch (e) {
+      console.warn('Error refreshing documents on new record:', e);
+    }
+
     this.form.reset({
       ...Ven229DefaultRecord,
       FECHA: this.todayDate(),
       FECHA_REGISTRO: this.todayDate(),
       FECHA_PRIMER_VENC: this.todayDate(),
-      USUARIO: this.business.identity.USUARIO
+      USUARIO: this.business.identity.USUARIO,
+      ID_UN_ITEM: this.defaultUnit,
+      ID_MONEDA: this.defaultCurrency
     });
+
+    if (this.documents().length === 1) {
+      this.selectDocument(String(this.documents()[0].DOCUMENTO));
+    }
+
+    if (this.defaultUnit) {
+      void this.onUnitChanged(this.defaultUnit);
+    }
 
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
@@ -677,6 +738,17 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
 
+    if (record.DOCUMENTO && !this.documents().some(d => d.DOCUMENTO === record.DOCUMENTO)) {
+      this.documents.update(docs => [
+        ...docs,
+        {
+          DOCUMENTO: record.DOCUMENTO_FAC || record.DOCUMENTO,
+          ID_DOCUMENTO: record.ID_DOCUMENTO,
+          CONSECUTIVO: record.CONSECUTIVO
+        }
+      ]);
+    }
+
     this.form.reset({
       ...Ven229DefaultRecord,
       ...record,
@@ -750,36 +822,55 @@ export class Ven229Component implements OnInit, OnDestroy {
     } else {
       list.push(row);
     }
+    list.sort((a, b) => a.ITEM - b.ITEM);
+    return this.applyItems(list);
+  }
 
-    try {
-      await this.applyItems(list);
-      return true;
-    } catch (error) {
-      this.notification.error(error instanceof Error ? error.message : 'Error al aplicar el ítem.');
-      return false;
+  async removeItem(item: number | number[]): Promise<void> {
+    if (this.readOnly() || this.busy()) return;
+    const answer = await Swal.fire({
+      text: '¿Desea eliminar el producto seleccionado?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    if (answer.isConfirmed) {
+      const toRemove = Array.isArray(item) ? item : [item];
+      await this.applyItems(this.items().filter(r => !toRemove.includes(r.ITEM)));
     }
   }
 
-  async removeItem(itemNum: number): Promise<void> {
-    const updated = this.items().filter(i => i.ITEM !== itemNum);
-    await this.applyItems(updated);
-  }
-
   async removeItems(itemNums: number[]): Promise<void> {
-    const updated = this.items().filter(i => !itemNums.includes(i.ITEM));
-    await this.applyItems(updated);
+    await this.removeItem(itemNums);
   }
 
-  async applyItems(updatedItems: Ven229PedidoItem[], option?: string): Promise<void> {
+  async applyItems(updatedItems: Ven229PedidoItem[], option = 'items'): Promise<boolean> {
+    if (this.readOnly() || this.busy()) return false;
     this.busy.set(true);
     try {
-      const taxResults = await this.business.taxes(this.header(), updatedItems, option);
+      const taxResults = await this.business.taxes(this.header(), updatedItems.map(row => ({ ...row, APLICACION: 2 })), option);
       const tax = taxResults[0];
-      this.items.set(updatedItems);
-      this.taxes.set(tax?.ENCAB ?? []);
-      this.taxItems.set(tax?.ITEMS ?? []);
+      if (!tax) throw new Error('El servidor no devolvió la liquidación de gravámenes.');
+      this.taxes.set(tax.ENCAB ?? []);
+      this.taxItems.set(tax.ITEMS ?? []);
+      this.items.set(updatedItems.map(row => {
+        const value = tax.ITEMS?.find(i => i.ITEM === row.ITEM);
+        return value ? {
+          ...row,
+          VALOR_IVA: value.VALOR_IVA,
+          SUB_TOTAL: value.SUB_TOTAL,
+          TOTAL: value.TOTAL,
+          GRAVAMENES: value.GRAV_TOTAL != null ? String(value.GRAV_TOTAL) : row.GRAVAMENES,
+          GRAV_TOTAL: value.GRAV_TOTAL
+        } : row;
+      }));
       this.recalculate();
-      if (!this.readOnly()) this.workspace.setDirty(this.applicationId, true);
+      this.workspace.setDirty(this.applicationId, true);
+      return true;
+    } catch (error) {
+      this.showError(error);
+      return false;
     } finally {
       this.busy.set(false);
     }
@@ -790,11 +881,14 @@ export class Ven229Component implements OnInit, OnDestroy {
     const totalTaxes = this.taxes().reduce((sum, tax) => sum + Number(tax.VALOR || 0), 0);
     const discounts = this.items().reduce((sum, item) => sum + Number(item.VALOR_DESCUENTO || 0), 0);
     const total = subtotal - discounts + totalTaxes;
+    const h = this.form.getRawValue();
+    const cuota = Number(h.PLAZO) > 0 ? (total - Number(h.CUOTA_INICIAL || 0)) / Number(h.PLAZO) : 0;
 
     this.form.patchValue({
       SUB_TOTAL: subtotal,
       VALOR_DESCUENTO: discounts,
-      TOTAL: total
+      TOTAL: total,
+      VALOR_CUOTA: cuota
     }, { emitEvent: false });
   }
 
@@ -821,11 +915,32 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   async onUnitChanged(unitId: string): Promise<void> {
     try {
-      const warehouses = await this.business.catalog('warehouses', { ID_UN: unitId });
-      this.warehouses.set(warehouses);
-      if (warehouses.length > 0) {
-        this.form.patchValue({ ID_UN_BODEGA: String(warehouses[0]['ID_UN_BODEGA'] || '') }, { emitEvent: false });
+      const warehouses = await this.business.catalog('warehouses', {
+        ESTADO: 'ACTIVO',
+        MOVIMIENTO: 'PEDIDO',
+        ID_UN_ITEM: unitId,
+        USUARIO: this.business.identity.USUARIO
+      });
+      const formatted = warehouses.map(r => ({
+        ...r,
+        ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? ''),
+        DESCRIPCION: String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),
+        NOMBRE_UN: String(r['NOMBRE_UN'] ?? ''),
+        BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))
+      }));
+      this.warehouses.set(formatted);
+      if (formatted.length > 0 && !this.form.controls.ID_UN_BODEGA.value) {
+        this.form.patchValue({ ID_UN_BODEGA: formatted[0].ID_UN_BODEGA }, { emitEvent: false });
       }
+    } catch {
+      // Non-critical
+    }
+  }
+
+  async refreshClients(): Promise<void> {
+    try {
+      const clients = await this.business.catalog('clients', { ESTADO: 'ACTIVO' }, true);
+      this.clients.set(clients);
     } catch {
       // Non-critical
     }
@@ -848,7 +963,10 @@ export class Ven229Component implements OnInit, OnDestroy {
     }
   }
 
-  async loadProducts(): Promise<void> {
+  async loadProducts(stockOnly?: boolean): Promise<void> {
+    if (stockOnly !== undefined) {
+      this.onlyStock.set(stockOnly);
+    }
     this.productsLoading.set(true);
     try {
       const items = await this.business.catalog('products', {
@@ -866,25 +984,68 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   private async loadCatalogs(): Promise<void> {
     try {
-      const [docs, clients, sellers, units, currencies, conditions, defaultUnit] = await Promise.all([
-        this.business.catalog('documents', { TIPO: 'PEDIDOS' }),
-        this.business.catalog('clients', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('units', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('conditions', { ESTADO: 'ACTIVO' }),
-        this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO })
-      ]);
+      const identity = this.business.identity;
 
-      this.documents.set(docs);
-      this.clients.set(clients);
-      this.sellers.set(sellers);
-      this.units.set(units);
-      this.currencies.set(currencies);
-      this.conditions.set(conditions);
+      // 1. Documents
+      try {
+        const docs = await this.business.catalog('documents', identity, true);
+        this.documents.set(docs);
+        if (docs.length === 1 && !this.form.controls.DOCUMENTO.value) {
+          this.selectDocument(String(docs[0].DOCUMENTO));
+        }
+      } catch (e) {
+        console.warn('Error loading documents:', e);
+      }
 
-      if (defaultUnit.length > 0 && !this.form.controls.ID_UN_ITEM.value) {
-        this.form.patchValue({ ID_UN_ITEM: String(defaultUnit[0].ID_UN || '') }, { emitEvent: false });
+      // 2. Default unit, currency and specifications
+      try {
+        const [defaultUnit, defaultCurrency, specs] = await Promise.all([
+          this.business.catalog('defaultUnit', { USUARIO: identity.USUARIO }),
+          this.business.catalog('specifications', { ID_ESPECIFICACION: 'OBJETOS', ID_APLICACION: 'GENERAL', NOMBRE_OBJETO: 'DEF_MONEDA' }),
+          this.business.catalog('specifications', { ...identity, ID_APLICACION_BASE: '' })
+        ]);
+        if (defaultUnit.length > 0) {
+          this.defaultUnit = String(defaultUnit[0].ID_UN || '');
+          if (!this.form.controls.ID_UN_ITEM.value && this.defaultUnit) {
+            this.form.patchValue({ ID_UN_ITEM: this.defaultUnit }, { emitEvent: false });
+            void this.onUnitChanged(this.defaultUnit);
+          }
+        }
+        if (defaultCurrency.length > 0) {
+          this.defaultCurrency = String(defaultCurrency[0].VALOR_DEFECTO || '');
+          if (!this.form.controls.ID_MONEDA.value && this.defaultCurrency) {
+            this.form.patchValue({ ID_MONEDA: this.defaultCurrency }, { emitEvent: false });
+          }
+        }
+        this.specifications.set(specs);
+      } catch (e) {
+        console.warn('Error loading defaults & specs:', e);
+      }
+
+      // 3. General catalogs: clients, sellers, units, currencies, saleTypes
+      try {
+        const [clients, sellers, units, currencies, saleTypes] = await Promise.all([
+          this.business.catalog('clients', { ESTADO: 'ACTIVO' }),
+          this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
+          this.business.catalog('units', { ESTADO: 'ACTIVO', ...identity }),
+          this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
+          this.business.catalog('saleTypes', { ID_DOMINIO: 'FACTURA', ID_GRUPO_DOMINIO: 'TIPO VENTA' })
+        ]);
+
+        this.clients.set(clients);
+        this.sellers.set(sellers.map(r => ({
+          ...r,
+          ID_ADC: String(r.ID_ADC ?? ''),
+          NOMBRE_COMPLETO: String(r.NOMBRE_COMPLETO ?? ''),
+          NUM_NOMBRE: String(r['NUM_NOMBRE'] ?? `${r.ID_ADC} - ${r.NOMBRE_COMPLETO ?? ''}`)
+        })));
+        this.units.set(units);
+        this.currencies.set(currencies);
+        if (saleTypes && saleTypes.length > 0) {
+          this.saleTypes.set(saleTypes.map(st => String(st['VALOR2'] || st['ID_ITM_DOMINIO'] || st['TIPO_VENTA'] || '')));
+        }
+      } catch (e) {
+        console.warn('Error loading general catalogs:', e);
       }
     } catch {
       // Non-critical fallback
@@ -905,7 +1066,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   // ================= Helpers =================
 
   money(val: number | string | null | undefined): string {
-    return formatNumber(Number(val || 0), '#,##0.00');
+    return formatNumber(Number(val || 0), this.spec('FORMATO MONEDA')?.FORMATO || '#,##0.00');
   }
 
   private todayDate(): string {
@@ -949,8 +1110,103 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.payments.set([]);
   }
 
-  onSettingSelected(setting: XteinApplicationSetting): void {
-    const optionName = setting.VALOR || setting.text || '';
-    this.notification.info(`Opción seleccionada: ${optionName}`);
+  private showError(err: unknown): void {
+    const msg = err instanceof Error ? err.message : 'Ocurrió un error en la operación.';
+    this.notification.error(msg);
+  }
+
+  async showSettings(): Promise<void> {
+    if (this.busy() || this.itemPending() || !this.permissions().configure) return;
+    this.busy.set(true);
+    try {
+      this.settings.set(await this.business.catalog('settings', {
+        APLICACION: this.applicationId,
+        USUARIO: this.business.identity.USUARIO.toUpperCase()
+      }));
+      this.settingsVisible.set(true);
+    } catch (error) {
+      this.showError(error);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  async executeSetting(option: Ven229Lookup): Promise<void> {
+    if (this.busy()) return;
+    try {
+      const config = option.CONFIG ? JSON.parse(option.CONFIG) : { MODO: 'edicion' };
+      if (this.readOnly() && config.MODO !== 'consulta') {
+        this.notification.warning('Esta operación no está permitida en modo consulta.');
+        return;
+      }
+      this.busy.set(true);
+      const result = (await this.business.action<Ven229SettingResult>('settings', {
+        ACCION: option.VALOR,
+        ...this.business.identity,
+        PEDIDO: this.header(),
+        ITM_PEDIDO: this.items(),
+        PEDIDO_PAGOS: this.payments()
+      }))[0];
+      if (!result) return;
+      this.settingsVisible.set(false);
+      if (result.tipoAccion === 'popup') {
+        this.selection.set(result);
+        this.selectedSettingsRows = (result.dataSource ?? []).filter(row =>
+          this.payments().some(p => p.ITEM === row['ITEM'])
+        );
+        this.selectedSettingsKeys = this.selectedSettingsRows.map(row => row['ITEM']);
+        this.selectionVisible.set(true);
+      }
+    } catch (error) {
+      this.showError(error);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  async applySelection(rows: Ven229Lookup[]): Promise<void> {
+    this.selectedSettingsRows = rows;
+    if (this.readOnly() || this.busy()) return;
+    const selected = this.selection();
+    if (!selected) return;
+
+    if (selected.titulo === 'Anticipos a aplicar') {
+      const payments = this.selectedSettingsRows as unknown as Ven229PedidoPago[];
+      if (payments.reduce((sum, p) => sum + Number(p.VALOR || 0), 0) > Number(this.form.controls.TOTAL.value)) {
+        this.notification.warning('El valor de los anticipos no puede superar el total del pedido.');
+        return;
+      }
+      this.payments.set(structuredClone(payments));
+      this.recalculate();
+      this.workspace.setDirty(this.applicationId, true);
+      this.selectionVisible.set(false);
+      return;
+    }
+
+    if (selected.titulo?.toLowerCase().includes('cargar') || selected.titulo === 'Cargar Cotización' || selected.titulo === 'Cargar Pedido') {
+      this.busy.set(true);
+      try {
+        const result = (await this.business.action<Ven229SettingResult>('load', {
+          ACCION: selected.titulo,
+          ...this.business.identity,
+          PEDIDO: this.header(),
+          ITM_PEDIDO: this.items(),
+          PEDIDO_PAGOS: this.payments(),
+          DATOS: this.selectedSettingsRows
+        }))[0];
+        if (!result) throw new Error('No se recibieron datos del pedido.');
+        this.items.set(result.ITM_Pedido ?? (result['ITM_PEDIDO'] as Ven229PedidoItem[]) ?? []);
+        this.taxes.set(result.DATA_GRAV?.[0]?.ENCAB ?? []);
+        this.taxItems.set(result.DATA_GRAV?.[0]?.ITEMS ?? []);
+        this.recalculate();
+        if (this.items().length > 0) this.disableFormControls();
+        this.workspace.setDirty(this.applicationId, true);
+        this.selectionVisible.set(false);
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.busy.set(false);
+      }
+    }
   }
 }

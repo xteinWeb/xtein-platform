@@ -1,0 +1,24 @@
+<xtein-popup [visible]="visible" (visibleChange)="visibleChange.emit($event)" [title]="config?.titulo || 'Seleccionar'"
+  [width]="size('width')" [height]="size('height')" [showCloseButton]="!busy && !saving" [hideOnOutsideClick]="false">
+  <div class="selection">
+    @if (error) { <p role="alert">{{error}}</p> }
+    <xtein-checkbox label="Solo seleccionados" [checked]="onlySelected" [disabled]="busy || saving" (checkedChange)="filterSelected($event)" />
+    <div class="selection__grid">
+      <xtein-data-grid [dataSource]="rows" keyExpr="ITEM" [columns]="columns" height="100%"
+        [selectedRowKeys]="keys" [selectionMode]="config?.modoSeleccion === 'single' ? 'single' : 'multiple'" [allowUpdating]="true" [groupTemplate]="groupTemplate" (selectionChanged)="selectionChanged($event)" (editingStart)="editingStart($event)" [disabled]="busy || !!error">
+      </xtein-data-grid>
+    </div>
+    <footer>
+      <xtein-button text="Aplicar" [disabled]="busy || saving || !!error" (clicked)="apply()" />
+      <xtein-button text="Cancelar" variant="secondary" [disabled]="busy || saving" (clicked)="visibleChange.emit(false)" />
+    </footer>
+  </div>
+</xtein-popup>
+
+<ng-template #groupTemplate let-cell>
+ @if (config?.modoSeleccion === 'multiple-grupo') {
+   <xtein-checkbox ariaLabel="Seleccionar grupo" [checked]="groupSelected(cell.row.key)" [indeterminate]="groupPartial(cell.row.key)"
+     [disabled]="busy || saving" (click)="$event.stopPropagation()" (checkedChange)="toggleGroup(cell.row.key, $event)" />
+ }
+ {{groupLabel(cell.row.key, cell.column.dataField)}}
+</ng-template>
