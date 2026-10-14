@@ -22,8 +22,14 @@ import {
 import {
   PlatformToolbarGroup,
   PlatformToolbarItem,
-  PlatformToolbarItems
+  PlatformToolbarItems,
+  PlatformToolbarTooltipInfo,
+  PlatformToolbarTooltips
 } from './platform-toolbar.constants';
+
+import {
+  DxTooltipModule
+} from 'devextreme-angular';
 
 
 interface RenderedPlatformToolbarItem
@@ -55,7 +61,7 @@ interface PlatformToolbarModeIndicator {
     true,
 
   imports:
-    [],
+    [DxTooltipModule],
 
   templateUrl:
     './platform-toolbar.component.html',
@@ -87,6 +93,27 @@ export class PlatformToolbar
     signal(
       false
     );
+
+  readonly activeTooltip = signal<PlatformToolbarTooltipInfo | null>(null);
+  tooltipTarget?: HTMLElement;
+  tooltipVisible = false;
+
+  readonly currentModeKey = computed<string>(() => {
+    return this.toolbarRuntime.activeToolbarState()?.record?.mode ?? '';
+  });
+
+  showTooltip(target: HTMLElement | EventTarget | null, key: string): void {
+    if (!target) return;
+    const info = PlatformToolbarTooltips[key];
+    if (!info) return;
+    this.activeTooltip.set(info);
+    this.tooltipTarget = target as HTMLElement;
+    this.tooltipVisible = true;
+  }
+
+  hideTooltip(): void {
+    this.tooltipVisible = false;
+  }
 
 
   private resizeObserver?:
@@ -416,6 +443,8 @@ export class PlatformToolbar
     action:
       ToolbarAction
   ): void {
+
+    this.hideTooltip();
 
     this.overflowMenuOpen.set(
       false

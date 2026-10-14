@@ -12,3 +12,87 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/* ============================================================
+   XTEIN PLATFORM TOOLBAR LEGACY TOOLTIP
+   ============================================================ */
+
+.xt-legacy-tooltip-wrapper {
+  pointer-events: none !important;
+
+  .dx-overlay-content {
+    background-color: #383838 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+    border: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    font-family: inherit !important;
+    text-align: center !important;
+  }
+
+  .dx-popup-content {
+    padding: 5px 14px !important;
+    text-align: center !important;
+    line-height: normal !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .dx-popover-arrow {
+    display: none !important;
+  }
+
+  .xt-legacy-tooltip {
+    display: block !important;
+    text-align: center !important;
+    width: max-content !important;
+    max-width: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+
+    &__title {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: #ffffff !important;
+      line-height: 1.3 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    &__divider {
+      display: block !important;
+      width: 100% !important;
+      margin: 3px 0 4px 0 !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+      height: 0 !important;
+    }
+
+    &__info {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      font-size: 13px !important;
+      font-weight: 400 !important;
+      color: #ffffff !important;
+      line-height: 1.3 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  }
+}

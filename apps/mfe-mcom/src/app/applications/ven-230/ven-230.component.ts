@@ -809,8 +809,17 @@ export class Ven230Component
   }
 
   @ViewChild(XteinVen230ItemsComponent) private itemEditor?: XteinVen230ItemsComponent;
-  readonly documents=signal<Ven230Lookup[]>([]);
-  readonly clients=signal<Ven230Lookup[]>([]);
+  readonly documents = signal<Ven230Lookup[]>([]);
+  readonly clients = signal<Ven230Lookup[]>([]);
+
+  async refreshClients(): Promise<void> {
+    try {
+      const clients = await this.business.catalog('clients', { ESTADO: 'ACTIVO' });
+      this.clients.set(clients);
+    } catch (e) {
+      console.warn('Error refreshing clients in VEN-230:', e);
+    }
+  }
   readonly sellers=signal<Ven230Lookup[]>([]);
   readonly addresses=signal<Ven230Lookup[]>([]);
   readonly conditions=signal<Ven230Lookup[]>([]);

@@ -174,8 +174,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     return current === RecordToolbarMode.Initial || current === RecordToolbarMode.Browsing;
   });
 
-  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing);
-  readonly isNew = computed(() => this.currentIndex() === -1 && this.isEditing());
+  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing || this.mode() === RecordToolbarMode.Creating);
+  readonly isNew = computed(() => this.mode() === RecordToolbarMode.Creating);
 
   readonly currentRecord = computed(() => {
     const idx = this.currentIndex();
@@ -214,7 +214,7 @@ export class Ven212Component implements OnInit, OnDestroy {
 
   readonly itemRecordKey = computed(() => {
     const h = this.header();
-    return this.mode() === RecordToolbarMode.Editing && this.currentIndex() === -1
+    return this.isNew()
       ? 'new'
       : `${h.ID_DOCUMENTO || ''}_${h.CONSECUTIVO || 0}`;
   });
@@ -497,7 +497,7 @@ export class Ven212Component implements OnInit, OnDestroy {
   newRecord(): void {
     if (this.busy() || !this.readOnly() || !this.permissions().create) return;
     this.indexBeforeNew = this.currentIndex();
-    this.mode.set(RecordToolbarMode.Editing);
+    this.mode.set(RecordToolbarMode.Creating);
     this.currentIndex.set(-1);
 
     this.items.set([]);

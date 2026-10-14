@@ -192,8 +192,8 @@ export class Ven229Component implements OnInit, OnDestroy {
     return current === RecordToolbarMode.Initial || current === RecordToolbarMode.Browsing;
   });
 
-  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing);
-  readonly isNew = computed(() => this.currentIndex() === -1 && this.isEditing());
+  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing || this.mode() === RecordToolbarMode.Creating);
+  readonly isNew = computed(() => this.mode() === RecordToolbarMode.Creating);
 
   readonly currentRecord = computed(() => {
     const idx = this.currentIndex();
@@ -210,25 +210,20 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.records()[0]?.QFILTRO || this.records().map(r => `(ID_DOCUMENTO='${r.ID_DOCUMENTO}' AND CONSECUTIVO=${r.CONSECUTIVO})`).join(' OR ')
   );
 
-  readonly stateStyle = computed(() => {
-    const estado = this.form.controls.ESTADO.value || 'REGISTRADO';
+  readonly stateStyle = computed<Record<string, string>>(() => {
     try {
       const styles = JSON.parse(this.spec('ESTILOS ESTADO')?.VALOR_DEFECTO || '[]');
-      const match = styles.find((s: Record<string, string>) => s['ESTADO'] === estado);
-      if (match) return { background: match['BG'], color: match['COLOR'], border: `1px solid ${match['BORDER']}` };
+      const match = styles.find((s: Record<string, string>) => s['ESTADO'] === this.form.controls.ESTADO.value);
+      if (match) {
+        const color = match['color'] || match['COLOR'];
+        const background = match['background'] || match['BG'];
+        const res: Record<string, string> = {};
+        if (color) res['color'] = color;
+        if (background) res['background'] = background;
+        return res;
+      }
     } catch {}
-
-    switch (estado) {
-      case 'ANULADO':
-        return { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' };
-      case 'COMPLETADO':
-        return { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' };
-      case 'EN PROCESO':
-      case 'PROGRAMADO':
-        return { background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' };
-      default:
-        return { background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1' };
-    }
+    return {};
   });
 
   readonly itemsReady = computed(() => {
@@ -238,7 +233,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   readonly itemRecordKey = computed(() => {
     const h = this.header();
-    return this.mode() === RecordToolbarMode.Editing && this.currentIndex() === -1
+    return this.isNew()
       ? 'new'
       : `${h.ID_DOCUMENTO || ''}_${h.CONSECUTIVO || 0}`;
   });
@@ -531,7 +526,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   async newRecord(): Promise<void> {
     if (this.busy() || !this.readOnly() || !this.permissions().create) return;
     this.indexBeforeNew = this.currentIndex();
-    this.mode.set(RecordToolbarMode.Editing);
+    this.mode.set(RecordToolbarMode.Creating);
     this.currentIndex.set(-1);
 
     this.items.set([]);
