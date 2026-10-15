@@ -24,6 +24,29 @@ export class Ven230BusinessService {
     if (error) throw new Error(String(error.ErrMensaje));
     return rows as T[];
   }
+  private static clientsCache: Ven230Lookup[] | null = null;
+
+  clearCache(): void {
+    Ven230BusinessService.clientsCache = null;
+  }
+
+  async loadClients(forceRefresh = false): Promise<Ven230Lookup[]> {
+    if (!forceRefresh && Ven230BusinessService.clientsCache && Ven230BusinessService.clientsCache.length > 0) {
+      return Ven230BusinessService.clientsCache;
+    }
+    const [endpoint, action] = Ven230Catalog.clients;
+    const raw = await firstValueFrom(this.api.request(endpoint, action, { ESTADO: 'ACTIVO' }));
+    const decoded = this.decode<Ven230Lookup>(raw);
+    let clients: Ven230Lookup[] = [];
+    const first = decoded[0] as Record<string, unknown> | undefined;
+    if (first && typeof first === 'object' && 'CLIENTES' in first && Array.isArray(first['CLIENTES'])) {
+      clients = first['CLIENTES'] as Ven230Lookup[];
+    } else {
+      clients = decoded;
+    }
+    Ven230BusinessService.clientsCache = clients;
+    return clients;
+  }
   async catalog(name: keyof typeof Ven230Catalog, data: unknown): Promise<Ven230Lookup[]> {
     const [endpoint, action] = Ven230Catalog[name];
     return this.decode<Ven230Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));

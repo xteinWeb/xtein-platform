@@ -776,11 +776,10 @@ label.xtein-label--disabled,
 }
 
 /* XTEIN Lookup DropDown Box Popup styling matching Legacy */
-.dx-dropdowneditor-overlay {
+.xtein-lookup-popup {
   .dx-overlay-content {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
     border: 1px solid #e2e8f0;
   }
 }

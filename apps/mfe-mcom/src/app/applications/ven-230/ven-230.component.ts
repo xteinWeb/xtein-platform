@@ -772,12 +772,23 @@ export class Ven230Component
   /**
    * Loads general catalogs.
    */
-    private async loadDataLists(): Promise<void> {
+    private async loadDataLists(forceRefresh = false): Promise<void> {
+    if (forceRefresh) {
+      this.business.clearCache();
+    }
     this.loading.set(true);
     try {
       const identity=this.business.identity;
-      const [clients,sellers,units,currencies,saleTypes,specs,defaultUnit,defaultCurrency,moneySpec,quantitySpec]=await Promise.all([
-        this.business.catalog('clients',{ESTADO:'ACTIVO'}),this.business.catalog('sellers',{ESTADO:'ACTIVO'}),
+
+      // Clients: load immediately in parallel (like Id Legal in VEN-209)
+      const pClients = this.business.loadClients(forceRefresh).then(clients => {
+        this.clients.set(clients);
+      }).catch(e => {
+        console.warn('Error loading clients in VEN-230:', e);
+      });
+
+      const [sellers,units,currencies,saleTypes,specs,defaultUnit,defaultCurrency,moneySpec,quantitySpec]=await Promise.all([
+        this.business.catalog('sellers',{ESTADO:'ACTIVO'}),
         this.business.catalog('units',{ESTADO:'ACTIVO',...identity}),this.business.catalog('currencies',{ESTADO:'ACTIVO'}),
         this.business.catalog('saleTypes',{ID_DOMINIO:'FACTURA',ID_GRUPO_DOMINIO:'TIPO VENTA'}),
         this.business.catalog('specifications',{...identity,ID_APLICACION_BASE:''}),
@@ -785,7 +796,7 @@ export class Ven230Component
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'DEF_MONEDA'}),
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'FORMATO MONEDA'}),
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'FORMATO CANTIDAD'})]);
-      this.clients.set(clients);
+      await pClients;
       this.sellers.set(sellers.map(r => ({ ...r, ID_ADC: String(r.ID_ADC ?? ''), NOMBRE_COMPLETO: String(r.NOMBRE_COMPLETO ?? ''), NUM_NOMBRE: String(r['NUM_NOMBRE'] ?? `${r.ID_ADC} - ${r.NOMBRE_COMPLETO ?? ''}`) })));
       this.specifications.set([...specs,...moneySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO MONEDA'})),...quantitySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO CANTIDAD'}))]);
       this.defaultUnit=String(defaultUnit[0]?.ID_UN ?? '');
@@ -814,7 +825,7 @@ export class Ven230Component
 
   async refreshClients(): Promise<void> {
     try {
-      const clients = await this.business.catalog('clients', { ESTADO: 'ACTIVO' });
+      const clients = await this.business.loadClients(true);
       this.clients.set(clients);
     } catch (e) {
       console.warn('Error refreshing clients in VEN-230:', e);

@@ -934,7 +934,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   async refreshClients(): Promise<void> {
     try {
-      const clients = await this.business.catalog('clients', { ESTADO: 'ACTIVO' }, true);
+      const clients = await this.business.loadClients(true);
       this.clients.set(clients);
     } catch {
       // Non-critical
@@ -977,9 +977,19 @@ export class Ven229Component implements OnInit, OnDestroy {
     }
   }
 
-  private async loadCatalogs(): Promise<void> {
+  private async loadCatalogs(forceRefresh = false): Promise<void> {
+    if (forceRefresh) {
+      this.business.clearCache();
+    }
     try {
       const identity = this.business.identity;
+
+      // Clients: load immediately in parallel (like Id Legal in VEN-209)
+      const pClients = this.business.loadClients(forceRefresh).then(clients => {
+        this.clients.set(clients);
+      }).catch(e => {
+        console.warn('Error loading clients:', e);
+      });
 
       // 1. Documents
       try {
@@ -1017,17 +1027,17 @@ export class Ven229Component implements OnInit, OnDestroy {
         console.warn('Error loading defaults & specs:', e);
       }
 
-      // 3. General catalogs: clients, sellers, units, currencies, saleTypes
+      // 3. General catalogs: sellers, units, currencies, saleTypes
       try {
-        const [clients, sellers, units, currencies, saleTypes] = await Promise.all([
-          this.business.catalog('clients', { ESTADO: 'ACTIVO' }),
+        const [sellers, units, currencies, saleTypes] = await Promise.all([
           this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
           this.business.catalog('units', { ESTADO: 'ACTIVO', ...identity }),
           this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
           this.business.catalog('saleTypes', { ID_DOMINIO: 'FACTURA', ID_GRUPO_DOMINIO: 'TIPO VENTA' })
         ]);
 
-        this.clients.set(clients);
+        await pClients;
+
         this.sellers.set(sellers.map(r => ({
           ...r,
           ID_ADC: String(r.ID_ADC ?? ''),

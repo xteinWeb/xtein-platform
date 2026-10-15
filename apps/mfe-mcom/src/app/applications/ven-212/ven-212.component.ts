@@ -920,11 +920,29 @@ export class Ven212Component implements OnInit, OnDestroy {
     }
   }
 
-  private async loadCatalogs(): Promise<void> {
+  async refreshClients(): Promise<void> {
     try {
-      const [docs, clients, sellers, units, currencies, conditions, banks, defaultUnit] = await Promise.all([
+      const clients = await this.business.loadClients(true);
+      this.clients.set(clients);
+    } catch (e) {
+      console.warn('Error refreshing clients in VEN-212:', e);
+    }
+  }
+
+  private async loadCatalogs(forceRefresh = false): Promise<void> {
+    if (forceRefresh) {
+      this.business.clearCache();
+    }
+    try {
+      // Clients: load immediately in parallel (like Id Legal in VEN-209)
+      const pClients = this.business.loadClients(forceRefresh).then(clients => {
+        this.clients.set(clients);
+      }).catch(e => {
+        console.warn('Error loading clients in VEN-212:', e);
+      });
+
+      const [docs, sellers, units, currencies, conditions, banks, defaultUnit] = await Promise.all([
         this.business.catalog('documents', { ID_APLICACION: this.applicationId, USUARIO: this.business.identity.USUARIO }),
-        this.business.catalog('clients', { ESTADO: 'ACTIVO' }),
         this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
         this.business.catalog('units', { ESTADO: 'ACTIVO', USUARIO: this.business.identity.USUARIO, ID_APLICACION: this.applicationId }),
         this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
@@ -933,8 +951,9 @@ export class Ven212Component implements OnInit, OnDestroy {
         this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO })
       ]);
 
+      await pClients;
+
       this.documents.set(docs);
-      this.clients.set(clients);
       this.sellers.set(sellers);
       this.units.set(units);
       this.currencies.set(currencies);

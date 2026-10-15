@@ -74,19 +74,29 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() required = false;
   @Input() showClearButton = false;
   @Input() dropDownWidth: string | number = 'min(600px, 95vw)';
-  @Input() dropDownHeight: string | number = 'min(320px, 65dvh)';
+  @Input() dropDownHeight: string | number = 300;
+
+  private _lastWidth?: string | number;
+  private _lastHeight?: string | number;
+  private _cachedDropDownOptions: Record<string, unknown> = {
+    width: 'min(600px, 95vw)',
+    height: 300,
+    hideOnParentScroll: true,
+    wrapperAttr: { class: 'xtein-lookup-popup' }
+  };
 
   get dropDownOptions(): Record<string, unknown> {
-    return {
-      width: this.dropDownWidth,
-      height: this.dropDownHeight,
-      hideOnParentScroll: true,
-      position: {
-        my: 'left top',
-        at: 'left bottom',
-        collision: { x: 'flipfit', y: 'none' }
-      }
-    };
+    if (this._lastWidth !== this.dropDownWidth || this._lastHeight !== this.dropDownHeight) {
+      this._lastWidth = this.dropDownWidth;
+      this._lastHeight = this.dropDownHeight;
+      this._cachedDropDownOptions = {
+        width: this.dropDownWidth,
+        height: this.dropDownHeight,
+        hideOnParentScroll: true,
+        wrapperAttr: { class: 'xtein-lookup-popup' }
+      };
+    }
+    return this._cachedDropDownOptions;
   }
 
   value: unknown = null;
