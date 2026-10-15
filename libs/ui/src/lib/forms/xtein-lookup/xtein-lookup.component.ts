@@ -45,6 +45,23 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     queueMicrotask(() => {
       this.dataGrid?.repaint();
     });
+    const focusSearch = (): boolean => {
+      const content = this.editor?.instance?.content() as HTMLElement | undefined;
+      const searchInput =
+        content?.querySelector<HTMLInputElement>('.dx-datagrid-search-panel input, .dx-searchbox input') ||
+        document.querySelector<HTMLInputElement>('.xtein-lookup-popup .dx-datagrid-search-panel input, .xtein-lookup-popup .dx-searchbox input');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select?.();
+        return true;
+      }
+      return false;
+    };
+    setTimeout(() => {
+      if (!focusSearch()) {
+        setTimeout(focusSearch, 100);
+      }
+    }, 50);
   }
 
   ngAfterViewInit(): void {

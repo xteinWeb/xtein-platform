@@ -10,6 +10,7 @@ import { Ven230Lookup, Ven230Details, Ven230SettingResult, Ven230TaxResult } fro
 import { Ven230PrefacturaGrav, Ven230PrefacturaPago } from './models/ven-230.model';
 import { XteinVen230ItemsComponent } from './components/xtein-ven230-items/xtein-ven230-items.component';
 import { XteinButtonComponent } from '@xtein/ui';
+import { ElementRef } from '@angular/core';
 import {
   untracked,
   computed,
@@ -326,7 +327,8 @@ export class Ven230Component
     private readonly toolbar: ToolbarRuntimeService,
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly elementRef: ElementRef
   ) {
     // Synchronize toolbar state whenever mode, index, records, loading or permissions change.
     effect(() => {
@@ -495,11 +497,12 @@ export class Ven230Component
       this.detailsReady.set(true);this.mode.set(RecordToolbarMode.Creating);
       this.form.reset({...Ven230DefaultRecord, FECHA:this.localDate(), FECHA_REGISTRO:this.localDate(), FECHA_PRIMER_VENC:this.localDate(),
         USUARIO:this.business.identity.USUARIO,ID_UN_ITEM:this.defaultUnit,ID_MONEDA:this.defaultCurrency}, {emitEvent:false});
-      this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.headerLocked.set(false);this.previousCondition="";this.products.set([]);this.conditions.set([]);this.terms.set([]);
+      this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.addresses.set([]);this.headerLocked.set(false);this.previousCondition="";this.products.set([]);this.conditions.set([]);this.terms.set([]);
       this.enableFormControls();
       if(documents.length===1)this.selectDocument(String(documents[0].DOCUMENTO));
       await this.loadWarehouses();
       this.workspace.setDirty(this.applicationId,false);
+      this.focusFirstControl();
     } catch(error){this.showError(error);} finally{this.loading.set(false);}
   }
 
@@ -819,6 +822,45 @@ export class Ven230Component
     this.updateCreditControls();
   }
 
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .ven-230__form') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
+  }
+
   @ViewChild(XteinVen230ItemsComponent) private itemEditor?: XteinVen230ItemsComponent;
   readonly documents = signal<Ven230Lookup[]>([]);
   readonly clients = signal<Ven230Lookup[]>([]);
@@ -883,7 +925,7 @@ export class Ven230Component
     watch('DOCUMENTO',()=>this.selectDocument(this.form.controls.DOCUMENTO.value ?? ''));
     watch('ID_CLIENTE',async()=>{
       const client=this.clients().find(c=>c.ID_CLIENTE===this.form.controls.ID_CLIENTE.value);
-      this.form.patchValue({NOMBRE_CLIENTE:client?.NOMBRE_COMPLETO ?? '',ID_UBICACION:client?.ID_UBICACION ?? '',DIRECCION:client?.DIRECCION ?? ''},{emitEvent:false});
+      this.form.patchValue({NOMBRE_CLIENTE:client?.NOMBRE_COMPLETO ?? '',ID_UBICACION:client?.ID_UBICACION ?? ''},{emitEvent:false});
       await this.loadAddresses();
     });
     watch('ID_UN_ITEM',async()=>{this.form.controls.ID_UN_BODEGA.setValue('',{emitEvent:false});await this.loadWarehouses();this.products.set([]);});
@@ -901,11 +943,34 @@ export class Ven230Component
       PREFIJO:row.PREFIJO ?? '',SUFIJO:row.SUFIJO ?? ''},{emitEvent:false});
   }
   private async loadAddresses():Promise<void> {
-    const id=this.form.controls.ID_CLIENTE.value;if(!id){this.addresses.set([]);return;}
-    const rows=await this.business.catalog('addresses',{ID_CLIENTE:id});
-    if(this.form.controls.ID_CLIENTE.value!==id)return;
-    this.addresses.set(rows);
-    if(rows.length===1 && !this.readOnly())this.form.controls.DIRECCION.setValue(rows[0].DIRECCION ?? '',{emitEvent:false});
+    const id=this.form.controls.ID_CLIENTE.value;
+    if(!id){
+      this.addresses.set([]);
+      this.form.controls.DIRECCION.setValue('',{emitEvent:false});
+      return;
+    }
+    try {
+      const rows=await this.business.catalog('addresses',{ID_CLIENTE:id});
+      if(this.form.controls.ID_CLIENTE.value!==id)return;
+      this.addresses.set(rows || []);
+      if(rows && rows.length > 0) {
+        if(!this.readOnly()) {
+          const preferred = rows.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('cobro')) || rows[0];
+          this.form.controls.DIRECCION.setValue(preferred.DIRECCION ?? '',{emitEvent:false});
+        }
+      } else {
+        if(!this.readOnly()) {
+          this.form.controls.DIRECCION.setValue('',{emitEvent:false});
+          this.notification.warning('No se encontró una dirección del Tipo: Cobro');
+        }
+      }
+    } catch {
+      this.addresses.set([]);
+      if(!this.readOnly()) {
+        this.form.controls.DIRECCION.setValue('',{emitEvent:false});
+        this.notification.warning('No se encontró una dirección del Tipo: Cobro');
+      }
+    }
   }
   private async loadWarehouses():Promise<void> {
     const id=this.form.controls.ID_UN_ITEM.value;if(!id){this.dataLists.update(d=>({...d,bodegas:[]}));return;}

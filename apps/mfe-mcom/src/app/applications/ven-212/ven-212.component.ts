@@ -7,7 +7,8 @@ import {
   computed,
   effect,
   untracked,
-  inject
+  inject,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -303,7 +304,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     private readonly toolbar: ToolbarRuntimeService,
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly elementRef: ElementRef
   ) {
     // Toolbar state synchronization
     effect(() => {
@@ -356,6 +358,9 @@ export class Ven212Component implements OnInit, OnDestroy {
       this.form.controls.ID_CLIENTE.valueChanges.subscribe(clienteId => {
         if (clienteId && !this.readOnly()) {
           void this.onClientChanged(clienteId);
+        } else if (!clienteId && !this.readOnly()) {
+          this.addresses.set([]);
+          this.form.patchValue({ DIRECCION: '', NOMBRE_CLIENTE: '' }, { emitEvent: false });
         }
       })
     );
@@ -504,6 +509,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     this.taxes.set([]);
     this.taxItems.set([]);
     this.payments.set([]);
+    this.addresses.set([]);
 
     this.form.reset({
       ...Ven212DefaultRecord,
@@ -515,6 +521,7 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   editRecord(): void {
@@ -863,12 +870,22 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     try {
       const addresses = await this.business.catalog('addresses', { ID_CLIENTE: clienteId });
-      this.addresses.set(addresses);
-      if (addresses.length > 0) {
-        this.form.patchValue({ DIRECCION: String(addresses[0].DIRECCION || '') }, { emitEvent: false });
+      this.addresses.set(addresses || []);
+      if (addresses && addresses.length > 0) {
+        const preferred = addresses.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('cobro')) || addresses[0];
+        this.form.patchValue({ DIRECCION: String(preferred.DIRECCION || '') }, { emitEvent: false });
+      } else {
+        this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
+        if (!this.readOnly()) {
+          this.notification.warning('No se encontró una dirección del Tipo: Cobro');
+        }
       }
     } catch {
-      // Non-critical
+      this.addresses.set([]);
+      this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
+      if (!this.readOnly()) {
+        this.notification.warning('No se encontró una dirección del Tipo: Cobro');
+      }
     }
   }
 
@@ -1013,6 +1030,45 @@ export class Ven212Component implements OnInit, OnDestroy {
     if (!isNew) {
       this.form.controls.DOCUMENTO.disable({ emitEvent: false });
     }
+  }
+
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .ven-212__form') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
   }
 
   private clearForm(): void {
