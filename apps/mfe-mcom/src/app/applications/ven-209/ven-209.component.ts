@@ -3,6 +3,7 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
+  ElementRef,
   signal,
   computed,
   effect,
@@ -201,7 +202,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     CLASE: new FormControl<string>('CLIENTES', [Validators.required]),
     PERFIL_TRIBUTARIO: new FormControl<string>('', [Validators.required]),
     RT: new FormControl<string[]>([], [Validators.required]),
-    CONTACTO: new FormControl<string>(''),
+    CONTACTO: new FormControl<number | string>(''),
     COMENTARIOS: new FormControl<string>(''),
     ZONA: new FormControl<string>(''),
     ID_ADC: new FormControl<string>(''),
@@ -223,7 +224,8 @@ export class Ven209Component implements OnInit, OnDestroy {
     private readonly toolbar: ToolbarRuntimeService,
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly host: ElementRef
   ) {
     // Synchronize toolbar state
     effect(() => {
@@ -268,7 +270,7 @@ export class Ven209Component implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.form.controls.ID_LEGAL.valueChanges.subscribe(val => {
-        if (val) this.onIdLegalChanged(val);
+        this.onIdLegalChanged(val);
       })
     );
 
@@ -513,6 +515,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.idClienteValidationStatus.set(null);
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   editRecord(): void {
@@ -524,8 +527,22 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   @ViewChild('clienteInput') private clienteInput?: XteinInputComponent;
   @ViewChild('idLegalSelect') private idLegalSelect?: XteinSelectComponent;
+  @ViewChild('contactoSelect') private contactoSelect?: XteinSelectComponent;
   @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
   @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
+
+  private focusFirstControl(): void {
+    setTimeout(() => {
+      if (this.clienteInput) {
+        this.clienteInput.focus();
+      } else {
+        const el = this.host.nativeElement.querySelector(
+          '#ven-209-id-cliente input, #ven-209-id-cliente, input:not([readonly]):not([disabled]), select:not([readonly]):not([disabled])'
+        ) as HTMLElement | null;
+        el?.focus();
+      }
+    }, 150);
+  }
 
   async saveRecord(): Promise<void> {
     if (this.loading() || this.readOnly()) return;
@@ -592,6 +609,7 @@ export class Ven209Component implements OnInit, OnDestroy {
         ...raw,
         ID_CLIENTE: String(raw.ID_CLIENTE ?? ''),
         ID_LEGAL: String(raw.ID_LEGAL ?? ''),
+        CONTACTO: raw.CONTACTO != null ? String(raw.CONTACTO) : '',
         RT: raw.RT ? (Array.isArray(raw.RT) ? raw.RT : [raw.RT]) : [],
         CUPO_CREDITO: cupoCreditoVal,
         CUPO_CUOTA: cupoCuotaVal,
@@ -942,6 +960,25 @@ export class Ven209Component implements OnInit, OnDestroy {
 
     const financials = this.extractFinancials(record);
 
+    const rawContacto = record.CONTACTO != null ? String(record.CONTACTO).trim() : '';
+    let resolvedContacto: number | string = rawContacto;
+    if (rawContacto) {
+      const matchContacto = this.idLegales().find(l => String(l.ID_LEGAL).trim() === rawContacto);
+      if (matchContacto?.ID_LEGAL != null) {
+        resolvedContacto = matchContacto.ID_LEGAL;
+      } else {
+        const syntheticContactId = isNaN(Number(rawContacto)) ? rawContacto : Number(rawContacto);
+        const syntheticContact: Ven209Lookup = {
+          ID_LEGAL: syntheticContactId,
+          NOMBRE_COMPLETO: (record as Record<string, unknown>)['NOMBRE_CONTACTO']
+            ? String((record as Record<string, unknown>)['NOMBRE_CONTACTO']).trim()
+            : rawContacto
+        };
+        this.idLegales.set([...this.idLegales(), syntheticContact]);
+        resolvedContacto = syntheticContactId;
+      }
+    }
+
     this.form.reset({
       ...Ven209DefaultRecord,
       ID_CLIENTE: record.ID_CLIENTE ? String(record.ID_CLIENTE).trim() : '',
@@ -958,7 +995,7 @@ export class Ven209Component implements OnInit, OnDestroy {
       CLASE: rawClase,
       PERFIL_TRIBUTARIO: rawPerfil,
       RT: rtVal,
-      CONTACTO: record.CONTACTO ? String(record.CONTACTO).trim() : '',
+      CONTACTO: resolvedContacto,
       COMENTARIOS: record.COMENTARIOS ? String(record.COMENTARIOS).trim() : '',
       ZONA: record.ZONA ? String(record.ZONA).trim() : '',
       ID_ADC: record.ID_ADC ? String(record.ID_ADC).trim() : '',
@@ -1009,9 +1046,18 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.notification.error(error instanceof Error ? error.message : 'No se pudieron cargar los datos de clientes.');
   }
 
-  onIdLegalChanged(selectedId: number | string): void {
+  onIdLegalChanged(selectedId: number | string | null | undefined): void {
     if (this.readOnly()) return;
-    if (selectedId === '' || selectedId === null || selectedId === undefined) return;
+    if (selectedId === '' || selectedId === null || selectedId === undefined || selectedId === 0) {
+      this.form.patchValue({
+        CONTACTO: '',
+        NOMBRE: '',
+        NOMBRE2: '',
+        APELLIDO: '',
+        APELLIDO2: ''
+      });
+      return;
+    }
     const match = this.idLegales().find(l => String(l.ID_LEGAL) === String(selectedId));
     if (match) {
       this.form.patchValue({
@@ -1021,9 +1067,28 @@ export class Ven209Component implements OnInit, OnDestroy {
         APELLIDO2: match['APELLIDO2'] ? String(match['APELLIDO2']) : '',
         TIPO_ID: match['TIPO_ID'] ? String(match['TIPO_ID']) : (match.TIPO ? String(match.TIPO) : 'NIT'),
         PERSONA: match.PERSONA ? String(match.PERSONA) : 'JURIDICA',
-        CONTACTO: String(match.ID_LEGAL || '')
+        CONTACTO: match.ID_LEGAL != null ? match.ID_LEGAL : selectedId
+      });
+    } else {
+      this.form.patchValue({
+        CONTACTO: selectedId
       });
     }
+  }
+
+  onContactoCustomItem(event: any): void {
+    const text = typeof event.text === 'string' ? event.text.trim() : '';
+    if (!text) {
+      event.customItem = null;
+      return;
+    }
+    const syntheticId = isNaN(Number(text)) ? text : Number(text);
+    const newItem: Ven209Lookup = {
+      ID_LEGAL: syntheticId,
+      NOMBRE_COMPLETO: text
+    };
+    event.customItem = newItem;
+    this.form.controls.CONTACTO.setValue(syntheticId);
   }
 
   onIdLegalCustomItem(event: any): void {
