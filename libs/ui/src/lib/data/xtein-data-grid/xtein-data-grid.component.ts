@@ -1,19 +1,29 @@
-import { Component, Input, Output, EventEmitter, TemplateRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, TemplateRef, ViewChild, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { DxDataGridModule, DxDataGridComponent, DxTemplateModule } from 'devextreme-angular';
 import type { KeyDownEvent } from 'devextreme/ui/data_grid';
 import { XteinGridColumn, XteinGridSelectionEvent, XteinGridEditingEvent, XteinGridRowEvent, XteinGridToolbarAction } from './models/xtein-data-grid.model';
 @Component({selector:'xtein-data-grid',standalone:true,imports:[DxDataGridModule,DxTemplateModule,NgTemplateOutlet,CommonModule],
   templateUrl:'./xtein-data-grid.component.html',styleUrl:'./xtein-data-grid.component.scss'})
-export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChanges {
+export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChanges, OnInit {
   @Input() dataSource: T[] = [];
   @Input() keyExpr: string | undefined;
   @Input() columns: XteinGridColumn<T,K>[] | undefined;
   resolvedColumns: (XteinGridColumn<T,K> | string)[] = [];
+  ngOnInit(): void {
+    this.updateResolvedColumns();
+  }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['columns'] || changes['dataSource']) {
-      const first = this.dataSource[0];
-      this.resolvedColumns = this.columns ?? (first && typeof first === 'object' ? Object.keys(first) : []);
+      this.updateResolvedColumns();
+    }
+  }
+  private updateResolvedColumns(): void {
+    if (this.columns && this.columns.length > 0) {
+      this.resolvedColumns = this.columns;
+    } else {
+      const first = this.dataSource?.[0];
+      this.resolvedColumns = first && typeof first === 'object' ? Object.keys(first) : (this.columns ?? []);
     }
   }
   @Input() height: string | number = '100%';
@@ -64,5 +74,8 @@ export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChang
     if (event.event?.key !== 'Enter' || this.allowUpdating || this.disabled) return;
     const rows = await event.component.getSelectedRowsData();
     if (rows.length) this.rowActivated.emit(rows[0]);
+  }
+  repaint(): void {
+    this.grid?.instance.repaint();
   }
 }

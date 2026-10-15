@@ -45,9 +45,29 @@ export class Ven229BusinessService {
   }
 
   private static readonly catalogCache = new Map<string, Ven229Lookup[]>();
+  private static clientsCache: Ven229Lookup[] | null = null;
 
   clearCache(): void {
     Ven229BusinessService.catalogCache.clear();
+    Ven229BusinessService.clientsCache = null;
+  }
+
+  async loadClients(forceRefresh = false): Promise<Ven229Lookup[]> {
+    if (!forceRefresh && Ven229BusinessService.clientsCache && Ven229BusinessService.clientsCache.length > 0) {
+      return Ven229BusinessService.clientsCache;
+    }
+    const [endpoint, action] = Ven229Catalog.clients;
+    const raw = await firstValueFrom(this.api.request(endpoint, action, { ESTADO: 'ACTIVO' }));
+    const decoded = this.decode<Ven229Lookup>(raw);
+    let clients: Ven229Lookup[] = [];
+    const first = decoded[0] as Record<string, unknown> | undefined;
+    if (first && typeof first === 'object' && 'CLIENTES' in first && Array.isArray(first['CLIENTES'])) {
+      clients = first['CLIENTES'] as Ven229Lookup[];
+    } else {
+      clients = decoded;
+    }
+    Ven229BusinessService.clientsCache = clients;
+    return clients;
   }
 
   async catalog(name: keyof typeof Ven229Catalog, data: unknown = {}, forceRefresh = false): Promise<Ven229Lookup[]> {

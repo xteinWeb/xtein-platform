@@ -92,19 +92,15 @@
                 Documento del Cliente
               </xtein-label>
               <div class="ven-229__control-inline">
-                <xtein-select
+                <xtein-lookup
                   id="ven-229-id-cliente"
+                  ariaLabel="Documento del Cliente"
                   placeholder="Documento"
-                  [items]="$any(clients())"
+                  [items]="clients()"
                   valueExpr="ID_CLIENTE"
                   displayExpr="ID_CLIENTE"
-                  [columns]="['ID_CLIENTE', 'NOMBRE_COMPLETO']"
-                  [columnHeaders]="['Documento', 'Nombre del cliente']"
-                  [columnWidths]="[140, 'auto']"
-                  [searchEnabled]="true"
-                  searchMode="contains"
-                  [refreshEnabled]="true"
-                  (refreshRequested)="refreshClients()"
+                  searchPlaceholder="Buscar…"
+                  [columns]="clientColumns"
                   [required]="true"
                   formControlName="ID_CLIENTE"
                   [readOnly]="readOnly() || headerLocked() || itemPending()"

@@ -37,8 +37,15 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() autoFocus = false;
   @Input() selectionMode: 'single' | 'multiple' = 'single';
   @ViewChild(DxDropDownBoxComponent) private editor?: DxDropDownBoxComponent;
+  @ViewChild('dataGrid') private dataGrid?: XteinDataGridComponent<T, unknown>;
   private readonly destroyRef = inject(DestroyRef);
   private readonly zone = inject(NgZone);
+
+  onDropDownOpened(): void {
+    queueMicrotask(() => {
+      this.dataGrid?.repaint();
+    });
+  }
 
   ngAfterViewInit(): void {
     if (this.autoFocus) queueMicrotask(() => this.focus());
@@ -57,6 +64,7 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() ariaLabel = '';
   @Input() placeholder = 'Seleccionar…';
   @Input() searchPlaceholder = 'Buscar…';
+  @Input() searchWidth: number = 550;
   @Input() items: T[] = [];
   @Input() valueExpr = '';
   @Input() displayExpr = '';
@@ -68,8 +76,17 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() dropDownWidth: string | number = 'min(600px, 95vw)';
   @Input() dropDownHeight: string | number = 'min(320px, 65dvh)';
 
-  get dropDownOptions(): { width: string | number; height: string | number; hideOnParentScroll: boolean } {
-    return { width: this.dropDownWidth, height: this.dropDownHeight, hideOnParentScroll: true };
+  get dropDownOptions(): Record<string, unknown> {
+    return {
+      width: this.dropDownWidth,
+      height: this.dropDownHeight,
+      hideOnParentScroll: true,
+      position: {
+        my: 'left top',
+        at: 'left bottom',
+        collision: { x: 'flipfit', y: 'none' }
+      }
+    };
   }
 
   value: unknown = null;

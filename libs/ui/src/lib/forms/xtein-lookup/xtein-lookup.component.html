@@ -4,17 +4,18 @@
   [displayValueFormatter]="displayValueFormatter" [deferRendering]="false"
   [fieldTemplate]="selectionMode === 'multiple' ? 'xteinLookupSelection' : null"
   [inputAttr]="{id:id,'aria-label':ariaLabel,'aria-required':required.toString()}"
+  (onOpened)="onDropDownOpened()"
   (onValueChanged)="changed($event)" (onFocusOut)="touched()">
   <div *dxTemplate="let data of 'xteinLookupSelection'">
     <dx-text-box [value]="selectionText" [readOnly]="true" [placeholder]="placeholder"
       [inputAttr]="{ 'aria-label': ariaLabel, title: selectionText }" stylingMode="filled" />
   </div>
   <div *dxTemplate="let data of 'content'" class="lookup-content">
-    <xtein-data-grid [dataSource]="items" [keyExpr]="valueExpr" [columns]="columns" [selectionMode]="selectionMode"
+    <xtein-data-grid #dataGrid [dataSource]="items" [keyExpr]="valueExpr" [columns]="columns" [selectionMode]="selectionMode"
       [showCheckBoxesMode]="selectionMode === 'multiple' ? 'always' : 'none'"
       (selectionChanged)="onGridSelectionChanged($event)"
       [selectedRowKeys]="selectedKeys" [filterEnabled]="false" [pageSize]="10" [searchPlaceholder]="searchPlaceholder"
-      [searchWidth]="160" scrollingMode="virtual" [showPager]="false"
+      [searchWidth]="searchWidth" scrollingMode="virtual" [showPager]="false"
       (rowClick)="$event.rowType === 'data' && choose($event.data)" (rowActivated)="choose($event)" />
   </div>
 </dx-drop-down-box>
