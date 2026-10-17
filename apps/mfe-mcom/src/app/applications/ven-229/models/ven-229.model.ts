@@ -114,6 +114,7 @@ export interface Ven229PedidoItem {
   UDM_EQUIV?: string;
   CANTIDAD_PRES?: number;
   CANTIDAD_EQUIV?: number;
+  CANTIDAD_REAL?: number;
   FECHA?: string | null;
   FECHA_ENTREGA?: string | null;
   ESTADO?: string;

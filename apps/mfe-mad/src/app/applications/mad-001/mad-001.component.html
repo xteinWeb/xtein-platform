@@ -46,206 +46,344 @@
         class="mad-001__form"
         [formGroup]="form">
 
-        <!-- General information -->
-        <fieldset
-          class="mad-001__group xtein-fieldset">
+        <!-- Tab Navigation -->
+        <div class="mad-001__tabs-nav" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            class="mad-001__tab-btn"
+            [class.mad-001__tab-btn--active]="activeTab() === 'general'"
+            [attr.aria-selected]="activeTab() === 'general'"
+            (click)="activeTab.set('general')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>General</span>
+          </button>
 
-          <legend
-            class="mad-001__group-title">
-            <xtein-group-label label="Información General"></xtein-group-label>
-          </legend>
+          <button
+            type="button"
+            role="tab"
+            class="mad-001__tab-btn"
+            [class.mad-001__tab-btn--active]="activeTab() === 'tecnica'"
+            [attr.aria-selected]="activeTab() === 'tecnica'"
+            (click)="activeTab.set('tecnica')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            <span>Configuración Técnica</span>
+          </button>
 
+          <button
+            type="button"
+            role="tab"
+            class="mad-001__tab-btn"
+            [class.mad-001__tab-btn--active]="activeTab() === 'metricas'"
+            [attr.aria-selected]="activeTab() === 'metricas'"
+            (click)="activeTab.set('metricas')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Métricas / KPIs</span>
+          </button>
 
-          <div
-            class="mad-001__grid mad-001__grid--general">
+          <button
+            type="button"
+            role="tab"
+            class="mad-001__tab-btn"
+            [class.mad-001__tab-btn--active]="activeTab() === 'comentarios'"
+            [attr.aria-selected]="activeTab() === 'comentarios'"
+            (click)="activeTab.set('comentarios')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Comentarios</span>
+          </button>
+        </div>
 
-            <xtein-input
-              id="mad-001-application-id"
-              label="ID Aplicación"
-              placeholder="Ingrese ID de aplicación"
-              [required]="true"
-              [maxLength]="30"
-              [invalid]="isInvalid('ID_APLICACION')"
-              errorMessage="ID de aplicación es requerido"
-              formControlName="ID_APLICACION"
-              (blurred)="validateApplicationIdOnBlur()">
-            </xtein-input>
+        <div class="mad-001__tab-content">
+          <!-- Pestaña 1: General -->
+          @if (activeTab() === 'general') {
+            <div class="mad-001__tab-pane">
+              <fieldset class="mad-001__group xtein-fieldset">
+                <legend class="mad-001__group-title">
+                  <xtein-group-label label="Identificación y Clasificación"></xtein-group-label>
+                </legend>
 
+                <div class="mad-001__grid mad-001__grid--general">
+                  <xtein-input
+                    id="mad-001-application-id"
+                    label="ID Aplicación"
+                    placeholder="Ingrese ID de aplicación (ej. MAD-001)"
+                    [required]="true"
+                    [maxLength]="30"
+                    [invalid]="isInvalid('ID_APLICACION')"
+                    errorMessage="ID de aplicación es requerido"
+                    formControlName="ID_APLICACION"
+                    (blurred)="validateApplicationIdOnBlur()">
+                  </xtein-input>
 
-            <xtein-select
-              id="mad-001-parent"
-              label="ID Aplicación Padre"
-              placeholder="Seleccione ID Aplicación Padre"
-              [items]="$any(parentApplications())"
-              displayExpr="APLICACION"
-              valueExpr="ID_APLICACION"
-              [searchEnabled]="true"
-              [showClearButton]="true"
-              formControlName="ID_APLICACION_PADRE">
-            </xtein-select>
+                  <xtein-select
+                    id="mad-001-parent"
+                    label="ID Aplicación Padre"
+                    placeholder="Seleccione Módulo o Padre"
+                    [items]="$any(parentApplications())"
+                    displayExpr="APLICACION"
+                    valueExpr="ID_APLICACION"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    formControlName="ID_APLICACION_PADRE">
+                  </xtein-select>
 
+                  <xtein-input
+                    id="mad-001-name"
+                    label="Nombre"
+                    placeholder="Ingrese nombre descriptivo"
+                    [required]="true"
+                    [maxLength]="60"
+                    [invalid]="isInvalid('NOMBRE')"
+                    errorMessage="Nombre es requerido"
+                    formControlName="NOMBRE">
+                  </xtein-input>
 
-            <xtein-input
-              id="mad-001-name"
-              label="Nombre"
-              placeholder="Ingrese nombre de aplicación"
-              [required]="true"
-              [maxLength]="60"
-              [invalid]="isInvalid('NOMBRE')"
-              errorMessage="Nombre es requerido"
-              formControlName="NOMBRE">
-            </xtein-input>
+                  <xtein-select
+                    id="mad-001-type"
+                    label="Tipo"
+                    placeholder="Seleccione tipo"
+                    [items]="$any(typeOptions())"
+                    [searchEnabled]="true"
+                    [required]="true"
+                    [invalid]="isInvalid('TIPO')"
+                    errorMessage="Tipo es requerido"
+                    formControlName="TIPO">
+                  </xtein-select>
 
+                  <xtein-select
+                    id="mad-001-status"
+                    label="Estado"
+                    placeholder="Seleccione estado"
+                    [items]="$any(statusOptions())"
+                    [searchEnabled]="true"
+                    formControlName="ESTADO">
+                  </xtein-select>
 
-            <xtein-select
-              id="mad-001-type"
-              label="Tipo"
-              placeholder="Seleccione tipo"
-              [items]="$any(typeOptions())"
-              [searchEnabled]="true"
-              [required]="true"
-              [invalid]="isInvalid('TIPO')"
-              errorMessage="Tipo es requerido"
-              formControlName="TIPO">
-            </xtein-select>
+                  <xtein-select
+                    id="mad-001-system-type"
+                    label="Tipo de Sistema"
+                    placeholder="Seleccione tipo de sistema"
+                    [items]="$any(systemTypeOptions())"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    formControlName="TIPO_SISTEMA">
+                  </xtein-select>
 
+                  <xtein-select
+                    id="mad-001-action"
+                    label="Acción"
+                    placeholder="Seleccione acción"
+                    [items]="$any(actionOptions())"
+                    [searchEnabled]="true"
+                    [required]="true"
+                    [invalid]="isInvalid('ACCION')"
+                    errorMessage="Acción es requerida"
+                    formControlName="ACCION">
+                  </xtein-select>
+                </div>
+              </fieldset>
 
-            <xtein-select
-              id="mad-001-action"
-              label="Acción"
-              placeholder="Seleccione acción"
-              [items]="$any(actionOptions())"
-              [searchEnabled]="true"
-              [required]="true"
-              [invalid]="isInvalid('ACCION')"
-              errorMessage="Acción es requerida"
-              formControlName="ACCION">
-            </xtein-select>
+              <!-- Comportamiento y Opciones -->
+              <fieldset class="mad-001__group xtein-fieldset">
+                <legend class="mad-001__group-title">
+                  <xtein-group-label label="Comportamiento y Opciones"></xtein-group-label>
+                </legend>
 
+                <div class="mad-001__grid mad-001__grid--switches">
+                  <div class="mad-001__switch-field">
+                    <xtein-switch
+                      id="mad-001-defecto"
+                      label="Abrir por Defecto"
+                      formControlName="DEFECTO">
+                    </xtein-switch>
+                    <span class="mad-001__field-hint">Abre automáticamente la aplicación al ingresar al sistema.</span>
+                  </div>
 
-            <xtein-select
-              id="mad-001-status"
-              label="Estado"
-              placeholder="Seleccione estado"
-              [items]="$any(statusOptions())"
-              [searchEnabled]="true"
-              formControlName="ESTADO">
-            </xtein-select>
-
-
-            <xtein-select
-              id="mad-001-level"
-              label="Nivel"
-              placeholder="Seleccione nivel"
-              [items]="$any(levelOptions())"
-              [searchEnabled]="true"
-              [showClearButton]="true"
-              formControlName="NIVEL">
-            </xtein-select>
-
-          </div>
-
-        </fieldset>
-
-
-        <!-- Metrics -->
-        <fieldset
-          class="mad-001__group xtein-fieldset">
-
-          <legend
-            class="mad-001__group-title">
-            <xtein-group-label label="Métricas"></xtein-group-label>
-          </legend>
-
-
-          <div
-            class="mad-001__grid mad-001__grid--metrics">
-
-            <div
-              class="mad-001__field">
-
-              <xtein-label
-                class="form-label"
-                for="mad-001-min-target">
-
-                Meta Inferior
-
-              </xtein-label>
-
-              <xtein-number
-                id="mad-001-min-target"
-                name="META_INFERIOR"
-                placeholder="Ingrese meta inferior"
-                [step]="0.01"
-                [showSpinButtons]="true"
-                formControlName="META_INFERIOR">
-              </xtein-number>
-
+                  <div class="mad-001__switch-field">
+                    <xtein-switch
+                      id="mad-001-genera"
+                      label="Genera Proceso / Contabilidad"
+                      formControlName="GENERA">
+                    </xtein-switch>
+                    <span class="mad-001__field-hint">Indica si la aplicación genera contabilización o proceso masivo.</span>
+                  </div>
+                </div>
+              </fieldset>
             </div>
+          }
 
+          <!-- Pestaña 2: Técnica -->
+          @if (activeTab() === 'tecnica') {
+            <div class="mad-001__tab-pane">
+              <fieldset class="mad-001__group xtein-fieldset">
+                <legend class="mad-001__group-title">
+                  <xtein-group-label label="Ejecución y Enrutamiento"></xtein-group-label>
+                </legend>
 
-            <div
-              class="mad-001__field">
+                <div class="mad-001__grid mad-001__grid--technical">
+                  <xtein-select
+                    id="mad-001-microfrontend"
+                    label="Microfrontend (MFE)"
+                    placeholder="Seleccione Microfrontend"
+                    [items]="$any(microfrontendOptions())"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    formControlName="MICROFRONTEND_ID">
+                  </xtein-select>
 
-              <xtein-label
-                class="form-label"
-                for="mad-001-max-target">
+                  <xtein-input
+                    id="mad-001-program"
+                    label="Programa / Componente"
+                    placeholder="Nombre del componente o ejecutable"
+                    [maxLength]="50"
+                    formControlName="PROGRAMA">
+                  </xtein-input>
 
-                Meta Superior
+                  <xtein-input
+                    id="mad-001-directory"
+                    label="Directorio / Ruta"
+                    placeholder="Ruta relativa o namespace"
+                    [maxLength]="200"
+                    formControlName="DIRECTORIO">
+                  </xtein-input>
 
-              </xtein-label>
+                  <xtein-input
+                    id="mad-001-table"
+                    label="Tabla de Aplicación"
+                    placeholder="Tabla principal en Base de Datos"
+                    [maxLength]="50"
+                    formControlName="TABLA_APLICACION">
+                  </xtein-input>
 
-              <xtein-number
-                id="mad-001-max-target"
-                name="META_SUPERIOR"
-                placeholder="Ingrese meta superior"
-                [step]="0.01"
-                [showSpinButtons]="false"
-                formControlName="META_SUPERIOR">
-              </xtein-number>
+                  <xtein-input
+                    id="mad-001-params"
+                    label="Parámetros"
+                    placeholder="Parámetros de configuración"
+                    [maxLength]="50"
+                    formControlName="PARAMETROS">
+                  </xtein-input>
 
+                  <xtein-date
+                    id="mad-001-vigencia"
+                    label="Fecha de Vigencia"
+                    placeholder="AAAA-MM-DD"
+                    formControlName="FECHA_VIGENCIA">
+                  </xtein-date>
+
+                  <div class="mad-001__grid-col-full">
+                    <xtein-input
+                      id="mad-001-image-url"
+                      label="URL de Imagen / Ícono"
+                      placeholder="Ruta relativa o URL del icono de la aplicación"
+                      [maxLength]="200"
+                      formControlName="IMAGEN_URL">
+                    </xtein-input>
+                  </div>
+                </div>
+              </fieldset>
             </div>
+          }
 
+          <!-- Pestaña 3: Métricas -->
+          @if (activeTab() === 'metricas') {
+            <div class="mad-001__tab-pane">
+              <fieldset class="mad-001__group xtein-fieldset">
+                <legend class="mad-001__group-title">
+                  <xtein-group-label label="Definición de Indicadores y Metas"></xtein-group-label>
+                </legend>
 
-            <xtein-select
-              id="mad-001-uom"
-              label="Unidad Medida"
-              placeholder="Seleccione unidad de medida"
-              [items]="$any(unitOfMeasures())"
-              displayExpr="NOMBRE"
-              valueExpr="ID_UDM"
-              [searchEnabled]="true"
-              [showClearButton]="true"
-              formControlName="UDM">
-            </xtein-select>
+                <div class="mad-001__grid mad-001__grid--metrics">
+                  <xtein-select
+                    id="mad-001-level"
+                    label="Nivel"
+                    placeholder="Seleccione nivel"
+                    [items]="$any(levelOptions())"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    formControlName="NIVEL">
+                  </xtein-select>
 
-          </div>
+                  <xtein-select
+                    id="mad-001-uom"
+                    label="Unidad de Medida (UDM)"
+                    placeholder="Seleccione unidad de medida"
+                    [items]="$any(unitOfMeasures())"
+                    displayExpr="NOMBRE"
+                    valueExpr="ID_UDM"
+                    [searchEnabled]="true"
+                    [showClearButton]="true"
+                    formControlName="UDM">
+                  </xtein-select>
 
-        </fieldset>
+                  <div class="mad-001__field">
+                    <xtein-label class="form-label" for="mad-001-min-target">
+                      Meta Inferior
+                    </xtein-label>
+                    <xtein-number
+                      id="mad-001-min-target"
+                      name="META_INFERIOR"
+                      placeholder="0.00"
+                      [step]="0.01"
+                      [showSpinButtons]="true"
+                      formControlName="META_INFERIOR">
+                    </xtein-number>
+                  </div>
 
+                  <div class="mad-001__field">
+                    <xtein-label class="form-label" for="mad-001-max-target">
+                      Meta Superior
+                    </xtein-label>
+                    <xtein-number
+                      id="mad-001-max-target"
+                      name="META_SUPERIOR"
+                      placeholder="0.00"
+                      [showSpinButtons]="false"
+                      formControlName="META_SUPERIOR">
+                    </xtein-number>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          }
 
-        <!-- Comments -->
-        <fieldset
-          class="mad-001__group xtein-fieldset">
+          <!-- Pestaña 4: Comentarios -->
+          @if (activeTab() === 'comentarios') {
+            <div class="mad-001__tab-pane">
+              <fieldset class="mad-001__group xtein-fieldset">
+                <legend class="mad-001__group-title">
+                  <xtein-group-label label="Notas y Documentación"></xtein-group-label>
+                </legend>
 
-          <legend
-            class="mad-001__group-title">
-            <xtein-group-label label="Comentarios"></xtein-group-label>
-          </legend>
-
-
-          <xtein-textarea
-            id="mad-001-comments"
-            name="COMENTARIOS"
-            ariaLabel="Comentarios"
-            placeholder="Ingrese comentarios"
-            [height]="140"
-            [minHeight]="100"
-            [autoResizeEnabled]="false"
-            formControlName="COMENTARIOS">
-          </xtein-textarea>
-
-        </fieldset>
+                <div class="mad-001__comments-container">
+                  <xtein-textarea
+                    id="mad-001-comments"
+                    name="COMENTARIOS"
+                    ariaLabel="Comentarios"
+                    placeholder="Ingrese observaciones, especificaciones o documentación de la aplicación..."
+                    [height]="220"
+                    [minHeight]="140"
+                    [autoResizeEnabled]="false"
+                    formControlName="COMENTARIOS">
+                  </xtein-textarea>
+                </div>
+              </fieldset>
+            </div>
+          }
+        </div>
 
       </div>
 
@@ -266,13 +404,13 @@
 
 </section>
 <xtein-record-filter [visible]="filterVisible()" (visibleChange)="filterVisible.set($event)"
-  tableBase="APLICACIONES_ASOCIADAS" (search)="searchRecords($event)"></xtein-record-filter>
+  tableBase="APLICACIONES" (search)="searchRecords($event)"></xtein-record-filter>
 <xtein-record-view [visible]="viewVisible()" (visibleChange)="viewVisible.set($event)"
   [records]="applications()" [columns]="viewColumns" keyField="ID_APLICACION"
   (selected)="selectViewedRecord($event)"></xtein-record-view>
 @if (reportsVisible()) {
   <xtein-record-reports [visible]="reportsVisible()" (visibleChange)="reportsVisible.set($event)"
-    [applicationId]="applicationId" table="APLICACIONES_ASOCIADAS"
+    [applicationId]="applicationId" table="APLICACIONES"
     [currentFilter]="currentReportFilter()" [allFilter]="queryFilter()"></xtein-record-reports>
 }
 <xtein-record-settings [visible]="settingsVisible()" [applicationId]="applicationId" (closed)="settingsVisible.set(false)" />

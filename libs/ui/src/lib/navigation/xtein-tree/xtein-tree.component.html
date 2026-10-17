@@ -12,6 +12,7 @@
         [value]="searchText()"
         [placeholder]="searchPlaceholder"
         [showClearButton]="true"
+        valueChangeEvent="input keyup change"
         (onValueChanged)="updateSearch($event.value)">
       </dx-text-box>
 

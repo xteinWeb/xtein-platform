@@ -120,7 +120,7 @@ export const Ven230ToolbarCapabilities: Readonly<RecordToolbarCapabilities> = {
 };
 
 export const Ven230ClientColumns: XteinGridColumn<Ven230Lookup,unknown>[] = [
- {dataField:'ID_CLIENTE',caption:'Documento del Cliente',width:130},
+ {dataField:'ID_CLIENTE',caption:'Documento',width:140},
  {dataField:'NOMBRE_COMPLETO',caption:'Nombre del Cliente'}
 ];
 

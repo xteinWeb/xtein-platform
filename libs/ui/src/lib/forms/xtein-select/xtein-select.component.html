@@ -29,6 +29,18 @@
       <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
     </div>
   }
+  @if (columnHeaders && columnHeaders.length) {
+    <div *dxTemplate="let data of 'columnsHeaderTemplate'" class="xtein-select-columns-header">
+      @for (header of columnHeaders; track header; let i = $index) {
+        <span
+          class="xtein-select-header-col"
+          [class.xtein-select-header-col--first]="i === 0"
+          [ngStyle]="getHeaderColumnStyle(i)">
+          {{ header }}
+        </span>
+      }
+    </div>
+  }
   @if (columns && columns.length) {
     <div *dxTemplate="let item of 'columnsItem'">
       <div class="xtein-select-columns-item">
@@ -36,7 +48,7 @@
           <span
             class="xtein-select-col"
             [class.xtein-select-col--first]="i === 0"
-            [style.width]="getColumnWidth(i)">
+            [ngStyle]="getHeaderColumnStyle(i)">
             {{ item?.[col] ?? item }}
           </span>
         }

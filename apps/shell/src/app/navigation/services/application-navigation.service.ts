@@ -158,6 +158,16 @@ export class ApplicationNavigationService {
           items => {
 
             /*
+             * Filter the application tree: keep only applications with
+             * a configured MICROFRONTEND_ID and their ancestor modules/menus.
+             */
+            const filteredItems =
+              this.filterMicrofrontendTree(
+                items
+              );
+
+
+            /*
              * Replace the runtime registry with the applications
              * currently authorized for the authenticated user.
              */
@@ -167,7 +177,7 @@ export class ApplicationNavigationService {
 
             this.applicationRegistry
               .registerApplications(
-                items
+                filteredItems
               );
 
 
@@ -176,7 +186,7 @@ export class ApplicationNavigationService {
              */
             this.itemsState.set(
               [
-                ...items
+                ...filteredItems
               ]
             );
 
@@ -188,7 +198,7 @@ export class ApplicationNavigationService {
              * contains the complete authorized application catalog.
              */
             this.openDefaultApplications(
-              items
+              filteredItems
             );
           },
 
@@ -462,5 +472,108 @@ export class ApplicationNavigationService {
 
 
     return 'Unable to load the XTEIN application tree.';
+  }
+
+
+  /**
+   * Filters the application tree so that only applications with a configured
+   * MICROFRONTEND_ID (and their ancestor modules/menus) are displayed.
+   *
+   * Applications without a microfrontend cannot be executed in this version
+   * of the Shell and are excluded along with modules that contain no
+   * migratable applications.
+   *
+   * @param items Raw application tree nodes.
+   * @returns Filtered application tree nodes.
+   */
+  private filterMicrofrontendTree(
+    items:
+      readonly ApplicationTreeNode[]
+  ): ApplicationTreeNode[] {
+
+    const itemMap =
+      new Map<string, ApplicationTreeNode>();
+
+    for (const item of items) {
+      const id =
+        item.applicationId
+          ?.trim()
+          .toUpperCase();
+
+      if (id) {
+        itemMap.set(id, item);
+      }
+    }
+
+
+    /*
+     * 1. Collect all nodes that have a valid microfrontend identifier
+     */
+    const validAppIds =
+      new Set<string>();
+
+    for (const item of items) {
+      const mfeId =
+        (
+          (item as unknown as { microfrontendId?: string }).microfrontendId ??
+          item.remote?.microfrontendId
+        )?.trim();
+
+      if (mfeId) {
+        validAppIds.add(
+          item.applicationId
+            .trim()
+            .toUpperCase()
+        );
+      }
+    }
+
+
+    /*
+     * 2. Retain valid applications and all their ancestor modules/menus
+     */
+    const retainedIds =
+      new Set<string>(validAppIds);
+
+    for (const validId of validAppIds) {
+      let current =
+        itemMap.get(validId);
+
+      while (
+        current &&
+        current.parentApplicationId
+      ) {
+        const parentId =
+          current.parentApplicationId
+            .trim()
+            .toUpperCase();
+
+        if (
+          parentId === 'XTEIN' ||
+          parentId === ''
+        ) {
+          break;
+        }
+
+        retainedIds.add(parentId);
+        current =
+          itemMap.get(parentId);
+      }
+    }
+
+
+    /*
+     * 3. Keep only retained nodes in the tree
+     */
+    return items.filter(item => {
+      const id =
+        item.applicationId
+          ?.trim()
+          .toUpperCase();
+
+      return id
+        ? retainedIds.has(id)
+        : false;
+    });
   }
 }

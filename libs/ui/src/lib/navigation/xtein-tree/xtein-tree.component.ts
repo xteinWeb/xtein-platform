@@ -269,9 +269,9 @@ export class XteinTreeComponent
       () => {
 
         const search =
-          this.searchText()
-            .trim()
-            .toLowerCase();
+          this.normalizeString(
+            this.searchText()
+          );
 
 
         if (
@@ -618,12 +618,15 @@ export class XteinTreeComponent
           search
         );
 
-
-      if (
+      const isMatch =
         this.matchesSearch(
           node,
           search
-        ) ||
+        );
+
+
+      if (
+        isMatch ||
         children.length > 0
       ) {
 
@@ -634,7 +637,10 @@ export class XteinTreeComponent
             expanded:
               true,
 
-            children
+            children:
+              isMatch && children.length === 0
+                ? node.children
+                : children
           }
         );
       }
@@ -660,6 +666,14 @@ export class XteinTreeComponent
       string
   ): boolean {
 
+    if (
+      this.normalizeString(node.text).includes(search) ||
+      (node.prefix && this.normalizeString(node.prefix).includes(search)) ||
+      (node.key && this.normalizeString(node.key).includes(search))
+    ) {
+      return true;
+    }
+
     const fields =
       this.searchFields.length > 0
         ? this.searchFields
@@ -679,15 +693,41 @@ export class XteinTreeComponent
           );
 
 
-        return String(
-          value ?? ''
-        )
-          .toLowerCase()
-          .includes(
-            search
-          );
+        return this.normalizeString(
+          value
+        ).includes(
+          search
+        );
       }
     );
+  }
+
+
+  /**
+   * Normalizes a string by stripping diacritics, trimming and converting to lowercase.
+   *
+   * @param value Raw value.
+   * @returns Normalized string.
+   */
+  private normalizeString(
+    value:
+      unknown
+  ): string {
+
+    if (
+      value === null ||
+      value === undefined
+    ) {
+      return '';
+    }
+
+    return String(
+      value
+    )
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
   }
 
 
@@ -765,7 +805,8 @@ export class XteinTreeComponent
   ): unknown {
 
     if (
-      !field
+      !field ||
+      !item
     ) {
 
       return undefined;
@@ -779,10 +820,18 @@ export class XteinTreeComponent
           unknown
         >;
 
+    if (record[field] !== undefined) {
+      return record[field];
+    }
 
-    return record[
-      field
-    ];
+    const target = field.toLowerCase();
+    for (const key of Object.keys(record)) {
+      if (key.toLowerCase() === target) {
+        return record[key];
+      }
+    }
+
+    return undefined;
   }
 
 

@@ -297,6 +297,13 @@ export class ApplicationTreeMapperService {
             .level
         ),
 
+      microfrontendId:
+        this.getOptionalString(
+          item,
+          APPLICATION_TREE_FIELDS
+            .microfrontendId
+        ),
+
       remote:
         this.mapRemote(
           item

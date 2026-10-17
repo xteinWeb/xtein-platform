@@ -11,7 +11,7 @@ export class Ven230SelectionService {
     if (!Array.isArray(values)) throw new Error('La configuración de columnas no es válida.');
     return values.map(column => {
       const {editable, templateGroup, validationRules, msgError, ...options} = column;
-      const result: XteinGridColumn<Ven230Lookup, number> = {...options, visible: column.visible !== false, allowEditing: !!editable};
+      const result: XteinGridColumn<Ven230Lookup, number> = {...options, visible: column['visible'] !== false, allowEditing: !!editable};
       if (typeof validationRules === 'string' && validationRules.trim()) {
         const validate = compileValidation(validationRules);
         result.validationRules = [{type:'custom', reevaluate:true, ignoreEmptyValue:false,
@@ -19,17 +19,18 @@ export class Ven230SelectionService {
             try { return validate(event); } catch { return false; }
           }}];
       } else if (Array.isArray(validationRules)) result.validationRules = validationRules;
-      if (templateGroup || column.groupIndex != null) result.groupCellTemplate = 'xteinGroup';
+      if (templateGroup || column['groupIndex'] != null) result.groupCellTemplate = 'xteinGroup';
       return result;
     });
   }
   validateRows(config: string | undefined, rows: Ven230Lookup[]): void {
     const columns: Ven230SelectionColumn[] = config ? JSON.parse(config) : [];
     for (const column of columns) {
-      if (!column.dataField || typeof column.validationRules !== 'string' || !column.validationRules.trim()) continue;
+      const dataField = column['dataField'];
+      if (!dataField || typeof column.validationRules !== 'string' || !column.validationRules.trim()) continue;
       const validate = compileValidation(column.validationRules);
       for (const data of rows) {
-        if (!validate({value: data[column.dataField], data, column})) {
+        if (!validate({value: data[dataField], data, column})) {
           throw new Error(column.msgError || 'El valor no cumple la validación configurada.');
         }
       }
@@ -37,7 +38,7 @@ export class Ven230SelectionService {
   }
   groupFields(config: string | undefined, field: string): string[] {
     const columns: Ven230SelectionColumn[] = config ? JSON.parse(config) : [];
-    const template = columns.find(column=>column.dataField===field)?.templateGroup;
+    const template = columns.find(column=>column['dataField']===field)?.templateGroup;
     if (Array.isArray(template)) return template;
     if (!template) return [field];
     try { const fields = JSON.parse(template.replace(/'/g,'"')); return Array.isArray(fields)?fields:[field]; }

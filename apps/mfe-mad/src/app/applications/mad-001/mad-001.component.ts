@@ -55,7 +55,9 @@ import {
   XteinTextareaComponent,
   XteinTreeComponent,
   XteinTreeDataItem,
-  XteinRecordSettingsComponent
+  XteinRecordSettingsComponent,
+  XteinSwitchComponent,
+  XteinDateComponent
 } from '@xtein/ui';
 
 import {
@@ -104,7 +106,9 @@ import {
     XteinTextareaComponent,
     XteinTreeComponent,
     XteinLoadingComponent,
-    XteinRecordSettingsComponent
+    XteinRecordSettingsComponent,
+    XteinSwitchComponent,
+    XteinDateComponent
   ],
 
   providers: [
@@ -127,13 +131,14 @@ export class Mad001Component
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
   readonly settingsVisible = signal(false);
+  readonly activeTab = signal<'general' | 'tecnica' | 'metricas' | 'comentarios'>('general');
   readonly queryFilter = computed(() => buildReportRecordFilter(
-    'APLICACIONES_ASOCIADAS', 'ID_APLICACION', this.applications().map(record => record.ID_APLICACION)));
+    'APLICACIONES', 'ID_APLICACION', this.applications().map(record => record.ID_APLICACION)));
   readonly viewColumns = Mad001RecordViewColumns;
 
   currentReportFilter(): string {
     const record = this.applications()[this.currentIndex()];
-    return record ? " APLICACIONES_ASOCIADAS.ID_APLICACION = '" + String(record.ID_APLICACION).replace(/'/g, "''") + "'" : '';
+    return record ? " APLICACIONES.ID_APLICACION = '" + String(record.ID_APLICACION).replace(/'/g, "''") + "'" : '';
   }
 
   selectViewedRecord(record: object): void {
@@ -146,7 +151,7 @@ export class Mad001Component
     if (this.loading() || this.isChanging() || !this.permissions.search) return;
     this.filterVisible.set(false);
     this.loading.set(true);
-    this.subscriptions.add(this.mad001Service.query(Mad001Action.Query, { APLICACIONES_ASOCIADAS: filter.ESTRUCTURA })
+    this.subscriptions.add(this.mad001Service.query(Mad001Action.Query, { APLICACIONES: filter.ESTRUCTURA })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: response => {
@@ -255,6 +260,109 @@ export class Mad001Component
           string | null
         >(
           'ACTIVO'
+        ),
+
+      TIPO_SISTEMA:
+        new FormControl<
+          string | null
+        >(
+          'WEB'
+        ),
+
+      DEFECTO:
+        new FormControl<
+          boolean
+        >(
+          false,
+          {
+            nonNullable:
+              true
+          }
+        ),
+
+      GENERA:
+        new FormControl<
+          boolean
+        >(
+          false,
+          {
+            nonNullable:
+              true
+          }
+        ),
+
+      MICROFRONTEND_ID:
+        new FormControl<
+          string | null
+        >(
+          null
+        ),
+
+      PROGRAMA:
+        new FormControl<
+          string | null
+        >(
+          null,
+          {
+            validators: [
+              Validators.maxLength(50)
+            ]
+          }
+        ),
+
+      DIRECTORIO:
+        new FormControl<
+          string | null
+        >(
+          null,
+          {
+            validators: [
+              Validators.maxLength(200)
+            ]
+          }
+        ),
+
+      TABLA_APLICACION:
+        new FormControl<
+          string | null
+        >(
+          null,
+          {
+            validators: [
+              Validators.maxLength(50)
+            ]
+          }
+        ),
+
+      PARAMETROS:
+        new FormControl<
+          string | null
+        >(
+          null,
+          {
+            validators: [
+              Validators.maxLength(50)
+            ]
+          }
+        ),
+
+      FECHA_VIGENCIA:
+        new FormControl<
+          string | null
+        >(
+          null
+        ),
+
+      IMAGEN_URL:
+        new FormControl<
+          string | null
+        >(
+          null,
+          {
+            validators: [
+              Validators.maxLength(200)
+            ]
+          }
         ),
 
       NIVEL:
@@ -373,6 +481,39 @@ export class Mad001Component
       readonly string[]
     >(
       []
+    );
+
+
+  readonly systemTypeOptions =
+    signal<
+      readonly string[]
+    >(
+      [
+        'WEB',
+        'MOVIL',
+        'ESCRITORIO',
+        'HIBRIDA'
+      ]
+    );
+
+
+  readonly microfrontendOptions =
+    signal<
+      readonly string[]
+    >(
+      [
+        'MFE-ADM',
+        'MFE-DASHBOARD',
+        'MFE-INV',
+        'MFE-MAD',
+        'MFE-MALM',
+        'MFE-MAN',
+        'MFE-MCOM',
+        'MFE-MCPR',
+        'MFE-MEN',
+        'MFE-MFIN',
+        'MFE-MTHU'
+      ]
     );
 
 
@@ -820,6 +961,10 @@ export class Mad001Component
   private startCreating():
     void {
 
+    this.activeTab.set(
+      'general'
+    );
+
     this.previousRecord =
       this.getCurrentRecord();
 
@@ -943,7 +1088,7 @@ export class Mad001Component
           ? await firstValueFrom(
               this.mad001Service
                 .create({
-                  APLICACIONES_ASOCIADAS:
+                  APLICACIONES:
                     record
                 })
             )
@@ -951,7 +1096,7 @@ export class Mad001Component
           : await firstValueFrom(
               this.mad001Service
                 .update({
-                  APLICACIONES_ASOCIADAS:
+                  APLICACIONES:
                     record
                 })
             );
@@ -1714,6 +1859,51 @@ export class Mad001Component
           ESTADO:
             record.ESTADO,
 
+          TIPO_SISTEMA:
+            record.TIPO_SISTEMA ??
+            'WEB',
+
+          DEFECTO:
+            Boolean(
+              record.DEFECTO
+            ),
+
+          GENERA:
+            Boolean(
+              record.GENERA
+            ),
+
+          MICROFRONTEND_ID:
+            record.MICROFRONTEND_ID ??
+            null,
+
+          PROGRAMA:
+            record.PROGRAMA ??
+            null,
+
+          DIRECTORIO:
+            record.DIRECTORIO ??
+            null,
+
+          TABLA_APLICACION:
+            record.TABLA_APLICACION ??
+            null,
+
+          PARAMETROS:
+            record.PARAMETROS ??
+            null,
+
+          FECHA_VIGENCIA:
+            record.FECHA_VIGENCIA
+              ? String(
+                  record.FECHA_VIGENCIA
+                ).slice(0, 10)
+              : null,
+
+          IMAGEN_URL:
+            record.IMAGEN_URL ??
+            null,
+
           NIVEL:
             record.NIVEL,
 
@@ -1807,6 +1997,53 @@ export class Mad001Component
       ACCION:
         value.ACCION,
 
+      TIPO_SISTEMA:
+        value.TIPO_SISTEMA ||
+        null,
+
+      DEFECTO:
+        Boolean(
+          value.DEFECTO
+        ),
+
+      GENERA:
+        Boolean(
+          value.GENERA
+        ),
+
+      MICROFRONTEND_ID:
+        value.MICROFRONTEND_ID ||
+        null,
+
+      PROGRAMA:
+        value.PROGRAMA
+          ?.trim() ||
+        null,
+
+      DIRECTORIO:
+        value.DIRECTORIO
+          ?.trim() ||
+        null,
+
+      TABLA_APLICACION:
+        value.TABLA_APLICACION
+          ?.trim() ||
+        null,
+
+      PARAMETROS:
+        value.PARAMETROS
+          ?.trim() ||
+        null,
+
+      FECHA_VIGENCIA:
+        value.FECHA_VIGENCIA ||
+        null,
+
+      IMAGEN_URL:
+        value.IMAGEN_URL
+          ?.trim() ||
+        null,
+
       META_INFERIOR:
         value.META_INFERIOR,
 
@@ -1894,6 +2131,26 @@ export class Mad001Component
         ...dataLists.nivel
       ]
     );
+
+
+    if (
+      dataLists.tipoSistema &&
+      dataLists.tipoSistema.length > 0
+    ) {
+
+      const uniqueTypes =
+        Array.from(
+          new Set([
+            ...dataLists.tipoSistema,
+            'HIBRIDA'
+          ])
+        );
+
+
+      this.systemTypeOptions.set(
+        uniqueTypes
+      );
+    }
   }
 
 

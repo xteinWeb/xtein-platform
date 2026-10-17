@@ -365,12 +365,23 @@
                   Contacto
                 </xtein-label>
                 <div class="ven-209__control-inline">
-                  <xtein-input
+                  <xtein-select
+                    #contactoSelect
                     id="ven-209-contacto"
+                    placeholder="Contacto"
+                    [items]="$any(idLegales())"
+                    valueExpr="ID_LEGAL"
+                    displayExpr="ID_LEGAL"
+                    [columns]="['ID_LEGAL', 'NOMBRE_COMPLETO']"
+                    [searchEnabled]="true"
+                    searchMode="contains"
+                    [acceptCustomValue]="true"
+                    [refreshEnabled]="true"
+                    (refreshRequested)="refreshIdLegales()"
+                    (customItemCreating)="onContactoCustomItem($event)"
                     formControlName="CONTACTO"
-                    placeholder="Nombre del contacto"
                     [readOnly]="readOnly()"
-                  ></xtein-input>
+                  ></xtein-select>
                 </div>
               </div>
             </div>

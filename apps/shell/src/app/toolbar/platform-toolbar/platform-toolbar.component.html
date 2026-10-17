@@ -15,7 +15,8 @@
 
         <div
           class="xt-platform-toolbar__mode"
-          [attr.title]="indicator.label"
+          (mouseenter)="showTooltip($event.currentTarget, currentModeKey())"
+          (mouseleave)="hideTooltip()"
           [attr.aria-label]="indicator.label"
           role="status">
 
@@ -57,26 +58,31 @@
 
         }
 
+        <span
+          class="xt-platform-toolbar__button-wrapper"
+          (mouseenter)="showTooltip($event.currentTarget, item.action)"
+          (mouseleave)="hideTooltip()">
 
-        <button
-          type="button"
-          class="xt-platform-toolbar__button"
-          [class.xt-platform-toolbar__button--disabled]="!item.enabled"
-          [disabled]="!item.enabled"
-          [attr.data-xtein-toolbar-action]="item.action"
-          [attr.title]="item.label"
-          [attr.aria-label]="item.label"
-          (click)="execute(item.action)">
+          <button
+            type="button"
+            class="xt-platform-toolbar__button"
+            [class.xt-platform-toolbar__button--disabled]="!item.enabled"
+            [disabled]="!item.enabled"
+            [attr.data-xtein-toolbar-action]="item.action"
+            [attr.aria-label]="item.label"
+            (click)="hideTooltip(); execute(item.action)">
 
-          <i
-            [class]="
-              'xt-platform-toolbar__icon ' +
-              item.iconClass
-            "
-            aria-hidden="true">
-          </i>
+            <i
+              [class]="
+                'xt-platform-toolbar__icon ' +
+                item.iconClass
+              "
+              aria-hidden="true">
+            </i>
 
-        </button>
+          </button>
+
+        </span>
 
 
         @if (
@@ -86,18 +92,21 @@
 
           <div
             class="xt-platform-toolbar__position"
-            title="Registro actual / total de registros"
             aria-label="Registro {{ currentRecord() }} de {{ totalRecords() }}">
 
             <input #recordNumber type="number" min="1" [max]="totalRecords()"
               [value]="currentRecord()" [disabled]="!goToEnabled()"
               class="xt-platform-toolbar__position-current"
               aria-label="Ir al número de registro"
+              (mouseenter)="showTooltip($event.currentTarget, 'positionCurrent')"
+              (mouseleave)="hideTooltip()"
               (change)="goToRecord(recordNumber)"
               (keydown.enter)="goToRecord(recordNumber)">
 
             <span
-              class="xt-platform-toolbar__position-total">
+              class="xt-platform-toolbar__position-total"
+              (mouseenter)="showTooltip($event.currentTarget, 'positionTotal')"
+              (mouseleave)="hideTooltip()">
 
               de {{ totalRecords() }}
 
@@ -128,11 +137,12 @@
             type="button"
             class="xt-platform-toolbar__button xt-platform-toolbar__more-button"
             data-xtein-toolbar-overflow
-            title="Más opciones"
             aria-label="Más opciones"
             aria-haspopup="menu"
             [attr.aria-expanded]="overflowMenuOpen()"
-            (click)="toggleOverflowMenu($event)">
+            (mouseenter)="showTooltip($event.currentTarget, 'overflow')"
+            (mouseleave)="hideTooltip()"
+            (click)="hideTooltip(); toggleOverflowMenu($event)">
 
             <i
               class="xt-platform-toolbar__icon icon-mas-opciones"
@@ -169,7 +179,9 @@
                   class="xt-platform-toolbar__overflow-item"
                   [disabled]="!item.enabled"
                   role="menuitem"
-                  (click)="execute(item.action)">
+                  (mouseenter)="showTooltip($event.currentTarget, item.action)"
+                  (mouseleave)="hideTooltip()"
+                  (click)="hideTooltip(); execute(item.action)">
 
                   <i
                     [class]="
@@ -201,6 +213,22 @@
     </div>
 
   </nav>
+
+  <dx-tooltip
+    [target]="tooltipTarget"
+    [(visible)]="tooltipVisible"
+    position="bottom"
+    [hideOnOutsideClick]="false"
+    [wrapperAttr]="{ class: 'xt-legacy-tooltip-wrapper' }"
+    showEvent=""
+    hideEvent="">
+    <div *dxTemplate="let data of 'content'" class="xt-legacy-tooltip" style="display: block; text-align: center; width: max-content; overflow: visible; margin: 0; padding: 0;">
+      <b class="xt-legacy-tooltip__title" style="display: block; text-align: center; font-size: 13px; font-weight: 700; color: #ffffff; line-height: 1.3; margin: 0; padding: 0;">{{ activeTooltip()?.title }}</b>
+      <hr class="xt-legacy-tooltip__divider" style="display: block; width: 100%; margin: 3px 0 4px 0; border: 0; border-top: 1px solid rgba(255, 255, 255, 0.25); height: 0;" />
+      <div class="xt-legacy-tooltip__info" style="display: block; text-align: center; font-size: 13px; font-weight: 400; color: #ffffff; line-height: 1.3; margin: 0; padding: 0;">{{ activeTooltip()?.info }}</div>
+    </div>
+  </dx-tooltip>
+
   <div class="xt-platform-toolbar__actions xt-platform-toolbar__measurement"
     data-measurement aria-hidden="true" inert>
     <button type="button" tabindex="-1" class="xt-platform-toolbar__button"></button>

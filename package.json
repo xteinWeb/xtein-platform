@@ -28,6 +28,7 @@
         "serve:men": "npx ng serve mfe-men",
         "serve:mfin": "npx ng serve mfe-mfin",
         "serve:mthu": "npx ng serve mfe-mthu",
+        "serve:apps": "concurrently -n SHELL,ADM,DASH,MAD,MCOM -c \"blue,green,magenta,yellow,cyan\" \"npm run serve:shell\" \"npm run serve:adm\" \"npm run serve:dashboard\" \"npm run serve:mad\" \"npm run serve:mcom\"",
         "serve:all": "concurrently --kill-others-on-fail -n SHELL,ADM,DASH,INV,MAD,MALM,MCOM,MCPR,MEN,MFIN,MTHU \"npm run serve:shell\" \"npm run serve:adm\" \"npm run serve:dashboard\" \"npm run serve:inv\" \"npm run serve:mad\" \"npm run serve:malm\" \"npm run serve:mcom\" \"npm run serve:mcpr\" \"npm run serve:men\" \"npm run serve:mfin\" \"npm run serve:mthu\"",
         "dev:all": "npm run build:libs && npm run serve:all"
     },

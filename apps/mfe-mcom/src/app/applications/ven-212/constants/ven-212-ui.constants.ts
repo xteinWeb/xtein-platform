@@ -71,7 +71,7 @@ export const Ven212DefaultRecord = {
 };
 
 export const Ven212ClientColumns: XteinGridColumn<Ven212Lookup, unknown>[] = [
-  { dataField: 'ID_CLIENTE', caption: 'Documento del Cliente', width: 130 },
+  { dataField: 'ID_CLIENTE', caption: 'Documento', width: 140 },
   { dataField: 'NOMBRE_COMPLETO', caption: 'Nombre del Cliente' }
 ];
 

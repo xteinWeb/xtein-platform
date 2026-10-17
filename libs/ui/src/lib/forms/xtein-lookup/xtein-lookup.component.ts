@@ -37,8 +37,32 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() autoFocus = false;
   @Input() selectionMode: 'single' | 'multiple' = 'single';
   @ViewChild(DxDropDownBoxComponent) private editor?: DxDropDownBoxComponent;
+  @ViewChild('dataGrid') private dataGrid?: XteinDataGridComponent<T, unknown>;
   private readonly destroyRef = inject(DestroyRef);
   private readonly zone = inject(NgZone);
+
+  onDropDownOpened(): void {
+    queueMicrotask(() => {
+      this.dataGrid?.repaint();
+    });
+    const focusSearch = (): boolean => {
+      const content = this.editor?.instance?.content() as HTMLElement | undefined;
+      const searchInput =
+        content?.querySelector<HTMLInputElement>('.dx-datagrid-search-panel input, .dx-searchbox input') ||
+        document.querySelector<HTMLInputElement>('.xtein-lookup-popup .dx-datagrid-search-panel input, .xtein-lookup-popup .dx-searchbox input');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select?.();
+        return true;
+      }
+      return false;
+    };
+    setTimeout(() => {
+      if (!focusSearch()) {
+        setTimeout(focusSearch, 100);
+      }
+    }, 50);
+  }
 
   ngAfterViewInit(): void {
     if (this.autoFocus) queueMicrotask(() => this.focus());
@@ -57,6 +81,7 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() ariaLabel = '';
   @Input() placeholder = 'Seleccionar…';
   @Input() searchPlaceholder = 'Buscar…';
+  @Input() searchWidth: number | string = '100%';
   @Input() items: T[] = [];
   @Input() valueExpr = '';
   @Input() displayExpr = '';
@@ -66,10 +91,29 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   @Input() required = false;
   @Input() showClearButton = false;
   @Input() dropDownWidth: string | number = 'min(600px, 95vw)';
-  @Input() dropDownHeight: string | number = 'min(320px, 65dvh)';
+  @Input() dropDownHeight: string | number = 300;
 
-  get dropDownOptions(): { width: string | number; height: string | number; hideOnParentScroll: boolean } {
-    return { width: this.dropDownWidth, height: this.dropDownHeight, hideOnParentScroll: true };
+  private _lastWidth?: string | number;
+  private _lastHeight?: string | number;
+  private _cachedDropDownOptions: Record<string, unknown> = {
+    width: 'min(600px, 95vw)',
+    height: 300,
+    hideOnParentScroll: true,
+    wrapperAttr: { class: 'xtein-lookup-popup' }
+  };
+
+  get dropDownOptions(): Record<string, unknown> {
+    if (this._lastWidth !== this.dropDownWidth || this._lastHeight !== this.dropDownHeight) {
+      this._lastWidth = this.dropDownWidth;
+      this._lastHeight = this.dropDownHeight;
+      this._cachedDropDownOptions = {
+        width: this.dropDownWidth,
+        height: this.dropDownHeight,
+        hideOnParentScroll: true,
+        wrapperAttr: { class: 'xtein-lookup-popup' }
+      };
+    }
+    return this._cachedDropDownOptions;
   }
 
   value: unknown = null;

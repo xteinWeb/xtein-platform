@@ -51,7 +51,7 @@ export interface Ven209ClienteRecord {
   CLASE?: string | null;
   ID_GRUPO?: string | null;
   COMENTARIOS?: string | null;
-  CONTACTO?: string | null;
+  CONTACTO?: number | string | null;
   REPRESENTANTE_LEGAL?: string | null;
   ZONA?: string | null;
   ID_ADC?: string | null;
