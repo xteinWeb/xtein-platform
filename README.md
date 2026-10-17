@@ -41,3 +41,4 @@ npx ng serve mfe-adm
 npx ng serve mfe-mad
 npx ng serve mfe-dashboard
 npx ng serve mfe-mcom
+npx ng serve mfe-mthu
