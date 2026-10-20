@@ -12,8 +12,8 @@ export const environment = {
   files: 'https://reportes.colchonessunmoon.com',
   dashboard: 'https://dashboard.colchonessunmoon.com',
   dashboardDesigner: '/api/dashboard-designer',
-  userDiseno: 'administratos',
-  passUserDiseno: '2022.Admin',
+  // Empty: use the REMOTE_ENTRY_URL stored in the microfrontend catalog (local ng serve ports).
+  remoteEntryBaseUrl: '',
   apiDiseno: 'https://apidiseno.colchonessunmoon.com/files?command=GetDirContents&arguments=',
   apiDocElec: 'http://190.85.54.78:8770',
   apiArchivos: 'http://181.79.25.235:8556',
