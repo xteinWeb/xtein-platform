@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Despliegue de xtein-platform en el servidor (lo corre el runner de GitHub Actions; también se puede correr a mano).
-#   bash deploy/desplegar-platform.sh <commit>       (sin commit: el último de origin/main)
+#   bash deploy/desplegar-platform.sh <commit>       (sin commit: el último de origin/$RAMA)
 #
 # Compila en la copia instalada (APP_DIR, por defecto ~/apps/platform) las librerías, los microfrontends y el
 # shell, y solo si todo compila reemplaza lo que sirve nginx (WEB_DIR/browser) con un cambio de carpeta casi
@@ -12,6 +12,8 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-$HOME/apps/platform}"
 WEB_DIR="${WEB_DIR:-/var/www/xtein-platform}"
 SITE_URL="${SITE_URL:-http://127.0.0.1:7596}"
+# Rama del entorno de desarrollo (dev2026); main queda para producción
+RAMA="${RAMA:-developer}"
 export NG_CLI_ANALYTICS=false
 
 paso() { echo; echo "== $* =="; }
@@ -25,11 +27,11 @@ paso "Estado actual"
   git status --short
   falla "Hay archivos modificados a mano en $APP_DIR: revísalos antes de desplegar (git status)."
 }
-[ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || falla "$APP_DIR no está en la rama main."
+[ "$(git rev-parse --abbrev-ref HEAD)" = "$RAMA" ] || falla "$APP_DIR no está en la rama $RAMA."
 ANTERIOR="$(git rev-parse HEAD)"
-git fetch --quiet origin main
-OBJETIVO="$(git rev-parse "${1:-origin/main}")"
-git merge-base --is-ancestor "$OBJETIVO" origin/main || falla "El commit $OBJETIVO no está en origin/main."
+git fetch --quiet origin "$RAMA"
+OBJETIVO="$(git rev-parse "${1:-origin/$RAMA}")"
+git merge-base --is-ancestor "$OBJETIVO" "origin/$RAMA" || falla "El commit $OBJETIVO no está en origin/$RAMA."
 echo "Instalado: $(git log --oneline -1 "$ANTERIOR")"
 echo "A desplegar: $(git log --oneline -1 "$OBJETIVO")"
 git merge-base --is-ancestor "$ANTERIOR" "$OBJETIVO" || falla "El commit a desplegar es anterior al instalado (para volver atrás, hazlo a mano)."

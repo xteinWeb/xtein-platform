@@ -1,15 +1,16 @@
-# En cada PR: compilación de librerías y pruebas. Al unir a main: lo mismo y, si pasa, despliegue en dev2026 con
-# deploy/desplegar-platform.sh (shell + microfrontends en nginx, puerto 7596).
+# Entorno de desarrollo: en cada PR a developer, compilación de librerías y pruebas. Al unir a developer: lo mismo
+# y, si pasa, despliegue en dev2026 con deploy/desplegar-platform.sh (shell + microfrontends en nginx, puerto 7596).
+# main no despliega aquí: queda para producción.
 # Corre en el runner propio instalado en dev2026 (etiqueta "dev2026"): GitHub no puede entrar a la red interna,
 # el runner sale a buscar los trabajos. Se puede relanzar a mano desde Actions → "Desplegar" → Run workflow.
 name: Desplegar
 
 on:
   push:
-    branches: [main]
-  # En cada PR a main corren solo las pruebas (sin desplegar): se ve el resultado antes de unir
+    branches: [developer]
+  # En cada PR a developer corren solo las pruebas (sin desplegar): se ve el resultado antes de unir
   pull_request:
-    branches: [main]
+    branches: [developer]
   workflow_dispatch:
 
 env:
@@ -28,10 +29,11 @@ jobs:
 
   desplegar:
     needs: pruebas
-    if: github.event_name != 'pull_request'
+    # Solo desde developer (también al relanzarlo a mano desde otra rama, no despliega)
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/developer'
     # Nunca dos despliegues a la vez; uno nuevo espera a que termine el que está en curso
     concurrency:
-      group: produccion-platform
+      group: dev2026-platform
       cancel-in-progress: false
     runs-on: [self-hosted, dev2026]
     timeout-minutes: 60
