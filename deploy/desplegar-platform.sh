@@ -2,8 +2,8 @@
 # Despliegue de xtein-platform en el servidor (lo corre el runner de GitHub Actions; también se puede correr a mano).
 #   bash deploy/desplegar-platform.sh <commit>       (sin commit: el último de origin/$RAMA)
 #
-# Compila en la copia instalada (APP_DIR, por defecto ~/apps/platform) las librerías, los microfrontends y el
-# shell, y solo si todo compila reemplaza lo que sirve nginx (WEB_DIR/browser) con un cambio de carpeta casi
+# Compila en la copia instalada (APP_DIR, por defecto ~/apps/platform) las librerías, los microfrontends con
+# pantallas y el shell (npm run build:deploy), y solo si todo compila reemplaza lo que sirve nginx (WEB_DIR/browser) con un cambio de carpeta casi
 # instantáneo. Estructura publicada: el shell en la raíz y cada microfrontend en <WEB_DIR>/browser/<mfe>/.
 # Si la página o algún remoteEntry.json no responde después, deja de nuevo la versión anterior.
 # WEB_DIR debe pertenecer al usuario del runner (sin sudo).
@@ -40,7 +40,10 @@ paso "Código"
 git merge --quiet --ff-only "$OBJETIVO"
 
 paso "Dependencias y compilación (librerías, microfrontends y shell)"
-if ! { npm ci --no-audit --no-fund && npm run build:all; }; then
+# build:deploy compila solo los microfrontends con pantallas (al dar a uno vacío su primera pantalla, se
+# agrega allí). dist/ se borra antes: si no, se publicarían carpetas viejas de compilaciones anteriores.
+rm -rf dist
+if ! { npm ci --no-audit --no-fund && npm run build:deploy; }; then
   git reset --quiet --hard "$ANTERIOR"
   falla "No compiló: la página publicada no se tocó y el código volvió a $ANTERIOR."
 fi
