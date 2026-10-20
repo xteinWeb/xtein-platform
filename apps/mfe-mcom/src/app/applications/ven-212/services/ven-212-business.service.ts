@@ -45,9 +45,11 @@ export class Ven212BusinessService {
   }
 
   private static clientsCache: Ven212Lookup[] | null = null;
+  private static catalogCache = new Map<string, Ven212Lookup[]>();
 
   clearCache(): void {
     Ven212BusinessService.clientsCache = null;
+    Ven212BusinessService.catalogCache.clear();
   }
 
   async loadClients(forceRefresh = false): Promise<Ven212Lookup[]> {
@@ -68,9 +70,15 @@ export class Ven212BusinessService {
     return clients;
   }
 
-  async catalog(name: keyof typeof Ven212Catalog, data: unknown = {}): Promise<Ven212Lookup[]> {
+  async catalog(name: keyof typeof Ven212Catalog, data: unknown = {}, forceRefresh = false): Promise<Ven212Lookup[]> {
+    const cacheKey = `${String(name)}_${JSON.stringify(data ?? {})}`;
+    if (!forceRefresh && Ven212BusinessService.catalogCache.has(cacheKey)) {
+      return Ven212BusinessService.catalogCache.get(cacheKey)!;
+    }
     const [endpoint, action] = Ven212Catalog[name];
-    return this.decode<Ven212Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    const decoded = this.decode<Ven212Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    Ven212BusinessService.catalogCache.set(cacheKey, decoded);
+    return decoded;
   }
 
   async action<T>(name: keyof typeof Ven212BusinessAction, data: unknown): Promise<T[]> {
