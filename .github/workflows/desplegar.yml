@@ -1,0 +1,44 @@
+# En cada PR: compilación de librerías y pruebas. Al unir a main: lo mismo y, si pasa, despliegue en dev2026 con
+# deploy/desplegar-platform.sh (shell + microfrontends en nginx, puerto 7596).
+# Corre en el runner propio instalado en dev2026 (etiqueta "dev2026"): GitHub no puede entrar a la red interna,
+# el runner sale a buscar los trabajos. Se puede relanzar a mano desde Actions → "Desplegar" → Run workflow.
+name: Desplegar
+
+on:
+  push:
+    branches: [main]
+  # En cada PR a main corren solo las pruebas (sin desplegar): se ve el resultado antes de unir
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NG_CLI_ANALYTICS: "false"
+
+jobs:
+  pruebas:
+    runs-on: [self-hosted, dev2026]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci --no-audit --no-fund
+      # Las pruebas importan las librerías @xtein/* desde dist/ (alias de tsconfig.json)
+      - run: npm run build:libs
+      - run: npm run test:ci
+
+  desplegar:
+    needs: pruebas
+    if: github.event_name != 'pull_request'
+    # Nunca dos despliegues a la vez; uno nuevo espera a que termine el que está en curso
+    concurrency:
+      group: produccion-platform
+      cancel-in-progress: false
+    runs-on: [self-hosted, dev2026]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Desplegar en dev2026
+        # Vacío: que el runner no mate procesos al terminar el job (nginx sigue vivo)
+        env:
+          RUNNER_TRACKING_ID: ""
+        run: bash deploy/desplegar-platform.sh "$GITHUB_SHA"

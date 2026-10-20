@@ -11,6 +11,7 @@
         "build-prod": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng build --configuration production",
         "watch": "node --max-old-space-size=14336 ./node_modules/@angular/cli/bin/ng build --watch --configuration development",
         "test": "ng test",
+        "test:ci": "npx ng test sdk --watch=false && npx ng test runtime --watch=false && npx ng test ui --watch=false",
         "proxy": "ng serve --port 4800 --proxy-config proxy.conf.json",
         "serve-prod": "node --max-old-space-size=14336 ./node_modules/@angular/cli/bin/ng serve --configuration production --port 4795",
         

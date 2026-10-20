@@ -22,6 +22,8 @@ import {
   WorkspaceTab
 } from '@xtein/sdk';
 
+import { environment } from '../../../environments/environment';
+
 
 /**
  * Defines the contract exposed by every XTEIN
@@ -202,7 +204,7 @@ export class WorkspaceTabHostComponent
         >({
 
           remoteEntry:
-            this.tab.remoteEntryUrl,
+            this.resolveRemoteEntryUrl(),
 
           remoteName:
             this.tab.remoteName,
@@ -283,7 +285,7 @@ export class WorkspaceTabHostComponent
             this.tab.remoteName,
 
           remoteEntryUrl:
-            this.tab.remoteEntryUrl,
+            this.resolveRemoteEntryUrl(),
 
           exposedModule:
             this.tab.exposedModule,
@@ -292,6 +294,27 @@ export class WorkspaceTabHostComponent
         }
       );
     }
+  }
+
+
+  /**
+   * Returns the remote entry used to load the microfrontend.
+   *
+   * When the environment defines remoteEntryBaseUrl, every
+   * microfrontend is served by the same web server under
+   * /<REMOTE_NAME>/ and the catalog URL is ignored.
+   */
+  private resolveRemoteEntryUrl():
+    string {
+
+    const baseUrl =
+      environment.remoteEntryBaseUrl;
+
+    if (!baseUrl) {
+      return this.tab.remoteEntryUrl;
+    }
+
+    return `${baseUrl.replace(/\/+$/, '')}/${this.tab.remoteName}/remoteEntry.json`;
   }
 
 
