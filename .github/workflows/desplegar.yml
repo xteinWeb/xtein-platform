@@ -12,6 +12,11 @@ on:
   pull_request:
     branches: [developer]
   workflow_dispatch:
+    inputs:
+      completo:
+        description: "Compilar y publicar todo (si no, solo lo que cambió desde el último despliegue)"
+        type: boolean
+        default: false
 
 env:
   NG_CLI_ANALYTICS: "false"
@@ -43,4 +48,6 @@ jobs:
         # Vacío: que el runner no mate procesos al terminar el job (nginx sigue vivo)
         env:
           RUNNER_TRACKING_ID: ""
+          # Solo al relanzarlo a mano con "Compilar y publicar todo"; en un push queda en false
+          COMPLETO: ${{ inputs.completo == true }}
         run: bash deploy/desplegar-platform.sh "$GITHUB_SHA"
