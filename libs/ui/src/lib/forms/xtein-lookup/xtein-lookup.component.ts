@@ -135,29 +135,41 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   get selectionText(): string {
     const field = this.displayExpr || this.valueExpr;
     return this.selectedKeys.map(key => {
-      const item = this.items.find(row => (row as Record<string, unknown>)[this.valueExpr] === key);
-      return String(item ? (item as Record<string, unknown>)[field] ?? key : key);
+      const item = this.items.find(row => {
+        const rowVal = (row as Record<string, unknown>)[this.valueExpr];
+        return rowVal === key || (rowVal != null && key != null && String(rowVal).trim() === String(key).trim());
+      });
+      return String(item ? ((item as Record<string, unknown>)[field] ?? (item as Record<string, unknown>)['NOMBRE'] ?? key) : key);
     }).join(', ');
   }
 
   displayValueFormatter = (value: unknown): string => {
     if (value == null || value === '') return '';
     const displayField = this.displayExpr || this.valueExpr;
+
+    const matchItem = (val: unknown): Record<string, unknown> | undefined => {
+      return this.items?.find(it => {
+        const itemVal = (it as Record<string, unknown>)[this.valueExpr];
+        return itemVal === val || (itemVal != null && val != null && String(itemVal).trim() === String(val).trim());
+      }) as Record<string, unknown> | undefined;
+    };
+
+    const formatItem = (val: unknown): string => {
+      if (typeof val === 'object' && val !== null) {
+        return String((val as Record<string, unknown>)[displayField] ?? (val as Record<string, unknown>)['NOMBRE'] ?? '');
+      }
+      const item = matchItem(val);
+      if (item) {
+        return String(item[displayField] ?? item['NOMBRE'] ?? val);
+      }
+      return String(val);
+    };
+
     if (Array.isArray(value)) {
-      const labels = value.map(v => {
-        if (typeof v === 'object' && v !== null) {
-          return (v as Record<string, unknown>)[displayField] ?? '';
-        }
-        const item = this.items?.find(it => (it as Record<string, unknown>)[this.valueExpr] === v);
-        return item ? (item as Record<string, unknown>)[displayField] ?? v : v;
-      });
+      const labels = value.map(v => formatItem(v));
       return labels.filter(Boolean).join(', ');
     }
-    if (typeof value === 'object') {
-      return String((value as Record<string, unknown>)[displayField] ?? '');
-    }
-    const item = this.items?.find(it => (it as Record<string, unknown>)[this.valueExpr] === value);
-    return item ? String((item as Record<string, unknown>)[displayField] ?? value) : String(value);
+    return formatItem(value);
   };
 
   private setValue(value: unknown): void {
@@ -251,8 +263,11 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     if (this.isDisabled || this.readOnly) this.opened = false;
     if (changes['items'] && this.editor?.instance) {
       this.editor.instance.option('items', this.items);
-      if (this.value) {
-        this.editor.instance.option('value', this.selectionMode === 'multiple' ? [...(this.value as unknown[])] : this.value);
+      if (this.value != null && this.value !== '') {
+        const currentVal = this.selectionMode === 'multiple' ? [...(this.value as unknown[])] : this.value;
+        this.editor.instance.option('value', undefined);
+        this.editor.instance.option('value', currentVal);
+        this.editor.instance.repaint();
       }
     }
     this.detector.markForCheck();
@@ -261,7 +276,10 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   writeValue(value: unknown): void {
     this.setValue(value);
     if (this.editor?.instance) {
-      this.editor.instance.option('value', this.selectionMode === 'multiple' ? [...(this.value as unknown[])] : this.value);
+      const val = this.selectionMode === 'multiple' ? [...(this.value as unknown[])] : this.value;
+      this.editor.instance.option('value', undefined);
+      this.editor.instance.option('value', val);
+      this.editor.instance.repaint();
     }
     this.detector.markForCheck();
   }
@@ -284,12 +302,12 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     if (this.isDisabled || this.readOnly || this.selectionMode === 'multiple') return;
     const value = (row as Record<string, unknown>)[this.valueExpr];
     if (value == null) return;
-    if (value !== this.value) {
-      this.setValue(value);
-      this.change(value);
-      if (this.editor?.instance) {
-        this.editor.instance.option('value', value);
-      }
+    this.setValue(value);
+    this.change(value);
+    if (this.editor?.instance) {
+      this.editor.instance.option('value', undefined);
+      this.editor.instance.option('value', value);
+      this.editor.instance.repaint();
     }
     this.opened = false;
     this.touched();
