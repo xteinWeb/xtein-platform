@@ -26,12 +26,15 @@
     @if (cell.column.dataField === 'EMAIL') {
       <xtein-input
         [(ngModel)]="emailDraft.EMAIL"
+        (ngModelChange)="pendingChange.emit()"
         placeholder="ejemplo@correo.com"
         ariaLabel="Correo electrónico"
+        [autoFocus]="true"
       />
     } @else if (cell.column.dataField === 'ETIQUETA') {
       <xtein-select
         [(ngModel)]="emailDraft.ETIQUETA"
+        (ngModelChange)="pendingChange.emit()"
         [items]="etiquetasEmail"
         placeholder="Tipo"
         ariaLabel="Tipo de correo"

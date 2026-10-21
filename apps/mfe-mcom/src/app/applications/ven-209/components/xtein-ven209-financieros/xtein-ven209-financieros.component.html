@@ -1,5 +1,5 @@
 <div class="xtein-financieros">
-  <!-- Acordeón 1: Cupo -->
+  <!-- Acordeón 1: Cupos -->
   <div class="xtein-accordion-item">
     <div class="xtein-accordion-header" (click)="toggleSection('cupo')">
       <div class="xtein-accordion-icon">
@@ -10,29 +10,14 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Cupo</span>
+      <span class="xtein-accordion-title">Cupos</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.cupo()">
-      <div class="xtein-financieros__form-grid">
-        <div class="xtein-financieros__field-inline">
-          <xtein-label class="xtein-financieros__label-inline" for="fin-cupo">Cupo crédito</xtein-label>
-          <div class="xtein-financieros__control-inline">
-            <xtein-number
-              id="fin-cupo"
-              [ngModel]="cupoCredito"
-              (ngModelChange)="onCupoChange($event)"
-              [disabled]="readOnly"
-              [readOnly]="readOnly"
-              [min]="0"
-              [showSpinButtons]="false"
-              placeholder="0"
-            ></xtein-number>
-          </div>
-        </div>
-
-        <div class="xtein-financieros__field-inline">
-          <xtein-label class="xtein-financieros__label-inline" for="fin-tiempo">Días entrega</xtein-label>
-          <div class="xtein-financieros__control-inline">
+      <!-- Frecuencia / Días de entrega -->
+      <div class="xtein-financieros__top-row">
+        <div class="xtein-financieros__field-inline xtein-financieros__field-inline--frecuencia">
+          <xtein-label class="xtein-financieros__label-inline" for="fin-tiempo">Frecuencia</xtein-label>
+          <div class="xtein-financieros__control-frecuencia">
             <xtein-number
               id="fin-tiempo"
               [ngModel]="tiempoEntrega"
@@ -43,8 +28,157 @@
               [showSpinButtons]="false"
               placeholder="0"
             ></xtein-number>
+            <span class="xtein-financieros__suffix-text">Días</span>
           </div>
         </div>
+      </div>
+
+      <div class="xtein-financieros__cards-grid">
+        <!-- Card 1: Global -->
+        <fieldset class="xtein-financieros__fieldset">
+          <legend class="xtein-financieros__legend">
+            <xtein-group-label label="Global"></xtein-group-label>
+          </legend>
+          <div class="xtein-financieros__fieldset-content">
+            <!-- Autorizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-credito">Autorizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-credito"
+                  [ngModel]="cupoCredito"
+                  (ngModelChange)="onCupoCreditoChange($event)"
+                  [disabled]="readOnly"
+                  [readOnly]="readOnly"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-estado-cupo">Estado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-input
+                  id="fin-estado-cupo"
+                  [ngModel]="estadoCupo"
+                  [readOnly]="true"
+                  [disabled]="true"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <!-- Utilizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-utilizado">Utilizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-utilizado"
+                  [ngModel]="cupoUtilizado"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Disponible -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-disponible">Disponible</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-disponible"
+                  [ngModel]="cupoDisponible"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Card 2: Cuota -->
+        <fieldset class="xtein-financieros__fieldset">
+          <legend class="xtein-financieros__legend">
+            <xtein-group-label label="Cuota"></xtein-group-label>
+          </legend>
+          <div class="xtein-financieros__fieldset-content">
+            <!-- Autorizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-cuota">Autorizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-cuota"
+                  [ngModel]="cupoCuota"
+                  (ngModelChange)="onCupoCuotaChange($event)"
+                  [disabled]="readOnly"
+                  [readOnly]="readOnly"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-estado-cuota">Estado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-input
+                  id="fin-estado-cuota"
+                  [ngModel]="estadoCuota"
+                  [readOnly]="true"
+                  [disabled]="true"
+                ></xtein-input>
+              </div>
+            </div>
+
+            <!-- Utilizado -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-uti-cuota">Utilizado</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-uti-cuota"
+                  [ngModel]="cupoUtiCuota"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+
+            <!-- Disponible -->
+            <div class="xtein-financieros__field-inline">
+              <xtein-label class="xtein-financieros__label-inline" for="fin-cupo-dis-cuota">Disponible</xtein-label>
+              <div class="xtein-financieros__control-inline">
+                <xtein-number
+                  id="fin-cupo-dis-cuota"
+                  [ngModel]="cupoDisCuota"
+                  [readOnly]="true"
+                  [disabled]="true"
+                  [min]="0"
+                  format="#,##0.00"
+                  [showSpinButtons]="false"
+                  placeholder="0.00"
+                ></xtein-number>
+              </div>
+            </div>
+          </div>
+        </fieldset>
       </div>
     </div>
   </div>

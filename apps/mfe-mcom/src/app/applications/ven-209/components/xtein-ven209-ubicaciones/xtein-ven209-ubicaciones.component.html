@@ -57,7 +57,7 @@
       <span class="xtein-accordion-title">Correos</span>
     </div>
     <div class="xtein-accordion-body" *ngIf="expanded.correos()">
-      <xtein-correos [emails]="emails" [readOnly]="readOnly" (emailsChange)="emailsChange.emit($event)" />
+      <xtein-correos [emails]="emails" [readOnly]="readOnly" (emailsChange)="emailsChange.emit($event)" (pendingChange)="pendingChange.emit()" />
     </div>
   </div>
 

@@ -3,6 +3,7 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
+  ElementRef,
   signal,
   computed,
   effect,
@@ -52,7 +53,8 @@ import {
   XteinPerfilGridColumn,
   XteinPerfilTasaRecord,
   XteinTagBoxComponent,
-  XteinLoadingComponent
+  XteinLoadingComponent,
+  XteinGroupLabelComponent
 } from '@xtein/ui';
 
 import {
@@ -101,6 +103,7 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinPerfilTributarioComponent,
     XteinTagBoxComponent,
     XteinLoadingComponent,
+    XteinGroupLabelComponent,
     XteinVen209UbicacionesComponent,
     XteinVen209FinancierosComponent
   ],
@@ -199,12 +202,19 @@ export class Ven209Component implements OnInit, OnDestroy {
     CLASE: new FormControl<string>('CLIENTES', [Validators.required]),
     PERFIL_TRIBUTARIO: new FormControl<string>('', [Validators.required]),
     RT: new FormControl<string[]>([], [Validators.required]),
-    CONTACTO: new FormControl<string>(''),
+    CONTACTO: new FormControl<number | string>(''),
     COMENTARIOS: new FormControl<string>(''),
     ZONA: new FormControl<string>(''),
     ID_ADC: new FormControl<string>(''),
     STATUS: new FormControl<string>(''),
     CUPO_CREDITO: new FormControl<number>(0),
+    CUPO_DISPONIBLE: new FormControl<number>(0),
+    CUPO_UTILIZADO: new FormControl<number>(0),
+    ESTADO_CUPO: new FormControl<string>('ACTIVO'),
+    CUPO_CUOTA: new FormControl<number>(0),
+    CUPO_DIS_CUOTA: new FormControl<number>(0),
+    CUPO_UTI_CUOTA: new FormControl<number>(0),
+    ESTADO_CUOTA: new FormControl<string>('ACTIVO'),
     TIEMPO_ENTREGA: new FormControl<number>(0)
   });
 
@@ -214,7 +224,8 @@ export class Ven209Component implements OnInit, OnDestroy {
     private readonly toolbar: ToolbarRuntimeService,
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly host: ElementRef
   ) {
     // Synchronize toolbar state
     effect(() => {
@@ -259,7 +270,7 @@ export class Ven209Component implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.form.controls.ID_LEGAL.valueChanges.subscribe(val => {
-        if (val) this.onIdLegalChanged(val);
+        this.onIdLegalChanged(val);
       })
     );
 
@@ -328,6 +339,12 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.form.enable({ emitEvent: false });
     this.form.controls.ESTADO.disable({ emitEvent: false });
     this.form.controls.FECHA_REGISTRO.disable({ emitEvent: false });
+    this.form.controls.CUPO_DISPONIBLE.disable({ emitEvent: false });
+    this.form.controls.CUPO_UTILIZADO.disable({ emitEvent: false });
+    this.form.controls.ESTADO_CUPO.disable({ emitEvent: false });
+    this.form.controls.CUPO_DIS_CUOTA.disable({ emitEvent: false });
+    this.form.controls.CUPO_UTI_CUOTA.disable({ emitEvent: false });
+    this.form.controls.ESTADO_CUOTA.disable({ emitEvent: false });
     if (!isNew) {
       this.form.controls.ID_CLIENTE.disable({ emitEvent: false });
     }
@@ -478,6 +495,13 @@ export class Ven209Component implements OnInit, OnDestroy {
       ID_ADC: '',
       STATUS: '',
       CUPO_CREDITO: 0,
+      CUPO_DISPONIBLE: 0,
+      CUPO_UTILIZADO: 0,
+      ESTADO_CUPO: 'ACTIVO',
+      CUPO_CUOTA: 0,
+      CUPO_DIS_CUOTA: 0,
+      CUPO_UTI_CUOTA: 0,
+      ESTADO_CUOTA: 'ACTIVO',
       TIEMPO_ENTREGA: 0
     }, { emitEvent: false });
     this.direcciones.set([]);
@@ -491,6 +515,7 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.idClienteValidationStatus.set(null);
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   editRecord(): void {
@@ -502,8 +527,22 @@ export class Ven209Component implements OnInit, OnDestroy {
 
   @ViewChild('clienteInput') private clienteInput?: XteinInputComponent;
   @ViewChild('idLegalSelect') private idLegalSelect?: XteinSelectComponent;
+  @ViewChild('contactoSelect') private contactoSelect?: XteinSelectComponent;
   @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
   @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
+
+  private focusFirstControl(): void {
+    setTimeout(() => {
+      if (this.clienteInput) {
+        this.clienteInput.focus();
+      } else {
+        const el = this.host.nativeElement.querySelector(
+          '#ven-209-id-cliente input, #ven-209-id-cliente, input:not([readonly]):not([disabled]), select:not([readonly]):not([disabled])'
+        ) as HTMLElement | null;
+        el?.focus();
+      }
+    }, 150);
+  }
 
   async saveRecord(): Promise<void> {
     if (this.loading() || this.readOnly()) return;
@@ -561,16 +600,38 @@ export class Ven209Component implements OnInit, OnDestroy {
       );
       this.business.decode(response);
 
+      const cupoCreditoVal = Number(raw.CUPO_CREDITO ?? 0) || 0;
+      const cupoCuotaVal = Number(raw.CUPO_CUOTA ?? 0) || 0;
+      const tiempoEntregaVal = Number(raw.TIEMPO_ENTREGA ?? (raw as Record<string, unknown>)['DIAS_ENTREGA'] ?? 0) || 0;
+
       const savedRecord: Ven209ClienteRecord = {
+        ...this.currentRecord(),
         ...raw,
         ID_CLIENTE: String(raw.ID_CLIENTE ?? ''),
         ID_LEGAL: String(raw.ID_LEGAL ?? ''),
+        CONTACTO: raw.CONTACTO != null ? String(raw.CONTACTO) : '',
         RT: raw.RT ? (Array.isArray(raw.RT) ? raw.RT : [raw.RT]) : [],
+        CUPO_CREDITO: cupoCreditoVal,
+        CUPO_CUOTA: cupoCuotaVal,
+        CUPO_DISPONIBLE: isNew ? cupoCreditoVal : (this.currentRecord()?.CUPO_DISPONIBLE ?? cupoCreditoVal),
+        CUPO_UTILIZADO: this.currentRecord()?.CUPO_UTILIZADO ?? 0,
+        ESTADO_CUPO: this.currentRecord()?.ESTADO_CUPO ?? 'ACTIVO',
+        CUPO_DIS_CUOTA: isNew ? cupoCuotaVal : (this.currentRecord()?.CUPO_DIS_CUOTA ?? cupoCuotaVal),
+        CUPO_UTI_CUOTA: this.currentRecord()?.CUPO_UTI_CUOTA ?? 0,
+        ESTADO_CUOTA: this.currentRecord()?.ESTADO_CUOTA ?? 'ACTIVO',
+        TIEMPO_ENTREGA: tiempoEntregaVal,
+        DIAS_ENTREGA: tiempoEntregaVal,
         DIRECCIONES: this.direcciones(),
         TELEFONOS: this.telefonos(),
         ITM_EMAIL: this.emails(),
         CONDICIONES: this.condiciones(),
-        ADIC_ACREEDORES: this.contactoAdicional()
+        CONDICIONES_ADIC: {
+          CUPO_CREDITO: cupoCreditoVal,
+          CUPO_CUOTA: cupoCuotaVal,
+          TIEMPO_ENTREGA: tiempoEntregaVal,
+          DIAS_ENTREGA: tiempoEntregaVal
+        },
+        ADIC_CLIENTES: this.contactoAdicional()
       };
 
       const list = [...this.records()];
@@ -734,6 +795,95 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
   }
 
+  private extractFinancials(record: Ven209ClienteRecord): {
+    cupoCredito: number;
+    cupoDisponible: number;
+    cupoUtilizado: number;
+    estadoCupo: string;
+    cupoCuota: number;
+    cupoDisCuota: number;
+    cupoUtiCuota: number;
+    estadoCuota: string;
+    tiempoEntrega: number;
+    condiciones: Ven209Condicion[];
+  } {
+    const parseIfString = (val: unknown): unknown => {
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch {
+          return val;
+        }
+      }
+      return val;
+    };
+
+    const condRaw = parseIfString(record.CONDICIONES);
+    let rawCondList: unknown[] = [];
+    if (Array.isArray(condRaw)) {
+      rawCondList = condRaw;
+    } else if (condRaw && typeof condRaw === 'object' && Array.isArray((condRaw as Record<string, unknown>)['CONDICIONES'])) {
+      rawCondList = (condRaw as Record<string, unknown>)['CONDICIONES'] as unknown[];
+    }
+
+    const adicSource = parseIfString(
+      record.CONDICIONES_ADIC ?? (condRaw && typeof condRaw === 'object' ? (condRaw as Record<string, unknown>)['ADICIONALES'] : undefined)
+    );
+    const adicObj: Record<string, unknown> = (
+      Array.isArray(adicSource) && adicSource.length > 0
+        ? ((parseIfString(adicSource[0]) as Record<string, unknown>) || {})
+        : (adicSource && typeof adicSource === 'object' ? (adicSource as Record<string, unknown>) : {})
+    );
+
+    const cupoCredito = Number(adicObj['CUPO_CREDITO'] ?? record.CUPO_CREDITO ?? 0) || 0;
+    const cupoDisponible = Number(record.CUPO_DISPONIBLE ?? 0) || 0;
+    const cupoUtilizado = Number(record.CUPO_UTILIZADO ?? 0) || 0;
+    const estadoCupo = String(record.ESTADO_CUPO ?? 'ACTIVO').trim();
+
+    const cupoCuota = Number(adicObj['CUPO_CUOTA'] ?? record.CUPO_CUOTA ?? 0) || 0;
+    const cupoDisCuota = Number(record.CUPO_DIS_CUOTA ?? 0) || 0;
+    const cupoUtiCuota = Number(record.CUPO_UTI_CUOTA ?? 0) || 0;
+    const estadoCuota = String(record.ESTADO_CUOTA ?? 'ACTIVO').trim();
+
+    const tiempoEntrega = Number(
+      adicObj['TIEMPO_ENTREGA'] ??
+      adicObj['DIAS_ENTREGA'] ??
+      record.TIEMPO_ENTREGA ??
+      record.DIAS_ENTREGA ??
+      (record as Record<string, unknown>)['DIAS_ENTREGA'] ??
+      0
+    ) || 0;
+
+    const matchedCondiciones: Ven209Condicion[] = rawCondList.map((item, index) => {
+      const c = (typeof item === 'object' && item !== null ? item : {}) as Record<string, unknown>;
+      const idCond = String(c['ID_CONDICION'] ?? c['CODIGO'] ?? '').trim();
+      const match = this.availableCondiciones().find(
+        ac => String(ac.ID_CONDICION ?? ac.CODIGO ?? '').trim() === idCond
+      );
+      const nombre = String(c['NOMBRE_CONDICION'] ?? c['DESCRIPCION'] ?? match?.DESCRIPCION ?? match?.NOMBRE ?? '').trim();
+      return {
+        ...c,
+        ITEM: Number(c['ITEM'] ?? index + 1),
+        ID_CONDICION: idCond,
+        NOMBRE_CONDICION: nombre,
+        DESCRIPCION: nombre
+      };
+    });
+
+    return {
+      cupoCredito,
+      cupoDisponible,
+      cupoUtilizado,
+      estadoCupo,
+      cupoCuota,
+      cupoDisCuota,
+      cupoUtiCuota,
+      estadoCuota,
+      tiempoEntrega,
+      condiciones: matchedCondiciones
+    };
+  }
+
   private populateForm(record: Ven209ClienteRecord): void {
     const rawIdLegal = record.ID_LEGAL != null ? String(record.ID_LEGAL).trim() : '';
     const currentLegales = this.idLegales();
@@ -808,6 +958,27 @@ export class Ven209Component implements OnInit, OnDestroy {
     }
     this.perfilTasas.set(parsedTasas);
 
+    const financials = this.extractFinancials(record);
+
+    const rawContacto = record.CONTACTO != null ? String(record.CONTACTO).trim() : '';
+    let resolvedContacto: number | string = rawContacto;
+    if (rawContacto) {
+      const matchContacto = this.idLegales().find(l => String(l.ID_LEGAL).trim() === rawContacto);
+      if (matchContacto?.ID_LEGAL != null) {
+        resolvedContacto = matchContacto.ID_LEGAL;
+      } else {
+        const syntheticContactId = isNaN(Number(rawContacto)) ? rawContacto : Number(rawContacto);
+        const syntheticContact: Ven209Lookup = {
+          ID_LEGAL: syntheticContactId,
+          NOMBRE_COMPLETO: (record as Record<string, unknown>)['NOMBRE_CONTACTO']
+            ? String((record as Record<string, unknown>)['NOMBRE_CONTACTO']).trim()
+            : rawContacto
+        };
+        this.idLegales.set([...this.idLegales(), syntheticContact]);
+        resolvedContacto = syntheticContactId;
+      }
+    }
+
     this.form.reset({
       ...Ven209DefaultRecord,
       ID_CLIENTE: record.ID_CLIENTE ? String(record.ID_CLIENTE).trim() : '',
@@ -824,20 +995,27 @@ export class Ven209Component implements OnInit, OnDestroy {
       CLASE: rawClase,
       PERFIL_TRIBUTARIO: rawPerfil,
       RT: rtVal,
-      CONTACTO: record.CONTACTO ? String(record.CONTACTO).trim() : '',
+      CONTACTO: resolvedContacto,
       COMENTARIOS: record.COMENTARIOS ? String(record.COMENTARIOS).trim() : '',
       ZONA: record.ZONA ? String(record.ZONA).trim() : '',
       ID_ADC: record.ID_ADC ? String(record.ID_ADC).trim() : '',
       STATUS: record.STATUS ? String(record.STATUS).trim() : '',
-      CUPO_CREDITO: record.CUPO_CREDITO || 0,
-      TIEMPO_ENTREGA: record.TIEMPO_ENTREGA || 0
+      CUPO_CREDITO: financials.cupoCredito,
+      CUPO_DISPONIBLE: financials.cupoDisponible,
+      CUPO_UTILIZADO: financials.cupoUtilizado,
+      ESTADO_CUPO: financials.estadoCupo,
+      CUPO_CUOTA: financials.cupoCuota,
+      CUPO_DIS_CUOTA: financials.cupoDisCuota,
+      CUPO_UTI_CUOTA: financials.cupoUtiCuota,
+      ESTADO_CUOTA: financials.estadoCuota,
+      TIEMPO_ENTREGA: financials.tiempoEntrega
     }, { emitEvent: false });
 
     this.direcciones.set(record.DIRECCIONES ?? []);
     this.telefonos.set(record.TELEFONOS ?? []);
     this.emails.set(record.ITM_EMAIL ?? []);
-    this.condiciones.set(record.CONDICIONES ?? []);
-    this.contactoAdicional.set(record.ADIC_ACREEDORES ?? { URL: '', CIIU: '' });
+    this.condiciones.set(financials.condiciones);
+    this.contactoAdicional.set(record.ADIC_CLIENTES ?? { URL: '', CIIU: '' });
 
     if (this.readOnly()) {
       this.disableFormControls();
@@ -868,9 +1046,18 @@ export class Ven209Component implements OnInit, OnDestroy {
     this.notification.error(error instanceof Error ? error.message : 'No se pudieron cargar los datos de clientes.');
   }
 
-  onIdLegalChanged(selectedId: number | string): void {
+  onIdLegalChanged(selectedId: number | string | null | undefined): void {
     if (this.readOnly()) return;
-    if (selectedId === '' || selectedId === null || selectedId === undefined) return;
+    if (selectedId === '' || selectedId === null || selectedId === undefined || selectedId === 0) {
+      this.form.patchValue({
+        CONTACTO: '',
+        NOMBRE: '',
+        NOMBRE2: '',
+        APELLIDO: '',
+        APELLIDO2: ''
+      });
+      return;
+    }
     const match = this.idLegales().find(l => String(l.ID_LEGAL) === String(selectedId));
     if (match) {
       this.form.patchValue({
@@ -880,9 +1067,28 @@ export class Ven209Component implements OnInit, OnDestroy {
         APELLIDO2: match['APELLIDO2'] ? String(match['APELLIDO2']) : '',
         TIPO_ID: match['TIPO_ID'] ? String(match['TIPO_ID']) : (match.TIPO ? String(match.TIPO) : 'NIT'),
         PERSONA: match.PERSONA ? String(match.PERSONA) : 'JURIDICA',
-        CONTACTO: String(match.ID_LEGAL || '')
+        CONTACTO: match.ID_LEGAL != null ? match.ID_LEGAL : selectedId
+      });
+    } else {
+      this.form.patchValue({
+        CONTACTO: selectedId
       });
     }
+  }
+
+  onContactoCustomItem(event: any): void {
+    const text = typeof event.text === 'string' ? event.text.trim() : '';
+    if (!text) {
+      event.customItem = null;
+      return;
+    }
+    const syntheticId = isNaN(Number(text)) ? text : Number(text);
+    const newItem: Ven209Lookup = {
+      ID_LEGAL: syntheticId,
+      NOMBRE_COMPLETO: text
+    };
+    event.customItem = newItem;
+    this.form.controls.CONTACTO.setValue(syntheticId);
   }
 
   onIdLegalCustomItem(event: any): void {

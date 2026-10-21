@@ -99,6 +99,12 @@ export class XteinInputComponent
   name = '';
 
   /**
+   * Tab navigation index.
+   */
+  @Input()
+  tabIndex = 0;
+
+  /**
    * Browser autocomplete behavior.
    */
   @Input()

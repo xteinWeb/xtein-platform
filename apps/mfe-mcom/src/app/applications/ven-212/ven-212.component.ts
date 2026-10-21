@@ -7,7 +7,8 @@ import {
   computed,
   effect,
   untracked,
-  inject
+  inject,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -51,7 +52,8 @@ import {
   XteinLoadingComponent,
   XteinNotificationService,
   XteinRecordFilterResult,
-  XteinRecordViewColumn
+  XteinRecordViewColumn,
+  XteinGroupLabelComponent
 } from '@xtein/ui';
 
 import {
@@ -105,6 +107,7 @@ import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein
     XteinRecordReportsComponent,
     XteinRecordSettingsComponent,
     XteinLoadingComponent,
+    XteinGroupLabelComponent,
     XteinVen212ItemsComponent
   ],
   providers: [
@@ -172,8 +175,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     return current === RecordToolbarMode.Initial || current === RecordToolbarMode.Browsing;
   });
 
-  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing);
-  readonly isNew = computed(() => this.currentIndex() === -1 && this.isEditing());
+  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing || this.mode() === RecordToolbarMode.Creating);
+  readonly isNew = computed(() => this.mode() === RecordToolbarMode.Creating);
 
   readonly currentRecord = computed(() => {
     const idx = this.currentIndex();
@@ -212,7 +215,7 @@ export class Ven212Component implements OnInit, OnDestroy {
 
   readonly itemRecordKey = computed(() => {
     const h = this.header();
-    return this.mode() === RecordToolbarMode.Editing && this.currentIndex() === -1
+    return this.isNew()
       ? 'new'
       : `${h.ID_DOCUMENTO || ''}_${h.CONSECUTIVO || 0}`;
   });
@@ -301,7 +304,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     private readonly toolbar: ToolbarRuntimeService,
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly elementRef: ElementRef
   ) {
     // Toolbar state synchronization
     effect(() => {
@@ -354,6 +358,9 @@ export class Ven212Component implements OnInit, OnDestroy {
       this.form.controls.ID_CLIENTE.valueChanges.subscribe(clienteId => {
         if (clienteId && !this.readOnly()) {
           void this.onClientChanged(clienteId);
+        } else if (!clienteId && !this.readOnly()) {
+          this.addresses.set([]);
+          this.form.patchValue({ DIRECCION: '', NOMBRE_CLIENTE: '' }, { emitEvent: false });
         }
       })
     );
@@ -495,13 +502,14 @@ export class Ven212Component implements OnInit, OnDestroy {
   newRecord(): void {
     if (this.busy() || !this.readOnly() || !this.permissions().create) return;
     this.indexBeforeNew = this.currentIndex();
-    this.mode.set(RecordToolbarMode.Editing);
+    this.mode.set(RecordToolbarMode.Creating);
     this.currentIndex.set(-1);
 
     this.items.set([]);
     this.taxes.set([]);
     this.taxItems.set([]);
     this.payments.set([]);
+    this.addresses.set([]);
 
     this.form.reset({
       ...Ven212DefaultRecord,
@@ -513,6 +521,7 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   editRecord(): void {
@@ -861,12 +870,22 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     try {
       const addresses = await this.business.catalog('addresses', { ID_CLIENTE: clienteId });
-      this.addresses.set(addresses);
-      if (addresses.length > 0) {
-        this.form.patchValue({ DIRECCION: String(addresses[0].DIRECCION || '') }, { emitEvent: false });
+      this.addresses.set(addresses || []);
+      if (addresses && addresses.length > 0) {
+        const preferred = addresses.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('cobro')) || addresses[0];
+        this.form.patchValue({ DIRECCION: String(preferred.DIRECCION || '') }, { emitEvent: false });
+      } else {
+        this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
+        if (!this.readOnly()) {
+          this.notification.warning('No se encontró una dirección del Tipo: Cobro');
+        }
       }
     } catch {
-      // Non-critical
+      this.addresses.set([]);
+      this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
+      if (!this.readOnly()) {
+        this.notification.warning('No se encontró una dirección del Tipo: Cobro');
+      }
     }
   }
 
@@ -918,11 +937,29 @@ export class Ven212Component implements OnInit, OnDestroy {
     }
   }
 
-  private async loadCatalogs(): Promise<void> {
+  async refreshClients(): Promise<void> {
     try {
-      const [docs, clients, sellers, units, currencies, conditions, banks, defaultUnit] = await Promise.all([
+      const clients = await this.business.loadClients(true);
+      this.clients.set(clients);
+    } catch (e) {
+      console.warn('Error refreshing clients in VEN-212:', e);
+    }
+  }
+
+  private async loadCatalogs(forceRefresh = false): Promise<void> {
+    if (forceRefresh) {
+      this.business.clearCache();
+    }
+    try {
+      // Clients: load immediately in parallel (like Id Legal in VEN-209)
+      const pClients = this.business.loadClients(forceRefresh).then(clients => {
+        this.clients.set(clients);
+      }).catch(e => {
+        console.warn('Error loading clients in VEN-212:', e);
+      });
+
+      const [docs, sellers, units, currencies, conditions, banks, defaultUnit] = await Promise.all([
         this.business.catalog('documents', { ID_APLICACION: this.applicationId, USUARIO: this.business.identity.USUARIO }),
-        this.business.catalog('clients', { ESTADO: 'ACTIVO' }),
         this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
         this.business.catalog('units', { ESTADO: 'ACTIVO', USUARIO: this.business.identity.USUARIO, ID_APLICACION: this.applicationId }),
         this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
@@ -931,8 +968,9 @@ export class Ven212Component implements OnInit, OnDestroy {
         this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO })
       ]);
 
+      await pClients;
+
       this.documents.set(docs);
-      this.clients.set(clients);
       this.sellers.set(sellers);
       this.units.set(units);
       this.currencies.set(currencies);
@@ -992,6 +1030,45 @@ export class Ven212Component implements OnInit, OnDestroy {
     if (!isNew) {
       this.form.controls.DOCUMENTO.disable({ emitEvent: false });
     }
+  }
+
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .ven-212__form') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
   }
 
   private clearForm(): void {

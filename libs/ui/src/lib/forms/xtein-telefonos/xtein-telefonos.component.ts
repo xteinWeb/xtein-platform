@@ -193,9 +193,9 @@ export class XteinTelefonosComponent implements OnChanges, OnInit {
 
     const types = telefonoTipos(this.draft.TIPO_TELEFONO);
     const message = !types.length
-      ? 'Falta seleccionar el tipo de teléfono.'
+      ? 'Seleccione el tipo de teléfono.'
       : !this.draft.TELEFONO?.trim()
-        ? 'Falta asignar un número de teléfono.'
+        ? 'Ingrese el número de teléfono.'
         : '';
 
     if (message) {

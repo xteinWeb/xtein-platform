@@ -6,7 +6,9 @@
       <div class="ven-209__top-groups">
         <!-- Grupo 1: Identificación -->
         <fieldset class="ven-209__fieldset">
-          <legend class="ven-209__legend xtein-group-label">Identificación</legend>
+          <legend class="ven-209__legend">
+            <xtein-group-label label="Identificación"></xtein-group-label>
+          </legend>
           <div class="ven-209__fieldset-content">
             <div class="ven-209__field-inline">
               <xtein-label class="ven-209__label-inline" for="ven-209-id-cliente" [required]="true">
@@ -55,7 +57,9 @@
 
         <!-- Grupo 2: Fecha de registro y estado -->
         <fieldset class="ven-209__fieldset">
-          <legend class="ven-209__legend xtein-group-label">Fecha de registro y estado</legend>
+          <legend class="ven-209__legend">
+            <xtein-group-label label="Fecha de registro y estado"></xtein-group-label>
+          </legend>
           <div class="ven-209__fieldset-content">
             <div class="ven-209__field-inline">
               <xtein-label class="ven-209__label-inline" for="ven-209-estado">
@@ -89,95 +93,97 @@
 
       <!-- Fila 2: Grupo Detalle Cliente (Ancho Completo, 2 Columnas) -->
       <fieldset class="ven-209__fieldset ven-209__fieldset--full">
-        <legend class="ven-209__legend xtein-group-label">Detalle Cliente</legend>
+        <legend class="ven-209__legend">
+          <xtein-group-label label="Detalle Cliente"></xtein-group-label>
+        </legend>
         <div class="ven-209__detail-grid">
-          <!-- Columna Izquierda: Primer Nombre, Primer Apellido, Tipo Identificación -->
-          <div class="ven-209__col">
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-nombre" [required]="true">
-                Primer Nombre
-              </xtein-label>
-              <div class="ven-209__control-inline">
-                <xtein-input
-                  id="ven-209-nombre"
-                  formControlName="NOMBRE"
-                  placeholder="Primer nombre"
-                  [readOnly]="readOnly()"
-                ></xtein-input>
-              </div>
-            </div>
-
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-apellido" [required]="true">
-                Primer Apellido
-              </xtein-label>
-              <div class="ven-209__control-inline">
-                <xtein-input
-                  id="ven-209-apellido"
-                  formControlName="APELLIDO"
-                  placeholder="Primer apellido"
-                  [readOnly]="readOnly()"
-                ></xtein-input>
-              </div>
-            </div>
-
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-tipo-id" [required]="true">
-                Tipo Identificación
-              </xtein-label>
-              <div class="ven-209__control-inline">
-                <xtein-select
-                  id="ven-209-tipo-id"
-                  [items]="$any(tiposId())"
-                  formControlName="TIPO_ID"
-                  [readOnly]="readOnly()"
-                ></xtein-select>
-              </div>
+          <!-- 1. Primer Nombre (Fila 1, Columna 1) -->
+          <div class="ven-209__field-inline">
+            <xtein-label class="ven-209__label-inline" for="ven-209-nombre" [required]="true">
+              Primer Nombre
+            </xtein-label>
+            <div class="ven-209__control-inline">
+              <xtein-input
+                id="ven-209-nombre"
+                formControlName="NOMBRE"
+                placeholder="Primer nombre"
+                [readOnly]="readOnly()"
+              ></xtein-input>
             </div>
           </div>
 
-          <!-- Columna Derecha: Segundo Nombre, Segundo Apellido, Nat/Jur -->
-          <div class="ven-209__col">
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-nombre2">
-                Segundo Nombre
-              </xtein-label>
-              <div class="ven-209__control-inline">
-                <xtein-input
-                  id="ven-209-nombre2"
-                  formControlName="NOMBRE2"
-                  placeholder="Segundo nombre (opcional)"
-                  [readOnly]="readOnly()"
-                ></xtein-input>
-              </div>
+          <!-- 2. Segundo Nombre (Fila 1, Columna 2) -->
+          <div class="ven-209__field-inline">
+            <xtein-label class="ven-209__label-inline" for="ven-209-nombre2">
+              Segundo Nombre
+            </xtein-label>
+            <div class="ven-209__control-inline">
+              <xtein-input
+                id="ven-209-nombre2"
+                formControlName="NOMBRE2"
+                placeholder="Segundo nombre (opcional)"
+                [readOnly]="readOnly()"
+              ></xtein-input>
             </div>
+          </div>
 
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-apellido2">
-                Segundo Apellido
-              </xtein-label>
-              <div class="ven-209__control-inline">
-                <xtein-input
-                  id="ven-209-apellido2"
-                  formControlName="APELLIDO2"
-                  placeholder="Segundo apellido"
-                  [readOnly]="readOnly()"
-                ></xtein-input>
-              </div>
+          <!-- 3. Primer Apellido (Fila 2, Columna 1) -->
+          <div class="ven-209__field-inline">
+            <xtein-label class="ven-209__label-inline" for="ven-209-apellido" [required]="true">
+              Primer Apellido
+            </xtein-label>
+            <div class="ven-209__control-inline">
+              <xtein-input
+                id="ven-209-apellido"
+                formControlName="APELLIDO"
+                placeholder="Primer apellido"
+                [readOnly]="readOnly()"
+              ></xtein-input>
             </div>
+          </div>
 
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-persona" [required]="true">
-                Nat/Jur
-              </xtein-label>
-              <div class="ven-209__control-inline">
-                <xtein-select
-                  id="ven-209-persona"
-                  [items]="$any(personas())"
-                  formControlName="PERSONA"
-                  [readOnly]="readOnly()"
-                ></xtein-select>
-              </div>
+          <!-- 4. Segundo Apellido (Fila 2, Columna 2) -->
+          <div class="ven-209__field-inline">
+            <xtein-label class="ven-209__label-inline" for="ven-209-apellido2">
+              Segundo Apellido
+            </xtein-label>
+            <div class="ven-209__control-inline">
+              <xtein-input
+                id="ven-209-apellido2"
+                formControlName="APELLIDO2"
+                placeholder="Segundo apellido"
+                [readOnly]="readOnly()"
+              ></xtein-input>
+            </div>
+          </div>
+
+          <!-- 5. Tipo Identificación (Fila 3, Columna 1) -->
+          <div class="ven-209__field-inline">
+            <xtein-label class="ven-209__label-inline" for="ven-209-tipo-id" [required]="true">
+              Tipo Identificación
+            </xtein-label>
+            <div class="ven-209__control-inline">
+              <xtein-select
+                id="ven-209-tipo-id"
+                [items]="$any(tiposId())"
+                formControlName="TIPO_ID"
+                [readOnly]="readOnly()"
+              ></xtein-select>
+            </div>
+          </div>
+
+          <!-- 6. Nat/Jur (Fila 3, Columna 2) -->
+          <div class="ven-209__field-inline">
+            <xtein-label class="ven-209__label-inline" for="ven-209-persona" [required]="true">
+              Nat/Jur
+            </xtein-label>
+            <div class="ven-209__control-inline">
+              <xtein-select
+                id="ven-209-persona"
+                [items]="$any(personas())"
+                formControlName="PERSONA"
+                [readOnly]="readOnly()"
+              ></xtein-select>
             </div>
           </div>
         </div>
@@ -359,12 +365,23 @@
                   Contacto
                 </xtein-label>
                 <div class="ven-209__control-inline">
-                  <xtein-input
+                  <xtein-select
+                    #contactoSelect
                     id="ven-209-contacto"
+                    placeholder="Contacto"
+                    [items]="$any(idLegales())"
+                    valueExpr="ID_LEGAL"
+                    displayExpr="ID_LEGAL"
+                    [columns]="['ID_LEGAL', 'NOMBRE_COMPLETO']"
+                    [searchEnabled]="true"
+                    searchMode="contains"
+                    [acceptCustomValue]="true"
+                    [refreshEnabled]="true"
+                    (refreshRequested)="refreshIdLegales()"
+                    (customItemCreating)="onContactoCustomItem($event)"
                     formControlName="CONTACTO"
-                    placeholder="Nombre del contacto"
                     [readOnly]="readOnly()"
-                  ></xtein-input>
+                  ></xtein-select>
                 </div>
               </div>
             </div>
@@ -401,12 +418,20 @@
         <div class="ven-209__tab-pane" [hidden]="activeMainTab() !== 'financieros'">
           <xtein-ven209-financieros (pendingChange)="markPendingChanges()"
             [readOnly]="readOnly()"
-            [cupoCredito]="form.controls.CUPO_CREDITO.value || 0"
-            [tiempoEntrega]="form.controls.TIEMPO_ENTREGA.value || 0"
+            [cupoCredito]="form.controls.CUPO_CREDITO.value ?? 0"
+            [estadoCupo]="form.controls.ESTADO_CUPO.value ?? ''"
+            [cupoUtilizado]="form.controls.CUPO_UTILIZADO.value ?? 0"
+            [cupoDisponible]="form.controls.CUPO_DISPONIBLE.value ?? 0"
+            [cupoCuota]="form.controls.CUPO_CUOTA.value ?? 0"
+            [estadoCuota]="form.controls.ESTADO_CUOTA.value ?? ''"
+            [cupoUtiCuota]="form.controls.CUPO_UTI_CUOTA.value ?? 0"
+            [cupoDisCuota]="form.controls.CUPO_DIS_CUOTA.value ?? 0"
+            [tiempoEntrega]="form.controls.TIEMPO_ENTREGA.value ?? 0"
             [condiciones]="condiciones()"
             [availableCondiciones]="availableCondiciones()"
-            (cupoCreditoChange)="form.controls.CUPO_CREDITO.setValue($event)"
-            (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event)"
+            (cupoCreditoChange)="form.controls.CUPO_CREDITO.setValue($event); markPendingChanges()"
+            (cupoCuotaChange)="form.controls.CUPO_CUOTA.setValue($event); markPendingChanges()"
+            (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event); markPendingChanges()"
             (condicionesChange)="condiciones.set($event); markPendingChanges()"
           ></xtein-ven209-financieros>
         </div>

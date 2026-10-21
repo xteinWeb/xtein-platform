@@ -21,7 +21,6 @@ import {
   XteinSelectComponent,
   XteinNumberComponent,
   XteinDateComponent,
-  XteinButtonComponent,
   XteinNotificationService
 } from '@xtein/ui';
 import { Ven229PedidoItem, Ven229PresentacionItem, Ven229IvaItem } from '../../models/ven-229.model';
@@ -40,8 +39,7 @@ import { Ven229BusinessService } from '../../services/ven-229-business.service';
     XteinCheckboxComponent,
     XteinSelectComponent,
     XteinNumberComponent,
-    XteinDateComponent,
-    XteinButtonComponent
+    XteinDateComponent
   ],
   templateUrl: './xtein-ven229-items.component.html',
   styleUrl: './xtein-ven229-items.component.scss',
@@ -77,33 +75,41 @@ export class XteinVen229ItemsComponent implements OnChanges {
   productDropdownOpened = false;
 
   readonly productDropDownOptions = {
-    width: 720,
-    height: 420,
+    width: 'min(750px, 95vw)',
+    height: 'min(420px, 70dvh)',
     hideOnParentScroll: true
   };
 
-  readonly productColumns: XteinGridColumn<Ven229Lookup, unknown>[] = [
-    { dataField: 'PRODUCTO', caption: 'Producto', width: 140 },
-    { dataField: 'NOMBRE', caption: 'Nombre', minWidth: 260 },
-    { dataField: 'PRECIO', caption: 'Precio', width: 120, format: 'currency' },
-    { dataField: 'CAN_INV', caption: 'Inventario', width: 100 }
-  ];
+  private productColumnKey = '';
+  private cachedProductColumns: XteinGridColumn<Ven229Lookup>[] = [];
+  get productColumns(): XteinGridColumn<Ven229Lookup>[] {
+    const key = JSON.stringify([this.moneyFormat, this.quantityFormat, this.onlyStock]);
+    if (key === this.productColumnKey) return this.cachedProductColumns;
+    this.productColumnKey = key;
+    return this.cachedProductColumns = [
+      { dataField: 'PRODUCTO', caption: 'Producto', width: 130 },
+      { dataField: 'NOMBRE', caption: 'Nombre' },
+      { dataField: 'PRECIO', caption: 'Precio', dataType: 'number', format: this.moneyFormat, alignment: 'right', width: 140 },
+      { dataField: 'CAN_INV', caption: 'Inventario', dataType: 'number', format: this.quantityFormat, visible: this.onlyStock, alignment: 'right', width: 120 }
+    ];
+  }
 
   private readonly business = inject(Ven229BusinessService);
   private readonly notification = inject(XteinNotificationService);
 
-  get minimumDeliveryDate(): string | null {
-    return this.header.FECHA ? String(this.header.FECHA).slice(0, 10) : null;
+  get minimumDeliveryDate(): string {
+    const now = new Date();
+    return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['recordKey'] && !changes['recordKey'].firstChange) {
-      this.cancel();
+    if (changes['recordKey'] || (changes['readOnly'] && this.readOnly)) {
       this.selected.set([]);
-    }
-    if (changes['readOnly'] && this.readOnly) {
-      this.cancel();
-      this.selected.set([]);
+      this.draft.set(null);
+      this.productDropdownOpened = false;
+    } else if (changes['items']) {
+      const keys = new Set(this.items.map(item => item.ITEM));
+      this.selected.update(selected => selected.filter(key => keys.has(key)));
     }
   }
 
@@ -164,7 +170,7 @@ export class XteinVen229ItemsComponent implements OnChanges {
             CANTIDAD_PENDIENTE: 0,
             VALOR_COSTOS: 0,
             UDM_VENTA: '',
-            FECHA_ENTREGA: this.header.FECHA || null,
+            FECHA_ENTREGA: null,
             PRODUCTO: '',
             ATRIBUTO: 'SIN',
             CANTIDAD: 0,
@@ -226,6 +232,8 @@ export class XteinVen229ItemsComponent implements OnChanges {
         VALOR_BASE: Number(p.VALOR_BASE ?? 0),
         PRESENTACION: (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [],
         IVAS: (p.IVAS as unknown as Ven229IvaItem[]) ?? [],
+        GRAV_ORG: undefined,
+        GRAVAMENES: undefined,
         PORC_IVA: 0,
         POR_IVA: 0,
         VALOR_IVA: 0,
@@ -258,7 +266,7 @@ export class XteinVen229ItemsComponent implements OnChanges {
   unit(value: unknown): void {
     const row = this.draft();
     if (!row) return;
-    const unit = row.PRESENTACION?.find(p => (p.UDM_VENTA ?? p.UDM_COMPRA) === value);
+    const unit = (row.PRESENTACION as unknown as Ven229Lookup[])?.find(p => (p.UDM_VENTA ?? p.UDM_COMPRA) === value);
     if (!unit) return;
 
     if (this.items.some(i => i.ITEM !== row.ITEM && i.PRODUCTO === row.PRODUCTO && i.UDM_VENTA === value)) {
@@ -271,25 +279,30 @@ export class XteinVen229ItemsComponent implements OnChanges {
       UDM_VENTA: String(value),
       UDM_EQUIV: unit.UDM_EQUIV,
       CANTIDAD_PRES: unit.CANTIDAD_PRES,
-      CANTIDAD_EQUIV: unit.CANTIDAD_EQUIV
+      CANTIDAD_EQUIV: unit.CANTIDAD_EQUIV,
+      VALOR_UNITARIO: Number(unit.PRECIO ?? row.VALOR_UNITARIO)
     });
+    this.onDraftQtyChange();
     this.draft.set({ ...row });
   }
 
   tax(value: unknown): void {
     const row = this.draft();
-    if (!row) return;
-    const taxItem = row.IVAS?.find(t => t.ID_TASA === value);
-    if (!taxItem) return;
-
-    row.PORC_IVA = Number(taxItem.TASA ?? (Number(taxItem.PORCENTAJE || 0) / 100));
-    row.POR_IVA = row.PORC_IVA * 100;
-    this.onDraftQtyChange();
-    this.draft.set({ ...row });
+    const taxItem = row?.IVAS?.find(t => t.ID_TASA === value);
+    if (row && taxItem) {
+      Object.assign(row, {
+        GRAVAMENES: taxItem,
+        GRAV_ORG: taxItem,
+        PORC_IVA: Number(taxItem.TASA ?? (Number(taxItem.PORCENTAJE || 0) / 100)),
+        POR_IVA: Number(taxItem.PORCENTAJE ?? Number(taxItem.TASA || 0) * 100)
+      });
+      this.onDraftQtyChange();
+      this.draft.set({ ...row });
+    }
   }
 
   selectProductFromDropdown(data: Ven229Lookup): void {
-    if (!data?.PRODUCTO) return;
+    if (!data?.PRODUCTO || this.working() || this.busy) return;
     this.productDropdownOpened = false;
     void this.product(data.PRODUCTO);
   }
@@ -300,58 +313,96 @@ export class XteinVen229ItemsComponent implements OnChanges {
         id: 'refresh',
         icon: 'refresh',
         title: 'Refrescar productos',
+        variant: 'secondary',
+        disabled: this.productsLoading || this.working(),
         action: () => this.refreshProducts.emit()
       }
     ];
   }
 
-  presentationOptions(): { UDM_VENTA: string }[] {
+  presentationOptions(): Ven229Lookup[] {
     const draft = this.draft();
-    return (draft?.PRESENTACION || []).map(p => ({
-      UDM_VENTA: String(p.UDM_VENTA ?? p.UDM_COMPRA ?? '')
+    return (draft?.PRESENTACION as unknown as Ven229Lookup[] ?? []).map(unit => ({
+      ...unit,
+      UDM_VENTA: unit.UDM_VENTA ?? unit.UDM_COMPRA,
+      LABEL: [
+        unit.UDM_VENTA ?? unit.UDM_COMPRA,
+        String(unit.CANTIDAD_PRES ?? ''),
+        'Equiv: ' + String(unit.CANTIDAD_EQUIV ?? '') + ' ' + String(unit.UDM_EQUIV ?? ''),
+        this.money(Number(unit.PRECIO ?? 0))
+      ].join(' · ')
     }));
   }
 
-  taxOptions(): { ID_TASA: string; LABEL: string }[] {
+  taxOptions(): Ven229Lookup[] {
     const draft = this.draft();
-    return (draft?.IVAS || []).map(t => ({
-      ID_TASA: String(t.ID_TASA || ''),
-      LABEL: `${t.ID_TASA} (${t.TASA || t.PORCENTAJE || 0}%)`
+    return (draft?.IVAS as unknown as Ven229Lookup[] ?? []).map(tax => ({
+      ...tax,
+      LABEL: [
+        tax.ID_TASA,
+        tax.DESCRIPCION,
+        String(tax.PORCENTAJE ?? (Number(tax['TASA'] || 0) * 100)) + '%',
+        this.money(Number(tax.VALOR_BASE ?? 0))
+      ].filter(Boolean).join(' · ')
     }));
   }
 
-  selectedTaxId(): string {
-    const draft = this.draft();
-    if (!draft?.IVAS?.length) return '';
-    return draft.IVAS[0]?.ID_TASA || '';
+  selectedTaxId(): unknown {
+    const tax = this.draft()?.GRAV_ORG;
+    if (tax && typeof tax === 'object' && 'ID_TASA' in tax) {
+      return (tax as { ID_TASA?: unknown }).ID_TASA;
+    }
+    const ivas = this.draft()?.IVAS;
+    return ivas && ivas.length ? ivas[0]?.ID_TASA : null;
   }
 
   async commit(): Promise<void> {
     const row = this.draft();
     if (!row || this.working() || this.busy) return;
 
-    if (!row.PRODUCTO) {
-      this.notification.warning('Debe seleccionar un producto.');
+    if (!row.PRODUCTO || !(Number(row.CANTIDAD) > 0)) {
+      this.notification.warning('Complete producto y cantidad.');
       return;
     }
-    if (!Number(row.CANTIDAD) || Number(row.CANTIDAD) <= 0) {
-      this.notification.warning('La cantidad debe ser mayor a cero.');
+    const previous = this.items.find(item => item.ITEM === row.ITEM);
+    if (row.FECHA_ENTREGA && row.FECHA_ENTREGA !== previous?.FECHA_ENTREGA && String(row.FECHA_ENTREGA).slice(0, 10) < this.minimumDeliveryDate) {
+      this.notification.warning('La fecha de entrega no puede ser anterior a hoy.');
+      return;
+    }
+    if ((row.IVAS?.length ?? 0) > 1 && !row.GRAV_ORG) {
+      this.notification.warning('Seleccione el IVA del producto.');
       return;
     }
 
     this.working.set(true);
     try {
-      const ok = await this.persist(row);
-      if (ok) {
+      await this.business.action('quantity', {
+        PEDIDO: this.header,
+        ITEMS: {
+          ...row,
+          CANTIDAD_PREV: this.items.find(i => i.ITEM === row.ITEM)?.CANTIDAD ?? 0
+        },
+        ...this.business.identity
+      });
+
+      row.SUB_TOTAL = Number(row.CANTIDAD) * Number(row.VALOR_UNITARIO);
+      row.CANTIDAD_REAL = Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1) * Number(row.CANTIDAD);
+      row.VALOR_IVA = row.SUB_TOTAL * Number(row.PORC_IVA ?? (Number(row.POR_IVA) / 100));
+      row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
+
+      if (await this.persist(structuredClone(row))) {
         this.draft.set(null);
         this.pending.emit(false);
       }
+    } catch (error) {
+      this.notification.error(error instanceof Error ? error.message : 'Error validando cantidad.');
     } finally {
       this.working.set(false);
     }
   }
 
   private async loadExistingOptions(row: Ven229PedidoItem): Promise<void> {
+    this.working.set(true);
     try {
       const rows = await this.business.action<Ven229Lookup>('stock', {
         PRODUCTO: row.PRODUCTO,
@@ -365,13 +416,21 @@ export class XteinVen229ItemsComponent implements OnChanges {
         ID_UN_BODEGA: this.header.ID_UN_BODEGA
       });
       const p = rows[0];
-      if (p) {
-        row.PRESENTACION = (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [];
-        row.IVAS = (p.IVAS as unknown as Ven229IvaItem[]) ?? [];
-        this.draft.set({ ...row });
+      if (p && this.draft()?.ITEM === row.ITEM) {
+        this.draft.update(current =>
+          current
+            ? {
+                ...current,
+                PRESENTACION: (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [],
+                IVAS: (p.IVAS as unknown as Ven229IvaItem[]) ?? []
+              }
+            : null
+        );
       }
-    } catch {
-      // Non-critical fallback
+    } catch (error) {
+      this.notification.error(error instanceof Error ? error.message : 'Error cargando presentaciones.');
+    } finally {
+      this.working.set(false);
     }
   }
 }

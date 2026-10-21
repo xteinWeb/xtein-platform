@@ -82,7 +82,7 @@
 
         <!-- Sección Cliente -->
         <div class="ven-229__section-divider">
-          <h3 class="ven-229__section-title">Cliente</h3>
+          <xtein-group-label class="ven-229__section-title" label="Cliente"></xtein-group-label>
         </div>
 
         <div class="ven-229__client-grid">
@@ -231,7 +231,7 @@
           <!-- Datos de la Venta -->
           <div class="ven-229__params-section">
             <div class="ven-229__section-divider">
-              <h3 class="ven-229__section-title">Datos de la venta</h3>
+              <xtein-group-label class="ven-229__section-title" label="Datos de la venta"></xtein-group-label>
             </div>
             <div class="ven-229__params-grid">
               <div class="ven-229__field-inline">
@@ -342,7 +342,7 @@
           <!-- Liquidación -->
           <div class="ven-229__params-section">
             <div class="ven-229__section-divider">
-              <h3 class="ven-229__section-title">Liquidación</h3>
+              <xtein-group-label class="ven-229__section-title" label="Liquidación"></xtein-group-label>
             </div>
             <div class="ven-229__params-grid">
               <div class="ven-229__field-inline">
@@ -444,15 +444,15 @@
           [ready]="itemsReady()"
           [busy]="busy()"
           [conditionType]="conditionType()"
-          [moneyFormat]="'#,##0.00'"
-          [quantityFormat]="'#,##0.00'"
-          [repeatItem]="true"
-          [editPrice]="true"
+          [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'"
+          [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
+          [repeatItem]="enabledSpec('REPETIR ITEM')"
+          [editPrice]="enabledSpec('MODIFICAR PRECIO')"
           [persist]="persistItemBind"
           (removed)="removeItem($event)"
-          (removedMany)="removeItems($event)"
+          (removedMany)="removeItem($event)"
           (pending)="onItemPending($event)"
-          (stockOnly)="onlyStock.set($event); loadProducts()"
+          (stockOnly)="loadProducts($event)"
           (refreshProducts)="loadProducts()"
         />
       </div>
@@ -499,9 +499,17 @@
   />
 }
 
-<xtein-record-settings
-  [visible]="settingsVisible()"
-  (visibleChange)="settingsVisible.set($event)"
-  [applicationId]="applicationId"
-  (optionSelected)="onSettingSelected($event)"
-/>
+<xtein-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
+  <div class="ven-229__options">
+    @if (settings().length === 0) {
+      <div style="padding: 1rem; text-align: center; color: var(--xt-color-text-secondary, #64748b);">
+        No hay opciones de configuración disponibles para esta aplicación.
+      </div>
+    }
+    @for (option of settings(); track $index) {
+      <xtein-button [text]="option.VALOR || ''" [disabled]="busy()" (clicked)="executeSetting(option)" />
+    }
+  </div>
+</xtein-popup>
+<xtein-ven229-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
+  [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="busy()" (accepted)="applySelection($event)" />

@@ -275,19 +275,44 @@ export class Ven209BusinessService {
         ? [record.RT]
         : [];
 
+    const cupoCredito = Number(record.CUPO_CREDITO ?? 0) || 0;
+    const cupoCuota = Number(record.CUPO_CUOTA ?? 0) || 0;
+    const tiempoEntrega = Number(record.TIEMPO_ENTREGA ?? record.DIAS_ENTREGA ?? 0) || 0;
+
+    const clienteClean = { ...record };
+    delete clienteClean.CUPO_DISPONIBLE;
+    delete clienteClean.CUPO_UTILIZADO;
+    delete clienteClean.ESTADO_CUPO;
+    delete clienteClean.CUPO_DIS_CUOTA;
+    delete clienteClean.CUPO_UTI_CUOTA;
+    delete clienteClean.ESTADO_CUOTA;
+    delete clienteClean.DESCRIPCION_CUPO;
+
     return {
-      ACREEDOR: {
-        ...record,
+      CLIENTE: {
+        ...clienteClean,
         RT: rtVal,
+        CUPO_CREDITO: cupoCredito,
+        CUPO_CUOTA: cupoCuota,
+        TIEMPO_ENTREGA: tiempoEntrega,
+        DIAS_ENTREGA: tiempoEntrega,
         NOMBRE_COMPLETO: [record.NOMBRE, record.NOMBRE2, record.APELLIDO, record.APELLIDO2]
           .filter(Boolean)
           .join(' ')
       },
-      ADIC_ACREEDORES: contactoAdic ?? { URL: '', CIIU: '' },
+      ADIC_CLIENTES: contactoAdic ?? { URL: '', CIIU: '' },
       EMAIL: emails,
       DIRECCIONES: direcciones,
       TELEFONOS: telefonos,
-      CONDICIONES: condiciones,
+      CONDICIONES: {
+        CONDICIONES: condiciones,
+        ADICIONALES: {
+          CUPO_CREDITO: cupoCredito,
+          CUPO_CUOTA: cupoCuota,
+          TIEMPO_ENTREGA: tiempoEntrega,
+          DIAS_ENTREGA: tiempoEntrega
+        }
+      },
       CLIENTES_EVAL: record.CLIENTES_PRO ?? [],
       BANCOS: record.BANCOS ?? [],
       USUARIO: this.identity.USUARIO,

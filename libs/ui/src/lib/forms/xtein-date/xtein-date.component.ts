@@ -19,6 +19,7 @@ export class XteinDateComponent implements ControlValueAccessor {
   @Input() required = false;
   @Input() readOnly = false;
   @Input() disabled = false;
+  @Input() tabIndex = 0;
   @Input() min: string | null = null;
   @Input() max: string | null = null;
   value: string | null = null;

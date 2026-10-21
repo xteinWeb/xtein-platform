@@ -7,7 +7,7 @@ export class LoggingSanitizerService {
     if (typeof value === 'string') {
       if (/^\s*[\[{]/.test(value)) { try { return this.clean(JSON.parse(value), depth + 1, seen); } catch {} }
       return value.replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[TOKEN]')
-        .replace(/((?:password|pwd|token|secret|authorization)\s*[=:]\s*)[^\s;,]+/gi, '$1[REDACTED]').slice(0, 16000);
+        .replace(/((?:password|pwd|contrase(?:n|ñ)a|token|secret|authorization)\s*[=:]\s*)[^\s;,]+/gi, '$1[REDACTED]').slice(0, 16000);
     }
     if (!value || typeof value !== 'object') return value;
     if (value instanceof Blob) return { bytes: value.size, type: value.type };
@@ -15,6 +15,6 @@ export class LoggingSanitizerService {
     seen.add(value);
     if (Array.isArray(value)) return value.slice(0, 100).map(item => this.clean(item, depth + 1, seen));
     return Object.fromEntries(Object.entries(value).slice(0, 100).map(([key, item]) => [key,
-      /token|password|passwd|clave|secret|authorization|cookie|connectionstring|cadena.?conexion/i.test(key) ? '[REDACTED]' : this.clean(item, depth + 1, seen)]));
+      /token|password|passwd|contrase(?:n|ñ)a|clave|secret|authorization|cookie|connectionstring|cadena.?conexion/i.test(key) ? '[REDACTED]' : this.clean(item, depth + 1, seen)]));
   }
 }

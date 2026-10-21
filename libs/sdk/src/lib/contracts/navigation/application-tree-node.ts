@@ -149,6 +149,13 @@ export interface ApplicationTreeNode {
 
 
   /**
+   * Optional microfrontend identifier configured for the application.
+   */
+  microfrontendId?:
+    string;
+
+
+  /**
    * Microfrontend configuration associated with the application.
    *
    * This value is undefined for modules and for applications

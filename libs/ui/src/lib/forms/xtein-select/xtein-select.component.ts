@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { NgStyle, NgTemplateOutlet } from '@angular/common';
 import { XteinLabelComponent } from '../xtein-label/xtein-label.component';
 import {
   ViewChild,
@@ -36,7 +36,7 @@ import type {
   standalone: true,
 
   imports: [XteinLabelComponent,
-    DxSelectBoxModule, DxTemplateModule, DxButtonModule, NgTemplateOutlet
+    DxSelectBoxModule, DxTemplateModule, DxButtonModule, NgTemplateOutlet, NgStyle
   ],
 
   templateUrl:
@@ -63,6 +63,7 @@ export class XteinSelectComponent
   implements ControlValueAccessor {
   @Input() searchExpr: string | string[] = '';
   @Input() columns?: string[];
+  @Input() columnHeaders?: string[];
   @Input() columnWidths?: (string | number)[];
   readonly searchIdentity = (item: unknown): unknown => item;
   @Input() itemTemplate: TemplateRef<any> | null = null;
@@ -72,31 +73,50 @@ export class XteinSelectComponent
   @Input() minSearchLength = 0;
   @Input() paginate = true;
   @Input() pageSize = 20;
+  @Input() tabIndex = 0;
   @Output() readonly refreshRequested = new EventEmitter<void>();
-
-  private readonly refreshToolbar = [{
-    widget: 'dxButton',
-    location: 'after',
-    toolbar: 'top',
-    options: {
-      icon: 'refresh',
-      stylingMode: 'text',
-      type: 'normal',
-      hint: 'Actualizar lista',
-      elementAttr: { class: 'xtein-select-refresh-btn' },
-      onClick: () => this.refreshRequested.emit()
-    }
-  }];
 
   private lastPopupOptions?: Record<string, unknown>;
   private lastRefreshEnabled?: boolean;
+  private lastHasHeaders?: boolean;
   private popupOptions: Record<string, unknown> = {};
 
   get resolvedDropDownOptions(): Record<string, unknown> {
-    if (this.lastPopupOptions !== this.dropDownOptions || this.lastRefreshEnabled !== this.refreshEnabled) {
+    const hasHeaders = !!(this.columnHeaders && this.columnHeaders.length > 0);
+    if (
+      this.lastPopupOptions !== this.dropDownOptions ||
+      this.lastRefreshEnabled !== this.refreshEnabled ||
+      this.lastHasHeaders !== hasHeaders
+    ) {
       this.lastPopupOptions = this.dropDownOptions;
       this.lastRefreshEnabled = this.refreshEnabled;
-      this.popupOptions = this.refreshEnabled ? { ...this.dropDownOptions, toolbarItems: this.refreshToolbar } : this.dropDownOptions;
+      this.lastHasHeaders = hasHeaders;
+      const toolbarItems: Record<string, unknown>[] = [];
+      if (hasHeaders) {
+        toolbarItems.push({
+          location: 'before',
+          toolbar: 'top',
+          template: 'columnsHeaderTemplate'
+        });
+      }
+      if (this.refreshEnabled) {
+        toolbarItems.push({
+          widget: 'dxButton',
+          location: 'after',
+          toolbar: 'top',
+          options: {
+            icon: 'refresh',
+            stylingMode: 'text',
+            type: 'normal',
+            hint: 'Actualizar lista',
+            elementAttr: { class: 'xtein-select-refresh-btn' },
+            onClick: () => this.refreshRequested.emit()
+          }
+        });
+      }
+      this.popupOptions = toolbarItems.length > 0
+        ? { ...this.dropDownOptions, toolbarItems }
+        : this.dropDownOptions;
     }
     return this.popupOptions;
   }
@@ -123,6 +143,14 @@ export class XteinSelectComponent
       return '120px';
     }
     return 'auto';
+  }
+
+  getHeaderColumnStyle(index: number): Record<string, string> {
+    const width = this.getColumnWidth(index);
+    if (width !== 'auto') {
+      return { width, flex: `0 0 ${width}` };
+    }
+    return { flex: '1 1 auto' };
   }
 
   @Input()

@@ -165,8 +165,8 @@ export class Adm015Component implements OnInit, OnDestroy {
     return current === RecordToolbarMode.Initial || current === RecordToolbarMode.Browsing;
   });
 
-  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing);
-  readonly isNew = computed(() => this.currentIndex() === -1 && this.mode() === RecordToolbarMode.Editing);
+  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing || this.mode() === RecordToolbarMode.Creating);
+  readonly isNew = computed(() => this.mode() === RecordToolbarMode.Creating);
 
   readonly currentRecord = computed(() => {
     const idx = this.currentIndex();
@@ -345,7 +345,7 @@ export class Adm015Component implements OnInit, OnDestroy {
     if (this.loading() || !this.readOnly()) return;
     this.applicationDraft.set(null);
     this.indexBeforeNew = this.currentIndex();
-    this.mode.set(RecordToolbarMode.Editing);
+    this.mode.set(RecordToolbarMode.Creating);
     this.currentIndex.set(-1);
 
     this.form.reset({

@@ -24,6 +24,7 @@ export class XteinCorreosComponent implements OnChanges, OnInit {
   @Input() readOnly = false;
   @Input() emails: XteinCorreo[] = [];
   @Output() readonly emailsChange = new EventEmitter<XteinCorreo[]>();
+  @Output() readonly pendingChange = new EventEmitter<void>();
   @ViewChild('emailsGrid') private emailsGrid?: XteinDataGridComponent;
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -76,7 +77,7 @@ export class XteinCorreosComponent implements OnChanges, OnInit {
     this.emails = list;
     this.selectedEmails = this.selectedEmails.filter(key => list.some(e => e.ITEM === key));
     this.emailRows = this.emailDraft
-      ? [this.emailDraft, ...list.filter(e => e.ITEM !== this.emailDraft?.originalItem)]
+      ? [{ ...this.emailDraft }, ...list.filter(e => e.ITEM !== this.emailDraft?.originalItem)]
       : [...list];
     this.updateEmailToolbar();
   }
@@ -150,6 +151,7 @@ export class XteinCorreosComponent implements OnChanges, OnInit {
     };
     this.rebuildEmails();
     this.emailsGrid?.resetView();
+    this.pendingChange.emit();
   }
 
   beginEditEmail(row: XteinCorreo): void {
@@ -160,25 +162,27 @@ export class XteinCorreosComponent implements OnChanges, OnInit {
       isNew: false
     };
     this.rebuildEmails();
+    this.pendingChange.emit();
   }
 
-  commitEmail(): void {
-    if (this.readOnly || !this.emailDraft) return;
+  commitEmail(): boolean {
+    if (this.readOnly) return false;
+    if (!this.emailDraft) return true;
     const emailStr = (this.emailDraft.EMAIL || '').trim();
     if (!emailStr) {
-      this.notification.warning('Ingrese una dirección de correo electrónico.');
-      return;
+      this.notification.warning('Ingrese el correo electrónico.');
+      return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailStr)) {
       this.notification.warning('El formato del correo electrónico no es válido.');
-      return;
+      return false;
     }
 
     const etiqueta = this.emailDraft.ETIQUETA;
     if (!etiqueta) {
-      this.notification.warning('Seleccione un tipo de correo.');
-      return;
+      this.notification.warning('Seleccione el tipo de correo.');
+      return false;
     }
     const isNew = this.emailDraft.isNew;
     const originalItem = this.emailDraft.originalItem;
@@ -208,11 +212,24 @@ export class XteinCorreosComponent implements OnChanges, OnInit {
     this.emails = updatedList;
     this.emailsChange.emit(this.emails);
     this.rebuildEmails();
+    this.pendingChange.emit();
+    return true;
+  }
+
+  commit(): boolean {
+    if (!this.emailDraft) return true;
+    if (this.readOnly) return false;
+    if (this.emailDraft.isNew && !this.emailDraft.EMAIL?.trim()) {
+      this.cancelEmailDraft();
+      return true;
+    }
+    return this.commitEmail();
   }
 
   cancelEmailDraft(): void {
     this.emailDraft = null;
     this.rebuildEmails();
+    this.pendingChange.emit();
   }
 
   async removeSelectedEmails(): Promise<void> {

@@ -81,7 +81,7 @@
 
         <!-- Sección Cliente -->
         <div class="ven-230__section-divider">
-          <h3 class="ven-230__section-title">Cliente</h3>
+          <xtein-group-label class="ven-230__section-title" label="Cliente"></xtein-group-label>
         </div>
 
         <div class="ven-230__client-grid">
@@ -91,9 +91,19 @@
                 Documento del Cliente
               </xtein-label>
               <div class="ven-230__control-inline">
-                <xtein-lookup id="ven-230-id-cliente" ariaLabel="Documento del Cliente" placeholder="Documento" [items]="clients()"
-                  valueExpr="ID_CLIENTE" displayExpr="ID_CLIENTE" searchPlaceholder="Buscar…" [columns]="clientColumns" [required]="true"
-                  formControlName="ID_CLIENTE" [readOnly]="readOnly() || headerLocked() || itemPending()" />
+                <xtein-lookup
+                  id="ven-230-id-cliente"
+                  ariaLabel="Documento del Cliente"
+                  placeholder="Documento"
+                  [items]="clients()"
+                  valueExpr="ID_CLIENTE"
+                  displayExpr="ID_CLIENTE"
+                  searchPlaceholder="Buscar…"
+                  [columns]="clientColumns"
+                  [required]="true"
+                  formControlName="ID_CLIENTE"
+                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                />
               </div>
             </div>
 
@@ -223,7 +233,7 @@
           <!-- Datos de la Venta -->
           <div class="ven-230__params-section">
             <div class="ven-230__section-divider">
-              <h3 class="ven-230__section-title">Datos de la venta</h3>
+              <xtein-group-label class="ven-230__section-title" label="Datos de la venta"></xtein-group-label>
             </div>
             <div class="ven-230__params-grid">
               <div class="ven-230__field-inline">
@@ -341,7 +351,7 @@
           <!-- Liquidación -->
           <div class="ven-230__params-section">
             <div class="ven-230__section-divider">
-              <h3 class="ven-230__section-title">Liquidación</h3>
+              <xtein-group-label class="ven-230__section-title" label="Liquidación"></xtein-group-label>
             </div>
             <div class="ven-230__params-grid">
               <div class="ven-230__field-inline">

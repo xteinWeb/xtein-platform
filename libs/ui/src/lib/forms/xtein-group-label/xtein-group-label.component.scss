@@ -1,17 +1,21 @@
 :host {
   display: inline-block;
+  margin: 0;
+  padding: 0;
 }
 
 .xtein-group-label {
   display: inline-flex;
   align-items: center;
   font-size: 0.95rem;
-  font-weight: 400;
+  font-weight: 500;
   color: rgba(10, 57, 96, 0.55);
   line-height: 1.4;
   letter-spacing: normal;
   text-transform: none;
   font-family: inherit;
+  margin: 0;
+  padding: 0;
 
   &__required {
     color: #df3e3e;
