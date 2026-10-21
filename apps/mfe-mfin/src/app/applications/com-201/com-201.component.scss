@@ -1,0 +1,116 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+
+/*======================================================================
+= COM-201 PAGE
+======================================================================*/
+
+.com-201 {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 20px;
+  background: #f2f5f9;
+  box-sizing: border-box;
+}
+
+.com-201__card {
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
+}
+
+.com-201__section-title {
+  display: block;
+  margin-bottom: 12px;
+}
+
+
+/*======================================================================
+= HEADER FORM
+======================================================================*/
+
+.com-201__header-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+}
+
+.com-201__header-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.com-201__field {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.com-201__label {
+  font-size: 13px;
+}
+
+.com-201__control {
+  min-width: 0;
+}
+
+.com-201__control--shaded {
+  opacity: 0.85;
+}
+
+
+/*======================================================================
+= GROUPS | ITEMS
+======================================================================*/
+
+.com-201__panels {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr);
+  gap: 20px;
+  min-height: 520px;
+}
+
+.com-201__card--groups,
+.com-201__card--items {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.com-201__card--groups > *,
+.com-201__card--items > * {
+  flex: 1 1 auto;
+}
+
+
+/*======================================================================
+= RESPONSIVE
+======================================================================*/
+
+@media (max-width: 900px) {
+  .com-201__header-grid,
+  .com-201__panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .com-201__field {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+}

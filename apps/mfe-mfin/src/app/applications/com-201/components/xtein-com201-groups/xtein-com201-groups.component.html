@@ -1,0 +1,39 @@
+<div class="com201-groups">
+  <div class="com201-groups__toolbar">
+    <xtein-button
+      [text]="expanded() ? 'Contraer' : 'Expandir'"
+      variant="secondary"
+      (clicked)="toggleExpanded()"
+    />
+    <xtein-button
+      text="Todos"
+      variant="link"
+      [disabled]="disabled || !selectedId"
+      (clicked)="clear()"
+    />
+  </div>
+
+  <div class="com201-groups__current">
+    @if (selectedId) {
+      Grupo: <b>[{{ selectedId }}] {{ selectedName() }}</b>
+    } @else {
+      Grupo: <b>Todos</b>
+    }
+  </div>
+
+  <div class="com201-groups__tree">
+    @for (key of [treeKey()]; track key) {
+      <xtein-tree
+        [items]="treeItems"
+        idField="ID_GRUPO"
+        parentIdField="ID_GRUPO_PADRE"
+        displayField="NOMBRE"
+        prefixField="ID_GRUPO"
+        [searchFields]="searchFields"
+        [showStatus]="false"
+        [expandAllOnLoad]="expanded()"
+        (itemClick)="pick($event)"
+      />
+    }
+  </div>
+</div>
