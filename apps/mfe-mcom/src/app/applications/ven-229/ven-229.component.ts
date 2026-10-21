@@ -177,6 +177,9 @@ export class Ven229Component implements OnInit, OnDestroy {
   readonly selection = signal<Ven229SettingResult | null>(null);
   selectedSettingsRows: Ven229Lookup[] = [];
   selectedSettingsKeys: unknown[] = [];
+  previousCondition = '';
+  previousWarehouse = '';
+  private productRequest = 0;
 
   spec(name: string): Ven229Lookup | undefined {
     return this.specifications().find(s => s.NOMBRE_OBJETO === name);
@@ -224,7 +227,15 @@ export class Ven229Component implements OnInit, OnDestroy {
         return res;
       }
     } catch {}
-    return {};
+    const estado = this.form.controls.ESTADO.value;
+    switch (estado) {
+      case 'REGISTRADO': return { background: '#e8f5e8', color: '#2e7d32' };
+      case 'AUTORIZADO': return { background: 'rgb(132, 223, 170)', color: '#065f46' };
+      case 'PARCIAL': return { background: 'rgb(240, 152, 217)', color: '#831843' };
+      case 'ANULADO': return { background: 'rgb(242, 161, 169)', color: '#991b1b' };
+      case 'PROGRAMADO': return { background: 'rgba(172, 200, 255, 1)', color: '#1e40af' };
+      default: return { background: '#f1f5f9', color: '#475569' };
+    }
   });
 
   readonly itemsReady = computed(() => {
@@ -391,11 +402,29 @@ export class Ven229Component implements OnInit, OnDestroy {
       })
     );
 
-    // Watch condition changes
+    // Watch ADC / Vendedor changes -> reload conditions
+    this.subscriptions.add(
+      this.form.controls.ID_ADC.valueChanges.subscribe(adcId => {
+        if (!this.readOnly()) {
+          void this.loadConditions();
+        }
+      })
+    );
+
+    // Watch condition changes with confirmation if items exist
     this.subscriptions.add(
       this.form.controls.ID_CONDICION.valueChanges.subscribe(condId => {
         if (condId && !this.readOnly()) {
-          void this.onConditionChanged(condId);
+          void this.handleConditionChange(condId);
+        }
+      })
+    );
+
+    // Watch bodega changes with confirmation if items exist
+    this.subscriptions.add(
+      this.form.controls.ID_UN_BODEGA.valueChanges.subscribe(bodegaId => {
+        if (bodegaId && !this.readOnly()) {
+          void this.handleWarehouseChange(bodegaId);
         }
       })
     );
@@ -404,8 +433,46 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.form.controls.TIPO_VENTA.valueChanges.subscribe(tipo => {
         if (tipo === 'CONTADO') {
-          this.form.controls.PLAZO.setValue(0);
-          this.form.controls.FECHA_PRIMER_VENC.setValue(this.form.controls.FECHA.value);
+          this.form.controls.PLAZO.setValue(0, { emitEvent: false });
+          this.form.controls.FECHA_PRIMER_VENC.setValue(this.form.controls.FECHA.value, { emitEvent: false });
+          this.form.controls.CUOTA_INICIAL.setValue(0, { emitEvent: false });
+          this.form.controls.PLAZO.disable({ emitEvent: false });
+          this.form.controls.FECHA_PRIMER_VENC.disable({ emitEvent: false });
+          this.form.controls.CUOTA_INICIAL.disable({ emitEvent: false });
+          this.recalculate();
+        } else if (!this.readOnly()) {
+          this.form.controls.PLAZO.enable({ emitEvent: false });
+          this.form.controls.FECHA_PRIMER_VENC.enable({ emitEvent: false });
+          this.form.controls.CUOTA_INICIAL.enable({ emitEvent: false });
+        }
+        if (!this.readOnly()) {
+          void this.loadConditions();
+        }
+      })
+    );
+
+    // Watch plazo changes -> recalculate and reload products
+    this.subscriptions.add(
+      this.form.controls.PLAZO.valueChanges.subscribe(() => {
+        this.recalculate();
+        if (!this.readOnly() && this.form.controls.ID_CONDICION.value) {
+          void this.loadProducts();
+        }
+      })
+    );
+
+    // Watch cuota inicial changes -> recalculate
+    this.subscriptions.add(
+      this.form.controls.CUOTA_INICIAL.valueChanges.subscribe(() => {
+        this.recalculate();
+      })
+    );
+
+    // Watch fecha changes -> if CONTADO, update FECHA_PRIMER_VENC
+    this.subscriptions.add(
+      this.form.controls.FECHA.valueChanges.subscribe(fecha => {
+        if (this.form.controls.TIPO_VENTA.value === 'CONTADO') {
+          this.form.controls.FECHA_PRIMER_VENC.setValue(fecha, { emitEvent: false });
         }
       })
     );
@@ -535,11 +602,16 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Creating);
     this.currentIndex.set(-1);
 
+    this.previousCondition = '';
+    this.previousWarehouse = '';
     this.items.set([]);
     this.taxes.set([]);
     this.taxItems.set([]);
     this.payments.set([]);
     this.addresses.set([]);
+    this.products.set([]);
+    this.conditions.set([]);
+    this.terms.set([]);
 
     // Query fresh document consecutive from backend on new record
     try {
@@ -765,6 +837,23 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.taxes.set(record.PEDIDO_GRAV || record.Pedido_GRAV || []);
     this.payments.set(record.PEDIDO_PAGOS || record.Pedido_PAGOS || []);
 
+    this.previousCondition = record.ID_CONDICION ? String(record.ID_CONDICION).trim() : '';
+    this.previousWarehouse = record.ID_UN_BODEGA ? String(record.ID_UN_BODEGA).trim() : '';
+
+    if (record.ID_ADC) {
+      void this.loadConditions().then(() => {
+        if (record.ID_CONDICION) {
+          void this.onConditionChanged(record.ID_CONDICION);
+        }
+      });
+    }
+    if (record.ID_UN_ITEM) {
+      void this.onUnitChanged(record.ID_UN_ITEM);
+    }
+    if (record.ID_CLIENTE) {
+      void this.onClientChanged(record.ID_CLIENTE);
+    }
+
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -959,39 +1048,181 @@ export class Ven229Component implements OnInit, OnDestroy {
     }
   }
 
+  async handleConditionChange(newCond: string): Promise<void> {
+    if (this.previousCondition && this.previousCondition !== newCond && this.items().length > 0) {
+      const result = await Swal.fire({
+        text: `Está cambiando la Condición ${this.previousCondition} por ${newCond}, esto borrará los Productos asociados, ¿Desea Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DF3E3E',
+        cancelButtonColor: '#0F4C81',
+        confirmButtonText: 'Sí, Borrar',
+        cancelButtonText: 'No'
+      });
+
+      if (result.isConfirmed) {
+        this.items.set([]);
+        this.taxes.set([]);
+        this.taxItems.set([]);
+        this.recalculate();
+        this.previousCondition = newCond;
+        await this.onConditionChanged(newCond);
+      } else {
+        this.form.controls.ID_CONDICION.setValue(this.previousCondition, { emitEvent: false });
+        return;
+      }
+    } else {
+      this.previousCondition = newCond;
+      await this.onConditionChanged(newCond);
+    }
+  }
+
+  async handleWarehouseChange(newBodega: string): Promise<void> {
+    if (this.previousWarehouse && this.previousWarehouse !== newBodega && this.items().length > 0) {
+      const result = await Swal.fire({
+        text: `Está cambiando la Bodega ${this.previousWarehouse} por ${newBodega}, esto borrará los Productos asociados, ¿Desea Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DF3E3E',
+        cancelButtonColor: '#0F4C81',
+        confirmButtonText: 'Sí, Borrar',
+        cancelButtonText: 'No'
+      });
+
+      if (result.isConfirmed) {
+        this.items.set([]);
+        this.taxes.set([]);
+        this.taxItems.set([]);
+        this.recalculate();
+        this.previousWarehouse = newBodega;
+        await this.loadProducts();
+      } else {
+        this.form.controls.ID_UN_BODEGA.setValue(this.previousWarehouse, { emitEvent: false });
+        return;
+      }
+    } else {
+      this.previousWarehouse = newBodega;
+      await this.loadProducts();
+    }
+  }
+
+  async loadConditions(): Promise<void> {
+    const adc = this.form.controls.ID_ADC.value;
+    const tipo = this.form.controls.TIPO_VENTA.value || 'CONTADO';
+    if (!adc) {
+      this.conditions.set([]);
+      return;
+    }
+    try {
+      const raw = await this.business.catalog('conditions', {
+        ID_ADC: adc,
+        TIPO_VENTA: tipo,
+        ESTADO: 'ACTIVO'
+      }, true);
+      const rows = raw.map(r => {
+        const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '');
+        return {
+          ...r,
+          CODIGO: code,
+          ID_CONDICION: code,
+          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code)
+        };
+      }).filter(r => r.CODIGO && r.CODIGO !== 'null');
+
+      this.conditions.set(rows);
+
+      if (raw.length > 0 && raw[0]['CODIGO'] === null) {
+        this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
+      }
+
+      const current = this.form.controls.ID_CONDICION.value;
+      if (rows.length === 1 && (!current || !rows.some(r => r.CODIGO === current))) {
+        this.form.patchValue({ ID_CONDICION: rows[0].CODIGO });
+      } else if (current && !rows.some(r => r.CODIGO === current)) {
+        this.form.patchValue({ ID_CONDICION: '' });
+        this.terms.set([]);
+      }
+    } catch {
+      this.conditions.set([]);
+    }
+  }
+
   async onConditionChanged(condId: string): Promise<void> {
     const cond = this.conditions().find(c => c['CODIGO'] === condId || c['ID_CONDICION'] === condId);
     if (cond) {
       const plazosRaw = cond['PLAZOS'];
       let plazoList: { PLAZO: number }[] = [];
       if (typeof plazosRaw === 'string') {
-        plazoList = plazosRaw.split(',').map(p => ({ PLAZO: parseInt(p.trim(), 10) })).filter(p => !isNaN(p.PLAZO));
+        try {
+          const parsed = JSON.parse(plazosRaw);
+          if (Array.isArray(parsed)) {
+            plazoList = parsed.map(p => ({ PLAZO: Number(p.PLAZO ?? p) })).filter(p => !isNaN(p.PLAZO));
+          }
+        } catch {
+          plazoList = plazosRaw.split(',').map(p => ({ PLAZO: parseInt(p.trim(), 10) })).filter(p => !isNaN(p.PLAZO));
+        }
       } else if (Array.isArray(plazosRaw)) {
         plazoList = plazosRaw.map(p => ({ PLAZO: Number(p.PLAZO || 0) }));
       }
+
+      if (plazoList.length === 0) {
+        plazoList = [{ PLAZO: 0 }];
+      }
       this.terms.set(plazoList);
-      if (plazoList.length > 0) {
-        this.form.patchValue({ PLAZO: plazoList[0].PLAZO }, { emitEvent: false });
+
+      if (this.form.controls.TIPO_VENTA.value === 'CONTADO') {
+        this.form.patchValue({
+          PLAZO: 0,
+          FECHA_PRIMER_VENC: this.form.controls.FECHA.value
+        }, { emitEvent: false });
+      } else {
+        if (cond['DIAS_VENC']) {
+          const fechaBase = this.form.controls.FECHA.value ? new Date(this.form.controls.FECHA.value + 'T00:00:00') : new Date();
+          fechaBase.setDate(fechaBase.getDate() + Number(cond['DIAS_VENC']));
+          const vencStr = [
+            fechaBase.getFullYear(),
+            String(fechaBase.getMonth() + 1).padStart(2, '0'),
+            String(fechaBase.getDate()).padStart(2, '0')
+          ].join('-');
+          this.form.patchValue({ FECHA_PRIMER_VENC: vencStr }, { emitEvent: false });
+        }
+        if (plazoList.length === 1) {
+          this.form.patchValue({ PLAZO: plazoList[0].PLAZO }, { emitEvent: false });
+        }
       }
     }
+    await this.loadProducts();
   }
 
-  async loadProducts(stockOnly?: boolean): Promise<void> {
-    if (stockOnly !== undefined) {
-      this.onlyStock.set(stockOnly);
+  async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
+    this.onlyStock.set(stockOnly);
+    const req = ++this.productRequest;
+    const h = this.header();
+    if (!h.ID_CONDICION) {
+      this.products.set([]);
+      this.productsLoading.set(false);
+      return;
     }
     this.productsLoading.set(true);
     try {
       const items = await this.business.catalog('products', {
-        ID_UN_ITEM: this.form.controls.ID_UN_ITEM.value,
-        ID_UN_BODEGA: this.form.controls.ID_UN_BODEGA.value,
-        SOLO_EXISTENCIAS: this.onlyStock()
-      });
-      this.products.set(items);
+        ID_LISTA: h.ID_CONDICION,
+        TIPO: this.conditionType(),
+        PLAZO: h.PLAZO,
+        CON_EXIS: stockOnly ? 'SI' : undefined,
+        ID_UN_BODEGA: h.ID_UN_BODEGA
+      }, true);
+      if (req === this.productRequest) {
+        this.products.set(items);
+      }
     } catch {
-      // Non-critical
+      if (req === this.productRequest) {
+        this.products.set([]);
+      }
     } finally {
-      this.productsLoading.set(false);
+      if (req === this.productRequest) {
+        this.productsLoading.set(false);
+      }
     }
   }
 
@@ -1119,11 +1350,25 @@ export class Ven229Component implements OnInit, OnDestroy {
     if (!isNew) {
       this.form.controls.DOCUMENTO.disable({ emitEvent: false });
     }
+
+    if (this.form.controls.TIPO_VENTA.value === 'CONTADO') {
+      this.form.controls.PLAZO.disable({ emitEvent: false });
+      this.form.controls.FECHA_PRIMER_VENC.disable({ emitEvent: false });
+      this.form.controls.CUOTA_INICIAL.disable({ emitEvent: false });
+    }
   }
 
   private focusFirstControl(): void {
     const doFocus = (): boolean => {
       const host = this.elementRef.nativeElement as HTMLElement;
+      const initialInput = host.querySelector<HTMLInputElement>(
+        '#ven-229-documento input:not([readonly]):not([disabled]), #ven-229-id-cliente input:not([readonly]):not([disabled]), #ven-229-fecha input:not([readonly]):not([disabled])'
+      );
+      if (initialInput) {
+        initialInput.focus();
+        initialInput.select?.();
+        return true;
+      }
       const formEl = host.querySelector<HTMLElement>('form, [formGroup], .ven-229__form') || host;
       const candidates = formEl.querySelectorAll<HTMLElement>(
         'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'

@@ -497,7 +497,7 @@ export class Ven230Component
       this.detailsReady.set(true);this.mode.set(RecordToolbarMode.Creating);
       this.form.reset({...Ven230DefaultRecord, FECHA:this.localDate(), FECHA_REGISTRO:this.localDate(), FECHA_PRIMER_VENC:this.localDate(),
         USUARIO:this.business.identity.USUARIO,ID_UN_ITEM:this.defaultUnit,ID_MONEDA:this.defaultCurrency}, {emitEvent:false});
-      this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.addresses.set([]);this.headerLocked.set(false);this.previousCondition="";this.products.set([]);this.conditions.set([]);this.terms.set([]);
+      this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.addresses.set([]);this.headerLocked.set(false);this.previousCondition="";this.previousWarehouse="";this.products.set([]);this.conditions.set([]);this.terms.set([]);
       this.enableFormControls();
       if(documents.length===1)this.selectDocument(String(documents[0].DOCUMENTO));
       await this.loadWarehouses();
@@ -658,6 +658,8 @@ export class Ven230Component
     async selectRecordIndex(index: number): Promise<void> {
     const record=this.records()[index];if(!record)return;
     this.currentIndex.set(index);this.mode.set(RecordToolbarMode.Browsing);this.disableFormControls();
+    this.previousCondition = String(record.ID_CONDICION || '');
+    this.previousWarehouse = String(record.ID_UN_BODEGA || '');
     this.workspace.setDirty(this.applicationId,false);this.populateForm(record);
     this.documents.set([{DOCUMENTO:record.DOCUMENTO_FAC || record.DOCUMENTO,ID_DOCUMENTO:record.ID_DOCUMENTO,CONSECUTIVO:record.CONSECUTIVO}]);
     this.headerLocked.set(false);
@@ -825,6 +827,14 @@ export class Ven230Component
   private focusFirstControl(): void {
     const doFocus = (): boolean => {
       const host = this.elementRef.nativeElement as HTMLElement;
+      const initialInput = host.querySelector<HTMLInputElement>(
+        '#ven-230-documento input:not([readonly]):not([disabled]), #ven-230-id-cliente input:not([readonly]):not([disabled]), #ven-230-fecha input:not([readonly]):not([disabled])'
+      );
+      if (initialInput) {
+        initialInput.focus();
+        initialInput.select?.();
+        return true;
+      }
       const formEl = host.querySelector<HTMLElement>('form, [formGroup], .ven-230__form') || host;
       const candidates = formEl.querySelectorAll<HTMLElement>(
         'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -895,7 +905,8 @@ export class Ven230Component
   private detailVersion=0;
   private defaultUnit='';private defaultCurrency='';
   private lastCriteria: unknown[]=[];
-  private previousCondition='';
+  previousCondition='';
+  previousWarehouse='';
   conditionType='';
   onlyStock=false;
   header(): Ven230PrefacturaRecord {
@@ -931,11 +942,21 @@ export class Ven230Component
     watch('ID_UN_ITEM',async()=>{this.form.controls.ID_UN_BODEGA.setValue('',{emitEvent:false});await this.loadWarehouses();this.products.set([]);});
     watch('ID_ADC',()=>this.resetConditions());
     watch('TIPO_VENTA',async()=>{await this.resetConditions();this.updateCreditControls();});
-    watch('ID_CONDICION',()=>this.changeCondition());
     watch('PLAZO',async()=>{this.recalculate();await this.loadProducts();});
-    watch('ID_UN_BODEGA',()=>this.loadProducts());
     watch('CUOTA_INICIAL',()=>this.recalculate());
     watch('FECHA',()=>this.updateCreditControls());
+    watch('ID_CONDICION', async () => {
+      const cond = this.form.controls.ID_CONDICION.value;
+      if (cond && !this.readOnly()) {
+        await this.handleConditionChange(cond);
+      }
+    });
+    watch('ID_UN_BODEGA', async () => {
+      const bodega = this.form.controls.ID_UN_BODEGA.value;
+      if (bodega && !this.readOnly()) {
+        await this.handleWarehouseChange(bodega);
+      }
+    });
   }
   private selectDocument(value:string):void {
     const row=this.documents().find(d=>d.DOCUMENTO===value);if(!row)return;
@@ -1019,14 +1040,65 @@ export class Ven230Component
     if(!rows.some(r=>r.CODIGO) && !this.readOnly())this.notification.warning('El vendedor seleccionado no tiene condiciones de venta asociadas.');
     this.previousCondition=h.ID_CONDICION ?? '';this.applyCondition(false);await this.loadProducts();
   }
-  private async changeCondition():Promise<void> {
-    const value=this.form.controls.ID_CONDICION.value ?? '';
-    if(value!==this.previousCondition && this.items().length){
-      const answer=await Swal.fire({text:'Cambiar la condición borrará los productos asociados. ¿Desea continuar?',icon:'warning',showCancelButton:true,confirmButtonText:'Continuar',cancelButtonText:'Cancelar'});
-      if(!answer.isConfirmed){this.form.controls.ID_CONDICION.setValue(this.previousCondition,{emitEvent:false});return;}
-      this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.recalculate();
+  async handleConditionChange(newCond: string): Promise<void> {
+    const value = newCond ?? '';
+    if (this.previousCondition && value !== this.previousCondition && this.items().length > 0) {
+      const answer = await Swal.fire({
+        text: `Está cambiando la Condición ${this.previousCondition} por ${value}, esto borrará los Productos asociados, ¿Desea Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DF3E3E',
+        cancelButtonColor: '#0F4C81',
+        confirmButtonText: 'Sí, Borrar',
+        cancelButtonText: 'No'
+      });
+      if (!answer.isConfirmed) {
+        this.form.controls.ID_CONDICION.setValue(this.previousCondition, { emitEvent: false });
+        return;
+      }
+      this.items.set([]);
+      this.taxes.set([]);
+      this.taxItems.set([]);
+      this.payments.set([]);
+      this.recalculate();
     }
-    this.previousCondition=value;this.applyCondition(true);await this.loadProducts();
+    this.previousCondition = value;
+    this.form.patchValue({ ID_CONDICION: value }, { emitEvent: false });
+    this.applyCondition(true);
+    await this.loadProducts();
+  }
+
+  async handleWarehouseChange(newBodega: string): Promise<void> {
+    const value = newBodega ?? '';
+    if (this.previousWarehouse && value !== this.previousWarehouse && this.items().length > 0) {
+      const result = await Swal.fire({
+        text: `Está cambiando la Bodega ${this.previousWarehouse} por ${value}, esto borrará los Productos asociados, ¿Desea Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DF3E3E',
+        cancelButtonColor: '#0F4C81',
+        confirmButtonText: 'Sí, Borrar',
+        cancelButtonText: 'No'
+      });
+
+      if (result.isConfirmed) {
+        this.items.set([]);
+        this.taxes.set([]);
+        this.taxItems.set([]);
+        this.payments.set([]);
+        this.recalculate();
+        this.previousWarehouse = value;
+        this.form.patchValue({ ID_UN_BODEGA: value }, { emitEvent: false });
+        await this.loadProducts();
+      } else {
+        this.form.controls.ID_UN_BODEGA.setValue(this.previousWarehouse, { emitEvent: false });
+        return;
+      }
+    } else {
+      this.previousWarehouse = value;
+      this.form.patchValue({ ID_UN_BODEGA: value }, { emitEvent: false });
+      await this.loadProducts();
+    }
   }
   private applyCondition(assign:boolean):void {
     const cond=this.conditions().find(r=>r.CODIGO===this.form.controls.ID_CONDICION.value);
@@ -1041,7 +1113,7 @@ export class Ven230Component
     this.updateCreditControls();
   }
   private updateCreditControls():void {
-    if(this.readOnly() || this.headerLocked() || this.itemPending())return;
+    if (this.readOnly() || this.itemPending()) return;
     const allowed = !!(this.form.controls.ID_ADC.value && this.form.controls.TIPO_VENTA.value);
     if (allowed) this.form.controls.ID_CONDICION.enable({emitEvent: false});
     else this.form.controls.ID_CONDICION.disable({emitEvent: false});
@@ -1137,7 +1209,7 @@ export class Ven230Component
           PREFACTURA:this.header(),ITM_PREFACTURA:this.items(),Prefactura_PAGOS:this.payments(),DATOS:this.selectedSettingsRows}))[0];
         if(!result)throw new Error('No se recibieron datos de la prefactura.');
         this.items.set(result.ITM_Prefactura ?? []);this.taxes.set(result.DATA_GRAV?.[0]?.ENCAB ?? []);this.taxItems.set(result.DATA_GRAV?.[0]?.ITEMS ?? []);
-        this.recalculate();this.headerLocked.set(this.items().length>0);if(this.headerLocked())this.disableFormControls();this.workspace.setDirty(this.applicationId,true);this.selectionVisible.set(false);
+        this.recalculate();this.workspace.setDirty(this.applicationId,true);this.selectionVisible.set(false);
       }catch(error){this.showError(error);}finally{this.loading.set(false);}
     }
   }
@@ -1190,7 +1262,7 @@ export class Ven230Component
  onItemPending(pending:boolean):void {
    this.itemPending.set(pending);
    if(pending){this.disableFormControls();this.workspace.setDirty(this.applicationId,true);}
-   else if(!this.readOnly() && !this.headerLocked())this.enableFormControls();
+   else if(!this.readOnly())this.enableFormControls();
  }
  money(value:unknown):string{return formatNumber(Number(value || 0),this.spec('FORMATO MONEDA')?.FORMATO ?? '#,##0.00');}
  stateStyle():Record<string,string>{

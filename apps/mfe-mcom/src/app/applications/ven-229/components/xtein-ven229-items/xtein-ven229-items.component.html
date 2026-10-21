@@ -107,6 +107,8 @@
                   placeholder="Producto"
                   [dataSource]="products"
                   [showClearButton]="true"
+                  [acceptCustomValue]="true"
+                  (onValueChanged)="onProductValueChanged($event)"
                   [dropDownOptions]="productDropDownOptions"
                   [(opened)]="productDropdownOpened"
                   [disabled]="working() || busy"
@@ -173,7 +175,7 @@
               <xtein-select
                 class="cell-editor"
                 [items]="presentationOptions()"
-                displayExpr="UDM_VENTA"
+                displayExpr="LABEL"
                 valueExpr="UDM_VENTA"
                 [ngModel]="row.UDM_VENTA"
                 (ngModelChange)="unit($event)"

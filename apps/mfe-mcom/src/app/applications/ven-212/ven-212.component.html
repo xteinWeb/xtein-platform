@@ -35,7 +35,7 @@
                   placeholder="YYYY-MM-DD"
                   formControlName="FECHA"
                   [required]="true"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -135,7 +135,7 @@
                   valueExpr="DIRECCION"
                   [searchEnabled]="true"
                   formControlName="DIRECCION"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -156,7 +156,7 @@
                   [columns]="bankColumns"
                   [showClearButton]="true"
                   formControlName="BANCO"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -188,7 +188,7 @@
                   name="ID_DOC_SOPORTE"
                   placeholder="Orden de compra"
                   formControlName="ID_DOC_SOPORTE"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@
                   id="ven-212-fecha-oc"
                   name="FECHA_OC"
                   formControlName="FECHA_OC"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -288,7 +288,7 @@
                     dropDownWidth="min(480px, 95vw)"
                     formControlName="ID_UN_ITEM"
                     [required]="true"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -310,7 +310,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_MONEDA"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -332,7 +332,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(500px, 95vw)"
                     formControlName="ID_ADC"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -368,7 +368,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(650px, 95vw)"
                     formControlName="ID_UN_BODEGA"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -398,7 +398,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_CONDICION"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -414,7 +414,7 @@
                     displayExpr="PLAZO"
                     valueExpr="PLAZO"
                     formControlName="PLAZO"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -429,7 +429,7 @@
                     name="FECHA_PRIMER_VENC"
                     [min]="form.controls.FECHA.value || null"
                     formControlName="FECHA_PRIMER_VENC"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -457,7 +457,7 @@
                     name="CLIENTE_PADRE"
                     placeholder="Cliente Padre"
                     formControlName="CLIENTE_PADRE"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -477,7 +477,7 @@
                 name="DESCRIPCION"
                 placeholder="Descripción de la factura..."
                 formControlName="DESCRIPCION"
-                [readOnly]="readOnly() || headerLocked() || itemPending()"
+                [readOnly]="readOnly() || itemPending()"
               />
             </div>
           </div>
