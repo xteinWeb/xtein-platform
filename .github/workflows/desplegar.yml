@@ -27,10 +27,29 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci --no-audit --no-fund
+        with:
+          fetch-depth: 0
+      # test:ci solo prueba librerías (sdk, runtime, ui): si no cambiaron libs/ ni dependencias, no hay nada nuevo
+      # que probar y se ahorran npm ci + compilar librerías. A mano (Run workflow) se prueba siempre.
+      - name: ¿Hace falta probar?
+        id: cambios
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ -z "$BASE" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "probar=true" >> "$GITHUB_OUTPUT"; echo "Se prueba: ejecución manual o sin commit base con el que comparar."
+          elif git diff --name-only "$BASE" HEAD | grep -qE '^(libs/|package\.json$|package-lock\.json$|angular\.json$|tsconfig[^/]*\.json$)'; then
+            echo "probar=true" >> "$GITHUB_OUTPUT"; echo "Se prueba: cambiaron librerías o dependencias."
+          else
+            echo "probar=false" >> "$GITHUB_OUTPUT"; echo "Sin cambios en librerías ni dependencias: se omiten las pruebas."
+          fi
+      - if: steps.cambios.outputs.probar == 'true'
+        run: npm ci --no-audit --no-fund
       # Las pruebas importan las librerías @xtein/* desde dist/ (alias de tsconfig.json)
-      - run: npm run build:libs
-      - run: npm run test:ci
+      - if: steps.cambios.outputs.probar == 'true'
+        run: npm run build:libs
+      - if: steps.cambios.outputs.probar == 'true'
+        run: npm run test:ci
 
   desplegar:
     needs: pruebas

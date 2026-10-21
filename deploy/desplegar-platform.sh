@@ -8,8 +8,9 @@
 # <WEB_DIR>/browser/<mfe>/. Si la página o algún remoteEntry.json no responde después, deja la versión anterior.
 #
 # Qué se compila según lo que cambió:
-#   libs/, package.json, package-lock.json, angular.json, tsconfig*.json o algún federation.config.js
-#                                 → todo (las librerías van dentro de cada app y deben ser la misma versión en todas)
+#   libs/, package-lock.json, angular.json, tsconfig*.json o algún federation.config.js
+#                                 → todo (las librerías van dentro de cada app y deben ser la misma versión en todas;
+#                                   package.json solo no: las dependencias reales las fija package-lock.json)
 #   apps/shell/...                → solo el shell
 #   apps/<mfe>/...                → solo ese microfrontend (si está en MICROFRONTENDS)
 #   cualquier otra cosa           → nada (documentación, workflow, este script, nginx...)
@@ -72,7 +73,7 @@ elif [ ! -f "$PUBLICADO/index.html" ]; then
 else
   for archivo in "${CAMBIOS[@]}"; do
     case "$archivo" in
-      libs/* | package.json | package-lock.json | angular.json | tsconfig*.json | apps/*/federation.config.js)
+      libs/* | package-lock.json | angular.json | tsconfig*.json | apps/*/federation.config.js)
         TODO="cambió $archivo, que afecta a todas las aplicaciones"
         break
         ;;
