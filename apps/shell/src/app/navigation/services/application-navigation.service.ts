@@ -1,25 +1,15 @@
-import {
-  Injectable,
-  signal
-} from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
-import {
-  finalize
-} from 'rxjs';
+import { finalize } from 'rxjs';
 
-import {
-  ApplicationTreeNode
-} from '@xtein/sdk';
+import { ApplicationTreeNode } from '@xtein/sdk';
 
 import {
   ApplicationRegistryService,
-  WorkspaceRuntimeService
+  WorkspaceRuntimeService,
 } from '@xtein/runtime';
 
-import {
-  ApplicationTreeApiService
-} from '../data-access/services/application-tree-api.service';
-
+import { ApplicationTreeApiService } from '../data-access/services/application-tree-api.service';
 
 /**
  * Maintains the application navigation state used by the XTEIN Shell.
@@ -30,86 +20,52 @@ import {
  * so they can later be resolved and launched from the workspace.
  */
 @Injectable({
-  providedIn:
-    'root'
+  providedIn: 'root',
 })
 export class ApplicationNavigationService {
-
   /**
    * Internal application-tree state.
    */
-  private readonly itemsState =
-    signal<
-      ApplicationTreeNode[]
-    >(
-      []
-    );
-
+  private readonly itemsState = signal<ApplicationTreeNode[]>([]);
 
   /**
    * Internal loading state.
    */
-  private readonly loadingState =
-    signal(
-      false
-    );
-
+  private readonly loadingState = signal(false);
 
   /**
    * Internal navigation error state.
    */
-  private readonly errorState =
-    signal<
-      string | null
-    >(
-      null
-    );
-
+  private readonly errorState = signal<string | null>(null);
 
   /**
    * Prevents default applications from being reopened every time
    * the application tree is refreshed during the same Shell session.
    */
-  private defaultApplicationsInitialized =
-    false;
-
+  private defaultApplicationsInitialized = false;
 
   /**
    * Read-only application tree exposed to UI components.
    */
-  readonly items =
-    this.itemsState
-      .asReadonly();
-
+  readonly items = this.itemsState.asReadonly();
 
   /**
    * Indicates whether the application tree is being loaded.
    */
-  readonly loading =
-    this.loadingState
-      .asReadonly();
-
+  readonly loading = this.loadingState.asReadonly();
 
   /**
    * Current navigation loading error.
    */
-  readonly error =
-    this.errorState
-      .asReadonly();
-
+  readonly error = this.errorState.asReadonly();
 
   constructor(
-    private readonly applicationTreeApi:
-      ApplicationTreeApiService,
+    private readonly applicationTreeApi: ApplicationTreeApiService,
 
-    private readonly applicationRegistry:
-      ApplicationRegistryService,
+    private readonly applicationRegistry: ApplicationRegistryService,
 
-    private readonly workspaceRuntime:
-      WorkspaceRuntimeService
-  ) {
-  }
-
+    private readonly workspaceRuntime: WorkspaceRuntimeService,
+  ) {}
 
   /**
    * Loads the application tree available to the
@@ -121,114 +77,61 @@ export class ApplicationNavigationService {
    * Applications configured with DEFECTO = 1 are automatically
    * opened after the registry is ready.
    */
-  load():
-    void {
-
-    if (
-      this.loadingState()
-    ) {
-
+  load(): void {
+    if (this.loadingState()) {
       return;
     }
 
+    this.loadingState.set(true);
 
-    this.loadingState.set(
-      true
-    );
-
-
-    this.errorState.set(
-      null
-    );
-
+    this.errorState.set(null);
 
     this.applicationTreeApi
       .load()
-      .pipe(
-        finalize(
-          () =>
-            this.loadingState.set(
-              false
-            )
-        )
-      )
+      .pipe(finalize(() => this.loadingState.set(false)))
       .subscribe({
+        next: (items) => {
+          /*
+           * Filter the application tree: keep only applications with
+           * a configured MICROFRONTEND_ID and their ancestor modules/menus.
+           */
+          const filteredItems = this.filterMicrofrontendTree(items);
 
-        next:
-          items => {
+          /*
+           * Replace the runtime registry with the applications
+           * currently authorized for the authenticated user.
+           */
+          this.applicationRegistry.clear();
 
-            /*
-             * Filter the application tree: keep only applications with
-             * a configured MICROFRONTEND_ID and their ancestor modules/menus.
-             */
-            const filteredItems =
-              this.filterMicrofrontendTree(
-                items
-              );
+          this.applicationRegistry.registerApplications(filteredItems);
 
+          /*
+           * Publish the same normalized collection to the Shell UI.
+           */
+          this.itemsState.set([...filteredItems]);
 
-            /*
-             * Replace the runtime registry with the applications
-             * currently authorized for the authenticated user.
-             */
-            this.applicationRegistry
-              .clear();
+          /*
+           * Open applications configured to load automatically.
+           *
+           * This happens only after ApplicationRegistryService
+           * contains the complete authorized application catalog.
+           */
+          this.openDefaultApplications(filteredItems);
+        },
 
+        error: (error) => {
+          /*
+           * Never leave stale navigation or runtime registrations
+           * after a failed reload.
+           */
+          this.applicationRegistry.clear();
 
-            this.applicationRegistry
-              .registerApplications(
-                filteredItems
-              );
+          this.itemsState.set([]);
 
-
-            /*
-             * Publish the same normalized collection to the Shell UI.
-             */
-            this.itemsState.set(
-              [
-                ...filteredItems
-              ]
-            );
-
-
-            /*
-             * Open applications configured to load automatically.
-             *
-             * This happens only after ApplicationRegistryService
-             * contains the complete authorized application catalog.
-             */
-            this.openDefaultApplications(
-              filteredItems
-            );
-          },
-
-
-        error:
-          error => {
-
-            /*
-             * Never leave stale navigation or runtime registrations
-             * after a failed reload.
-             */
-            this.applicationRegistry
-              .clear();
-
-
-            this.itemsState.set(
-              []
-            );
-
-
-            this.errorState.set(
-              this.getErrorMessage(
-                error
-              )
-            );
-          }
-
+          this.errorState.set(this.getErrorMessage(error));
+        },
       });
   }
-
 
   /**
    * Clears the current navigation and runtime application state.
@@ -236,36 +139,21 @@ export class ApplicationNavigationService {
    * This method should be used after logout or when the active
    * company/session context changes.
    */
-  clear():
-    void {
+  clear(): void {
+    this.applicationRegistry.clear();
 
-    this.applicationRegistry
-      .clear();
+    this.itemsState.set([]);
 
+    this.errorState.set(null);
 
-    this.itemsState.set(
-      []
-    );
-
-
-    this.errorState.set(
-      null
-    );
-
-
-    this.loadingState.set(
-      false
-    );
-
+    this.loadingState.set(false);
 
     /*
      * A new authenticated context must be allowed to initialize
      * its own default applications.
      */
-    this.defaultApplicationsInitialized =
-      false;
+    this.defaultApplicationsInitialized = false;
   }
-
 
   /**
    * Returns one application-tree node by identifier.
@@ -273,35 +161,18 @@ export class ApplicationNavigationService {
    * @param applicationId XTEIN application identifier.
    * @returns Matching node or undefined.
    */
-  findByApplicationId(
-    applicationId:
-      string
-  ): ApplicationTreeNode | undefined {
+  findByApplicationId(applicationId: string): ApplicationTreeNode | undefined {
+    const normalizedApplicationId = applicationId.trim().toUpperCase();
 
-    const normalizedApplicationId =
-      applicationId
-        .trim()
-        .toUpperCase();
-
-
-    if (
-      !normalizedApplicationId
-    ) {
-
+    if (!normalizedApplicationId) {
       return undefined;
     }
 
-
-    return this.itemsState()
-      .find(
-        item =>
-          item.applicationId
-            .trim()
-            .toUpperCase() ===
-          normalizedApplicationId
-      );
+    return this.itemsState().find(
+      (item) =>
+        item.applicationId.trim().toUpperCase() === normalizedApplicationId,
+    );
   }
-
 
   /**
    * Opens every authorized application configured with
@@ -318,101 +189,57 @@ export class ApplicationNavigationService {
    *
    * @param items Authorized application-tree nodes.
    */
-  private openDefaultApplications(
-    items:
-      readonly ApplicationTreeNode[]
-  ): void {
-
-    if (
-      this.defaultApplicationsInitialized
-    ) {
-
+  private openDefaultApplications(items: readonly ApplicationTreeNode[]): void {
+    if (this.defaultApplicationsInitialized) {
       return;
     }
 
+    this.defaultApplicationsInitialized = true;
 
-    this.defaultApplicationsInitialized =
-      true;
+    const defaultApplications = items.filter(
+      (item) =>
+        item.openByDefault && item.type.trim().toLowerCase() !== 'modulo',
+    );
 
-
-    const defaultApplications =
-      items.filter(
-        item =>
-          item.openByDefault &&
-          item.type
-            .trim()
-            .toLowerCase() !==
-            'modulo'
-      );
-
-
-    for (
-      const application of
-      defaultApplications
-    ) {
-
-      if (
-        !application.remote ||
-        !application.remote.enabled
-      ) {
-
+    for (const application of defaultApplications) {
+      if (!application.remote || !application.remote.enabled) {
         console.warn(
           'XTEIN default application was not opened because its microfrontend is unavailable.',
           {
-            applicationId:
-              application.applicationId,
+            applicationId: application.applicationId,
 
-            applicationName:
-              application.name,
+            applicationName: application.name,
 
-            remote:
-              application.remote
-          }
+            remote: application.remote,
+          },
         );
-
 
         continue;
       }
 
-
       try {
+        this.workspaceRuntime.openApplication({
+          applicationId: application.applicationId,
 
-        this.workspaceRuntime
-          .openApplication({
+          title: application.name,
 
-            applicationId:
-              application.applicationId,
-
-            title:
-              application.name,
-
-            icon:
-              application.icon
-
-          });
-
+          icon: application.icon,
+        });
       } catch (error) {
-
         /*
          * One invalid default application must never block
          * the remaining Shell initialization.
          */
-        console.error(
-          'XTEIN default application could not be opened.',
-          {
-            applicationId:
-              application.applicationId,
+        console.error('XTEIN default application could not be opened.', {
+          applicationId: application.applicationId,
 
-            applicationName:
-              application.name,
+          applicationName: application.name,
 
-            error
-          }
-        );
+          error,
+        });
       }
     }
   }
-
 
   /**
    * Converts an unknown loading error into a user-facing message.
@@ -420,60 +247,23 @@ export class ApplicationNavigationService {
    * @param error Loading error.
    * @returns Normalized error message.
    */
-  private getErrorMessage(
-    error:
-      unknown
-  ): string {
-
-    if (
-      error instanceof
-        Error &&
-      error.message
-        .trim()
-    ) {
-
-      return error.message
-        .trim();
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error && error.message.trim()) {
+      return error.message.trim();
     }
 
+    if (error !== null && typeof error === 'object') {
+      const record = error as Record<string, unknown>;
 
-    if (
-      error !==
-        null &&
-      typeof error ===
-        'object'
-    ) {
+      const backendMessage = record['message'];
 
-      const record =
-        error as
-          Record<
-            string,
-            unknown
-          >;
-
-
-      const backendMessage =
-        record[
-          'message'
-        ];
-
-
-      if (
-        typeof backendMessage ===
-          'string' &&
-        backendMessage
-          .trim()
-      ) {
-
-        return backendMessage
-          .trim();
+      if (typeof backendMessage === 'string' && backendMessage.trim()) {
+        return backendMessage.trim();
       }
     }
 
-
     return 'Unable to load the XTEIN application tree.';
   }
-
 
   /**
    * Filters the application tree so that only applications with a configured
@@ -487,93 +277,61 @@ export class ApplicationNavigationService {
    * @returns Filtered application tree nodes.
    */
   private filterMicrofrontendTree(
-    items:
-      readonly ApplicationTreeNode[]
+    items: readonly ApplicationTreeNode[],
   ): ApplicationTreeNode[] {
-
-    const itemMap =
-      new Map<string, ApplicationTreeNode>();
+    const itemMap = new Map<string, ApplicationTreeNode>();
 
     for (const item of items) {
-      const id =
-        item.applicationId
-          ?.trim()
-          .toUpperCase();
+      const id = item.applicationId?.trim().toUpperCase();
 
       if (id) {
         itemMap.set(id, item);
       }
     }
 
-
     /*
      * 1. Collect all nodes that have a valid microfrontend identifier
      */
-    const validAppIds =
-      new Set<string>();
+    const validAppIds = new Set<string>();
 
     for (const item of items) {
-      const mfeId =
-        (
-          (item as unknown as { microfrontendId?: string }).microfrontendId ??
-          item.remote?.microfrontendId
-        )?.trim();
+      const mfeId = (
+        (item as unknown as { microfrontendId?: string }).microfrontendId ??
+        item.remote?.microfrontendId
+      )?.trim();
 
       if (mfeId) {
-        validAppIds.add(
-          item.applicationId
-            .trim()
-            .toUpperCase()
-        );
+        validAppIds.add(item.applicationId.trim().toUpperCase());
       }
     }
-
 
     /*
      * 2. Retain valid applications and all their ancestor modules/menus
      */
-    const retainedIds =
-      new Set<string>(validAppIds);
+    const retainedIds = new Set<string>(validAppIds);
 
     for (const validId of validAppIds) {
-      let current =
-        itemMap.get(validId);
+      let current = itemMap.get(validId);
 
-      while (
-        current &&
-        current.parentApplicationId
-      ) {
-        const parentId =
-          current.parentApplicationId
-            .trim()
-            .toUpperCase();
+      while (current && current.parentApplicationId) {
+        const parentId = current.parentApplicationId.trim().toUpperCase();
 
-        if (
-          parentId === 'XTEIN' ||
-          parentId === ''
-        ) {
+        if (parentId === 'XTEIN' || parentId === '') {
           break;
         }
 
         retainedIds.add(parentId);
-        current =
-          itemMap.get(parentId);
+        current = itemMap.get(parentId);
       }
     }
-
 
     /*
      * 3. Keep only retained nodes in the tree
      */
-    return items.filter(item => {
-      const id =
-        item.applicationId
-          ?.trim()
-          .toUpperCase();
+    return items.filter((item) => {
+      const id = item.applicationId?.trim().toUpperCase();
 
-      return id
-        ? retainedIds.has(id)
-        : false;
+      return id ? retainedIds.has(id) : false;
     });
   }
 }

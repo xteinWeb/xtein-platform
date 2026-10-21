@@ -1,30 +1,18 @@
-import {
-  Injectable
-} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {
-  Observable,
-  map,
-  throwError
-} from 'rxjs';
+import { Observable, map, throwError } from 'rxjs';
 
 import {
   XteinApiAccessMode,
   XteinApiClientService,
-  XteinDataApiResponse
+  XteinDataApiResponse,
 } from '@xtein/api-client';
 
-import {
-  SessionService
-} from '@xtein/session';
+import { SessionService } from '@xtein/session';
 
-import {
-  ApplicationTreeNode
-} from '@xtein/sdk';
+import { ApplicationTreeNode } from '@xtein/sdk';
 
-import {
-  ApplicationTreeMapperService
-} from '@xtein/runtime';
+import { ApplicationTreeMapperService } from '@xtein/runtime';
 
 /**
  * Provides application-tree communication with
@@ -34,35 +22,28 @@ import {
  * Backend response mapping is delegated to the platform runtime.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApplicationTreeApiService {
-
   /**
    * Existing backend endpoint used to retrieve
    * the applications available to the authenticated user.
    */
-  private static readonly endpoint =
-    '/home';
+  private static readonly endpoint = '/home';
 
   /**
    * Existing backend action used to retrieve
    * the authenticated user's application tree.
    */
-  private static readonly action =
-    'USUARIO APLICACIONES';
+  private static readonly action = 'USUARIO APLICACIONES';
 
   constructor(
-    private readonly apiClient:
-      XteinApiClientService,
+    private readonly apiClient: XteinApiClientService,
 
-    private readonly sessionService:
-      SessionService,
+    private readonly sessionService: SessionService,
 
-    private readonly applicationTreeMapper:
-      ApplicationTreeMapperService
-  ) {
-  }
+    private readonly applicationTreeMapper: ApplicationTreeMapperService,
+  ) {}
 
   /**
    * Loads the application tree for the current authenticated user.
@@ -76,60 +57,41 @@ export class ApplicationTreeApiService {
    * @returns Normalized application-tree nodes.
    */
   load(): Observable<ApplicationTreeNode[]> {
-
-    const session =
-      this.sessionService.current;
-
+    const session = this.sessionService.current;
     if (!session) {
-
       return throwError(
         () =>
           new Error(
-            'An authenticated XTEIN session is required to load the application tree.'
-          )
+            'An authenticated XTEIN session is required to load the application tree.',
+          ),
       );
     }
 
     return this.apiClient
-      .execute<
-        XteinDataApiResponse<unknown>
-      >({
-        endpoint:
-          ApplicationTreeApiService.endpoint,
+      .execute<XteinDataApiResponse<unknown>>({
+        endpoint: ApplicationTreeApiService.endpoint,
 
-        action:
-          ApplicationTreeApiService.action,
+        action: ApplicationTreeApiService.action,
 
         data: {
-          USUARIO:
-            session.userId,
+          USUARIO: session.userId,
 
-          EMPRESA:
-            session.companyId
+          EMPRESA: session.companyId,
         },
 
-        accessMode:
-           XteinApiAccessMode.Authenticated
+        accessMode: XteinApiAccessMode.Authenticated,
       })
       .pipe(
-        map(response => {
-
-          const items =
-            this.applicationTreeMapper
-              .mapResponse(
-                response.data
-              );
+        map((response) => {
+          const items = this.applicationTreeMapper.mapResponse(response.data);
 
           /*
            * DevExtreme TreeView expects a mutable array.
            * The mapper intentionally exposes a readonly collection,
            * so the Shell receives its own array instance.
            */
-          return [
-            ...items
-          ];
-
-        })
+          return [...items];
+        }),
       );
   }
 }
