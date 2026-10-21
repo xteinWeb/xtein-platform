@@ -93,7 +93,9 @@ dashboard-runtime and mfe-adm have a test target; shell and the other mfe-* have
   secure-context issue locally, open the app by LAN IP (`http://192.168.11.61:<port>/`), not `localhost`; the
   driver prints `page errors:` (including uncaught exceptions) when the page never renders.
 - **Deployed copy (dev2026):** `http://192.168.11.80:7596`, deployed by `.github/workflows/desplegar.yml` on
-  push to `developer` via `deploy/desplegar-platform.sh` (`npm run build:deploy`, ~15 min). Probe it with
+  push to `developer` via `deploy/desplegar-platform.sh`, which builds only what changed (one microfrontend
+  ~3-4 min; anything under `libs/` or dependencies ~15 min; `SOLO_PLAN=1` prints the plan). The published
+  microfrontends are the `MICROFRONTENDS` list at the top of that script. Probe it with
   `node .claude/skills/run-xtein-platform/driver.mjs login http://192.168.11.80:7596/ xtein shots/dev2026.png`.
 
 - **Local apiRest rejects the Shell on :4210 with `Origin not allowed by CORS`** — its allowlist in
