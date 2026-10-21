@@ -7,14 +7,10 @@ import {
   Output,
   SimpleChanges,
   computed,
-  signal
+  signal,
 } from '@angular/core';
 
-import {
-  DxTextBoxModule,
-  DxTreeViewModule
-} from 'devextreme-angular';
-
+import { DxTextBoxModule, DxTreeViewModule } from 'devextreme-angular';
 
 /**
  * Generic data item emitted by the XTEIN tree.
@@ -22,75 +18,58 @@ import {
  * Applications are not required to implement an index signature
  * in their domain models.
  */
-export type XteinTreeDataItem =
-  Record<
-    string,
-    unknown
-  >;
-
+export type XteinTreeDataItem = Record<string, unknown>;
 
 /**
  * Internal normalized tree node.
  */
 interface XteinTreeNode {
-
   /**
    * Unique tree node identifier.
    */
-  key:
-    string;
+  key: string;
 
   /**
    * Main display text.
    */
-  text:
-    string;
+  text: string;
 
   /**
    * Optional display prefix.
    */
-  prefix:
-    string;
+  prefix: string;
 
   /**
    * Indicates whether the node represents an active item.
    */
-  active:
-    boolean;
+  active: boolean;
 
   /**
    * Indicates whether the node is expanded.
    */
-  expanded:
-    boolean;
+  expanded: boolean;
 
   /**
    * Child tree nodes.
    */
-  children:
-    XteinTreeNode[];
+  children: XteinTreeNode[];
 
   /**
    * Original application data object.
    */
-  data:
-    object;
+  data: object;
 }
-
 
 /**
  * Minimal DevExtreme item-click event required by the
  * XTEIN tree component.
  */
 interface XteinTreeItemClickEvent {
-
   /**
    * Selected tree node.
    */
-  itemData?:
-    XteinTreeNode;
+  itemData?: XteinTreeNode;
 }
-
 
 /**
  * Standard reusable XTEIN hierarchical tree.
@@ -102,215 +81,135 @@ interface XteinTreeItemClickEvent {
  * or implement an index signature.
  */
 @Component({
-  selector:
-    'xtein-tree',
+  selector: 'xtein-tree',
 
-  standalone:
-    true,
+  standalone: true,
 
-  imports: [
-    DxTextBoxModule,
-    DxTreeViewModule
-  ],
+  imports: [DxTextBoxModule, DxTreeViewModule],
 
-  templateUrl:
-    './xtein-tree.component.html',
+  templateUrl: './xtein-tree.component.html',
 
-  styleUrl:
-    './xtein-tree.component.scss',
+  styleUrl: './xtein-tree.component.scss',
 
-  changeDetection:
-    ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class XteinTreeComponent
-  implements OnChanges {
-
+export class XteinTreeComponent implements OnChanges {
   /**
    * Flat source collection.
    *
    * Any application domain object can be supplied.
    */
   @Input()
-  items:
-    readonly object[] =
-      [];
-
+  items: readonly object[] = [];
 
   /**
    * Unique identifier field.
    */
   @Input()
-  idField =
-    'id';
-
+  idField = 'id';
 
   /**
    * Parent identifier field.
    */
   @Input()
-  parentIdField =
-    'parentId';
-
+  parentIdField = 'parentId';
 
   /**
    * Main display field.
    */
   @Input()
-  displayField =
-    'name';
-
+  displayField = 'name';
 
   /**
    * Optional field displayed before the main text.
    */
   @Input()
-  prefixField =
-    '';
-
+  prefixField = '';
 
   /**
    * Optional status field.
    */
   @Input()
-  statusField =
-    '';
-
+  statusField = '';
 
   /**
    * Fields used by local tree search.
    */
   @Input()
-  searchFields:
-    readonly string[] =
-      [];
-
+  searchFields: readonly string[] = [];
 
   /**
    * Enables local search.
    */
   @Input()
-  searchEnabled =
-    true;
-
+  searchEnabled = true;
 
   /**
    * Search placeholder.
    */
   @Input()
-  searchPlaceholder =
-    'Buscar...';
-
+  searchPlaceholder = 'Buscar...';
 
   /**
    * Displays the configured prefix.
    */
   @Input()
-  showPrefix =
-    true;
-
+  showPrefix = true;
 
   /**
    * Displays active/inactive status.
    */
   @Input()
-  showStatus =
-    true;
-
+  showStatus = true;
 
   /**
    * Expands all nodes when data is loaded.
    */
   @Input()
-  expandAllOnLoad =
-    true;
-
+  expandAllOnLoad = true;
 
   /**
    * Emits the original selected data item.
    */
   @Output()
-  readonly itemClick =
-    new EventEmitter<
-      XteinTreeDataItem
-    >();
-
+  readonly itemClick = new EventEmitter<XteinTreeDataItem>();
 
   /**
    * Current local search text.
    */
-  readonly searchText =
-    signal(
-      ''
-    );
-
+  readonly searchText = signal('');
 
   /**
    * Internal hierarchical tree.
    *
    * DevExtreme requires a mutable array for its items binding.
    */
-  private readonly treeState =
-    signal<
-      XteinTreeNode[]
-    >(
-      []
-    );
-
+  private readonly treeState = signal<XteinTreeNode[]>([]);
 
   /**
    * Tree filtered according to the current local search.
    *
    * DevExtreme receives a mutable array.
    */
-  readonly visibleNodes =
-    computed<
-      XteinTreeNode[]
-    >(
-      () => {
+  readonly visibleNodes = computed<XteinTreeNode[]>(() => {
+    const search = this.normalizeString(this.searchText());
 
-        const search =
-          this.normalizeString(
-            this.searchText()
-          );
+    if (!search) {
+      return [...this.treeState()];
+    }
 
-
-        if (
-          !search
-        ) {
-
-          return [
-            ...this.treeState()
-          ];
-        }
-
-
-        return this.filterNodes(
-          this.treeState(),
-          search
-        );
-      }
-    );
-
+    return this.filterNodes(this.treeState(), search);
+  });
 
   /**
    * Indicates whether the tree currently has data.
    */
-  readonly hasItems =
-    computed(
-      () =>
-        this.visibleNodes()
-          .length > 0
-    );
-
+  readonly hasItems = computed(() => this.visibleNodes().length > 0);
 
   /**
    * Rebuilds the hierarchy when source data changes.
    */
-  ngOnChanges(
-    changes:
-      SimpleChanges
-  ): void {
-
+  ngOnChanges(changes: SimpleChanges): void {
     if (
       changes['items'] ||
       changes['idField'] ||
@@ -319,273 +218,123 @@ export class XteinTreeComponent
       changes['prefixField'] ||
       changes['statusField']
     ) {
-
       this.buildTree();
     }
   }
-
 
   /**
    * Updates the local search.
    *
    * @param value Search editor value.
    */
-  updateSearch(
-    value:
-      unknown
-  ): void {
-
-    this.searchText.set(
-      String(
-        value ?? ''
-      )
-    );
+  updateSearch(value: unknown): void {
+    this.searchText.set(String(value ?? ''));
   }
-
 
   /**
    * Handles one DevExtreme tree item click.
    *
    * @param event DevExtreme item-click event.
    */
-  handleItemClick(
-    event:
-      XteinTreeItemClickEvent
-  ): void {
+  handleItemClick(event: XteinTreeItemClickEvent): void {
+    const node = event.itemData;
 
-    const node =
-      event.itemData;
-
-
-    if (
-      !node
-    ) {
-
+    if (!node) {
       return;
     }
 
-
-    this.itemClick.emit(
-      this.toDataItem(
-        node.data
-      )
-    );
+    this.itemClick.emit(this.toDataItem(node.data));
   }
-
 
   /**
    * Converts the flat source collection into a hierarchy.
    */
-  private buildTree():
-    void {
-
-    if (
-      !this.items.length
-    ) {
-
-      this.treeState.set(
-        []
-      );
+  private buildTree(): void {
+    if (!this.items.length) {
+      this.treeState.set([]);
 
       return;
     }
 
+    const nodes = new Map<string, XteinTreeNode>();
 
-    const nodes =
-      new Map<
-        string,
-        XteinTreeNode
-      >();
+    for (const item of this.items) {
+      const key = this.normalizeKey(this.readValue(item, this.idField));
 
-
-    for (
-      const item
-      of this.items
-    ) {
-
-      const key =
-        this.normalizeKey(
-          this.readValue(
-            item,
-            this.idField
-          )
-        );
-
-
-      if (
-        !key
-      ) {
-
+      if (!key) {
         continue;
       }
 
-
-      nodes.set(
+      nodes.set(key, {
         key,
-        {
-          key,
 
-          text:
-            this.readText(
-              item,
-              this.displayField
-            ),
+        text: this.readText(item, this.displayField),
 
-          prefix:
-            this.prefixField
-              ? this.readText(
-                  item,
-                  this.prefixField
-                )
-              : '',
+        prefix: this.prefixField ? this.readText(item, this.prefixField) : '',
 
-          active:
-            this.isActive(
-              item
-            ),
+        active: this.isActive(item),
 
-          expanded:
-            this.expandAllOnLoad,
+        expanded: this.expandAllOnLoad,
 
-          children:
-            [],
+        children: [],
 
-          data:
-            item
-        }
-      );
+        data: item,
+      });
     }
 
+    const roots: XteinTreeNode[] = [];
 
-    const roots:
-      XteinTreeNode[] =
-        [];
+    for (const item of this.items) {
+      const key = this.normalizeKey(this.readValue(item, this.idField));
 
-
-    for (
-      const item
-      of this.items
-    ) {
-
-      const key =
-        this.normalizeKey(
-          this.readValue(
-            item,
-            this.idField
-          )
-        );
-
-
-      if (
-        !key
-      ) {
-
+      if (!key) {
         continue;
       }
 
+      const node = nodes.get(key);
 
-      const node =
-        nodes.get(
-          key
-        );
-
-
-      if (
-        !node
-      ) {
-
+      if (!node) {
         continue;
       }
 
+      const parentKey = this.normalizeKey(
+        this.readValue(item, this.parentIdField),
+      );
 
-      const parentKey =
-        this.normalizeKey(
-          this.readValue(
-            item,
-            this.parentIdField
-          )
-        );
+      if (parentKey && parentKey !== key) {
+        const parent = nodes.get(parentKey);
 
-
-      if (
-        parentKey &&
-        parentKey !==
-          key
-      ) {
-
-        const parent =
-          nodes.get(
-            parentKey
-          );
-
-
-        if (
-          parent
-        ) {
-
-          parent.children.push(
-            node
-          );
+        if (parent) {
+          parent.children.push(node);
 
           continue;
         }
       }
 
-
-      roots.push(
-        node
-      );
+      roots.push(node);
     }
 
+    this.sortNodes(roots);
 
-    this.sortNodes(
-      roots
-    );
-
-
-    this.treeState.set(
-      roots
-    );
+    this.treeState.set(roots);
   }
-
 
   /**
    * Sorts nodes recursively by display text.
    *
    * @param nodes Nodes to sort.
    */
-  private sortNodes(
-    nodes:
-      XteinTreeNode[]
-  ): void {
-
-    nodes.sort(
-      (
-        first,
-        second
-      ) =>
-        first.text.localeCompare(
-          second.text,
-          undefined,
-          {
-            sensitivity:
-              'base'
-          }
-        )
+  private sortNodes(nodes: XteinTreeNode[]): void {
+    nodes.sort((first, second) =>
+      first.text.localeCompare(second.text, undefined, {
+        sensitivity: 'base',
+      }),
     );
 
-
-    for (
-      const node
-      of nodes
-    ) {
-
-      this.sortNodes(
-        node.children
-      );
+    for (const node of nodes) {
+      this.sortNodes(node.children);
     }
   }
-
 
   /**
    * Filters nodes recursively while preserving matching parents.
@@ -595,61 +344,30 @@ export class XteinTreeComponent
    * @returns Mutable filtered tree.
    */
   private filterNodes(
-    nodes:
-      readonly XteinTreeNode[],
+    nodes: readonly XteinTreeNode[],
 
-    search:
-      string
+    search: string,
   ): XteinTreeNode[] {
+    const result: XteinTreeNode[] = [];
 
-    const result:
-      XteinTreeNode[] =
-        [];
+    for (const node of nodes) {
+      const children = this.filterNodes(node.children, search);
 
+      const isMatch = this.matchesSearch(node, search);
 
-    for (
-      const node
-      of nodes
-    ) {
+      if (isMatch || children.length > 0) {
+        result.push({
+          ...node,
 
-      const children =
-        this.filterNodes(
-          node.children,
-          search
-        );
+          expanded: true,
 
-      const isMatch =
-        this.matchesSearch(
-          node,
-          search
-        );
-
-
-      if (
-        isMatch ||
-        children.length > 0
-      ) {
-
-        result.push(
-          {
-            ...node,
-
-            expanded:
-              true,
-
-            children:
-              isMatch && children.length === 0
-                ? node.children
-                : children
-          }
-        );
+          children: isMatch && children.length === 0 ? node.children : children,
+        });
       }
     }
 
-
     return result;
   }
-
 
   /**
    * Tests one node against the configured search fields.
@@ -659,13 +377,10 @@ export class XteinTreeComponent
    * @returns True when the node matches.
    */
   private matchesSearch(
-    node:
-      XteinTreeNode,
+    node: XteinTreeNode,
 
-    search:
-      string
+    search: string,
   ): boolean {
-
     if (
       this.normalizeString(node.text).includes(search) ||
       (node.prefix && this.normalizeString(node.prefix).includes(search)) ||
@@ -677,31 +392,14 @@ export class XteinTreeComponent
     const fields =
       this.searchFields.length > 0
         ? this.searchFields
-        : [
-            this.idField,
-            this.displayField
-          ];
+        : [this.idField, this.displayField];
 
+    return fields.some((field) => {
+      const value = this.readValue(node.data, field);
 
-    return fields.some(
-      field => {
-
-        const value =
-          this.readValue(
-            node.data,
-            field
-          );
-
-
-        return this.normalizeString(
-          value
-        ).includes(
-          search
-        );
-      }
-    );
+      return this.normalizeString(value).includes(search);
+    });
   }
-
 
   /**
    * Normalizes a string by stripping diacritics, trimming and converting to lowercase.
@@ -709,27 +407,17 @@ export class XteinTreeComponent
    * @param value Raw value.
    * @returns Normalized string.
    */
-  private normalizeString(
-    value:
-      unknown
-  ): string {
-
-    if (
-      value === null ||
-      value === undefined
-    ) {
+  private normalizeString(value: unknown): string {
+    if (value === null || value === undefined) {
       return '';
     }
 
-    return String(
-      value
-    )
+    return String(value)
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim();
   }
-
 
   /**
    * Determines whether a source item represents an active node.
@@ -737,37 +425,20 @@ export class XteinTreeComponent
    * @param item Source data item.
    * @returns True when active.
    */
-  private isActive(
-    item:
-      object
-  ): boolean {
-
-    if (
-      !this.statusField
-    ) {
-
+  private isActive(item: object): boolean {
+    if (!this.statusField) {
       return true;
     }
 
+    const normalizedStatus = String(
+      this.readValue(item, this.statusField) ?? '',
+    )
+      .trim()
+      .toLowerCase();
 
-    const normalizedStatus =
-      String(
-        this.readValue(
-          item,
-          this.statusField
-        ) ?? ''
-      )
-        .trim()
-        .toLowerCase();
-
-
-    if (
-      !normalizedStatus
-    ) {
-
+    if (!normalizedStatus) {
       return true;
     }
-
 
     return [
       'activo',
@@ -778,12 +449,9 @@ export class XteinTreeComponent
       'sí',
       'yes',
       'habilitado',
-      'enabled'
-    ].includes(
-      normalizedStatus
-    );
+      'enabled',
+    ].includes(normalizedStatus);
   }
-
 
   /**
    * Reads one source property dynamically.
@@ -797,28 +465,15 @@ export class XteinTreeComponent
    * @returns Property value.
    */
   private readValue(
-    item:
-      object,
+    item: object,
 
-    field:
-      string
+    field: string,
   ): unknown {
-
-    if (
-      !field ||
-      !item
-    ) {
-
+    if (!field || !item) {
       return undefined;
     }
 
-
-    const record =
-      item as
-        Record<
-          string,
-          unknown
-        >;
+    const record = item as Record<string, unknown>;
 
     if (record[field] !== undefined) {
       return record[field];
@@ -834,7 +489,6 @@ export class XteinTreeComponent
     return undefined;
   }
 
-
   /**
    * Reads one field as display text.
    *
@@ -843,21 +497,12 @@ export class XteinTreeComponent
    * @returns Normalized text.
    */
   private readText(
-    item:
-      object,
+    item: object,
 
-    field:
-      string
+    field: string,
   ): string {
-
-    return String(
-      this.readValue(
-        item,
-        field
-      ) ?? ''
-    ).trim();
+    return String(this.readValue(item, field) ?? '').trim();
   }
-
 
   /**
    * Converts an object into the generic tree output contract.
@@ -865,15 +510,9 @@ export class XteinTreeComponent
    * @param item Original source object.
    * @returns Generic tree data item.
    */
-  private toDataItem(
-    item:
-      object
-  ): XteinTreeDataItem {
-
-    return item as
-      XteinTreeDataItem;
+  private toDataItem(item: object): XteinTreeDataItem {
+    return item as XteinTreeDataItem;
   }
-
 
   /**
    * Normalizes a source identifier.
@@ -881,24 +520,11 @@ export class XteinTreeComponent
    * @param value Identifier value.
    * @returns Normalized key.
    */
-  private normalizeKey(
-    value:
-      unknown
-  ): string {
-
-    if (
-      value ===
-        null ||
-      value ===
-        undefined
-    ) {
-
+  private normalizeKey(value: unknown): string {
+    if (value === null || value === undefined) {
       return '';
     }
 
-
-    return String(
-      value
-    ).trim();
+    return String(value).trim();
   }
 }

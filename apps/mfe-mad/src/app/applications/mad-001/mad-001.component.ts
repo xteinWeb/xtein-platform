@@ -1,4 +1,8 @@
-import {XteinLabelComponent, XteinButtonComponent, XteinGroupLabelComponent} from '@xtein/ui';
+import {
+  XteinLabelComponent,
+  XteinButtonComponent,
+  XteinGroupLabelComponent,
+} from '@xtein/ui';
 import {
   untracked,
   computed,
@@ -7,22 +11,17 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  signal
+  signal,
 } from '@angular/core';
 
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 
-import {
-  Subscription,
-  finalize,
-  firstValueFrom,
-  forkJoin
-} from 'rxjs';
+import { Subscription, finalize, firstValueFrom, forkJoin } from 'rxjs';
 
 import Swal from 'sweetalert2';
 
@@ -32,13 +31,13 @@ import {
   RecordToolbarPermissions,
   ToolbarAction,
   ToolbarCommand,
-  createRecordToolbarState
+  createRecordToolbarState,
 } from '@xtein/sdk';
 
 import {
   RecordToolbarPermissionsService,
   ToolbarRuntimeService,
-  WorkspaceRuntimeService
+  WorkspaceRuntimeService,
 } from '@xtein/runtime';
 
 import {
@@ -57,44 +56,38 @@ import {
   XteinTreeDataItem,
   XteinRecordSettingsComponent,
   XteinSwitchComponent,
-  XteinDateComponent
+  XteinDateComponent,
 } from '@xtein/ui';
 
-import {
-  Mad001Action,
-  Mad001Application
-} from './constants/mad-001.constants';
+import { Mad001Action, Mad001Application } from './constants/mad-001.constants';
 
 import {
   Mad001DefaultRecord,
   Mad001RecordViewColumns,
   Mad001ToolbarCapabilities,
-  Mad001TreeSearchFields
+  Mad001TreeSearchFields,
 } from './constants/mad-001-ui.constants';
 
 import {
   Mad001ApplicationRecord,
   Mad001DataLists,
   Mad001ParentApplication,
-  Mad001UnitOfMeasure
+  Mad001UnitOfMeasure,
 } from './models/mad-001.model';
 
-import {
-  Mad001Service
-} from './services/mad-001.service';
-
+import { Mad001Service } from './services/mad-001.service';
 
 /**
  * MAD-001 - XTEIN application master.
  */
 @Component({
-  selector:
-    'mad-001',
+  selector: 'mad-001',
 
-  standalone:
-    true,
+  standalone: true,
 
-  imports: [XteinLabelComponent,XteinButtonComponent,
+  imports: [
+    XteinLabelComponent,
+    XteinButtonComponent,
     XteinGroupLabelComponent,
     ReactiveFormsModule,
     XteinRecordFilterComponent,
@@ -108,42 +101,50 @@ import {
     XteinLoadingComponent,
     XteinRecordSettingsComponent,
     XteinSwitchComponent,
-    XteinDateComponent
+    XteinDateComponent,
   ],
 
-  providers: [
-    Mad001Service
-  ],
+  providers: [Mad001Service],
 
-  templateUrl:
-    './mad-001.component.html',
+  templateUrl: './mad-001.component.html',
 
-  styleUrl:
-    './mad-001.component.scss',
+  styleUrl: './mad-001.component.scss',
 
-  changeDetection:
-    ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Mad001Component
-  implements OnInit, OnDestroy {
-
+export class Mad001Component implements OnInit, OnDestroy {
   readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
   readonly reportsVisible = signal(false);
   readonly settingsVisible = signal(false);
-  readonly activeTab = signal<'general' | 'tecnica' | 'metricas' | 'comentarios'>('general');
-  readonly queryFilter = computed(() => buildReportRecordFilter(
-    'APLICACIONES', 'ID_APLICACION', this.applications().map(record => record.ID_APLICACION)));
+  readonly activeTab = signal<
+    'general' | 'tecnica' | 'metricas' | 'comentarios'
+  >('general');
+  readonly queryFilter = computed(() =>
+    buildReportRecordFilter(
+      'APLICACIONES',
+      'ID_APLICACION',
+      this.applications().map((record) => record.ID_APLICACION),
+    ),
+  );
   readonly viewColumns = Mad001RecordViewColumns;
 
   currentReportFilter(): string {
     const record = this.applications()[this.currentIndex()];
-    return record ? " APLICACIONES.ID_APLICACION = '" + String(record.ID_APLICACION).replace(/'/g, "''") + "'" : '';
+    return record
+      ? " APLICACIONES.ID_APLICACION = '" +
+          String(record.ID_APLICACION).replace(/'/g, "''") +
+          "'"
+      : '';
   }
 
   selectViewedRecord(record: object): void {
     if (this.loading() || this.isChanging()) return;
-    const index = this.applications().findIndex(item => item.ID_APLICACION === (record as Mad001ApplicationRecord).ID_APLICACION);
+    const index = this.applications().findIndex(
+      (item) =>
+        item.ID_APLICACION ===
+        (record as Mad001ApplicationRecord).ID_APLICACION,
+    );
     if (index >= 0) this.navigateTo(index);
   }
 
@@ -151,26 +152,42 @@ export class Mad001Component
     if (this.loading() || this.isChanging() || !this.permissions.search) return;
     this.filterVisible.set(false);
     this.loading.set(true);
-    this.subscriptions.add(this.mad001Service.query(Mad001Action.Query, { APLICACIONES: filter.ESTRUCTURA })
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: response => {
-          try {
-            const result = this.parseArray<Mad001ApplicationRecord>(response.data);
-            const message = result[0]?.ErrMensaje;
-            const rows = message ? [] : result;
-            this.applications.set(rows);
-            if (rows.length) this.navigateTo(0);
-            else {
-              this.currentIndex.set(0);
-              this.mode.set(RecordToolbarMode.Initial);
-              this.setFormRecord(Mad001DefaultRecord, false);
-              this.notification.warning(message || 'No se encontraron datos.');
+    this.subscriptions.add(
+      this.mad001Service
+        .query(Mad001Action.Query, { APLICACIONES: filter.ESTRUCTURA })
+        .pipe(finalize(() => this.loading.set(false)))
+        .subscribe({
+          next: (response) => {
+            try {
+              const result = this.parseArray<Mad001ApplicationRecord>(
+                response.data,
+              );
+              const message = result[0]?.ErrMensaje;
+              const rows = message ? [] : result;
+              this.applications.set(rows);
+              if (rows.length) this.navigateTo(0);
+              else {
+                this.currentIndex.set(0);
+                this.mode.set(RecordToolbarMode.Initial);
+                this.setFormRecord(Mad001DefaultRecord, false);
+                this.notification.warning(
+                  message || 'No se encontraron datos.',
+                );
+              }
+            } catch (error) {
+              this.showUnknownError(
+                error,
+                'No fue posible consultar los registros.',
+              );
             }
-          } catch (error) { this.showUnknownError(error, 'No fue posible consultar los registros.'); }
-        },
-        error: error => this.showUnknownError(error, 'No fue posible consultar los registros.')
-      }));
+          },
+          error: (error) =>
+            this.showUnknownError(
+              error,
+              'No fue posible consultar los registros.',
+            ),
+        }),
+    );
   }
 
   private readonly synchronizeBusyToolbar = effect(() => {
@@ -185,389 +202,153 @@ export class Mad001Component
       this.settingsVisible.set(false);
     }
   });
-  readonly applicationId =
-    Mad001Application.Id;
-
-
-  readonly treeSearchFields =
-    Mad001TreeSearchFields;
-
-
-  readonly form =
-    new FormGroup({
-
-      ID_APLICACION:
-        new FormControl(
-          '',
-          {
-            nonNullable:
-              true,
-
-            validators: [
-              Validators.required,
-              Validators.maxLength(30)
-            ]
-          }
-        ),
-
-      ID_APLICACION_PADRE:
-        new FormControl<
-          string | null
-        >(
-          null
-        ),
-
-      NOMBRE:
-        new FormControl(
-          '',
-          {
-            nonNullable:
-              true,
-
-            validators: [
-              Validators.required,
-              Validators.maxLength(60)
-            ]
-          }
-        ),
-
-      TIPO:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.required
-            ]
-          }
-        ),
-
-      ACCION:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.required
-            ]
-          }
-        ),
-
-      ESTADO:
-        new FormControl<
-          string | null
-        >(
-          'ACTIVO'
-        ),
-
-      TIPO_SISTEMA:
-        new FormControl<
-          string | null
-        >(
-          'WEB'
-        ),
-
-      DEFECTO:
-        new FormControl<
-          boolean
-        >(
-          false,
-          {
-            nonNullable:
-              true
-          }
-        ),
-
-      GENERA:
-        new FormControl<
-          boolean
-        >(
-          false,
-          {
-            nonNullable:
-              true
-          }
-        ),
-
-      MICROFRONTEND_ID:
-        new FormControl<
-          string | null
-        >(
-          null
-        ),
-
-      PROGRAMA:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.maxLength(50)
-            ]
-          }
-        ),
-
-      DIRECTORIO:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.maxLength(200)
-            ]
-          }
-        ),
-
-      TABLA_APLICACION:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.maxLength(50)
-            ]
-          }
-        ),
-
-      PARAMETROS:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.maxLength(50)
-            ]
-          }
-        ),
-
-      FECHA_VIGENCIA:
-        new FormControl<
-          string | null
-        >(
-          null
-        ),
-
-      IMAGEN_URL:
-        new FormControl<
-          string | null
-        >(
-          null,
-          {
-            validators: [
-              Validators.maxLength(200)
-            ]
-          }
-        ),
-
-      NIVEL:
-        new FormControl<
-          string | null
-        >(
-          null
-        ),
-
-      META_INFERIOR:
-        new FormControl<
-          number | null
-        >(
-          0
-        ),
-
-      META_SUPERIOR:
-        new FormControl<
-          number | null
-        >(
-          0
-        ),
-
-      UDM:
-        new FormControl<
-          string | null
-        >(
-          null
-        ),
-
-      COMENTARIOS:
-        new FormControl(
-          '',
-          {
-            nonNullable:
-              true
-          }
-        )
-    });
-
-
-  readonly mode =
-    signal<RecordToolbarMode>(
-      RecordToolbarMode.Initial
-    );
-
-
-  readonly loading =
-    signal(
-      false
-    );
-
-
-  readonly treePanelCollapsed =
-    signal(
-      false
-    );
-
-
-  readonly applications =
-    signal<
-      readonly Mad001ApplicationRecord[]
-    >(
-      []
-    );
-
-
-  readonly currentIndex =
-    signal(
-      0
-    );
-
-
-  readonly parentApplications =
-    signal<
-      readonly Mad001ParentApplication[]
-    >(
-      []
-    );
-
-
-  readonly unitOfMeasures =
-    signal<
-      readonly Mad001UnitOfMeasure[]
-    >(
-      []
-    );
-
-
-  readonly typeOptions =
-    signal<
-      readonly string[]
-    >(
-      []
-    );
-
-
-  readonly actionOptions =
-    signal<
-      readonly string[]
-    >(
-      []
-    );
-
-
-  readonly statusOptions =
-    signal<
-      readonly string[]
-    >(
-      []
-    );
-
-
-  readonly levelOptions =
-    signal<
-      readonly string[]
-    >(
-      []
-    );
-
-
-  readonly systemTypeOptions =
-    signal<
-      readonly string[]
-    >(
-      [
-        'WEB',
-        'MOVIL',
-        'ESCRITORIO',
-        'HIBRIDA'
-      ]
-    );
-
-
-  readonly microfrontendOptions =
-    signal<
-      readonly string[]
-    >(
-      [
-        'MFE-ADM',
-        'MFE-DASHBOARD',
-        'MFE-INV',
-        'MFE-MAD',
-        'MFE-MALM',
-        'MFE-MAN',
-        'MFE-MCOM',
-        'MFE-MCPR',
-        'MFE-MEN',
-        'MFE-MFIN',
-        'MFE-MTHU'
-      ]
-    );
-
-
-  readonly validationRequested =
-    signal(
-      false
-    );
-
-
-  private permissions:
-    Readonly<RecordToolbarPermissions> =
-      DeniedRecordToolbarPermissions;
-
-
-  private previousRecord:
-    Mad001ApplicationRecord | null =
-      null;
-
-
-  private synchronizingForm =
-    false;
-
-
-  private readonly subscriptions =
-    new Subscription();
+  readonly applicationId = Mad001Application.Id;
 
+  readonly treeSearchFields = Mad001TreeSearchFields;
+
+  readonly form = new FormGroup({
+    ID_APLICACION: new FormControl('', {
+      nonNullable: true,
+
+      validators: [Validators.required, Validators.maxLength(30)],
+    }),
+
+    ID_APLICACION_PADRE: new FormControl<string | null>(null),
+
+    NOMBRE: new FormControl('', {
+      nonNullable: true,
+
+      validators: [Validators.required, Validators.maxLength(60)],
+    }),
+
+    TIPO: new FormControl<string | null>(null, {
+      validators: [Validators.required],
+    }),
+
+    ACCION: new FormControl<string | null>(null, {
+      validators: [Validators.required],
+    }),
+
+    ESTADO: new FormControl<string | null>('ACTIVO'),
+
+    TIPO_SISTEMA: new FormControl<string | null>('WEB'),
+
+    DEFECTO: new FormControl<boolean>(false, {
+      nonNullable: true,
+    }),
+
+    GENERA: new FormControl<boolean>(false, {
+      nonNullable: true,
+    }),
+
+    MICROFRONTEND_ID: new FormControl<string | null>(null),
+
+    PROGRAMA: new FormControl<string | null>(null, {
+      validators: [Validators.maxLength(50)],
+    }),
+
+    DIRECTORIO: new FormControl<string | null>(null, {
+      validators: [Validators.maxLength(200)],
+    }),
+
+    TABLA_APLICACION: new FormControl<string | null>(null, {
+      validators: [Validators.maxLength(50)],
+    }),
+
+    PARAMETROS: new FormControl<string | null>(null, {
+      validators: [Validators.maxLength(50)],
+    }),
+
+    FECHA_VIGENCIA: new FormControl<string | null>(null),
+
+    IMAGEN_URL: new FormControl<string | null>(null, {
+      validators: [Validators.maxLength(200)],
+    }),
+
+    NIVEL: new FormControl<string | null>(null),
+
+    META_INFERIOR: new FormControl<number | null>(0),
+
+    META_SUPERIOR: new FormControl<number | null>(0),
+
+    UDM: new FormControl<string | null>(null),
+
+    COMENTARIOS: new FormControl('', {
+      nonNullable: true,
+    }),
+  });
+
+  readonly mode = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
+
+  readonly loading = signal(false);
+
+  readonly treePanelCollapsed = signal(false);
+
+  readonly applications = signal<readonly Mad001ApplicationRecord[]>([]);
+
+  readonly currentIndex = signal(0);
+
+  readonly parentApplications = signal<readonly Mad001ParentApplication[]>([]);
+
+  readonly unitOfMeasures = signal<readonly Mad001UnitOfMeasure[]>([]);
+
+  readonly typeOptions = signal<readonly string[]>([]);
+
+  readonly actionOptions = signal<readonly string[]>([]);
+
+  readonly statusOptions = signal<readonly string[]>([]);
+
+  readonly levelOptions = signal<readonly string[]>([]);
+
+  readonly systemTypeOptions = signal<readonly string[]>([
+    'WEB',
+    'MOVIL',
+    'ESCRITORIO',
+    'HIBRIDA',
+  ]);
+
+  readonly microfrontendOptions = signal<readonly string[]>([
+    'MFE-ADM',
+    'MFE-DASHBOARD',
+    'MFE-INV',
+    'MFE-MAD',
+    'MFE-MALM',
+    'MFE-MAN',
+    'MFE-MCOM',
+    'MFE-MCPR',
+    'MFE-MEN',
+    'MFE-MFIN',
+    'MFE-MTHU',
+  ]);
+
+  readonly validationRequested = signal(false);
+
+  private permissions: Readonly<RecordToolbarPermissions> =
+    DeniedRecordToolbarPermissions;
+
+  private previousRecord: Mad001ApplicationRecord | null = null;
+
+  private synchronizingForm = false;
+
+  private readonly subscriptions = new Subscription();
 
   constructor(
-    private readonly mad001Service:
-      Mad001Service,
+    private readonly mad001Service: Mad001Service,
 
-    private readonly permissionsService:
-      RecordToolbarPermissionsService,
+    private readonly permissionsService: RecordToolbarPermissionsService,
 
-    private readonly toolbarRuntime:
-      ToolbarRuntimeService,
+    private readonly toolbarRuntime: ToolbarRuntimeService,
 
-    private readonly workspaceRuntime:
-      WorkspaceRuntimeService,
+    private readonly workspaceRuntime: WorkspaceRuntimeService,
 
-    private readonly notification:
-      XteinNotificationService
+    private readonly notification: XteinNotificationService,
   ) {
-
     this.form.disable({
-      emitEvent:
-        false
+      emitEvent: false,
     });
   }
 
-
-  ngOnInit():
-    void {
-
+  ngOnInit(): void {
     this.subscribeToToolbar();
 
     this.subscribeToFormChanges();
@@ -577,284 +358,130 @@ export class Mad001Component
     this.loadInitialData();
   }
 
-
-  ngOnDestroy():
-    void {
-
-    this.subscriptions
-      .unsubscribe();
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
-
-  showTree():
-    boolean {
-
+  showTree(): boolean {
     return !this.isChanging();
   }
 
+  selectTreeItem(item: XteinTreeDataItem): void {
+    const applicationId = String(item['ID_APLICACION'] ?? '').trim();
 
-  selectTreeItem(
-    item:
-      XteinTreeDataItem
-  ): void {
-
-    const applicationId =
-      String(
-        item[
-          'ID_APLICACION'
-        ] ?? ''
-      ).trim();
-
-
-    if (
-      !applicationId
-    ) {
-
+    if (!applicationId) {
       return;
     }
 
-
-    const index =
-      this.applications()
-        .findIndex(
-          application =>
-            application.ID_APLICACION ===
-            applicationId
-        );
-
-
-    if (
-      index < 0
-    ) {
-
-      return;
-    }
-
-
-    this.navigateTo(
-      index
+    const index = this.applications().findIndex(
+      (application) => application.ID_APLICACION === applicationId,
     );
+
+    if (index < 0) {
+      return;
+    }
+
+    this.navigateTo(index);
   }
 
-
-  toggleTreePanel():
-    void {
-
-    this.treePanelCollapsed.update(
-      value =>
-        !value
-    );
+  toggleTreePanel(): void {
+    this.treePanelCollapsed.update((value) => !value);
   }
 
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const control = this.form.controls[controlName];
 
-  isInvalid(
-    controlName:
-      keyof typeof this.form.controls
-  ): boolean {
-
-    const control =
-      this.form.controls[
-        controlName
-      ];
-
-
-    return (
-      control.invalid &&
-      (
-        control.touched ||
-        this.validationRequested()
-      )
-    );
+    return control.invalid && (control.touched || this.validationRequested());
   }
 
-
-  validateApplicationIdOnBlur():
-    void {
-
-    if (
-      !this.isChanging()
-    ) {
-
+  validateApplicationIdOnBlur(): void {
+    if (!this.isChanging()) {
       return;
     }
 
+    const applicationId = this.form.controls.ID_APLICACION.value.trim();
 
-    const applicationId =
-      this.form.controls
-        .ID_APLICACION
-        .value
-        .trim();
-
-
-    if (
-      !applicationId
-    ) {
-
+    if (!applicationId) {
       return;
     }
-
 
     void this.validateApplicationId();
   }
 
-
-  private subscribeToToolbar():
-    void {
-
+  private subscribeToToolbar(): void {
     this.subscriptions.add(
       this.toolbarRuntime
-        .commandsForApplication(
-          this.applicationId
-        )
-        .subscribe(
-          command =>
-            this.handleToolbarCommand(
-              command
-            )
-        )
+        .commandsForApplication(this.applicationId)
+        .subscribe((command) => this.handleToolbarCommand(command)),
     );
   }
 
-
-  private subscribeToFormChanges():
-    void {
-
+  private subscribeToFormChanges(): void {
     this.subscriptions.add(
-      this.form.valueChanges
-        .subscribe(() => {
+      this.form.valueChanges.subscribe(() => {
+        if (this.synchronizingForm || !this.isChanging()) {
+          return;
+        }
 
-          if (
-            this.synchronizingForm ||
-            !this.isChanging()
-          ) {
-
-            return;
-          }
-
-
-          this.workspaceRuntime
-            .setDirty(
-              this.applicationId,
-              true
-            );
-        })
+        this.workspaceRuntime.setDirty(this.applicationId, true);
+      }),
     );
   }
 
-
-  private loadInitialData():
-    void {
-
-    this.loading.set(
-      true
-    );
-
+  private loadInitialData(): void {
+    this.loading.set(true);
 
     this.subscriptions.add(
       forkJoin({
+        permissions: this.permissionsService.getPermissions(this.applicationId),
 
-        permissions:
-          this.permissionsService
-            .getPermissions(
-              this.applicationId
-            ),
+        dataLists: this.mad001Service.getDataLists(),
 
-        dataLists:
-          this.mad001Service
-            .getDataLists(),
+        parentApplications: this.mad001Service.getParentApplications(),
 
-        parentApplications:
-          this.mad001Service
-            .getParentApplications(),
-
-        tree:
-          this.mad001Service
-            .getApplicationTree()
-
+        tree: this.mad001Service.getApplicationTree(),
       })
-        .pipe(
-          finalize(
-            () =>
-              this.loading.set(
-                false
-              )
-          )
-        )
+        .pipe(finalize(() => this.loading.set(false)))
         .subscribe({
+          next: (result) => {
+            try {
+              this.permissions = result.permissions;
 
-          next:
-            result => {
+              this.applyDataLists(this.parseDataLists(result.dataLists.data));
 
-              try {
+              this.parentApplications.set(
+                this.parseParentApplications(result.parentApplications.data),
+              );
 
-                this.permissions =
-                  result.permissions;
-
-
-                this.applyDataLists(
-                  this.parseDataLists(
-                    result.dataLists.data
-                  )
-                );
-
-
-                this.parentApplications.set(
-                  this.parseParentApplications(
-                    result.parentApplications.data
-                  )
-                );
-
-
-                this.applications.set(
-                  this.parseApplications(
-                    result.tree.data
-                  )
-                );
-
-
-                this.publishToolbarState();
-
-              } catch (error) {
-
-                this.showUnknownError(
-                  error,
-                  'No fue posible inicializar la aplicación.'
-                );
-              }
-            },
-
-
-          error:
-            error => {
-
-              this.permissions =
-                DeniedRecordToolbarPermissions;
-
+              this.applications.set(this.parseApplications(result.tree.data));
 
               this.publishToolbarState();
-
-
+            } catch (error) {
               this.showUnknownError(
                 error,
-                'No fue posible inicializar la aplicación.'
+                'No fue posible inicializar la aplicación.',
               );
             }
-        })
+          },
+
+          error: (error) => {
+            this.permissions = DeniedRecordToolbarPermissions;
+
+            this.publishToolbarState();
+
+            this.showUnknownError(
+              error,
+              'No fue posible inicializar la aplicación.',
+            );
+          },
+        }),
     );
   }
 
-
-  private handleToolbarCommand(
-    command:
-      ToolbarCommand
-  ): void {
-
+  private handleToolbarCommand(command: ToolbarCommand): void {
     if (this.loading()) return;
 
-    switch (
-      command.action
-    ) {
-
+    switch (command.action) {
       case ToolbarAction.Search:
         this.filterVisible.set(true);
         break;
@@ -868,1613 +495,764 @@ export class Mad001Component
         this.reportsVisible.set(true);
         break;
       case ToolbarAction.GoTo:
-        if (typeof command.payload === 'number' && Number.isInteger(command.payload) &&
-            command.payload >= 1 && command.payload <= this.applications().length) {
+        if (
+          typeof command.payload === 'number' &&
+          Number.isInteger(command.payload) &&
+          command.payload >= 1 &&
+          command.payload <= this.applications().length
+        ) {
           this.navigateTo(command.payload - 1);
         }
         break;
       case ToolbarAction.New:
-
         this.startCreating();
 
         break;
 
-
       case ToolbarAction.Edit:
-
         this.startEditing();
 
         break;
 
-
       case ToolbarAction.Save:
-
         void this.saveCurrentRecord();
 
         break;
 
-
       case ToolbarAction.Cancel:
-
         void this.cancelCurrentOperation();
 
         break;
 
-
       case ToolbarAction.Delete:
-
         void this.deleteCurrentRecord();
 
         break;
 
-
       case ToolbarAction.Refresh:
-
         void this.refreshApplicationData();
 
         break;
 
-
       case ToolbarAction.First:
-
-        this.navigateTo(
-          0
-        );
+        this.navigateTo(0);
 
         break;
-
 
       case ToolbarAction.Previous:
-
-        this.navigateTo(
-          this.currentIndex() - 1
-        );
+        this.navigateTo(this.currentIndex() - 1);
 
         break;
-
 
       case ToolbarAction.Next:
-
-        this.navigateTo(
-          this.currentIndex() + 1
-        );
+        this.navigateTo(this.currentIndex() + 1);
 
         break;
-
 
       case ToolbarAction.Last:
-
-        this.navigateTo(
-          this.applications().length - 1
-        );
+        this.navigateTo(this.applications().length - 1);
 
         break;
-
 
       default:
-
         break;
     }
   }
 
+  private startCreating(): void {
+    this.activeTab.set('general');
 
-  private startCreating():
-    void {
+    this.previousRecord = this.getCurrentRecord();
 
-    this.activeTab.set(
-      'general'
-    );
+    this.mode.set(RecordToolbarMode.Creating);
 
-    this.previousRecord =
-      this.getCurrentRecord();
+    this.validationRequested.set(false);
 
+    this.setFormRecord(Mad001DefaultRecord, true);
 
-    this.mode.set(
-      RecordToolbarMode.Creating
-    );
-
-
-    this.validationRequested.set(
-      false
-    );
-
-
-    this.setFormRecord(
-      Mad001DefaultRecord,
-      true
-    );
-
-
-    this.workspaceRuntime
-      .setDirty(
-        this.applicationId,
-        false
-      );
-
+    this.workspaceRuntime.setDirty(this.applicationId, false);
 
     this.publishToolbarState();
   }
 
+  private startEditing(): void {
+    const currentRecord = this.getCurrentRecord();
 
-  private startEditing():
-    void {
-
-    const currentRecord =
-      this.getCurrentRecord();
-
-
-    if (
-      !currentRecord
-    ) {
-
+    if (!currentRecord) {
       return;
     }
-
 
     this.previousRecord = {
-      ...currentRecord
+      ...currentRecord,
     };
 
+    this.mode.set(RecordToolbarMode.Editing);
 
-    this.mode.set(
-      RecordToolbarMode.Editing
-    );
+    this.validationRequested.set(false);
 
+    this.setFormEditable(true);
 
-    this.validationRequested.set(
-      false
-    );
-
-
-    this.setFormEditable(
-      true
-    );
-
-
-    this.workspaceRuntime
-      .setDirty(
-        this.applicationId,
-        false
-      );
-
+    this.workspaceRuntime.setDirty(this.applicationId, false);
 
     this.publishToolbarState();
   }
 
-
-  private async saveCurrentRecord():
-    Promise<void> {
-
-    if (
-      !this.isChanging() ||
-      this.loading()
-    ) {
-
+  private async saveCurrentRecord(): Promise<void> {
+    if (!this.isChanging() || this.loading()) {
       return;
     }
 
-
-    if (
-      !this.validateForm()
-    ) {
-
+    if (!this.validateForm()) {
       return;
     }
 
-
-    if (
-      !await this.validateApplicationId()
-    ) {
-
+    if (!(await this.validateApplicationId())) {
       return;
     }
 
+    const record = this.getFormRecord();
 
-    const record =
-      this.getFormRecord();
-
-
-    this.loading.set(
-      true
-    );
-
+    this.loading.set(true);
 
     try {
-
       const response =
-        this.mode() ===
-          RecordToolbarMode.Creating
-
+        this.mode() === RecordToolbarMode.Creating
           ? await firstValueFrom(
-              this.mad001Service
-                .create({
-                  APLICACIONES:
-                    record
-                })
+              this.mad001Service.create({
+                APLICACIONES: record,
+              }),
             )
-
           : await firstValueFrom(
-              this.mad001Service
-                .update({
-                  APLICACIONES:
-                    record
-                })
+              this.mad001Service.update({
+                APLICACIONES: record,
+              }),
             );
 
+      this.ensureSuccessfulMutation(response.data);
 
-      this.ensureSuccessfulMutation(
-        response.data
-      );
+      this.workspaceRuntime.setDirty(this.applicationId, false);
 
+      await this.reloadTreeAndReferences(record.ID_APLICACION);
 
-      this.workspaceRuntime
-        .setDirty(
-          this.applicationId,
-          false
-        );
-
-
-      await this.reloadTreeAndReferences(
-        record.ID_APLICACION
-      );
-
-
-      this.notification
-        .success(
-          'Registro actualizado.'
-        );
-
+      this.notification.success('Registro actualizado.');
     } catch (error) {
-
-      this.showUnknownError(
-        error,
-        'No fue posible guardar el registro.'
-      );
-
+      this.showUnknownError(error, 'No fue posible guardar el registro.');
     } finally {
-
-      this.loading.set(
-        false
-      );
+      this.loading.set(false);
     }
   }
 
-
-  private async cancelCurrentOperation():
-    Promise<void> {
-
-    if (
-      !this.isChanging()
-    ) {
-
+  private async cancelCurrentOperation(): Promise<void> {
+    if (!this.isChanging()) {
       return;
     }
-
 
     const dirty =
-      this.workspaceRuntime
-        .getTab(
-          this.applicationId
-        )
-        ?.dirty ??
-      false;
+      this.workspaceRuntime.getTab(this.applicationId)?.dirty ?? false;
 
+    const result = await Swal.fire({
+      title: this.workspaceRuntime.getApplicationTitle(this.applicationId),
 
-    const result =
-      await Swal.fire({
+      text: dirty
+        ? '¿Desea cancelar sin guardar cambios?'
+        : '¿Desea cancelar la operación?',
 
-        title:
-          this.workspaceRuntime
-            .getApplicationTitle(
-              this.applicationId
-            ),
+      icon: 'warning',
 
-        text:
-          dirty
-            ? '¿Desea cancelar sin guardar cambios?'
-            : '¿Desea cancelar la operación?',
+      showCancelButton: true,
 
-        icon:
-          'warning',
+      confirmButtonColor: '#DF3E3E',
 
-        showCancelButton:
-          true,
+      cancelButtonColor: '#438ef1',
 
-        confirmButtonColor:
-          '#DF3E3E',
+      cancelButtonText: 'No',
 
-        cancelButtonColor:
-          '#438ef1',
+      confirmButtonText: 'Sí, cancelar',
+    });
 
-        cancelButtonText:
-          'No',
-
-        confirmButtonText:
-          'Sí, cancelar'
-      });
-
-
-    if (
-      !result.isConfirmed
-    ) {
-
+    if (!result.isConfirmed) {
       return;
     }
 
+    if (this.previousRecord) {
+      this.setFormRecord(this.previousRecord, false);
 
-    if (
-      this.previousRecord
-    ) {
-
-      this.setFormRecord(
-        this.previousRecord,
-        false
+      const index = this.applications().findIndex(
+        (application) =>
+          application.ID_APLICACION === this.previousRecord?.ID_APLICACION,
       );
 
+      this.currentIndex.set(Math.max(index, 0));
 
-      const index =
-        this.applications()
-          .findIndex(
-            application =>
-              application.ID_APLICACION ===
-              this.previousRecord
-                ?.ID_APLICACION
-          );
-
-
-      this.currentIndex.set(
-        Math.max(
-          index,
-          0
-        )
-      );
-
-
-      this.mode.set(
-        RecordToolbarMode.Browsing
-      );
-
+      this.mode.set(RecordToolbarMode.Browsing);
     } else {
+      this.setFormRecord(Mad001DefaultRecord, false);
 
-      this.setFormRecord(
-        Mad001DefaultRecord,
-        false
-      );
-
-
-      this.mode.set(
-        RecordToolbarMode.Initial
-      );
+      this.mode.set(RecordToolbarMode.Initial);
     }
 
+    this.validationRequested.set(false);
 
-    this.validationRequested.set(
-      false
-    );
-
-
-    this.workspaceRuntime
-      .setDirty(
-        this.applicationId,
-        false
-      );
-
+    this.workspaceRuntime.setDirty(this.applicationId, false);
 
     this.publishToolbarState();
   }
 
+  private async deleteCurrentRecord(): Promise<void> {
+    const currentRecord = this.getCurrentRecord();
 
-  private async deleteCurrentRecord():
-    Promise<void> {
-
-    const currentRecord =
-      this.getCurrentRecord();
-
-
-    if (
-      !currentRecord ||
-      this.loading()
-    ) {
-
+    if (!currentRecord || this.loading()) {
       return;
     }
 
+    const result = await Swal.fire({
+      title: this.workspaceRuntime.getApplicationTitle(this.applicationId),
 
-    const result =
-      await Swal.fire({
+      html: `¿Desea eliminar la aplicación <i>${this.escapeHtml(
+        currentRecord.ID_APLICACION,
+      )}</i>?`,
 
-        title:
-          this.workspaceRuntime
-            .getApplicationTitle(
-              this.applicationId
-            ),
+      icon: 'warning',
 
-        html:
-          `¿Desea eliminar la aplicación <i>${this.escapeHtml(
-            currentRecord.ID_APLICACION
-          )}</i>?`,
+      showCancelButton: true,
 
-        icon:
-          'warning',
+      confirmButtonColor: '#DF3E3E',
 
-        showCancelButton:
-          true,
+      cancelButtonColor: '#438ef1',
 
-        confirmButtonColor:
-          '#DF3E3E',
+      cancelButtonText: 'No',
 
-        cancelButtonColor:
-          '#438ef1',
+      confirmButtonText: 'Sí, eliminar',
+    });
 
-        cancelButtonText:
-          'No',
-
-        confirmButtonText:
-          'Sí, eliminar'
-      });
-
-
-    if (
-      !result.isConfirmed
-    ) {
-
+    if (!result.isConfirmed) {
       return;
     }
 
-
-    this.loading.set(
-      true
-    );
-
+    this.loading.set(true);
 
     try {
-
-      const response =
-        await firstValueFrom(
-          this.mad001Service
-            .delete(
-              currentRecord.ID_APLICACION
-            )
-        );
-
-
-      this.ensureSuccessfulMutation(
-        response.data
+      const response = await firstValueFrom(
+        this.mad001Service.delete(currentRecord.ID_APLICACION),
       );
 
+      this.ensureSuccessfulMutation(response.data);
 
-      await this.reloadTreeAndReferences(
-        null
-      );
+      await this.reloadTreeAndReferences(null);
 
+      this.previousRecord = null;
 
-      this.previousRecord =
-        null;
+      this.mode.set(RecordToolbarMode.Initial);
 
+      this.setFormRecord(Mad001DefaultRecord, false);
 
-      this.mode.set(
-        RecordToolbarMode.Initial
-      );
-
-
-      this.setFormRecord(
-        Mad001DefaultRecord,
-        false
-      );
-
-
-      this.workspaceRuntime
-        .setDirty(
-          this.applicationId,
-          false
-        );
-
+      this.workspaceRuntime.setDirty(this.applicationId, false);
 
       this.publishToolbarState();
 
-
-      this.notification
-        .success(
-          'Registro eliminado.'
-        );
-
+      this.notification.success('Registro eliminado.');
     } catch (error) {
-
-      this.showUnknownError(
-        error,
-        'No fue posible eliminar el registro.'
-      );
-
+      this.showUnknownError(error, 'No fue posible eliminar el registro.');
     } finally {
-
-      this.loading.set(
-        false
-      );
+      this.loading.set(false);
     }
   }
 
-
-  private async refreshApplicationData():
-    Promise<void> {
-
-    if (
-      this.loading()
-    ) {
-
+  private async refreshApplicationData(): Promise<void> {
+    if (this.loading()) {
       return;
     }
 
-
     const selectedApplicationId =
-      this.getCurrentRecord()
-        ?.ID_APLICACION ??
-      null;
+      this.getCurrentRecord()?.ID_APLICACION ?? null;
 
-
-    this.loading.set(
-      true
-    );
-
+    this.loading.set(true);
 
     try {
+      const result = await firstValueFrom(
+        forkJoin({
+          dataLists: this.mad001Service.getDataLists(),
 
-      const result =
-        await firstValueFrom(
-          forkJoin({
+          parentApplications: this.mad001Service.getParentApplications(),
 
-            dataLists:
-              this.mad001Service
-                .getDataLists(),
-
-            parentApplications:
-              this.mad001Service
-                .getParentApplications(),
-
-            tree:
-              this.mad001Service
-                .getApplicationTree()
-          })
-        );
-
-
-      this.applyDataLists(
-        this.parseDataLists(
-          result.dataLists.data
-        )
+          tree: this.mad001Service.getApplicationTree(),
+        }),
       );
 
+      this.applyDataLists(this.parseDataLists(result.dataLists.data));
 
       this.parentApplications.set(
-        this.parseParentApplications(
-          result.parentApplications.data
-        )
+        this.parseParentApplications(result.parentApplications.data),
       );
-
 
       this.applyApplications(
-        this.parseApplications(
-          result.tree.data
-        ),
-        selectedApplicationId
+        this.parseApplications(result.tree.data),
+        selectedApplicationId,
       );
-
     } catch (error) {
-
-      this.showUnknownError(
-        error,
-        'No fue posible refrescar la aplicación.'
-      );
-
+      this.showUnknownError(error, 'No fue posible refrescar la aplicación.');
     } finally {
-
-      this.loading.set(
-        false
-      );
+      this.loading.set(false);
     }
   }
 
-
   private async reloadTreeAndReferences(
-    applicationId:
-      string | null
+    applicationId: string | null,
   ): Promise<void> {
+    const result = await firstValueFrom(
+      forkJoin({
+        parentApplications: this.mad001Service.getParentApplications(),
 
-    const result =
-      await firstValueFrom(
-        forkJoin({
-
-          parentApplications:
-            this.mad001Service
-              .getParentApplications(),
-
-          tree:
-            this.mad001Service
-              .getApplicationTree()
-        })
-      );
-
-
-    this.parentApplications.set(
-      this.parseParentApplications(
-        result.parentApplications.data
-      )
+        tree: this.mad001Service.getApplicationTree(),
+      }),
     );
 
+    this.parentApplications.set(
+      this.parseParentApplications(result.parentApplications.data),
+    );
 
     this.applyApplications(
-      this.parseApplications(
-        result.tree.data
-      ),
-      applicationId
+      this.parseApplications(result.tree.data),
+      applicationId,
     );
   }
 
-
   private applyApplications(
-    applications:
-      Mad001ApplicationRecord[],
+    applications: Mad001ApplicationRecord[],
 
-    selectedApplicationId:
-      string | null
+    selectedApplicationId: string | null,
   ): void {
+    this.applications.set(applications);
 
-    this.applications.set(
-      applications
-    );
+    if (selectedApplicationId) {
+      const index = applications.findIndex(
+        (application) => application.ID_APLICACION === selectedApplicationId,
+      );
 
-
-    if (
-      selectedApplicationId
-    ) {
-
-      const index =
-        applications
-          .findIndex(
-            application =>
-              application.ID_APLICACION ===
-              selectedApplicationId
-          );
-
-
-      if (
-        index >= 0
-      ) {
-
-        this.navigateTo(
-          index
-        );
+      if (index >= 0) {
+        this.navigateTo(index);
 
         return;
       }
     }
 
+    this.currentIndex.set(0);
 
-    this.currentIndex.set(
-      0
-    );
+    this.previousRecord = null;
 
+    this.mode.set(RecordToolbarMode.Initial);
 
-    this.previousRecord =
-      null;
-
-
-    this.mode.set(
-      RecordToolbarMode.Initial
-    );
-
-
-    this.setFormRecord(
-      Mad001DefaultRecord,
-      false
-    );
-
+    this.setFormRecord(Mad001DefaultRecord, false);
 
     this.publishToolbarState();
   }
 
+  private navigateTo(requestedIndex: number): void {
+    const applications = this.applications();
 
-  private navigateTo(
-    requestedIndex:
-      number
-  ): void {
-
-    const applications =
-      this.applications();
-
-
-    if (
-      applications.length ===
-        0
-    ) {
-
+    if (applications.length === 0) {
       return;
     }
 
-
-    const index =
-      Math.max(
-        0,
-        Math.min(
-          requestedIndex,
-          applications.length - 1
-        )
-      );
-
-
-    const record =
-      applications[
-        index
-      ];
-
-
-    this.currentIndex.set(
-      index
+    const index = Math.max(
+      0,
+      Math.min(requestedIndex, applications.length - 1),
     );
 
+    const record = applications[index];
+
+    this.currentIndex.set(index);
 
     this.previousRecord = {
-      ...record
+      ...record,
     };
 
+    this.mode.set(RecordToolbarMode.Browsing);
 
-    this.mode.set(
-      RecordToolbarMode.Browsing
-    );
+    this.setFormRecord(record, false);
 
-
-    this.setFormRecord(
-      record,
-      false
-    );
-
-
-    this.workspaceRuntime
-      .setDirty(
-        this.applicationId,
-        false
-      );
-
+    this.workspaceRuntime.setDirty(this.applicationId, false);
 
     this.publishToolbarState();
   }
 
-
-  private validateForm():
-    boolean {
-
-    this.validationRequested.set(
-      true
-    );
-
+  private validateForm(): boolean {
+    this.validationRequested.set(true);
 
     this.form.markAllAsTouched();
 
     this.form.updateValueAndValidity();
 
-
-    if (
-      this.form.invalid
-    ) {
-
-      this.notification
-        .warning(
-          'Hay datos incompletos. Complete todos los campos obligatorios.'
-        );
-
+    if (this.form.invalid) {
+      this.notification.warning(
+        'Hay datos incompletos. Complete todos los campos obligatorios.',
+      );
 
       return false;
     }
 
-
     if (
-      this.form.controls
-        .TIPO
-        .value ===
-        'KPI' &&
-      !this.form.controls
-        .NIVEL
-        .value
+      this.form.controls.TIPO.value === 'KPI' &&
+      !this.form.controls.NIVEL.value
     ) {
-
-      this.notification
-        .warning(
-          'Nivel es requerido cuando el tipo es KPI.'
-        );
-
+      this.notification.warning('Nivel es requerido cuando el tipo es KPI.');
 
       return false;
     }
-
 
     return true;
   }
 
+  private async validateApplicationId(): Promise<boolean> {
+    const applicationId = this.form.controls.ID_APLICACION.value
+      .trim()
+      .toUpperCase();
 
-  private async validateApplicationId():
-    Promise<boolean> {
-
-    const applicationId =
-      this.form.controls
-        .ID_APLICACION
-        .value
-        .trim()
-        .toUpperCase();
-
-
-    if (
-      !applicationId
-    ) {
-
+    if (!applicationId) {
       return false;
     }
 
-
     if (
-      this.mode() ===
-        RecordToolbarMode.Editing &&
-      this.previousRecord
-        ?.ID_APLICACION ===
-        applicationId
+      this.mode() === RecordToolbarMode.Editing &&
+      this.previousRecord?.ID_APLICACION === applicationId
     ) {
-
       return true;
     }
 
-
     try {
-
-      const response =
-        await firstValueFrom(
-          this.mad001Service
-            .validateKey(
-              applicationId
-            )
-        );
-
-
-      const rows =
-        this.parseArray<
-          Record<string, unknown>
-        >(
-          response.data
-        );
-
-
-      const errorMessage =
-        this.getBackendErrorMessage(
-          rows[
-            0
-          ]
-        );
-
-
-      const available =
-        Boolean(
-          errorMessage
-        );
-
-
-      if (
-        !available
-      ) {
-
-        this.notification
-          .warning(
-            `La aplicación ${applicationId} ya existe.`
-          );
-      }
-
-
-      return available;
-
-    } catch (error) {
-
-      this.showUnknownError(
-        error,
-        'No fue posible validar el ID de aplicación.'
+      const response = await firstValueFrom(
+        this.mad001Service.validateKey(applicationId),
       );
 
+      const rows = this.parseArray<Record<string, unknown>>(response.data);
+
+      const errorMessage = this.getBackendErrorMessage(rows[0]);
+
+      const available = Boolean(errorMessage);
+
+      if (!available) {
+        this.notification.warning(`La aplicación ${applicationId} ya existe.`);
+      }
+
+      return available;
+    } catch (error) {
+      this.showUnknownError(
+        error,
+        'No fue posible validar el ID de aplicación.',
+      );
 
       return false;
     }
   }
 
+  private publishToolbarState(): void {
+    const browsing = this.mode() === RecordToolbarMode.Browsing;
 
-  private publishToolbarState():
-    void {
+    this.toolbarRuntime.setState(
+      createRecordToolbarState({
+        busy: this.loading(),
 
-    const browsing =
-      this.mode() ===
-        RecordToolbarMode.Browsing;
+        applicationId: this.applicationId,
 
+        mode: this.mode(),
 
-    this.toolbarRuntime
-      .setState(
-        createRecordToolbarState({
-          busy: this.loading(),
+        permissions: this.permissions,
 
-          applicationId:
-            this.applicationId,
+        capabilities: Mad001ToolbarCapabilities,
 
-          mode:
-            this.mode(),
+        currentIndex: browsing ? this.currentIndex() : 0,
 
-          permissions:
-            this.permissions,
-
-          capabilities:
-            Mad001ToolbarCapabilities,
-
-          currentIndex:
-            browsing
-              ? this.currentIndex()
-              : 0,
-
-          totalRecords:
-            browsing
-              ? this.applications().length
-              : 0
-        })
-      );
+        totalRecords: browsing ? this.applications().length : 0,
+      }),
+    );
   }
 
-
   private setFormRecord(
-    record:
-      Readonly<Mad001ApplicationRecord>,
+    record: Readonly<Mad001ApplicationRecord>,
 
-    editable:
-      boolean
+    editable: boolean,
   ): void {
-
-    this.synchronizingForm =
-      true;
-
+    this.synchronizingForm = true;
 
     try {
-
       this.form.enable({
-        emitEvent:
-          false
+        emitEvent: false,
       });
-
 
       this.form.reset(
         {
-          ID_APLICACION:
-            record.ID_APLICACION,
+          ID_APLICACION: record.ID_APLICACION,
 
-          ID_APLICACION_PADRE:
-            record.ID_APLICACION_PADRE,
+          ID_APLICACION_PADRE: record.ID_APLICACION_PADRE,
 
-          NOMBRE:
-            record.NOMBRE,
+          NOMBRE: record.NOMBRE,
 
-          TIPO:
-            record.TIPO,
+          TIPO: record.TIPO,
 
-          ACCION:
-            record.ACCION,
+          ACCION: record.ACCION,
 
-          ESTADO:
-            record.ESTADO,
+          ESTADO: record.ESTADO,
 
-          TIPO_SISTEMA:
-            record.TIPO_SISTEMA ??
-            'WEB',
+          TIPO_SISTEMA: record.TIPO_SISTEMA ?? 'WEB',
 
-          DEFECTO:
-            Boolean(
-              record.DEFECTO
-            ),
+          DEFECTO: Boolean(record.DEFECTO),
 
-          GENERA:
-            Boolean(
-              record.GENERA
-            ),
+          GENERA: Boolean(record.GENERA),
 
-          MICROFRONTEND_ID:
-            record.MICROFRONTEND_ID ??
-            null,
+          MICROFRONTEND_ID: record.MICROFRONTEND_ID ?? null,
 
-          PROGRAMA:
-            record.PROGRAMA ??
-            null,
+          PROGRAMA: record.PROGRAMA ?? null,
 
-          DIRECTORIO:
-            record.DIRECTORIO ??
-            null,
+          DIRECTORIO: record.DIRECTORIO ?? null,
 
-          TABLA_APLICACION:
-            record.TABLA_APLICACION ??
-            null,
+          TABLA_APLICACION: record.TABLA_APLICACION ?? null,
 
-          PARAMETROS:
-            record.PARAMETROS ??
-            null,
+          PARAMETROS: record.PARAMETROS ?? null,
 
-          FECHA_VIGENCIA:
-            record.FECHA_VIGENCIA
-              ? String(
-                  record.FECHA_VIGENCIA
-                ).slice(0, 10)
-              : null,
+          FECHA_VIGENCIA: record.FECHA_VIGENCIA
+            ? String(record.FECHA_VIGENCIA).slice(0, 10)
+            : null,
 
-          IMAGEN_URL:
-            record.IMAGEN_URL ??
-            null,
+          IMAGEN_URL: record.IMAGEN_URL ?? null,
 
-          NIVEL:
-            record.NIVEL,
+          NIVEL: record.NIVEL,
 
-          META_INFERIOR:
-            record.META_INFERIOR,
+          META_INFERIOR: record.META_INFERIOR,
 
-          META_SUPERIOR:
-            record.META_SUPERIOR,
+          META_SUPERIOR: record.META_SUPERIOR,
 
-          UDM:
-            record.UDM,
+          UDM: record.UDM,
 
-          COMENTARIOS:
-            record.COMENTARIOS ??
-            ''
+          COMENTARIOS: record.COMENTARIOS ?? '',
         },
         {
-          emitEvent:
-            false
-        }
+          emitEvent: false,
+        },
       );
 
-
-      this.setFormEditable(
-        editable
-      );
-
+      this.setFormEditable(editable);
     } finally {
-
-      this.synchronizingForm =
-        false;
+      this.synchronizingForm = false;
     }
   }
 
-
-  private setFormEditable(
-    editable:
-      boolean
-  ): void {
-
-    if (
-      editable
-    ) {
-
+  private setFormEditable(editable: boolean): void {
+    if (editable) {
       this.form.enable({
-        emitEvent:
-          false
+        emitEvent: false,
       });
-
     } else {
-
       this.form.disable({
-        emitEvent:
-          false
+        emitEvent: false,
       });
     }
   }
 
-
-  private getFormRecord():
-    Mad001ApplicationRecord {
-
-    const value =
-      this.form.getRawValue();
-
+  private getFormRecord(): Mad001ApplicationRecord {
+    const value = this.form.getRawValue();
 
     return {
+      ID_APLICACION: value.ID_APLICACION.trim().toUpperCase(),
 
-      ID_APLICACION:
-        value.ID_APLICACION
-          .trim()
-          .toUpperCase(),
+      ID_APLICACION_PADRE: value.ID_APLICACION_PADRE,
 
-      ID_APLICACION_PADRE:
-        value.ID_APLICACION_PADRE,
+      NOMBRE: value.NOMBRE.trim(),
 
-      NOMBRE:
-        value.NOMBRE.trim(),
+      TIPO: value.TIPO,
 
-      TIPO:
-        value.TIPO,
+      COMENTARIOS: value.COMENTARIOS.trim() || null,
 
-      COMENTARIOS:
-        value.COMENTARIOS
-          .trim() ||
-        null,
+      ESTADO: value.ESTADO,
 
-      ESTADO:
-        value.ESTADO,
+      ACCION: value.ACCION,
 
-      ACCION:
-        value.ACCION,
+      TIPO_SISTEMA: value.TIPO_SISTEMA || null,
 
-      TIPO_SISTEMA:
-        value.TIPO_SISTEMA ||
-        null,
+      DEFECTO: Boolean(value.DEFECTO),
 
-      DEFECTO:
-        Boolean(
-          value.DEFECTO
-        ),
+      GENERA: Boolean(value.GENERA),
 
-      GENERA:
-        Boolean(
-          value.GENERA
-        ),
+      MICROFRONTEND_ID: value.MICROFRONTEND_ID || null,
 
-      MICROFRONTEND_ID:
-        value.MICROFRONTEND_ID ||
-        null,
+      PROGRAMA: value.PROGRAMA?.trim() || null,
 
-      PROGRAMA:
-        value.PROGRAMA
-          ?.trim() ||
-        null,
+      DIRECTORIO: value.DIRECTORIO?.trim() || null,
 
-      DIRECTORIO:
-        value.DIRECTORIO
-          ?.trim() ||
-        null,
+      TABLA_APLICACION: value.TABLA_APLICACION?.trim() || null,
 
-      TABLA_APLICACION:
-        value.TABLA_APLICACION
-          ?.trim() ||
-        null,
+      PARAMETROS: value.PARAMETROS?.trim() || null,
 
-      PARAMETROS:
-        value.PARAMETROS
-          ?.trim() ||
-        null,
+      FECHA_VIGENCIA: value.FECHA_VIGENCIA || null,
 
-      FECHA_VIGENCIA:
-        value.FECHA_VIGENCIA ||
-        null,
+      IMAGEN_URL: value.IMAGEN_URL?.trim() || null,
 
-      IMAGEN_URL:
-        value.IMAGEN_URL
-          ?.trim() ||
-        null,
+      META_INFERIOR: value.META_INFERIOR,
 
-      META_INFERIOR:
-        value.META_INFERIOR,
+      META_SUPERIOR: value.META_SUPERIOR,
 
-      META_SUPERIOR:
-        value.META_SUPERIOR,
+      UDM: value.UDM,
 
-      UDM:
-        value.UDM,
-
-      NIVEL:
-        value.NIVEL
+      NIVEL: value.NIVEL,
     };
   }
 
-
-  private getCurrentRecord():
-    Mad001ApplicationRecord | null {
-
+  private getCurrentRecord(): Mad001ApplicationRecord | null {
     if (
-      this.mode() ===
-        RecordToolbarMode.Initial ||
+      this.mode() === RecordToolbarMode.Initial ||
       !this.applications().length
     ) {
-
       return null;
     }
 
+    return this.applications()[this.currentIndex()] ?? null;
+  }
 
+  private isChanging(): boolean {
     return (
-      this.applications()[
-        this.currentIndex()
-      ] ??
-      null
+      this.mode() === RecordToolbarMode.Creating ||
+      this.mode() === RecordToolbarMode.Editing
     );
   }
 
+  private applyDataLists(dataLists: Mad001DataLists): void {
+    this.unitOfMeasures.set([...dataLists.udm]);
 
-  private isChanging():
-    boolean {
+    this.typeOptions.set([...dataLists.tipo]);
 
-    return (
-      this.mode() ===
-        RecordToolbarMode.Creating ||
-      this.mode() ===
-        RecordToolbarMode.Editing
-    );
-  }
+    this.actionOptions.set([...dataLists.accion]);
 
+    this.statusOptions.set([...dataLists.estado]);
 
-  private applyDataLists(
-    dataLists:
-      Mad001DataLists
-  ): void {
+    this.levelOptions.set([...dataLists.nivel]);
 
-    this.unitOfMeasures.set(
-      [
-        ...dataLists.udm
-      ]
-    );
-
-
-    this.typeOptions.set(
-      [
-        ...dataLists.tipo
-      ]
-    );
-
-
-    this.actionOptions.set(
-      [
-        ...dataLists.accion
-      ]
-    );
-
-
-    this.statusOptions.set(
-      [
-        ...dataLists.estado
-      ]
-    );
-
-
-    this.levelOptions.set(
-      [
-        ...dataLists.nivel
-      ]
-    );
-
-
-    if (
-      dataLists.tipoSistema &&
-      dataLists.tipoSistema.length > 0
-    ) {
-
-      const uniqueTypes =
-        Array.from(
-          new Set([
-            ...dataLists.tipoSistema,
-            'HIBRIDA'
-          ])
-        );
-
-
-      this.systemTypeOptions.set(
-        uniqueTypes
+    if (dataLists.tipoSistema && dataLists.tipoSistema.length > 0) {
+      const uniqueTypes = Array.from(
+        new Set([...dataLists.tipoSistema, 'HIBRIDA']),
       );
+
+      this.systemTypeOptions.set(uniqueTypes);
     }
   }
 
+  private parseDataLists(data: unknown): Mad001DataLists {
+    const rows = this.parseArray<Mad001DataLists>(data);
 
-  private parseDataLists(
-    data:
-      unknown
-  ): Mad001DataLists {
+    const result = rows[0];
 
-    const rows =
-      this.parseArray<
-        Mad001DataLists
-      >(
-        data
-      );
-
-
-    const result =
-      rows[
-        0
-      ];
-
-
-    if (
-      !result
-    ) {
-
-      throw new Error(
-        'The MAD-001 datalist response is empty.'
-      );
+    if (!result) {
+      throw new Error('The MAD-001 datalist response is empty.');
     }
 
-
-    if (
-      result.ErrMensaje
-        ?.trim()
-    ) {
-
-      throw new Error(
-        result.ErrMensaje
-      );
+    if (result.ErrMensaje?.trim()) {
+      throw new Error(result.ErrMensaje);
     }
-
 
     return {
-
       ...result,
 
-      udm:
-        Array.isArray(
-          result.udm
-        )
-          ? result.udm
-          : [],
+      udm: Array.isArray(result.udm) ? result.udm : [],
 
-      tipo:
-        Array.isArray(
-          result.tipo
-        )
-          ? result.tipo
-          : [],
+      tipo: Array.isArray(result.tipo) ? result.tipo : [],
 
-      estado:
-        Array.isArray(
-          result.estado
-        )
-          ? result.estado
-          : [],
+      estado: Array.isArray(result.estado) ? result.estado : [],
 
-      tipoSistema:
-        Array.isArray(
-          result.tipoSistema
-        )
-          ? result.tipoSistema
-          : [],
+      tipoSistema: Array.isArray(result.tipoSistema) ? result.tipoSistema : [],
 
-      accion:
-        Array.isArray(
-          result.accion
-        )
-          ? result.accion
-          : [],
+      accion: Array.isArray(result.accion) ? result.accion : [],
 
-      nivel:
-        Array.isArray(
-          result.nivel
-        )
-          ? result.nivel
-          : []
+      nivel: Array.isArray(result.nivel) ? result.nivel : [],
     };
   }
 
+  private parseParentApplications(data: unknown): Mad001ParentApplication[] {
+    const rows = this.parseArray<
+      Mad001ParentApplication & {
+        ErrMensaje?: string;
+      }
+    >(data);
 
-  private parseParentApplications(
-    data:
-      unknown
-  ): Mad001ParentApplication[] {
+    const errorMessage = rows[0]?.ErrMensaje?.trim();
 
-    const rows =
-      this.parseArray<
-        Mad001ParentApplication & {
-          ErrMensaje?:
-            string;
-        }
-      >(
-        data
-      );
-
-
-    const errorMessage =
-      rows[
-        0
-      ]
-        ?.ErrMensaje
-        ?.trim();
-
-
-    if (
-      errorMessage
-    ) {
-
-      throw new Error(
-        errorMessage
-      );
+    if (errorMessage) {
+      throw new Error(errorMessage);
     }
-
 
     return rows;
   }
 
+  private parseApplications(data: unknown): Mad001ApplicationRecord[] {
+    const rows = this.parseArray<Mad001ApplicationRecord>(data);
 
-  private parseApplications(
-    data:
-      unknown
-  ): Mad001ApplicationRecord[] {
+    const errorMessage = rows[0]?.ErrMensaje?.trim();
 
-    const rows =
-      this.parseArray<
-        Mad001ApplicationRecord
-      >(
-        data
-      );
-
-
-    const errorMessage =
-      rows[
-        0
-      ]
-        ?.ErrMensaje
-        ?.trim();
-
-
-    if (
-      errorMessage
-    ) {
-
-      throw new Error(
-        errorMessage
-      );
+    if (errorMessage) {
+      throw new Error(errorMessage);
     }
-
 
     return rows;
   }
 
+  private ensureSuccessfulMutation(data: unknown): void {
+    const rows = this.parseArray<Record<string, unknown>>(data);
 
-  private ensureSuccessfulMutation(
-    data:
-      unknown
-  ): void {
+    const errorMessage = this.getBackendErrorMessage(rows[0]);
 
-    const rows =
-      this.parseArray<
-        Record<string, unknown>
-      >(
-        data
-      );
-
-
-    const errorMessage =
-      this.getBackendErrorMessage(
-        rows[
-          0
-        ]
-      );
-
-
-    if (
-      errorMessage
-    ) {
-
-      throw new Error(
-        errorMessage
-      );
+    if (errorMessage) {
+      throw new Error(errorMessage);
     }
   }
 
+  private parseArray<T>(data: unknown): T[] {
+    let parsed = data;
 
-  private parseArray<T>(
-    data:
-      unknown
-  ): T[] {
+    if (typeof parsed === 'string') {
+      const value = parsed.trim();
 
-    let parsed =
-      data;
-
-
-    if (
-      typeof parsed ===
-        'string'
-    ) {
-
-      const value =
-        parsed.trim();
-
-
-      if (
-        !value
-      ) {
-
+      if (!value) {
         return [];
       }
 
-
-      parsed =
-        JSON.parse(
-          value
-        );
+      parsed = JSON.parse(value);
     }
 
-
-    if (
-      !Array.isArray(
-        parsed
-      )
-    ) {
-
-      throw new Error(
-        'The MAD-001 backend response must contain an array.'
-      );
+    if (!Array.isArray(parsed)) {
+      throw new Error('The MAD-001 backend response must contain an array.');
     }
-
 
     return parsed as T[];
   }
 
-
   private getBackendErrorMessage(
-    record:
-      Record<string, unknown> |
-      undefined
+    record: Record<string, unknown> | undefined,
   ): string {
-
-    if (
-      !record
-    ) {
-
+    if (!record) {
       return '';
     }
 
-
-    return String(
-      record[
-        'ErrMensaje'
-      ] ??
-      ''
-    ).trim();
+    return String(record['ErrMensaje'] ?? '').trim();
   }
-
 
   private showUnknownError(
-    error:
-      unknown,
+    error: unknown,
 
-    fallbackMessage:
-      string
+    fallbackMessage: string,
   ): void {
-
-    console.error(
-      'MAD-001 operation failed.',
-      error
-    );
-
+    console.error('MAD-001 operation failed.', error);
 
     const message =
-      error instanceof Error &&
-      error.message.trim()
-
+      error instanceof Error && error.message.trim()
         ? error.message.trim()
-
         : fallbackMessage;
 
-
-    this.notification
-      .error(
-        message
-      );
+    this.notification.error(message);
   }
 
-
-  private escapeHtml(
-    value:
-      string
-  ): string {
-
+  private escapeHtml(value: string): string {
     return value
-      .replaceAll(
-        '&',
-        '&amp;'
-      )
-      .replaceAll(
-        '<',
-        '&lt;'
-      )
-      .replaceAll(
-        '>',
-        '&gt;'
-      )
-      .replaceAll(
-        '"',
-        '&quot;'
-      )
-      .replaceAll(
-        "'",
-        '&#039;'
-      );
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 }
