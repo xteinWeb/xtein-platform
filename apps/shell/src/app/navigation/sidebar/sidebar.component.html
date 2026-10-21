@@ -1,199 +1,118 @@
-<aside
-  class="xt-sidebar"
-  [class.xt-sidebar--collapsed]="collapsed">
-
+<aside class="xt-sidebar" [class.xt-sidebar--collapsed]="collapsed">
   <!-- ======================================================
        HEADER
        ====================================================== -->
 
   <div class="xt-sidebar__header">
-
     <dx-button
       class="xt-sidebar__toggle"
       icon="menu"
       stylingMode="text"
       type="normal"
-      [hint]="
-        collapsed
-          ? 'Expandir menú'
-          : 'Contraer menú'
-      "
-      (onClick)="toggleSidebar()">
+      [hint]="collapsed ? 'Expandir menú' : 'Contraer menú'"
+      (onClick)="toggleSidebar()"
+    >
     </dx-button>
 
-
     @if (!collapsed) {
-
       <div class="xt-sidebar__brand">
-
         <img
           class="xt-sidebar__logo"
           src="/assets/img/logo/xtein.svg"
-          alt="XTEIN">
-
+          alt="XTEIN"
+        />
       </div>
-
     }
-
   </div>
-
 
   <!-- ======================================================
        LOADING
        ====================================================== -->
 
   @if (loading) {
-
     <div class="xt-sidebar__loading">
-
-      <dx-load-indicator
-        [height]="28"
-        [width]="28">
-      </dx-load-indicator>
-
+      <dx-load-indicator [height]="28" [width]="28"> </dx-load-indicator>
     </div>
-
   }
-
 
   <!-- ======================================================
        NAVIGATION LOAD ERROR
        ====================================================== -->
 
-  @if (
-    !loading &&
-    error &&
-    !collapsed
-  ) {
-
+  @if (!loading && error && !collapsed) {
     <div class="xt-sidebar__error">
-
       {{ error }}
-
     </div>
-
   }
-
 
   <!-- ======================================================
        APPLICATION OPEN ERROR
        ====================================================== -->
 
-  @if (
-    !loading &&
-    launchError &&
-    !collapsed
-  ) {
-
+  @if (!loading && launchError && !collapsed) {
     <div class="xt-sidebar__error">
-
       {{ launchError }}
-
     </div>
-
   }
-
 
   <!-- ======================================================
        NAVIGATION TREE
        ====================================================== -->
 
-  @if (
-    !loading &&
-    !error
-  ) {
-
+  @if (!loading && !error) {
     <div class="xt-sidebar__navigation">
-
       <dx-tree-view
         class="xt-sidebar__tree xt-treeview"
-
         dataStructure="plain"
-
         keyExpr="applicationId"
-
         parentIdExpr="parentApplicationId"
-
         displayExpr="name"
-
         [rootValue]="treeRootValue"
-
         selectionMode="single"
-
         expandEvent="click"
-
         searchMode="contains"
-
         noDataText="No se encontraron aplicaciones"
-
         [items]="navigationItems"
-
         [searchEnabled]="!collapsed"
-
         [searchEditorOptions]="searchEditorOptions"
-
         [selectByClick]="true"
-
         [focusStateEnabled]="true"
-
         [hoverStateEnabled]="true"
-
-        (onItemClick)="onNavigationItemClick($event)">
-
+        (onItemClick)="onNavigationItemClick($event)"
+      >
         <div
-          *dxTemplate="
-            let item of 'item'
-          "
+          *dxTemplate="let item of 'item'"
           class="xt-navigation-item"
           [class.xt-navigation-item--collapsed]="collapsed"
-          [id]="getItemElementId(item)">
-
+          [id]="getItemElementId(item)"
+        >
           <i
             class="xt-navigation-item__icon"
-            [class]="
-              'xt-navigation-item__icon ' +
-              resolveIconClass(item)
-            "
-            aria-hidden="true">
+            [class]="'xt-navigation-item__icon ' + resolveIconClass(item)"
+            aria-hidden="true"
+          >
           </i>
 
-
           @if (!collapsed) {
-
-            <span
-              class="xt-navigation-item__text">
-
+            <span class="xt-navigation-item__text">
               {{ item.name }}
-
             </span>
-
           }
 
-
           @if (collapsed) {
-
             <dx-tooltip
               [target]="getTooltipTarget(item)"
               showEvent="mouseenter"
               hideEvent="mouseleave"
-              position="right">
-
+              position="right"
+            >
               <div *dxTemplate="let data of 'content'">
-
                 {{ item.name }}
-
               </div>
-
             </dx-tooltip>
-
           }
-
         </div>
-
       </dx-tree-view>
-
     </div>
-
   }
-
 </aside>
