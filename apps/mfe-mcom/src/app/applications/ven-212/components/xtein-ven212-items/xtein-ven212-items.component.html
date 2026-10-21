@@ -49,6 +49,8 @@
             [dataSource]="products"
             [(opened)]="productDropdownOpened"
             [dropDownOptions]="productDropDownOptions"
+            (onOpened)="onProductOpened()"
+            (onInput)="onProductCodeInput($event)"
             (onValueChanged)="product($event.value)"
           >
             <div *dxTemplate="let data of 'content'">
@@ -68,7 +70,7 @@
           <label class="xtein-ven212-items__draft-label">Presentación</label>
           <xtein-select
             [items]="presentationOptions()"
-            displayExpr="UDM_VENTA"
+            displayExpr="LABEL"
             valueExpr="UDM_VENTA"
             [ngModel]="row.UDM_VENTA"
             placeholder="Presentación"

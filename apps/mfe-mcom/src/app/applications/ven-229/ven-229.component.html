@@ -19,7 +19,7 @@
                   valueExpr="DOCUMENTO"
                   [searchEnabled]="true"
                   formControlName="DOCUMENTO"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || !isNew() || itemPending()"
                 />
               </div>
             </div>
@@ -35,7 +35,7 @@
                   placeholder="YYYY-MM-DD"
                   formControlName="FECHA"
                   [required]="true"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -103,7 +103,7 @@
                   [columns]="clientColumns"
                   [required]="true"
                   formControlName="ID_CLIENTE"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -119,8 +119,9 @@
                   displayExpr="DIRECCION"
                   valueExpr="DIRECCION"
                   [searchEnabled]="true"
+                  [acceptCustomValue]="true"
                   formControlName="DIRECCION"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -134,7 +135,7 @@
                   id="ven-229-fecha-oc"
                   name="FECHA_OC"
                   formControlName="FECHA_OC"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -166,7 +167,7 @@
                   name="ID_DOC_SOPORTE"
                   placeholder="Orden de compra"
                   formControlName="ID_DOC_SOPORTE"
-                  [readOnly]="readOnly() || headerLocked() || itemPending()"
+                  [readOnly]="readOnly() || itemPending()"
                 />
               </div>
             </div>
@@ -252,7 +253,7 @@
                     dropDownWidth="min(480px, 95vw)"
                     formControlName="ID_UN_ITEM"
                     [required]="true"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -274,7 +275,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_MONEDA"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -296,7 +297,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(500px, 95vw)"
                     formControlName="ID_ADC"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -311,6 +312,7 @@
                     [items]="saleTypes()"
                     placeholder="Tipo Venta"
                     formControlName="TIPO_VENTA"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -332,7 +334,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(650px, 95vw)"
                     formControlName="ID_UN_BODEGA"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -356,13 +358,13 @@
                     placeholder="Condición/Lista"
                     searchPlaceholder="Buscar…"
                     [items]="conditions()"
-                    valueExpr="ID_CONDICION"
-                    displayExpr="ID_CONDICION"
+                    valueExpr="CODIGO"
+                    displayExpr="CODIGO"
                     [columns]="conditionColumns"
                     [showClearButton]="true"
                     dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_CONDICION"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending()"
                   />
                 </div>
               </div>
@@ -378,7 +380,7 @@
                     displayExpr="PLAZO"
                     valueExpr="PLAZO"
                     formControlName="PLAZO"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending() || form.controls.TIPO_VENTA.value === 'CONTADO'"
                   />
                 </div>
               </div>
@@ -393,7 +395,7 @@
                     name="FECHA_PRIMER_VENC"
                     [min]="form.controls.FECHA.value || null"
                     formControlName="FECHA_PRIMER_VENC"
-                    [readOnly]="readOnly() || headerLocked() || itemPending()"
+                    [readOnly]="readOnly() || itemPending() || form.controls.TIPO_VENTA.value === 'CONTADO'"
                   />
                 </div>
               </div>
@@ -407,6 +409,7 @@
                     id="ven-229-cuota-inicial"
                     placeholder="0.00"
                     formControlName="CUOTA_INICIAL"
+                    [readOnly]="readOnly() || itemPending() || form.controls.TIPO_VENTA.value === 'CONTADO'"
                   />
                 </div>
               </div>
@@ -426,7 +429,7 @@
                 name="DESCRIPCION"
                 placeholder="Descripción del pedido..."
                 formControlName="DESCRIPCION"
-                [readOnly]="readOnly() || headerLocked() || itemPending()"
+                [readOnly]="readOnly() || itemPending()"
               />
             </div>
           </div>
