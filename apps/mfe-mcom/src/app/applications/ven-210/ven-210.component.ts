@@ -980,7 +980,7 @@ export class Ven210Component
   private bindBusinessFields(): void {
     const watch=<K extends keyof typeof this.form.controls>(key:K, action:()=>void|Promise<void>)=>{
       this.subscriptions.add((this.form.controls[key].valueChanges as Observable<unknown>).subscribe(()=>{
-        if(this.readOnly())return;
+        if(this.readOnly() || this.applyingOrder)return;
         void Promise.resolve().then(action).catch(error=>this.showError(error));
       }));
     };
@@ -1051,6 +1051,8 @@ export class Ven210Component
   }
   private conditionRequest = 0;
   private productRequest = 0;
+  /** True while an order header is applied: field watchers must not reset what the order brings. */
+  private applyingOrder = false;
   readonly productsLoading = signal(false);
   private conditionSeller='';private conditionSaleType='';
   private async loadConditions():Promise<void> {
@@ -1235,7 +1237,7 @@ export class Ven210Component
       CONSECUTIVO:Number(order.CONSECUTIVO ?? 0),SUFIJO:String(order.SUFIJO ?? '')};
     const before=this.form.getRawValue();
     let patched=false;
-    this.loading.set(true);
+    this.loading.set(true);this.applyingOrder=true;
     try{
       const result=(await this.business.action<Ven210OrderLoad>('loadOrder',{...link,ID_CLIENTE:h.ID_CLIENTE}))[0];
       if(!result?.REMISION)throw new Error('No se recibieron los datos del pedido.');
@@ -1272,7 +1274,11 @@ export class Ven210Component
     }catch(error){
       this.showError(error);
       if(patched)await this.restoreHeader(before).catch(restoreError=>this.showError(restoreError));
-    }finally{this.loading.set(false);}
+    }finally{
+      // Let the editors echo the patched values back before the field watchers listen again.
+      await new Promise(resolve=>setTimeout(resolve));
+      this.applyingOrder=false;this.loading.set(false);
+    }
   }
   /** Restores the header (and its dependent lists) captured before an order load. */
   private async restoreHeader(before:ReturnType<typeof this.form.getRawValue>):Promise<void>{
