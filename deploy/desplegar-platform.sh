@@ -28,7 +28,7 @@ SOLO_PLAN="${SOLO_PLAN:-0}"
 export NG_CLI_ANALYTICS=false
 
 # Microfrontends que se publican: los que tienen pantallas. Al dar a uno vacío su primera pantalla, se agrega aquí.
-MICROFRONTENDS=(mfe-adm mfe-dashboard mfe-mad mfe-mcom mfe-mfin mfe-mthu)
+MICROFRONTENDS=(mfe-adm mfe-dashboard mfe-mad mfe-mcom mfe-mfin mfe-mthu mfe-prod)
 # Orden de compilación de las librerías (cada una depende de las anteriores)
 LIBRERIAS=(sdk logging session api-client runtime dashboard-runtime ui auth)
 

@@ -56,9 +56,9 @@ server {
         proxy_read_timeout 300s;
     }
 
-    # API del ERP (apiRest en .151, puerto 5779). Sin URI en proxy_pass: la ruta /api/... llega igual
+    # API del ERP (apiRest de este mismo servidor: pm2 "apirest", puerto 5900). Sin URI en proxy_pass: la ruta /api/... llega igual
     location /api/ {
-        proxy_pass http://192.168.11.151:5779;
+        proxy_pass http://127.0.0.1:5900;
         proxy_http_version 1.1;
         proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
