@@ -4,42 +4,32 @@ import {
   EventEmitter,
   Input,
   OnInit,
-  Output
+  Output,
 } from '@angular/core';
 
 import {
   DxButtonModule,
   DxLoadIndicatorModule,
   DxTooltipModule,
-  DxTreeViewModule
+  DxTreeViewModule,
 } from 'devextreme-angular';
 
-import {
-  ApplicationTreeNode
-} from '@xtein/sdk';
+import { ApplicationTreeNode } from '@xtein/sdk';
 
-import {
-  WorkspaceRuntimeService
-} from '@xtein/runtime';
+import { WorkspaceRuntimeService } from '@xtein/runtime';
 
-import {
-  ApplicationNavigationService
-} from '../services/application-navigation.service';
-
+import { ApplicationNavigationService } from '../services/application-navigation.service';
 
 /**
  * Represents the minimum DevExtreme TreeView click event
  * information required by the XTEIN navigation component.
  */
 interface NavigationItemClickEvent {
-
   /**
    * Application-tree node associated with the clicked item.
    */
-  itemData?:
-    ApplicationTreeNode;
+  itemData?: ApplicationTreeNode;
 }
-
 
 /**
  * Main navigation sidebar of the XTEIN Shell.
@@ -52,69 +42,52 @@ interface NavigationItemClickEvent {
  * delegated to the platform navigation services.
  */
 @Component({
-  selector:
-    'app-sidebar',
+  selector: 'app-sidebar',
 
-  standalone:
-    true,
+  standalone: true,
 
   imports: [
     DxButtonModule,
     DxLoadIndicatorModule,
     DxTooltipModule,
-    DxTreeViewModule
+    DxTreeViewModule,
   ],
 
-  templateUrl:
-    './sidebar.component.html',
+  templateUrl: './sidebar.component.html',
 
-  styleUrl:
-    './sidebar.component.scss',
+  styleUrl: './sidebar.component.scss',
 
-  changeDetection:
-    ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Sidebar
-  implements OnInit {
-
+export class Sidebar implements OnInit {
   /**
    * Logical root identifier returned by the XTEIN backend.
    */
-  readonly treeRootValue =
-    'XTEIN';
-
+  readonly treeRootValue = 'XTEIN';
 
   /**
    * Default XTEIN icon used for modules without
    * a configured database icon.
    */
-  private readonly defaultModuleIcon =
-    'xt-icon-module';
-
+  private readonly defaultModuleIcon = 'xt-icon-module';
 
   /**
    * Default XTEIN icon used for applications without
    * a configured database icon.
    */
-  private readonly defaultApplicationIcon =
-    'xt-icon-application';
-
+  private readonly defaultApplicationIcon = 'xt-icon-application';
 
   /**
    * Indicates whether the sidebar is currently collapsed.
    */
   @Input()
-  collapsed =
-    false;
-
+  collapsed = false;
 
   /**
    * Requests the Shell layout to change the sidebar state.
    */
   @Output()
-  readonly collapsedChange =
-    new EventEmitter<boolean>();
-
+  readonly collapsedChange = new EventEmitter<boolean>();
 
   /**
    * Error generated while attempting to open an application.
@@ -122,33 +95,22 @@ export class Sidebar
    * Navigation loading errors remain owned by
    * ApplicationNavigationService.
    */
-  launchError:
-    string | null =
-      null;
-
+  launchError: string | null = null;
 
   /**
    * DevExtreme TreeView search editor configuration.
    */
   readonly searchEditorOptions = {
+    placeholder: 'Buscar...',
 
-    placeholder:
-      'Buscar...',
-
-    showClearButton:
-      true
+    showClearButton: true,
   };
 
-
   constructor(
-    private readonly navigationService:
-      ApplicationNavigationService,
+    private readonly navigationService: ApplicationNavigationService,
 
-    private readonly workspaceRuntime:
-      WorkspaceRuntimeService
-  ) {
-  }
-
+    private readonly workspaceRuntime: WorkspaceRuntimeService,
+  ) {}
 
   /**
    * Current normalized application tree.
@@ -157,64 +119,39 @@ export class Sidebar
    * The collection itself continues to be controlled exclusively
    * by ApplicationNavigationService.
    */
-  get navigationItems():
-    ApplicationTreeNode[] {
-
-    return this.navigationService
-      .items();
+  get navigationItems(): ApplicationTreeNode[] {
+    return this.navigationService.items();
   }
-
 
   /**
    * Indicates whether navigation is currently loading.
    */
-  get loading():
-    boolean {
-
-    return this.navigationService
-      .loading();
+  get loading(): boolean {
+    return this.navigationService.loading();
   }
-
 
   /**
    * Current navigation loading error.
    */
-  get error():
-    string | null {
-
-    return this.navigationService
-      .error();
+  get error(): string | null {
+    return this.navigationService.error();
   }
-
 
   /**
    * Loads the authenticated user's navigation tree.
    */
-  ngOnInit():
-    void {
-
-    if (
-      this.navigationItems.length ===
-        0
-    ) {
-
-      this.navigationService
-        .load();
+  ngOnInit(): void {
+    if (this.navigationItems.length === 0) {
+      this.navigationService.load();
     }
   }
-
 
   /**
    * Toggles the sidebar state.
    */
-  toggleSidebar():
-    void {
-
-    this.collapsedChange.emit(
-      !this.collapsed
-    );
+  toggleSidebar(): void {
+    this.collapsedChange.emit(!this.collapsed);
   }
-
 
   /**
    * Processes a navigation-tree item click.
@@ -228,82 +165,46 @@ export class Sidebar
    *
    * @param event DevExtreme navigation item click event.
    */
-  onNavigationItemClick(
-    event:
-      NavigationItemClickEvent
-  ): void {
-
-    const item =
-      event.itemData;
-
+  onNavigationItemClick(event: NavigationItemClickEvent): void {
+    const item = event.itemData;
 
     if (!item) {
-
       return;
     }
-
 
     /*
      * Modules are navigation containers.
      *
      * DevExtreme handles their expand/collapse behavior.
      */
-    if (
-      this.isModule(
-        item
-      )
-    ) {
-
+    if (this.isModule(item)) {
       return;
     }
 
-
-    this.launchError =
-      null;
-
+    this.launchError = null;
 
     try {
+      this.workspaceRuntime.openApplication({
+        applicationId: item.applicationId,
 
-      this.workspaceRuntime
-        .openApplication({
+        title: item.name,
 
-          applicationId:
-            item.applicationId,
-
-          title:
-            item.name,
-
-          icon:
-            item.icon
-        });
-
+        icon: item.icon,
+      });
     } catch (error) {
+      this.launchError = this.resolveLaunchErrorMessage(error, item);
 
-      this.launchError =
-        this.resolveLaunchErrorMessage(
-          error,
-          item
-        );
+      console.error('XTEIN application opening failed.', {
+        applicationId: item.applicationId,
 
+        applicationName: item.name,
 
-      console.error(
-        'XTEIN application opening failed.',
-        {
-          applicationId:
-            item.applicationId,
+        remote: item.remote,
 
-          applicationName:
-            item.name,
-
-          remote:
-            item.remote,
-
-          error
-        }
-      );
+        error,
+      });
     }
   }
-
 
   /**
    * Returns the CSS icon class used to display a navigation node.
@@ -314,29 +215,17 @@ export class Sidebar
    * @param item Application-tree node.
    * @returns CSS icon class.
    */
-  resolveIconClass(
-    item:
-      ApplicationTreeNode
-  ): string {
-
-    const configuredIcon =
-      item.icon
-        ?.trim();
-
+  resolveIconClass(item: ApplicationTreeNode): string {
+    const configuredIcon = item.icon?.trim();
 
     if (configuredIcon) {
-
       return configuredIcon;
     }
 
-
-    return this.isModule(
-      item
-    )
+    return this.isModule(item)
       ? this.defaultModuleIcon
       : this.defaultApplicationIcon;
   }
-
 
   /**
    * Indicates whether a navigation node represents a module.
@@ -344,17 +233,9 @@ export class Sidebar
    * @param item Application-tree node.
    * @returns True for module nodes.
    */
-  isModule(
-    item:
-      ApplicationTreeNode
-  ): boolean {
-
-    return item.type
-      .trim()
-      .toLowerCase() ===
-      'modulo';
+  isModule(item: ApplicationTreeNode): boolean {
+    return item.type.trim().toLowerCase() === 'modulo';
   }
-
 
   /**
    * Creates a stable DOM identifier for the navigation item.
@@ -365,23 +246,13 @@ export class Sidebar
    * @param item Application-tree node.
    * @returns Safe DOM element identifier.
    */
-  getItemElementId(
-    item:
-      ApplicationTreeNode
-  ): string {
-
-    const normalizedId =
-      item.applicationId
-        .trim()
-        .replace(
-          /[^a-zA-Z0-9_-]/g,
-          '-'
-        );
-
+  getItemElementId(item: ApplicationTreeNode): string {
+    const normalizedId = item.applicationId
+      .trim()
+      .replace(/[^a-zA-Z0-9_-]/g, '-');
 
     return `xt-navigation-${normalizedId}`;
   }
-
 
   /**
    * Returns the DevExtreme Tooltip target selector
@@ -390,18 +261,9 @@ export class Sidebar
    * @param item Application-tree node.
    * @returns CSS selector.
    */
-  getTooltipTarget(
-    item:
-      ApplicationTreeNode
-  ): string {
-
-    return `#${
-      this.getItemElementId(
-        item
-      )
-    }`;
+  getTooltipTarget(item: ApplicationTreeNode): string {
+    return `#${this.getItemElementId(item)}`;
   }
-
 
   /**
    * Converts an application opening error into a user-facing message.
@@ -411,39 +273,21 @@ export class Sidebar
    * @returns Error description.
    */
   private resolveLaunchErrorMessage(
-    error:
-      unknown,
+    error: unknown,
 
-    item:
-      ApplicationTreeNode
+    item: ApplicationTreeNode,
   ): string {
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      const message = (
+        error as {
+          message?: unknown;
+        }
+      ).message;
 
-    if (
-      typeof error ===
-        'object' &&
-      error !==
-        null &&
-      'message' in error
-    ) {
-
-      const message =
-        (
-          error as {
-            message?: unknown;
-          }
-        ).message;
-
-
-      if (
-        typeof message ===
-          'string' &&
-        message.trim()
-      ) {
-
+      if (typeof message === 'string' && message.trim()) {
         return message;
       }
     }
-
 
     return (
       `No fue posible abrir la aplicación ` +

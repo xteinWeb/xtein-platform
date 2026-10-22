@@ -109,6 +109,8 @@
                   [showClearButton]="true"
                   [dropDownOptions]="productDropDownOptions"
                   [(opened)]="productDropdownOpened"
+                  (onOpened)="onProductOpened()"
+                  (onInput)="onProductCodeInput($event)"
                   [disabled]="working() || busy"
                 >
                   <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
@@ -173,7 +175,7 @@
               <xtein-select
                 class="cell-editor"
                 [items]="presentationOptions()"
-                displayExpr="UDM_VENTA"
+                displayExpr="LABEL"
                 valueExpr="UDM_VENTA"
                 [ngModel]="row.UDM_VENTA"
                 (ngModelChange)="unit($event)"

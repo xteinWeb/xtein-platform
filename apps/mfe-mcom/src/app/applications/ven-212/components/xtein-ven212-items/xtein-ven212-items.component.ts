@@ -135,8 +135,28 @@ export class XteinVen212ItemsComponent implements OnChanges {
     const row = this.draft();
     if (!row) return;
     row.SUB_TOTAL = Number(row.CANTIDAD || 0) * Number(row.VALOR_UNITARIO || 0);
-    row.VALOR_IVA = row.SUB_TOTAL * Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
+    const rate = Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
+    const effectiveRate = rate > 1 ? rate / 100 : rate;
+    row.VALOR_IVA = row.SUB_TOTAL * effectiveRate;
     row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
+  }
+
+  onProductOpened(): void {
+    setTimeout(() => {
+      const el = document.querySelector('.dx-dropdowneditor-overlay .dx-datagrid-search-panel input, .dx-dropdowneditor-overlay input[type="search"], .dx-dropdowneditor-overlay .dx-texteditor-input') as HTMLInputElement | null;
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }, 120);
+  }
+
+  onProductCodeInput(event: any): void {
+    const val = (event?.event?.target?.value || event?.value || '').trim();
+    if (val && this.products.some(p => p.PRODUCTO === val)) {
+      this.productDropdownOpened = false;
+      void this.product(val);
+    }
   }
 
   begin(row?: Ven212FacturaItem): void {
@@ -275,7 +295,8 @@ export class XteinVen212ItemsComponent implements OnChanges {
     const taxItem = row.IVAS?.find(t => t.ID_TASA === value);
     if (!taxItem) return;
 
-    row.PORC_IVA = Number(taxItem.TASA ?? (Number(taxItem.PORCENTAJE || 0) / 100));
+    const rate = Number(taxItem.TASA ?? taxItem.PORCENTAJE ?? 0);
+    row.PORC_IVA = rate > 1 ? rate / 100 : rate;
     row.POR_IVA = row.PORC_IVA * 100;
     this.onDraftQtyChange();
     this.draft.set({ ...row });
@@ -298,11 +319,17 @@ export class XteinVen212ItemsComponent implements OnChanges {
     ];
   }
 
-  presentationOptions(): { UDM_VENTA: string }[] {
+  presentationOptions(): { UDM_VENTA: string; LABEL: string }[] {
     const draft = this.draft();
-    return (draft?.PRESENTACION || []).map(p => ({
-      UDM_VENTA: String(p.UDM_VENTA ?? p.UDM_COMPRA ?? '')
-    }));
+    return (draft?.PRESENTACION || []).map(p => {
+      const code = String(p.UDM_VENTA ?? p.UDM_COMPRA ?? '');
+      const raw = p as Record<string, unknown>;
+      const name = String(raw['NOMBRE_UDM'] ?? raw['NOMBRE'] ?? code);
+      return {
+        UDM_VENTA: code,
+        LABEL: name && name !== code ? `${code} - ${name}` : code
+      };
+    });
   }
 
   taxOptions(): { ID_TASA: string; LABEL: string }[] {

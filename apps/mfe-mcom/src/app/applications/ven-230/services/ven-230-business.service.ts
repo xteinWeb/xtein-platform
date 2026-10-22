@@ -25,9 +25,11 @@ export class Ven230BusinessService {
     return rows as T[];
   }
   private static clientsCache: Ven230Lookup[] | null = null;
+  private static catalogCache = new Map<string, Ven230Lookup[]>();
 
   clearCache(): void {
     Ven230BusinessService.clientsCache = null;
+    Ven230BusinessService.catalogCache.clear();
   }
 
   async loadClients(forceRefresh = false): Promise<Ven230Lookup[]> {
@@ -47,9 +49,15 @@ export class Ven230BusinessService {
     Ven230BusinessService.clientsCache = clients;
     return clients;
   }
-  async catalog(name: keyof typeof Ven230Catalog, data: unknown): Promise<Ven230Lookup[]> {
+  async catalog(name: keyof typeof Ven230Catalog, data: unknown = {}, forceRefresh = false): Promise<Ven230Lookup[]> {
+    const cacheKey = `${String(name)}_${JSON.stringify(data ?? {})}`;
+    if (!forceRefresh && Ven230BusinessService.catalogCache.has(cacheKey)) {
+      return Ven230BusinessService.catalogCache.get(cacheKey)!;
+    }
     const [endpoint, action] = Ven230Catalog[name];
-    return this.decode<Ven230Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    const decoded = this.decode<Ven230Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    Ven230BusinessService.catalogCache.set(cacheKey, decoded);
+    return decoded;
   }
   async action<T>(name: keyof typeof Ven230BusinessAction, data: unknown): Promise<T[]> {
     return this.decode<T>(await firstValueFrom(this.api.query(Ven230BusinessAction[name], data)));

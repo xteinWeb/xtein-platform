@@ -1,0 +1,384 @@
+<section
+  class="ghu-250">
+
+  <!-- Wizard steps -->
+  <ol
+    class="ghu-250__steps"
+    aria-label="Pasos de la liquidación">
+
+    @for (item of steps; track item.step) {
+
+      <li
+        class="ghu-250__step"
+        [class.ghu-250__step--active]="step() === item.step"
+        [class.ghu-250__step--done]="step() > item.step"
+        [attr.aria-current]="step() === item.step ? 'step' : null">
+
+        <span class="ghu-250__step-number">{{ item.step }}</span>
+
+        <span class="ghu-250__step-text">
+          <span class="ghu-250__step-title">{{ item.title }}</span>
+          <span class="ghu-250__step-description">{{ item.description }}</span>
+        </span>
+
+      </li>
+    }
+
+  </ol>
+
+
+  <div
+    class="ghu-250__card">
+
+    @switch (step()) {
+
+      <!-- ================= PASO 1: Parámetros y filtro ================= -->
+      @case (Step.Parameters) {
+
+        <div
+          class="ghu-250__grid"
+          [formGroup]="form">
+
+          <div class="ghu-250__field ghu-250__span-2">
+
+            <xtein-tag-box
+              id="ghu-250-class"
+              label="Clase de liquidación"
+              placeholder="Seleccione la clase de liquidación"
+              [items]="classOptions"
+              displayExpr="text"
+              valueExpr="value"
+              [searchEnabled]="false"
+              [showSelectionControls]="true"
+              applyValueMode="instantly"
+              [required]="true"
+              [invalid]="isInvalid('CLASE_LIQUIDACION')"
+              errorMessage="Seleccione al menos una clase de liquidación"
+              formControlName="CLASE_LIQUIDACION">
+            </xtein-tag-box>
+
+          </div>
+
+
+          <div class="ghu-250__field">
+
+            <xtein-date
+              id="ghu-250-date"
+              name="FECHA_RETIRO"
+              label="Fecha de terminación contrato"
+              placeholder="dd/mm/aaaa"
+              [required]="true"
+              formControlName="FECHA_RETIRO">
+            </xtein-date>
+
+            @if (isInvalid('FECHA_RETIRO')) {
+              <span class="ghu-250__error" role="alert">Fecha de terminación es requerida</span>
+            }
+
+          </div>
+
+
+          <div class="ghu-250__field">
+
+            <xtein-select
+              id="ghu-250-cause"
+              label="Causa"
+              placeholder="Seleccione la causa"
+              [items]="causes()"
+              displayExpr="DESCRIPCION"
+              valueExpr="ID_CAUSA"
+              [searchEnabled]="true"
+              [showClearButton]="true"
+              formControlName="ID_CAUSA">
+            </xtein-select>
+
+          </div>
+
+
+          <div class="ghu-250__field">
+
+            <xtein-select
+              id="ghu-250-company"
+              label="Empresa"
+              placeholder="Todas las empresas"
+              [items]="companies()"
+              displayExpr="NOMBRE"
+              valueExpr="ID_EMPRESA"
+              [searchEnabled]="true"
+              [showClearButton]="true"
+              formControlName="ID_EMPRESA">
+            </xtein-select>
+
+          </div>
+
+
+          <div class="ghu-250__field">
+
+            <xtein-select
+              id="ghu-250-group"
+              label="Grupo"
+              placeholder="Todos los grupos"
+              [items]="groups()"
+              displayExpr="ID_GRUPO"
+              valueExpr="ID_GRUPO"
+              [searchEnabled]="true"
+              [showClearButton]="true"
+              formControlName="ID_GRUPO">
+            </xtein-select>
+
+          </div>
+
+
+          <!-- Employees: drop-down box with data grid -->
+          <div class="ghu-250__field ghu-250__span-2">
+
+            <xtein-label for="ghu-250-employees">
+              Empleados
+              <span class="ghu-250__hint">
+                ({{ lookupSelectedIds().length ? lookupSelectedIds().length + ' seleccionados' : 'todos los que cumplan el filtro' }})
+              </span>
+            </xtein-label>
+
+            <dx-drop-down-box
+              [value]="lookupSelectedIds()"
+              (onValueChanged)="changeLookupValue($event.value)"
+              [(opened)]="lookupOpened"
+              [dataSource]="lookupEmployees()"
+              valueExpr="ID_EMPLEADO"
+              displayExpr="NOMBRE"
+              placeholder="Seleccione empleados (opcional)"
+              [showClearButton]="true"
+              [inputAttr]="{ id: 'ghu-250-employees', 'aria-label': 'Empleados' }"
+              [dropDownOptions]="employeeDropDownOptions">
+
+              <div
+                *dxTemplate="let data of 'content'"
+                class="ghu-250__lookup">
+
+                <xtein-data-grid
+                  [dataSource]="lookupEmployees()"
+                  keyExpr="ID_EMPLEADO"
+                  [columns]="employeeLookupColumns"
+                  selectionMode="multiple"
+                  showCheckBoxesMode="always"
+                  [selectedRowKeys]="lookupSelectedIds()"
+                  (selectionChanged)="selectLookupEmployees($event)"
+                  height="100%"
+                  [pageSize]="50"
+                  [allowedPageSizes]="[50, 100, 200]"
+                  [filterEnabled]="false"
+                  searchPlaceholder="Buscar empleado…"
+                  [searchWidth]="220"
+                  [toolbarActions]="lookupToolbarActions" />
+
+              </div>
+
+            </dx-drop-down-box>
+
+          </div>
+
+        </div>
+      }
+
+
+      <!-- ================= PASO 2: Empleados seleccionados ================= -->
+      @case (Step.Employees) {
+
+        <header class="ghu-250__section-header">
+          <h2 class="ghu-250__section-title">Empleados a liquidar</h2>
+          <span class="ghu-250__hint">{{ preparedSelectedIds().length }} de {{ preparedEmployees().length }} seleccionados</span>
+        </header>
+
+        <div class="ghu-250__table">
+
+          <xtein-data-grid
+            [dataSource]="preparedEmployees()"
+            keyExpr="ID_EMPLEADO"
+            [columns]="employeeColumns"
+            selectionMode="multiple"
+            showCheckBoxesMode="always"
+            [selectedRowKeys]="preparedSelectedIds()"
+            (selectionChanged)="selectPreparedEmployees($event)"
+            [pageSize]="20"
+            searchPlaceholder="Buscar empleado…"
+            [searchWidth]="240" />
+
+        </div>
+      }
+
+
+      <!-- ================= PASO 3: Liquidaciones generadas ================= -->
+      @case (Step.Liquidation) {
+
+        <header class="ghu-250__section-header">
+          <h2 class="ghu-250__section-title">
+            Liquidación generada
+            @if (liquidation(); as result) {
+              <span class="ghu-250__hint">Consecutivo {{ result.CONSECUTIVO }} · Retiro {{ result.FECHA_RETIRO }}</span>
+            }
+          </h2>
+          <span class="ghu-250__total">Total a pagar: $ {{ liquidationTotal() | number: '1.0-0' }}</span>
+        </header>
+
+        <p class="ghu-250__help">
+          Puede modificar los valores de devengados y deducidos; los totales de la fila se recalculan automáticamente.
+        </p>
+
+        <div class="ghu-250__table">
+
+          <xtein-data-grid
+            #liquidationGrid
+            [dataSource]="liquidationRows()"
+            keyExpr="ID_EMPLEADO"
+            [columns]="liquidationColumns()"
+            [allowUpdating]="true"
+            (editingStart)="markLiquidationDirty()"
+            [pageSize]="20"
+            searchPlaceholder="Buscar empleado…"
+            [searchWidth]="240" />
+
+        </div>
+      }
+
+
+      <!-- ================= PASO 4: Reportes generados ================= -->
+      @case (Step.Reports) {
+
+        <header class="ghu-250__section-header">
+
+          <div class="ghu-250__report-tabs" role="tablist" aria-label="Reportes generados">
+
+            <button
+              type="button"
+              role="tab"
+              class="ghu-250__report-tab"
+              [class.ghu-250__report-tab--active]="activeReport() === 'general'"
+              [attr.aria-selected]="activeReport() === 'general'"
+              (click)="selectReport('general')">
+              Informe de liquidación general
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              class="ghu-250__report-tab"
+              [class.ghu-250__report-tab--active]="activeReport() === 'slips'"
+              [attr.aria-selected]="activeReport() === 'slips'"
+              (click)="selectReport('slips')">
+              Tirillas de pago individuales
+            </button>
+
+          </div>
+
+          <div class="ghu-250__report-actions">
+
+            <xtein-button
+              text="Descargar"
+              icon="download"
+              variant="secondary"
+              width="auto"
+              (clicked)="downloadReport()">
+            </xtein-button>
+
+            <xtein-button
+              text="Imprimir"
+              icon="print"
+              variant="primary"
+              width="auto"
+              (clicked)="printReport()">
+            </xtein-button>
+
+          </div>
+
+        </header>
+
+        <iframe
+          #reportFrame
+          class="ghu-250__report"
+          title="Vista previa del reporte"
+          [srcdoc]="reportDocument()">
+        </iframe>
+      }
+    }
+
+  </div>
+
+
+  <!-- Wizard actions -->
+  <footer
+    class="ghu-250__actions">
+
+    @if (step() !== Step.Parameters) {
+      <xtein-button
+        text="Anterior"
+        icon="chevronleft"
+        variant="secondary"
+        width="auto"
+        [disabled]="loading()"
+        (clicked)="goBack()">
+      </xtein-button>
+    }
+
+    <span class="ghu-250__actions-spacer"></span>
+
+    @switch (step()) {
+
+      @case (Step.Parameters) {
+        <xtein-button
+          text="Siguiente"
+          icon="chevronright"
+          variant="primary"
+          width="auto"
+          [disabled]="loading()"
+          (clicked)="prepareEmployees()">
+        </xtein-button>
+      }
+
+      @case (Step.Employees) {
+        <xtein-button
+          text="Liquidar"
+          icon="chevronright"
+          variant="primary"
+          width="auto"
+          [disabled]="loading() || !preparedSelectedIds().length"
+          (clicked)="liquidate()">
+        </xtein-button>
+      }
+
+      @case (Step.Liquidation) {
+        <xtein-button
+          text="Generar reportes"
+          icon="chevronright"
+          variant="primary"
+          width="auto"
+          [disabled]="loading() || !liquidationRows().length"
+          (clicked)="generateReports()">
+        </xtein-button>
+      }
+
+      @case (Step.Reports) {
+        <xtein-button
+          text="Nueva liquidación"
+          icon="refresh"
+          variant="success"
+          width="auto"
+          [disabled]="loading()"
+          (clicked)="restart()">
+        </xtein-button>
+      }
+    }
+
+  </footer>
+
+
+  <xtein-loading
+    [visible]="loading()"
+    message="Un momento. Procesando..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false">
+  </xtein-loading>
+
+</section>

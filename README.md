@@ -28,8 +28,17 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 #
 
+npx ng build session
+npx ng build logging
+npx ng build api-client
+npx ng build auth
+npx ng build sdk
+npx ng build runtime
+npx ng build ui
+
 npx ng serve shell
 npx ng serve mfe-adm
 npx ng serve mfe-mad
 npx ng serve mfe-dashboard
 npx ng serve mfe-mcom
+npx ng serve mfe-mthu

@@ -143,7 +143,9 @@ export class XteinVen229ItemsComponent implements OnChanges {
     const row = this.draft();
     if (!row) return;
     row.SUB_TOTAL = Number(row.CANTIDAD || 0) * Number(row.VALOR_UNITARIO || 0);
-    row.VALOR_IVA = row.SUB_TOTAL * Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
+    const rate = Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
+    const effectiveRate = rate > 1 ? rate / 100 : rate;
+    row.VALOR_IVA = row.SUB_TOTAL * effectiveRate;
     row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
   }
 
@@ -307,6 +309,14 @@ export class XteinVen229ItemsComponent implements OnChanges {
     void this.product(data.PRODUCTO);
   }
 
+  onProductValueChanged(event: { value?: unknown }): void {
+    const val = String(event.value ?? '').trim().toUpperCase();
+    const current = this.draft()?.PRODUCTO ? String(this.draft()?.PRODUCTO).trim().toUpperCase() : '';
+    if (val && val !== current && !this.working() && !this.busy) {
+      void this.product(val);
+    }
+  }
+
   productToolbarActions(): XteinGridToolbarAction[] {
     return [
       {
@@ -387,7 +397,9 @@ export class XteinVen229ItemsComponent implements OnChanges {
 
       row.SUB_TOTAL = Number(row.CANTIDAD) * Number(row.VALOR_UNITARIO);
       row.CANTIDAD_REAL = Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1) * Number(row.CANTIDAD);
-      row.VALOR_IVA = row.SUB_TOTAL * Number(row.PORC_IVA ?? (Number(row.POR_IVA) / 100));
+      const rate = Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
+      const effectiveRate = rate > 1 ? rate / 100 : rate;
+      row.VALOR_IVA = row.SUB_TOTAL * effectiveRate;
       row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
 
       if (await this.persist(structuredClone(row))) {

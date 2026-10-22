@@ -1,0 +1,318 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+
+/*======================================================================
+= GHU-250
+======================================================================*/
+
+.ghu-250 {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 16px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+
+/*======================================================================
+= STEPS
+======================================================================*/
+
+.ghu-250__steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ghu-250__step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+  background: #fbfdff;
+  color: #6b7c8f;
+}
+
+.ghu-250__step-number {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e6edf5;
+  color: #244d73;
+  font-weight: 600;
+}
+
+.ghu-250__step-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ghu-250__step-title {
+  color: #244d73;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ghu-250__step-description {
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ghu-250__step--active {
+  border-color: #244d73;
+  background: #eef3f9;
+
+  .ghu-250__step-number {
+    background: #244d73;
+    color: #ffffff;
+  }
+}
+
+.ghu-250__step--done .ghu-250__step-number {
+  background: #2e7d4f;
+  color: #ffffff;
+}
+
+
+/*======================================================================
+= CARD
+======================================================================*/
+
+.ghu-250__card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 18px 22px 22px;
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+
+/*======================================================================
+= FORM (STEP 1)
+======================================================================*/
+
+.ghu-250__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ghu-250__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ghu-250__span-2 {
+  grid-column: 1 / -1;
+}
+
+.ghu-250__error {
+  color: #c62828;
+  font-size: 12px;
+}
+
+.ghu-250__hint {
+  color: #6b7c8f;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.ghu-250__lookup {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+
+/*======================================================================
+= GRIDS (STEPS 2 AND 3)
+======================================================================*/
+
+.ghu-250__section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.ghu-250__section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  color: #244d73;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ghu-250__total {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #eef3f9;
+  color: #244d73;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ghu-250__help {
+  margin: 0;
+  color: #4a5b6d;
+  font-size: 12px;
+}
+
+.ghu-250__table {
+  height: clamp(320px, calc(100dvh - 340px), 760px);
+  min-width: 0;
+}
+
+:host ::ng-deep .ghu-250__total-cell {
+  background: #f6f9fc;
+  font-weight: 600;
+}
+
+
+/*======================================================================
+= REPORTS (STEP 4)
+======================================================================*/
+
+.ghu-250__report-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 9px;
+  background: #eef3f9;
+}
+
+.ghu-250__report-tab {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #244d73;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #244d73;
+    outline-offset: 1px;
+  }
+}
+
+.ghu-250__report-tab--active {
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(36, 77, 115, 0.18);
+  font-weight: 600;
+}
+
+.ghu-250__report-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ghu-250__report {
+  width: 100%;
+  height: clamp(360px, calc(100dvh - 330px), 820px);
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+
+/*======================================================================
+= ACTIONS
+======================================================================*/
+
+.ghu-250__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ghu-250__actions-spacer {
+  flex: 1 1 auto;
+}
+
+
+/*======================================================================
+= TABLET / MOBILE
+======================================================================*/
+
+@media (max-width: 767.98px) {
+
+  .ghu-250 {
+    padding: 10px;
+  }
+
+  .ghu-250__steps {
+    grid-template-columns: repeat(4, auto);
+    justify-content: space-between;
+  }
+
+  .ghu-250__step-text {
+    display: none;
+  }
+
+  .ghu-250__card {
+    padding: 16px;
+  }
+
+  .ghu-250__grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .ghu-250__span-2 {
+    grid-column: auto;
+  }
+}
+
+
+@media (max-width: 479.98px) {
+
+  .ghu-250 {
+    padding: 6px;
+  }
+
+  .ghu-250__card {
+    padding: 14px 12px 16px;
+    border-radius: 8px;
+  }
+}
