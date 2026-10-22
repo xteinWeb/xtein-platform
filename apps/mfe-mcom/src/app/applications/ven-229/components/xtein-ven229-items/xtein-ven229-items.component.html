@@ -173,15 +173,26 @@
           </td>
           <td class="col-um">
             @if (row.PRESENTACION?.length) {
-              <xtein-select
-                class="cell-editor"
-                [items]="presentationOptions()"
-                displayExpr="LABEL"
-                valueExpr="UDM_VENTA"
-                [ngModel]="row.UDM_VENTA"
-                (ngModelChange)="unit($event)"
+              <dx-select-box
+                class="cell-editor um-select-box"
+                [dataSource]="presentationItems()"
+                [value]="selectedPresentationIndex()"
+                valueExpr="INDEX"
+                displayExpr="UDM_VENTA"
+                [searchEnabled]="true"
+                searchMode="contains"
+                [dropDownOptions]="{ width: 550, minWidth: 420 }"
+                (onSelectionChanged)="onUnitSelectionChanged($event)"
                 [disabled]="working() || busy"
-              />
+              >
+                <div *dxTemplate="let data of 'item'" class="um-dropdown-row">
+                  <div class="um-col um-col--udm">{{ data.UDM_VENTA }}</div>
+                  <div class="um-col um-col--num">{{ data.CANTIDAD_EQUIV }}</div>
+                  <div class="um-col um-col--equiv">Equiv: {{ data.UDM_EQUIV }}</div>
+                  <div class="um-col um-col--num">{{ data.CANTIDAD_PRES }}</div>
+                  <div class="um-col um-col--price">{{ money(data.PRECIO) }}</div>
+                </div>
+              </dx-select-box>
             } @else {
               <span>{{ row.UDM_VENTA }}</span>
             }
@@ -196,28 +207,26 @@
             />
           </td>
           <td class="col-subtotal text-end">
-            {{ money(row.CANTIDAD * row.VALOR_UNITARIO) }}
+            {{ money(row.SUB_TOTAL) }}
           </td>
-          <td class="col-iva text-end">
-            @if ((row.IVAS?.length ?? 0) > 1) {
-              <xtein-select
-                class="cell-editor"
-                [items]="taxOptions()"
-                displayExpr="LABEL"
-                valueExpr="ID_TASA"
-                [ngModel]="selectedTaxId()"
-                (ngModelChange)="tax($event)"
-                [disabled]="working() || busy"
-              />
-            } @else {
-              <span>{{ money(row.VALOR_IVA) }}</span>
-            }
+          <td
+            class="col-iva text-end"
+            [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
+            (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
+            [title]="(row.IVAS?.length ?? 0) > 1 ? 'Haga clic para cambiar tarifa de IVA' : ''"
+          >
+            <span class="cell-val-number">{{ money(row.VALOR_IVA) }}</span>
           </td>
-          <td class="col-pct text-end">
-            {{ row.POR_IVA || 0 }}
+          <td
+            class="col-pct text-end"
+            [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
+            (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
+            [title]="(row.IVAS?.length ?? 0) > 1 ? 'Haga clic para cambiar tarifa de IVA' : ''"
+          >
+            <span class="cell-val-number">{{ row.POR_IVA || 0 }}</span>
           </td>
           <td class="col-total text-end">
-            {{ money((row.CANTIDAD * row.VALOR_UNITARIO) + (row.VALOR_IVA || 0)) }}
+            {{ money(row.TOTAL) }}
           </td>
           <td class="col-date">
             <xtein-date
@@ -272,3 +281,43 @@
     </tbody>
   </table>
 </div>
+
+<!-- Modal flotante para selección de tarifa de IVA (Idéntico a Image 1 / COM20001) -->
+<dx-popup
+  [visible]="taxModalVisible()"
+  (visibleChange)="taxModalVisible.set($event)"
+  [width]="600"
+  height="auto"
+  [showTitle]="false"
+  title="Selección de Iva"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="true"
+  [shading]="true"
+>
+  <div *dxTemplate="let data of 'content'" class="tax-popup-container">
+    <div class="tax-popup-header">
+      <div class="tax-col-radio"></div>
+      <div class="tax-col-id">Id Tasa</div>
+      <div class="tax-col-desc">Descripción</div>
+      <div class="tax-col-pct text-end">%</div>
+      <div class="tax-col-base text-end">Valor base</div>
+    </div>
+    <div class="tax-popup-body">
+      @for (t of taxList(); track t.ID_TASA) {
+        <div
+          class="tax-popup-row"
+          [class.tax-popup-row--selected]="isSelectedTax(t)"
+          (click)="selectTax(t)"
+        >
+          <div class="tax-col-radio">
+            <span class="tax-radio-circle" [class.tax-radio-circle--checked]="isSelectedTax(t)"></span>
+          </div>
+          <div class="tax-col-id">{{ t.ID_TASA }}</div>
+          <div class="tax-col-desc">{{ t.DESCRIPCION }}</div>
+          <div class="tax-col-pct text-end">{{ t.PORCENTAJE }}</div>
+          <div class="tax-col-base text-end">{{ t.VALOR_BASE }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</dx-popup>

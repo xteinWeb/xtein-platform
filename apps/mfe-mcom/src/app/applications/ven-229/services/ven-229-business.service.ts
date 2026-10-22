@@ -95,6 +95,7 @@ export class Ven229BusinessService {
       PEDIDO: header,
       ITM_Pedido: items,
       ITM_PEDIDO: items,
+      ITEMS: items,
       ...(option === 'original' ? { OPCION_GRAV: option } : { APL_GRAV: option })
     });
   }

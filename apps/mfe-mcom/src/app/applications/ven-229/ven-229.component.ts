@@ -83,7 +83,8 @@ import {
 import {
   Ven229Header,
   Ven229Lookup,
-  Ven229SettingResult
+  Ven229SettingResult,
+  Ven229Details
 } from './models/ven-229-business.model';
 
 import { Ven229Service } from './services/ven-229.service';
@@ -780,15 +781,13 @@ export class Ven229Component implements OnInit, OnDestroy {
       this.disableFormControls();
 
       // Refresh to newly saved document
-      const queryResult = await this.business.catalog('documents', {
-        ID_DOCUMENTO: savedDoc.ID_DOCUMENTO,
-        CONSECUTIVO: savedDoc.CONSECUTIVO
-      });
-      if (queryResult.length > 0) {
-        const fullRecords = await this.queryDocument(savedDoc.ID_DOCUMENTO, savedDoc.CONSECUTIVO);
+      const docId = savedDoc.ID_DOCUMENTO || headerData.ID_DOCUMENTO;
+      const docConsec = savedDoc.CONSECUTIVO ?? headerData.CONSECUTIVO;
+      if (docId && docConsec != null) {
+        const fullRecords = await this.queryDocument(docId, Number(docConsec));
         if (fullRecords.length > 0) {
           this.records.set(fullRecords);
-          this.selectRecordIndex(0);
+          await this.selectRecordIndex(0);
         }
       }
     } catch (err: unknown) {
@@ -849,7 +848,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         const list = [...this.records()];
         list[this.currentIndex()] = refreshed[0];
         this.records.set(list);
-        this.selectRecordIndex(this.currentIndex());
+        await this.selectRecordIndex(this.currentIndex());
         this.notification.success('Registro actualizado.');
       }
     } catch (err: unknown) {
@@ -860,7 +859,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   // ================= Navigation & Records =================
 
-  selectRecordIndex(index: number): void {
+  async selectRecordIndex(index: number): Promise<void> {
     const list = this.records();
     if (index < 0 || index >= list.length) return;
     const record = list[index];
@@ -868,11 +867,15 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
 
-    if (record.DOCUMENTO && !this.documents().some(d => d.DOCUMENTO === record.DOCUMENTO)) {
+    const docVal = String(record.DOCUMENTO_FAC || record.DOCUMENTO || `${record.ID_DOCUMENTO}-${record.CONSECUTIVO}`).trim();
+    record.DOCUMENTO = docVal;
+    record.DOCUMENTO_FAC = docVal;
+
+    if (docVal && !this.documents().some(d => d.DOCUMENTO === docVal)) {
       this.documents.update(docs => [
         ...docs,
         {
-          DOCUMENTO: record.DOCUMENTO_FAC || record.DOCUMENTO,
+          DOCUMENTO: docVal,
           ID_DOCUMENTO: record.ID_DOCUMENTO,
           CONSECUTIVO: record.CONSECUTIVO
         }
@@ -882,6 +885,8 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.form.reset({
       ...Ven229DefaultRecord,
       ...record,
+      DOCUMENTO: docVal,
+      DOCUMENTO_FAC: docVal,
       FECHA: record.FECHA ? String(record.FECHA).slice(0, 10) : null,
       FECHA_REGISTRO: record.FECHA_REGISTRO ? String(record.FECHA_REGISTRO).slice(0, 10) : null,
       FECHA_OC: record.FECHA_OC ? String(record.FECHA_OC).slice(0, 10) : null,
@@ -889,7 +894,6 @@ export class Ven229Component implements OnInit, OnDestroy {
     }, { emitEvent: false });
     this.formVersion.update(v => v + 1);
 
-    this.items.set(record['ITM_PEDIDO'] || record['ITM_Pedido'] || []);
     this.taxes.set(record.PEDIDO_GRAV || record.Pedido_GRAV || []);
     this.payments.set(record.PEDIDO_PAGOS || record.Pedido_PAGOS || []);
 
@@ -911,6 +915,23 @@ export class Ven229Component implements OnInit, OnDestroy {
       void this.onClientChanged(record.ID_CLIENTE);
     }
 
+    // Load items and additional details for this order
+    try {
+      const details = await this.business.action<Ven229Details>('additional', {
+        ID_DOCUMENTO: record.ID_DOCUMENTO,
+        CONSECUTIVO: record.CONSECUTIVO
+      });
+      const adicionales = details[0] || {};
+      const itms = (adicionales.ITM_PEDIDO || adicionales.ITM_Pedido || []) as Ven229PedidoItem[];
+      this.items.set(itms);
+      if (adicionales.PEDIDO_GRAV_AUX) {
+        this.taxItems.set(adicionales.PEDIDO_GRAV_AUX);
+      }
+    } catch (e) {
+      console.error('Error loading additional order items:', e);
+      this.items.set(record['ITM_PEDIDO'] || record['ITM_Pedido'] || []);
+    }
+
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -926,16 +947,21 @@ export class Ven229Component implements OnInit, OnDestroy {
       case 'last': target = total - 1; break;
     }
     if (target !== this.currentIndex()) {
-      this.selectRecordIndex(target);
+      void this.selectRecordIndex(target);
     }
   }
 
   selectViewedRecord(record: unknown): void {
     this.viewVisible.set(false);
     const rec = record as Ven229PedidoRecord;
-    const idx = this.records().findIndex(r => r.DOCUMENTO === rec?.DOCUMENTO);
+    const docVal = String(rec?.DOCUMENTO_FAC || rec?.DOCUMENTO || `${rec?.ID_DOCUMENTO}-${rec?.CONSECUTIVO}`).trim();
+    const idx = this.records().findIndex(r =>
+      r.DOCUMENTO === docVal ||
+      r.DOCUMENTO_FAC === docVal ||
+      (r.ID_DOCUMENTO === rec?.ID_DOCUMENTO && Number(r.CONSECUTIVO) === Number(rec?.CONSECUTIVO))
+    );
     if (idx >= 0) {
-      this.selectRecordIndex(idx);
+      void this.selectRecordIndex(idx);
     }
   }
 
@@ -945,10 +971,13 @@ export class Ven229Component implements OnInit, OnDestroy {
     try {
       const prm = { PEDIDO: result?.ESTRUCTURA ?? [] };
       const response = await this.service.query('consulta', prm).toPromise();
-      const users = this.business.decode<Ven229PedidoRecord>(response);
+      const users = this.business.decode<Ven229PedidoRecord>(response).map(r => {
+        const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+        return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+      });
       if (users.length > 0) {
         this.records.set(users);
-        this.selectRecordIndex(0);
+        await this.selectRecordIndex(0);
         this.notification.success(`Se encontraron ${users.length} pedido(s).`);
       } else {
         this.notification.warning('No se encontraron registros con el criterio especificado.');
@@ -1477,7 +1506,11 @@ export class Ven229Component implements OnInit, OnDestroy {
       ]
     };
     const response = await this.service.query('consulta', prm).toPromise();
-    return this.business.decode<Ven229PedidoRecord>(response);
+    const rows = this.business.decode<Ven229PedidoRecord>(response);
+    return rows.map(r => {
+      const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+      return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+    });
   }
 
   // ================= Helpers =================

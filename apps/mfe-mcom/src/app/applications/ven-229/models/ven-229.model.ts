@@ -63,10 +63,14 @@ export interface Ven229PresentacionItem {
   UDM_EQUIV?: string;
   CANTIDAD_PRES?: number;
   CANTIDAD_EQUIV?: number;
+  PRECIO?: number;
+  [key: string]: unknown;
 }
 
 export interface Ven229IvaItem {
   ID_TASA: string;
+  DESCRIPCION?: string;
+  VALOR_BASE?: number;
   TASA?: number;
   PORCENTAJE?: number;
   CLASE?: string;
@@ -106,9 +110,9 @@ export interface Ven229PedidoItem {
   VALOR_IVA?: number;
   POR_IVA?: number;
   PORC_IVA?: number;
-  GRAVAMENES?: string;
+  GRAVAMENES?: any;
   GRAV_TOTAL?: number;
-  GRAV_ORG?: unknown;
+  GRAV_ORG?: any;
   TOTAL: number;
   UDM_VENTA?: string;
   UDM_EQUIV?: string;
