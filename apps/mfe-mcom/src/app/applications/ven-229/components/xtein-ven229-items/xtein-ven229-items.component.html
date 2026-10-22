@@ -222,6 +222,7 @@
           <td class="col-date">
             <xtein-date
               class="cell-editor"
+              [required]="true"
               [min]="minimumDeliveryDate"
               [(ngModel)]="row.FECHA_ENTREGA"
               [disabled]="working() || busy"

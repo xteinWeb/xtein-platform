@@ -175,7 +175,7 @@ export class XteinVen229ItemsComponent implements OnChanges {
             CANTIDAD_PENDIENTE: 0,
             VALOR_COSTOS: 0,
             UDM_VENTA: '',
-            FECHA_ENTREGA: null,
+            FECHA_ENTREGA: this.minimumDeliveryDate,
             PRODUCTO: '',
             ATRIBUTO: 'SIN',
             CANTIDAD: 0,
@@ -268,6 +268,9 @@ export class XteinVen229ItemsComponent implements OnChanges {
 
       if (p.IVAS?.length === 1) {
         this.tax(p.IVAS[0].ID_TASA);
+      }
+      if (!draft.FECHA_ENTREGA) {
+        draft.FECHA_ENTREGA = this.minimumDeliveryDate;
       }
       this.draft.set({ ...draft });
     } catch (error) {
@@ -385,6 +388,10 @@ export class XteinVen229ItemsComponent implements OnChanges {
 
     if (!row.PRODUCTO || !(Number(row.CANTIDAD) > 0)) {
       this.notification.warning('Complete producto y cantidad.');
+      return;
+    }
+    if (!row.FECHA_ENTREGA || !String(row.FECHA_ENTREGA).trim()) {
+      this.notification.warning('La fecha de entrega es obligatoria.');
       return;
     }
     const previous = this.items.find(item => item.ITEM === row.ITEM);

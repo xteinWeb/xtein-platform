@@ -943,7 +943,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.filterVisible.set(false);
     this.busy.set(true);
     try {
-      const prm = { PEDIDOS: result?.ESTRUCTURA ?? [] };
+      const prm = { PEDIDO: result?.ESTRUCTURA ?? [] };
       const response = await this.service.query('consulta', prm).toPromise();
       const users = this.business.decode<Ven229PedidoRecord>(response);
       if (users.length > 0) {
@@ -1471,7 +1471,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   private async queryDocument(idDoc: string, consecutivo: number): Promise<Ven229PedidoRecord[]> {
     const prm = {
-      PEDIDOS: [
+      PEDIDO: [
         { CAMPO: 'ID_DOCUMENTO', EXPRESION: idDoc, TABLA: 'Pedido' },
         { CAMPO: 'CONSECUTIVO', EXPRESION: String(consecutivo), TABLA: 'Pedido' }
       ]
