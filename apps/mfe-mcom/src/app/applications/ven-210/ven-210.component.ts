@@ -1119,7 +1119,8 @@ export class Ven210Component
     this.productsLoading.set(true);
     try {
       const rows = await this.business.catalog('products', { ID_LISTA: header.ID_CONDICION,
-        TIPO: this.conditionType, PLAZO: header.PLAZO, ID_UN_ITEM: header.ID_UN_ITEM });
+        TIPO: this.conditionType, PLAZO: header.PLAZO, ID_UN_ITEM: header.ID_UN_ITEM,
+        USUARIO: this.business.identity.USUARIO });
       if (request === this.productRequest && this.form.controls.ID_CONDICION.value === header.ID_CONDICION
         && this.form.controls.ID_UN_ITEM.value === header.ID_UN_ITEM
         && this.form.controls.PLAZO.value === header.PLAZO) this.products.set(rows);
