@@ -31,6 +31,7 @@ export class XteinVen210ItemsComponent implements OnChanges {
  @Input({required:true}) persist!: (row:Ven210RemisionItem)=>Promise<boolean>;
  @Input() moneyFormat='#,##0.00';
  @Input() quantityFormat='#,##0.00';
+ get savedRecord(): boolean { return !!this.recordKey && this.recordKey !== 'new'; }
  money(value:number):string{return formatNumber(Number(value || 0),this.moneyFormat);}
  quantity(value:number):string{return formatNumber(Number(value || 0),this.quantityFormat);}
  readonly selected=signal<number[]>([]);

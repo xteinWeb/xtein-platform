@@ -81,7 +81,7 @@
         </th>
         <th class="col-product">Producto</th>
         <th class="col-name">Nombre del Producto</th>
-        <th class="col-qty text-end">Cantidad</th>
+        <th class="col-qty text-end" [title]="savedRecord ? 'Cantidad en unidad base' : ''">Cantidad</th>
         <th class="col-um">UM</th>
         <th class="col-price text-end">Valor Unitario</th>
         <th class="col-subtotal text-end">Subtotal</th>
@@ -259,3 +259,6 @@
     </tbody>
   </table>
 </div>
+@if (savedRecord && items.length) {
+  <p class="base-unit-note" role="note">Cantidad en unidad base.</p>
+}

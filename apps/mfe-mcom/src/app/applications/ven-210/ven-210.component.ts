@@ -298,8 +298,8 @@ export class Ven210Component
   readonly queryFilter = computed(() => this.records()[0]?.QFILTRO || this.records().map(record => '('+this.recordFilter(record)+')').join(' OR '));
   private recordFilter(record: Ven210RemisionRecord): string {
     const text=(value:unknown)=>"'"+String(value ?? '').replace(/'/g,"''")+"'";
-    return " REMISION.ID_DOCUMENTO = "+text(record.ID_DOCUMENTO)+" AND ISNULL(REMISION.PREFIJO,'') = "+text(record.PREFIJO)
-      +" AND REMISION.CONSECUTIVO = "+Number(record.CONSECUTIVO)+" AND ISNULL(REMISION.SUFIJO,'') = "+text(record.SUFIJO);
+    return " REMISION.ID_DOCUMENTO = "+text(record.ID_DOCUMENTO)+" AND ISNULL(NULLIF(REMISION.PREFIJO,'SIN'),'') = "+text(record.PREFIJO)
+      +" AND REMISION.CONSECUTIVO = "+Number(record.CONSECUTIVO)+" AND ISNULL(NULLIF(REMISION.SUFIJO,'SIN'),'') = "+text(record.SUFIJO);
   }
   reportEmailContext() {
     const h=this.header();return {defaults:{ASUNTO:this.spec('ASUNTO EMAIL')?.VALOR_DEFECTO ?? '',
@@ -592,6 +592,9 @@ export class Ven210Component
     const message=this.business.validate(header,items) || this.business.validateDistributions(items)
       || items.map(item=>validateOrderQuantity(item)).find(Boolean) || '';
     if(message){this.form.markAllAsTouched();this.notification.warning(message);return;}
+    if(this.payments().some(p=>!Number.isInteger(Number(p.VALOR || 0)))){
+      this.notification.warning('El valor de los anticipos debe ser un número entero (sin decimales).');return;
+    }
     if(this.payments().reduce((sum,p)=>sum+Number(p.VALOR || 0),0)>Number(header.TOTAL)){
       this.notification.warning('El valor de los anticipos no puede superar el total de la remisión.');return;
     }
@@ -608,8 +611,9 @@ export class Ven210Component
       const list=[...this.records()];let index=this.currentIndex();
       if(isNew){index=list.length;list.push(saved);}else{list[index]=saved;}
       this.records.set(list);this.currentIndex.set(index);this.populateForm(saved);
-      this.detailsReady.set(true);this.mode.set(RecordToolbarMode.Browsing);this.disableFormControls();this.workspace.setDirty(this.applicationId,false);
+      this.mode.set(RecordToolbarMode.Browsing);this.disableFormControls();this.workspace.setDirty(this.applicationId,false);
       this.notification.success('Remisión guardada correctamente.');
+      await this.loadAdditionalData(saved);
     }catch(error){this.showError(error);}finally{this.loading.set(false);}
   }
 
@@ -1208,6 +1212,9 @@ export class Ven210Component
     const option=this.activeSetting;if(!option)return;
     if(option.CLAVE==='ANTICIPOS'){
       const payments=rows as unknown as Ven210RemisionPago[];
+      if(payments.some(p=>!Number.isInteger(Number(p.VALOR || 0)))){
+        this.notification.warning('El valor de los anticipos debe ser un número entero (sin decimales).');return;
+      }
       if(payments.reduce((sum,p)=>sum+Number(p.VALOR || 0),0)>Number(this.form.controls.TOTAL.value)){
         this.notification.warning('El valor de los anticipos no puede superar el total de la remisión.');return;
       }
