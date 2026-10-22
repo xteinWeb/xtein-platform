@@ -121,7 +121,7 @@
                   [searchEnabled]="true"
                   [acceptCustomValue]="true"
                   formControlName="DIRECCION"
-                  [readOnly]="readOnly() || itemPending()"
+                  [readOnly]="readOnly() || itemPending() || !form.controls.ID_CLIENTE.value"
                 />
               </div>
             </div>
@@ -334,7 +334,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(650px, 95vw)"
                     formControlName="ID_UN_BODEGA"
-                    [readOnly]="readOnly() || itemPending()"
+                    [readOnly]="readOnly() || itemPending() || !form.controls.ID_UN_ITEM.value"
                   />
                 </div>
               </div>
@@ -364,7 +364,7 @@
                     [showClearButton]="true"
                     dropDownWidth="min(450px, 95vw)"
                     formControlName="ID_CONDICION"
-                    [readOnly]="readOnly() || itemPending()"
+                    [readOnly]="readOnly() || itemPending() || !form.controls.ID_ADC.value || !form.controls.TIPO_VENTA.value"
                   />
                 </div>
               </div>
@@ -380,7 +380,7 @@
                     displayExpr="PLAZO"
                     valueExpr="PLAZO"
                     formControlName="PLAZO"
-                    [readOnly]="readOnly() || itemPending() || form.controls.TIPO_VENTA.value === 'CONTADO'"
+                    [readOnly]="readOnly() || itemPending() || form.controls.TIPO_VENTA.value === 'CONTADO' || !form.controls.ID_CONDICION.value"
                   />
                 </div>
               </div>

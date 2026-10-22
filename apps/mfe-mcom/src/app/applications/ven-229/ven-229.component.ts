@@ -142,6 +142,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   readonly busy = signal<boolean>(false);
   readonly itemPending = signal<boolean>(false);
   readonly permissions = signal<RecordToolbarPermissions>(DeniedRecordToolbarPermissions);
+  readonly formVersion = signal<number>(0);
 
   // Document details signals
   readonly items = signal<Ven229PedidoItem[]>([]);
@@ -205,7 +206,10 @@ export class Ven229Component implements OnInit, OnDestroy {
     return idx >= 0 && idx < list.length ? list[idx] : null;
   });
 
-  readonly header = computed(() => this.form.getRawValue() as Ven229Header);
+  readonly header = computed(() => {
+    this.formVersion();
+    return this.form.getRawValue() as Ven229Header;
+  });
   readonly headerLocked = computed(() => this.items().length > 0);
   readonly advances = computed(() => this.payments().reduce((sum, p) => sum + Number(p.VALOR || p.TOTAL || 0), 0));
   readonly totalTaxes = computed(() => this.taxes().reduce((sum, t) => sum + Number(t.VALOR || 0), 0));
@@ -239,8 +243,20 @@ export class Ven229Component implements OnInit, OnDestroy {
   });
 
   readonly itemsReady = computed(() => {
+    this.formVersion();
     const h = this.header();
-    return !!(h.DOCUMENTO && h.ID_CLIENTE && h.ID_UN_ITEM && h.ID_ADC && h.ID_CONDICION && h.ID_MONEDA);
+    const plazoValid = h.TIPO_VENTA === 'CONTADO' ? true : (h.PLAZO !== null && h.PLAZO !== undefined && String(h.PLAZO).trim() !== '');
+    return Boolean(
+      h.DOCUMENTO &&
+      h.ID_CLIENTE &&
+      h.FECHA &&
+      h.ID_UN_ITEM &&
+      h.ID_UN_BODEGA &&
+      h.ID_ADC &&
+      h.ID_CONDICION &&
+      h.ID_MONEDA &&
+      plazoValid
+    );
   });
 
   readonly itemRecordKey = computed(() => {
@@ -381,14 +397,18 @@ export class Ven229Component implements OnInit, OnDestroy {
       })
     );
 
+    // Watch form value changes to trigger reactive computations
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        this.formVersion.update(v => v + 1);
+      })
+    );
+
     // Watch client changes
     this.subscriptions.add(
       this.form.controls.ID_CLIENTE.valueChanges.subscribe(clienteId => {
-        if (clienteId && !this.readOnly()) {
-          void this.onClientChanged(clienteId);
-        } else if (!clienteId && !this.readOnly()) {
-          this.addresses.set([]);
-          this.form.patchValue({ DIRECCION: '', NOMBRE_CLIENTE: '' }, { emitEvent: false });
+        if (!this.readOnly()) {
+          void this.onClientChanged(clienteId || '');
         }
       })
     );
@@ -396,8 +416,8 @@ export class Ven229Component implements OnInit, OnDestroy {
     // Watch UN changes
     this.subscriptions.add(
       this.form.controls.ID_UN_ITEM.valueChanges.subscribe(unId => {
-        if (unId && !this.readOnly()) {
-          void this.onUnitChanged(unId);
+        if (!this.readOnly()) {
+          void this.onUnitChanged(unId || '');
         }
       })
     );
@@ -445,6 +465,7 @@ export class Ven229Component implements OnInit, OnDestroy {
           this.form.controls.FECHA_PRIMER_VENC.enable({ emitEvent: false });
           this.form.controls.CUOTA_INICIAL.enable({ emitEvent: false });
         }
+        this.formVersion.update(v => v + 1);
         if (!this.readOnly()) {
           void this.loadConditions();
         }
@@ -594,6 +615,7 @@ export class Ven229Component implements OnInit, OnDestroy {
       SUFIJO: String(row.SUFIJO || ''),
       DOCUMENTO_FAC: value
     }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
   }
 
   async newRecord(): Promise<void> {
@@ -628,8 +650,13 @@ export class Ven229Component implements OnInit, OnDestroy {
       FECHA_PRIMER_VENC: this.todayDate(),
       USUARIO: this.business.identity.USUARIO,
       ID_UN_ITEM: this.defaultUnit,
-      ID_MONEDA: this.defaultCurrency
+      ID_MONEDA: this.defaultCurrency,
+      TIPO_VENTA: 'CONTADO',
+      PLAZO: 0,
+      CUOTA_INICIAL: 0,
+      ESTADO: 'REGISTRADO'
     });
+    this.formVersion.update(v => v + 1);
 
     if (this.documents().length === 1) {
       this.selectDocument(String(this.documents()[0].DOCUMENTO));
@@ -832,6 +859,7 @@ export class Ven229Component implements OnInit, OnDestroy {
       FECHA_OC: record.FECHA_OC ? String(record.FECHA_OC).slice(0, 10) : null,
       FECHA_PRIMER_VENC: record.FECHA_PRIMER_VENC ? String(record.FECHA_PRIMER_VENC).slice(0, 10) : null
     }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
 
     this.items.set(record['ITM_PEDIDO'] || record['ITM_Pedido'] || []);
     this.taxes.set(record.PEDIDO_GRAV || record.Pedido_GRAV || []);
@@ -982,11 +1010,18 @@ export class Ven229Component implements OnInit, OnDestroy {
       TOTAL: total,
       VALOR_CUOTA: cuota
     }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
   }
 
   // ================= Catalog Handlers =================
 
   async onClientChanged(clienteId: string): Promise<void> {
+    if (!clienteId) {
+      this.addresses.set([]);
+      this.form.patchValue({ NOMBRE_CLIENTE: '', DIRECCION: '' }, { emitEvent: false });
+      this.formVersion.update(v => v + 1);
+      return;
+    }
     const cli = this.clients().find(c => c.ID_CLIENTE === clienteId);
     if (cli) {
       this.form.patchValue({
@@ -1012,10 +1047,18 @@ export class Ven229Component implements OnInit, OnDestroy {
       if (!this.readOnly()) {
         this.notification.warning('No se encontró una dirección del Tipo: Despacho');
       }
+    } finally {
+      this.formVersion.update(v => v + 1);
     }
   }
 
   async onUnitChanged(unitId: string): Promise<void> {
+    if (!unitId) {
+      this.warehouses.set([]);
+      this.form.patchValue({ ID_UN_BODEGA: '' }, { emitEvent: false });
+      this.formVersion.update(v => v + 1);
+      return;
+    }
     try {
       const warehouses = await this.business.catalog('warehouses', {
         ESTADO: 'ACTIVO',
@@ -1031,9 +1074,13 @@ export class Ven229Component implements OnInit, OnDestroy {
         BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))
       }));
       this.warehouses.set(formatted);
-      if (formatted.length > 0 && !this.form.controls.ID_UN_BODEGA.value) {
-        this.form.patchValue({ ID_UN_BODEGA: formatted[0].ID_UN_BODEGA }, { emitEvent: false });
+      const currentBodega = this.form.controls.ID_UN_BODEGA.value;
+      const exists = formatted.some(w => w.ID_UN_BODEGA === currentBodega);
+      if (!exists) {
+        const nextBodega = formatted.length > 0 ? formatted[0].ID_UN_BODEGA : '';
+        this.form.patchValue({ ID_UN_BODEGA: nextBodega }, { emitEvent: false });
       }
+      this.formVersion.update(v => v + 1);
     } catch {
       // Non-critical
     }
@@ -1109,8 +1156,11 @@ export class Ven229Component implements OnInit, OnDestroy {
   async loadConditions(): Promise<void> {
     const adc = this.form.controls.ID_ADC.value;
     const tipo = this.form.controls.TIPO_VENTA.value || 'CONTADO';
-    if (!adc) {
+    if (!adc || !tipo) {
       this.conditions.set([]);
+      this.terms.set([]);
+      this.form.patchValue({ ID_CONDICION: '' }, { emitEvent: false });
+      this.formVersion.update(v => v + 1);
       return;
     }
     try {
@@ -1144,6 +1194,10 @@ export class Ven229Component implements OnInit, OnDestroy {
       }
     } catch {
       this.conditions.set([]);
+      this.terms.set([]);
+      this.form.patchValue({ ID_CONDICION: '' });
+    } finally {
+      this.formVersion.update(v => v + 1);
     }
   }
 
@@ -1415,6 +1469,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.taxes.set([]);
     this.payments.set([]);
+    this.formVersion.update(v => v + 1);
   }
 
   private showError(err: unknown): void {
