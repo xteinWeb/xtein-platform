@@ -14,9 +14,8 @@
         "test:ci": "npx ng test sdk --watch=false && npx ng test runtime --watch=false && npx ng test ui --watch=false",
         "proxy": "ng serve --port 4800 --proxy-config proxy.conf.json",
         "serve-prod": "node --max-old-space-size=14336 ./node_modules/@angular/cli/bin/ng serve --configuration production --port 4795",
-        
         "build:libs": "npx ng build sdk && npx ng build logging && npx ng build session && npx ng build api-client && npx ng build runtime && npx ng build dashboard-runtime && npx ng build ui && npx ng build auth",
-        "build:apps": "npx ng build mfe-adm && npx ng build mfe-dashboard && npx ng build mfe-inv && npx ng build mfe-mad && npx ng build mfe-malm && npx ng build mfe-mcom && npx ng build mfe-mcpr && npx ng build mfe-men && npx ng build mfe-mfin && npx ng build mfe-mthu && npx ng build shell",
+        "build:apps": "npx ng build mfe-adm && npx ng build mfe-dashboard && npx ng build mfe-inv && npx ng build mfe-mad && npx ng build mfe-malm && npx ng build mfe-mcom && npx ng build mfe-mcpr && npx ng build mfe-men && npx ng build mfe-mfin && npx ng build mfe-mthu && npx ng build mfe-prod && npx ng build shell",
         "build:all": "npm run build:libs && npm run build:apps",
         "build:deploy": "npm run build:libs && npx ng build mfe-adm && npx ng build mfe-dashboard && npx ng build mfe-mad && npx ng build mfe-mcom && npx ng build shell",
         "serve:shell": "npx ng serve shell",
@@ -30,8 +29,9 @@
         "serve:men": "npx ng serve mfe-men",
         "serve:mfin": "npx ng serve mfe-mfin",
         "serve:mthu": "npx ng serve mfe-mthu",
+        "serve:prod": "npx ng serve mfe-prod",
         "serve:apps": "concurrently -n SHELL,ADM,DASH,MAD,MCOM -c \"blue,green,magenta,yellow,cyan\" \"npm run serve:shell\" \"npm run serve:adm\" \"npm run serve:dashboard\" \"npm run serve:mad\" \"npm run serve:mcom\"",
-        "serve:all": "concurrently --kill-others-on-fail -n SHELL,ADM,DASH,INV,MAD,MALM,MCOM,MCPR,MEN,MFIN,MTHU \"npm run serve:shell\" \"npm run serve:adm\" \"npm run serve:dashboard\" \"npm run serve:inv\" \"npm run serve:mad\" \"npm run serve:malm\" \"npm run serve:mcom\" \"npm run serve:mcpr\" \"npm run serve:men\" \"npm run serve:mfin\" \"npm run serve:mthu\"",
+        "serve:all": "concurrently --kill-others-on-fail -n SHELL,ADM,DASH,INV,MAD,MALM,MCOM,MCPR,MEN,MFIN,MTHU,PROD \"npm run serve:shell\" \"npm run serve:adm\" \"npm run serve:dashboard\" \"npm run serve:inv\" \"npm run serve:mad\" \"npm run serve:malm\" \"npm run serve:mcom\" \"npm run serve:mcpr\" \"npm run serve:men\" \"npm run serve:mfin\" \"npm run serve:mthu\" \"npm run serve:prod\"",
         "dev:all": "npm run build:libs && npm run serve:all"
     },
     "private": true,
