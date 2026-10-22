@@ -748,7 +748,8 @@ export class Com208Component implements OnInit, OnDestroy {
         this.form.controls.SECCION.setValue(String(rows[0].ID_SECCION ?? ''));
       }
     } catch (error) {
-      this.showError(error);
+      // Producto sin matriz: se avisa, pero el consumo sigue y los materiales se agregan a mano
+      this.warnNoMatrix(error);
     }
   }
 
@@ -762,11 +763,13 @@ export class Com208Component implements OnInit, OnDestroy {
     try {
       const materials = await this.business.materials(h.PRODUCTO, h.SECCION, String(h.ID_UN_ORIGEN ?? ''));
       this.busy.set(false);
+      if (!materials.length) throw new Error(`No hay materiales en la matriz para ${h.PRODUCTO}`);
       await this.applyItems(materials);
       this.notification.success(`Se cargaron ${materials.length} material(es) de la matriz.`);
     } catch (error) {
-      this.setItems([]);
-      this.showError(error);
+      // Se quitan solo los de la matriz anterior: los agregados a mano se conservan
+      this.setItems(this.items().filter(row => !row.ES_MATRIZ));
+      this.warnNoMatrix(error);
     } finally {
       this.busy.set(false);
     }
@@ -919,5 +922,10 @@ export class Com208Component implements OnInit, OnDestroy {
 
   private showError(err: unknown): void {
     this.notification.error(err instanceof Error ? err.message : 'Ocurrió un error en la operación.');
+  }
+
+  private warnNoMatrix(err: unknown): void {
+    const message = err instanceof Error ? err.message : 'No se pudieron cargar los materiales de la matriz';
+    this.notification.warning(`${message}. Puede agregar los materiales manualmente con "+ Agregar material".`);
   }
 }
