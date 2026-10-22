@@ -111,7 +111,7 @@ export interface Ven229PedidoItem {
   POR_IVA?: number;
   PORC_IVA?: number;
   GRAVAMENES?: any;
-  GRAV_TOTAL?: number;
+  GRAV_TOTAL?: any;
   GRAV_ORG?: any;
   TOTAL: number;
   UDM_VENTA?: string;

@@ -77,6 +77,7 @@ import {
   Ven229PedidoRecord,
   Ven229PedidoItem,
   Ven229PedidoGrav,
+  Ven229PedidoGravAux,
   Ven229PedidoPago
 } from './models/ven-229.model';
 
@@ -1023,26 +1024,95 @@ export class Ven229Component implements OnInit, OnDestroy {
     await this.removeItem(itemNums);
   }
 
-  async applyItems(updatedItems: Ven229PedidoItem[], option = 'items'): Promise<boolean> {
+  async applyItems(updatedItems: Ven229PedidoItem[], option?: string): Promise<boolean> {
     if (this.readOnly() || this.busy()) return false;
     this.busy.set(true);
     try {
-      const taxResults = await this.business.taxes(this.header(), updatedItems.map(row => ({ ...row, APLICACION: 2 })), option);
-      const tax = taxResults[0];
-      if (!tax) throw new Error('El servidor no devolvió la liquidación de gravámenes.');
-      this.taxes.set(tax.ENCAB ?? []);
-      this.taxItems.set(tax.ITEMS ?? []);
-      this.items.set(updatedItems.map(row => {
-        const value = tax.ITEMS?.find(i => i.ITEM === row.ITEM);
-        return value ? {
+      const currentHeader = this.header();
+      const sanitizedHeader: Ven229Header = {
+        ...currentHeader,
+        FECHA: currentHeader.FECHA || new Date().toISOString().slice(0, 10),
+        FECHA_REGISTRO: currentHeader.FECHA_REGISTRO || currentHeader.FECHA || new Date().toISOString().slice(0, 10)
+      };
+
+      const sanitizedItems: Ven229PedidoItem[] = updatedItems.map(row => {
+        const qty = Number(row.CANTIDAD || 0);
+        const price = Number(row.VALOR_UNITARIO || 0);
+        const subTotal = qty * price;
+        const discount = Number(row.VALOR_DESCUENTO || 0);
+        const base = subTotal - discount;
+
+        let porIva = Number(row.POR_IVA != null ? row.POR_IVA : (Number(row.PORC_IVA || 0) * 100));
+        if (!Number.isFinite(porIva)) porIva = 0;
+        const effectiveRate = porIva / 100;
+        const valorIva = base * effectiveRate;
+        const total = base + valorIva;
+
+        let taxObj: Record<string, unknown> | null = null;
+        if (row.GRAV_ORG && typeof row.GRAV_ORG === 'object' && !Array.isArray(row.GRAV_ORG) && 'ID_TASA' in row.GRAV_ORG) {
+          taxObj = row.GRAV_ORG as Record<string, unknown>;
+        } else if (row.GRAVAMENES && typeof row.GRAVAMENES === 'object' && !Array.isArray(row.GRAVAMENES) && 'ID_TASA' in row.GRAVAMENES) {
+          taxObj = row.GRAVAMENES as Record<string, unknown>;
+        }
+
+        if (!taxObj) {
+          taxObj = {
+            ID_TASA: porIva === 0 ? 'IV-000' : 'IV-GEN',
+            DESCRIPCION: porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA',
+            PORCENTAJE: porIva,
+            VALOR_BASE: porIva === 0 ? 0 : 1
+          };
+        } else {
+          taxObj = {
+            ...taxObj,
+            PORCENTAJE: porIva
+          };
+        }
+
+        return {
           ...row,
-          VALOR_IVA: value.VALOR_IVA,
-          SUB_TOTAL: value.SUB_TOTAL,
-          TOTAL: value.TOTAL,
-          GRAVAMENES: value.GRAV_TOTAL != null ? String(value.GRAV_TOTAL) : row.GRAVAMENES,
-          GRAV_TOTAL: value.GRAV_TOTAL
-        } : row;
+          APLICACION: 2,
+          CANTIDAD: qty,
+          VALOR_UNITARIO: price,
+          VALOR_DESCUENTO: discount,
+          VALOR_COSTOS: Number(row.VALOR_COSTOS || 0),
+          VALOR_BASE: Number(row.VALOR_BASE || 0),
+          SUB_TOTAL: subTotal,
+          POR_IVA: porIva,
+          PORC_IVA: effectiveRate,
+          VALOR_IVA: valorIva,
+          TOTAL: total,
+          GRAV_ORG: taxObj,
+          GRAVAMENES: taxObj
+        };
+      });
+
+      let serverEncab: Ven229PedidoGrav[] = [];
+      let serverItems: Ven229PedidoItem[] = [];
+      try {
+        const taxResults = await this.business.taxes(sanitizedHeader, sanitizedItems, option);
+        const tax = taxResults[0];
+        if (tax) {
+          serverEncab = tax.ENCAB ?? [];
+          serverItems = tax.ITEMS ?? [];
+        }
+      } catch (err) {
+        console.warn('Error calculando gravámenes en servidor:', err);
+      }
+
+      this.taxItems.set(serverItems);
+
+      // Preserve each item's individual values strictly, storing server GRAV_TOTAL if returned
+      this.items.set(sanitizedItems.map(row => {
+        const value = serverItems.find(i => i.ITEM === row.ITEM);
+        return {
+          ...row,
+          GRAV_TOTAL: value?.GRAV_TOTAL ?? row.GRAV_TOTAL
+        };
       }));
+
+      // Totalize taxes by individual applied rates across all rows for RESUMEN
+      this.updateSummaryTaxes(sanitizedItems, serverEncab);
       this.recalculate();
       this.workspace.setDirty(this.applicationId, true);
       return true;
@@ -1052,6 +1122,52 @@ export class Ven229Component implements OnInit, OnDestroy {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  private updateSummaryTaxes(items: Ven229PedidoItem[], serverEncab: Ven229PedidoGrav[]): void {
+    if (!items.length) {
+      this.taxes.set([]);
+      return;
+    }
+
+    const ivaGroups = new Map<number, { valor: number; base: number; idTasa: string; descripcion: string }>();
+    for (const item of items) {
+      const pct = Number(item.POR_IVA || 0);
+      const current = ivaGroups.get(pct) ?? {
+        valor: 0,
+        base: 0,
+        idTasa: pct === 0 ? 'IV-000' : 'IV-GEN',
+        descripcion: pct === 0 ? 'Sin iva' : 'Tarifa general del IVA'
+      };
+      current.valor += Number(item.VALOR_IVA || 0);
+      current.base += Number(item.SUB_TOTAL || 0) - Number(item.VALOR_DESCUENTO || 0);
+      const taxObj = item.GRAVAMENES as { ID_TASA?: string; DESCRIPCION?: string } | undefined;
+      if (taxObj?.ID_TASA) current.idTasa = taxObj.ID_TASA;
+      if (taxObj?.DESCRIPCION) current.descripcion = taxObj.DESCRIPCION;
+      ivaGroups.set(pct, current);
+    }
+
+    const summaryTaxes: Ven229PedidoGrav[] = [];
+    const sortedPcts = Array.from(ivaGroups.keys()).sort((a, b) => b - a);
+    for (const pct of sortedPcts) {
+      const g = ivaGroups.get(pct)!;
+      summaryTaxes.push({
+        CLASE: 'IVA',
+        ID_TASA: g.idTasa,
+        POR_TASA: pct,
+        VALOR: g.valor,
+        BASE: g.base
+      });
+    }
+
+    // Include other taxes/retentions (e.g., ReteFuente, ReteIva, ICA) from serverEncab
+    for (const enc of serverEncab) {
+      if (enc.CLASE && enc.CLASE !== 'IVA') {
+        summaryTaxes.push(enc);
+      }
+    }
+
+    this.taxes.set(summaryTaxes);
   }
 
   recalculate(): void {

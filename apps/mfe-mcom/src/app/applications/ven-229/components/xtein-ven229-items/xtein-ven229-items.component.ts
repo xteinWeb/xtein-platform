@@ -12,7 +12,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DxDropDownBoxModule, DxTemplateModule, DxSelectBoxModule, DxPopupModule } from 'devextreme-angular';
+import {
+  DxDropDownBoxModule,
+  DxTemplateModule,
+  DxSelectBoxModule,
+  DxPopupModule,
+  DxNumberBoxModule
+} from 'devextreme-angular';
 import { formatNumber } from 'devextreme/localization';
 import {
   XteinDataGridComponent,
@@ -20,7 +26,6 @@ import {
   XteinGridColumn,
   XteinGridToolbarAction,
   XteinSelectComponent,
-  XteinNumberComponent,
   XteinDateComponent,
   XteinNotificationService
 } from '@xtein/ui';
@@ -38,9 +43,9 @@ import { Ven229BusinessService } from '../../services/ven-229-business.service';
     DxTemplateModule,
     DxSelectBoxModule,
     DxPopupModule,
+    DxNumberBoxModule,
     XteinDataGridComponent,
     XteinCheckboxComponent,
-    XteinNumberComponent,
     XteinDateComponent
   ],
   templateUrl: './xtein-ven229-items.component.html',
@@ -77,6 +82,10 @@ export class XteinVen229ItemsComponent implements OnChanges {
   readonly taxModalVisible = signal(false);
   readonly taxList = signal<Ven229IvaItem[]>([]);
   productDropdownOpened = false;
+  umDropdownOpened = false;
+
+  presentationList: (Ven229PresentacionItem & { INDEX: number })[] = [];
+  selectedUnitIndex = 0;
 
   readonly productDropDownOptions = {
     width: 'min(750px, 95vw)',
@@ -111,7 +120,10 @@ export class XteinVen229ItemsComponent implements OnChanges {
     if (changes['recordKey'] || (changes['readOnly'] && this.readOnly)) {
       this.selected.set([]);
       this.draft.set(null);
+      this.presentationList = [];
+      this.selectedUnitIndex = 0;
       this.productDropdownOpened = false;
+      this.umDropdownOpened = false;
     } else if (changes['items']) {
       const keys = new Set(this.items.map(item => item.ITEM));
       this.selected.update(selected => selected.filter(key => keys.has(key)));
@@ -125,6 +137,11 @@ export class XteinVen229ItemsComponent implements OnChanges {
 
   quantity(value: number | string | null | undefined): string {
     return formatNumber(Number(value || 0), this.quantityFormat);
+  }
+
+  isNewDraft(): boolean {
+    const d = this.draft();
+    return !!d && !this.items.some(i => i.ITEM === d.ITEM);
   }
 
   toggle(item: number, checked: boolean): void {
@@ -148,11 +165,19 @@ export class XteinVen229ItemsComponent implements OnChanges {
   onDraftQtyChange(): void {
     const row = this.draft();
     if (!row) return;
-    row.SUB_TOTAL = Number(row.CANTIDAD || 0) * Number(row.VALOR_UNITARIO || 0);
-    const rate = Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
-    const effectiveRate = rate > 1 ? rate / 100 : rate;
-    row.VALOR_IVA = row.SUB_TOTAL * effectiveRate;
-    row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
+    const qty = Number(row.CANTIDAD || 0);
+    const unitPrice = Number(row.VALOR_UNITARIO || 0);
+    row.SUB_TOTAL = qty * unitPrice;
+    const discount = Number(row.VALOR_DESCUENTO || 0);
+    const base = row.SUB_TOTAL - discount;
+    let porIva = Number(row.POR_IVA != null ? row.POR_IVA : (Number(row.PORC_IVA || 0) * 100));
+    if (!Number.isFinite(porIva)) porIva = 0;
+    const effectiveRate = porIva / 100;
+    row.POR_IVA = porIva;
+    row.PORC_IVA = effectiveRate;
+    row.VALOR_IVA = base * effectiveRate;
+    row.TOTAL = base + row.VALOR_IVA;
+    row.CANTIDAD_REAL = Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1) * qty;
   }
 
   begin(row?: Ven229PedidoItem): void {
@@ -193,11 +218,17 @@ export class XteinVen229ItemsComponent implements OnChanges {
           }
     );
     this.pending.emit(true);
+    if (row) {
+      this.updatePresentationList((row.PRESENTACION as Ven229PresentacionItem[]) ?? []);
+      if (!row.PRESENTACION?.length || !row.IVAS?.length) {
+        void this.loadExistingOptions(row);
+      }
+    } else {
+      this.presentationList = [];
+      this.selectedUnitIndex = 0;
+    }
     if (!this.products.length && !this.productsLoading) {
       this.refreshProducts.emit();
-    }
-    if (row && !row.PRESENTACION?.length) {
-      void this.loadExistingOptions(row);
     }
     this.cdr.markForCheck();
   }
@@ -211,6 +242,8 @@ export class XteinVen229ItemsComponent implements OnChanges {
   cancel(): void {
     if (this.working()) return;
     this.draft.set(null);
+    this.presentationList = [];
+    this.selectedUnitIndex = 0;
     this.pending.emit(false);
   }
 
@@ -242,14 +275,17 @@ export class XteinVen229ItemsComponent implements OnChanges {
       const p = rows[0];
       if (!p) throw new Error('No se encontraron existencias del producto.');
 
+      const presentations = (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [];
+      const ivas = (p.IVAS as unknown as Ven229IvaItem[]) ?? [];
+
       Object.assign(draft, {
         PRODUCTO: code,
         NOMBRE_PRODUCTO: p.NOMBRE,
         REFERENCIA: p.REFERENCIA,
         VALOR_UNITARIO: Number(p.PRECIO ?? 0),
         VALOR_BASE: Number(p.VALOR_BASE ?? 0),
-        PRESENTACION: (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [],
-        IVAS: (p.IVAS as unknown as Ven229IvaItem[]) ?? [],
+        PRESENTACION: presentations,
+        IVAS: ivas,
         GRAV_ORG: undefined,
         GRAVAMENES: undefined,
         PORC_IVA: 0,
@@ -261,17 +297,16 @@ export class XteinVen229ItemsComponent implements OnChanges {
         CANTIDAD_EQUIV: 0
       });
 
-      const unit = p.PRESENTACION?.[0];
+      const unit = presentations[0];
       if (unit) {
-        draft.UDM_VENTA = String(unit.UDM_VENTA || '');
+        draft.UDM_VENTA = String(unit.UDM_VENTA || unit.UDM_COMPRA || '');
         draft.UDM_EQUIV = String(unit.UDM_EQUIV || '');
-        draft.CANTIDAD_PRES = Number(unit.CANTIDAD_PRES || 0);
-        draft.CANTIDAD_EQUIV = Number(unit.CANTIDAD_EQUIV || 0);
+        draft.CANTIDAD_PRES = Number(unit.CANTIDAD_PRES ?? 1);
+        draft.CANTIDAD_EQUIV = Number(unit.CANTIDAD_EQUIV ?? 1);
         draft.VALOR_UNITARIO = Number(unit.PRECIO ?? draft.VALOR_UNITARIO);
       }
 
-      const ivas = (p.IVAS as unknown as Ven229IvaItem[]) ?? [];
-      draft.IVAS = ivas;
+      this.updatePresentationList(presentations);
 
       if (ivas.length > 1) {
         this.taxList.set(ivas);
@@ -302,27 +337,26 @@ export class XteinVen229ItemsComponent implements OnChanges {
     }
   }
 
-  presentationItems(): (Ven229PresentacionItem & { INDEX: number })[] {
-    const draft = this.draft();
-    return ((draft?.PRESENTACION as Ven229PresentacionItem[]) ?? []).map((p, idx) => ({
+  private updatePresentationList(presentations: Ven229PresentacionItem[]): void {
+    this.presentationList = (presentations || []).map((p, idx) => ({
       ...p,
       INDEX: idx
     }));
-  }
-
-  selectedPresentationIndex(): number {
     const draft = this.draft();
-    if (!draft) return 0;
-    const list = (draft.PRESENTACION as Ven229PresentacionItem[]) ?? [];
-    const idx = list.findIndex(p =>
+    if (!draft || !this.presentationList.length) {
+      this.selectedUnitIndex = 0;
+      return;
+    }
+    const idx = this.presentationList.findIndex(p =>
       (p.UDM_VENTA === draft.UDM_VENTA || p.UDM_COMPRA === draft.UDM_VENTA) &&
       (Number(p.PRECIO) === Number(draft.VALOR_UNITARIO))
     );
-    return idx >= 0 ? idx : 0;
+    this.selectedUnitIndex = idx >= 0 ? idx : 0;
   }
 
-  onUnitSelectionChanged(event: { selectedItem?: unknown }): void {
-    const selected = event.selectedItem as (Ven229PresentacionItem & { INDEX: number }) | undefined;
+  onUnitValueChanged(event: { value?: number }): void {
+    const idx = Number(event.value ?? 0);
+    const selected = this.presentationList[idx];
     if (!selected) return;
     const draft = this.draft();
     if (!draft) return;
@@ -337,6 +371,22 @@ export class XteinVen229ItemsComponent implements OnChanges {
     this.onDraftQtyChange();
     this.draft.set({ ...draft });
     this.cdr.markForCheck();
+  }
+
+  onEnterKey(): void {
+    if (this.productDropdownOpened || this.umDropdownOpened || this.taxModalVisible() || this.working() || this.busy) {
+      return;
+    }
+    void this.commit();
+  }
+
+  onRowEnter(event: Event): void {
+    if (this.productDropdownOpened || this.umDropdownOpened || this.taxModalVisible() || this.working() || this.busy) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    void this.commit();
   }
 
   openTaxModal(): void {
@@ -355,8 +405,12 @@ export class XteinVen229ItemsComponent implements OnChanges {
   }
 
   isSelectedTax(item: Ven229IvaItem): boolean {
-    const cur = this.draft()?.GRAV_ORG as Ven229IvaItem | undefined;
-    return cur?.ID_TASA === item.ID_TASA;
+    const row = this.draft();
+    if (!row) return false;
+    const cur = row.GRAV_ORG as Ven229IvaItem | undefined;
+    if (cur?.ID_TASA === item.ID_TASA) return true;
+    const rowPct = Number(row.POR_IVA != null ? row.POR_IVA : (Number(row.PORC_IVA ?? 0) * 100));
+    return rowPct === Number(item.PORCENTAJE);
   }
 
   tax(value: unknown): void {
@@ -368,9 +422,15 @@ export class XteinVen229ItemsComponent implements OnChanges {
         : row.IVAS?.find(t => t.ID_TASA === value);
     if (taxItem) {
       const porc = Number(taxItem.PORCENTAJE ?? 0);
+      const cleanTax: Ven229IvaItem = {
+        ID_TASA: String(taxItem.ID_TASA || (porc === 0 ? 'IV-000' : 'IV-GEN')),
+        DESCRIPCION: String(taxItem.DESCRIPCION || (porc === 0 ? 'Sin iva' : 'Tarifa general del IVA')),
+        PORCENTAJE: porc,
+        VALOR_BASE: Number(taxItem.VALOR_BASE ?? (porc === 0 ? 0 : 1))
+      };
       Object.assign(row, {
-        GRAVAMENES: taxItem,
-        GRAV_ORG: taxItem,
+        GRAVAMENES: cleanTax,
+        GRAV_ORG: cleanTax,
         PORC_IVA: porc / 100,
         POR_IVA: porc
       });
@@ -411,7 +471,8 @@ export class XteinVen229ItemsComponent implements OnChanges {
     const row = this.draft();
     if (!row || this.working() || this.busy) return;
 
-    if (!row.PRODUCTO || !(Number(row.CANTIDAD) > 0)) {
+    const qty = Number(row.CANTIDAD || 0);
+    if (!row.PRODUCTO || qty <= 0) {
       this.notification.warning('Complete producto y cantidad.');
       return;
     }
@@ -440,15 +501,48 @@ export class XteinVen229ItemsComponent implements OnChanges {
         ...this.business.identity
       });
 
-      row.SUB_TOTAL = Number(row.CANTIDAD) * Number(row.VALOR_UNITARIO);
-      row.CANTIDAD_REAL = Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1) * Number(row.CANTIDAD);
-      const rate = Number(row.PORC_IVA ?? (Number(row.POR_IVA || 0) / 100));
-      const effectiveRate = rate > 1 ? rate / 100 : rate;
-      row.VALOR_IVA = row.SUB_TOTAL * effectiveRate;
-      row.TOTAL = row.SUB_TOTAL + row.VALOR_IVA;
+      const qty = Number(row.CANTIDAD || 0);
+      const unitPrice = Number(row.VALOR_UNITARIO || 0);
+      row.SUB_TOTAL = qty * unitPrice;
+      row.CANTIDAD_REAL = Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1) * qty;
+      const discount = Number(row.VALOR_DESCUENTO || 0);
+      const base = row.SUB_TOTAL - discount;
+      let porIva = Number(row.POR_IVA != null ? row.POR_IVA : (Number(row.PORC_IVA || 0) * 100));
+      if (!Number.isFinite(porIva)) porIva = 0;
+      const effectiveRate = porIva / 100;
+      row.POR_IVA = porIva;
+      row.PORC_IVA = effectiveRate;
+      row.VALOR_IVA = base * effectiveRate;
+      row.TOTAL = base + row.VALOR_IVA;
+
+      // Ensure clean tax object
+      let taxObj: Ven229IvaItem | null = null;
+      if (row.GRAV_ORG && typeof row.GRAV_ORG === 'object' && !Array.isArray(row.GRAV_ORG) && 'ID_TASA' in row.GRAV_ORG) {
+        taxObj = row.GRAV_ORG as Ven229IvaItem;
+      } else if (row.GRAVAMENES && typeof row.GRAVAMENES === 'object' && !Array.isArray(row.GRAVAMENES) && 'ID_TASA' in row.GRAVAMENES) {
+        taxObj = row.GRAVAMENES as Ven229IvaItem;
+      }
+      if (!taxObj) {
+        taxObj = {
+          ID_TASA: porIva === 0 ? 'IV-000' : 'IV-GEN',
+          DESCRIPCION: porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA',
+          PORCENTAJE: porIva,
+          VALOR_BASE: porIva === 0 ? 0 : 1
+        };
+      }
+      const cleanTax: Ven229IvaItem = {
+        ID_TASA: String(taxObj.ID_TASA || (porIva === 0 ? 'IV-000' : 'IV-GEN')),
+        DESCRIPCION: String(taxObj.DESCRIPCION || (porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA')),
+        PORCENTAJE: porIva,
+        VALOR_BASE: Number(taxObj.VALOR_BASE ?? (porIva === 0 ? 0 : 1))
+      };
+      row.GRAVAMENES = cleanTax;
+      row.GRAV_ORG = cleanTax;
 
       if (await this.persist(structuredClone(row))) {
         this.draft.set(null);
+        this.presentationList = [];
+        this.selectedUnitIndex = 0;
         this.pending.emit(false);
       }
     } catch (error) {
@@ -474,15 +568,18 @@ export class XteinVen229ItemsComponent implements OnChanges {
       });
       const p = rows[0];
       if (p && this.draft()?.ITEM === row.ITEM) {
+        const presentations = (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [];
+        const ivas = (p.IVAS as unknown as Ven229IvaItem[]) ?? [];
         this.draft.update(current =>
           current
             ? {
                 ...current,
-                PRESENTACION: (p.PRESENTACION as unknown as Ven229PresentacionItem[]) ?? [],
-                IVAS: (p.IVAS as unknown as Ven229IvaItem[]) ?? []
+                PRESENTACION: presentations,
+                IVAS: ivas
               }
             : null
         );
+        this.updatePresentationList(presentations);
       }
     } catch (error) {
       this.notification.error(error instanceof Error ? error.message : 'Error cargando presentaciones.');

@@ -93,9 +93,9 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Fila editable en línea (cuando draft() está activo) -->
-      @if (draft(); as row) {
-        <tr class="row-editing">
+      <!-- Plantilla reutilizable de fila en edición -->
+      <ng-template #editRowTemplate let-row>
+        <tr class="row-editing" (keydown.enter)="onRowEnter($event)">
           <td class="col-select"></td>
           <td class="col-product">
             <div class="product-cell-box">
@@ -110,6 +110,7 @@
                   [acceptCustomValue]="true"
                   (onValueChanged)="onProductValueChanged($event)"
                   (onOpened)="onProductDropDownOpened()"
+                  (onEnterKey)="onEnterKey()"
                   [dropDownOptions]="productDropDownOptions"
                   [(opened)]="productDropdownOpened"
                   [disabled]="working() || busy"
@@ -163,26 +164,32 @@
           </td>
           <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
           <td class="col-qty">
-            <xtein-number
+            <dx-number-box
               class="cell-editor"
-              ariaLabel="Cantidad"
-              [(ngModel)]="row.CANTIDAD"
-              (ngModelChange)="onDraftQtyChange()"
+              [(value)]="row.CANTIDAD"
+              valueChangeEvent="keyup input change focusout"
+              (onValueChanged)="onDraftQtyChange()"
+              (onEnterKey)="onEnterKey()"
+              [min]="0"
+              [showSpinButtons]="false"
               [disabled]="working() || busy"
+              [inputAttr]="{ style: 'text-align: right;' }"
             />
           </td>
           <td class="col-um">
-            @if (row.PRESENTACION?.length) {
+            @if (presentationList.length) {
               <dx-select-box
                 class="cell-editor um-select-box"
-                [dataSource]="presentationItems()"
-                [value]="selectedPresentationIndex()"
+                [dataSource]="presentationList"
+                [(value)]="selectedUnitIndex"
                 valueExpr="INDEX"
                 displayExpr="UDM_VENTA"
                 [searchEnabled]="true"
                 searchMode="contains"
                 [dropDownOptions]="{ width: 550, minWidth: 420 }"
-                (onSelectionChanged)="onUnitSelectionChanged($event)"
+                [(opened)]="umDropdownOpened"
+                (onValueChanged)="onUnitValueChanged($event)"
+                (onEnterKey)="onEnterKey()"
                 [disabled]="working() || busy"
               >
                 <div *dxTemplate="let data of 'item'" class="um-dropdown-row">
@@ -198,12 +205,17 @@
             }
           </td>
           <td class="col-price">
-            <xtein-number
+            <dx-number-box
               class="cell-editor"
-              ariaLabel="Valor unitario"
-              [(ngModel)]="row.VALOR_UNITARIO"
-              (ngModelChange)="onDraftQtyChange()"
+              [(value)]="row.VALOR_UNITARIO"
+              [format]="moneyFormat"
+              valueChangeEvent="keyup input change focusout"
+              (onValueChanged)="onDraftQtyChange()"
+              (onEnterKey)="onEnterKey()"
+              [min]="0"
+              [showSpinButtons]="false"
               [disabled]="!editPrice || working() || busy"
+              [inputAttr]="{ style: 'text-align: right;' }"
             />
           </td>
           <td class="col-subtotal text-end">
@@ -241,36 +253,45 @@
             <span class="cell-badge">{{ row.ESTADO || 'REGISTRADO' }}</span>
           </td>
         </tr>
+      </ng-template>
+
+      <!-- Fila nueva (al hacer click en +) -->
+      @if (isNewDraft()) {
+        <ng-container *ngTemplateOutlet="editRowTemplate; context: { $implicit: draft() }"></ng-container>
       }
 
-      <!-- Filas de datos existentes -->
+      <!-- Filas de datos existentes (o en edición in-line si coincide el ITEM) -->
       @for (row of items; track row.ITEM) {
-        <tr
-          [class.row-selected]="selected().includes(row.ITEM)"
-          (dblclick)="!readOnly && !draft() && begin(row)"
-        >
-          <td class="col-select">
-            <xtein-checkbox
-              ariaLabel="Seleccionar producto"
-              [disabled]="readOnly || busy || !!draft()"
-              [checked]="selected().includes(row.ITEM)"
-              (checkedChange)="toggle(row.ITEM, $event)"
-            />
-          </td>
-          <td class="col-product">{{ row.PRODUCTO }}</td>
-          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
-          <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
-          <td class="col-um">{{ row.UDM_VENTA }}</td>
-          <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
-          <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
-          <td class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
-          <td class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
-          <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
-          <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
-          <td class="col-status">
-            <span class="cell-badge">{{ row.ESTADO }}</span>
-          </td>
-        </tr>
+        @if (draft()?.ITEM === row.ITEM) {
+          <ng-container *ngTemplateOutlet="editRowTemplate; context: { $implicit: draft() }"></ng-container>
+        } @else {
+          <tr
+            [class.row-selected]="selected().includes(row.ITEM)"
+            (dblclick)="!readOnly && !draft() && begin(row)"
+          >
+            <td class="col-select">
+              <xtein-checkbox
+                ariaLabel="Seleccionar producto"
+                [disabled]="readOnly || busy || !!draft()"
+                [checked]="selected().includes(row.ITEM)"
+                (checkedChange)="toggle(row.ITEM, $event)"
+              />
+            </td>
+            <td class="col-product">{{ row.PRODUCTO }}</td>
+            <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+            <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
+            <td class="col-um">{{ row.UDM_VENTA }}</td>
+            <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
+            <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
+            <td class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
+            <td class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
+            <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
+            <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
+            <td class="col-status">
+              <span class="cell-badge">{{ row.ESTADO }}</span>
+            </td>
+          </tr>
+        }
       } @empty {
         @if (!draft()) {
           <tr>
