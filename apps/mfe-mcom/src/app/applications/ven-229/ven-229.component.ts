@@ -181,6 +181,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   selectedSettingsKeys: unknown[] = [];
   previousCondition = '';
   previousWarehouse = '';
+  previousUnit = '';
   private productRequest = 0;
 
   spec(name: string): Ven229Lookup | undefined {
@@ -277,9 +278,13 @@ export class Ven229Component implements OnInit, OnDestroy {
   });
 
   readonly conditionType = computed(() => {
-    const condId = this.form.controls.ID_CONDICION.value;
-    const cond = this.conditions().find(c => c['CODIGO'] === condId || c['ID_CONDICION'] === condId);
-    return String(cond?.['TIPO'] || '');
+    const condId = String(this.form.controls.ID_CONDICION.value || '').trim();
+    if (!condId) return 'CONDICION';
+    const cond = this.conditions().find(c =>
+      String(c['CODIGO'] || c['ID_CONDICION'] || '').trim() === condId
+    );
+    const tipo = String(cond?.['TIPO'] || '').trim().toUpperCase();
+    return tipo === 'LISTA' ? 'LISTA' : 'CONDICION';
   });
 
   readonly persistItemBind = (row: Ven229PedidoItem): Promise<boolean> => this.persistItem(row);
@@ -438,7 +443,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.form.controls.ID_UN_ITEM.valueChanges.subscribe(unId => {
         if (!this.readOnly()) {
-          void this.onUnitChanged(unId || '');
+          void this.handleUnitChange(unId || '');
         }
       })
     );
@@ -647,6 +652,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
     this.previousCondition = '';
     this.previousWarehouse = '';
+    this.previousUnit = this.defaultUnit || '';
     this.items.set([]);
     this.taxes.set([]);
     this.taxItems.set([]);
@@ -655,6 +661,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.products.set([]);
     this.conditions.set([]);
     this.terms.set([]);
+    this.warehouses.set([]);
 
     // Query fresh document consecutive from backend on new record
     try {
@@ -888,6 +895,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
     this.previousCondition = record.ID_CONDICION ? String(record.ID_CONDICION).trim() : '';
     this.previousWarehouse = record.ID_UN_BODEGA ? String(record.ID_UN_BODEGA).trim() : '';
+    this.previousUnit = record.ID_UN_ITEM ? String(record.ID_UN_ITEM).trim() : '';
 
     if (record.ID_ADC) {
       void this.loadConditions().then(() => {
@@ -1037,75 +1045,88 @@ export class Ven229Component implements OnInit, OnDestroy {
   // ================= Catalog Handlers =================
 
   async onClientChanged(clienteId: string): Promise<void> {
-    if (!clienteId) {
+    if (!this.readOnly()) {
       this.addresses.set([]);
-      this.form.patchValue({ NOMBRE_CLIENTE: '', DIRECCION: '' }, { emitEvent: false });
+      this.form.patchValue({ NOMBRE_CLIENTE: '', DIRECCION: '' });
       this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    const cleanId = String(clienteId || '').trim();
+    if (!cleanId) {
       return;
     }
-    const cli = this.clients().find(c => c.ID_CLIENTE === clienteId);
+    const cli = this.clients().find(c => String(c.ID_CLIENTE || '').trim() === cleanId);
     if (cli) {
       this.form.patchValue({
         NOMBRE_CLIENTE: String(cli.NOMBRE_COMPLETO || cli.NOMBRE || '')
-      }, { emitEvent: false });
+      });
     }
 
     try {
-      const addresses = await this.business.catalog('addresses', { ID_CLIENTE: clienteId });
-      this.addresses.set(addresses || []);
-      if (addresses && addresses.length > 0) {
-        const preferred = addresses.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('despacho')) || addresses[0];
-        this.form.patchValue({ DIRECCION: String(preferred.DIRECCION || '') }, { emitEvent: false });
-      } else {
-        this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
-        if (!this.readOnly()) {
+      const addresses = await this.business.catalog('addresses', { ID_CLIENTE: cleanId }, true);
+      const formatted = (addresses || []).filter(a => a && (a.DIRECCION || a['ID_DIRECCION']));
+      this.addresses.set(formatted);
+      if (!this.readOnly()) {
+        if (formatted.length > 0) {
+          const preferred = formatted.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('despacho')) || formatted[0];
+          this.form.patchValue({ DIRECCION: String(preferred.DIRECCION || preferred['ID_DIRECCION'] || '') });
+        } else {
+          this.form.patchValue({ DIRECCION: '' });
           this.notification.warning('No se encontró una dirección del Tipo: Despacho');
         }
       }
     } catch {
       this.addresses.set([]);
-      this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
+      this.form.patchValue({ DIRECCION: '' });
       if (!this.readOnly()) {
         this.notification.warning('No se encontró una dirección del Tipo: Despacho');
       }
     } finally {
       this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     }
   }
 
   async onUnitChanged(unitId: string): Promise<void> {
-    if (!unitId) {
+    if (!this.readOnly()) {
       this.warehouses.set([]);
       this.form.patchValue({ ID_UN_BODEGA: '' });
+      this.products.set([]);
       this.formVersion.update(v => v + 1);
       this.cdr.markForCheck();
+    }
+    const cleanId = String(unitId || '').trim();
+    if (!cleanId) {
       return;
     }
     try {
       const warehouses = await this.business.catalog('warehouses', {
         ESTADO: 'ACTIVO',
         MOVIMIENTO: 'PEDIDO',
-        ID_UN_ITEM: unitId,
+        ID_UN_ITEM: cleanId,
         USUARIO: this.business.identity.USUARIO
       }, true);
       const formatted = warehouses.map(r => ({
         ...r,
-        ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? ''),
-        DESCRIPCION: String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),
-        NOMBRE_UN: String(r['NOMBRE_UN'] ?? ''),
-        BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))
-      }));
+        ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? '').trim(),
+        DESCRIPCION: String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? '').trim(),
+        NOMBRE_UN: String(r['NOMBRE_UN'] ?? '').trim(),
+        BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? '')).trim()
+      })).filter(r => r.ID_UN_BODEGA);
       this.warehouses.set(formatted);
-      const currentBodega = this.form.controls.ID_UN_BODEGA.value;
-      const exists = formatted.some(w => w.ID_UN_BODEGA === currentBodega);
-      if (!exists) {
+      if (!this.readOnly()) {
         const nextBodega = formatted.length > 0 ? formatted[0].ID_UN_BODEGA : '';
         this.form.patchValue({ ID_UN_BODEGA: nextBodega });
       }
+    } catch {
+      this.warehouses.set([]);
+      this.form.patchValue({ ID_UN_BODEGA: '' });
+    } finally {
       this.formVersion.update(v => v + 1);
       this.cdr.markForCheck();
-    } catch {
-      // Non-critical
+      if (!this.readOnly() && this.form.controls.ID_CONDICION.value) {
+        void this.loadProducts();
+      }
     }
   }
 
@@ -1176,14 +1197,47 @@ export class Ven229Component implements OnInit, OnDestroy {
     }
   }
 
+  async handleUnitChange(newUnit: string): Promise<void> {
+    if (this.previousUnit && this.previousUnit !== newUnit && this.items().length > 0) {
+      const result = await Swal.fire({
+        text: `Está cambiando la Unidad de Negocio ${this.previousUnit} por ${newUnit}, esto borrará los Productos asociados, ¿Desea Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DF3E3E',
+        cancelButtonColor: '#0F4C81',
+        confirmButtonText: 'Sí, Borrar',
+        cancelButtonText: 'No'
+      });
+
+      if (result.isConfirmed) {
+        this.items.set([]);
+        this.taxes.set([]);
+        this.taxItems.set([]);
+        this.recalculate();
+        this.previousUnit = newUnit;
+        await this.onUnitChanged(newUnit);
+      } else {
+        this.form.controls.ID_UN_ITEM.setValue(this.previousUnit, { emitEvent: false });
+        return;
+      }
+    } else {
+      this.previousUnit = newUnit;
+      await this.onUnitChanged(newUnit);
+    }
+  }
+
   async loadConditions(): Promise<void> {
     const adc = this.form.controls.ID_ADC.value;
     const tipo = this.form.controls.TIPO_VENTA.value || 'CONTADO';
-    if (!adc || !tipo) {
+    if (!this.readOnly()) {
       this.conditions.set([]);
       this.terms.set([]);
-      this.form.patchValue({ ID_CONDICION: '' }, { emitEvent: false });
+      this.products.set([]);
+      this.form.patchValue({ ID_CONDICION: '', PLAZO: 0 });
       this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    if (!adc || !tipo) {
       return;
     }
     try {
@@ -1193,39 +1247,59 @@ export class Ven229Component implements OnInit, OnDestroy {
         ESTADO: 'ACTIVO'
       }, true);
       const rows = raw.map(r => {
-        const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '');
+        const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '').trim();
         return {
           ...r,
           CODIGO: code,
           ID_CONDICION: code,
-          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code)
+          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code).trim(),
+          TIPO: String(r['TIPO'] ?? 'CONDICION').trim()
         };
       }).filter(r => r.CODIGO && r.CODIGO !== 'null');
 
       this.conditions.set(rows);
 
-      if (raw.length > 0 && raw[0]['CODIGO'] === null) {
-        this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
-      }
-
-      const current = this.form.controls.ID_CONDICION.value;
-      if (rows.length === 1 && (!current || !rows.some(r => r.CODIGO === current))) {
-        this.form.patchValue({ ID_CONDICION: rows[0].CODIGO });
-      } else if (current && !rows.some(r => r.CODIGO === current)) {
-        this.form.patchValue({ ID_CONDICION: '' });
-        this.terms.set([]);
+      if (rows.length === 0) {
+        if (!this.readOnly()) {
+          this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
+        }
+      } else if (!this.readOnly()) {
+        const defaultCond = rows[0].CODIGO;
+        this.form.patchValue({ ID_CONDICION: defaultCond });
+        await this.onConditionChanged(defaultCond);
       }
     } catch {
       this.conditions.set([]);
       this.terms.set([]);
-      this.form.patchValue({ ID_CONDICION: '' });
+      this.products.set([]);
+      this.form.patchValue({ ID_CONDICION: '', PLAZO: 0 });
+      if (!this.readOnly()) {
+        this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
+      }
     } finally {
       this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     }
   }
 
   async onConditionChanged(condId: string): Promise<void> {
-    const cond = this.conditions().find(c => c['CODIGO'] === condId || c['ID_CONDICION'] === condId);
+    if (!this.readOnly()) {
+      this.terms.set([]);
+      this.products.set([]);
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    const cleanId = String(condId || '').trim();
+    if (!cleanId) {
+      this.form.patchValue({ PLAZO: 0 });
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const cond = this.conditions().find(c =>
+      String(c['CODIGO'] || c['ID_CONDICION'] || '').trim() === cleanId
+    );
     if (cond) {
       const plazosRaw = cond['PLAZOS'];
       let plazoList: { PLAZO: number }[] = [];
@@ -1251,7 +1325,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         this.form.patchValue({
           PLAZO: 0,
           FECHA_PRIMER_VENC: this.form.controls.FECHA.value
-        }, { emitEvent: false });
+        });
       } else {
         if (cond['DIAS_VENC']) {
           const fechaBase = this.form.controls.FECHA.value ? new Date(this.form.controls.FECHA.value + 'T00:00:00') : new Date();
@@ -1261,36 +1335,47 @@ export class Ven229Component implements OnInit, OnDestroy {
             String(fechaBase.getMonth() + 1).padStart(2, '0'),
             String(fechaBase.getDate()).padStart(2, '0')
           ].join('-');
-          this.form.patchValue({ FECHA_PRIMER_VENC: vencStr }, { emitEvent: false });
+          this.form.patchValue({ FECHA_PRIMER_VENC: vencStr });
         }
-        if (plazoList.length === 1) {
-          this.form.patchValue({ PLAZO: plazoList[0].PLAZO }, { emitEvent: false });
+        if (!this.readOnly()) {
+          const defaultPlazo = plazoList.length > 0 ? plazoList[0].PLAZO : 0;
+          this.form.patchValue({ PLAZO: defaultPlazo });
         }
       }
+    } else {
+      this.form.patchValue({ PLAZO: 0 });
     }
+    this.formVersion.update(v => v + 1);
+    this.cdr.markForCheck();
     await this.loadProducts();
   }
 
   async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
     this.onlyStock.set(stockOnly);
     const req = ++this.productRequest;
-    const h = this.header();
-    if (!h.ID_CONDICION) {
+    const condId = String(this.form.controls.ID_CONDICION.value || '').trim();
+    if (!condId) {
       this.products.set([]);
       this.productsLoading.set(false);
+      this.cdr.markForCheck();
       return;
     }
     this.productsLoading.set(true);
+    this.cdr.markForCheck();
     try {
+      const tipo = this.conditionType();
+      const plazoVal = this.form.controls.PLAZO.value ?? 0;
+      const bodegaVal = String(this.form.controls.ID_UN_BODEGA.value || '').trim();
+
       const items = await this.business.catalog('products', {
-        ID_LISTA: h.ID_CONDICION,
-        TIPO: this.conditionType(),
-        PLAZO: h.PLAZO,
+        ID_LISTA: condId,
+        TIPO: tipo || 'CONDICION',
+        PLAZO: Number(plazoVal) || 0,
         CON_EXIS: stockOnly ? 'SI' : undefined,
-        ID_UN_BODEGA: h.ID_UN_BODEGA
+        ID_UN_BODEGA: bodegaVal || undefined
       }, true);
       if (req === this.productRequest) {
-        this.products.set(items);
+        this.products.set(items || []);
       }
     } catch {
       if (req === this.productRequest) {
@@ -1299,6 +1384,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     } finally {
       if (req === this.productRequest) {
         this.productsLoading.set(false);
+        this.cdr.markForCheck();
       }
     }
   }
@@ -1492,7 +1578,13 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.taxes.set([]);
     this.payments.set([]);
+    this.addresses.set([]);
+    this.products.set([]);
+    this.conditions.set([]);
+    this.terms.set([]);
+    this.warehouses.set([]);
     this.formVersion.update(v => v + 1);
+    this.cdr.markForCheck();
   }
 
   private showError(err: unknown): void {

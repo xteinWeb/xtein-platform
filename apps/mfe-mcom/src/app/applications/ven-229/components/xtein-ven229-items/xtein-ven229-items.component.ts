@@ -190,8 +190,18 @@ export class XteinVen229ItemsComponent implements OnChanges {
           }
     );
     this.pending.emit(true);
+    if (!this.products.length && !this.productsLoading) {
+      this.refreshProducts.emit();
+    }
     if (row && !row.PRESENTACION?.length) {
       void this.loadExistingOptions(row);
+    }
+    this.cdr.markForCheck();
+  }
+
+  onProductDropDownOpened(): void {
+    if (!this.products.length && !this.productsLoading) {
+      this.refreshProducts.emit();
     }
   }
 

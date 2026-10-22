@@ -109,6 +109,7 @@
                   [showClearButton]="true"
                   [acceptCustomValue]="true"
                   (onValueChanged)="onProductValueChanged($event)"
+                  (onOpened)="onProductDropDownOpened()"
                   [dropDownOptions]="productDropDownOptions"
                   [(opened)]="productDropdownOpened"
                   [disabled]="working() || busy"
