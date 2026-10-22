@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Input,
   OnChanges,
@@ -96,6 +97,7 @@ export class XteinVen229ItemsComponent implements OnChanges {
 
   private readonly business = inject(Ven229BusinessService);
   private readonly notification = inject(XteinNotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   get minimumDeliveryDate(): string {
     const now = new Date();
@@ -111,6 +113,7 @@ export class XteinVen229ItemsComponent implements OnChanges {
       const keys = new Set(this.items.map(item => item.ITEM));
       this.selected.update(selected => selected.filter(key => keys.has(key)));
     }
+    this.cdr.markForCheck();
   }
 
   money(value: number | string | null | undefined): string {

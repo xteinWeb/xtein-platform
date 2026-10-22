@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   OnDestroy,
@@ -245,16 +246,25 @@ export class Ven229Component implements OnInit, OnDestroy {
   readonly itemsReady = computed(() => {
     this.formVersion();
     const h = this.header();
-    const plazoValid = h.TIPO_VENTA === 'CONTADO' ? true : (h.PLAZO !== null && h.PLAZO !== undefined && String(h.PLAZO).trim() !== '');
+    const tipoVenta = String(h.TIPO_VENTA || 'CONTADO').trim().toUpperCase();
+    const plazoValid = tipoVenta === 'CONTADO'
+      ? true
+      : (h.PLAZO !== null && h.PLAZO !== undefined && String(h.PLAZO).trim() !== '');
+
+    const docValid = Boolean(h.DOCUMENTO && String(h.DOCUMENTO).trim() !== '');
+    const clientValid = Boolean(h.ID_CLIENTE && String(h.ID_CLIENTE).trim() !== '');
+    const fechaValid = Boolean(h.FECHA && String(h.FECHA).trim() !== '');
+    const unValid = Boolean(h.ID_UN_ITEM && String(h.ID_UN_ITEM).trim() !== '');
+    const adcValid = Boolean(h.ID_ADC && String(h.ID_ADC).trim() !== '');
+    const condValid = Boolean(h.ID_CONDICION && String(h.ID_CONDICION).trim() !== '');
+
     return Boolean(
-      h.DOCUMENTO &&
-      h.ID_CLIENTE &&
-      h.FECHA &&
-      h.ID_UN_ITEM &&
-      h.ID_UN_BODEGA &&
-      h.ID_ADC &&
-      h.ID_CONDICION &&
-      h.ID_MONEDA &&
+      docValid &&
+      clientValid &&
+      fechaValid &&
+      unValid &&
+      adcValid &&
+      condValid &&
       plazoValid
     );
   });
@@ -347,12 +357,22 @@ export class Ven229Component implements OnInit, OnDestroy {
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
-    private readonly elementRef: ElementRef
+    private readonly elementRef: ElementRef,
+    private readonly cdr: ChangeDetectorRef
   ) {
 
     // Toolbar state synchronization
     effect(() => {
       this.publishToolbarState();
+    });
+
+    // Ensure OnPush ChangeDetection triggers when formVersion, itemsReady, mode or readOnly updates
+    effect(() => {
+      this.formVersion();
+      this.itemsReady();
+      this.mode();
+      this.readOnly();
+      this.cdr.markForCheck();
     });
 
     // Close overlays on tab focus change
@@ -401,6 +421,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         this.formVersion.update(v => v + 1);
+        this.cdr.markForCheck();
       })
     );
 
@@ -1055,8 +1076,9 @@ export class Ven229Component implements OnInit, OnDestroy {
   async onUnitChanged(unitId: string): Promise<void> {
     if (!unitId) {
       this.warehouses.set([]);
-      this.form.patchValue({ ID_UN_BODEGA: '' }, { emitEvent: false });
+      this.form.patchValue({ ID_UN_BODEGA: '' });
       this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
       return;
     }
     try {
@@ -1065,7 +1087,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         MOVIMIENTO: 'PEDIDO',
         ID_UN_ITEM: unitId,
         USUARIO: this.business.identity.USUARIO
-      });
+      }, true);
       const formatted = warehouses.map(r => ({
         ...r,
         ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? ''),
@@ -1078,9 +1100,10 @@ export class Ven229Component implements OnInit, OnDestroy {
       const exists = formatted.some(w => w.ID_UN_BODEGA === currentBodega);
       if (!exists) {
         const nextBodega = formatted.length > 0 ? formatted[0].ID_UN_BODEGA : '';
-        this.form.patchValue({ ID_UN_BODEGA: nextBodega }, { emitEvent: false });
+        this.form.patchValue({ ID_UN_BODEGA: nextBodega });
       }
       this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     } catch {
       // Non-critical
     }
