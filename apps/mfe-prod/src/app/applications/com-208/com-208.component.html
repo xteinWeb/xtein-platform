@@ -1,0 +1,272 @@
+<section class="com-208">
+  <div class="com-208__form" [formGroup]="form">
+    <!-- ===== FILA SUPERIOR: Tarjeta Principal + Tarjeta Resumen ===== -->
+    <div class="com-208__top-row">
+      <div class="com-208__card-main">
+        <!-- Cabecera del consumo -->
+        <div class="com-208__header-grid">
+          <div class="com-208__header-col">
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-documento">Consumo Número</xtein-label>
+              <div class="com-208__control-inline">
+                <xtein-lookup
+                  id="com-208-documento"
+                  ariaLabel="Documento"
+                  placeholder="Documento"
+                  [items]="documents()"
+                  valueExpr="DOCUMENTO"
+                  displayExpr="DOCUMENTO"
+                  formControlName="DOCUMENTO"
+                  [required]="true"
+                  [readOnly]="readOnly() || !isNew()"
+                />
+              </div>
+            </div>
+
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-fecha">Fecha</xtein-label>
+              <div class="com-208__control-inline">
+                <xtein-date
+                  id="com-208-fecha"
+                  name="FECHA"
+                  placeholder="YYYY-MM-DD"
+                  formControlName="FECHA"
+                  [required]="true"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
+
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-fecha-registro">Fecha de Registro</xtein-label>
+              <div class="com-208__control-inline com-208__control-inline--shaded">
+                <xtein-date id="com-208-fecha-registro" name="FECHA_REGISTRO" formControlName="FECHA_REGISTRO" [readOnly]="true" />
+              </div>
+            </div>
+          </div>
+
+          <div class="com-208__header-col">
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline">Estado</xtein-label>
+              <div class="com-208__control-inline">
+                <span class="com-208__badge-status" [attr.data-estado]="form.controls.ESTADO.value">{{ form.controls.ESTADO.value }}</span>
+              </div>
+            </div>
+
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-movimiento">Movimiento</xtein-label>
+              <div class="com-208__control-inline com-208__control-inline--shaded">
+                <xtein-input id="com-208-movimiento" name="MOVIMIENTO" formControlName="MOVIMIENTO" [readOnly]="true" />
+              </div>
+            </div>
+
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-usuario">Usuario</xtein-label>
+              <div class="com-208__control-inline com-208__control-inline--shaded">
+                <xtein-input id="com-208-usuario" name="USUARIO" placeholder="Usuario" formControlName="USUARIO" [readOnly]="true" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Consumo de producción -->
+        <div class="com-208__section-divider">
+          <xtein-group-label class="com-208__section-title" label="Consumo de producción"></xtein-group-label>
+        </div>
+
+        <div class="com-208__client-grid">
+          <div class="com-208__client-col">
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-producto">Producto</xtein-label>
+              <div class="com-208__control-inline">
+                <xtein-lookup
+                  id="com-208-producto"
+                  ariaLabel="Producto"
+                  placeholder="Producto"
+                  searchPlaceholder="Buscar…"
+                  [items]="products()"
+                  valueExpr="PRODUCTO"
+                  displayExpr="PRODUCTO"
+                  [columns]="productColumns"
+                  [required]="true"
+                  dropDownWidth="min(650px, 95vw)"
+                  formControlName="PRODUCTO"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="com-208__client-col">
+            <div class="com-208__field-inline">
+              <xtein-label class="com-208__label-inline" for="com-208-seccion">Sección</xtein-label>
+              <div class="com-208__control-inline">
+                <xtein-lookup
+                  id="com-208-seccion"
+                  ariaLabel="Sección"
+                  placeholder="Sección"
+                  searchPlaceholder="Buscar…"
+                  [items]="sections()"
+                  valueExpr="ID_SECCION"
+                  displayExpr="ID_SECCION"
+                  [columns]="sectionColumns"
+                  dropDownWidth="min(500px, 95vw)"
+                  formControlName="SECCION"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Resumen -->
+      <div class="com-208__card-totals">
+        <div class="com-208__totals-header">
+          <span class="com-208__totals-card-title">Resumen</span>
+        </div>
+
+        <div class="com-208__totals-body">
+          <div class="com-208__totals-row">
+            <span class="com-208__totals-label">Materiales</span>
+            <span class="com-208__totals-value">{{ items().length }}</span>
+          </div>
+
+          @for (row of totalRows(); track $index) {
+            <div class="com-208__totals-row">
+              <span class="com-208__totals-label">{{ row.DESCRIPCION || row.CONCEPTO }}</span>
+              <span class="com-208__totals-value">{{ money(row.VALOR) }}</span>
+            </div>
+          }
+
+          <div class="com-208__totals-divider"></div>
+
+          <div class="com-208__totals-row com-208__totals-row--grand">
+            <span class="com-208__totals-label">TOTAL</span>
+            <span class="com-208__totals-value">{{ money(totalValue()) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FILA INFERIOR: Origen / Destino + Materiales ===== -->
+    <div class="com-208__bottom-row">
+      <div class="com-208__card-bottom">
+        <div class="com-208__params-row">
+          <div class="com-208__params-section">
+            <div class="com-208__section-divider">
+              <xtein-group-label class="com-208__section-title" label="Origen / Destino"></xtein-group-label>
+            </div>
+            <div class="com-208__params-grid">
+              <div class="com-208__field-inline">
+                <xtein-label class="com-208__label-inline" for="com-208-origen">Bodega Origen</xtein-label>
+                <div class="com-208__control-inline">
+                  <xtein-lookup
+                    id="com-208-origen"
+                    ariaLabel="Bodega Origen"
+                    placeholder="Bodega"
+                    searchPlaceholder="Buscar…"
+                    [items]="origins()"
+                    valueExpr="ID_UN_ORIGEN"
+                    displayExpr="ORIGEN"
+                    [columns]="originColumns"
+                    [required]="true"
+                    dropDownWidth="min(650px, 95vw)"
+                    formControlName="ID_UN_ORIGEN"
+                    [readOnly]="readOnly()"
+                  />
+                </div>
+              </div>
+
+              <div class="com-208__field-inline">
+                <xtein-label class="com-208__label-inline" for="com-208-destino">Destino</xtein-label>
+                <div class="com-208__control-inline">
+                  <xtein-lookup
+                    id="com-208-destino"
+                    ariaLabel="Destino"
+                    placeholder="Unidad de negocio"
+                    searchPlaceholder="Buscar…"
+                    [items]="destinations()"
+                    valueExpr="ID_UN_DESTINO"
+                    displayExpr="DESTINO"
+                    [columns]="destinationColumns"
+                    [required]="true"
+                    dropDownWidth="min(550px, 95vw)"
+                    formControlName="ID_UN_DESTINO"
+                    [readOnly]="readOnly()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observación (ancho completo) -->
+        <div class="com-208__full-row">
+          <div class="com-208__field-inline com-208__field-inline--full">
+            <xtein-label class="com-208__label-inline" for="com-208-detalle">Observación</xtein-label>
+            <div class="com-208__control-inline">
+              <xtein-input id="com-208-detalle" name="DETALLE" placeholder="Descripción / observación del consumo..." formControlName="DETALLE" [readOnly]="readOnly()" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Materiales del consumo -->
+        <xtein-com208-items
+          [items]="items()"
+          [products]="itemProducts()"
+          [productsLoading]="itemProductsLoading()"
+          [recordKey]="itemRecordKey()"
+          [readOnly]="readOnly()"
+          [ready]="itemsReady()"
+          [busy]="busy()"
+          [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'"
+          [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
+          (quantityChanged)="onQuantityChanged($event)"
+          (productAdded)="addProduct($event)"
+          (removedMany)="removeItems($event)"
+          (refreshProducts)="loadItemProducts()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <xtein-loading
+    [visible]="busy()"
+    message="Procesando datos del consumo..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false"
+  />
+</section>
+
+<!-- Modales estándar de la plataforma -->
+<xtein-record-filter
+  [visible]="filterVisible()"
+  (visibleChange)="filterVisible.set($event)"
+  [tableBase]="tableBase"
+  (search)="searchRecords($event)"
+/>
+
+<xtein-record-view
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="DOCUMENTO"
+  (selected)="selectViewedRecord($event)"
+/>
+
+@if (reportsVisible()) {
+  <xtein-record-reports
+    [visible]="reportsVisible()"
+    (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId"
+    [table]="tableBase"
+    [currentFilter]="currentReportFilter()"
+    [allFilter]="queryFilter()"
+    [emailContext]="reportEmailContext()"
+  />
+}
