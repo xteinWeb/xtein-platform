@@ -119,7 +119,8 @@ export class XteinVen210BodegasComponent implements OnChanges {
     this.warehouses.set([]);
     try {
       const rows = await this.business.action<Ven210Lookup>('warehouseStock', { PRODUCTO: item.PRODUCTO,
-        ATRIBUTO: item.ATRIBUTO || 'SIN', ID_UN_ITEM: this.header.ID_UN_ITEM, ...(this.documentKeys ?? {}) });
+        ATRIBUTO: item.ATRIBUTO || 'SIN', ID_UN_ITEM: this.header.ID_UN_ITEM,
+        USUARIO: this.business.identity.USUARIO, ...(this.documentKeys ?? {}) });
       if (request !== this.request) return;
       const warehouses = rows.map(row => ({ ...row, ID_UN_BODEGA: String(row.ID_UN_BODEGA ?? ''),
         DESCRIPCION: String(row.DESCRIPCION ?? row.ID_UN_BODEGA ?? ''), EXISTENCIA: Number(row.EXISTENCIA ?? 0) }));
