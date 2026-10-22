@@ -167,17 +167,21 @@ export class Com208Component implements OnInit, OnDestroy {
     return idx >= 0 && idx < list.length ? list[idx] : null;
   });
 
-  readonly header = computed(() => this.form.getRawValue() as Com208Header);
+  // Métodos y no computed(): el formulario reactivo no es una señal, un computed() que solo lo lee
+  // se queda con el primer valor y nunca se recalcula.
+  header(): Com208Header {
+    return this.form.getRawValue() as Com208Header;
+  }
 
-  readonly itemsReady = computed(() => {
+  itemsReady(): boolean {
     const h = this.header();
     return !!(h.DOCUMENTO && h.ID_UN_ORIGEN && h.ID_UN_DESTINO);
-  });
+  }
 
-  readonly itemRecordKey = computed(() => {
+  itemRecordKey(): string {
     const h = this.header();
     return this.isNew() ? 'new' : `${h.ID_DOCUMENTO || ''}_${h.CONSECUTIVO || 0}`;
-  });
+  }
 
   readonly totalValue = computed(() => this.items().reduce((sum, item) => sum + Number(item.TOTAL || 0), 0));
 
