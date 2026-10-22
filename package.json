@@ -17,7 +17,6 @@
         "build:libs": "npx ng build sdk && npx ng build logging && npx ng build session && npx ng build api-client && npx ng build runtime && npx ng build dashboard-runtime && npx ng build ui && npx ng build auth",
         "build:apps": "npx ng build mfe-adm && npx ng build mfe-dashboard && npx ng build mfe-inv && npx ng build mfe-mad && npx ng build mfe-malm && npx ng build mfe-mcom && npx ng build mfe-mcpr && npx ng build mfe-men && npx ng build mfe-mfin && npx ng build mfe-mthu && npx ng build mfe-prod && npx ng build shell",
         "build:all": "npm run build:libs && npm run build:apps",
-        "build:deploy": "npm run build:libs && npx ng build mfe-adm && npx ng build mfe-dashboard && npx ng build mfe-mad && npx ng build mfe-mcom && npx ng build shell",
         "serve:shell": "npx ng serve shell",
         "serve:adm": "npx ng serve mfe-adm",
         "serve:dashboard": "npx ng serve mfe-dashboard",
