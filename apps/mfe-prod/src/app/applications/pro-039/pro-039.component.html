@@ -1,0 +1,292 @@
+<section class="pro-039">
+  <div class="pro-039__form" [formGroup]="form">
+    <!-- ===== FILA SUPERIOR: Tarjeta Principal + Tarjeta Resumen ===== -->
+    <div class="pro-039__top-row">
+      <div class="pro-039__card-main">
+        <!-- Cabecera del consumo -->
+        <div class="pro-039__header-grid">
+          <div class="pro-039__header-col">
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-documento">Consumo Número</xtein-label>
+              <div class="pro-039__control-inline">
+                <xtein-lookup
+                  id="pro-039-documento"
+                  ariaLabel="Documento"
+                  placeholder="Documento"
+                  [items]="documents()"
+                  valueExpr="DOCUMENTO"
+                  displayExpr="DOCUMENTO"
+                  formControlName="DOCUMENTO"
+                  [required]="true"
+                  [readOnly]="readOnly() || !isNew()"
+                />
+              </div>
+            </div>
+
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-fecha">Fecha</xtein-label>
+              <div class="pro-039__control-inline">
+                <xtein-date
+                  id="pro-039-fecha"
+                  name="FECHA"
+                  placeholder="YYYY-MM-DD"
+                  formControlName="FECHA"
+                  [required]="true"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
+
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-fecha-registro">Fecha de Registro</xtein-label>
+              <div class="pro-039__control-inline pro-039__control-inline--shaded">
+                <xtein-date id="pro-039-fecha-registro" name="FECHA_REGISTRO" formControlName="FECHA_REGISTRO" [readOnly]="true" />
+              </div>
+            </div>
+          </div>
+
+          <div class="pro-039__header-col">
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline">Estado</xtein-label>
+              <div class="pro-039__control-inline">
+                <span class="pro-039__badge-status" [attr.data-estado]="form.controls.ESTADO.value">{{ form.controls.ESTADO.value }}</span>
+              </div>
+            </div>
+
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-movimiento">Movimiento</xtein-label>
+              <div class="pro-039__control-inline pro-039__control-inline--shaded">
+                <xtein-input id="pro-039-movimiento" name="MOVIMIENTO" formControlName="MOVIMIENTO" [readOnly]="true" />
+              </div>
+            </div>
+
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-usuario">Usuario</xtein-label>
+              <div class="pro-039__control-inline pro-039__control-inline--shaded">
+                <xtein-input id="pro-039-usuario" name="USUARIO" placeholder="Usuario" formControlName="USUARIO" [readOnly]="true" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Consumo de producción -->
+        <div class="pro-039__section-divider">
+          <xtein-group-label class="pro-039__section-title" label="Consumo de producción"></xtein-group-label>
+        </div>
+
+        <div class="pro-039__client-grid">
+          <div class="pro-039__client-col">
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-producto">Producto</xtein-label>
+              <div class="pro-039__control-inline">
+                <xtein-lookup
+                  id="pro-039-producto"
+                  ariaLabel="Producto"
+                  placeholder="Producto"
+                  searchPlaceholder="Buscar…"
+                  [items]="products()"
+                  valueExpr="PRODUCTO"
+                  displayExpr="LABEL"
+                  [columns]="productColumns"
+                  [required]="true"
+                  dropDownWidth="min(760px, 95vw)"
+                  formControlName="PRODUCTO"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
+
+            @if (isJuego()) {
+              <div class="pro-039__field-inline">
+                <xtein-label class="pro-039__label-inline" for="pro-039-componente">Componente</xtein-label>
+                <div class="pro-039__control-inline">
+                  <xtein-lookup
+                    id="pro-039-componente"
+                    ariaLabel="Componente del juego"
+                    placeholder="Todo el juego"
+                    searchPlaceholder="Buscar…"
+                    [items]="components()"
+                    valueExpr="PRODUCTO"
+                    displayExpr="LABEL"
+                    [columns]="componentColumns"
+                    dropDownWidth="min(650px, 95vw)"
+                    formControlName="COMPONENTE"
+                    [readOnly]="readOnly()"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="pro-039__client-col">
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-seccion">Sección</xtein-label>
+              <div class="pro-039__control-inline">
+                <xtein-lookup
+                  id="pro-039-seccion"
+                  ariaLabel="Sección"
+                  placeholder="Sección"
+                  searchPlaceholder="Buscar…"
+                  [items]="sections()"
+                  valueExpr="ID_SECCION"
+                  displayExpr="LABEL"
+                  [columns]="sectionColumns"
+                  dropDownWidth="min(560px, 95vw)"
+                  formControlName="SECCION"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Resumen -->
+      <div class="pro-039__card-totals">
+        <div class="pro-039__totals-header">
+          <span class="pro-039__totals-card-title">Resumen</span>
+        </div>
+
+        <div class="pro-039__totals-body">
+          <div class="pro-039__totals-row">
+            <span class="pro-039__totals-label">Materiales</span>
+            <span class="pro-039__totals-value">{{ items().length }}</span>
+          </div>
+
+          @for (row of totalRows(); track $index) {
+            <div class="pro-039__totals-row">
+              <span class="pro-039__totals-label">{{ row.DESCRIPCION || row.CONCEPTO }}</span>
+              <span class="pro-039__totals-value">{{ money(row.VALOR) }}</span>
+            </div>
+          }
+
+          <div class="pro-039__totals-divider"></div>
+
+          <div class="pro-039__totals-row pro-039__totals-row--grand">
+            <span class="pro-039__totals-label">TOTAL</span>
+            <span class="pro-039__totals-value">{{ money(totalValue()) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FILA INFERIOR: Origen / Destino + Materiales ===== -->
+    <div class="pro-039__bottom-row">
+      <div class="pro-039__card-bottom">
+        <div class="pro-039__params-row">
+          <div class="pro-039__params-section">
+            <div class="pro-039__section-divider">
+              <xtein-group-label class="pro-039__section-title" label="Origen / Destino"></xtein-group-label>
+            </div>
+            <div class="pro-039__params-grid">
+              <div class="pro-039__field-inline">
+                <xtein-label class="pro-039__label-inline" for="pro-039-origen">Bodega Origen</xtein-label>
+                <div class="pro-039__control-inline">
+                  <xtein-lookup
+                    id="pro-039-origen"
+                    ariaLabel="Bodega Origen"
+                    placeholder="Bodega"
+                    searchPlaceholder="Buscar…"
+                    [items]="origins()"
+                    valueExpr="ID_UN_ORIGEN"
+                    displayExpr="ORIGEN"
+                    [columns]="originColumns"
+                    [required]="true"
+                    dropDownWidth="min(650px, 95vw)"
+                    formControlName="ID_UN_ORIGEN"
+                    [readOnly]="readOnly()"
+                  />
+                </div>
+              </div>
+
+              <div class="pro-039__field-inline">
+                <xtein-label class="pro-039__label-inline" for="pro-039-destino">Destino</xtein-label>
+                <div class="pro-039__control-inline">
+                  <xtein-lookup
+                    id="pro-039-destino"
+                    ariaLabel="Destino"
+                    placeholder="Unidad de negocio"
+                    searchPlaceholder="Buscar…"
+                    [items]="destinations()"
+                    valueExpr="ID_UN_DESTINO"
+                    displayExpr="DESTINO"
+                    [columns]="destinationColumns"
+                    [required]="true"
+                    dropDownWidth="min(550px, 95vw)"
+                    formControlName="ID_UN_DESTINO"
+                    [readOnly]="readOnly()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observación (ancho completo) -->
+        <div class="pro-039__full-row">
+          <div class="pro-039__field-inline pro-039__field-inline--full">
+            <xtein-label class="pro-039__label-inline" for="pro-039-detalle">Observación</xtein-label>
+            <div class="pro-039__control-inline">
+              <xtein-input id="pro-039-detalle" name="DETALLE" placeholder="Descripción / observación del consumo..." formControlName="DETALLE" [readOnly]="readOnly()" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Materiales del consumo -->
+        <xtein-pro039-items
+          [items]="items()"
+          [products]="itemProducts()"
+          [productsLoading]="itemProductsLoading()"
+          [recordKey]="itemRecordKey()"
+          [readOnly]="readOnly()"
+          [ready]="itemsReady()"
+          [busy]="busy()"
+          [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
+          (quantityChanged)="onQuantityChanged($event)"
+          (productAdded)="addProduct($event)"
+          (removedMany)="removeItems($event)"
+          (refreshProducts)="loadItemProducts()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <xtein-loading
+    [visible]="busy()"
+    message="Procesando datos del consumo..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false"
+  />
+</section>
+
+<!-- Modales estándar de la plataforma -->
+<xtein-record-filter
+  [visible]="filterVisible()"
+  (visibleChange)="filterVisible.set($event)"
+  [tableBase]="tableBase"
+  (search)="searchRecords($event)"
+/>
+
+<xtein-record-view
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="DOCUMENTO"
+  (selected)="selectViewedRecord($event)"
+/>
+
+@if (reportsVisible()) {
+  <xtein-record-reports
+    [visible]="reportsVisible()"
+    (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId"
+    [table]="tableBase"
+    [currentFilter]="currentReportFilter()"
+    [allFilter]="queryFilter()"
+    [emailContext]="reportEmailContext()"
+  />
+}

@@ -7,10 +7,10 @@
 }
 
 /*======================================================================
-= COM-208 PAGE
+= PRO-039 PAGE
 ======================================================================*/
 
-.com-208 {
+.pro-039 {
   width: 100%;
   min-width: 0;
   min-height: 100%;
@@ -23,7 +23,7 @@
 = FORM WRAPPER
 ======================================================================*/
 
-.com-208__form {
+.pro-039__form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -35,7 +35,7 @@
 = TOP ROW: Main Card + Totals Card
 ======================================================================*/
 
-.com-208__top-row {
+.pro-039__top-row {
   display: flex;
   gap: 20px;
   width: 100%;
@@ -43,7 +43,7 @@
   align-items: stretch;
 }
 
-.com-208__card-main {
+.pro-039__card-main {
   flex: 1 1 0;
   min-width: 0;
   padding: 20px 24px 24px;
@@ -53,7 +53,7 @@
   box-sizing: border-box;
 }
 
-.com-208__card-totals {
+.pro-039__card-totals {
   flex: 0 0 250px;
   align-self: stretch;
   display: flex;
@@ -71,7 +71,7 @@
 = HEADER GRID (Cabecera Consumo)
 ======================================================================*/
 
-.com-208__header-grid {
+.pro-039__header-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 28px;
@@ -79,7 +79,7 @@
   min-width: 0;
 }
 
-.com-208__header-col {
+.pro-039__header-col {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -89,14 +89,14 @@
 = SECTION DIVIDER
 ======================================================================*/
 
-.com-208__section-divider {
+.pro-039__section-divider {
   margin-top: 18px;
   margin-bottom: 12px;
   padding-bottom: 6px;
   border-bottom: 1px solid #e8eef5;
 }
 
-.com-208__section-title {
+.pro-039__section-title {
   margin: 0;
   padding: 0;
   color: rgba(10, 57, 96, 0.55);
@@ -111,14 +111,14 @@
 = INLINE FIELDS
 ======================================================================*/
 
-.com-208__field-inline {
+.pro-039__field-inline {
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 34px;
 }
 
-.com-208__label-inline {
+.pro-039__label-inline {
   flex: 0 0 140px;
   margin: 0;
   white-space: nowrap;
@@ -126,7 +126,7 @@
   text-overflow: ellipsis;
 }
 
-.com-208__control-inline {
+.pro-039__control-inline {
   flex: 1 1 0;
   min-width: 0;
 
@@ -135,25 +135,25 @@
   }
 }
 
-.com-208__full-row {
+.pro-039__full-row {
   width: 100%;
   margin-top: 10px;
   margin-bottom: 6px;
 }
 
-.com-208__field-inline--full {
+.pro-039__field-inline--full {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
 
-  .com-208__label-inline {
+  .pro-039__label-inline {
     flex: 0 0 140px;
     margin: 0;
     white-space: nowrap;
   }
 
-  .com-208__control-inline {
+  .pro-039__control-inline {
     flex: 1 1 0;
     min-width: 0;
     width: 100%;
@@ -169,7 +169,7 @@
 = CLIENT GRID
 ======================================================================*/
 
-.com-208__client-grid {
+.pro-039__client-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px 28px;
@@ -180,7 +180,7 @@
   box-sizing: border-box;
 }
 
-.com-208__client-col {
+.pro-039__client-col {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -190,7 +190,7 @@
 = TOTALS CARD
 ======================================================================*/
 
-.com-208__totals-header {
+.pro-039__totals-header {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -198,7 +198,7 @@
   border-bottom: 1px solid #d1e5ec;
 }
 
-.com-208__totals-card-title {
+.pro-039__totals-card-title {
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -206,7 +206,7 @@
   color: #1b506f;
 }
 
-.com-208__totals-body {
+.pro-039__totals-body {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -215,7 +215,7 @@
   justify-content: flex-start;
 }
 
-.com-208__totals-row {
+.pro-039__totals-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -223,33 +223,33 @@
   color: #2b4c63;
 }
 
-.com-208__totals-label {
+.pro-039__totals-label {
   font-weight: 500;
 }
 
-.com-208__totals-value {
+.pro-039__totals-value {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
-.com-208__totals-divider {
+.pro-039__totals-divider {
   height: 1px;
   margin: 6px 0;
   background: #cbe2ea;
 }
 
-.com-208__totals-row--grand {
+.pro-039__totals-row--grand {
   font-size: 17px;
   font-weight: 700;
   color: #1b506f;
   margin-top: 2px;
 
-  .com-208__totals-label {
+  .pro-039__totals-label {
     font-weight: 700;
   }
 
-  .com-208__totals-value {
+  .pro-039__totals-value {
     font-weight: 700;
     font-size: 18px;
   }
@@ -259,12 +259,12 @@
 = BOTTOM ROW
 ======================================================================*/
 
-.com-208__bottom-row {
+.pro-039__bottom-row {
   width: 100%;
   min-width: 0;
 }
 
-.com-208__card-bottom {
+.pro-039__card-bottom {
   width: 100%;
   min-width: 0;
   padding: 20px 24px 24px;
@@ -278,19 +278,19 @@
 = PARAMS ROW & SECTIONS
 ======================================================================*/
 
-.com-208__params-row {
+.pro-039__params-row {
   display: flex;
   gap: 32px;
   width: 100%;
   min-width: 0;
 }
 
-.com-208__params-section {
+.pro-039__params-section {
   flex: 1 1 0;
   min-width: 0;
 }
 
-.com-208__params-grid {
+.pro-039__params-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px 20px;
@@ -305,7 +305,7 @@
 = BADGES
 ======================================================================*/
 
-.com-208__badge-status {
+.pro-039__badge-status {
   display: inline-block;
   padding: 4px 14px;
   border-radius: 12px;
@@ -324,54 +324,54 @@
 ======================================================================*/
 
 @media (max-width: 1200px) {
-  .com-208__top-row {
+  .pro-039__top-row {
     flex-direction: column;
   }
 
-  .com-208__card-totals {
+  .pro-039__card-totals {
     flex: none;
     width: 100%;
   }
 
-  .com-208__params-row {
+  .pro-039__params-row {
     flex-direction: column;
     gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
-  .com-208 {
+  .pro-039 {
     padding: 12px;
   }
 
-  .com-208__header-grid,
-  .com-208__client-grid,
-  .com-208__params-grid {
+  .pro-039__header-grid,
+  .pro-039__client-grid,
+  .pro-039__params-grid {
     grid-template-columns: 1fr;
     gap: 10px;
   }
 
-  .com-208__card-main,
-  .com-208__card-bottom {
+  .pro-039__card-main,
+  .pro-039__card-bottom {
     padding: 16px;
   }
 
-  .com-208__field-inline {
+  .pro-039__field-inline {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .com-208__label-inline {
+  .pro-039__label-inline {
     flex: none;
   }
 }
 
-.com-208__badge-status[data-estado='ANULADO'] {
+.pro-039__badge-status[data-estado='ANULADO'] {
   background: #fdecea;
   color: #c62828;
 }
 
-.com-208__badge-status[data-estado='AUTORIZADO'] {
+.pro-039__badge-status[data-estado='AUTORIZADO'] {
   background: #e3f2fd;
   color: #1565c0;
 }

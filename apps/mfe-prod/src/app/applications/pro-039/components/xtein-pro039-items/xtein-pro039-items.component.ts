@@ -18,16 +18,16 @@ import {
   XteinGridToolbarAction,
   XteinNumberComponent
 } from '@xtein/ui';
-import { Com208ItemProductColumns } from '../../constants/com-208-ui.constants';
-import { Com208Lookup } from '../../models/com-208-business.model';
-import { Com208MovementItem } from '../../models/com-208.model';
+import { Pro039ItemProductColumns } from '../../constants/pro-039-ui.constants';
+import { Pro039Lookup } from '../../models/pro-039-business.model';
+import { Pro039MovementItem } from '../../models/pro-039.model';
 
 /**
- * Materiales del consumo: los de la matriz (no se eliminan; se dejan en 0 si no se usan)
+ * Materiales del consumo: los de la matriz
  * y los adicionales agregados desde la lista de productos de la bodega de origen.
  */
 @Component({
-  selector: 'xtein-com208-items',
+  selector: 'xtein-pro039-items',
   standalone: true,
   imports: [
     CommonModule,
@@ -38,20 +38,19 @@ import { Com208MovementItem } from '../../models/com-208.model';
     XteinCheckboxComponent,
     XteinNumberComponent
   ],
-  templateUrl: './xtein-com208-items.component.html',
-  styleUrl: './xtein-com208-items.component.scss',
+  templateUrl: './xtein-pro039-items.component.html',
+  styleUrl: './xtein-pro039-items.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class XteinCom208ItemsComponent implements OnChanges {
-  @Input() items: Com208MovementItem[] = [];
-  @Input() products: Com208Lookup[] = [];
+export class XteinPro039ItemsComponent implements OnChanges {
+  @Input() items: Pro039MovementItem[] = [];
+  @Input() products: Pro039Lookup[] = [];
   @Input() productsLoading = false;
   @Input() recordKey = '';
   @Input() readOnly = true;
   /** Hay bodega de origen y destino: se pueden agregar materiales. */
   @Input() ready = false;
   @Input() busy = false;
-  @Input() moneyFormat = '#,##0.00';
   @Input() quantityFormat = '#,##0.00';
 
   @Output() quantityChanged = new EventEmitter<{ item: number; quantity: number }>();
@@ -60,7 +59,9 @@ export class XteinCom208ItemsComponent implements OnChanges {
   @Output() refreshProducts = new EventEmitter<void>();
 
   readonly selected = signal<number[]>([]);
-  readonly productColumns = Com208ItemProductColumns;
+  /** Fila nueva abierta en la grilla para elegir el material. */
+  readonly adding = signal(false);
+  readonly productColumns = Pro039ItemProductColumns;
   productDropdownOpened = false;
 
   readonly productDropDownOptions = {
@@ -72,31 +73,27 @@ export class XteinCom208ItemsComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['recordKey'] || (changes['readOnly'] && this.readOnly)) {
       this.selected.set([]);
+      this.adding.set(false);
       this.productDropdownOpened = false;
     } else if (changes['items']) {
-      const keys = new Set(this.items.filter(item => !item.ES_MATRIZ).map(item => item.ITEM));
+      const keys = new Set(this.items.map(item => item.ITEM));
       this.selected.update(selected => selected.filter(key => keys.has(key)));
     }
-  }
-
-  money(value: number | string | null | undefined): string {
-    return formatNumber(Number(value || 0), this.moneyFormat);
   }
 
   quantity(value: number | string | null | undefined): string {
     return formatNumber(Number(value || 0), this.quantityFormat);
   }
 
-  onQuantity(row: Com208MovementItem, value: number | null): void {
+  onQuantity(row: Pro039MovementItem, value: number | null): void {
     const quantity = Number(value ?? 0);
     if (quantity < 0) return;
     if (quantity === Number(row.CANTIDAD)) return;
     this.quantityChanged.emit({ item: row.ITEM, quantity });
   }
 
-  /** Solo los adicionales se pueden seleccionar para eliminar. */
-  toggle(row: Com208MovementItem, checked: boolean): void {
-    if (row.ES_MATRIZ) return;
+  /** Se puede seleccionar cualquier material (de la matriz o adicional) para eliminarlo. */
+  toggle(row: Pro039MovementItem, checked: boolean): void {
     this.selected.update(list => checked ? [...new Set([...list, row.ITEM])] : list.filter(key => key !== row.ITEM));
   }
 
@@ -105,10 +102,23 @@ export class XteinCom208ItemsComponent implements OnChanges {
     this.removedMany.emit([...this.selected()]);
   }
 
-  selectProductFromDropdown(data: Com208Lookup): void {
+  beginAdd(): void {
+    if (!this.canAdd) return;
+    this.selected.set([]);
+    this.adding.set(true);
+    // La lista se abre sola al aparecer la fila nueva
+    setTimeout(() => this.productDropdownOpened = true);
+  }
+
+  cancelAdd(): void {
+    this.productDropdownOpened = false;
+    this.adding.set(false);
+  }
+
+  selectProductFromDropdown(data: Pro039Lookup): void {
     const product = String(data?.PRODUCTO ?? '');
     if (!product || this.busy) return;
-    this.productDropdownOpened = false;
+    this.cancelAdd();
     this.productAdded.emit(product);
   }
 

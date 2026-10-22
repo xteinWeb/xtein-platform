@@ -6,17 +6,17 @@ import {
   XteinDataApiResponse
 } from '@xtein/api-client';
 import {
-  Com208Action,
-  Com208Endpoint
-} from '../constants/com-208.constants';
-import { createCom208Log } from '../constants/com-208-logging.constants';
+  Pro039Action,
+  Pro039Endpoint
+} from '../constants/pro-039.constants';
+import { createPro039Log } from '../constants/pro-039-logging.constants';
 
 /**
- * Provides backend communication for COM-208 (Consumos).
+ * Provides backend communication for PRO-039 (Consumos).
  */
 @Injectable()
-export class Com208Service {
-  private readonly log = createCom208Log();
+export class Pro039Service {
+  private readonly log = createPro039Log();
 
   constructor(
     private readonly apiClient: XteinApiClientService
@@ -33,12 +33,12 @@ export class Com208Service {
   }
 
   query(action: string, data: unknown): Observable<XteinDataApiResponse<string>> {
-    return this.request(Com208Endpoint.Query, action, data);
+    return this.request(Pro039Endpoint.Query, action, data);
   }
 
-  save(action: typeof Com208Action.New | typeof Com208Action.Update, data: unknown): Observable<XteinDataApiResponse<string>> {
+  save(action: typeof Pro039Action.New | typeof Pro039Action.Update, data: unknown): Observable<XteinDataApiResponse<string>> {
     return this.apiClient.execute<XteinDataApiResponse<string>>({
-      endpoint: Com208Endpoint.Save,
+      endpoint: Pro039Endpoint.Save,
       action,
       data,
       logContext: this.log.Save,
@@ -48,8 +48,8 @@ export class Com208Service {
 
   delete(data: unknown): Observable<XteinDataApiResponse<string>> {
     return this.apiClient.execute<XteinDataApiResponse<string>>({
-      endpoint: Com208Endpoint.Delete,
-      action: Com208Action.Delete,
+      endpoint: Pro039Endpoint.Delete,
+      action: Pro039Action.Delete,
       data,
       logContext: this.log.Delete,
       accessMode: XteinApiAccessMode.Authenticated

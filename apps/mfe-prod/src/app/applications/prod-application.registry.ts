@@ -1,11 +1,11 @@
 import type { ProdApplicationRegistration } from '../models/prod-application-registration.model';
-import { Com208Application } from './com-208/constants/com-208.constants';
+import { Pro039Application } from './pro-039/constants/pro-039.constants';
 
 /** Add only implemented applications, using the same lazy-loading contract as MAD. */
 export const ProdApplicationRegistry: readonly ProdApplicationRegistration[] = [
   {
-    applicationId: Com208Application.Id,
-    load: async () => (await import('./com-208/com-208.component')).Com208Component
+    applicationId: Pro039Application.Id,
+    load: async () => (await import('./pro-039/pro-039.component')).Pro039Component
   }
 ];
 

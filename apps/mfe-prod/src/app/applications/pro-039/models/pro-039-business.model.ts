@@ -1,6 +1,6 @@
-import type { Com208MovementGrav, Com208MovementItem, Com208MovementRecord, Com208Total } from './com-208.model';
+import type { Pro039MovementGrav, Pro039MovementItem, Pro039MovementRecord, Pro039Total } from './pro-039.model';
 
-export interface Com208Lookup {
+export interface Pro039Lookup {
   [key: string]: unknown;
   ID_DOCUMENTO?: string;
   CONSECUTIVO?: number;
@@ -9,6 +9,15 @@ export interface Com208Lookup {
   NOMBRE?: string;
   ID_SECCION?: string;
   NOMBRE_SECCION?: string;
+  /** Código y nombre, para mostrar en los selectores. */
+  LABEL?: string;
+  GRUPO?: string;
+  /** Producto JU: se elige el componente. */
+  ES_JUEGO?: boolean;
+  /** La sección tiene materiales en la matriz del producto. */
+  TIENE_MATRIZ?: boolean;
+  MATRIZ?: string;
+  CANTIDAD?: number;
   NOMBRE_OBJETO?: string;
   VALOR_DEFECTO?: string;
   FORMATO?: string;
@@ -17,7 +26,7 @@ export interface Com208Lookup {
 }
 
 /** Bodega/UN que devuelve 'UN MOVIMIENTOS' dentro de ORIGEN o DESTINO. */
-export interface Com208Warehouse {
+export interface Pro039Warehouse {
   ID_UN_ORIGEN?: string;
   ID_UN_DESTINO?: string;
   DESCRIPCION?: string;
@@ -27,7 +36,7 @@ export interface Com208Warehouse {
 }
 
 /** Material de la matriz ('MATERIALES PRODUCTO'). */
-export interface Com208Material {
+export interface Pro039Material {
   PRODUCTO: string;
   NOMBRE?: string;
   UDM?: string;
@@ -37,7 +46,7 @@ export interface Com208Material {
 }
 
 /** Datos del producto que devuelve 'EXISTENCIAS PRODUCTO' al agregarlo manualmente. */
-export interface Com208ProductStock {
+export interface Pro039ProductStock {
   PRODUCTO?: string;
   NOMBRE?: string;
   REFERENCIA?: string;
@@ -50,17 +59,17 @@ export interface Com208ProductStock {
 }
 
 /** Respuesta de GRAVAMENES. */
-export interface Com208TaxResult {
-  ENCAB?: Com208MovementGrav[];
-  ITEMS?: Partial<Com208MovementItem>[];
-  TOTALES?: Com208Total[];
+export interface Pro039TaxResult {
+  ENCAB?: Pro039MovementGrav[];
+  ITEMS?: Partial<Pro039MovementItem>[];
+  TOTALES?: Pro039Total[];
 }
 
 /** Respuesta de 'consulta adicionales'. */
-export interface Com208AdditionalResult {
-  ITM_MOVIMIENTOS?: Com208MovementItem[];
-  MOVIMIENTOS_GRAV?: Com208MovementGrav[];
-  TOTALES?: Com208Total[];
+export interface Pro039AdditionalResult {
+  ITM_MOVIMIENTOS?: Pro039MovementItem[];
+  MOVIMIENTOS_GRAV?: Pro039MovementGrav[];
+  TOTALES?: Pro039Total[];
 }
 
-export type Com208Header = Partial<Com208MovementRecord>;
+export type Pro039Header = Partial<Pro039MovementRecord>;
