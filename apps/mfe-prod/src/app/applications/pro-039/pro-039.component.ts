@@ -52,44 +52,45 @@ import {
 } from '@xtein/ui';
 
 import {
-  Com208Action,
-  Com208Application,
-  Com208ToolbarCapabilities
-} from './constants/com-208.constants';
+  Pro039Action,
+  Pro039Application,
+  Pro039ToolbarCapabilities
+} from './constants/pro-039.constants';
 
 import {
-  Com208DefaultRecord,
-  Com208DestinationColumns,
-  Com208OriginColumns,
-  Com208ProductColumns,
-  Com208RecordViewColumns,
-  Com208SectionColumns
-} from './constants/com-208-ui.constants';
+  Pro039DefaultRecord,
+  Pro039DestinationColumns,
+  Pro039OriginColumns,
+  Pro039ProductColumns,
+  Pro039ComponentColumns,
+  Pro039RecordViewColumns,
+  Pro039SectionColumns
+} from './constants/pro-039-ui.constants';
 
 import {
-  Com208MovementGrav,
-  Com208MovementItem,
-  Com208MovementRecord,
-  Com208Total
-} from './models/com-208.model';
+  Pro039MovementGrav,
+  Pro039MovementItem,
+  Pro039MovementRecord,
+  Pro039Total
+} from './models/pro-039.model';
 
 import {
-  Com208Header,
-  Com208Lookup,
-  Com208Warehouse
-} from './models/com-208-business.model';
+  Pro039Header,
+  Pro039Lookup,
+  Pro039Warehouse
+} from './models/pro-039-business.model';
 
-import { Com208Service } from './services/com-208.service';
-import { Com208BusinessService } from './services/com-208-business.service';
-import { XteinCom208ItemsComponent } from './components/xtein-com208-items/xtein-com208-items.component';
+import { Pro039Service } from './services/pro-039.service';
+import { Pro039BusinessService } from './services/pro-039-business.service';
+import { XteinPro039ItemsComponent } from './components/xtein-pro039-items/xtein-pro039-items.component';
 
 /**
- * COM-208 Consumos: salidas de inventario de tipo CONSUMO de producción.
- * Migrado de Legacy modulos/COM208 (COM20801 materiales, COM20802 origen/destino, COM20805 totales).
- * COM20804 (entrada por orden de compra) no aplica a consumos.
+ * PRO-039 Consumos: salidas de inventario de tipo CONSUMO de producción.
+ * Migrado de Legacy modulos/PRO039 (PRO03901 materiales, PRO03902 origen/destino, PRO03905 totales).
+ * PRO03904 (entrada por orden de compra) no aplica a consumos.
  */
 @Component({
-  selector: 'xtein-com-208',
+  selector: 'xtein-pro-039',
   standalone: true,
   imports: [
     CommonModule,
@@ -103,54 +104,57 @@ import { XteinCom208ItemsComponent } from './components/xtein-com208-items/xtein
     XteinRecordReportsComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinCom208ItemsComponent
+    XteinPro039ItemsComponent
   ],
   providers: [
-    Com208Service,
-    Com208BusinessService
+    Pro039Service,
+    Pro039BusinessService
   ],
-  templateUrl: './com-208.component.html',
-  styleUrls: ['./com-208.component.scss'],
+  templateUrl: './pro-039.component.html',
+  styleUrls: ['./pro-039.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Com208Component implements OnInit, OnDestroy {
-  readonly applicationId = Com208Application.Id;
-  readonly tableBase = Com208Application.Table;
+export class Pro039Component implements OnInit, OnDestroy {
+  readonly applicationId = Pro039Application.Id;
+  readonly tableBase = Pro039Application.Table;
 
-  readonly viewColumns: XteinRecordViewColumn[] = [...Com208RecordViewColumns];
-  readonly productColumns = Com208ProductColumns;
-  readonly sectionColumns = Com208SectionColumns;
-  readonly originColumns = Com208OriginColumns;
-  readonly destinationColumns = Com208DestinationColumns;
+  readonly viewColumns: XteinRecordViewColumn[] = [...Pro039RecordViewColumns];
+  readonly productColumns = Pro039ProductColumns;
+  readonly componentColumns = Pro039ComponentColumns;
+  readonly sectionColumns = Pro039SectionColumns;
+  readonly originColumns = Pro039OriginColumns;
+  readonly destinationColumns = Pro039DestinationColumns;
 
   // Estado
   readonly mode = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
-  readonly records = signal<Com208MovementRecord[]>([]);
+  readonly records = signal<Pro039MovementRecord[]>([]);
   readonly currentIndex = signal<number>(-1);
   readonly busy = signal<boolean>(false);
   readonly permissions = signal<RecordToolbarPermissions>(DeniedRecordToolbarPermissions);
 
   // Detalle
-  readonly items = signal<Com208MovementItem[]>([]);
-  readonly taxes = signal<Com208MovementGrav[]>([]);
-  readonly totals = signal<Com208Total[]>([]);
+  readonly items = signal<Pro039MovementItem[]>([]);
+  readonly taxes = signal<Pro039MovementGrav[]>([]);
+  readonly totals = signal<Pro039Total[]>([]);
 
   // Catálogos
-  readonly documents = signal<Com208Lookup[]>([]);
-  readonly products = signal<Com208Lookup[]>([]);
-  readonly sections = signal<Com208Lookup[]>([]);
-  readonly origins = signal<Com208Warehouse[]>([]);
-  readonly destinations = signal<Com208Warehouse[]>([]);
-  readonly itemProducts = signal<Com208Lookup[]>([]);
+  readonly documents = signal<Pro039Lookup[]>([]);
+  readonly products = signal<Pro039Lookup[]>([]);
+  readonly sections = signal<Pro039Lookup[]>([]);
+  /** Productos que componen el juego (solo si el producto es un JU). */
+  readonly components = signal<Pro039Lookup[]>([]);
+  readonly origins = signal<Pro039Warehouse[]>([]);
+  readonly destinations = signal<Pro039Warehouse[]>([]);
+  readonly itemProducts = signal<Pro039Lookup[]>([]);
   readonly itemProductsLoading = signal<boolean>(false);
-  readonly specifications = signal<Com208Lookup[]>([]);
+  readonly specifications = signal<Pro039Lookup[]>([]);
 
   // Ventanas
   readonly filterVisible = signal<boolean>(false);
   readonly viewVisible = signal<boolean>(false);
   readonly reportsVisible = signal<boolean>(false);
 
-  spec(name: string): Com208Lookup | undefined {
+  spec(name: string): Pro039Lookup | undefined {
     return this.specifications().find(s => s.NOMBRE_OBJETO === name);
   }
 
@@ -169,8 +173,8 @@ export class Com208Component implements OnInit, OnDestroy {
 
   // Métodos y no computed(): el formulario reactivo no es una señal, un computed() que solo lo lee
   // se queda con el primer valor y nunca se recalcula.
-  header(): Com208Header {
-    return this.form.getRawValue() as Com208Header;
+  header(): Pro039Header {
+    return this.form.getRawValue() as Pro039Header;
   }
 
   itemsReady(): boolean {
@@ -219,12 +223,13 @@ export class Com208Component implements OnInit, OnDestroy {
     FECHA_REGISTRO: new FormControl<string | null>(this.todayDate()),
     FECHA_VENCIMIENTO: new FormControl<string | null>(this.todayDate()),
     HORA: new FormControl<string | null>(null),
-    MOVIMIENTO: new FormControl<string>(Com208Application.Movement),
-    TIPO: new FormControl<string>(Com208Application.Type),
-    TIPO_INVENTARIO: new FormControl<string>(Com208Application.InventoryType),
+    MOVIMIENTO: new FormControl<string>(Pro039Application.Movement),
+    TIPO: new FormControl<string>(Pro039Application.Type),
+    TIPO_INVENTARIO: new FormControl<string>(Pro039Application.InventoryType),
     TIPO_COMPRA: new FormControl<string>('CONTADO'),
     PRODUCTO: new FormControl<string>('', [Validators.required]),
     SECCION: new FormControl<string>(''),
+    COMPONENTE: new FormControl<string>(''),
     ID_UN_ORIGEN: new FormControl<string>('', [Validators.required]),
     ID_UN_DESTINO: new FormControl<string>('', [Validators.required]),
     ID_SOPORTE: new FormControl<string>(''),
@@ -245,8 +250,8 @@ export class Com208Component implements OnInit, OnDestroy {
   private indexBeforeNew = -1;
 
   constructor(
-    private readonly service: Com208Service,
-    readonly business: Com208BusinessService,
+    private readonly service: Pro039Service,
+    readonly business: Pro039BusinessService,
     private readonly toolbar: ToolbarRuntimeService,
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
@@ -283,13 +288,23 @@ export class Com208Component implements OnInit, OnDestroy {
       })
     );
 
-    // Producto de producción: carga sus secciones con materiales
+    // Producto de producción: si es un juego, carga sus componentes; recarga las secciones
     this.subscriptions.add(
       this.form.controls.PRODUCTO.valueChanges.subscribe(product => {
         if (this.readOnly()) return;
-        this.form.patchValue({ SECCION: '' }, { emitEvent: false });
+        this.form.patchValue({ SECCION: '', COMPONENTE: '' }, { emitEvent: false });
         this.setItems([]);
-        void this.loadSections(product ?? '');
+        void this.loadComponents(product ?? '');
+        void this.loadSections(product ?? '', '');
+      })
+    );
+
+    // Componente del juego: la matriz sale solo de ese producto
+    this.subscriptions.add(
+      this.form.controls.COMPONENTE.valueChanges.subscribe(component => {
+        if (this.readOnly()) return;
+        void this.loadSections(this.form.controls.PRODUCTO.value ?? '', component ?? '')
+          .then(() => this.form.controls.SECCION.value ? this.loadMaterials() : undefined);
       })
     );
 
@@ -344,7 +359,7 @@ export class Com208Component implements OnInit, OnDestroy {
       applicationId: this.applicationId,
       mode: this.mode(),
       permissions: this.permissions(),
-      capabilities: Com208ToolbarCapabilities,
+      capabilities: Pro039ToolbarCapabilities,
       currentIndex: this.currentIndex(),
       totalRecords: this.records().length
     });
@@ -421,8 +436,9 @@ export class Com208Component implements OnInit, OnDestroy {
     this.currentIndex.set(-1);
     this.setItems([]);
     this.sections.set([]);
+    this.components.set([]);
 
-    // Documento de COM-208 (SCO) con el consecutivo siguiente
+    // Documento de PRO-039 (SCO) con el consecutivo siguiente
     try {
       this.documents.set(await this.business.catalog('documents', this.documentsFilter(), true));
     } catch (error) {
@@ -430,7 +446,7 @@ export class Com208Component implements OnInit, OnDestroy {
     }
 
     this.form.reset({
-      ...Com208DefaultRecord,
+      ...Pro039DefaultRecord,
       FECHA: this.todayDate(),
       FECHA_REGISTRO: this.todayDate(),
       FECHA_VENCIMIENTO: this.todayDate(),
@@ -479,11 +495,11 @@ export class Com208Component implements OnInit, OnDestroy {
   async saveRecord(): Promise<void> {
     if (!this.isNew()) return;
     this.form.markAllAsTouched();
-    const headerData: Com208Header = {
+    const headerData: Pro039Header = {
       ...this.header(),
-      MOVIMIENTO: Com208Application.Movement,
-      TIPO: Com208Application.Type,
-      ID_APLICACION: Com208Application.Id
+      MOVIMIENTO: Pro039Application.Movement,
+      TIPO: Pro039Application.Type,
+      ID_APLICACION: Pro039Application.Id
     };
     const validationError = this.business.validate(headerData, this.items());
     if (validationError) {
@@ -502,11 +518,11 @@ export class Com208Component implements OnInit, OnDestroy {
         MOVIMIENTOS: headerData,
         ITM_MOVIMIENTOS: liquidation.items,
         MOVIMIENTOS_GRAV: liquidation.taxes,
-        ID_APLICACION: Com208Application.Id,
+        ID_APLICACION: Pro039Application.Id,
         USUARIO: this.business.identity.USUARIO
       };
-      const response = await firstValueFrom(this.service.save(Com208Action.New, payload));
-      const saved = this.business.decode<Com208MovementRecord & { MsgAccion?: string }>(response)[0];
+      const response = await firstValueFrom(this.service.save(Pro039Action.New, payload));
+      const saved = this.business.decode<Pro039MovementRecord & { MsgAccion?: string }>(response)[0];
 
       this.notification.success(`Consumo ${saved?.DOCUMENTO ?? headerData.DOCUMENTO ?? ''} guardado.`);
       if (saved?.MsgAccion) this.notification.info(saved.MsgAccion);
@@ -555,7 +571,7 @@ export class Com208Component implements OnInit, OnDestroy {
         MOVIMIENTOS: this.header(),
         ITM_MOVIMIENTOS: this.items(),
         MOVIMIENTOS_GRAV: this.taxes(),
-        ID_APLICACION: Com208Application.Id,
+        ID_APLICACION: Pro039Application.Id,
         USUARIO: this.business.identity.USUARIO
       }));
       this.business.decode(response);
@@ -603,10 +619,11 @@ export class Com208Component implements OnInit, OnDestroy {
     this.ensureOption(this.destinations, 'ID_UN_DESTINO', record.ID_UN_DESTINO, record.DESTINO);
 
     this.form.reset({
-      ...Com208DefaultRecord,
+      ...Pro039DefaultRecord,
       ...record,
       DOCUMENTO: documentLabel,
       SECCION: String(record.ID_SECCION ?? record.SECCION ?? ''),
+      COMPONENTE: String(record.PRODUCTO_COMPONENTE ?? record.COMPONENTE ?? ''),
       FECHA: record.FECHA ? String(record.FECHA).slice(0, 10) : null,
       FECHA_REGISTRO: record.FECHA_REGISTRO ? String(record.FECHA_REGISTRO).slice(0, 10) : null,
       FECHA_VENCIMIENTO: record.FECHA_VENCIMIENTO ? String(record.FECHA_VENCIMIENTO).slice(0, 10) : null
@@ -614,6 +631,10 @@ export class Com208Component implements OnInit, OnDestroy {
 
     this.setItems([]);
     this.workspace.setDirty(this.applicationId, false);
+    // Para mostrar código y nombre de la sección y del componente guardados
+    const component = String(record.PRODUCTO_COMPONENTE ?? '');
+    void this.loadComponents(record.PRODUCTO);
+    void this.loadSections(record.PRODUCTO, component);
     void this.loadRecordDetail(record);
   }
 
@@ -633,7 +654,7 @@ export class Com208Component implements OnInit, OnDestroy {
 
   selectViewedRecord(record: unknown): void {
     this.viewVisible.set(false);
-    const rec = record as Com208MovementRecord;
+    const rec = record as Pro039MovementRecord;
     const idx = this.records().findIndex(r => r.ID_DOCUMENTO === rec?.ID_DOCUMENTO && r.CONSECUTIVO === rec?.CONSECUTIVO);
     if (idx >= 0) this.selectRecordIndex(idx);
   }
@@ -642,8 +663,8 @@ export class Com208Component implements OnInit, OnDestroy {
     this.filterVisible.set(false);
     this.busy.set(true);
     try {
-      const response = await firstValueFrom(this.service.query(Com208Action.Query, { MOVIMIENTOS: result?.ESTRUCTURA ?? [] }));
-      const found = this.business.decode<Com208MovementRecord>(response);
+      const response = await firstValueFrom(this.service.query(Pro039Action.Query, { MOVIMIENTOS: result?.ESTRUCTURA ?? [] }));
+      const found = this.business.decode<Pro039MovementRecord>(response);
       if (found.length > 0) {
         this.records.set(found);
         this.selectRecordIndex(0);
@@ -688,11 +709,10 @@ export class Com208Component implements OnInit, OnDestroy {
 
   async removeItems(itemNumbers: number[]): Promise<void> {
     if (this.readOnly() || this.busy()) return;
-    // Los materiales de la matriz no se eliminan: si no se usan se dejan en 0
-    const removable = this.items().filter(row => itemNumbers.includes(row.ITEM) && !row.ES_MATRIZ).map(row => row.ITEM);
+    const removable = this.items().filter(row => itemNumbers.includes(row.ITEM)).map(row => row.ITEM);
     if (removable.length === 0) return;
     const answer = await Swal.fire({
-      text: '¿Desea eliminar los materiales adicionales seleccionados?',
+      text: '¿Desea eliminar los materiales seleccionados?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
@@ -703,7 +723,7 @@ export class Com208Component implements OnInit, OnDestroy {
   }
 
   /** Aplica la lista de materiales y liquida gravámenes/totales (como Legacy al cargar o editar ítems). */
-  private async applyItems(list: Com208MovementItem[]): Promise<void> {
+  private async applyItems(list: Pro039MovementItem[]): Promise<void> {
     this.setItems(list);
     this.workspace.setDirty(this.applicationId, true);
     const toLiquidate = list.filter(row => Number(row.CANTIDAD) > 0);
@@ -723,7 +743,7 @@ export class Com208Component implements OnInit, OnDestroy {
     }
   }
 
-  private setItems(list: Com208MovementItem[]): void {
+  private setItems(list: Pro039MovementItem[]): void {
     this.items.set(list);
     const total = list.reduce((sum, row) => sum + Number(row.TOTAL || 0), 0);
     const subtotal = list.reduce((sum, row) => sum + Number(row.SUB_TOTAL || 0), 0);
@@ -734,22 +754,42 @@ export class Com208Component implements OnInit, OnDestroy {
     }
   }
 
-  private async loadSections(product: string): Promise<void> {
-    this.sections.set([]);
-    if (!product) return;
+  /** Producto JU: el consumo se puede hacer por uno de los productos que lo componen. */
+  isJuego(): boolean {
+    const product = this.form.controls.PRODUCTO.value ?? '';
+    const row = this.products().find(p => p.PRODUCTO === product);
+    return row ? !!row.ES_JUEGO : product.toUpperCase().startsWith('JU');
+  }
+
+  private async loadComponents(product: string): Promise<void> {
+    this.components.set([]);
+    if (!product || !product.toUpperCase().startsWith('JU')) return;
     try {
-      const rows = await this.business.catalog('sections', { PRODUCTO: product, ...this.business.identity });
+      const rows = await this.business.catalog('components', { PRODUCTO: product, ...this.business.identity });
+      this.components.set(rows.map(row => ({ ...row, PRODUCTO: String(row.PRODUCTO ?? ''), LABEL: this.label(row.PRODUCTO, row.NOMBRE) })));
+    } catch (error) {
+      this.warnNoMatrix(error);
+    }
+  }
+
+  /** Secciones marcadas como "Asignable materiales"; MATRIZ indica si el producto tiene materiales en ella. */
+  private async loadSections(product: string, component: string): Promise<void> {
+    if (!product) {
+      this.sections.set([]);
+      return;
+    }
+    try {
+      const rows = await this.business.catalog('sections', { PRODUCTO: product, COMPONENTE: component, ...this.business.identity });
       this.sections.set(rows.map(row => ({
         ...row,
         ID_SECCION: String(row.ID_SECCION ?? ''),
-        NOMBRE_SECCION: String(row.NOMBRE_SECCION ?? '')
+        NOMBRE_SECCION: String(row.NOMBRE_SECCION ?? ''),
+        LABEL: this.label(row.ID_SECCION, row.NOMBRE_SECCION),
+        MATRIZ: row.TIENE_MATRIZ ? 'Sí' : ''
       })));
-      if (rows.length === 1) {
-        this.form.controls.SECCION.setValue(String(rows[0].ID_SECCION ?? ''));
-      }
     } catch (error) {
-      // Producto sin matriz: se avisa, pero el consumo sigue y los materiales se agregan a mano
-      this.warnNoMatrix(error);
+      this.sections.set([]);
+      this.showError(error);
     }
   }
 
@@ -761,9 +801,9 @@ export class Com208Component implements OnInit, OnDestroy {
     }
     this.busy.set(true);
     try {
-      const materials = await this.business.materials(h.PRODUCTO, h.SECCION, String(h.ID_UN_ORIGEN ?? ''));
+      const materials = await this.business.materials(h.PRODUCTO, h.SECCION, String(h.ID_UN_ORIGEN ?? ''), String(h.COMPONENTE ?? ''));
       this.busy.set(false);
-      if (!materials.length) throw new Error(`No hay materiales en la matriz para ${h.PRODUCTO}`);
+      if (!materials.length) throw new Error(`No hay materiales en la matriz para ${h.COMPONENTE || h.PRODUCTO}`);
       await this.applyItems(materials);
       this.notification.success(`Se cargaron ${materials.length} material(es) de la matriz.`);
     } catch (error) {
@@ -788,8 +828,8 @@ export class Com208Component implements OnInit, OnDestroy {
         ID_PROVEEDOR: '',
         ID_UN_ORIGEN: h.ID_UN_ORIGEN,
         ID_UN_DESTINO: h.ID_UN_DESTINO,
-        MOVIMIENTO: Com208Application.Movement,
-        TIPO: Com208Application.Type
+        MOVIMIENTO: Pro039Application.Movement,
+        TIPO: Pro039Application.Type
       }));
     } catch {
       this.itemProducts.set([]);
@@ -798,7 +838,7 @@ export class Com208Component implements OnInit, OnDestroy {
     }
   }
 
-  private async loadRecordDetail(record: Com208MovementRecord): Promise<void> {
+  private async loadRecordDetail(record: Pro039MovementRecord): Promise<void> {
     try {
       const detail = await this.business.additional(record.ID_DOCUMENTO, record.CONSECUTIVO);
       if (this.currentRecord() !== record) return;
@@ -819,9 +859,9 @@ export class Com208Component implements OnInit, OnDestroy {
 
   private documentsFilter() {
     return {
-      ID_APLICACION: Com208Application.Id,
-      MOVIMIENTO: Com208Application.Movement,
-      TIPO: Com208Application.Type,
+      ID_APLICACION: Pro039Application.Id,
+      MOVIMIENTO: Pro039Application.Movement,
+      TIPO: Pro039Application.Type,
       USUARIO: this.business.identity.USUARIO
     };
   }
@@ -832,27 +872,27 @@ export class Com208Component implements OnInit, OnDestroy {
     const tasks: Promise<void>[] = [
       this.business.catalog('documents', this.documentsFilter(), true)
         .then(docs => this.documents.set(docs))
-        .catch(error => console.warn('COM-208 documentos:', error)),
+        .catch(error => console.warn('PRO-039 documentos:', error)),
 
       // Igual que Legacy: el tipo CONSUMO debe estar autorizado para el usuario en las salidas
-      this.business.catalog<Com208Lookup>('types', { MOVIMIENTO: Com208Application.Movement, ID_APLICACION: 'COM-205', USUARIO: identity.USUARIO })
+      this.business.catalog<Pro039Lookup>('types', { MOVIMIENTO: Pro039Application.Movement, ID_APLICACION: 'COM-205', USUARIO: identity.USUARIO })
         .then(types => {
-          if (!types.some(t => String(t['TIPO'] ?? '').toUpperCase() === Com208Application.Type)) {
+          if (!types.some(t => String(t['TIPO'] ?? '').toUpperCase() === Pro039Application.Type)) {
             this.notification.warning('El usuario no tiene autorizado el tipo de salida CONSUMO.');
           }
         })
         .catch(error => this.notification.warning(error instanceof Error ? error.message : 'No fue posible validar el tipo CONSUMO.')),
 
-      this.business.catalog<{ ORIGEN?: Com208Warehouse[]; DESTINO?: Com208Warehouse[] }>('warehouses', {
-        MOVIMIENTOS: { MOVIMIENTO: Com208Application.Movement, TIPO: Com208Application.Type, USUARIO: identity.USUARIO }
+      this.business.catalog<{ ORIGEN?: Pro039Warehouse[]; DESTINO?: Pro039Warehouse[] }>('warehouses', {
+        MOVIMIENTOS: { MOVIMIENTO: Pro039Application.Movement, TIPO: Pro039Application.Type, USUARIO: identity.USUARIO }
       }).then(rows => {
         this.origins.set((rows[0]?.ORIGEN ?? []).map(r => ({ ...r, ID_UN_ORIGEN: String(r.ID_UN_ORIGEN ?? '') })));
         this.destinations.set((rows[0]?.DESTINO ?? []).map(r => ({ ...r, ID_UN_DESTINO: String(r.ID_UN_DESTINO ?? '') })));
-      }).catch(error => console.warn('COM-208 bodegas:', error)),
+      }).catch(error => console.warn('PRO-039 bodegas:', error)),
 
-      this.business.catalog('products', { MODO: 'BASICO' })
-        .then(rows => this.products.set(rows.map(r => ({ ...r, PRODUCTO: String(r.PRODUCTO ?? ''), NOMBRE: String(r.NOMBRE ?? '') }))))
-        .catch(error => console.warn('COM-208 productos:', error)),
+      this.business.catalog('products', identity)
+        .then(rows => this.products.set(rows.map(r => ({ ...r, PRODUCTO: String(r.PRODUCTO ?? ''), NOMBRE: String(r.NOMBRE ?? ''), LABEL: this.label(r.PRODUCTO, r.NOMBRE) }))))
+        .catch(error => console.warn('PRO-039 productos:', error)),
 
       this.business.catalog('specifications', { ...identity, ID_APLICACION_BASE: '' })
         .then(specs => this.specifications.set(specs))
@@ -861,15 +901,15 @@ export class Com208Component implements OnInit, OnDestroy {
     await Promise.all(tasks);
   }
 
-  private async queryDocument(idDocument: string, consecutive: number): Promise<Com208MovementRecord[]> {
+  private async queryDocument(idDocument: string, consecutive: number): Promise<Pro039MovementRecord[]> {
     const prm = {
       MOVIMIENTOS: [
         { CAMPO: 'ID_DOCUMENTO', EXPRESION: idDocument, TABLA: this.tableBase },
         { CAMPO: 'CONSECUTIVO', EXPRESION: String(consecutive), TABLA: this.tableBase }
       ]
     };
-    const response = await firstValueFrom(this.service.query(Com208Action.Query, prm));
-    return this.business.decode<Com208MovementRecord>(response);
+    const response = await firstValueFrom(this.service.query(Pro039Action.Query, prm));
+    return this.business.decode<Pro039MovementRecord>(response);
   }
 
   // ================= Utilidades =================
@@ -880,7 +920,7 @@ export class Com208Component implements OnInit, OnDestroy {
 
   private ensureOption(target: typeof this.origins, key: 'ID_UN_ORIGEN' | 'ID_UN_DESTINO', value: string, label?: string): void {
     if (!value || target().some(row => row[key] === value)) return;
-    target.update(rows => [...rows, { [key]: value, DESCRIPCION: label ?? value } as Com208Warehouse]);
+    target.update(rows => [...rows, { [key]: value, DESCRIPCION: label ?? value } as Pro039Warehouse]);
   }
 
   private todayDate(): string {
@@ -904,7 +944,7 @@ export class Com208Component implements OnInit, OnDestroy {
   private focusFirstControl(): void {
     setTimeout(() => {
       const host = this.elementRef.nativeElement as HTMLElement;
-      const input = Array.from(host.querySelectorAll<HTMLInputElement>('.com-208__form input:not([type="hidden"])'))
+      const input = Array.from(host.querySelectorAll<HTMLInputElement>('.pro-039__form input:not([type="hidden"])'))
         .find(el => el.offsetParent !== null && !el.disabled && !el.readOnly && !el.closest('.dx-state-readonly, .dx-state-disabled'));
       input?.focus();
     }, 150);
@@ -912,12 +952,18 @@ export class Com208Component implements OnInit, OnDestroy {
 
   private clearForm(): void {
     this.form.reset({
-      ...Com208DefaultRecord,
+      ...Pro039DefaultRecord,
       FECHA: this.todayDate(),
       FECHA_REGISTRO: this.todayDate(),
       FECHA_VENCIMIENTO: this.todayDate()
     }, { emitEvent: false });
     this.setItems([]);
+  }
+
+  private label(code: unknown, name: unknown): string {
+    const c = String(code ?? '');
+    const n = String(name ?? '');
+    return n ? `${c} - ${n}` : c;
   }
 
   private showError(err: unknown): void {

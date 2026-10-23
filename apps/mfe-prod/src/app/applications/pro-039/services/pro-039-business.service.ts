@@ -1,33 +1,33 @@
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { SessionService } from '@xtein/session';
-import { Com208Service } from './com-208.service';
-import { Com208BusinessAction, Com208Catalog } from '../constants/com-208-catalog.constants';
-import { Com208Application } from '../constants/com-208.constants';
+import { Pro039Service } from './pro-039.service';
+import { Pro039BusinessAction, Pro039Catalog } from '../constants/pro-039-catalog.constants';
+import { Pro039Application } from '../constants/pro-039.constants';
 import {
-  Com208AdditionalResult,
-  Com208Header,
-  Com208Lookup,
-  Com208Material,
-  Com208ProductStock,
-  Com208TaxResult
-} from '../models/com-208-business.model';
-import { Com208MovementGrav, Com208MovementItem, Com208Total } from '../models/com-208.model';
+  Pro039AdditionalResult,
+  Pro039Header,
+  Pro039Lookup,
+  Pro039Material,
+  Pro039ProductStock,
+  Pro039TaxResult
+} from '../models/pro-039-business.model';
+import { Pro039MovementGrav, Pro039MovementItem, Pro039Total } from '../models/pro-039.model';
 
-export interface Com208TaxLiquidation {
-  items: Com208MovementItem[];
-  taxes: Com208MovementGrav[];
-  totals: Com208Total[];
+export interface Pro039TaxLiquidation {
+  items: Pro039MovementItem[];
+  taxes: Pro039MovementGrav[];
+  totals: Pro039Total[];
 }
 
 @Injectable()
-export class Com208BusinessService {
-  private readonly api = inject(Com208Service);
+export class Pro039BusinessService {
+  private readonly api = inject(Pro039Service);
   private readonly session = inject(SessionService);
 
   get identity() {
     return {
-      ID_APLICACION: Com208Application.Id,
+      ID_APLICACION: Pro039Application.Id,
       USUARIO: this.session.current?.userId ?? ''
     };
   }
@@ -57,34 +57,35 @@ export class Com208BusinessService {
     return rows as T[];
   }
 
-  private static readonly catalogCache = new Map<string, Com208Lookup[]>();
+  private static readonly catalogCache = new Map<string, Pro039Lookup[]>();
 
   clearCache(): void {
-    Com208BusinessService.catalogCache.clear();
+    Pro039BusinessService.catalogCache.clear();
   }
 
-  async catalog<T = Com208Lookup>(name: keyof typeof Com208Catalog, data: unknown = {}, forceRefresh = false): Promise<T[]> {
+  async catalog<T = Pro039Lookup>(name: keyof typeof Pro039Catalog, data: unknown = {}, forceRefresh = false): Promise<T[]> {
     const cacheKey = `${String(name)}_${JSON.stringify(data ?? {})}`;
-    if (!forceRefresh && Com208BusinessService.catalogCache.has(cacheKey)) {
-      return Com208BusinessService.catalogCache.get(cacheKey)! as T[];
+    if (!forceRefresh && Pro039BusinessService.catalogCache.has(cacheKey)) {
+      return Pro039BusinessService.catalogCache.get(cacheKey)! as T[];
     }
-    const [endpoint, action] = Com208Catalog[name];
-    const decoded = this.decode<Com208Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
-    Com208BusinessService.catalogCache.set(cacheKey, decoded);
+    const [endpoint, action] = Pro039Catalog[name];
+    const decoded = this.decode<Pro039Lookup>(await firstValueFrom(this.api.request(endpoint, action, data)));
+    Pro039BusinessService.catalogCache.set(cacheKey, decoded);
     return decoded as T[];
   }
 
-  async action<T>(name: keyof typeof Com208BusinessAction, data: unknown): Promise<T[]> {
-    const [endpoint, action] = Com208BusinessAction[name];
+  async action<T>(name: keyof typeof Pro039BusinessAction, data: unknown): Promise<T[]> {
+    const [endpoint, action] = Pro039BusinessAction[name];
     return this.decode<T>(await firstValueFrom(this.api.request(endpoint, action, data)));
   }
 
   /** Materiales de la matriz del producto/sección, con el costo de la bodega de origen (o el de la matriz). */
-  async materials(product: string, section: string, originWarehouse: string): Promise<Com208MovementItem[]> {
-    const rows = await this.action<Com208Material>('materials', {
+  async materials(product: string, section: string, originWarehouse: string, component = ''): Promise<Pro039MovementItem[]> {
+    const rows = await this.action<Pro039Material>('materials', {
       PRODUCTO: product,
       SECCION: section || '',
       ID_UN_ORIGEN: originWarehouse || '',
+      COMPONENTE: component || '',
       ...this.identity
     });
     return rows.map((row, index) => this.newItem({
@@ -106,8 +107,8 @@ export class Com208BusinessService {
    * Producto agregado manualmente: igual que COM-203 ('EXISTENCIAS PRODUCTO'), valida que esté asociado
    * a la bodega de origen y trae nombre, costo y presentación.
    */
-  async productItem(product: string, header: Com208Header, item: number): Promise<Com208MovementItem> {
-    const rows = await this.action<Com208ProductStock>('stock', {
+  async productItem(product: string, header: Pro039Header, item: number): Promise<Pro039MovementItem> {
+    const rows = await this.action<Pro039ProductStock>('stock', {
       PRODUCTO: product,
       PRESENTACION: 'SI',
       MOVIMIENTO: header.MOVIMIENTO,
@@ -142,9 +143,9 @@ export class Com208BusinessService {
    * Liquida gravámenes (GRAVAMENES). El SP exige GRAVAMENES/GRAV_TOTAL en cada ítem y MOVIMIENTOS_GRAV,
    * por eso se aplica siempre que cambian los ítems (como Legacy con APL_GRAV = []).
    */
-  async taxes(header: Com208Header, items: Com208MovementItem[]): Promise<Com208TaxLiquidation> {
+  async taxes(header: Pro039Header, items: Pro039MovementItem[]): Promise<Pro039TaxLiquidation> {
     const prepared = items.map(row => ({ ...row, APLICACION: 2 }));
-    const result = (await this.action<Com208TaxResult>('taxes', {
+    const result = (await this.action<Pro039TaxResult>('taxes', {
       ORDEN_COMPRA: header,
       ITEMS: prepared,
       APL_GRAV: []
@@ -167,13 +168,13 @@ export class Com208BusinessService {
     };
   }
 
-  async additional(idDocument: string, consecutive: number): Promise<Com208AdditionalResult> {
-    const rows = await this.action<Com208AdditionalResult>('additional', { ID_DOCUMENTO: idDocument, CONSECUTIVO: consecutive });
+  async additional(idDocument: string, consecutive: number): Promise<Pro039AdditionalResult> {
+    const rows = await this.action<Pro039AdditionalResult>('additional', { ID_DOCUMENTO: idDocument, CONSECUTIVO: consecutive });
     return rows[0] ?? {};
   }
 
   /** Recalcula los valores de una línea al cambiar la cantidad. */
-  withQuantity(row: Com208MovementItem, quantity: number): Com208MovementItem {
+  withQuantity(row: Pro039MovementItem, quantity: number): Pro039MovementItem {
     const qty = Math.max(0, Number(quantity) || 0);
     const subtotal = qty * Number(row.VALOR_UNITARIO || 0);
     return {
@@ -185,8 +186,8 @@ export class Com208BusinessService {
     };
   }
 
-  validate(header: Com208Header, items: Com208MovementItem[]): string {
-    const fields: [keyof Com208Header, string][] = [
+  validate(header: Pro039Header, items: Pro039MovementItem[]): string {
+    const fields: [keyof Pro039Header, string][] = [
       ['DOCUMENTO', 'Documento'],
       ['FECHA', 'Fecha'],
       ['PRODUCTO', 'Producto'],
@@ -202,13 +203,13 @@ export class Com208BusinessService {
     return '';
   }
 
-  private newItem(values: Partial<Com208MovementItem> & Pick<Com208MovementItem, 'ITEM' | 'PRODUCTO'>): Com208MovementItem {
-    const base: Com208MovementItem = {
+  private newItem(values: Partial<Pro039MovementItem> & Pick<Pro039MovementItem, 'ITEM' | 'PRODUCTO'>): Pro039MovementItem {
+    const base: Pro039MovementItem = {
       ITEM: values.ITEM,
       PRODUCTO: values.PRODUCTO,
       NOMBRE_PRODUCTO: '',
       ATRIBUTO: 'SIN',
-      TIPO_INVENTARIO: Com208Application.InventoryType,
+      TIPO_INVENTARIO: Pro039Application.InventoryType,
       REFERENCIA: '',
       PRODUCTO_KIT: '',
       SOPORTE: '',

@@ -3,7 +3,7 @@
  * PRODUCTO/SECCION son el producto y la sección de producción del consumo;
  * al consultar, la sección llega como ID_SECCION.
  */
-export interface Com208MovementRecord {
+export interface Pro039MovementRecord {
   ID_UN: string;
   ID_DOCUMENTO: string;
   PREFIJO: string;
@@ -21,6 +21,9 @@ export interface Com208MovementRecord {
   PRODUCTO: string;
   SECCION: string;
   ID_SECCION?: string | null;
+  /** Producto que compone el juego (solo cuando PRODUCTO es un JU); al consultar llega como PRODUCTO_COMPONENTE. */
+  COMPONENTE: string;
+  PRODUCTO_COMPONENTE?: string | null;
   ID_UN_ORIGEN: string;
   ID_UN_DESTINO: string;
   ORIGEN?: string;
@@ -44,7 +47,7 @@ export interface Com208MovementRecord {
 }
 
 /** Ítem del consumo (ITM_MOVIMIENTOS_PRO). */
-export interface Com208MovementItem {
+export interface Pro039MovementItem {
   ITEM: number;
   PRODUCTO: string;
   NOMBRE_PRODUCTO: string;
@@ -80,7 +83,7 @@ export interface Com208MovementItem {
 }
 
 /** Gravamen liquidado (MOVIMIENTOS_GRAV / ENCAB de GRAVAMENES). */
-export interface Com208MovementGrav {
+export interface Pro039MovementGrav {
   ID_TASA?: string;
   POR_TASA?: number;
   VALOR?: number;
@@ -89,7 +92,7 @@ export interface Com208MovementGrav {
 }
 
 /** Fila de totales que devuelve GRAVAMENES / consulta adicionales. */
-export interface Com208Total {
+export interface Pro039Total {
   CONCEPTO?: string;
   DESCRIPCION?: string;
   PORCENTAJE?: number;
