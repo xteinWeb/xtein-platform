@@ -268,6 +268,7 @@ export interface Ven230IvaItem {
   DESCRIPCION?: string;
   VALOR_BASE?: number;
   TASA?: number;
+  POR_TASA?: number;
   PORCENTAJE?: number;
   CLASE?: string;
   BASE?: number;

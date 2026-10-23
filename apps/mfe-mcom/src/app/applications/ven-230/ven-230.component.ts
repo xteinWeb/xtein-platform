@@ -649,26 +649,131 @@ export class Ven230Component
   /**
    * Saves the current record (new or update).
    */
-    async saveRecord(): Promise<void> {
-    if(this.loading() || this.readOnly() || this.itemPending()) return;
-    const header=this.header();
-    const message=this.business.validate(header,this.items());
-    if(message){this.form.markAllAsTouched();this.notification.warning(message);return;}
+  async saveRecord(): Promise<void> {
+    if (this.loading() || this.readOnly() || this.itemPending()) return;
+    const header = this.header();
+    const message = this.business.validate(header, this.items());
+    if (message) {
+      this.form.markAllAsTouched();
+      this.notification.warning(message);
+      return;
+    }
     this.loading.set(true);
     try {
-      const payload={PREFACTURAS:header,ITM_PREFACTURAS:this.items(),PREFACTURA_GRAV:this.taxes(),
-        PREFACTURA_GRAV_AUX:this.taxItems(),PREFACTURA_PAGOS:this.payments(),...this.business.identity};
-      const isNew=this.mode()===RecordToolbarMode.Creating;
-      const result=this.business.decode<Partial<Ven230PrefacturaRecord>>(await firstValueFrom(isNew ? this.service.create(payload):this.service.update(payload)))[0];
-      if(!result)throw new Error('El servidor no devolvió el resultado del guardado.');
-      const saved={...header,...result,DOCUMENTO:result.DOCUMENTO || header.DOCUMENTO,
-        DOCUMENTO_FAC:result.DOCUMENTO || header.DOCUMENTO,PREFACTURA_GRAV:structuredClone(this.taxes()),PREFACTURA_PAGOS:structuredClone(this.payments())} as Ven230PrefacturaRecord;
-      const list=[...this.records()];let index=this.currentIndex();
-      if(isNew){index=list.length;list.push(saved);}else{list[index]=saved;}
-      this.records.set(list);this.currentIndex.set(index);this.populateForm(saved);
-      this.detailsReady.set(true);this.mode.set(RecordToolbarMode.Browsing);this.disableFormControls();this.workspace.setDirty(this.applicationId,false);
+      const preparedItems = this.items().map(item => {
+        const porIva = Number(item.POR_IVA != null ? item.POR_IVA : (Number(item.PORC_IVA || 0) * 100));
+        const subTotal = Number(item.SUB_TOTAL || 0);
+        const discount = Number(item.VALOR_DESCUENTO || 0);
+        const base = subTotal - discount;
+        const valorIva = Number(item.VALOR_IVA != null ? item.VALOR_IVA : (base * (porIva / 100)));
+
+        let taxObj: Record<string, unknown> | null = null;
+        if (item.GRAV_ORG && typeof item.GRAV_ORG === 'object' && !Array.isArray(item.GRAV_ORG) && 'ID_TASA' in item.GRAV_ORG) {
+          taxObj = item.GRAV_ORG as Record<string, unknown>;
+        } else if (item.GRAVAMENES && typeof item.GRAVAMENES === 'object' && !Array.isArray(item.GRAVAMENES) && 'ID_TASA' in item.GRAVAMENES) {
+          taxObj = item.GRAVAMENES as Record<string, unknown>;
+        } else if (Array.isArray(item.GRAVAMENES) && item.GRAVAMENES.length > 0 && typeof item.GRAVAMENES[0] === 'object') {
+          taxObj = item.GRAVAMENES[0] as Record<string, unknown>;
+        }
+
+        const idTasa = (taxObj?.['ID_TASA'] as string) || (porIva === 0 ? 'IV-000' : 'IV-GEN');
+        const descTasa = (taxObj?.['DESCRIPCION'] as string) || (porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA');
+
+        const cleanTax = {
+          ID_TASA: idTasa,
+          DESCRIPCION: descTasa,
+          POR_TASA: porIva,
+          PORCENTAJE: porIva,
+          VALOR: valorIva,
+          VALOR_BASE: base
+        };
+
+        return {
+          ...item,
+          APLICACION: 2,
+          VALOR_IVA: valorIva,
+          POR_IVA: porIva,
+          PORC_IVA: porIva / 100,
+          TOTAL: base + valorIva,
+          GRAV_ORG: cleanTax,
+          GRAVAMENES: [cleanTax]
+        };
+      });
+
+      const auxItems = (this.taxItems()?.length ? this.taxItems() : preparedItems.map(item => ({
+        ITEM: item.ITEM,
+        PRODUCTO: item.PRODUCTO,
+        SUB_TOTAL: item.SUB_TOTAL,
+        GRAV_TOTAL: [{
+          ITEM: item.ITEM,
+          ID_TASA: (item.GRAV_ORG as any)?.ID_TASA || 'IV-GEN',
+          POR_TASA: Number(item.POR_IVA ?? 0),
+          VALOR: Number(item.VALOR_IVA ?? 0)
+        }]
+      })));
+
+      const payload = {
+        PREFACTURAS: header,
+        ITM_PREFACTURAS: preparedItems,
+        PREFACTURA_GRAV: this.taxes(),
+        PREFACTURA_GRAV_AUX: auxItems,
+        PREFACTURA_PAGOS: this.payments(),
+        ...this.business.identity
+      };
+
+      const isNew = this.mode() === RecordToolbarMode.Creating;
+      const result = this.business.decode<Partial<Ven230PrefacturaRecord>>(
+        await firstValueFrom(isNew ? this.service.create(payload) : this.service.update(payload))
+      )[0];
+      if (!result) throw new Error('El servidor no devolvió el resultado del guardado.');
+
+      const saved = {
+        ...header,
+        ...result,
+        ESTADO: result.ESTADO || header.ESTADO || 'REGISTRADO',
+        DOCUMENTO: result.DOCUMENTO || header.DOCUMENTO,
+        DOCUMENTO_FAC: result.DOCUMENTO || header.DOCUMENTO,
+        PREFACTURA_GRAV: structuredClone(this.taxes()),
+        PREFACTURA_PAGOS: structuredClone(this.payments())
+      } as Ven230PrefacturaRecord;
+
+      const list = [...this.records()];
+      let index = this.currentIndex();
+      if (isNew) {
+        index = list.length;
+        list.push(saved);
+      } else {
+        list[index] = saved;
+      }
+      this.records.set(list);
+      this.currentIndex.set(index);
+      this.populateForm(saved);
+
+      // Refresh to newly saved document from DB
+      const docId = result.ID_DOCUMENTO || header.ID_DOCUMENTO;
+      const docConsec = result.CONSECUTIVO ?? header.CONSECUTIVO;
+      if (docId && docConsec != null) {
+        try {
+          const fullRecords = await this.queryDocument(docId, Number(docConsec));
+          if (fullRecords.length > 0) {
+            this.records.set(fullRecords);
+            await this.selectRecordIndex(0);
+          }
+        } catch {
+          // ignore query refresh errors
+        }
+      }
+
+      this.detailsReady.set(true);
+      this.mode.set(RecordToolbarMode.Browsing);
+      this.disableFormControls();
+      this.workspace.setDirty(this.applicationId, false);
       this.notification.success('Prefactura guardada correctamente.');
-    }catch(error){this.showError(error);}finally{this.loading.set(false);}
+    } catch(error) {
+      this.showError(error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   /**

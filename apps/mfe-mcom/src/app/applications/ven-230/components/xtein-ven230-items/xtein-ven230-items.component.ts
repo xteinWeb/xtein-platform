@@ -424,7 +424,9 @@ export class XteinVen230ItemsComponent implements OnChanges {
       const cleanTax: Ven230IvaItem = {
         ID_TASA: String(taxItem.ID_TASA || (porc === 0 ? 'IV-000' : 'IV-GEN')),
         DESCRIPCION: String(taxItem.DESCRIPCION || (porc === 0 ? 'Sin iva' : 'Tarifa general del IVA')),
+        POR_TASA: porc,
         PORCENTAJE: porc,
+        VALOR: Number(row.VALOR_IVA ?? 0),
         VALOR_BASE: Number(taxItem.VALOR_BASE ?? (porc === 0 ? 0 : 1))
       };
       Object.assign(row, {
@@ -536,8 +538,10 @@ export class XteinVen230ItemsComponent implements OnChanges {
       const cleanTax: Ven230IvaItem = {
         ID_TASA: String(taxObj.ID_TASA || (porIva === 0 ? 'IV-000' : 'IV-GEN')),
         DESCRIPCION: String(taxObj.DESCRIPCION || (porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA')),
+        POR_TASA: porIva,
         PORCENTAJE: porIva,
-        VALOR_BASE: Number(taxObj.VALOR_BASE ?? (porIva === 0 ? 0 : 1))
+        VALOR: row.VALOR_IVA,
+        VALOR_BASE: base
       };
       row.GRAVAMENES = cleanTax;
       row.GRAV_ORG = cleanTax;
