@@ -8,10 +8,10 @@
 <ng-template #locationItem let-item><span class="catalog-item"><span>{{item.ID_UBICACION}}</span><span>{{item.NOMBRE}}</span></span></ng-template>
 <ng-template #postalItem let-item><span class="catalog-item"><span>{{item.CODIGO_POSTAL}}</span><span>{{item.DETALLE}}</span></span></ng-template>
 <ng-template #cellTemplate let-cell>
-  @if (draft && cell.data.ID_DIRECCION === draft.ID_DIRECCION) {
+  @if (draft && cell.data.ID_DIRECCION != null && draft.ID_DIRECCION != null && ('' + cell.data.ID_DIRECCION === '' + draft.ID_DIRECCION)) {
     @switch (cell.column.dataField) {
       @case ('TIPO_DIRECCION') {
-        <xtein-lookup [(ngModel)]="draft.TIPO_DIRECCION" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
+        <xtein-lookup [(ngModel)]="draft.TIPO_DIRECCION" (valueChange)="onTipoDireccionChange($event)" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
           selectionMode="multiple" valueExpr="TIPO" displayExpr="TIPO" placeholder="" ariaLabel="Tipo dirección"
           [autoFocus]="true" [showClearButton]="true" [dropDownWidth]="400" />
       }

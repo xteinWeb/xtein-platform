@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   forwardRef,
   ChangeDetectorRef,
   OnChanges,
@@ -36,14 +38,24 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   implements ControlValueAccessor, OnChanges, AfterViewInit {
   @Input() autoFocus = false;
   @Input() selectionMode: 'single' | 'multiple' = 'single';
+  @Output() readonly valueChange = new EventEmitter<any>();
   @ViewChild(DxDropDownBoxComponent) private editor?: DxDropDownBoxComponent;
   @ViewChild('dataGrid') private dataGrid?: XteinDataGridComponent<T, unknown>;
   private readonly destroyRef = inject(DestroyRef);
   private readonly zone = inject(NgZone);
 
+  isClosing = false;
+
   onDropDownOpened(): void {
+    this.isClosing = false;
     queueMicrotask(() => {
       this.dataGrid?.repaint();
+      if (this.selectionMode === 'multiple' && this.editor?.instance) {
+        const input = this.editor.instance.element().querySelector('.dx-texteditor-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = this.selectionText;
+        }
+      }
     });
     const focusSearch = (): boolean => {
       const content = this.editor?.instance?.content() as HTMLElement | undefined;
@@ -64,10 +76,23 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     }, 50);
   }
 
+  onDropDownHiding(): void {
+    this.isClosing = true;
+  }
+
+  onDropDownClosed(): void {
+    this.isClosing = false;
+    this.opened = false;
+  }
+
   ngAfterViewInit(): void {
     if (this.autoFocus) queueMicrotask(() => this.focus());
     if (this.editor?.instance && this.value != null && this.selectionMode === 'multiple') {
       this.editor.instance.option('value', [...(this.value as unknown[])]);
+      const input = this.editor.instance.element().querySelector('.dx-texteditor-input') as HTMLInputElement | null;
+      if (input) {
+        input.value = this.selectionText;
+      }
     }
   }
 
@@ -99,7 +124,14 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     width: 'min(600px, 95vw)',
     height: 300,
     hideOnParentScroll: true,
-    wrapperAttr: { class: 'xtein-lookup-popup' }
+    wrapperAttr: { class: 'xtein-lookup-popup' },
+    onHiding: () => {
+      this.isClosing = true;
+    },
+    onHidden: () => {
+      this.isClosing = false;
+      this.opened = false;
+    }
   };
 
   get dropDownOptions(): Record<string, unknown> {
@@ -110,7 +142,14 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
         width: this.dropDownWidth,
         height: this.dropDownHeight,
         hideOnParentScroll: true,
-        wrapperAttr: { class: 'xtein-lookup-popup' }
+        wrapperAttr: { class: 'xtein-lookup-popup' },
+        onHiding: () => {
+          this.isClosing = true;
+        },
+        onHidden: () => {
+          this.isClosing = false;
+          this.opened = false;
+        }
       };
     }
     return this._cachedDropDownOptions;
@@ -207,13 +246,10 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   }
 
   onGridSelectionChanged(event: XteinGridSelectionEvent<T, unknown>): void {
-    if (this.selectionMode !== 'multiple' || this.isDisabled || this.readOnly) return;
+    if (this.selectionMode !== 'multiple' || this.isDisabled || this.readOnly || this.isClosing || !this.opened) return;
 
-    // Ignore programmatic events with empty selection (e.g. grid initialization or popup close/destruction)
     if (!event.selectedRowKeys || !event.selectedRowKeys.length) {
-      // If the dropdown is closed or closing, definitely ignore
-      if (!this.opened) return;
-      // Only allow clearing if user actively deselected rows
+      if (!this.opened || this.isClosing) return;
       if (!event.currentDeselectedRowKeys?.length) return;
     }
 
@@ -237,10 +273,16 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     }
     this.zone.run(() => {
       this.setValue(newKeys);
+      const text = this.selectionText;
       if (this.editor?.instance) {
         this.editor.instance.option('value', [...newKeys]);
+        const input = this.editor.instance.element().querySelector('.dx-texteditor-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = text;
+        }
       }
       this.change(this.value);
+      this.valueChange.emit(this.value);
       this.touched();
       this.detector.markForCheck();
     });
@@ -252,8 +294,13 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
       this.setValue([]);
       if (this.editor?.instance) {
         this.editor.instance.option('value', []);
+        const input = this.editor.instance.element().querySelector('.dx-texteditor-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = '';
+        }
       }
       this.change(this.value);
+      this.valueChange.emit(this.value);
       this.touched();
       this.detector.markForCheck();
     });
@@ -264,10 +311,18 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     if (changes['items'] && this.editor?.instance) {
       this.editor.instance.option('items', this.items);
       if (this.value != null && this.value !== '') {
-        const currentVal = this.selectionMode === 'multiple' ? [...(this.value as unknown[])] : this.value;
-        this.editor.instance.option('value', undefined);
-        this.editor.instance.option('value', currentVal);
-        this.editor.instance.repaint();
+        if (this.selectionMode === 'multiple') {
+          const currentVal = Array.isArray(this.value) ? [...this.value] : [this.value];
+          this.editor.instance.option('value', currentVal);
+          const input = this.editor.instance.element().querySelector('.dx-texteditor-input') as HTMLInputElement | null;
+          if (input) {
+            input.value = this.selectionText;
+          }
+        } else {
+          this.editor.instance.option('value', undefined);
+          this.editor.instance.option('value', this.value);
+          this.editor.instance.repaint();
+        }
       }
     }
     this.detector.markForCheck();
@@ -276,10 +331,18 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
   writeValue(value: unknown): void {
     this.setValue(value);
     if (this.editor?.instance) {
-      const val = this.selectionMode === 'multiple' ? [...(this.value as unknown[])] : this.value;
-      this.editor.instance.option('value', undefined);
-      this.editor.instance.option('value', val);
-      this.editor.instance.repaint();
+      if (this.selectionMode === 'multiple') {
+        const val = Array.isArray(this.value) ? [...this.value] : [];
+        this.editor.instance.option('value', val);
+        const input = this.editor.instance.element().querySelector('.dx-texteditor-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = this.selectionText;
+        }
+      } else {
+        this.editor.instance.option('value', undefined);
+        this.editor.instance.option('value', this.value);
+        this.editor.instance.repaint();
+      }
     }
     this.detector.markForCheck();
   }
@@ -304,6 +367,7 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     if (value == null) return;
     this.setValue(value);
     this.change(value);
+    this.valueChange.emit(value);
     if (this.editor?.instance) {
       this.editor.instance.option('value', undefined);
       this.editor.instance.option('value', value);
@@ -332,6 +396,7 @@ export class XteinLookupComponent<T extends object = Record<string, unknown>>
     ) {
       this.setValue(null);
       this.change(this.value);
+      this.valueChange.emit(this.value);
       this.touched();
     }
   }
