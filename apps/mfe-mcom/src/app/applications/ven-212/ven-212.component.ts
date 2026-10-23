@@ -195,10 +195,16 @@ export class Ven212Component implements OnInit, OnDestroy {
   );
 
   readonly stateStyle = computed(() => {
-    const estado = this.form.controls.ESTADO.value || 'REGISTRADO';
+    const estado = (this.form.controls.ESTADO.value || 'REGISTRADO').toUpperCase().trim();
     switch (estado) {
+      case 'REGISTRADO':
+        return { background: '#eafaf1', color: '#27ae60', border: '1px solid #a9dfbf' };
       case 'ANULADO':
-        return { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' };
+        return { background: '#fdedec', color: '#c0392b', border: '1px solid #f5b7b1' };
+      case 'AUTORIZADO':
+        return { background: 'rgb(132, 223, 170)', color: '#065f46' };
+      case 'PARCIAL':
+        return { background: 'rgb(240, 152, 217)', color: '#831843' };
       case 'COMPLETADO':
         return { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' };
       case 'EN PROCESO':
@@ -472,12 +478,22 @@ export class Ven212Component implements OnInit, OnDestroy {
   // ================= Toolbar & Commands =================
 
   private publishToolbarState(): void {
+    const isAnulado = this.currentRecord()?.ESTADO === 'ANULADO' || this.form?.controls?.ESTADO?.value === 'ANULADO';
+    const basePerms = this.permissions();
+    const effectivePerms: RecordToolbarPermissions = isAnulado
+      ? { ...basePerms, edit: false, delete: false }
+      : basePerms;
+
     const state = createRecordToolbarState({
-      busy: this.busy(),
+      busy: this.busy() || this.itemPending(),
       applicationId: this.applicationId,
       mode: this.mode(),
-      permissions: this.permissions(),
-      capabilities: Ven212ToolbarCapabilities,
+      permissions: effectivePerms,
+      capabilities: {
+        ...Ven212ToolbarCapabilities,
+        edit: !isAnulado,
+        delete: !isAnulado
+      },
       currentIndex: this.currentIndex(),
       totalRecords: this.records().length
     });
@@ -634,9 +650,19 @@ export class Ven212Component implements OnInit, OnDestroy {
     const isNewRecord = this.isNew();
     const headerData = this.header();
 
+    const preparedItems = this.items().map(item => ({
+      ...item,
+      GRAVAMENES: [{
+        ID_TASA: String((item.GRAVAMENES as any)?.ID_TASA || (Number(item.POR_IVA ?? 0) === 0 ? 'IV-000' : 'IV-GEN')),
+        DESCRIPCION: String((item.GRAVAMENES as any)?.DESCRIPCION || (Number(item.POR_IVA ?? 0) === 0 ? 'Sin iva' : 'Tarifa general del IVA')),
+        POR_TASA: Number(item.POR_IVA ?? 0),
+        VALOR: Number(item.VALOR_IVA ?? 0)
+      }]
+    }));
+
     const payload = {
       FACTURAS: headerData,
-      ITM_FACTURAS: this.items(),
+      ITM_FACTURAS: preparedItems,
       FACTURA_GRAV: this.taxes(),
       FACTURA_GRAV_AUX: this.taxItems(),
       FACTURA_PAGOS: this.payments(),
@@ -656,15 +682,17 @@ export class Ven212Component implements OnInit, OnDestroy {
       this.disableFormControls();
 
       // Refresh to newly saved document
-      const queryResult = await this.business.catalog('documents', {
-        ID_DOCUMENTO: savedDoc.ID_DOCUMENTO,
-        CONSECUTIVO: savedDoc.CONSECUTIVO
-      });
-      if (queryResult.length > 0) {
-        const fullRecords = await this.queryDocument(savedDoc.ID_DOCUMENTO, savedDoc.CONSECUTIVO);
-        if (fullRecords.length > 0) {
-          this.records.set(fullRecords);
-          this.selectRecordIndex(0);
+      const docId = savedDoc.ID_DOCUMENTO || headerData.ID_DOCUMENTO;
+      const docConsec = savedDoc.CONSECUTIVO ?? headerData.CONSECUTIVO;
+      if (docId && docConsec != null) {
+        try {
+          const fullRecords = await this.queryDocument(docId, Number(docConsec));
+          if (fullRecords.length > 0) {
+            this.records.set(fullRecords);
+            await this.selectRecordIndex(0);
+          }
+        } catch {
+          // ignore query refresh error
         }
       }
     } catch (err: unknown) {
@@ -672,6 +700,7 @@ export class Ven212Component implements OnInit, OnDestroy {
       this.notification.error(msg);
     } finally {
       this.busy.set(false);
+      this.publishToolbarState();
     }
   }
 
@@ -685,7 +714,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     }
 
     const result = await Swal.fire({
-      html: `¿Está seguro de anular la factura <b>${current.DOCUMENTO}</b>?`,
+      title: '¿Anular Factura?',
+      html: `¿Está seguro de anular la factura <b>${current.DOCUMENTO || current.ID_DOCUMENTO}</b>?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#DF3E3E',
@@ -698,27 +728,42 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     this.busy.set(true);
     try {
-      await firstValueFrom(
+      const response = await firstValueFrom(
         this.service.delete({
           FACTURAS: {
             DOCUMENTO: current.DOCUMENTO,
             ID_DOCUMENTO: current.ID_DOCUMENTO,
-            PREFIJO: current.PREFIJO,
+            PREFIJO: current.PREFIJO || 'SIN',
             CONSECUTIVO: current.CONSECUTIVO,
-            SUFIJO: current.SUFIJO
+            SUFIJO: current.SUFIJO || 'SIN'
           },
+          DOCUMENTO: current.DOCUMENTO,
+          ID_DOCUMENTO: current.ID_DOCUMENTO,
+          CONSECUTIVO: current.CONSECUTIVO,
           ID_APLICACION: this.applicationId,
           USUARIO: this.business.identity.USUARIO
         })
       );
 
+      const decoded = this.business.decode<any>(response);
+      if (decoded.length > 0 && decoded[0]?.ErrMensaje) {
+        this.notification.error(decoded[0].ErrMensaje);
+        return;
+      }
+
       this.notification.success('Factura anulada exitosamente.');
+      const updated = { ...current, ESTADO: 'ANULADO' };
+      const list = [...this.records()];
+      list[this.currentIndex()] = updated;
+      this.records.set(list);
+      this.form.controls.ESTADO.setValue('ANULADO');
       await this.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al anular la factura.';
       this.notification.error(msg);
     } finally {
       this.busy.set(false);
+      this.publishToolbarState();
     }
   }
 
@@ -835,8 +880,12 @@ export class Ven212Component implements OnInit, OnDestroy {
       const prm = { FACTURA: result?.ESTRUCTURA ?? [] };
       const response = await firstValueFrom(this.service.query('consulta', prm));
       const facturas = this.business.decode<Ven212FacturaRecord>(response);
-      if (facturas.length > 0) {
-        this.records.set(facturas);
+      const mapped = facturas.map(r => {
+        const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+        return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+      });
+      if (mapped.length > 0) {
+        this.records.set(mapped);
         await this.selectRecordIndex(0);
       } else {
         this.notification.warning('No se encontraron registros con el criterio especificado.');
@@ -1194,7 +1243,11 @@ export class Ven212Component implements OnInit, OnDestroy {
       ]
     };
     const response = await firstValueFrom(this.service.query('consulta', prm));
-    return this.business.decode<Ven212FacturaRecord>(response);
+    const rows = this.business.decode<Ven212FacturaRecord>(response);
+    return rows.map(r => {
+      const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+      return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+    });
   }
 
   // ================= Helpers =================
