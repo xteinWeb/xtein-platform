@@ -4,7 +4,7 @@
     type="button"
     class="grid-btn grid-btn--primary"
     aria-label="Nuevo ítem"
-    title="Agregar nuevo producto"
+    [title]="readOnly ? 'Presione Editar o Nuevo en la barra superior para agregar productos' : (!ready ? 'Complete los campos obligatorios del encabezado (Documento, Cliente, Fecha, UN, ADC/Vendedor, Condición, Moneda)' : 'Agregar nuevo producto')"
     [disabled]="readOnly || !ready || busy || !!draft()"
     (click)="begin()"
   >

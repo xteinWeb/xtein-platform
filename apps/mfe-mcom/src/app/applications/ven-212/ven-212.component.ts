@@ -184,7 +184,12 @@ export class Ven212Component implements OnInit, OnDestroy {
     return idx >= 0 && idx < list.length ? list[idx] : null;
   });
 
-  readonly header = computed(() => this.form.getRawValue() as Ven212Header);
+  readonly formVersion = signal(0);
+
+  readonly header = computed(() => {
+    this.formVersion();
+    return this.form.getRawValue() as Ven212Header;
+  });
   readonly headerLocked = computed(() => this.items().length > 0);
   readonly advances = computed(() => this.payments().reduce((sum, p) => sum + Number(p.VALOR || p.TOTAL || 0), 0));
   readonly totalTaxes = computed(() => this.taxes().reduce((sum, t) => sum + Number(t.VALOR || 0), 0));
@@ -215,8 +220,31 @@ export class Ven212Component implements OnInit, OnDestroy {
   });
 
   readonly itemsReady = computed(() => {
+    this.formVersion();
     const h = this.header();
-    return !!(h.DOCUMENTO && h.ID_CLIENTE && h.ID_UN_ITEM && h.ID_ADC && h.ID_CONDICION && h.ID_MONEDA);
+    const tipoVenta = String(h.TIPO_VENTA || 'CONTADO').trim().toUpperCase();
+    const plazoValid = tipoVenta === 'CONTADO'
+      ? true
+      : (h.PLAZO !== null && h.PLAZO !== undefined && String(h.PLAZO).trim() !== '');
+
+    const docValid = Boolean(h.DOCUMENTO && String(h.DOCUMENTO).trim() !== '');
+    const clientValid = Boolean(h.ID_CLIENTE && String(h.ID_CLIENTE).trim() !== '');
+    const fechaValid = Boolean(h.FECHA && String(h.FECHA).trim() !== '');
+    const unValid = Boolean(h.ID_UN_ITEM && String(h.ID_UN_ITEM).trim() !== '');
+    const adcValid = Boolean(h.ID_ADC && String(h.ID_ADC).trim() !== '');
+    const condValid = Boolean(h.ID_CONDICION && String(h.ID_CONDICION).trim() !== '');
+    const monedaValid = Boolean(h.ID_MONEDA && String(h.ID_MONEDA).trim() !== '');
+
+    return Boolean(
+      docValid &&
+      clientValid &&
+      fechaValid &&
+      unValid &&
+      adcValid &&
+      condValid &&
+      monedaValid &&
+      plazoValid
+    );
   });
 
   readonly itemRecordKey = computed(() => {
@@ -337,9 +365,10 @@ export class Ven212Component implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.disableFormControls();
 
-    // Mark dirty on form changes
+    // Mark dirty and update formVersion on form changes
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
+        this.formVersion.update(v => v + 1);
         if (!this.readOnly()) {
           this.workspace.setDirty(this.applicationId, true);
         }
@@ -586,6 +615,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     });
 
     this.enableFormControls(true);
+    this.formVersion.update(v => v + 1);
     void this.loadConditions();
     this.workspace.setDirty(this.applicationId, false);
     this.focusFirstControl();
@@ -601,6 +631,7 @@ export class Ven212Component implements OnInit, OnDestroy {
 
     this.mode.set(RecordToolbarMode.Editing);
     this.enableFormControls(false);
+    this.formVersion.update(v => v + 1);
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -798,7 +829,11 @@ export class Ven212Component implements OnInit, OnDestroy {
     this.form.reset(
       {
         ...Ven212DefaultRecord,
-      ...record,
+        ...record,
+        ID_UN: record.ID_UN || record.ID_UN_ITEM || '',
+        ID_UN_ITEM: record.ID_UN_ITEM || record.ID_UN || '',
+        DOCUMENTO: record.DOCUMENTO || record.DOCUMENTO_FAC || '',
+        DOCUMENTO_FAC: record.DOCUMENTO_FAC || record.DOCUMENTO || '',
         FECHA: record.FECHA ? String(record.FECHA).slice(0, 10) : null,
         FECHA_REGISTRO: record.FECHA_REGISTRO ? String(record.FECHA_REGISTRO).slice(0, 10) : null,
         FECHA_OC: record.FECHA_OC ? String(record.FECHA_OC).slice(0, 10) : null,
@@ -807,6 +842,7 @@ export class Ven212Component implements OnInit, OnDestroy {
       },
       { emitEvent: false }
     );
+    this.formVersion.update(v => v + 1);
 
     this.taxes.set(record.FACTURA_GRAV || record.Factura_GRAV || []);
     this.payments.set(record.FACTURA_PAGOS || record.Factura_PAGOS || []);
@@ -882,7 +918,8 @@ export class Ven212Component implements OnInit, OnDestroy {
       const facturas = this.business.decode<Ven212FacturaRecord>(response);
       const mapped = facturas.map(r => {
         const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
-        return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+        const unVal = String(r.ID_UN_ITEM || r.ID_UN || '').trim();
+        return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal, ID_UN_ITEM: unVal, ID_UN: unVal };
       });
       if (mapped.length > 0) {
         this.records.set(mapped);
@@ -1349,6 +1386,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.taxes.set([]);
     this.payments.set([]);
+    this.formVersion.update(v => v + 1);
   }
 
   onSettingSelected(setting: XteinApplicationSetting): void {
