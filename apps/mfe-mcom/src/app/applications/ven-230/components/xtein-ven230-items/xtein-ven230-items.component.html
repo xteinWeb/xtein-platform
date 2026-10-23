@@ -93,9 +93,9 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Fila editable en línea (cuando draft() está activo) -->
-      @if (draft(); as row) {
-        <tr class="row-editing">
+      <!-- Plantilla reutilizable de fila en edición -->
+      <ng-template #editRowTemplate let-row>
+        <tr class="row-editing" (keydown.enter)="onRowEnter($event)">
           <td class="col-select"></td>
           <td class="col-product">
             <div class="product-cell-box">
@@ -107,10 +107,12 @@
                   placeholder="Producto"
                   [dataSource]="products"
                   [showClearButton]="true"
+                  [acceptCustomValue]="true"
+                  (onValueChanged)="onProductValueChanged($event)"
+                  (onOpened)="onProductDropDownOpened()"
+                  (onEnterKey)="onEnterKey()"
                   [dropDownOptions]="productDropDownOptions"
                   [(opened)]="productDropdownOpened"
-                  (onOpened)="onProductOpened()"
-                  (onInput)="onProductCodeInput($event)"
                   [disabled]="working() || busy"
                 >
                   <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
@@ -139,7 +141,7 @@
                       [pageSize]="100"
                       [allowedPageSizes]="[50, 100, 200]"
                       [showPager]="true"
-                      searchPlaceholder="Search"
+                      searchPlaceholder="Buscar producto…"
                       [searchWidth]="240"
                     />
                   </div>
@@ -162,111 +164,181 @@
           </td>
           <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
           <td class="col-qty">
-            <xtein-number
+            <dx-number-box
               class="cell-editor"
-              ariaLabel="Cantidad"
-              [(ngModel)]="row.CANTIDAD"
-              (ngModelChange)="onDraftQtyChange()"
+              [(value)]="row.CANTIDAD"
+              valueChangeEvent="keyup input change focusout"
+              (onValueChanged)="onDraftQtyChange()"
+              (onEnterKey)="onEnterKey()"
+              [min]="0"
+              [showSpinButtons]="false"
               [disabled]="working() || busy"
+              [inputAttr]="{ style: 'text-align: right;' }"
             />
           </td>
           <td class="col-um">
-            @if (row.PRESENTACION?.length) {
-              <xtein-select
-                class="cell-editor"
-                [items]="presentationOptions()"
-                displayExpr="LABEL"
-                valueExpr="UDM_VENTA"
-                [ngModel]="row.UDM_VENTA"
-                (ngModelChange)="unit($event)"
+            @if (presentationList.length) {
+              <dx-select-box
+                class="cell-editor um-select-box"
+                [dataSource]="presentationList"
+                [(value)]="selectedUnitIndex"
+                valueExpr="INDEX"
+                displayExpr="UDM_VENTA"
+                [searchEnabled]="true"
+                searchMode="contains"
+                [dropDownOptions]="{ width: 550, minWidth: 420 }"
+                [(opened)]="umDropdownOpened"
+                (onValueChanged)="onUnitValueChanged($event)"
+                (onEnterKey)="onEnterKey()"
                 [disabled]="working() || busy"
-              />
+              >
+                <div *dxTemplate="let data of 'item'" class="um-dropdown-row">
+                  <div class="um-col um-col--udm">{{ data.UDM_VENTA }}</div>
+                  <div class="um-col um-col--num">{{ data.CANTIDAD_EQUIV }}</div>
+                  <div class="um-col um-col--equiv">Equiv: {{ data.UDM_EQUIV }}</div>
+                  <div class="um-col um-col--num">{{ data.CANTIDAD_PRES }}</div>
+                  <div class="um-col um-col--price">{{ money(data.PRECIO) }}</div>
+                </div>
+              </dx-select-box>
             } @else {
               <span>{{ row.UDM_VENTA }}</span>
             }
           </td>
           <td class="col-price">
-            <xtein-number
+            <dx-number-box
               class="cell-editor"
-              ariaLabel="Valor unitario"
-              [(ngModel)]="row.VALOR_UNITARIO"
-              (ngModelChange)="onDraftQtyChange()"
+              [(value)]="row.VALOR_UNITARIO"
+              [format]="moneyFormat"
+              valueChangeEvent="keyup input change focusout"
+              (onValueChanged)="onDraftQtyChange()"
+              (onEnterKey)="onEnterKey()"
+              [min]="0"
+              [showSpinButtons]="false"
               [disabled]="!editPrice || working() || busy"
+              [inputAttr]="{ style: 'text-align: right;' }"
             />
           </td>
           <td class="col-subtotal text-end">
-            {{ money(row.CANTIDAD * row.VALOR_UNITARIO) }}
+            {{ money(row.SUB_TOTAL) }}
           </td>
-          <td class="col-iva text-end">
-            @if ((row.IVAS?.length ?? 0) > 1) {
-              <xtein-select
-                class="cell-editor"
-                [items]="taxOptions()"
-                displayExpr="LABEL"
-                valueExpr="ID_TASA"
-                [ngModel]="selectedTaxId()"
-                (ngModelChange)="tax($event)"
-                [disabled]="working() || busy"
-              />
-            } @else {
-              <span>{{ money(row.VALOR_IVA) }}</span>
-            }
+          <td
+            class="col-iva text-end"
+            [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
+            (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
+            [title]="(row.IVAS?.length ?? 0) > 1 ? 'Haga clic para cambiar tarifa de IVA' : ''"
+          >
+            <span class="cell-val-number">{{ money(row.VALOR_IVA) }}</span>
           </td>
-          <td class="col-pct text-end">
-            {{ row.POR_IVA || 0 }}
+          <td
+            class="col-pct text-end"
+            [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
+            (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
+            [title]="(row.IVAS?.length ?? 0) > 1 ? 'Haga clic para cambiar tarifa de IVA' : ''"
+          >
+            <span class="cell-val-number">{{ row.POR_IVA || 0 }}</span>
           </td>
           <td class="col-total text-end">
-            {{ money((row.CANTIDAD * row.VALOR_UNITARIO) + (row.VALOR_IVA || 0)) }}
+            {{ money(row.TOTAL) }}
           </td>
           <td class="col-date">
             <xtein-date
               class="cell-editor"
+              [required]="true"
               [min]="minimumDeliveryDate"
               [(ngModel)]="row.FECHA_ENTREGA"
               [disabled]="working() || busy"
             />
           </td>
           <td class="col-status">
-            <span class="cell-badge">{{ row.ESTADO || 'REGISTRADO' }}</span>
+            <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
           </td>
         </tr>
+      </ng-template>
+
+      <!-- Fila nueva (al hacer click en +) -->
+      @if (isNewDraft()) {
+        <ng-container *ngTemplateOutlet="editRowTemplate; context: { $implicit: draft() }"></ng-container>
       }
 
-      <!-- Filas de datos existentes -->
+      <!-- Filas de datos existentes (o en edición in-line si coincide el ITEM) -->
       @for (row of items; track row.ITEM) {
-        <tr
-          [class.row-selected]="selected().includes(row.ITEM)"
-          (dblclick)="!readOnly && !draft() && begin(row)"
-        >
-          <td class="col-select">
-            <xtein-checkbox
-              ariaLabel="Seleccionar producto"
-              [disabled]="readOnly || busy || !!draft()"
-              [checked]="selected().includes(row.ITEM)"
-              (checkedChange)="toggle(row.ITEM, $event)"
-            />
-          </td>
-          <td class="col-product">{{ row.PRODUCTO }}</td>
-          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
-          <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
-          <td class="col-um">{{ row.UDM_VENTA }}</td>
-          <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
-          <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
-          <td class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
-          <td class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
-          <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
-          <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
-          <td class="col-status">
-            <span class="cell-badge">{{ row.ESTADO }}</span>
-          </td>
-        </tr>
+        @if (draft()?.ITEM === row.ITEM) {
+          <ng-container *ngTemplateOutlet="editRowTemplate; context: { $implicit: draft() }"></ng-container>
+        } @else {
+          <tr
+            [class.row-selected]="selected().includes(row.ITEM)"
+            (dblclick)="!readOnly && !draft() && begin(row)"
+          >
+            <td class="col-select">
+              <xtein-checkbox
+                ariaLabel="Seleccionar producto"
+                [disabled]="readOnly || busy || !!draft()"
+                [checked]="selected().includes(row.ITEM)"
+                (checkedChange)="toggle(row.ITEM, $event)"
+              />
+            </td>
+            <td class="col-product">{{ row.PRODUCTO }}</td>
+            <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+            <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
+            <td class="col-um">{{ row.UDM_VENTA }}</td>
+            <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
+            <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
+            <td class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
+            <td class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
+            <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
+            <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
+            <td class="col-status">
+              <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
+            </td>
+          </tr>
+        }
       } @empty {
         @if (!draft()) {
           <tr>
-            <td colspan="12" class="empty-message">No hay productos asociados.</td>
+            <td colspan="12" class="empty-message">No hay productos asociados a la prefactura.</td>
           </tr>
         }
       }
     </tbody>
   </table>
 </div>
+
+<!-- Modal flotante para selección de tarifa de IVA -->
+<dx-popup
+  [visible]="taxModalVisible()"
+  (visibleChange)="taxModalVisible.set($event)"
+  [width]="600"
+  height="auto"
+  [showTitle]="false"
+  title="Selección de Iva"
+  [hideOnOutsideClick]="false"
+  [showCloseButton]="true"
+  [shading]="true"
+>
+  <div *dxTemplate="let data of 'content'" class="tax-popup-container">
+    <div class="tax-popup-header">
+      <div class="tax-col-radio"></div>
+      <div class="tax-col-id">Id Tasa</div>
+      <div class="tax-col-desc">Descripción</div>
+      <div class="tax-col-pct text-end">%</div>
+      <div class="tax-col-base text-end">Valor base</div>
+    </div>
+    <div class="tax-popup-body">
+      @for (t of taxList(); track t.ID_TASA) {
+        <div
+          class="tax-popup-row"
+          [class.tax-popup-row--selected]="isSelectedTax(t)"
+          (click)="selectTax(t)"
+        >
+          <div class="tax-col-radio">
+            <span class="tax-radio-circle" [class.tax-radio-circle--checked]="isSelectedTax(t)"></span>
+          </div>
+          <div class="tax-col-id">{{ t.ID_TASA }}</div>
+          <div class="tax-col-desc">{{ t.DESCRIPCION }}</div>
+          <div class="tax-col-pct text-end">{{ t.PORCENTAJE }}</div>
+          <div class="tax-col-base text-end">{{ t.VALOR_BASE }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</dx-popup>

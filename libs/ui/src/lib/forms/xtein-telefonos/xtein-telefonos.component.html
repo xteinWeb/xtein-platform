@@ -7,10 +7,10 @@
   (selectionChanged)="select($event.selectedRowKeys)" [toolbarVisible]="!readOnly" [toolbarActions]="toolbar" [groupTemplate]="cellTemplate" />
 
 <ng-template #cellTemplate let-cell>
-  @if (draft && cell.data.ID_TELEFONO === draft.ID_TELEFONO) {
+  @if (draft && cell.data.ID_TELEFONO != null && draft.ID_TELEFONO != null && ('' + cell.data.ID_TELEFONO === '' + draft.ID_TELEFONO)) {
     @switch (cell.column.dataField) {
       @case ('TIPO_TELEFONO') {
-        <xtein-lookup [(ngModel)]="draft.TIPO_TELEFONO" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
+        <xtein-lookup [(ngModel)]="draft.TIPO_TELEFONO" (valueChange)="onTipoTelefonoChange($event)" (ngModelChange)="pendingChange.emit()" [items]="types" [columns]="typeColumns"
           selectionMode="multiple" valueExpr="TIPO" displayExpr="TIPO" placeholder="Tipo..." ariaLabel="Tipo teléfono"
           [autoFocus]="true" [showClearButton]="true" [dropDownWidth]="400" />
       }

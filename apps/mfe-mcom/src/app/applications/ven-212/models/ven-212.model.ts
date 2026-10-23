@@ -69,11 +69,17 @@ export interface Ven212PresentacionItem {
   CANTIDAD_PRES?: number;
   CANTIDAD_EQUIV?: number;
   PRECIO?: number;
+  ESTADO?: string;
+  CODIGO_ASOCIADO?: string;
+  DETALLE?: string;
 }
 
 export interface Ven212IvaItem {
   ID_TASA: string;
+  DESCRIPCION?: string;
+  VALOR_BASE?: number;
   TASA?: number;
+  POR_TASA?: number;
   PORCENTAJE?: number;
   CLASE?: string;
   BASE?: number;

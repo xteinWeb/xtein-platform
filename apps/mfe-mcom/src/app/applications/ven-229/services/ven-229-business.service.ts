@@ -39,7 +39,11 @@ export class Ven229BusinessService {
     const rows = Array.isArray(data) ? data : data == null ? [] : [data];
     const error = rows.find(row => row && typeof row === 'object' && 'ErrMensaje' in row && (row as { ErrMensaje: unknown }).ErrMensaje);
     if (error) {
-      throw new Error(String((error as { ErrMensaje: unknown }).ErrMensaje));
+      const msg = String((error as { ErrMensaje: unknown }).ErrMensaje).trim();
+      if (msg === '[]' || msg === '' || msg === 'No hay datos') {
+        return [];
+      }
+      throw new Error(msg);
     }
     return rows as T[];
   }
@@ -91,6 +95,7 @@ export class Ven229BusinessService {
       PEDIDO: header,
       ITM_Pedido: items,
       ITM_PEDIDO: items,
+      ITEMS: items,
       ...(option === 'original' ? { OPCION_GRAV: option } : { APL_GRAV: option })
     });
   }

@@ -252,6 +252,30 @@ export interface Ven230PrefacturaRecord {
 }
 
 
+export interface Ven230PresentacionItem {
+  UDM_VENTA?: string;
+  UDM_COMPRA?: string;
+  UDM_EQUIV?: string;
+  CANTIDAD_PRES?: number;
+  CANTIDAD_EQUIV?: number;
+  PRECIO?: number;
+  INDEX?: number;
+  [key: string]: unknown;
+}
+
+export interface Ven230IvaItem {
+  ID_TASA: string;
+  DESCRIPCION?: string;
+  VALOR_BASE?: number;
+  TASA?: number;
+  POR_TASA?: number;
+  PORCENTAJE?: number;
+  CLASE?: string;
+  BASE?: number;
+  VALOR?: number;
+  [key: string]: unknown;
+}
+
 /**
  * Represents an individual line item of a prefactura.
  */
@@ -260,8 +284,8 @@ export interface Ven230PrefacturaItem {
   NOMBRE_PRODUCTO?: string;
   REFERENCIA?: string;
   PORC_IVA?: number;
-  PRESENTACION?: import('./ven-230-business.model').Ven230Lookup[];
-  IVAS?: import('./ven-230-business.model').Ven230Lookup[];
+  PRESENTACION?: Ven230PresentacionItem[];
+  IVAS?: Ven230IvaItem[];
   UDM_EQUIV?: string;
   CANTIDAD_PRES?: number;
   CANTIDAD_EQUIV?: number;
@@ -360,30 +384,18 @@ export interface Ven230PrefacturaPago {
  * Represents an applied tax breakdown line on a prefactura.
  */
 export interface Ven230PrefacturaGrav {
-
   ID_UN?: string;
-
   ID_DOCUMENTO?: string;
-
   PREFIJO?: string;
-
   CONSECUTIVO?: number;
-
   SUFIJO?: string;
-
-  ITEM: number;
-
+  ITEM?: number;
   APLICACION?: number;
-
-  ID_TASA: string;
-
+  ID_TASA?: string;
   CLASE?: string;
-
-  POR_TASA: number;
-
-  VALOR: number;
-
-  BASE: number;
+  POR_TASA?: number;
+  VALOR?: number;
+  BASE?: number;
 }
 
 

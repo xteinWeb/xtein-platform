@@ -48,6 +48,7 @@ export interface Ven229Lookup {
 export interface Ven229Details {
   ErrMensaje?: string;
   ITM_PEDIDO?: Ven229PedidoItem[];
+  ITM_Pedido?: Ven229PedidoItem[];
   PEDIDO_GRAV_AUX?: Ven229PedidoItem[];
   PEDIDO_GRAV?: Ven229PedidoGrav[];
   PEDIDO_PAGOS?: Ven229PedidoPago[];
