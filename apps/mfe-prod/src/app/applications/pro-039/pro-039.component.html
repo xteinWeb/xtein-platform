@@ -1,6 +1,6 @@
 <section class="pro-039">
   <div class="pro-039__form" [formGroup]="form">
-    <!-- ===== FILA SUPERIOR: Tarjeta Principal + Tarjeta Resumen ===== -->
+    <!-- ===== FILA SUPERIOR: Tarjeta Principal ===== -->
     <div class="pro-039__top-row">
       <div class="pro-039__card-main">
         <!-- Cabecera del consumo -->
@@ -150,34 +150,6 @@
                 />
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta Resumen -->
-      <div class="pro-039__card-totals">
-        <div class="pro-039__totals-header">
-          <span class="pro-039__totals-card-title">Resumen</span>
-        </div>
-
-        <div class="pro-039__totals-body">
-          <div class="pro-039__totals-row">
-            <span class="pro-039__totals-label">Materiales</span>
-            <span class="pro-039__totals-value">{{ items().length }}</span>
-          </div>
-
-          @for (row of totalRows(); track $index) {
-            <div class="pro-039__totals-row">
-              <span class="pro-039__totals-label">{{ row.DESCRIPCION || row.CONCEPTO }}</span>
-              <span class="pro-039__totals-value">{{ money(row.VALOR) }}</span>
-            </div>
-          }
-
-          <div class="pro-039__totals-divider"></div>
-
-          <div class="pro-039__totals-row pro-039__totals-row--grand">
-            <span class="pro-039__totals-label">TOTAL</span>
-            <span class="pro-039__totals-value">{{ money(totalValue()) }}</span>
           </div>
         </div>
       </div>

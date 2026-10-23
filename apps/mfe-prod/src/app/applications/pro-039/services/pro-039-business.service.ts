@@ -104,6 +104,11 @@ export class Pro039BusinessService {
     }));
   }
 
+  /** Fila provisional de un material agregado a mano, mientras llegan sus datos. */
+  pendingItem(product: string, name: string, item: number): Pro039MovementItem {
+    return this.newItem({ ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false });
+  }
+
   /**
    * Producto agregado manualmente: igual que COM-203 ('EXISTENCIAS PRODUCTO'), valida que esté asociado
    * a la bodega de origen y trae nombre, costo y presentación.
