@@ -1485,19 +1485,16 @@ export class Ven230Component
           taxObj = row.GRAVAMENES as Record<string, unknown>;
         }
 
-        if (!taxObj) {
-          taxObj = {
-            ID_TASA: porIva === 0 ? 'IV-000' : 'IV-GEN',
-            DESCRIPCION: porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA',
-            PORCENTAJE: porIva,
-            VALOR_BASE: porIva === 0 ? 0 : 1
-          };
-        } else {
-          taxObj = {
-            ...taxObj,
-            PORCENTAJE: porIva
-          };
-        }
+        const idTasa = (taxObj?.['ID_TASA'] as string) || (porIva === 0 ? 'IV-000' : 'IV-GEN');
+        const descTasa = (taxObj?.['DESCRIPCION'] as string) || (porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA');
+        const cleanTax = {
+          ID_TASA: idTasa,
+          DESCRIPCION: descTasa,
+          POR_TASA: porIva,
+          PORCENTAJE: porIva,
+          VALOR: valorIva,
+          VALOR_BASE: base
+        };
 
         return {
           ...row,
@@ -1512,8 +1509,8 @@ export class Ven230Component
           PORC_IVA: effectiveRate,
           VALOR_IVA: valorIva,
           TOTAL: total,
-          GRAV_ORG: taxObj,
-          GRAVAMENES: taxObj
+          GRAV_ORG: cleanTax,
+          GRAVAMENES: cleanTax
         };
       });
 
