@@ -602,7 +602,9 @@ export class Ven213Component
 
       const returned = this.business.decode<Partial<Ven213DevolucionRecord>>(response)[0];
 
-      const cancelled = { ...record, ...(returned ?? {}), ESTADO: returned?.ESTADO || Ven213Estado.Anulada } as Ven213DevolucionRecord;
+      // delete does not return the cartera amounts; consulta returns 0 for both once the devolución is ANULADA.
+      const cancelled = { ...record, ...(returned ?? {}), ESTADO: returned?.ESTADO || Ven213Estado.Anulada,
+        VALOR_CARTERA: 0, VALOR_NO_APLICADO: 0 } as Ven213DevolucionRecord;
       const list = this.records().map(row => row === record ? cancelled : row);
       this.records.set(list);
       if (this.currentRecord() === cancelled) {
@@ -654,7 +656,6 @@ export class Ven213Component
     const record=this.records()[index];if(!record)return;
     this.currentIndex.set(index);this.mode.set(RecordToolbarMode.Browsing);this.disableFormControls();
     this.workspace.setDirty(this.applicationId,false);this.populateForm(record);
-    this.documents.set([{DOCUMENTO:record.DOCUMENTO,ID_DOCUMENTO:record.ID_DOCUMENTO,PREFIJO:record.PREFIJO,CONSECUTIVO:record.CONSECUTIVO,SUFIJO:record.SUFIJO}]);
     await this.loadAdditionalData(record);
   }
 
@@ -709,9 +710,12 @@ export class Ven213Component
    * Populates form fields with values from a record and sets its persistent source link.
    */
   private populateForm(record: Ven213DevolucionRecord): void {
+    // The select only shows values present in its items: in consulta the items are the record's own document.
+    const documento = record.DOCUMENTO || (record.ID_DOCUMENTO ? `${record.ID_DOCUMENTO}-${record.CONSECUTIVO ?? ''}` : '');
+    this.documents.set([{DOCUMENTO:documento,ID_DOCUMENTO:record.ID_DOCUMENTO,PREFIJO:record.PREFIJO,CONSECUTIVO:record.CONSECUTIVO,SUFIJO:record.SUFIJO}]);
     this.form.reset({
       ...Ven213DefaultRecord,
-      DOCUMENTO: record.DOCUMENTO || '',
+      DOCUMENTO: documento,
       ID_DOCUMENTO: record.ID_DOCUMENTO || '',
       PREFIJO: record.PREFIJO || '',
       CONSECUTIVO: record.CONSECUTIVO || 0,
@@ -936,6 +940,14 @@ export class Ven213Component
         this.notification.warning('No se encontró una dirección del Tipo: Cobro');
       }
     }
+    this.keepAddressOption(this.form.controls.DIRECCION.value);
+  }
+  /**
+   * The address of a devolución comes from its source document and may not match the client's address list
+   * (which usually carries a city suffix): it is offered as its own option so the select can show it.
+   */
+  private keepAddressOption(value:string | null):void {
+    if(value && !this.addresses().some(a=>a.DIRECCION===value))this.addresses.update(list=>[{DIRECCION:value},...list]);
   }
   /** Header totals: Σ of the line amounts (preview; the SP returns the final values). */
   private recalculate():void {
@@ -956,7 +968,8 @@ export class Ven213Component
   /** Lines can be removed, never added. */
   async removeItem(item:number | number[]):Promise<void> {
     if(this.readOnly() || this.loading())return;
-    const answer=await Swal.fire({text:'¿Desea quitar el producto seleccionado de la devolución?',icon:'warning',showCancelButton:true,confirmButtonText:'Quitar',cancelButtonText:'Cancelar'});
+    const count=Array.isArray(item)?item.length:1;
+    const answer=await Swal.fire({text:count>1?`¿Desea quitar los ${count} productos seleccionados de la devolución?`:'¿Desea quitar el producto seleccionado de la devolución?',icon:'warning',showCancelButton:true,confirmButtonText:'Quitar',cancelButtonText:'Cancelar'});
     if(answer.isConfirmed)this.applyItems(this.items().filter(r=>!(Array.isArray(item)?item:[item]).includes(r.ITEM)));
   }
   private applyItems(items:Ven213DevolucionItem[]):boolean {
@@ -1003,7 +1016,8 @@ export class Ven213Component
         return;
       }
       this.activeSetting=option;
-      this.selection.set({titulo:option.TITULO,modoSeleccion:option.MODO,colsConfig:option.COLUMNAS,dataSource:rows});
+      // Room for a full page of the grid (10 rows); the popup caps it at 95vw x 90dvh and the grid scrolls inside.
+      this.selection.set({titulo:option.TITULO,modoSeleccion:option.MODO,colsConfig:option.COLUMNAS,dataSource:rows,width:760,height:640});
       this.selectedSettingsKeys=[];
       this.settingsVisible.set(false);
       this.selectionVisible.set(true);
@@ -1039,7 +1053,7 @@ export class Ven213Component
         ORIGEN_TIPO:link.TIPO,ORIGEN_ID_DOCUMENTO:link.ID_DOCUMENTO,ORIGEN_PREFIJO:link.PREFIJO,ORIGEN_CONSECUTIVO:link.CONSECUTIVO,
         ORIGEN_SUFIJO:link.SUFIJO,ORIGEN_DOCUMENTO:String(source.DOCUMENTO ?? link.ID_DOCUMENTO)},{emitEvent:false});
       await this.loadAddresses();
-      if(values.DIRECCION!==undefined)this.form.controls.DIRECCION.setValue(values.DIRECCION ?? '',{emitEvent:false});
+      if(values.DIRECCION!==undefined){this.form.controls.DIRECCION.setValue(values.DIRECCION ?? '',{emitEvent:false});this.keepAddressOption(values.DIRECCION ?? '');}
       this.items.set(items);
       this.sourceLink.set(link);this.lockHeader();
       this.recalculate();this.workspace.setDirty(this.applicationId,true);this.selectionVisible.set(false);
@@ -1060,6 +1074,7 @@ export class Ven213Component
     this.form.patchValue(before,{emitEvent:false});
     await this.loadAddresses();
     this.form.controls.DIRECCION.setValue(before.DIRECCION ?? '',{emitEvent:false});
+    this.keepAddressOption(before.DIRECCION ?? '');
   }
 
  readonly persistItem=(row:Ven213DevolucionItem)=>this.commitItem(row);
