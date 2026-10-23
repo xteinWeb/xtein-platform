@@ -838,7 +838,6 @@ export class Ven212Component implements OnInit, OnDestroy {
       if (facturas.length > 0) {
         this.records.set(facturas);
         await this.selectRecordIndex(0);
-        this.notification.success(`Se encontraron ${facturas.length} factura(s).`);
       } else {
         this.notification.warning('No se encontraron registros con el criterio especificado.');
       }

@@ -561,11 +561,17 @@ export class Ven229Component implements OnInit, OnDestroy {
   // ================= Toolbar & Commands =================
 
   private publishToolbarState(): void {
+    const isAnulado = this.currentRecord()?.ESTADO === 'ANULADO' || this.form.controls.ESTADO.value === 'ANULADO';
+    const basePerms = this.permissions();
+    const effectivePerms: RecordToolbarPermissions = isAnulado
+      ? { ...basePerms, edit: false, delete: false }
+      : basePerms;
+
     const state = createRecordToolbarState({
       busy: this.busy(),
       applicationId: this.applicationId,
       mode: this.mode(),
-      permissions: this.permissions(),
+      permissions: effectivePerms,
       capabilities: Ven229ToolbarCapabilities,
       currentIndex: this.currentIndex(),
       totalRecords: this.records().length
@@ -822,13 +828,25 @@ export class Ven229Component implements OnInit, OnDestroy {
 
     this.busy.set(true);
     try {
-      await this.service.delete({
+      const res = await this.service.delete({
+        PEDIDOS: {
+          ID_DOCUMENTO: current.ID_DOCUMENTO,
+          PREFIJO: current.PREFIJO || 'SIN',
+          CONSECUTIVO: current.CONSECUTIVO,
+          SUFIJO: current.SUFIJO || 'SIN'
+        },
         DOCUMENTO: current.DOCUMENTO,
         ID_DOCUMENTO: current.ID_DOCUMENTO,
         CONSECUTIVO: current.CONSECUTIVO,
         ID_APLICACION: this.applicationId,
         USUARIO: this.business.identity.USUARIO
       }).toPromise();
+
+      const decoded = this.business.decode<any>(res);
+      if (decoded.length > 0 && decoded[0]?.ErrMensaje) {
+        this.notification.error(decoded[0].ErrMensaje);
+        return;
+      }
 
       this.notification.success('Pedido anulado exitosamente.');
       await this.refresh();
@@ -867,6 +885,11 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.currentIndex.set(index);
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
+
+    this.items.set([]);
+    this.taxItems.set([]);
+    this.taxes.set([]);
+    this.payments.set([]);
 
     const docVal = String(record.DOCUMENTO_FAC || record.DOCUMENTO || `${record.ID_DOCUMENTO}-${record.CONSECUTIVO}`).trim();
     record.DOCUMENTO = docVal;
@@ -933,6 +956,7 @@ export class Ven229Component implements OnInit, OnDestroy {
       this.items.set(record['ITM_PEDIDO'] || record['ITM_Pedido'] || []);
     }
 
+    this.publishToolbarState();
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -979,7 +1003,6 @@ export class Ven229Component implements OnInit, OnDestroy {
       if (users.length > 0) {
         this.records.set(users);
         await this.selectRecordIndex(0);
-        this.notification.success(`Se encontraron ${users.length} pedido(s).`);
       } else {
         this.notification.warning('No se encontraron registros con el criterio especificado.');
       }
@@ -1171,6 +1194,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   }
 
   recalculate(): void {
+    if (this.readOnly()) return;
     const subtotal = this.items().reduce((sum, item) => sum + Number(item.SUB_TOTAL || 0), 0);
     const totalTaxes = this.taxes().reduce((sum, tax) => sum + Number(tax.VALOR || 0), 0);
     const discounts = this.items().reduce((sum, item) => sum + Number(item.VALOR_DESCUENTO || 0), 0);
