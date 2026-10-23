@@ -113,6 +113,11 @@ export class XteinDireccionesComponent implements OnChanges, OnInit {
     Object.assign(this.draft, { ID_UBICACION: value || '', NOMBRE_UBICACION: this.cities.find(row => row.ID_UBICACION === value)?.NOMBRE || '', BARRIO: '', NOMBRE_BARRIO: '', DEPENDIENTE: '', CODIGO_POSTAL: '' });
     this.loadDependents(); this.pendingChange.emit();
   }
+  onTipoDireccionChange(value: unknown): void {
+    if (!this.draft || this.readOnly) return;
+    this.draft.TIPO_DIRECCION = direccionTipos(value);
+    this.pendingChange.emit();
+  }
   changeNeighborhood(value: string | null): void {
     if (!this.draft || this.readOnly || (value || '') === (this.draft.BARRIO || '')) return;
     Object.assign(this.draft, { BARRIO: value || '', NOMBRE_BARRIO: this.neighborhoods.find(row => row.ID_UBICACION === value)?.NOMBRE || '', DEPENDIENTE: '' });
@@ -126,7 +131,7 @@ export class XteinDireccionesComponent implements OnChanges, OnInit {
   private rebuild(): void {
     // Keep the editor model separate: mutating a dataSource row makes DevExtreme
     // recreate its cell template and closes a multiple-selection popup mid-edit.
-    this.rows = this.draft ? [{ ...this.draft, TIPO_DIRECCION: direccionTipos(this.draft.TIPO_DIRECCION) }, ...this.direcciones.filter(row => row.ID_DIRECCION !== this.draft!.ID_DIRECCION)] : [...this.direcciones];
+    this.rows = this.draft ? [{ ...this.draft, TIPO_DIRECCION: direccionTipos(this.draft.TIPO_DIRECCION) }, ...this.direcciones.filter(row => String(row.ID_DIRECCION) !== String(this.draft!.ID_DIRECCION))] : [...this.direcciones];
     this.toolbar = this.readOnly ? [] : [
       { id: 'add-dir', icon: 'plus', title: 'Nueva dirección', variant: 'primary', disabled: !!this.draft, action: () => this.add() },
       { id: 'edit-dir', icon: 'edit', title: this.selected.length === 1 ? 'Editar dirección' : 'Seleccione una dirección para editar', variant: 'secondary', visible: !this.draft, disabled: this.selected.length !== 1, action: () => this.edit(this.direcciones.find(row => row.ID_DIRECCION === this.selected[0])!) },
@@ -138,7 +143,7 @@ export class XteinDireccionesComponent implements OnChanges, OnInit {
   add(): void {
     if (this.readOnly || this.draft) return;
     this.adding = true;
-    this.draft = { ID_DIRECCION: Math.max(0, ...this.direcciones.map(row => row.ID_DIRECCION || 0)) + 1, TIPO_DIRECCION: [], DOMICILIO: '', ID_UBICACION: '', NOMBRE_UBICACION: '', BARRIO: '', DEPENDIENTE: '', REFERENCIA: '', CODIGO_POSTAL: '' };
+    this.draft = { ID_DIRECCION: Math.max(0, ...this.direcciones.map(row => Number(row.ID_DIRECCION) || 0)) + 1, TIPO_DIRECCION: [], DOMICILIO: '', ID_UBICACION: '', NOMBRE_UBICACION: '', BARRIO: '', DEPENDIENTE: '', REFERENCIA: '', CODIGO_POSTAL: '' };
     this.clearDependents(); this.rebuild(); this.grid?.resetView(); this.pendingChange.emit();
   }
   edit(row: XteinDireccion): void {
@@ -155,7 +160,7 @@ export class XteinDireccionesComponent implements OnChanges, OnInit {
     const message = !types.length ? 'Seleccione el tipo de dirección.' : !this.draft.DOMICILIO?.trim() ? 'Ingrese la dirección o domicilio.' : !this.draft.ID_UBICACION ? 'Seleccione la ciudad o municipio.' : '';
     if (message) { this.notification.warning(message); return false; }
     const row = { ...this.draft, TIPO_DIRECCION: types, DOMICILIO: this.draft.DOMICILIO!.trim() };
-    this.direcciones = this.adding ? [...this.direcciones, row] : this.direcciones.map(item => item.ID_DIRECCION === row.ID_DIRECCION ? row : item);
+    this.direcciones = this.adding ? [...this.direcciones, row] : this.direcciones.map(item => String(item.ID_DIRECCION) === String(row.ID_DIRECCION) ? row : item);
     this.draft = null; this.clearDependents(); this.rebuild(); this.direccionesChange.emit(this.direcciones);
     return true;
   }

@@ -104,11 +104,17 @@ export class XteinTelefonosComponent implements OnChanges, OnInit {
     this.rebuild();
   }
 
+  onTipoTelefonoChange(value: unknown): void {
+    if (!this.draft || this.readOnly) return;
+    this.draft.TIPO_TELEFONO = telefonoTipos(value);
+    this.pendingChange.emit();
+  }
+
   private rebuild(): void {
     this.rows = this.draft
       ? [
           { ...this.draft, TIPO_TELEFONO: telefonoTipos(this.draft.TIPO_TELEFONO) },
-          ...this.telefonos.filter(row => row.ID_TELEFONO !== this.draft!.ID_TELEFONO)
+          ...this.telefonos.filter(row => String(row.ID_TELEFONO) !== String(this.draft!.ID_TELEFONO))
         ]
       : [...this.telefonos];
 
@@ -167,7 +173,7 @@ export class XteinTelefonosComponent implements OnChanges, OnInit {
     if (this.readOnly || this.draft) return;
     this.adding = true;
     this.draft = {
-      ID_TELEFONO: Math.max(0, ...this.telefonos.map(row => row.ID_TELEFONO || 0)) + 1,
+      ID_TELEFONO: Math.max(0, ...this.telefonos.map(row => Number(row.ID_TELEFONO) || 0)) + 1,
       TIPO_TELEFONO: [],
       TELEFONO: '',
       EXTENSION: ''
@@ -213,7 +219,7 @@ export class XteinTelefonosComponent implements OnChanges, OnInit {
 
     this.telefonos = this.adding
       ? [...this.telefonos, row]
-      : this.telefonos.map(item => (item.ID_TELEFONO === row.ID_TELEFONO ? row : item));
+      : this.telefonos.map(item => (String(item.ID_TELEFONO) === String(row.ID_TELEFONO) ? row : item));
 
     this.draft = null;
     this.rebuild();

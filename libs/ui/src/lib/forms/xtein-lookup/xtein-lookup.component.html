@@ -5,6 +5,8 @@
   [fieldTemplate]="selectionMode === 'multiple' ? 'xteinLookupSelection' : null"
   [inputAttr]="{id:id,'aria-label':ariaLabel,'aria-required':required.toString()}"
   (onOpened)="onDropDownOpened()"
+  (onHiding)="onDropDownHiding()"
+  (onClosed)="onDropDownClosed()"
   (onValueChanged)="changed($event)" (onFocusOut)="touched()">
   <div *dxTemplate="let data of 'xteinLookupSelection'">
     <dx-text-box [value]="selectionText" [readOnly]="true" [placeholder]="placeholder"

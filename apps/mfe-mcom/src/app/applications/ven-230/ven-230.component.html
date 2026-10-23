@@ -440,11 +440,28 @@
           </div>
         </div>
 
-        <xtein-ven230-items [items]="items()" [products]="products()" [productsLoading]="productsLoading()" [onlyStock]="onlyStock"
-          [recordKey]="itemRecordKey()" [header]="header()"
-          [readOnly]="readOnly()" [ready]="itemsReady()" [busy]="loading()" [conditionType]="conditionType"
-          [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'" [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'" [repeatItem]="enabledSpec('REPETIR ITEM')" [editPrice]="enabledSpec('MODIFICAR PRECIO')"
-          [persist]="persistItem" (removed)="removeItem($event)" (removedMany)="removeItem($event)" (pending)="onItemPending($event)" (stockOnly)="loadProducts($event)" (refreshProducts)="loadProducts()" />
+        <xtein-ven230-items
+          [items]="items()"
+          [products]="products()"
+          [productsLoading]="productsLoading()"
+          [onlyStock]="onlyStock()"
+          [recordKey]="itemRecordKey()"
+          [header]="header()"
+          [readOnly]="readOnly()"
+          [ready]="itemsReady()"
+          [busy]="loading()"
+          [conditionType]="conditionType()"
+          [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'"
+          [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
+          [repeatItem]="enabledSpec('REPETIR ITEM')"
+          [editPrice]="enabledSpec('MODIFICAR PRECIO')"
+          [persist]="persistItemBind"
+          (removed)="removeItem($event)"
+          (removedMany)="removeItem($event)"
+          (pending)="onItemPending($event)"
+          (stockOnly)="loadProducts($event)"
+          (refreshProducts)="loadProducts()"
+        />
 
       </div>
     </div>

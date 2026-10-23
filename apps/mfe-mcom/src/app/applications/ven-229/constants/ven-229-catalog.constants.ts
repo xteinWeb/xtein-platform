@@ -20,5 +20,6 @@ export const Ven229BusinessAction = {
   quantity: 'actualizar cantidad',
   stock: 'EXISTENCIAS PRODUCTO',
   settings: 'acciones settings',
-  load: 'cargar datos'
+  load: 'cargar datos',
+  additional: 'consulta adicionales'
 } as const;

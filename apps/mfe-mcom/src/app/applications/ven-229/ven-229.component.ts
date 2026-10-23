@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   OnDestroy,
@@ -76,13 +77,15 @@ import {
   Ven229PedidoRecord,
   Ven229PedidoItem,
   Ven229PedidoGrav,
+  Ven229PedidoGravAux,
   Ven229PedidoPago
 } from './models/ven-229.model';
 
 import {
   Ven229Header,
   Ven229Lookup,
-  Ven229SettingResult
+  Ven229SettingResult,
+  Ven229Details
 } from './models/ven-229-business.model';
 
 import { Ven229Service } from './services/ven-229.service';
@@ -142,6 +145,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   readonly busy = signal<boolean>(false);
   readonly itemPending = signal<boolean>(false);
   readonly permissions = signal<RecordToolbarPermissions>(DeniedRecordToolbarPermissions);
+  readonly formVersion = signal<number>(0);
 
   // Document details signals
   readonly items = signal<Ven229PedidoItem[]>([]);
@@ -179,6 +183,7 @@ export class Ven229Component implements OnInit, OnDestroy {
   selectedSettingsKeys: unknown[] = [];
   previousCondition = '';
   previousWarehouse = '';
+  previousUnit = '';
   private productRequest = 0;
 
   spec(name: string): Ven229Lookup | undefined {
@@ -205,7 +210,10 @@ export class Ven229Component implements OnInit, OnDestroy {
     return idx >= 0 && idx < list.length ? list[idx] : null;
   });
 
-  readonly header = computed(() => this.form.getRawValue() as Ven229Header);
+  readonly header = computed(() => {
+    this.formVersion();
+    return this.form.getRawValue() as Ven229Header;
+  });
   readonly headerLocked = computed(() => this.items().length > 0);
   readonly advances = computed(() => this.payments().reduce((sum, p) => sum + Number(p.VALOR || p.TOTAL || 0), 0));
   readonly totalTaxes = computed(() => this.taxes().reduce((sum, t) => sum + Number(t.VALOR || 0), 0));
@@ -215,9 +223,11 @@ export class Ven229Component implements OnInit, OnDestroy {
   );
 
   readonly stateStyle = computed<Record<string, string>>(() => {
+    this.formVersion();
+    const estado = String(this.form.controls.ESTADO?.value || '').toUpperCase().trim();
     try {
       const styles = JSON.parse(this.spec('ESTILOS ESTADO')?.VALOR_DEFECTO || '[]');
-      const match = styles.find((s: Record<string, string>) => s['ESTADO'] === this.form.controls.ESTADO.value);
+      const match = styles.find((s: Record<string, string>) => String(s['ESTADO'] || '').toUpperCase() === estado);
       if (match) {
         const color = match['color'] || match['COLOR'];
         const background = match['background'] || match['BG'];
@@ -227,20 +237,40 @@ export class Ven229Component implements OnInit, OnDestroy {
         return res;
       }
     } catch {}
-    const estado = this.form.controls.ESTADO.value;
     switch (estado) {
-      case 'REGISTRADO': return { background: '#e8f5e8', color: '#2e7d32' };
+      case 'REGISTRADO': return { background: '#e8f5e8', color: '#2e7d32', border: '1px solid #c8e6c9' };
       case 'AUTORIZADO': return { background: 'rgb(132, 223, 170)', color: '#065f46' };
       case 'PARCIAL': return { background: 'rgb(240, 152, 217)', color: '#831843' };
-      case 'ANULADO': return { background: 'rgb(242, 161, 169)', color: '#991b1b' };
+      case 'ANULADO': return { background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' };
       case 'PROGRAMADO': return { background: 'rgba(172, 200, 255, 1)', color: '#1e40af' };
       default: return { background: '#f1f5f9', color: '#475569' };
     }
   });
 
   readonly itemsReady = computed(() => {
+    this.formVersion();
     const h = this.header();
-    return !!(h.DOCUMENTO && h.ID_CLIENTE && h.ID_UN_ITEM && h.ID_ADC && h.ID_CONDICION && h.ID_MONEDA);
+    const tipoVenta = String(h.TIPO_VENTA || 'CONTADO').trim().toUpperCase();
+    const plazoValid = tipoVenta === 'CONTADO'
+      ? true
+      : (h.PLAZO !== null && h.PLAZO !== undefined && String(h.PLAZO).trim() !== '');
+
+    const docValid = Boolean(h.DOCUMENTO && String(h.DOCUMENTO).trim() !== '');
+    const clientValid = Boolean(h.ID_CLIENTE && String(h.ID_CLIENTE).trim() !== '');
+    const fechaValid = Boolean(h.FECHA && String(h.FECHA).trim() !== '');
+    const unValid = Boolean(h.ID_UN_ITEM && String(h.ID_UN_ITEM).trim() !== '');
+    const adcValid = Boolean(h.ID_ADC && String(h.ID_ADC).trim() !== '');
+    const condValid = Boolean(h.ID_CONDICION && String(h.ID_CONDICION).trim() !== '');
+
+    return Boolean(
+      docValid &&
+      clientValid &&
+      fechaValid &&
+      unValid &&
+      adcValid &&
+      condValid &&
+      plazoValid
+    );
   });
 
   readonly itemRecordKey = computed(() => {
@@ -251,9 +281,13 @@ export class Ven229Component implements OnInit, OnDestroy {
   });
 
   readonly conditionType = computed(() => {
-    const condId = this.form.controls.ID_CONDICION.value;
-    const cond = this.conditions().find(c => c['CODIGO'] === condId || c['ID_CONDICION'] === condId);
-    return String(cond?.['TIPO'] || '');
+    const condId = String(this.form.controls.ID_CONDICION.value || '').trim();
+    if (!condId) return 'CONDICION';
+    const cond = this.conditions().find(c =>
+      String(c['CODIGO'] || c['ID_CONDICION'] || '').trim() === condId
+    );
+    const tipo = String(cond?.['TIPO'] || '').trim().toUpperCase();
+    return tipo === 'LISTA' ? 'LISTA' : 'CONDICION';
   });
 
   readonly persistItemBind = (row: Ven229PedidoItem): Promise<boolean> => this.persistItem(row);
@@ -331,12 +365,22 @@ export class Ven229Component implements OnInit, OnDestroy {
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
-    private readonly elementRef: ElementRef
+    private readonly elementRef: ElementRef,
+    private readonly cdr: ChangeDetectorRef
   ) {
 
     // Toolbar state synchronization
     effect(() => {
       this.publishToolbarState();
+    });
+
+    // Ensure OnPush ChangeDetection triggers when formVersion, itemsReady, mode or readOnly updates
+    effect(() => {
+      this.formVersion();
+      this.itemsReady();
+      this.mode();
+      this.readOnly();
+      this.cdr.markForCheck();
     });
 
     // Close overlays on tab focus change
@@ -381,14 +425,19 @@ export class Ven229Component implements OnInit, OnDestroy {
       })
     );
 
+    // Watch form value changes to trigger reactive computations
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        this.formVersion.update(v => v + 1);
+        this.cdr.markForCheck();
+      })
+    );
+
     // Watch client changes
     this.subscriptions.add(
       this.form.controls.ID_CLIENTE.valueChanges.subscribe(clienteId => {
-        if (clienteId && !this.readOnly()) {
-          void this.onClientChanged(clienteId);
-        } else if (!clienteId && !this.readOnly()) {
-          this.addresses.set([]);
-          this.form.patchValue({ DIRECCION: '', NOMBRE_CLIENTE: '' }, { emitEvent: false });
+        if (!this.readOnly()) {
+          void this.onClientChanged(clienteId || '');
         }
       })
     );
@@ -396,8 +445,8 @@ export class Ven229Component implements OnInit, OnDestroy {
     // Watch UN changes
     this.subscriptions.add(
       this.form.controls.ID_UN_ITEM.valueChanges.subscribe(unId => {
-        if (unId && !this.readOnly()) {
-          void this.onUnitChanged(unId);
+        if (!this.readOnly()) {
+          void this.handleUnitChange(unId || '');
         }
       })
     );
@@ -445,6 +494,7 @@ export class Ven229Component implements OnInit, OnDestroy {
           this.form.controls.FECHA_PRIMER_VENC.enable({ emitEvent: false });
           this.form.controls.CUOTA_INICIAL.enable({ emitEvent: false });
         }
+        this.formVersion.update(v => v + 1);
         if (!this.readOnly()) {
           void this.loadConditions();
         }
@@ -512,11 +562,17 @@ export class Ven229Component implements OnInit, OnDestroy {
   // ================= Toolbar & Commands =================
 
   private publishToolbarState(): void {
+    const isAnulado = this.currentRecord()?.ESTADO === 'ANULADO' || this.form.controls.ESTADO.value === 'ANULADO';
+    const basePerms = this.permissions();
+    const effectivePerms: RecordToolbarPermissions = isAnulado
+      ? { ...basePerms, edit: false, delete: false }
+      : basePerms;
+
     const state = createRecordToolbarState({
       busy: this.busy(),
       applicationId: this.applicationId,
       mode: this.mode(),
-      permissions: this.permissions(),
+      permissions: effectivePerms,
       capabilities: Ven229ToolbarCapabilities,
       currentIndex: this.currentIndex(),
       totalRecords: this.records().length
@@ -594,6 +650,7 @@ export class Ven229Component implements OnInit, OnDestroy {
       SUFIJO: String(row.SUFIJO || ''),
       DOCUMENTO_FAC: value
     }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
   }
 
   async newRecord(): Promise<void> {
@@ -604,6 +661,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
     this.previousCondition = '';
     this.previousWarehouse = '';
+    this.previousUnit = this.defaultUnit || '';
     this.items.set([]);
     this.taxes.set([]);
     this.taxItems.set([]);
@@ -612,6 +670,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.products.set([]);
     this.conditions.set([]);
     this.terms.set([]);
+    this.warehouses.set([]);
 
     // Query fresh document consecutive from backend on new record
     try {
@@ -628,8 +687,13 @@ export class Ven229Component implements OnInit, OnDestroy {
       FECHA_PRIMER_VENC: this.todayDate(),
       USUARIO: this.business.identity.USUARIO,
       ID_UN_ITEM: this.defaultUnit,
-      ID_MONEDA: this.defaultCurrency
+      ID_MONEDA: this.defaultCurrency,
+      TIPO_VENTA: 'CONTADO',
+      PLAZO: 0,
+      CUOTA_INICIAL: 0,
+      ESTADO: 'REGISTRADO'
     });
+    this.formVersion.update(v => v + 1);
 
     if (this.documents().length === 1) {
       this.selectDocument(String(this.documents()[0].DOCUMENTO));
@@ -725,15 +789,13 @@ export class Ven229Component implements OnInit, OnDestroy {
       this.disableFormControls();
 
       // Refresh to newly saved document
-      const queryResult = await this.business.catalog('documents', {
-        ID_DOCUMENTO: savedDoc.ID_DOCUMENTO,
-        CONSECUTIVO: savedDoc.CONSECUTIVO
-      });
-      if (queryResult.length > 0) {
-        const fullRecords = await this.queryDocument(savedDoc.ID_DOCUMENTO, savedDoc.CONSECUTIVO);
+      const docId = savedDoc.ID_DOCUMENTO || headerData.ID_DOCUMENTO;
+      const docConsec = savedDoc.CONSECUTIVO ?? headerData.CONSECUTIVO;
+      if (docId && docConsec != null) {
+        const fullRecords = await this.queryDocument(docId, Number(docConsec));
         if (fullRecords.length > 0) {
           this.records.set(fullRecords);
-          this.selectRecordIndex(0);
+          await this.selectRecordIndex(0);
         }
       }
     } catch (err: unknown) {
@@ -767,13 +829,25 @@ export class Ven229Component implements OnInit, OnDestroy {
 
     this.busy.set(true);
     try {
-      await this.service.delete({
+      const res = await this.service.delete({
+        PEDIDOS: {
+          ID_DOCUMENTO: current.ID_DOCUMENTO,
+          PREFIJO: current.PREFIJO || 'SIN',
+          CONSECUTIVO: current.CONSECUTIVO,
+          SUFIJO: current.SUFIJO || 'SIN'
+        },
         DOCUMENTO: current.DOCUMENTO,
         ID_DOCUMENTO: current.ID_DOCUMENTO,
         CONSECUTIVO: current.CONSECUTIVO,
         ID_APLICACION: this.applicationId,
         USUARIO: this.business.identity.USUARIO
       }).toPromise();
+
+      const decoded = this.business.decode<any>(res);
+      if (decoded.length > 0 && decoded[0]?.ErrMensaje) {
+        this.notification.error(decoded[0].ErrMensaje);
+        return;
+      }
 
       this.notification.success('Pedido anulado exitosamente.');
       await this.refresh();
@@ -794,7 +868,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         const list = [...this.records()];
         list[this.currentIndex()] = refreshed[0];
         this.records.set(list);
-        this.selectRecordIndex(this.currentIndex());
+        await this.selectRecordIndex(this.currentIndex());
         this.notification.success('Registro actualizado.');
       }
     } catch (err: unknown) {
@@ -805,7 +879,7 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   // ================= Navigation & Records =================
 
-  selectRecordIndex(index: number): void {
+  async selectRecordIndex(index: number): Promise<void> {
     const list = this.records();
     if (index < 0 || index >= list.length) return;
     const record = list[index];
@@ -813,11 +887,20 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
 
-    if (record.DOCUMENTO && !this.documents().some(d => d.DOCUMENTO === record.DOCUMENTO)) {
+    this.items.set([]);
+    this.taxItems.set([]);
+    this.taxes.set([]);
+    this.payments.set([]);
+
+    const docVal = String(record.DOCUMENTO_FAC || record.DOCUMENTO || `${record.ID_DOCUMENTO}-${record.CONSECUTIVO}`).trim();
+    record.DOCUMENTO = docVal;
+    record.DOCUMENTO_FAC = docVal;
+
+    if (docVal && !this.documents().some(d => d.DOCUMENTO === docVal)) {
       this.documents.update(docs => [
         ...docs,
         {
-          DOCUMENTO: record.DOCUMENTO_FAC || record.DOCUMENTO,
+          DOCUMENTO: docVal,
           ID_DOCUMENTO: record.ID_DOCUMENTO,
           CONSECUTIVO: record.CONSECUTIVO
         }
@@ -827,18 +910,21 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.form.reset({
       ...Ven229DefaultRecord,
       ...record,
+      DOCUMENTO: docVal,
+      DOCUMENTO_FAC: docVal,
       FECHA: record.FECHA ? String(record.FECHA).slice(0, 10) : null,
       FECHA_REGISTRO: record.FECHA_REGISTRO ? String(record.FECHA_REGISTRO).slice(0, 10) : null,
       FECHA_OC: record.FECHA_OC ? String(record.FECHA_OC).slice(0, 10) : null,
       FECHA_PRIMER_VENC: record.FECHA_PRIMER_VENC ? String(record.FECHA_PRIMER_VENC).slice(0, 10) : null
     }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
 
-    this.items.set(record['ITM_PEDIDO'] || record['ITM_Pedido'] || []);
     this.taxes.set(record.PEDIDO_GRAV || record.Pedido_GRAV || []);
     this.payments.set(record.PEDIDO_PAGOS || record.Pedido_PAGOS || []);
 
     this.previousCondition = record.ID_CONDICION ? String(record.ID_CONDICION).trim() : '';
     this.previousWarehouse = record.ID_UN_BODEGA ? String(record.ID_UN_BODEGA).trim() : '';
+    this.previousUnit = record.ID_UN_ITEM ? String(record.ID_UN_ITEM).trim() : '';
 
     if (record.ID_ADC) {
       void this.loadConditions().then(() => {
@@ -854,6 +940,24 @@ export class Ven229Component implements OnInit, OnDestroy {
       void this.onClientChanged(record.ID_CLIENTE);
     }
 
+    // Load items and additional details for this order
+    try {
+      const details = await this.business.action<Ven229Details>('additional', {
+        ID_DOCUMENTO: record.ID_DOCUMENTO,
+        CONSECUTIVO: record.CONSECUTIVO
+      });
+      const adicionales = details[0] || {};
+      const itms = (adicionales.ITM_PEDIDO || adicionales.ITM_Pedido || []) as Ven229PedidoItem[];
+      this.items.set(itms);
+      if (adicionales.PEDIDO_GRAV_AUX) {
+        this.taxItems.set(adicionales.PEDIDO_GRAV_AUX);
+      }
+    } catch (e) {
+      console.error('Error loading additional order items:', e);
+      this.items.set(record['ITM_PEDIDO'] || record['ITM_Pedido'] || []);
+    }
+
+    this.publishToolbarState();
     this.workspace.setDirty(this.applicationId, false);
   }
 
@@ -869,16 +973,21 @@ export class Ven229Component implements OnInit, OnDestroy {
       case 'last': target = total - 1; break;
     }
     if (target !== this.currentIndex()) {
-      this.selectRecordIndex(target);
+      void this.selectRecordIndex(target);
     }
   }
 
   selectViewedRecord(record: unknown): void {
     this.viewVisible.set(false);
     const rec = record as Ven229PedidoRecord;
-    const idx = this.records().findIndex(r => r.DOCUMENTO === rec?.DOCUMENTO);
+    const docVal = String(rec?.DOCUMENTO_FAC || rec?.DOCUMENTO || `${rec?.ID_DOCUMENTO}-${rec?.CONSECUTIVO}`).trim();
+    const idx = this.records().findIndex(r =>
+      r.DOCUMENTO === docVal ||
+      r.DOCUMENTO_FAC === docVal ||
+      (r.ID_DOCUMENTO === rec?.ID_DOCUMENTO && Number(r.CONSECUTIVO) === Number(rec?.CONSECUTIVO))
+    );
     if (idx >= 0) {
-      this.selectRecordIndex(idx);
+      void this.selectRecordIndex(idx);
     }
   }
 
@@ -886,13 +995,15 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.filterVisible.set(false);
     this.busy.set(true);
     try {
-      const prm = { PEDIDOS: result?.ESTRUCTURA ?? [] };
+      const prm = { PEDIDO: result?.ESTRUCTURA ?? [] };
       const response = await this.service.query('consulta', prm).toPromise();
-      const users = this.business.decode<Ven229PedidoRecord>(response);
+      const users = this.business.decode<Ven229PedidoRecord>(response).map(r => {
+        const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+        return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+      });
       if (users.length > 0) {
         this.records.set(users);
-        this.selectRecordIndex(0);
-        this.notification.success(`Se encontraron ${users.length} pedido(s).`);
+        await this.selectRecordIndex(0);
       } else {
         this.notification.warning('No se encontraron registros con el criterio especificado.');
       }
@@ -937,26 +1048,95 @@ export class Ven229Component implements OnInit, OnDestroy {
     await this.removeItem(itemNums);
   }
 
-  async applyItems(updatedItems: Ven229PedidoItem[], option = 'items'): Promise<boolean> {
+  async applyItems(updatedItems: Ven229PedidoItem[], option?: string): Promise<boolean> {
     if (this.readOnly() || this.busy()) return false;
     this.busy.set(true);
     try {
-      const taxResults = await this.business.taxes(this.header(), updatedItems.map(row => ({ ...row, APLICACION: 2 })), option);
-      const tax = taxResults[0];
-      if (!tax) throw new Error('El servidor no devolvió la liquidación de gravámenes.');
-      this.taxes.set(tax.ENCAB ?? []);
-      this.taxItems.set(tax.ITEMS ?? []);
-      this.items.set(updatedItems.map(row => {
-        const value = tax.ITEMS?.find(i => i.ITEM === row.ITEM);
-        return value ? {
+      const currentHeader = this.header();
+      const sanitizedHeader: Ven229Header = {
+        ...currentHeader,
+        FECHA: currentHeader.FECHA || new Date().toISOString().slice(0, 10),
+        FECHA_REGISTRO: currentHeader.FECHA_REGISTRO || currentHeader.FECHA || new Date().toISOString().slice(0, 10)
+      };
+
+      const sanitizedItems: Ven229PedidoItem[] = updatedItems.map(row => {
+        const qty = Number(row.CANTIDAD || 0);
+        const price = Number(row.VALOR_UNITARIO || 0);
+        const subTotal = qty * price;
+        const discount = Number(row.VALOR_DESCUENTO || 0);
+        const base = subTotal - discount;
+
+        let porIva = Number(row.POR_IVA != null ? row.POR_IVA : (Number(row.PORC_IVA || 0) * 100));
+        if (!Number.isFinite(porIva)) porIva = 0;
+        const effectiveRate = porIva / 100;
+        const valorIva = base * effectiveRate;
+        const total = base + valorIva;
+
+        let taxObj: Record<string, unknown> | null = null;
+        if (row.GRAV_ORG && typeof row.GRAV_ORG === 'object' && !Array.isArray(row.GRAV_ORG) && 'ID_TASA' in row.GRAV_ORG) {
+          taxObj = row.GRAV_ORG as Record<string, unknown>;
+        } else if (row.GRAVAMENES && typeof row.GRAVAMENES === 'object' && !Array.isArray(row.GRAVAMENES) && 'ID_TASA' in row.GRAVAMENES) {
+          taxObj = row.GRAVAMENES as Record<string, unknown>;
+        }
+
+        if (!taxObj) {
+          taxObj = {
+            ID_TASA: porIva === 0 ? 'IV-000' : 'IV-GEN',
+            DESCRIPCION: porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA',
+            PORCENTAJE: porIva,
+            VALOR_BASE: porIva === 0 ? 0 : 1
+          };
+        } else {
+          taxObj = {
+            ...taxObj,
+            PORCENTAJE: porIva
+          };
+        }
+
+        return {
           ...row,
-          VALOR_IVA: value.VALOR_IVA,
-          SUB_TOTAL: value.SUB_TOTAL,
-          TOTAL: value.TOTAL,
-          GRAVAMENES: value.GRAV_TOTAL != null ? String(value.GRAV_TOTAL) : row.GRAVAMENES,
-          GRAV_TOTAL: value.GRAV_TOTAL
-        } : row;
+          APLICACION: 2,
+          CANTIDAD: qty,
+          VALOR_UNITARIO: price,
+          VALOR_DESCUENTO: discount,
+          VALOR_COSTOS: Number(row.VALOR_COSTOS || 0),
+          VALOR_BASE: Number(row.VALOR_BASE || 0),
+          SUB_TOTAL: subTotal,
+          POR_IVA: porIva,
+          PORC_IVA: effectiveRate,
+          VALOR_IVA: valorIva,
+          TOTAL: total,
+          GRAV_ORG: taxObj,
+          GRAVAMENES: taxObj
+        };
+      });
+
+      let serverEncab: Ven229PedidoGrav[] = [];
+      let serverItems: Ven229PedidoItem[] = [];
+      try {
+        const taxResults = await this.business.taxes(sanitizedHeader, sanitizedItems, option);
+        const tax = taxResults[0];
+        if (tax) {
+          serverEncab = tax.ENCAB ?? [];
+          serverItems = tax.ITEMS ?? [];
+        }
+      } catch (err) {
+        console.warn('Error calculando gravámenes en servidor:', err);
+      }
+
+      this.taxItems.set(serverItems);
+
+      // Preserve each item's individual values strictly, storing server GRAV_TOTAL if returned
+      this.items.set(sanitizedItems.map(row => {
+        const value = serverItems.find(i => i.ITEM === row.ITEM);
+        return {
+          ...row,
+          GRAV_TOTAL: value?.GRAV_TOTAL ?? row.GRAV_TOTAL
+        };
       }));
+
+      // Totalize taxes by individual applied rates across all rows for RESUMEN
+      this.updateSummaryTaxes(sanitizedItems, serverEncab);
       this.recalculate();
       this.workspace.setDirty(this.applicationId, true);
       return true;
@@ -968,7 +1148,54 @@ export class Ven229Component implements OnInit, OnDestroy {
     }
   }
 
+  private updateSummaryTaxes(items: Ven229PedidoItem[], serverEncab: Ven229PedidoGrav[]): void {
+    if (!items.length) {
+      this.taxes.set([]);
+      return;
+    }
+
+    const ivaGroups = new Map<number, { valor: number; base: number; idTasa: string; descripcion: string }>();
+    for (const item of items) {
+      const pct = Number(item.POR_IVA || 0);
+      const current = ivaGroups.get(pct) ?? {
+        valor: 0,
+        base: 0,
+        idTasa: pct === 0 ? 'IV-000' : 'IV-GEN',
+        descripcion: pct === 0 ? 'Sin iva' : 'Tarifa general del IVA'
+      };
+      current.valor += Number(item.VALOR_IVA || 0);
+      current.base += Number(item.SUB_TOTAL || 0) - Number(item.VALOR_DESCUENTO || 0);
+      const taxObj = item.GRAVAMENES as { ID_TASA?: string; DESCRIPCION?: string } | undefined;
+      if (taxObj?.ID_TASA) current.idTasa = taxObj.ID_TASA;
+      if (taxObj?.DESCRIPCION) current.descripcion = taxObj.DESCRIPCION;
+      ivaGroups.set(pct, current);
+    }
+
+    const summaryTaxes: Ven229PedidoGrav[] = [];
+    const sortedPcts = Array.from(ivaGroups.keys()).sort((a, b) => b - a);
+    for (const pct of sortedPcts) {
+      const g = ivaGroups.get(pct)!;
+      summaryTaxes.push({
+        CLASE: 'IVA',
+        ID_TASA: g.idTasa,
+        POR_TASA: pct,
+        VALOR: g.valor,
+        BASE: g.base
+      });
+    }
+
+    // Include other taxes/retentions (e.g., ReteFuente, ReteIva, ICA) from serverEncab
+    for (const enc of serverEncab) {
+      if (enc.CLASE && enc.CLASE !== 'IVA') {
+        summaryTaxes.push(enc);
+      }
+    }
+
+    this.taxes.set(summaryTaxes);
+  }
+
   recalculate(): void {
+    if (this.readOnly()) return;
     const subtotal = this.items().reduce((sum, item) => sum + Number(item.SUB_TOTAL || 0), 0);
     const totalTaxes = this.taxes().reduce((sum, tax) => sum + Number(tax.VALOR || 0), 0);
     const discounts = this.items().reduce((sum, item) => sum + Number(item.VALOR_DESCUENTO || 0), 0);
@@ -982,60 +1209,94 @@ export class Ven229Component implements OnInit, OnDestroy {
       TOTAL: total,
       VALOR_CUOTA: cuota
     }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
   }
 
   // ================= Catalog Handlers =================
 
   async onClientChanged(clienteId: string): Promise<void> {
-    const cli = this.clients().find(c => c.ID_CLIENTE === clienteId);
+    if (!this.readOnly()) {
+      this.addresses.set([]);
+      this.form.patchValue({ NOMBRE_CLIENTE: '', DIRECCION: '' });
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    const cleanId = String(clienteId || '').trim();
+    if (!cleanId) {
+      return;
+    }
+    const cli = this.clients().find(c => String(c.ID_CLIENTE || '').trim() === cleanId);
     if (cli) {
       this.form.patchValue({
         NOMBRE_CLIENTE: String(cli.NOMBRE_COMPLETO || cli.NOMBRE || '')
-      }, { emitEvent: false });
+      });
     }
 
     try {
-      const addresses = await this.business.catalog('addresses', { ID_CLIENTE: clienteId });
-      this.addresses.set(addresses || []);
-      if (addresses && addresses.length > 0) {
-        const preferred = addresses.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('despacho')) || addresses[0];
-        this.form.patchValue({ DIRECCION: String(preferred.DIRECCION || '') }, { emitEvent: false });
-      } else {
-        this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
-        if (!this.readOnly()) {
+      const addresses = await this.business.catalog('addresses', { ID_CLIENTE: cleanId }, true);
+      const formatted = (addresses || []).filter(a => a && (a.DIRECCION || a['ID_DIRECCION']));
+      this.addresses.set(formatted);
+      if (!this.readOnly()) {
+        if (formatted.length > 0) {
+          const preferred = formatted.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('despacho')) || formatted[0];
+          this.form.patchValue({ DIRECCION: String(preferred.DIRECCION || preferred['ID_DIRECCION'] || '') });
+        } else {
+          this.form.patchValue({ DIRECCION: '' });
           this.notification.warning('No se encontró una dirección del Tipo: Despacho');
         }
       }
     } catch {
       this.addresses.set([]);
-      this.form.patchValue({ DIRECCION: '' }, { emitEvent: false });
+      this.form.patchValue({ DIRECCION: '' });
       if (!this.readOnly()) {
         this.notification.warning('No se encontró una dirección del Tipo: Despacho');
       }
+    } finally {
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     }
   }
 
   async onUnitChanged(unitId: string): Promise<void> {
+    if (!this.readOnly()) {
+      this.warehouses.set([]);
+      this.form.patchValue({ ID_UN_BODEGA: '' });
+      this.products.set([]);
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    const cleanId = String(unitId || '').trim();
+    if (!cleanId) {
+      return;
+    }
     try {
       const warehouses = await this.business.catalog('warehouses', {
         ESTADO: 'ACTIVO',
         MOVIMIENTO: 'PEDIDO',
-        ID_UN_ITEM: unitId,
+        ID_UN_ITEM: cleanId,
         USUARIO: this.business.identity.USUARIO
-      });
+      }, true);
       const formatted = warehouses.map(r => ({
         ...r,
-        ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? ''),
-        DESCRIPCION: String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),
-        NOMBRE_UN: String(r['NOMBRE_UN'] ?? ''),
-        BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))
-      }));
+        ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? '').trim(),
+        DESCRIPCION: String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? '').trim(),
+        NOMBRE_UN: String(r['NOMBRE_UN'] ?? '').trim(),
+        BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? '')).trim()
+      })).filter(r => r.ID_UN_BODEGA);
       this.warehouses.set(formatted);
-      if (formatted.length > 0 && !this.form.controls.ID_UN_BODEGA.value) {
-        this.form.patchValue({ ID_UN_BODEGA: formatted[0].ID_UN_BODEGA }, { emitEvent: false });
+      if (!this.readOnly()) {
+        const nextBodega = formatted.length > 0 ? formatted[0].ID_UN_BODEGA : '';
+        this.form.patchValue({ ID_UN_BODEGA: nextBodega });
       }
     } catch {
-      // Non-critical
+      this.warehouses.set([]);
+      this.form.patchValue({ ID_UN_BODEGA: '' });
+    } finally {
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+      if (!this.readOnly() && this.form.controls.ID_CONDICION.value) {
+        void this.loadProducts();
+      }
     }
   }
 
@@ -1106,11 +1367,47 @@ export class Ven229Component implements OnInit, OnDestroy {
     }
   }
 
+  async handleUnitChange(newUnit: string): Promise<void> {
+    if (this.previousUnit && this.previousUnit !== newUnit && this.items().length > 0) {
+      const result = await Swal.fire({
+        text: `Está cambiando la Unidad de Negocio ${this.previousUnit} por ${newUnit}, esto borrará los Productos asociados, ¿Desea Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DF3E3E',
+        cancelButtonColor: '#0F4C81',
+        confirmButtonText: 'Sí, Borrar',
+        cancelButtonText: 'No'
+      });
+
+      if (result.isConfirmed) {
+        this.items.set([]);
+        this.taxes.set([]);
+        this.taxItems.set([]);
+        this.recalculate();
+        this.previousUnit = newUnit;
+        await this.onUnitChanged(newUnit);
+      } else {
+        this.form.controls.ID_UN_ITEM.setValue(this.previousUnit, { emitEvent: false });
+        return;
+      }
+    } else {
+      this.previousUnit = newUnit;
+      await this.onUnitChanged(newUnit);
+    }
+  }
+
   async loadConditions(): Promise<void> {
     const adc = this.form.controls.ID_ADC.value;
     const tipo = this.form.controls.TIPO_VENTA.value || 'CONTADO';
-    if (!adc) {
+    if (!this.readOnly()) {
       this.conditions.set([]);
+      this.terms.set([]);
+      this.products.set([]);
+      this.form.patchValue({ ID_CONDICION: '', PLAZO: 0 });
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    if (!adc || !tipo) {
       return;
     }
     try {
@@ -1120,35 +1417,59 @@ export class Ven229Component implements OnInit, OnDestroy {
         ESTADO: 'ACTIVO'
       }, true);
       const rows = raw.map(r => {
-        const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '');
+        const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '').trim();
         return {
           ...r,
           CODIGO: code,
           ID_CONDICION: code,
-          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code)
+          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code).trim(),
+          TIPO: String(r['TIPO'] ?? 'CONDICION').trim()
         };
       }).filter(r => r.CODIGO && r.CODIGO !== 'null');
 
       this.conditions.set(rows);
 
-      if (raw.length > 0 && raw[0]['CODIGO'] === null) {
-        this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
-      }
-
-      const current = this.form.controls.ID_CONDICION.value;
-      if (rows.length === 1 && (!current || !rows.some(r => r.CODIGO === current))) {
-        this.form.patchValue({ ID_CONDICION: rows[0].CODIGO });
-      } else if (current && !rows.some(r => r.CODIGO === current)) {
-        this.form.patchValue({ ID_CONDICION: '' });
-        this.terms.set([]);
+      if (rows.length === 0) {
+        if (!this.readOnly()) {
+          this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
+        }
+      } else if (!this.readOnly()) {
+        const defaultCond = rows[0].CODIGO;
+        this.form.patchValue({ ID_CONDICION: defaultCond });
+        await this.onConditionChanged(defaultCond);
       }
     } catch {
       this.conditions.set([]);
+      this.terms.set([]);
+      this.products.set([]);
+      this.form.patchValue({ ID_CONDICION: '', PLAZO: 0 });
+      if (!this.readOnly()) {
+        this.notification.warning('El Vendedor seleccionado no tiene Condiciones de Venta asociadas');
+      }
+    } finally {
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     }
   }
 
   async onConditionChanged(condId: string): Promise<void> {
-    const cond = this.conditions().find(c => c['CODIGO'] === condId || c['ID_CONDICION'] === condId);
+    if (!this.readOnly()) {
+      this.terms.set([]);
+      this.products.set([]);
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+    }
+    const cleanId = String(condId || '').trim();
+    if (!cleanId) {
+      this.form.patchValue({ PLAZO: 0 });
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const cond = this.conditions().find(c =>
+      String(c['CODIGO'] || c['ID_CONDICION'] || '').trim() === cleanId
+    );
     if (cond) {
       const plazosRaw = cond['PLAZOS'];
       let plazoList: { PLAZO: number }[] = [];
@@ -1174,7 +1495,7 @@ export class Ven229Component implements OnInit, OnDestroy {
         this.form.patchValue({
           PLAZO: 0,
           FECHA_PRIMER_VENC: this.form.controls.FECHA.value
-        }, { emitEvent: false });
+        });
       } else {
         if (cond['DIAS_VENC']) {
           const fechaBase = this.form.controls.FECHA.value ? new Date(this.form.controls.FECHA.value + 'T00:00:00') : new Date();
@@ -1184,36 +1505,47 @@ export class Ven229Component implements OnInit, OnDestroy {
             String(fechaBase.getMonth() + 1).padStart(2, '0'),
             String(fechaBase.getDate()).padStart(2, '0')
           ].join('-');
-          this.form.patchValue({ FECHA_PRIMER_VENC: vencStr }, { emitEvent: false });
+          this.form.patchValue({ FECHA_PRIMER_VENC: vencStr });
         }
-        if (plazoList.length === 1) {
-          this.form.patchValue({ PLAZO: plazoList[0].PLAZO }, { emitEvent: false });
+        if (!this.readOnly()) {
+          const defaultPlazo = plazoList.length > 0 ? plazoList[0].PLAZO : 0;
+          this.form.patchValue({ PLAZO: defaultPlazo });
         }
       }
+    } else {
+      this.form.patchValue({ PLAZO: 0 });
     }
+    this.formVersion.update(v => v + 1);
+    this.cdr.markForCheck();
     await this.loadProducts();
   }
 
   async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
     this.onlyStock.set(stockOnly);
     const req = ++this.productRequest;
-    const h = this.header();
-    if (!h.ID_CONDICION) {
+    const condId = String(this.form.controls.ID_CONDICION.value || '').trim();
+    if (!condId) {
       this.products.set([]);
       this.productsLoading.set(false);
+      this.cdr.markForCheck();
       return;
     }
     this.productsLoading.set(true);
+    this.cdr.markForCheck();
     try {
+      const tipo = this.conditionType();
+      const plazoVal = this.form.controls.PLAZO.value ?? 0;
+      const bodegaVal = String(this.form.controls.ID_UN_BODEGA.value || '').trim();
+
       const items = await this.business.catalog('products', {
-        ID_LISTA: h.ID_CONDICION,
-        TIPO: this.conditionType(),
-        PLAZO: h.PLAZO,
+        ID_LISTA: condId,
+        TIPO: tipo || 'CONDICION',
+        PLAZO: Number(plazoVal) || 0,
         CON_EXIS: stockOnly ? 'SI' : undefined,
-        ID_UN_BODEGA: h.ID_UN_BODEGA
+        ID_UN_BODEGA: bodegaVal || undefined
       }, true);
       if (req === this.productRequest) {
-        this.products.set(items);
+        this.products.set(items || []);
       }
     } catch {
       if (req === this.productRequest) {
@@ -1222,6 +1554,7 @@ export class Ven229Component implements OnInit, OnDestroy {
     } finally {
       if (req === this.productRequest) {
         this.productsLoading.set(false);
+        this.cdr.markForCheck();
       }
     }
   }
@@ -1308,13 +1641,17 @@ export class Ven229Component implements OnInit, OnDestroy {
 
   private async queryDocument(idDoc: string, consecutivo: number): Promise<Ven229PedidoRecord[]> {
     const prm = {
-      PEDIDOS: [
+      PEDIDO: [
         { CAMPO: 'ID_DOCUMENTO', EXPRESION: idDoc, TABLA: 'Pedido' },
         { CAMPO: 'CONSECUTIVO', EXPRESION: String(consecutivo), TABLA: 'Pedido' }
       ]
     };
     const response = await this.service.query('consulta', prm).toPromise();
-    return this.business.decode<Ven229PedidoRecord>(response);
+    const rows = this.business.decode<Ven229PedidoRecord>(response);
+    return rows.map(r => {
+      const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+      return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+    });
   }
 
   // ================= Helpers =================
@@ -1415,6 +1752,13 @@ export class Ven229Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.taxes.set([]);
     this.payments.set([]);
+    this.addresses.set([]);
+    this.products.set([]);
+    this.conditions.set([]);
+    this.terms.set([]);
+    this.warehouses.set([]);
+    this.formVersion.update(v => v + 1);
+    this.cdr.markForCheck();
   }
 
   private showError(err: unknown): void {
