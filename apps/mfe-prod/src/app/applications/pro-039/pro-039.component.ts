@@ -17,7 +17,6 @@ import {
   Validators
 } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { formatNumber } from 'devextreme/localization';
 import Swal from 'sweetalert2';
 
 import {
@@ -149,6 +148,8 @@ export class Pro039Component implements OnInit, OnDestroy {
   readonly destinations = signal<Pro039Warehouse[]>([]);
   readonly itemProducts = signal<Pro039Lookup[]>([]);
   readonly itemProductsLoading = signal<boolean>(false);
+  /** ITEM de los materiales agregados cuyos datos (precio, presentación) aún se están consultando. */
+  readonly pendingProducts = signal<number[]>([]);
   readonly specifications = signal<Pro039Lookup[]>([]);
 
   // Ventanas
@@ -188,13 +189,6 @@ export class Pro039Component implements OnInit, OnDestroy {
     const h = this.header();
     return this.isNew() ? 'new' : `${h.ID_DOCUMENTO || ''}_${h.CONSECUTIVO || 0}`;
   }
-
-  readonly totalValue = computed(() => this.items().reduce((sum, item) => sum + Number(item.TOTAL || 0), 0));
-
-  /** Filas de totales de la liquidación (el total general se muestra aparte). */
-  readonly totalRows = computed(() =>
-    this.totals().filter(row => String(row.CONCEPTO ?? row.DESCRIPCION ?? '').toUpperCase() !== 'TOTAL')
-  );
 
   readonly queryFilter = computed(() =>
     this.records()[0]?.QFILTRO || this.records().map(r => `(ID_DOCUMENTO='${r.ID_DOCUMENTO}' AND CONSECUTIVO=${r.CONSECUTIVO})`).join(' OR ')
@@ -504,6 +498,10 @@ export class Pro039Component implements OnInit, OnDestroy {
 
   async saveRecord(): Promise<void> {
     if (!this.isNew()) return;
+    if (this.pendingProducts().length > 0) {
+      this.notification.warning('Espere a que terminen de cargarse los materiales agregados.');
+      return;
+    }
     this.form.markAllAsTouched();
     const headerData: Pro039Header = {
       ...this.header(),
@@ -698,23 +696,32 @@ export class Pro039Component implements OnInit, OnDestroy {
     await this.applyItems(list);
   }
 
+  /**
+   * La fila aparece al instante con el código y nombre de la lista; precio y presentación
+   * ('EXISTENCIAS PRODUCTO') se completan después sin bloquear la pantalla.
+   */
   async addProduct(product: string): Promise<void> {
     if (this.readOnly() || this.busy()) return;
     if (this.items().some(row => row.PRODUCTO === product)) {
       this.notification.warning(`El material ${product} ya está en el consumo.`);
       return;
     }
-    this.busy.set(true);
+    const next = this.items().reduce((max, row) => Math.max(max, row.ITEM), 0) + 1;
+    const name = String(this.itemProducts().find(p => p.PRODUCTO === product)?.NOMBRE ?? '');
+    this.setItems([...this.items(), this.business.pendingItem(product, name, next)]);
+    this.workspace.setDirty(this.applicationId, true);
+    this.pendingProducts.update(list => [...list, next]);
     try {
-      const next = this.items().reduce((max, row) => Math.max(max, row.ITEM), 0) + 1;
       const row = await this.business.productItem(product, this.header(), next);
-      this.setItems([...this.items(), row]);
-      this.workspace.setDirty(this.applicationId, true);
-      this.notification.info(`Material ${product} agregado: indique la cantidad consumida.`);
+      // Conserva la cantidad que el usuario haya escrito mientras cargaba
+      this.setItems(this.items().map(current => current.ITEM === next
+        ? this.business.withQuantity(row, Number(current.CANTIDAD || 0))
+        : current));
     } catch (error) {
+      this.setItems(this.items().filter(current => current.ITEM !== next));
       this.showError(error);
     } finally {
-      this.busy.set(false);
+      this.pendingProducts.update(list => list.filter(item => item !== next));
     }
   }
 
@@ -932,10 +939,6 @@ export class Pro039Component implements OnInit, OnDestroy {
   }
 
   // ================= Utilidades =================
-
-  money(value: number | string | null | undefined): string {
-    return formatNumber(Number(value || 0), this.spec('FORMATO MONEDA')?.FORMATO || '#,##0.00');
-  }
 
   private ensureOption(target: typeof this.origins, key: 'ID_UN_ORIGEN' | 'ID_UN_DESTINO', value: string, label?: string): void {
     if (!value || target().some(row => row[key] === value)) return;

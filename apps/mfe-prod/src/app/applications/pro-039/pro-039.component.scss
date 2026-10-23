@@ -53,20 +53,6 @@
   box-sizing: border-box;
 }
 
-.pro-039__card-totals {
-  flex: 0 0 250px;
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  border: 1px solid #d1e5ec;
-  border-radius: 10px;
-  background: #f0fdfa;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
 /*======================================================================
 = HEADER GRID (Cabecera Consumo)
 ======================================================================*/
@@ -187,75 +173,6 @@
 }
 
 /*======================================================================
-= TOTALS CARD
-======================================================================*/
-
-.pro-039__totals-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 10px 16px 6px;
-  border-bottom: 1px solid #d1e5ec;
-}
-
-.pro-039__totals-card-title {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #1b506f;
-}
-
-.pro-039__totals-body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 16px 14px;
-  flex: 1;
-  justify-content: flex-start;
-}
-
-.pro-039__totals-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 13px;
-  color: #2b4c63;
-}
-
-.pro-039__totals-label {
-  font-weight: 500;
-}
-
-.pro-039__totals-value {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
-.pro-039__totals-divider {
-  height: 1px;
-  margin: 6px 0;
-  background: #cbe2ea;
-}
-
-.pro-039__totals-row--grand {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1b506f;
-  margin-top: 2px;
-
-  .pro-039__totals-label {
-    font-weight: 700;
-  }
-
-  .pro-039__totals-value {
-    font-weight: 700;
-    font-size: 18px;
-  }
-}
-
-/*======================================================================
 = BOTTOM ROW
 ======================================================================*/
 
@@ -328,10 +245,6 @@
     flex-direction: column;
   }
 
-  .pro-039__card-totals {
-    flex: none;
-    width: 100%;
-  }
 
   .pro-039__params-row {
     flex-direction: column;
