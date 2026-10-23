@@ -23,6 +23,8 @@ export interface Pro039MovementRecord {
   ID_SECCION?: string | null;
   /** Producto que compone el juego (solo cuando PRODUCTO es un JU); al consultar llega como PRODUCTO_COMPONENTE. */
   COMPONENTE: string;
+  /** Unidades del producto que se fabrican: el consumo de la matriz es unitario x lote. */
+  CANTIDAD_LOTE: number;
   PRODUCTO_COMPONENTE?: string | null;
   ID_UN_ORIGEN: string;
   ID_UN_DESTINO: string;

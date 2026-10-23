@@ -137,6 +137,19 @@
                 />
               </div>
             </div>
+
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-lote">Cantidad lote</xtein-label>
+              <div class="pro-039__control-inline">
+                <xtein-number
+                  id="pro-039-lote"
+                  ariaLabel="Cantidad del lote"
+                  [min]="0"
+                  formControlName="CANTIDAD_LOTE"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -242,6 +255,7 @@
           [ready]="itemsReady()"
           [busy]="busy()"
           [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
+          [lot]="lot()"
           (quantityChanged)="onQuantityChanged($event)"
           (productAdded)="addProduct($event)"
           (removedMany)="removeItems($event)"

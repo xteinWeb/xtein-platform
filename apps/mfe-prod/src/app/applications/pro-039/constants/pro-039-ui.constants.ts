@@ -30,6 +30,7 @@ export const Pro039DefaultRecord: Readonly<Pro039MovementRecord> = {
   PRODUCTO: '',
   SECCION: '',
   COMPONENTE: '',
+  CANTIDAD_LOTE: 1,
   ID_UN_ORIGEN: '',
   ID_UN_DESTINO: '',
   ID_SOPORTE: '',
@@ -76,6 +77,8 @@ export const Pro039DestinationColumns: XteinGridColumn<Pro039Warehouse, unknown>
 ];
 
 export const Pro039ItemProductColumns: XteinGridColumn<Pro039Lookup, unknown>[] = [
-  { dataField: 'PRODUCTO', caption: 'Producto', width: 130 },
-  { dataField: 'NOMBRE', caption: 'Nombre' }
+  { dataField: 'PRODUCTO', caption: 'Producto', width: 110 },
+  { dataField: 'NOMBRE', caption: 'Nombre' },
+  { dataField: 'UBICACION', caption: 'Ubicación', width: 140 },
+  { dataField: 'EXISTENCIA', caption: 'Existencia', width: 100 }
 ];
