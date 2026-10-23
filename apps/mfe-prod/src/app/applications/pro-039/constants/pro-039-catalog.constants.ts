@@ -5,11 +5,11 @@
 export const Pro039Catalog = {
   documents: ['/PRO039/consulta', 'DOCUMENTOS CONSECUTIVO'],
   types: ['/PRO039/consulta', 'TIPO MOVIMIENTOS USUARIO'],
-  warehouses: ['/PRO039/consulta', 'UN MOVIMIENTOS'],
+  warehouses: ['/PRO039/consulta', 'BODEGAS CONSUMO'],
   products: ['/PRO039/consulta', 'PRODUCTOS CONSUMO'],
   components: ['/PRO039/consulta', 'COMPONENTES PRODUCTO'],
   sections: ['/PRO039/consulta', 'SECCIONES PRODUCTO'],
-  itemProducts: ['/PRO022/consulta', 'PRODUCTOS COMPRAS'],
+  itemProducts: ['/PRO039/consulta', 'MATERIALES BODEGA'],
   specifications: ['/ADM011/consulta', 'ESPECIFICACIONES']
 } as const;
 

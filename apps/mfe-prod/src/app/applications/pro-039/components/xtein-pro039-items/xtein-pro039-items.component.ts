@@ -52,6 +52,8 @@ export class XteinPro039ItemsComponent implements OnChanges {
   @Input() ready = false;
   @Input() busy = false;
   @Input() quantityFormat = '#,##0.00';
+  /** Cantidad del lote del consumo: Total = consumo unitario de la matriz x lote. */
+  @Input() lot = 1;
 
   @Output() quantityChanged = new EventEmitter<{ item: number; quantity: number }>();
   @Output() productAdded = new EventEmitter<string>();

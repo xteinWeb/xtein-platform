@@ -80,7 +80,8 @@ export class Pro039BusinessService {
   }
 
   /** Materiales de la matriz del producto/sección, con el costo de la bodega de origen (o el de la matriz). */
-  async materials(product: string, section: string, originWarehouse: string, component = ''): Promise<Pro039MovementItem[]> {
+  /** CONSUMO_BASE queda unitario (matriz); CANTIDAD = unitario x lote. */
+  async materials(product: string, section: string, originWarehouse: string, component = '', lot = 1): Promise<Pro039MovementItem[]> {
     const rows = await this.action<Pro039Material>('materials', {
       PRODUCTO: product,
       SECCION: section || '',
@@ -97,7 +98,7 @@ export class Pro039BusinessService {
       UDM_PRESENTACION: row.UDM || 'UND',
       UDM_EQUIV: row.UDM || 'UND',
       CONSUMO_BASE: Number(row.CONSUMO || 0),
-      CANTIDAD: Number(row.CONSUMO || 0),
+      CANTIDAD: Number(row.CONSUMO || 0) * lot,
       VALOR_UNITARIO: Number(row.VALOR_UNITARIO || 0),
       ES_MATRIZ: true
     }));

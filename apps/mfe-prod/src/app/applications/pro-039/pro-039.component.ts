@@ -37,6 +37,7 @@ import {
 
 import {
   XteinInputComponent,
+  XteinNumberComponent,
   XteinLabelComponent,
   XteinDateComponent,
   XteinLookupComponent,
@@ -96,6 +97,7 @@ import { XteinPro039ItemsComponent } from './components/xtein-pro039-items/xtein
     CommonModule,
     ReactiveFormsModule,
     XteinInputComponent,
+    XteinNumberComponent,
     XteinLabelComponent,
     XteinDateComponent,
     XteinLookupComponent,
@@ -230,6 +232,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     PRODUCTO: new FormControl<string>('', [Validators.required]),
     SECCION: new FormControl<string>(''),
     COMPONENTE: new FormControl<string>(''),
+    CANTIDAD_LOTE: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
     ID_UN_ORIGEN: new FormControl<string>('', [Validators.required]),
     ID_UN_DESTINO: new FormControl<string>('', [Validators.required]),
     ID_SOPORTE: new FormControl<string>(''),
@@ -312,6 +315,13 @@ export class Pro039Component implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.form.controls.SECCION.valueChanges.subscribe(() => {
         if (!this.readOnly()) void this.loadMaterials();
+      })
+    );
+
+    // Cantidad del lote: recalcula el consumo de los materiales de la matriz (unitario x lote)
+    this.subscriptions.add(
+      this.form.controls.CANTIDAD_LOTE.valueChanges.subscribe(() => {
+        if (!this.readOnly()) void this.applyLot();
       })
     );
 
@@ -438,7 +448,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     this.sections.set([]);
     this.components.set([]);
 
-    // Documento de PRO-039 (SCO) con el consecutivo siguiente
+    // Documentos de PRO-039 de las sedes del usuario (SC100, SC101, SC102) con su consecutivo siguiente
     try {
       this.documents.set(await this.business.catalog('documents', this.documentsFilter(), true));
     } catch (error) {
@@ -624,6 +634,7 @@ export class Pro039Component implements OnInit, OnDestroy {
       DOCUMENTO: documentLabel,
       SECCION: String(record.ID_SECCION ?? record.SECCION ?? ''),
       COMPONENTE: String(record.PRODUCTO_COMPONENTE ?? record.COMPONENTE ?? ''),
+      CANTIDAD_LOTE: Number(record.CANTIDAD_LOTE ?? 1) || 1,
       FECHA: record.FECHA ? String(record.FECHA).slice(0, 10) : null,
       FECHA_REGISTRO: record.FECHA_REGISTRO ? String(record.FECHA_REGISTRO).slice(0, 10) : null,
       FECHA_VENCIMIENTO: record.FECHA_VENCIMIENTO ? String(record.FECHA_VENCIMIENTO).slice(0, 10) : null
@@ -801,7 +812,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     }
     this.busy.set(true);
     try {
-      const materials = await this.business.materials(h.PRODUCTO, h.SECCION, String(h.ID_UN_ORIGEN ?? ''), String(h.COMPONENTE ?? ''));
+      const materials = await this.business.materials(h.PRODUCTO, h.SECCION, String(h.ID_UN_ORIGEN ?? ''), String(h.COMPONENTE ?? ''), this.lot());
       this.busy.set(false);
       if (!materials.length) throw new Error(`No hay materiales en la matriz para ${h.COMPONENTE || h.PRODUCTO}`);
       await this.applyItems(materials);
@@ -815,6 +826,20 @@ export class Pro039Component implements OnInit, OnDestroy {
     }
   }
 
+  /** Cantidad del lote (1 si está vacía o no es válida). */
+  lot(): number {
+    const value = Number(this.form.controls.CANTIDAD_LOTE.value);
+    return value > 0 ? value : 1;
+  }
+
+  private async applyLot(): Promise<void> {
+    const lot = this.lot();
+    if (!this.items().some(row => row.ES_MATRIZ)) return;
+    await this.applyItems(this.items().map(row => row.ES_MATRIZ
+      ? this.business.withQuantity(row, Number(row.CONSUMO_BASE || 0) * lot)
+      : row));
+  }
+
   async loadItemProducts(): Promise<void> {
     const h = this.header();
     if (!h.ID_UN_ORIGEN) {
@@ -823,14 +848,8 @@ export class Pro039Component implements OnInit, OnDestroy {
     }
     this.itemProductsLoading.set(true);
     try {
-      this.itemProducts.set(await this.business.catalog('itemProducts', {
-        ID_CONDICION: '',
-        ID_PROVEEDOR: '',
-        ID_UN_ORIGEN: h.ID_UN_ORIGEN,
-        ID_UN_DESTINO: h.ID_UN_DESTINO,
-        MOVIMIENTO: Pro039Application.Movement,
-        TIPO: Pro039Application.Type
-      }));
+      // Materiales (MA) activos ubicados en la bodega de origen
+      this.itemProducts.set(await this.business.catalog('itemProducts', { ID_UN_ORIGEN: h.ID_UN_ORIGEN, ...this.business.identity }));
     } catch {
       this.itemProducts.set([]);
     } finally {
