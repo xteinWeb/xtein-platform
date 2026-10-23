@@ -6,11 +6,11 @@ import { formatNumber } from 'devextreme/localization';
 import { Ven230ElectronicService } from './services/ven-230-electronic.service';
 import { Ven230ElectronicDocument, Ven230ElectronicView } from './models/ven-230-electronic.model';
 import { Ven230BusinessService } from './services/ven-230-business.service';
-import { Ven230Lookup, Ven230Details, Ven230SettingResult, Ven230TaxResult } from './models/ven-230-business.model';
+import { Ven230Lookup, Ven230Details, Ven230SettingResult, Ven230TaxResult, Ven230Header } from './models/ven-230-business.model';
 import { Ven230PrefacturaGrav, Ven230PrefacturaPago } from './models/ven-230.model';
 import { XteinVen230ItemsComponent } from './components/xtein-ven230-items/xtein-ven230-items.component';
 import { XteinButtonComponent } from '@xtein/ui';
-import { ElementRef } from '@angular/core';
+import { ElementRef, ChangeDetectorRef } from '@angular/core';
 import {
   untracked,
   computed,
@@ -251,6 +251,9 @@ export class Ven230Component
       this.mode() !== RecordToolbarMode.Editing
     );
 
+  readonly isEditing = computed(() => this.mode() === RecordToolbarMode.Editing || this.mode() === RecordToolbarMode.Creating);
+  readonly isNew = computed(() => this.mode() === RecordToolbarMode.Creating);
+
   /**
    * Record view columns.
    */
@@ -271,6 +274,88 @@ export class Ven230Component
    * Report filter for all queried records.
    */
   readonly queryFilter = computed(() => this.records()[0]?.QFILTRO || this.records().map(record => '('+this.recordFilter(record)+')').join(' OR '));
+
+  readonly formVersion = signal(0);
+
+  readonly stateStyle = computed<Record<string, string>>(() => {
+    this.formVersion();
+    const estado = String(this.form?.controls?.ESTADO?.value || '').toUpperCase().trim();
+    try {
+      const styles = JSON.parse(this.spec('ESTILOS ESTADO')?.VALOR_DEFECTO || '[]');
+      const match = styles.find((s: Record<string, string>) => String(s['ESTADO'] || '').toUpperCase() === estado);
+      if (match) {
+        const color = match['color'] || match['COLOR'];
+        const background = match['background'] || match['BG'];
+        const res: Record<string, string> = {};
+        if (color) res['color'] = color;
+        if (background) res['background'] = background;
+        return res;
+      }
+    } catch {}
+    switch (estado) {
+      case 'REGISTRADO': return { background: '#e8f5e8', color: '#2e7d32', border: '1px solid #c8e6c9' };
+      case 'AUTORIZADO': return { background: 'rgb(132, 223, 170)', color: '#065f46' };
+      case 'PARCIAL': return { background: 'rgb(240, 152, 217)', color: '#831843' };
+      case 'ANULADO': return { background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' };
+      case 'PROGRAMADO': return { background: 'rgba(172, 200, 255, 1)', color: '#1e40af' };
+      default: return { background: '#f1f5f9', color: '#475569' };
+    }
+  });
+
+  readonly itemsReady = computed(() => {
+    this.formVersion();
+    const h = this.header();
+    const tipoVenta = String(h.TIPO_VENTA || 'CONTADO').trim().toUpperCase();
+    const plazoValid = tipoVenta === 'CONTADO'
+      ? true
+      : (h.PLAZO !== null && h.PLAZO !== undefined && String(h.PLAZO).trim() !== '');
+
+    const docValid = Boolean(h.DOCUMENTO && String(h.DOCUMENTO).trim() !== '');
+    const clientValid = Boolean(h.ID_CLIENTE && String(h.ID_CLIENTE).trim() !== '');
+    const fechaValid = Boolean(h.FECHA && String(h.FECHA).trim() !== '');
+    const unValid = Boolean(h.ID_UN_ITEM && String(h.ID_UN_ITEM).trim() !== '');
+    const adcValid = Boolean(h.ID_ADC && String(h.ID_ADC).trim() !== '');
+    const condValid = Boolean(h.ID_CONDICION && String(h.ID_CONDICION).trim() !== '');
+
+    return Boolean(
+      docValid &&
+      clientValid &&
+      fechaValid &&
+      unValid &&
+      adcValid &&
+      condValid &&
+      plazoValid
+    );
+  });
+
+  readonly itemRecordKey = computed(() => {
+    const h = this.header();
+    return this.isNew()
+      ? 'new'
+      : `${h.ID_DOCUMENTO || ''}_${h.CONSECUTIVO || 0}`;
+  });
+
+  readonly conditionType = computed(() => {
+    const condId = String(this.form?.controls?.ID_CONDICION?.value || '').trim();
+    if (!condId) return 'CONDICION';
+    const cond = this.conditions().find(c =>
+      String(c['CODIGO'] || c['ID_CONDICION'] || '').trim() === condId
+    );
+    const tipo = String(cond?.['TIPO'] || '').trim().toUpperCase();
+    return tipo === 'LISTA' ? 'LISTA' : 'CONDICION';
+  });
+
+  readonly persistItemBind = (row: Ven230PrefacturaItem): Promise<boolean> => this.persistItem(row);
+
+  onItemPending(pending: boolean): void {
+    this.itemPending.set(pending);
+    if (pending) {
+      this.disableFormControls();
+      this.workspace.setDirty(this.applicationId, true);
+    } else if (!this.readOnly()) {
+      this.enableFormControls();
+    }
+  }
   private recordFilter(record: Ven230PrefacturaRecord): string {
     return " PREFACTURA.ID_DOCUMENTO = '"+String(record.ID_DOCUMENTO).replace(/'/g,"''")+"' AND PREFACTURA.CONSECUTIVO = "+Number(record.CONSECUTIVO);
   }
@@ -328,7 +413,8 @@ export class Ven230Component
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
-    private readonly elementRef: ElementRef
+    private readonly elementRef: ElementRef,
+    private readonly cdr: ChangeDetectorRef
   ) {
     // Synchronize toolbar state whenever mode, index, records, loading or permissions change.
     effect(() => {
@@ -391,12 +477,22 @@ export class Ven230Component
    * Publishes the current state to the platform toolbar.
    */
   private publishToolbarState(): void {
+    const isAnulado = this.currentRecord()?.ESTADO === 'ANULADO' || this.form?.controls?.ESTADO?.value === 'ANULADO';
+    const basePerms = this.permissions();
+    const effectivePerms: RecordToolbarPermissions = isAnulado
+      ? { ...basePerms, edit: false, delete: false }
+      : basePerms;
+
     const state = createRecordToolbarState({
       busy: this.loading() || this.itemPending(),
       applicationId: this.applicationId,
       mode: this.mode(),
-      permissions: this.permissions(),
-      capabilities: { ...Ven230ToolbarCapabilities, edit: this.detailsReady() && this.currentRecord()?.ESTADO !== 'ANULADO', delete: this.currentRecord()?.ESTADO !== 'ANULADO' },
+      permissions: effectivePerms,
+      capabilities: {
+        ...Ven230ToolbarCapabilities,
+        edit: this.detailsReady() && !isAnulado,
+        delete: !isAnulado
+      },
       currentIndex: this.currentIndex(),
       totalRecords: this.records().length
     });
@@ -576,19 +672,24 @@ export class Ven230Component
   }
 
   /**
-   * Prompts confirmation and deletes / cancels the active prefactura.
+   * Prompts confirmation and cancels the active prefactura.
    */
   async deleteRecord(): Promise<void> {
     const record = this.currentRecord();
-    if (!record || this.loading() || !this.readOnly() || !this.permissions().delete || record.ESTADO==='ANULADO') return;
+    if (!record || this.loading() || !this.readOnly() || !this.permissions().delete) return;
+
+    if (record.ESTADO === 'ANULADO') {
+      this.notification.warning('La prefactura ya se encuentra anulada.');
+      return;
+    }
 
     const confirmation = await Swal.fire({
       title: '¿Anular Prefactura?',
-      text: `¿Desea anular la Prefactura ${record.DOCUMENTO || record.ID_DOCUMENTO}?`,
+      html: `¿Está seguro de anular la prefactura <b>${record.DOCUMENTO || record.ID_DOCUMENTO}</b>?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#244d73',
-      cancelButtonColor: '#8a99a8',
+      confirmButtonColor: '#DF3E3E',
+      cancelButtonColor: '#0F4C81',
       confirmButtonText: 'Sí, anular',
       cancelButtonText: 'Cancelar'
     });
@@ -601,68 +702,124 @@ export class Ven230Component
 
     try {
       const prm = {
-        PrefacturaS: {
+        PREFACTURAS: {
           ID_DOCUMENTO: record.ID_DOCUMENTO,
-          PREFIJO: record.PREFIJO,
+          PREFIJO: record.PREFIJO || 'SIN',
           CONSECUTIVO: record.CONSECUTIVO,
-          SUFIJO: record.SUFIJO
-        }
+          SUFIJO: record.SUFIJO || 'SIN'
+        },
+        DOCUMENTO: record.DOCUMENTO,
+        ID_DOCUMENTO: record.ID_DOCUMENTO,
+        CONSECUTIVO: record.CONSECUTIVO,
+        ID_APLICACION: this.applicationId,
+        USUARIO: this.business.identity.USUARIO
       };
 
       const response = await firstValueFrom(this.service.delete(prm));
-
-      this.business.decode(response);
+      const decoded = this.business.decode<any>(response);
+      if (decoded.length > 0 && decoded[0]?.ErrMensaje) {
+        this.notification.error(decoded[0].ErrMensaje);
+        return;
+      }
 
       this.notification.success('Prefactura anulada correctamente.');
-      const remaining=this.records().filter(r=>r!==record);this.records.set(remaining);
-      if(remaining.length)await this.selectRecordIndex(Math.min(this.currentIndex(),remaining.length-1));else this.clearRecord();
-
+      await this.refresh();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error al anular.';
+      const message = error instanceof Error ? error.message : 'Error al anular la prefactura.';
       this.notification.error(message);
+    } finally {
+      this.loading.set(false);
+      this.publishToolbarState();
+    }
+  }
+
+  private async queryDocument(idDoc: string, consecutivo: number): Promise<Ven230PrefacturaRecord[]> {
+    const prm = {
+      PREFACTURA: [
+        { CAMPO: 'ID_DOCUMENTO', EXPRESION: idDoc, TABLA: 'Prefactura' },
+        { CAMPO: 'CONSECUTIVO', EXPRESION: String(consecutivo), TABLA: 'Prefactura' }
+      ]
+    };
+    const response = await firstValueFrom(this.service.getRecords(prm));
+    const rows = this.business.decode<Ven230PrefacturaRecord>(response);
+    return rows.map(r => {
+      const docVal = String(r.DOCUMENTO_FAC || r.DOCUMENTO || `${r.ID_DOCUMENTO}-${r.CONSECUTIVO}`).trim();
+      return { ...r, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+    });
+  }
+
+  /**
+   * Refreshes the active view or dataset.
+   */
+  async refresh(): Promise<void> {
+    if (this.loading() || !this.readOnly()) return;
+    const current = this.currentRecord();
+    if (!current) return;
+    this.loading.set(true);
+    try {
+      const refreshed = await this.queryDocument(current.ID_DOCUMENTO, current.CONSECUTIVO);
+      if (refreshed.length > 0) {
+        const list = [...this.records()];
+        list[this.currentIndex()] = refreshed[0];
+        this.records.set(list);
+        this.populateForm(refreshed[0]);
+        this.formVersion.update(v => v + 1);
+        await this.loadAdditionalData(refreshed[0]);
+      }
+    } catch (err) {
+      console.error('Error refreshing prefactura:', err);
+    } finally {
+      this.loading.set(false);
+      this.publishToolbarState();
+    }
+  }
+
+  /**
+   * Searches records matching a filter string or query object.
+   */
+  async searchRecords(filter: string | XteinRecordFilterResult): Promise<void> {
+    if (typeof filter !== 'string' && (this.loading() || !this.readOnly() || !this.permissions().search)) return;
+    this.filterVisible.set(false);
+    this.loading.set(true);
+    try {
+      const criteria = typeof filter === 'string' ? this.lastCriteria : filter.ESTRUCTURA;
+      const list = this.business.decode<Ven230PrefacturaRecord>(await firstValueFrom(this.service.getRecords({ PREFACTURA: criteria }))).map(row => {
+        const docVal = String(row.DOCUMENTO_FAC || row.DOCUMENTO || `${row.ID_DOCUMENTO}-${row.CONSECUTIVO}`).trim();
+        return { ...row, DOCUMENTO: docVal, DOCUMENTO_FAC: docVal };
+      });
+      this.lastCriteria = criteria;
+      this.records.set(list);
+      if (list.length) {
+        const selected = typeof filter === 'string' ? this.records().findIndex(r => r.DOCUMENTO === filter) : 0;
+        await this.selectRecordIndex(Math.max(0, selected));
+      } else {
+        this.clearRecord();
+        this.notification.warning('No se encontraron registros.');
+      }
+    } catch (error) {
+      this.showError(error);
     } finally {
       this.loading.set(false);
     }
   }
 
   /**
-   * Refreshes the active view or dataset.
-   */
-  refresh(): void {
-    if (this.loading() || !this.readOnly()) return;
-    const current = this.currentRecord();
-    void this.loadDataLists().then(()=>this.searchRecords(current?.DOCUMENTO || ''));
-  }
-
-  /**
-   * Searches records matching a filter string or query object.
-   */
-    async searchRecords(filter: string | XteinRecordFilterResult): Promise<void> {
-    if(typeof filter!=='string' && (this.loading() || !this.readOnly() || !this.permissions().search))return;
-    this.filterVisible.set(false);this.loading.set(true);
-    try {
-      const criteria=typeof filter==='string' ? this.lastCriteria : filter.ESTRUCTURA;
-      const list=this.business.decode<Ven230PrefacturaRecord>(await firstValueFrom(this.service.getRecords({PREFACTURA:criteria})));
-      this.lastCriteria=criteria;
-      this.records.set(list.map(row=>({...row,DOCUMENTO:row.DOCUMENTO_FAC || row.DOCUMENTO})));
-      if(list.length){
-        const selected=typeof filter==='string' ? this.records().findIndex(r=>r.DOCUMENTO===filter) : 0;
-        await this.selectRecordIndex(Math.max(0,selected));
-      }else{this.clearRecord();this.notification.warning('No se encontraron registros.');}
-    }catch(error){this.showError(error);}finally{this.loading.set(false);}
-  }
-
-  /**
    * Selects a record by its index and loads additional line items.
    */
-    async selectRecordIndex(index: number): Promise<void> {
-    const record=this.records()[index];if(!record)return;
-    this.currentIndex.set(index);this.mode.set(RecordToolbarMode.Browsing);this.disableFormControls();
+  async selectRecordIndex(index: number): Promise<void> {
+    const record = this.records()[index];
+    if (!record) return;
+    this.currentIndex.set(index);
+    this.mode.set(RecordToolbarMode.Browsing);
+    this.disableFormControls();
     this.previousCondition = String(record.ID_CONDICION || '');
     this.previousWarehouse = String(record.ID_UN_BODEGA || '');
-    this.workspace.setDirty(this.applicationId,false);this.populateForm(record);
-    this.documents.set([{DOCUMENTO:record.DOCUMENTO_FAC || record.DOCUMENTO,ID_DOCUMENTO:record.ID_DOCUMENTO,CONSECUTIVO:record.CONSECUTIVO}]);
+    this.workspace.setDirty(this.applicationId, false);
+    this.populateForm(record);
+    this.documents.set([{ DOCUMENTO: record.DOCUMENTO_FAC || record.DOCUMENTO, ID_DOCUMENTO: record.ID_DOCUMENTO, CONSECUTIVO: record.CONSECUTIVO }]);
     this.headerLocked.set(false);
+    this.formVersion.update(v => v + 1);
+    this.cdr.markForCheck();
     await this.loadAdditionalData(record);
   }
 
@@ -671,14 +828,18 @@ export class Ven230Component
    */
   selectViewedRecord(record: unknown): void {
     if (this.loading() || !this.readOnly()) return;
+    this.viewVisible.set(false);
     const rec = record as Ven230PrefacturaRecord;
-    const list = this.records();
-    const foundIndex = list.findIndex(r => r.DOCUMENTO === rec.DOCUMENTO);
+    const docVal = String(rec?.DOCUMENTO_FAC || rec?.DOCUMENTO || `${rec?.ID_DOCUMENTO}-${rec?.CONSECUTIVO}`).trim();
+    const foundIndex = this.records().findIndex(r =>
+      r.DOCUMENTO === docVal ||
+      r.DOCUMENTO_FAC === docVal ||
+      (r.ID_DOCUMENTO === rec?.ID_DOCUMENTO && Number(r.CONSECUTIVO) === Number(rec?.CONSECUTIVO))
+    );
 
     if (foundIndex >= 0) {
-      this.selectRecordIndex(foundIndex);
+      void this.selectRecordIndex(foundIndex);
     }
-    this.viewVisible.set(false);
   }
 
   /**
@@ -907,8 +1068,7 @@ export class Ven230Component
   private lastCriteria: unknown[]=[];
   previousCondition='';
   previousWarehouse='';
-  conditionType='';
-  onlyStock=false;
+  readonly onlyStock = signal<boolean>(false);
   header(): Ven230PrefacturaRecord {
     return {...(this.mode()===RecordToolbarMode.Creating ? Ven230DefaultRecord : this.currentRecord() ?? Ven230DefaultRecord),
       ...this.form.getRawValue()} as Ven230PrefacturaRecord;
@@ -918,9 +1078,6 @@ export class Ven230Component
   }
   spec(name:string): Ven230Lookup | undefined {return this.specifications().find(s=>s.NOMBRE_OBJETO===name);}
   enabledSpec(name:string): boolean {const value=this.spec(name)?.ACTIVADO;return value===true || value===1;}
-  itemsReady(): boolean {
-    const h=this.header();return !!(h.DOCUMENTO && h.ID_CLIENTE && h.FECHA && h.ID_UN_ITEM && h.ID_ADC && h.ID_CONDICION && h.ID_UN_BODEGA && h.PLAZO!=null);
-  }
   private showError(error:unknown): void {this.notification.error(error instanceof Error ? error.message : 'No se pudieron cargar los datos.');}
   private clearRecord(): void {
     ++this.detailVersion;this.currentIndex.set(-1);this.mode.set(RecordToolbarMode.Initial);this.form.reset({}, {emitEvent:false});
@@ -971,26 +1128,30 @@ export class Ven230Component
       return;
     }
     try {
-      const rows=await this.business.catalog('addresses',{ID_CLIENTE:id});
-      if(this.form.controls.ID_CLIENTE.value!==id)return;
-      this.addresses.set(rows || []);
-      if(rows && rows.length > 0) {
-        if(!this.readOnly()) {
-          const preferred = rows.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('cobro')) || rows[0];
-          this.form.controls.DIRECCION.setValue(preferred.DIRECCION ?? '',{emitEvent:false});
+      const rows = await this.business.catalog('addresses', { ID_CLIENTE: id }, true);
+      if (this.form.controls.ID_CLIENTE.value !== id) return;
+      const formatted = (rows || []).filter(a => a && (a.DIRECCION || a['ID_DIRECCION']));
+      this.addresses.set(formatted);
+      if (formatted.length > 0) {
+        if (!this.readOnly()) {
+          const preferred = formatted.find((a: any) => a.TIPO_DIRECCION && String(a.TIPO_DIRECCION).toLowerCase().includes('cobro')) || formatted[0];
+          this.form.controls.DIRECCION.setValue(String(preferred.DIRECCION || preferred['ID_DIRECCION'] || ''), { emitEvent: false });
         }
       } else {
-        if(!this.readOnly()) {
-          this.form.controls.DIRECCION.setValue('',{emitEvent:false});
+        if (!this.readOnly()) {
+          this.form.controls.DIRECCION.setValue('', { emitEvent: false });
           this.notification.warning('No se encontró una dirección del Tipo: Cobro');
         }
       }
     } catch {
       this.addresses.set([]);
-      if(!this.readOnly()) {
-        this.form.controls.DIRECCION.setValue('',{emitEvent:false});
+      if (!this.readOnly()) {
+        this.form.controls.DIRECCION.setValue('', { emitEvent: false });
         this.notification.warning('No se encontró una dirección del Tipo: Cobro');
       }
+    } finally {
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     }
   }
   private async loadWarehouses():Promise<void> {
@@ -1024,7 +1185,6 @@ export class Ven230Component
     this.dataLists.update(lists => ({...lists, condiciones: []}));
     this.terms.set([]);
     this.products.set([]);
-    this.conditionType = '';
     if (!h.ID_ADC || !h.TIPO_VENTA) {
       this.previousCondition = '';
       this.form.controls.ID_CONDICION.setValue('', {emitEvent: false});
@@ -1102,7 +1262,6 @@ export class Ven230Component
   }
   private applyCondition(assign:boolean):void {
     const cond=this.conditions().find(r=>r.CODIGO===this.form.controls.ID_CONDICION.value);
-    this.conditionType=cond?.TIPO ?? '';
     const terms=typeof cond?.PLAZOS==='string' ? JSON.parse(cond.PLAZOS) : cond?.PLAZOS ?? [];
     this.terms.set(Array.isArray(terms)?terms:[]);
     if(assign && this.form.controls.TIPO_VENTA.value==='CREDITO'){
@@ -1124,8 +1283,8 @@ export class Ven230Component
     if(!credit)this.form.patchValue({PLAZO:0,FECHA_PRIMER_VENC:this.form.controls.FECHA.value},{emitEvent:false});
     this.recalculate();
   }
-  async loadProducts(stockOnly = this.onlyStock): Promise<void> {
-    this.onlyStock = stockOnly;
+  async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
+    this.onlyStock.set(stockOnly);
     const request = ++this.productRequest;
     const header = this.header();
     this.products.set([]);
@@ -1133,7 +1292,7 @@ export class Ven230Component
     this.productsLoading.set(true);
     try {
       const rows = await this.business.catalog('products', { ID_LISTA: header.ID_CONDICION,
-        TIPO: this.conditionType, PLAZO: header.PLAZO, CON_EXIS: stockOnly ? 'SI' : undefined,
+        TIPO: this.conditionType(), PLAZO: header.PLAZO, CON_EXIS: stockOnly ? 'SI' : undefined,
         ID_UN_BODEGA: header.ID_UN_BODEGA });
       if (request === this.productRequest && this.form.controls.ID_CONDICION.value === header.ID_CONDICION
         && this.form.controls.ID_UN_BODEGA.value === header.ID_UN_BODEGA
@@ -1141,30 +1300,198 @@ export class Ven230Component
     } catch (error) { if (request === this.productRequest) this.showError(error); }
     finally { if (request === this.productRequest) this.productsLoading.set(false); }
   }
-  private recalculate():void {
-    const subtotal=this.items().reduce((sum,row)=>sum+Number(row.SUB_TOTAL || 0),0);
-    const tax=this.taxes().reduce((sum,row)=>sum+Number(row.VALOR || 0),0);
-    const total=subtotal+tax;const h=this.form.getRawValue();
-    this.form.patchValue({SUB_TOTAL:subtotal,TOTAL:total,VALOR_CUOTA:Number(h.PLAZO)>0?(total-Number(h.CUOTA_INICIAL || 0))/Number(h.PLAZO):0},{emitEvent:false});
+  recalculate(): void {
+    if (this.readOnly()) return;
+    const subtotal = this.items().reduce((sum, item) => sum + Number(item.SUB_TOTAL || 0), 0);
+    const totalTaxes = this.taxes().reduce((sum, tax) => sum + Number(tax.VALOR || 0), 0);
+    const discounts = this.items().reduce((sum, item) => sum + Number(item.VALOR_DESCUENTO || 0), 0);
+    const total = subtotal - discounts + totalTaxes;
+    const h = this.form.getRawValue();
+    const cuota = Number(h.PLAZO) > 0 ? (total - Number(h.CUOTA_INICIAL || 0)) / Number(h.PLAZO) : 0;
+
+    this.form.patchValue({
+      SUB_TOTAL: subtotal,
+      VALOR_DESCUENTO: discounts,
+      TOTAL: total,
+      VALOR_CUOTA: cuota
+    }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
+    this.cdr.markForCheck();
   }
-  async commitItem(row:Ven230PrefacturaItem):Promise<boolean> {
-    const list=this.items().filter(i=>i.ITEM!==row.ITEM);list.push(row);list.sort((a,b)=>a.ITEM-b.ITEM);
+
+  async persistItem(row: Ven230PrefacturaItem): Promise<boolean> {
+    const list = [...this.items()];
+    const idx = list.findIndex(i => i.ITEM === row.ITEM);
+    if (idx >= 0) {
+      list[idx] = row;
+    } else {
+      list.push(row);
+    }
+    list.sort((a, b) => a.ITEM - b.ITEM);
     return this.applyItems(list);
   }
-  async removeItem(item:number | number[]):Promise<void> {
-    if(this.readOnly() || this.loading())return;
-    const answer=await Swal.fire({text:'¿Desea eliminar el producto seleccionado?',icon:'warning',showCancelButton:true,confirmButtonText:'Eliminar',cancelButtonText:'Cancelar'});
-    if(answer.isConfirmed)await this.applyItems(this.items().filter(r=>!(Array.isArray(item)?item:[item]).includes(r.ITEM)));
+
+  async commitItem(row: Ven230PrefacturaItem): Promise<boolean> {
+    return this.persistItem(row);
   }
-  private async applyItems(items:Ven230PrefacturaItem[],option='items'):Promise<boolean> {
-    if(this.readOnly() || this.loading())return false;this.loading.set(true);
+
+  async removeItem(item: number | number[]): Promise<void> {
+    if (this.readOnly() || this.loading()) return;
+    const answer = await Swal.fire({
+      text: '¿Desea eliminar el producto seleccionado?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    if (answer.isConfirmed) {
+      await this.applyItems(this.items().filter(r => !(Array.isArray(item) ? item : [item]).includes(r.ITEM)));
+    }
+  }
+
+  async applyItems(updatedItems: Ven230PrefacturaItem[], option?: string): Promise<boolean> {
+    if (this.readOnly() || this.loading()) return false;
+    this.loading.set(true);
     try {
-      const rows=await this.business.taxes(this.header(),items.map(row=>({...row,APLICACION:2})),option);
-      const tax=rows[0];if(!tax)throw new Error('El servidor no devolvió la liquidación de gravámenes.');this.taxes.set(tax.ENCAB ?? []);this.taxItems.set(tax.ITEMS ?? []);
-      this.items.set(items.map(row=>{const value=tax.ITEMS?.find(i=>i.ITEM===row.ITEM);return value ? {...row,
-        VALOR_IVA:value.VALOR_IVA,SUB_TOTAL:value.SUB_TOTAL,TOTAL:value.TOTAL,GRAVAMENES:value.GRAV_TOTAL,GRAV_TOTAL:value.GRAV_TOTAL}:row;}));
-      this.recalculate();this.workspace.setDirty(this.applicationId,true);return true;
-    }catch(error){this.showError(error);return false;}finally{this.loading.set(false);}
+      const currentHeader = this.header();
+      const sanitizedHeader: Ven230Header = {
+        ...currentHeader,
+        FECHA: currentHeader.FECHA || new Date().toISOString().slice(0, 10),
+        FECHA_REGISTRO: currentHeader.FECHA_REGISTRO || currentHeader.FECHA || new Date().toISOString().slice(0, 10)
+      };
+
+      const sanitizedItems: Ven230PrefacturaItem[] = updatedItems.map(row => {
+        const qty = Number(row.CANTIDAD || 0);
+        const price = Number(row.VALOR_UNITARIO || 0);
+        const subTotal = qty * price;
+        const discount = Number(row.VALOR_DESCUENTO || 0);
+        const base = subTotal - discount;
+
+        let porIva = Number(row.POR_IVA != null ? row.POR_IVA : (Number(row.PORC_IVA || 0) * 100));
+        if (!Number.isFinite(porIva)) porIva = 0;
+        const effectiveRate = porIva / 100;
+        const valorIva = base * effectiveRate;
+        const total = base + valorIva;
+
+        let taxObj: Record<string, unknown> | null = null;
+        if (row.GRAV_ORG && typeof row.GRAV_ORG === 'object' && !Array.isArray(row.GRAV_ORG) && 'ID_TASA' in row.GRAV_ORG) {
+          taxObj = row.GRAV_ORG as Record<string, unknown>;
+        } else if (row.GRAVAMENES && typeof row.GRAVAMENES === 'object' && !Array.isArray(row.GRAVAMENES) && 'ID_TASA' in row.GRAVAMENES) {
+          taxObj = row.GRAVAMENES as Record<string, unknown>;
+        }
+
+        if (!taxObj) {
+          taxObj = {
+            ID_TASA: porIva === 0 ? 'IV-000' : 'IV-GEN',
+            DESCRIPCION: porIva === 0 ? 'Sin iva' : 'Tarifa general del IVA',
+            PORCENTAJE: porIva,
+            VALOR_BASE: porIva === 0 ? 0 : 1
+          };
+        } else {
+          taxObj = {
+            ...taxObj,
+            PORCENTAJE: porIva
+          };
+        }
+
+        return {
+          ...row,
+          APLICACION: 2,
+          CANTIDAD: qty,
+          VALOR_UNITARIO: price,
+          VALOR_DESCUENTO: discount,
+          VALOR_COSTOS: Number(row.VALOR_COSTOS || 0),
+          VALOR_BASE: Number(row.VALOR_BASE || 0),
+          SUB_TOTAL: subTotal,
+          POR_IVA: porIva,
+          PORC_IVA: effectiveRate,
+          VALOR_IVA: valorIva,
+          TOTAL: total,
+          GRAV_ORG: taxObj,
+          GRAVAMENES: taxObj
+        };
+      });
+
+      let serverEncab: Ven230PrefacturaGrav[] = [];
+      let serverItems: Ven230PrefacturaItem[] = [];
+      try {
+        const taxResults = await this.business.taxes(sanitizedHeader, sanitizedItems, option);
+        const tax = taxResults[0];
+        if (tax) {
+          serverEncab = tax.ENCAB ?? [];
+          serverItems = tax.ITEMS ?? [];
+        }
+      } catch (err) {
+        console.warn('Error calculando gravámenes en servidor:', err);
+      }
+
+      this.taxItems.set(serverItems);
+
+      this.items.set(sanitizedItems.map(row => {
+        const value = serverItems.find(i => i.ITEM === row.ITEM);
+        return {
+          ...row,
+          GRAV_TOTAL: value?.GRAV_TOTAL ?? row.GRAV_TOTAL
+        };
+      }));
+
+      this.updateSummaryTaxes(sanitizedItems, serverEncab);
+      this.recalculate();
+      this.workspace.setDirty(this.applicationId, true);
+      return true;
+    } catch (error) {
+      this.showError(error);
+      return false;
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private updateSummaryTaxes(items: Ven230PrefacturaItem[], serverEncab: Ven230PrefacturaGrav[]): void {
+    if (!items.length) {
+      this.taxes.set([]);
+      return;
+    }
+
+    const ivaGroups = new Map<number, { valor: number; base: number; idTasa: string; descripcion: string }>();
+    for (const item of items) {
+      const pct = Number(item.POR_IVA || 0);
+      const current = ivaGroups.get(pct) ?? {
+        valor: 0,
+        base: 0,
+        idTasa: pct === 0 ? 'IV-000' : 'IV-GEN',
+        descripcion: pct === 0 ? 'Sin iva' : 'Tarifa general del IVA'
+      };
+      current.valor += Number(item.VALOR_IVA || 0);
+      current.base += Number(item.SUB_TOTAL || 0) - Number(item.VALOR_DESCUENTO || 0);
+      const taxObj = item.GRAVAMENES as { ID_TASA?: string; DESCRIPCION?: string } | undefined;
+      if (taxObj?.ID_TASA) current.idTasa = taxObj.ID_TASA;
+      if (taxObj?.DESCRIPCION) current.descripcion = taxObj.DESCRIPCION;
+      ivaGroups.set(pct, current);
+    }
+
+    const summaryTaxes: Ven230PrefacturaGrav[] = [];
+    const sortedPcts = Array.from(ivaGroups.keys()).sort((a, b) => b - a);
+    let taxIdx = 1;
+    for (const pct of sortedPcts) {
+      const g = ivaGroups.get(pct)!;
+      summaryTaxes.push({
+        ITEM: taxIdx++,
+        CLASE: 'IVA',
+        ID_TASA: g.idTasa,
+        POR_TASA: pct,
+        VALOR: g.valor,
+        BASE: g.base
+      });
+    }
+
+    for (const enc of serverEncab) {
+      if (enc.CLASE && enc.CLASE !== 'IVA') {
+        summaryTaxes.push(enc);
+      }
+    }
+
+    this.taxes.set(summaryTaxes);
   }
   async restoreTaxes():Promise<void>{await this.applyItems(this.items(),'original');}
   async showSettings():Promise<void>{
@@ -1257,22 +1584,7 @@ export class Ven230Component
      const link=document.createElement('a');link.href=url;link.download=this.header().DOCUMENTO+'.pdf';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
    }catch(error){this.electronicFailure(error);}finally{this.electronicBusy.set(false);}
  }
-
- readonly persistItem=(row:Ven230PrefacturaItem)=>this.commitItem(row);
- onItemPending(pending:boolean):void {
-   this.itemPending.set(pending);
-   if(pending){this.disableFormControls();this.workspace.setDirty(this.applicationId,true);}
-   else if(!this.readOnly())this.enableFormControls();
- }
- money(value:unknown):string{return formatNumber(Number(value || 0),this.spec('FORMATO MONEDA')?.FORMATO ?? '#,##0.00');}
- stateStyle():Record<string,string>{
-   try{const styles=JSON.parse(this.spec('ESTILOS ESTADO')?.VALOR_DEFECTO || '[]');
-     const style=styles.find((row:{ESTADO:string})=>row.ESTADO===this.form.controls.ESTADO.value);
-     return style?{color:style.color,background:style.background}:{};
-   }catch{return {};}
- }
-  itemRecordKey(): string {
-    const record = this.currentRecord();
-    return this.mode() === RecordToolbarMode.Creating ? 'new' : JSON.stringify([record?.ID_DOCUMENTO, record?.PREFIJO, record?.CONSECUTIVO, record?.SUFIJO]);
+  money(value: unknown): string {
+    return formatNumber(Number(value || 0), this.spec('FORMATO MONEDA')?.FORMATO ?? '#,##0.00');
   }
 }
