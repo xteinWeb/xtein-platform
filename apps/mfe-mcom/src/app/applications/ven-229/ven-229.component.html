@@ -59,7 +59,13 @@
             <div class="ven-229__field-inline">
               <xtein-label class="ven-229__label-inline">Estado</xtein-label>
               <div class="ven-229__control-inline">
-                <span class="ven-229__badge-status" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
+                <span 
+                  class="ven-229__badge-status" 
+                  [class.ven-229__badge-status--anulado]="(form.controls.ESTADO.value || '').toUpperCase() === 'ANULADO'"
+                  [class.ven-229__badge-status--registrado]="(form.controls.ESTADO.value || '').toUpperCase() === 'REGISTRADO'"
+                  [ngStyle]="stateStyle()">
+                  {{ form.controls.ESTADO.value }}
+                </span>
               </div>
             </div>
 

@@ -223,9 +223,11 @@ export class Ven229Component implements OnInit, OnDestroy {
   );
 
   readonly stateStyle = computed<Record<string, string>>(() => {
+    this.formVersion();
+    const estado = String(this.form.controls.ESTADO?.value || '').toUpperCase().trim();
     try {
       const styles = JSON.parse(this.spec('ESTILOS ESTADO')?.VALOR_DEFECTO || '[]');
-      const match = styles.find((s: Record<string, string>) => s['ESTADO'] === this.form.controls.ESTADO.value);
+      const match = styles.find((s: Record<string, string>) => String(s['ESTADO'] || '').toUpperCase() === estado);
       if (match) {
         const color = match['color'] || match['COLOR'];
         const background = match['background'] || match['BG'];
@@ -235,12 +237,11 @@ export class Ven229Component implements OnInit, OnDestroy {
         return res;
       }
     } catch {}
-    const estado = this.form.controls.ESTADO.value;
     switch (estado) {
-      case 'REGISTRADO': return { background: '#e8f5e8', color: '#2e7d32' };
+      case 'REGISTRADO': return { background: '#e8f5e8', color: '#2e7d32', border: '1px solid #c8e6c9' };
       case 'AUTORIZADO': return { background: 'rgb(132, 223, 170)', color: '#065f46' };
       case 'PARCIAL': return { background: 'rgb(240, 152, 217)', color: '#831843' };
-      case 'ANULADO': return { background: 'rgb(242, 161, 169)', color: '#991b1b' };
+      case 'ANULADO': return { background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' };
       case 'PROGRAMADO': return { background: 'rgba(172, 200, 255, 1)', color: '#1e40af' };
       default: return { background: '#f1f5f9', color: '#475569' };
     }

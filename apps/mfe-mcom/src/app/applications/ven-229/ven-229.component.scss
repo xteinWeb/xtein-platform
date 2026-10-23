@@ -317,6 +317,18 @@
   line-height: 1.4;
   text-transform: uppercase;
   white-space: nowrap;
+
+  &--anulado {
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fca5a5;
+  }
+
+  &--registrado {
+    background: #e8f5e9 !important;
+    color: #2e7d32 !important;
+    border: 1px solid #c8e6c9;
+  }
 }
 
 /*======================================================================

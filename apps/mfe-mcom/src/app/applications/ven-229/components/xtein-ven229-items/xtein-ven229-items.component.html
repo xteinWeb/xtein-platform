@@ -250,7 +250,7 @@
             />
           </td>
           <td class="col-status">
-            <span class="cell-badge">{{ row.ESTADO || 'REGISTRADO' }}</span>
+            <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
           </td>
         </tr>
       </ng-template>
@@ -288,7 +288,7 @@
             <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
             <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
             <td class="col-status">
-              <span class="cell-badge">{{ row.ESTADO }}</span>
+              <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
             </td>
           </tr>
         }
