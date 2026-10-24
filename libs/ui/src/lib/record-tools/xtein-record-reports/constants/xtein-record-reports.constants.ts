@@ -5,8 +5,7 @@ export const XteinRecordReportsBackend = {
   ListAction: 'LISTA INFORMES',
   PdfEndpoint: 'api/ApiReport/ExportPDF',
   EmailEndpoint: '/generales/emailer',
-  EmailAction: 'send',
-  ViewerAction: 'DXXRDV'
+  EmailAction: 'send'
 } as const;
 
 export const XteinReportAnchorSelector = '[data-xtein-toolbar-action="print"]';
