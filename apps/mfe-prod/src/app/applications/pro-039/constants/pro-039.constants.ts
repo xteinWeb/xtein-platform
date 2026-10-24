@@ -42,7 +42,7 @@ export const Pro039ToolbarCapabilities: Readonly<RecordToolbarCapabilities> = {
   view: true,
   sort: false,
   navigation: true,
-  download: false,
+  download: true,
   print: true,
   configure: false
 };
