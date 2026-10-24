@@ -114,7 +114,14 @@ module.exports =
 
       /^devexpress-/,
 
-      /^@devexpress\//
+      /^@devexpress\//,
+
+
+      /*
+       * exceljs (exportación a Excel de PRO-039) se empaqueta localmente con su build de navegador;
+       * su entrada principal es para Node (fs, stream) y no se puede compartir.
+       */
+      /^exceljs($|\/)/
     ],
 
 

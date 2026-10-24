@@ -82,7 +82,9 @@ import {
 
 import { Pro039Service } from './services/pro-039.service';
 import { Pro039BusinessService } from './services/pro-039-business.service';
+import { Pro039ExcelHeader, Pro039ExcelService } from './services/pro-039-excel.service';
 import { XteinPro039ItemsComponent } from './components/xtein-pro039-items/xtein-pro039-items.component';
+import { Pro039ExportScope, XteinPro039ExportComponent } from './components/xtein-pro039-export/xtein-pro039-export.component';
 
 /**
  * PRO-039 Consumos: salidas de inventario de tipo CONSUMO de producción.
@@ -105,7 +107,8 @@ import { XteinPro039ItemsComponent } from './components/xtein-pro039-items/xtein
     XteinRecordReportsComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinPro039ItemsComponent
+    XteinPro039ItemsComponent,
+    XteinPro039ExportComponent
   ],
   providers: [
     Pro039Service,
@@ -156,6 +159,7 @@ export class Pro039Component implements OnInit, OnDestroy {
   readonly filterVisible = signal<boolean>(false);
   readonly viewVisible = signal<boolean>(false);
   readonly reportsVisible = signal<boolean>(false);
+  readonly exportVisible = signal<boolean>(false);
 
   spec(name: string): Pro039Lookup | undefined {
     return this.specifications().find(s => s.NOMBRE_OBJETO === name);
@@ -253,6 +257,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
+    private readonly excel: Pro039ExcelService,
     private readonly elementRef: ElementRef
   ) {
     effect(() => {
@@ -264,6 +269,7 @@ export class Pro039Component implements OnInit, OnDestroy {
         this.filterVisible.set(false);
         this.viewVisible.set(false);
         this.reportsVisible.set(false);
+        this.exportVisible.set(false);
       }
     });
   }
@@ -408,6 +414,9 @@ export class Pro039Component implements OnInit, OnDestroy {
         break;
       case ToolbarAction.Print:
         this.reportsVisible.set(true);
+        break;
+      case ToolbarAction.Download:
+        this.exportVisible.set(true);
         break;
       case ToolbarAction.GoTo:
         if (typeof command.payload === 'number' && Number.isInteger(command.payload)) {
@@ -980,6 +989,67 @@ export class Pro039Component implements OnInit, OnDestroy {
       FECHA_VENCIMIENTO: this.todayDate()
     }, { emitEvent: false });
     this.setItems([]);
+  }
+
+  /**
+   * Exportar a Excel (ventana de exportación): el consumo actual o, como en los informes,
+   * todos los consumos de la búsqueda.
+   */
+  async exportExcel(scope: Pro039ExportScope): Promise<void> {
+    const record = this.currentRecord();
+    if (!record || this.busy()) return;
+    const all = this.records();
+    try {
+      if (scope === 'actual') {
+        await this.excel.export(this.excelHeader({ ...record, ...this.header() }, this.lot()), this.items());
+        this.exportVisible.set(false);
+        return;
+      }
+      this.busy.set(true);
+      const consumptions: { header: Pro039ExcelHeader; items: Pro039MovementItem[] }[] = [];
+      // Materiales de cada consumo ('consulta adicionales'), de a 4 a la vez
+      for (let i = 0; i < all.length; i += 4) {
+        const block = await Promise.all(all.slice(i, i + 4).map(async row => {
+          const detail = await this.business.additional(row.ID_DOCUMENTO, row.CONSECUTIVO);
+          const items = (detail.ITM_MOVIMIENTOS ?? []).map(item => ({
+            ...item,
+            ES_MATRIZ: item.ES_MATRIZ === true || Number(item.ES_MATRIZ) === 1,
+            CONSUMO_BASE: Number(item.CONSUMO_BASE ?? 0)
+          }));
+          return { header: this.excelHeader(row, Number(row.CANTIDAD_LOTE ?? 1) || 1), items };
+        }));
+        consumptions.push(...block);
+      }
+      await this.excel.exportMany(consumptions);
+      this.exportVisible.set(false);
+    } catch (error) {
+      this.showError(error);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  /** Encabezado del consumo para el Excel, con código y nombre cuando están en los catálogos cargados. */
+  private excelHeader(row: Partial<Pro039MovementRecord>, lot: number): Pro039ExcelHeader {
+    const find = (list: Pro039Lookup[], key: string, value: unknown) => list.find(item => String(item[key] ?? '') === String(value ?? ''));
+    const date = (value: unknown) => value ? String(value).slice(0, 10) : '';
+    const section = row.SECCION || row.ID_SECCION || '';
+    const component = row.COMPONENTE || row.PRODUCTO_COMPONENTE || '';
+    return {
+      documento: String(row.DOCUMENTO || `${row.ID_DOCUMENTO ?? ''}-${row.CONSECUTIVO ?? ''}`),
+      fecha: date(row.FECHA),
+      fechaRegistro: date(row.FECHA_REGISTRO),
+      estado: String(row.ESTADO ?? ''),
+      movimiento: `${row.MOVIMIENTO ?? ''} ${row.TIPO ?? ''}`.trim(),
+      usuario: String(row.USUARIO ?? ''),
+      producto: String(find(this.products(), 'PRODUCTO', row.PRODUCTO)?.LABEL ?? row.PRODUCTO ?? ''),
+      componente: String(find(this.products(), 'PRODUCTO', component)?.LABEL ?? find(this.components(), 'PRODUCTO', component)?.LABEL ?? component),
+      seccion: String(find(this.sections(), 'ID_SECCION', section)?.LABEL ?? section),
+      lote: lot,
+      origen: String(row.ORIGEN ?? row.ID_UN_ORIGEN ?? ''),
+      destino: String(row.DESTINO ?? row.ID_UN_DESTINO ?? ''),
+      observacion: String(row.DETALLE ?? '')
+    };
   }
 
   private label(code: unknown, name: unknown): string {

@@ -265,6 +265,15 @@
   (selected)="selectViewedRecord($event)"
 />
 
+<xtein-pro039-export
+  [visible]="exportVisible()"
+  (visibleChange)="exportVisible.set($event)"
+  [current]="currentRecord()?.DOCUMENTO ?? ''"
+  [total]="records().length"
+  [busy]="busy()"
+  (exported)="exportExcel($event)"
+/>
+
 @if (reportsVisible()) {
   <xtein-record-reports
     [visible]="reportsVisible()"
