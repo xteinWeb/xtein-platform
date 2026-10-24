@@ -62,6 +62,14 @@ export class XteinButtonComponent {
   @Input()
   pressed: boolean | null = null;
 
+  /**
+   * DevExtreme toma un nombre sin espacios como ícono propio (dx-icon-<nombre>); los íconos de la fuente
+   * XTEIN (icon-*) necesitan un espacio para que los pinte como clase CSS de fuente.
+   */
+  get dxIcon(): string {
+    return /^icon-[\w-]+$/.test(this.icon) ? ' ' + this.icon : this.icon;
+  }
+
   get elementAttributes(): Record<string, string> {
     const attributes: Record<string, string> = {};
     if (this.ariaLabel) attributes['aria-label'] = this.ariaLabel;
