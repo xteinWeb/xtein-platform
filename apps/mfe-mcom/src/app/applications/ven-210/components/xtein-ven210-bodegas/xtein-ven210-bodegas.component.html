@@ -1,0 +1,64 @@
+<xtein-popup [visible]="visible" (visibleChange)="!$event && close()" [title]="title"
+  width="min(820px, 95vw)" height="min(520px, 90dvh)" [showCloseButton]="!loading()" [hideOnOutsideClick]="false">
+  <div class="bodegas">
+    @if (item; as current) {
+      <p class="bodegas__summary">
+        Cantidad del ítem: <strong>{{ quantity(current.CANTIDAD) }} {{ unitLabel }}</strong>
+        · Repartido: <strong [class.bodegas__mismatch]="pendingQuantity !== 0">{{ quantity(total) }} {{ unitLabel }}</strong>
+        @if (pendingQuantity !== 0) { · Pendiente: <strong class="bodegas__mismatch">{{ quantity(pendingQuantity) }}</strong> }
+      </p>
+    }
+    @if (loading()) { <p role="status" aria-live="polite">Consultando existencias…</p> }
+    @if (error()) { <p role="alert">{{ error() }}</p> }
+    <div class="bodegas__table">
+      <table>
+        <thead>
+          <tr>
+            <th>Bodega</th>
+            <th class="text-end">Existencia (unidad base)</th>
+            <th class="text-end">Cantidad ({{ unitLabel || 'presentación' }})</th>
+            <th class="text-end">Equivalente base</th>
+            @if (!readOnly) { <th></th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track $index) {
+            <tr>
+              <td>
+                @if (readOnly) {
+                  {{ row.ID_UN_BODEGA }} {{ row.DESCRIPCION ? '· ' + row.DESCRIPCION : '' }}
+                } @else {
+                  <xtein-select [items]="warehouseOptions()" displayExpr="LABEL" valueExpr="ID_UN_BODEGA" [searchEnabled]="true"
+                    [ngModel]="row.ID_UN_BODEGA" (ngModelChange)="selectWarehouse(row, $event)" [disabled]="loading()" />
+                }
+              </td>
+              <td class="text-end">{{ quantity(row.EXISTENCIA) }} {{ stockUnit(row) }}</td>
+              <td class="text-end">
+                @if (readOnly) {
+                  {{ quantity(row.CANTIDAD) }}
+                } @else {
+                  <xtein-number ariaLabel="Cantidad de la bodega" [(ngModel)]="row.CANTIDAD" [min]="0" [disabled]="loading()" />
+                }
+              </td>
+              <td class="text-end">{{ quantity(base(row)) }}</td>
+              @if (!readOnly) {
+                <td><xtein-button text="Quitar" variant="secondary" [disabled]="loading()" (clicked)="removeRow($index)" /></td>
+              }
+            </tr>
+          } @empty {
+            <tr><td [attr.colspan]="readOnly ? 4 : 5" class="bodegas__empty">Sin reparto por bodega.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <footer>
+      @if (!readOnly) {
+        <xtein-button text="Agregar bodega" variant="secondary" [disabled]="loading()" (clicked)="addRow()" />
+        <xtein-button text="Aplicar" [disabled]="loading()" (clicked)="apply()" />
+        <xtein-button text="Cancelar" variant="secondary" [disabled]="loading()" (clicked)="close()" />
+      } @else {
+        <xtein-button text="Cerrar" variant="secondary" (clicked)="close()" />
+      }
+    </footer>
+  </div>
+</xtein-popup>

@@ -58,6 +58,7 @@ export class XteinVen229SelectionComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['config'] && !(changes['visible'] && this.visible)) return;
     this.grid?.cancelEditData();
+    this.grid?.clearDataFilter();
     this.error = '';
     this.onlySelected = false;
     this.rows = structuredClone(this.config?.dataSource ?? []);
@@ -86,7 +87,11 @@ export class XteinVen229SelectionComponent implements OnChanges {
   async filterSelected(value: boolean): Promise<void> {
     if (!await this.commitEdits()) return;
     this.onlySelected = value;
-    if (value) this.grid?.filter(['ITEM', 'anyof', this.keys]);
+    // 'anyof' is only valid in filterValue; a DataSource filter needs one '=' per key joined by 'or'.
+    if (value) this.grid?.filter(this.keys.length
+      ? this.keys.length === 1 ? ['ITEM', '=', this.keys[0]]
+        : this.keys.flatMap((key, index) => index ? ['or', ['ITEM', '=', key]] : [['ITEM', '=', key]])
+      : ['ITEM', '=', null]);
     else this.grid?.clearDataFilter();
   }
 
