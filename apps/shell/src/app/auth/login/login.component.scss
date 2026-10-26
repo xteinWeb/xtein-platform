@@ -203,13 +203,38 @@
    RESPONSIVE
    ============================================================ */
 
-@media (max-width: 767.98px) {
+/*
+ * Below desktop widths the card column is narrower than the
+ * 350px card (col-md-5 in portrait tablets, container padding
+ * on phones), so the welcome text is hidden, the card column
+ * takes the full row and the card never exceeds it.
+ */
+@media (max-width: 991.98px) {
 
   .xtein-login__content {
     height: auto;
 
     min-height:
       calc(100vh - 100px);
+
+    justify-content: center;
+
+    /* The row keeps a fixed width, so its negative gutters would shift the card left. */
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .xtein-login .xtein-login__welcome {
+    display: none !important;
+  }
+
+  .xtein-login__content > .col-12 {
+    flex: 0 0 100%;
+
+    max-width: 100%;
+
+    padding-right: 0;
+    padding-left: 0;
   }
 
   .xtein-login
@@ -217,11 +242,19 @@
     flex-basis: auto;
 
     width:
-      calc(100vw - 32px) !important;
+      100% !important;
 
     min-width: 0;
 
     max-width:
       350px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+
+  .xtein-login > .container {
+    padding-right: 16px !important;
+    padding-left: 16px !important;
   }
 }

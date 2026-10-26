@@ -300,3 +300,16 @@
     font-size: 13px;
   }
 }
+
+// Celular: las pestañas (con indicador de posición fija) se desplazan en lugar de cortarse
+@media (max-width: 575.98px) {
+  .xtein-perfil-modal__tabs-container {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .xtein-perfil-modal__tabs {
+    flex: 0 0 auto;
+  }
+}

@@ -96,7 +96,7 @@
       <ng-template #editRowTemplate let-row>
         <tr class="row-editing" (keydown.enter)="onRowEnter($event)">
           <td class="col-select"></td>
-          <td class="col-product">
+          <td data-label="Producto" class="col-product">
             <div class="product-cell-box">
               <div class="product-select-wrap">
                 <dx-drop-down-box
@@ -161,8 +161,8 @@
               </button>
             </div>
           </td>
-          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
-          <td class="col-qty">
+          <td data-label="Nombre del Producto" class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td data-label="Cantidad" class="col-qty">
             <dx-number-box
               class="cell-editor"
               [(value)]="row.CANTIDAD"
@@ -175,7 +175,7 @@
               [inputAttr]="{ style: 'text-align: right;' }"
             />
           </td>
-          <td class="col-um">
+          <td data-label="UM" class="col-um">
             @if (presentationList.length) {
               <dx-select-box
                 class="cell-editor um-select-box"
@@ -203,7 +203,7 @@
               <span>{{ row.UDM_VENTA }}</span>
             }
           </td>
-          <td class="col-price">
+          <td data-label="Valor Unitario" class="col-price">
             <dx-number-box
               class="cell-editor"
               [(value)]="row.VALOR_UNITARIO"
@@ -217,10 +217,10 @@
               [inputAttr]="{ style: 'text-align: right;' }"
             />
           </td>
-          <td class="col-subtotal text-end">
+          <td data-label="Subtotal" class="col-subtotal text-end">
             {{ money(row.SUB_TOTAL) }}
           </td>
-          <td
+          <td data-label="IVA"
             class="col-iva text-end"
             [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
             (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
@@ -228,7 +228,7 @@
           >
             <span class="cell-val-number">{{ money(row.VALOR_IVA) }}</span>
           </td>
-          <td
+          <td data-label="%"
             class="col-pct text-end"
             [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
             (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
@@ -236,10 +236,10 @@
           >
             <span class="cell-val-number">{{ row.POR_IVA || 0 }}</span>
           </td>
-          <td class="col-total text-end">
+          <td data-label="Total" class="col-total text-end">
             {{ money(row.TOTAL) }}
           </td>
-          <td class="col-status">
+          <td data-label="Estado" class="col-status">
             <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
           </td>
         </tr>
@@ -267,16 +267,16 @@
                 (checkedChange)="toggle(row.ITEM, $event)"
               />
             </td>
-            <td class="col-product">{{ row.PRODUCTO }}</td>
-            <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
-            <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
-            <td class="col-um">{{ row.UDM_VENTA }}</td>
-            <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
-            <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
-            <td class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
-            <td class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
-            <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
-            <td class="col-status">
+            <td data-label="Producto" class="col-product">{{ row.PRODUCTO }}</td>
+            <td data-label="Nombre del Producto" class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+            <td data-label="Cantidad" class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
+            <td data-label="UM" class="col-um">{{ row.UDM_VENTA }}</td>
+            <td data-label="Valor Unitario" class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
+            <td data-label="Subtotal" class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
+            <td data-label="IVA" class="col-iva text-end">{{ money(row.VALOR_IVA) }}</td>
+            <td data-label="%" class="col-pct text-end">{{ row.POR_IVA || 0 }}</td>
+            <td data-label="Total" class="col-total text-end">{{ money(row.TOTAL) }}</td>
+            <td data-label="Estado" class="col-status">
               <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
             </td>
           </tr>
@@ -296,7 +296,7 @@
 <dx-popup
   [visible]="taxModalVisible()"
   (visibleChange)="taxModalVisible.set($event)"
-  [width]="600"
+  width="min(600px, 95vw)"
   height="auto"
   [showTitle]="false"
   title="Selección de Iva"

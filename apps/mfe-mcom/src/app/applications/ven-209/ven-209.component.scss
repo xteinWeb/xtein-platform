@@ -3,6 +3,9 @@
   width: 100%;
   height: 100%;
   box-sizing: border-box;
+  /* Breakpoints follow the width the Shell gives the app, not the viewport. */
+  container-type: inline-size;
+  container-name: ven-209;
 }
 
 .ven-209 {
@@ -324,3 +327,41 @@
 
 
 
+
+/* Espacio angosto (celular o menú abierto): etiquetas sobre el campo y menos relleno anidado */
+@container ven-209 (max-width: 560px) {
+  .ven-209 {
+    padding: 10px;
+    gap: 12px;
+
+    &__card-main {
+      padding: 12px;
+    }
+
+    &__fieldset {
+      padding: 12px;
+    }
+
+    &__fieldset-content,
+    &__detail-grid,
+    &__general-grid {
+      padding-left: 0;
+    }
+
+    &__field-inline {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+
+    &__label-inline {
+      flex: 0 0 auto;
+      white-space: normal;
+    }
+
+    &__control-inline {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+  }
+}
