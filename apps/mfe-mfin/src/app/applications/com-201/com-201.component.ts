@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -298,7 +299,8 @@ export class Com201Component
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly registry: ApplicationRegistryService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly elementRef: ElementRef
   ) {
     // Synchronize toolbar state whenever mode, index, records, loading or permissions change.
     effect(() => {
@@ -463,6 +465,7 @@ export class Com201Component
     this.form.enable({ emitEvent: false });
     void this.prepareEdition();
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   /**
@@ -484,7 +487,55 @@ export class Com201Component
       await this.store.load(record.ID_LISTA).catch(() => undefined);
     } finally {
       this.loading.set(false);
+      this.focusFirstControl();
     }
+  }
+
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const initialInput = host.querySelector<HTMLInputElement>(
+        '#com-201-id-lista input:not([readonly]):not([disabled]), #com-201-descripcion input:not([readonly]):not([disabled])'
+      );
+      if (initialInput) {
+        initialInput.focus();
+        initialInput.select?.();
+        return true;
+      }
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .com-201__card') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
   }
 
   /**

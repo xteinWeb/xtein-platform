@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnDestroy,
   OnInit,
   computed,
@@ -114,6 +115,7 @@ export class Fin224Component implements OnInit, OnDestroy {
   private readonly toolbar = inject(ToolbarRuntimeService);
   private readonly permissionsService = inject(RecordToolbarPermissionsService);
   private readonly workspace = inject(WorkspaceRuntimeService);
+  private readonly elementRef = inject(ElementRef);
   private readonly notification = inject(XteinNotificationService);
 
   private readonly subscriptions = new Subscription();
@@ -322,6 +324,7 @@ export class Fin224Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.form.enable({ emitEvent: false });
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   editRecord(): void {
@@ -332,6 +335,54 @@ export class Fin224Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Editing);
     this.form.enable({ emitEvent: false });
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
+  }
+
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const initialInput = host.querySelector<HTMLInputElement>(
+        '#fin-224-id-condicion input:not([readonly]):not([disabled]), #fin-224-descripcion input:not([readonly]):not([disabled])'
+      );
+      if (initialInput) {
+        initialInput.focus();
+        initialInput.select?.();
+        return true;
+      }
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .fin-224__card') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
   }
 
   async cancelEdit(): Promise<void> {
