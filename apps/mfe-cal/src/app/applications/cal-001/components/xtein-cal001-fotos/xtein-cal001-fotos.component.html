@@ -46,10 +46,11 @@
 </div>
 
 @if (vista(); as foto) {
-  <div class="ft-visor" role="dialog" [attr.aria-label]="foto.titulo" (click)="vista.set(null)">
+  <div class="ft-visor" role="dialog" aria-modal="true" [attr.aria-label]="foto.titulo" (click)="cerrarVista()">
     <figure (click)="$event.stopPropagation()">
       <img [src]="foto.url" [alt]="foto.titulo" />
-      <figcaption>{{ foto.titulo }} <button type="button" class="ft-boton" (click)="vista.set(null)">Cerrar</button></figcaption>
+      <figcaption><span class="ft-titulo">{{ foto.titulo }}</span>
+        <button #cerrarVisor type="button" class="ft-boton" (click)="cerrarVista()">Cerrar</button></figcaption>
     </figure>
   </div>
 }

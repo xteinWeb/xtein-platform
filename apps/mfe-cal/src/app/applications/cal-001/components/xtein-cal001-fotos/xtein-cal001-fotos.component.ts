@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector, afterNextRender, computed, effect, inject, input, output,
+  signal, untracked, viewChild
+} from '@angular/core';
 import Swal from 'sweetalert2';
 import { Cal001Limits } from '../../constants/cal-001.constants';
 import type { Cal001Foto } from '../../models/cal-001.model';
@@ -35,6 +38,8 @@ let secuencia = 0;
 })
 export class XteinCal001FotosComponent {
   private readonly servicio = inject(Cal001Service);
+  private readonly injector = inject(Injector);
+  private readonly cerrarVisor = viewChild<ElementRef<HTMLButtonElement>>('cerrarVisor');
   readonly fotos = input<readonly Cal001Foto[]>([]);
   readonly idRegistro = input<number | null>(null);
   readonly puedeAgregar = input(false);
@@ -161,14 +166,26 @@ export class XteinCal001FotosComponent {
   }
 
   verPendiente(foto: Cal001FotoPendiente): void {
-    this.vista.set({ titulo: foto.nombre, url: `data:image/jpeg;base64,${foto.base64}` });
+    this.mostrar(foto.nombre, `data:image/jpeg;base64,${foto.base64}`);
+  }
+
+  /** Abre el visor y deja el foco en «Cerrar». */
+  private mostrar(titulo: string, url: string): void {
+    this.vista.set({ titulo, url });
+    afterNextRender(() => this.cerrarVisor()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  /** El visor cierra con «Cerrar», con clic en el fondo y con la tecla Escape. */
+  @HostListener('document:keydown.escape')
+  cerrarVista(): void {
+    this.vista.set(null);
   }
 
   async ver(foto: Cal001Foto): Promise<void> {
     this.cargandoVista.set(foto.ID_FOTO_NC);
     try {
       const archivo = await this.servicio.foto(foto.ID_FOTO_NC);
-      this.vista.set({ titulo: foto.NOMBRE_ORIGINAL, url: `data:${archivo.MIME};base64,${archivo.BASE64}` });
+      this.mostrar(foto.NOMBRE_ORIGINAL, `data:${archivo.MIME};base64,${archivo.BASE64}`);
     } catch (error) {
       this.aviso.emit(mensajeError(error).mensaje);
     } finally {
