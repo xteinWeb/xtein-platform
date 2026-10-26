@@ -37,6 +37,13 @@ export class ApplicationTreeApiService {
    */
   private static readonly action = 'USUARIO APLICACIONES';
 
+  /**
+   * Platform marker. The legacy web frontend calls the same action
+   * without it; spUsuarioAplAsociadas uses it to return the
+   * microfrontend tree (MICROFRONTENDS) instead of the legacy web menu.
+   */
+  private static readonly platform = 'MFE';
+
   constructor(
     private readonly apiClient: XteinApiClientService,
 
@@ -77,6 +84,8 @@ export class ApplicationTreeApiService {
           USUARIO: session.userId,
 
           EMPRESA: session.companyId,
+
+          PLATAFORMA: ApplicationTreeApiService.platform,
         },
 
         accessMode: XteinApiAccessMode.Authenticated,
