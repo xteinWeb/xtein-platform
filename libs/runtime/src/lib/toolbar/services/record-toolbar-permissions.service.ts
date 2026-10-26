@@ -101,7 +101,11 @@ export class RecordToolbarPermissionsService {
           session.userId,
 
         aplicacion:
-          normalizedApplicationId
+          normalizedApplicationId,
+
+        PLATAFORMA:
+          RecordToolbarBackend
+            .Platform
       };
 
 

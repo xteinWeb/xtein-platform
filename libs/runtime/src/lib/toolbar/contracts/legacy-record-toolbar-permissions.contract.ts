@@ -18,6 +18,13 @@ export interface LegacyRecordToolbarPermissionsRequest {
    */
   aplicacion:
     string;
+
+  /**
+   * Platform marker. spUsuarioAplAsociadas uses it to read the
+   * microfrontend permissions instead of the legacy web ones.
+   */
+  PLATAFORMA:
+    string;
 }
 
 
