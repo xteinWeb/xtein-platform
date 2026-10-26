@@ -83,7 +83,7 @@ export const Ven230DefaultRecord: Readonly<Ven230PrefacturaRecord> = {
   GRAVAMENES: '',
   VALOR_COSTOS: 0,
   TOTAL: 0,
-  TIPO_VENTA: '',
+  TIPO_VENTA: 'CONTADO',
   VALOR_CUOTA: 0,
   VALOR_PRIMER_CUOTA: 0,
   FECHA_PRIMER_VENC: null,

@@ -377,7 +377,7 @@ export class Ven230Component
     FECHA: new FormControl<string>(this.localDate(), { nonNullable: true, validators: [Validators.required] }),
     FECHA_REGISTRO: new FormControl<string | null>(this.localDate()),
     ESTADO: new FormControl<string>('REGISTRADO', { nonNullable: true, validators: [Validators.required] }),
-    USUARIO: new FormControl<string>(''),
+    USUARIO: new FormControl<string>(this.business.identity.USUARIO),
     ID_CLIENTE: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     NOMBRE_CLIENTE: new FormControl<string>(''),
     DIRECCION: new FormControl<string>(''),
@@ -400,7 +400,7 @@ export class Ven230Component
     ID_DOC_SOPORTE: new FormControl<string>(''),
     FECHA_OC: new FormControl<string | null>(null),
     ID_UN_BODEGA: new FormControl<string>(''),
-    FECHA_PRIMER_VENC: new FormControl<string | null>(null),
+    FECHA_PRIMER_VENC: new FormControl<string | null>(this.localDate()),
     CUOTA_INICIAL: new FormControl<number>(0)
   });
 
@@ -586,6 +586,9 @@ export class Ven230Component
     async newRecord(): Promise<void> {
     if (this.loading() || !this.readOnly() || !this.permissions().create) return;
     this.loading.set(true);
+    this.indexBeforeNew = this.currentIndex();
+    this.mode.set(RecordToolbarMode.Creating);
+    this.currentIndex.set(-1);
     try {
       const documents=await this.business.catalog('documents',this.business.identity);
       this.documents.set(documents);
@@ -616,6 +619,13 @@ export class Ven230Component
       this.enableFormControls();
       if (documents.length === 1) this.selectDocument(String(documents[0].DOCUMENTO));
       await this.loadWarehouses();
+      const matchingSeller = this.sellers().find(s => String(s.ID_ADC || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase() || String(s['USUARIO'] || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase());
+      const defaultSeller = matchingSeller ? matchingSeller.ID_ADC : (this.sellers().length === 1 ? this.sellers()[0].ID_ADC : '');
+      if (defaultSeller) {
+        this.form.patchValue({ ID_ADC: defaultSeller }, { emitEvent: false });
+        void this.loadConditions();
+      }
+      this.formVersion.update(v => v + 1);
       this.workspace.setDirty(this.applicationId, false);
       this.focusFirstControl();
     } catch(error){this.showError(error);} finally{this.loading.set(false);}
@@ -655,12 +665,16 @@ export class Ven230Component
         : RecordToolbarMode.Initial
     );
     this.disableFormControls();
-    const current = this.currentRecord();
-    if (current) {
-      this.populateForm(current);
-      void this.loadAdditionalData(current);
+    if (this.indexBeforeNew >= 0 && this.indexBeforeNew < this.records().length) {
+      void this.selectRecordIndex(this.indexBeforeNew);
     } else {
-      this.clearRecord();
+      const current = this.currentRecord();
+      if (current) {
+        this.populateForm(current);
+        void this.loadAdditionalData(current);
+      } else {
+        this.clearRecord();
+      }
     }
     this.workspace.setDirty(this.applicationId, false);
   }
@@ -1077,7 +1091,8 @@ export class Ven230Component
         console.warn('Error loading clients in VEN-230:', e);
       });
 
-      const [sellers,units,currencies,saleTypes,specs,defaultUnit,defaultCurrency,moneySpec,quantitySpec]=await Promise.all([
+      const [documents,sellers,units,currencies,saleTypes,specs,defaultUnit,defaultCurrency,moneySpec,quantitySpec]=await Promise.all([
+        this.business.catalog('documents',identity),
         this.business.catalog('sellers',{ESTADO:'ACTIVO'}),
         this.business.catalog('units',{ESTADO:'ACTIVO',...identity}),this.business.catalog('currencies',{ESTADO:'ACTIVO'}),
         this.business.catalog('saleTypes',{ID_DOMINIO:'FACTURA',ID_GRUPO_DOMINIO:'TIPO VENTA'}),
@@ -1087,6 +1102,10 @@ export class Ven230Component
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'FORMATO MONEDA'}),
         this.business.catalog('specifications',{ID_ESPECIFICACION:'OBJETOS',ID_APLICACION:'GENERAL',NOMBRE_OBJETO:'FORMATO CANTIDAD'})]);
       await pClients;
+      this.documents.set(documents);
+      if (documents.length === 1 && !this.form.controls.DOCUMENTO.value) {
+        this.selectDocument(String(documents[0].DOCUMENTO));
+      }
       this.sellers.set(sellers.map(r => ({ ...r, ID_ADC: String(r.ID_ADC ?? ''), NOMBRE_COMPLETO: String(r.NOMBRE_COMPLETO ?? ''), NUM_NOMBRE: String(r['NUM_NOMBRE'] ?? `${r.ID_ADC} - ${r.NOMBRE_COMPLETO ?? ''}`) })));
       this.specifications.set([...specs,...moneySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO MONEDA'})),...quantitySpec.map(row=>({...row,NOMBRE_OBJETO:'FORMATO CANTIDAD'}))]);
       this.defaultUnit=String(defaultUnit[0]?.ID_UN ?? '');
@@ -1096,7 +1115,7 @@ export class Ven230Component
         tiposVenta:saleTypes.map(r=>({TIPO_VENTA:String(r['VALOR2'] ?? ''),DESCRIPCION:String(r['VALOR2'] ?? '')}))});
       if (!this.form.controls.ID_UN_ITEM.value && this.defaultUnit) {
         this.form.patchValue({ ID_UN_ITEM: this.defaultUnit }, { emitEvent: false });
-        void this.loadWarehouses();
+        await this.loadWarehouses();
       }
       if (!this.form.controls.ID_MONEDA.value && this.defaultCurrency) {
         this.form.patchValue({ ID_MONEDA: this.defaultCurrency }, { emitEvent: false });
@@ -1104,6 +1123,25 @@ export class Ven230Component
       if (!this.form.controls.TIPO_VENTA.value) {
         this.form.patchValue({ TIPO_VENTA: 'CONTADO' }, { emitEvent: false });
       }
+      if (!this.form.controls.USUARIO.value) {
+        this.form.patchValue({ USUARIO: identity.USUARIO }, { emitEvent: false });
+      }
+      if (!this.form.controls.FECHA.value) {
+        this.form.patchValue({ FECHA: this.localDate() }, { emitEvent: false });
+      }
+      if (!this.form.controls.FECHA_REGISTRO.value) {
+        this.form.patchValue({ FECHA_REGISTRO: this.localDate() }, { emitEvent: false });
+      }
+      if (!this.form.controls.FECHA_PRIMER_VENC.value) {
+        this.form.patchValue({ FECHA_PRIMER_VENC: this.localDate() }, { emitEvent: false });
+      }
+      const matchingSeller = this.sellers().find(s => String(s.ID_ADC || '').toUpperCase() === identity.USUARIO.toUpperCase() || String(s['USUARIO'] || '').toUpperCase() === identity.USUARIO.toUpperCase());
+      const defaultSeller = matchingSeller ? matchingSeller.ID_ADC : (this.sellers().length === 1 ? this.sellers()[0].ID_ADC : '');
+      if (defaultSeller && !this.form.controls.ID_ADC.value) {
+        this.form.patchValue({ ID_ADC: defaultSeller }, { emitEvent: false });
+        void this.loadConditions();
+      }
+      this.formVersion.update(v => v + 1);
     }catch(error){this.showError(error);}finally{this.loading.set(false);}
   }
 
@@ -1199,6 +1237,7 @@ export class Ven230Component
   selectedSettingsKeys: unknown[] = [];
   private detailVersion=0;
   private defaultUnit='';private defaultCurrency='';
+  private indexBeforeNew = -1;
   private lastCriteria: unknown[]=[];
   previousCondition='';
   previousWarehouse='';
@@ -1294,8 +1333,10 @@ export class Ven230Component
     if(this.form.controls.ID_UN_ITEM.value!==id)return;
     const bodegas = rows.map(r=>({ID_UN_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),ID_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),DESCRIPCION:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE_UN:String(r['NOMBRE_UN'] ?? ''),BODEGA_LABEL:String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))}));
     this.dataLists.update(d=>({...d,bodegas}));
-    if(!this.readOnly() && bodegas.length > 0 && !this.form.controls.ID_UN_BODEGA.value) {
+    if(bodegas.length > 0 && (!this.form.controls.ID_UN_BODEGA.value || !this.readOnly())) {
       this.form.controls.ID_UN_BODEGA.setValue(bodegas[0].ID_UN_BODEGA, {emitEvent:false});
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
     }
   }
   private async resetConditions():Promise<void> {

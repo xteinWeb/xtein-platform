@@ -703,6 +703,13 @@ export class Ven229Component implements OnInit, OnDestroy {
       void this.onUnitChanged(this.defaultUnit);
     }
 
+    const matchingSeller = this.sellers().find(s => String(s.ID_ADC || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase() || String(s['USUARIO'] || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase());
+    const defaultSeller = matchingSeller ? matchingSeller.ID_ADC : (this.sellers().length === 1 ? this.sellers()[0].ID_ADC : '');
+    if (defaultSeller) {
+      this.form.patchValue({ ID_ADC: defaultSeller });
+      void this.loadConditions();
+    }
+
     this.enableFormControls(true);
     this.workspace.setDirty(this.applicationId, false);
     this.focusFirstControl();
@@ -1284,8 +1291,8 @@ export class Ven229Component implements OnInit, OnDestroy {
         BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? '')).trim()
       })).filter(r => r.ID_UN_BODEGA);
       this.warehouses.set(formatted);
-      if (!this.readOnly()) {
-        const nextBodega = formatted.length > 0 ? formatted[0].ID_UN_BODEGA : '';
+      if (formatted.length > 0 && (!this.form.controls.ID_UN_BODEGA.value || !this.readOnly())) {
+        const nextBodega = formatted[0].ID_UN_BODEGA;
         this.form.patchValue({ ID_UN_BODEGA: nextBodega });
       }
     } catch {
@@ -1630,6 +1637,13 @@ export class Ven229Component implements OnInit, OnDestroy {
         this.currencies.set(currencies);
         if (saleTypes && saleTypes.length > 0) {
           this.saleTypes.set(saleTypes.map(st => String(st['VALOR2'] || st['ID_ITM_DOMINIO'] || st['TIPO_VENTA'] || '')));
+        }
+
+        const matchingSeller = this.sellers().find(s => String(s.ID_ADC || '').toUpperCase() === identity.USUARIO.toUpperCase() || String(s['USUARIO'] || '').toUpperCase() === identity.USUARIO.toUpperCase());
+        const defaultSeller = matchingSeller ? matchingSeller.ID_ADC : (this.sellers().length === 1 ? this.sellers()[0].ID_ADC : '');
+        if (defaultSeller && !this.form.controls.ID_ADC.value) {
+          this.form.patchValue({ ID_ADC: defaultSeller });
+          void this.loadConditions();
         }
       } catch (e) {
         console.warn('Error loading general catalogs:', e);
