@@ -359,6 +359,28 @@
                   />
                 </div>
               </div>
+            
+              <div class="ven-212__field-inline">
+                <xtein-label class="ven-212__label-inline" for="ven-212-bodega">
+                  Bodega
+                </xtein-label>
+                <div class="ven-212__control-inline">
+                  <xtein-lookup
+                    id="ven-212-bodega"
+                    ariaLabel="Bodega"
+                    placeholder="Bodega"
+                    searchPlaceholder="Buscar…"
+                    [items]="warehouses()"
+                    valueExpr="ID_UN_BODEGA"
+                    displayExpr="DESCRIPCION"
+                    [columns]="warehouseColumns"
+                    [showClearButton]="true"
+                    dropDownWidth="min(650px, 95vw)"
+                    formControlName="ID_UN_BODEGA"
+                    [readOnly]="readOnly() || itemPending()"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -437,39 +459,17 @@
           </div>
         </div>
 
-        <!-- Fila Bodega y Descripción Factura (igual que Legacy) -->
-        <div class="ven-212__bodega-desc-row">
-          <div class="ven-212__field-inline ven-212__field-inline--bodega">
-            <xtein-label class="ven-212__label-inline" for="ven-212-bodega">
-              Bodega
-            </xtein-label>
-            <div class="ven-212__control-inline">
-              <xtein-lookup
-                id="ven-212-bodega"
-                ariaLabel="Bodega"
-                placeholder="Seleccionar..."
-                searchPlaceholder="Buscar…"
-                [items]="warehouses()"
-                valueExpr="ID_UN_BODEGA"
-                displayExpr="DESCRIPCION"
-                [columns]="warehouseColumns"
-                [showClearButton]="true"
-                dropDownWidth="min(650px, 95vw)"
-                formControlName="ID_UN_BODEGA"
-                [readOnly]="readOnly() || itemPending()"
-              />
-            </div>
-          </div>
-
-          <div class="ven-212__field-inline ven-212__field-inline--desc">
+                <!-- Descripción hasta el final (ancho completo) -->
+        <div class="ven-212__full-row">
+          <div class="ven-212__field-inline ven-212__field-inline--full">
             <xtein-label class="ven-212__label-inline" for="ven-212-descripcion">
-              Descripción Factura
+              Descripción
             </xtein-label>
             <div class="ven-212__control-inline">
               <xtein-input
                 id="ven-212-descripcion"
                 name="DESCRIPCION"
-                placeholder="Descripción"
+                placeholder="Descripción de la factura..."
                 formControlName="DESCRIPCION"
                 [readOnly]="readOnly() || itemPending()"
               />
