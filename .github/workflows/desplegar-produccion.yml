@@ -1,0 +1,39 @@
+# Producción: al unir a main se despliega la platform en prod2026 con deploy/desplegar-platform.sh
+# (shell + microfrontends en nginx). Pide aprobación: el job usa el Environment "production" de GitHub
+# (Settings → Environments → production → Required reviewers); hasta que alguien aprueba en Actions, no se toca el servidor.
+# Corre en el runner propio de prod2026 (etiqueta "prod2026"). Las pruebas de librerías ya corrieron al unir a developer.
+# Se puede relanzar a mano desde Actions → "Desplegar producción" → Run workflow (solo despliega desde main).
+name: Desplegar producción
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      completo:
+        description: "Compilar y publicar todo (si no, solo lo que cambió desde el último despliegue)"
+        type: boolean
+        default: false
+
+env:
+  NG_CLI_ANALYTICS: "false"
+
+jobs:
+  desplegar:
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    # Nunca dos despliegues a la vez; uno nuevo espera a que termine el que está en curso
+    concurrency:
+      group: prod2026-platform
+      cancel-in-progress: false
+    runs-on: [self-hosted, prod2026]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Desplegar en prod2026
+        env:
+          # Vacío: que el runner no mate procesos al terminar el job (nginx sigue vivo)
+          RUNNER_TRACKING_ID: ""
+          RAMA: main
+          COMPLETO: ${{ inputs.completo == true }}
+        run: bash deploy/desplegar-platform.sh "$GITHUB_SHA"

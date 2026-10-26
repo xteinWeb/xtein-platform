@@ -21,7 +21,7 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-$HOME/apps/platform}"
 WEB_DIR="${WEB_DIR:-/var/www/xtein-platform}"
 SITE_URL="${SITE_URL:-http://127.0.0.1:7596}"
-# Rama del entorno de desarrollo (dev2026); main queda para producción
+# Rama a desplegar: developer en dev2026; en prod2026 el workflow de producción pasa RAMA=main
 RAMA="${RAMA:-developer}"
 COMPLETO="${COMPLETO:-false}"
 SOLO_PLAN="${SOLO_PLAN:-0}"

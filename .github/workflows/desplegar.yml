@@ -1,6 +1,6 @@
 # Entorno de desarrollo: en cada PR a developer, compilación de librerías y pruebas. Al unir a developer: lo mismo
 # y, si pasa, despliegue en dev2026 con deploy/desplegar-platform.sh (shell + microfrontends en nginx, puerto 7596).
-# main no despliega aquí: queda para producción.
+# main despliega en producción con .github/workflows/desplegar-produccion.yml (prod2026, con aprobación).
 # Corre en el runner propio instalado en dev2026 (etiqueta "dev2026"): GitHub no puede entrar a la red interna,
 # el runner sale a buscar los trabajos. Se puede relanzar a mano desde Actions → "Desplegar" → Run workflow.
 name: Desplegar
