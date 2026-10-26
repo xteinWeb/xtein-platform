@@ -497,7 +497,7 @@
           (removed)="removeItem($event)"
           (removedMany)="removeItems($event)"
           (pending)="onItemPending($event)"
-          (stockOnly)="onlyStock.set($event); loadProducts()"
+          (stockOnly)="onlyStock.set($event); loadProducts($event)"
           (refreshProducts)="loadProducts()"
         />
       </div>

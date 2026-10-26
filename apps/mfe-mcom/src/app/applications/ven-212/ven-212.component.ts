@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   OnDestroy,
@@ -344,7 +345,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
-    private readonly elementRef: ElementRef
+    private readonly elementRef: ElementRef,
+    private readonly cdr: ChangeDetectorRef
   ) {
     // Toolbar state synchronization
     effect(() => {
@@ -1119,11 +1121,13 @@ export class Ven212Component implements OnInit, OnDestroy {
       }, true);
       const rows = raw.map(r => {
         const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '');
+        const desc = String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code);
         return {
           ...r,
           CODIGO: code,
           ID_CONDICION: code,
-          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code)
+          NOMBRE: desc,
+          DESCRIPCION: desc
         };
       }).filter(r => r.CODIGO && r.CODIGO !== 'null');
 
@@ -1194,26 +1198,32 @@ export class Ven212Component implements OnInit, OnDestroy {
     await this.loadProducts();
   }
 
-  async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
+    async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
     this.onlyStock.set(stockOnly);
     const req = ++this.productRequest;
-    const h = this.header();
-    if (!h.ID_CONDICION) {
+    const condId = String(this.form.controls.ID_CONDICION.value || '').trim();
+    if (!condId) {
       this.products.set([]);
       this.productsLoading.set(false);
+      this.cdr.markForCheck();
       return;
     }
     this.productsLoading.set(true);
+    this.cdr.markForCheck();
     try {
+      const tipo = this.conditionType();
+      const plazoVal = this.form.controls.PLAZO.value ?? 0;
+      const bodegaVal = String(this.form.controls.ID_UN_BODEGA.value || '').trim();
+
       const items = await this.business.catalog('products', {
-        ID_LISTA: h.ID_CONDICION,
-        TIPO: this.conditionType(),
-        PLAZO: h.PLAZO,
+        ID_LISTA: condId,
+        TIPO: tipo || 'CONDICION',
+        PLAZO: Number(plazoVal) || 0,
         CON_EXIS: stockOnly ? 'SI' : undefined,
-        ID_UN_BODEGA: h.ID_UN_BODEGA
+        ID_UN_BODEGA: bodegaVal || undefined
       }, true);
       if (req === this.productRequest) {
-        this.products.set(items);
+        this.products.set(items || []);
       }
     } catch {
       if (req === this.productRequest) {
@@ -1222,6 +1232,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     } finally {
       if (req === this.productRequest) {
         this.productsLoading.set(false);
+        this.cdr.markForCheck();
       }
     }
   }
