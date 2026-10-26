@@ -18,7 +18,14 @@ export const RecordToolbarBackend = {
    * Backend action used to retrieve application permissions.
    */
   PermissionsAction:
-    'OPERACIONES APLICACIONES USUARIO'
+    'OPERACIONES APLICACIONES USUARIO',
+
+  /**
+   * Platform marker sent as PLATAFORMA. The legacy web frontend
+   * calls the same action without it and keeps its own permissions.
+   */
+  Platform:
+    'MFE'
 
 } as const;
 
