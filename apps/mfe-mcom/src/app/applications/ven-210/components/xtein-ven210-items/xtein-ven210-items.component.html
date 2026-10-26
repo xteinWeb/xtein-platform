@@ -96,7 +96,7 @@
       @if (draft(); as row) {
         <tr class="row-editing">
           <td class="col-select"></td>
-          <td class="col-product">
+          <td data-label="Producto" class="col-product">
             <div class="product-cell-box">
               <div class="product-select-wrap">
                 <dx-drop-down-box
@@ -151,8 +151,8 @@
               </button>
             </div>
           </td>
-          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
-          <td class="col-qty">
+          <td data-label="Nombre del Producto" class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td data-label="Cantidad" class="col-qty">
             <xtein-number
               class="cell-editor"
               ariaLabel="Cantidad"
@@ -163,7 +163,7 @@
               [disabled]="working() || busy"
             />
           </td>
-          <td class="col-um">
+          <td data-label="UM" class="col-um">
             @if (row.PRESENTACION?.length) {
               <xtein-select
                 class="cell-editor"
@@ -178,7 +178,7 @@
               <span>{{ row.UDM_VENTA }}</span>
             }
           </td>
-          <td class="col-price">
+          <td data-label="Valor Unitario" class="col-price">
             <xtein-number
               class="cell-editor"
               ariaLabel="Valor unitario"
@@ -187,13 +187,13 @@
               [disabled]="!editPrice || orderLocked || working() || busy"
             />
           </td>
-          <td class="col-subtotal text-end">
+          <td data-label="Subtotal" class="col-subtotal text-end">
             {{ money(row.CANTIDAD * row.VALOR_UNITARIO) }}
           </td>
-          <td class="col-total text-end">
+          <td data-label="Total" class="col-total text-end">
             {{ money(row.CANTIDAD * row.VALOR_UNITARIO) }}
           </td>
-          <td class="col-date">
+          <td data-label="Fecha entrega" class="col-date">
             <xtein-date
               class="cell-editor"
               [min]="minimumDeliveryDate"
@@ -201,10 +201,10 @@
               [disabled]="working() || busy || orderLocked"
             />
           </td>
-          <td class="col-status">
+          <td data-label="Estado" class="col-status">
             <span class="cell-badge">{{ row.ESTADO || 'ACTIVA' }}</span>
           </td>
-          <td class="col-bodegas"></td>
+          <td data-label="Bodegas" class="col-bodegas"></td>
         </tr>
       }
 
@@ -222,18 +222,18 @@
               (checkedChange)="toggle(row.ITEM, $event)"
             />
           </td>
-          <td class="col-product">{{ row.PRODUCTO }}</td>
-          <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
-          <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
-          <td class="col-um">{{ row.UDM_VENTA }}</td>
-          <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
-          <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
-          <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
-          <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
-          <td class="col-status">
+          <td data-label="Producto" class="col-product">{{ row.PRODUCTO }}</td>
+          <td data-label="Nombre del Producto" class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td data-label="Cantidad" class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
+          <td data-label="UM" class="col-um">{{ row.UDM_VENTA }}</td>
+          <td data-label="Valor Unitario" class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
+          <td data-label="Subtotal" class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
+          <td data-label="Total" class="col-total text-end">{{ money(row.TOTAL) }}</td>
+          <td data-label="Fecha entrega" class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
+          <td data-label="Estado" class="col-status">
             <span class="cell-badge">{{ row.ESTADO }}</span>
           </td>
-          <td class="col-bodegas">
+          <td data-label="Bodegas" class="col-bodegas">
             <button
               type="button"
               class="btn-cell-bodegas"

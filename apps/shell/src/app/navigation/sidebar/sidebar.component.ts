@@ -20,6 +20,8 @@ import { WorkspaceRuntimeService } from '@xtein/runtime';
 
 import { ApplicationNavigationService } from '../services/application-navigation.service';
 
+import { isShellCompactViewport } from '../../layout/shell-layout/shell-layout.breakpoints';
+
 /**
  * Represents the minimum DevExtreme TreeView click event
  * information required by the XTEIN navigation component.
@@ -191,6 +193,14 @@ export class Sidebar implements OnInit {
 
         icon: item.icon,
       });
+
+      /*
+       * On compact viewports the expanded sidebar floats over the
+       * workspace, so it gets out of the way once the app opens.
+       */
+      if (!this.collapsed && isShellCompactViewport()) {
+        this.collapsedChange.emit(true);
+      }
     } catch (error) {
       this.launchError = this.resolveLaunchErrorMessage(error, item);
 

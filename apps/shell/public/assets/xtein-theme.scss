@@ -7062,6 +7062,19 @@ svg.dxdi-canvas.dxdi-touch-action {
   min-width: 720px;
 }
 
+/* Celular y tablet vertical: los popups heredados no se salen de la pantalla */
+@media (max-width: 991.98px) {
+  .popup-wrapper .dx-overlay-content, .popup-wrapper .dx-popup-normal {
+    width: 96vw!important;
+    height: 90dvh!important;
+  }
+
+  .dx-popup-wrapper > .dx-overlay-content:has(.popup-content .ges-info) {
+    min-width: 0;
+    max-width: 96vw;
+  }
+}
+
 
 /* ========================================================================== 
    ESTILOS GENERALES DE LA APLICACIÓN · BLOQUE 59

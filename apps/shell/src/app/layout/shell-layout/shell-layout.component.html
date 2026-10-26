@@ -1,6 +1,7 @@
 <div
   class="xt-shell"
-  [class.xt-shell--sidebar-collapsed]="sidebarCollapsed()">
+  [class.xt-shell--sidebar-collapsed]="sidebarCollapsed()"
+  [class.xt-shell--compact]="compactLayout()">
 
   <!-- Header -->
   <header
@@ -22,6 +23,16 @@
     </app-sidebar>
 
   </aside>
+
+
+  <!-- Backdrop of the floating sidebar (compact viewports) -->
+  @if (compactLayout() && !sidebarCollapsed()) {
+    <div
+      class="xt-shell__backdrop"
+      aria-hidden="true"
+      (click)="closeFloatingSidebar()">
+    </div>
+  }
 
 
   <!-- Main workspace -->

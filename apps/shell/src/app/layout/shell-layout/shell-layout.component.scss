@@ -171,6 +171,59 @@
 
 
 /*
+ * Compact layout (phones and portrait tablets).
+ *
+ * The grid always reserves the collapsed rail width. When the
+ * user expands the sidebar it floats over the workspace with a
+ * backdrop instead of shrinking the application area.
+ *
+ * Keep in sync with SHELL_COMPACT_MEDIA_QUERY.
+ */
+@media (
+  max-width:
+    991.98px
+) {
+
+  .xt-shell,
+  .xt-shell--sidebar-collapsed {
+    --xt-sidebar-width:
+      72px;
+  }
+
+
+  .xt-shell:not(.xt-shell--sidebar-collapsed)
+  .xt-shell__sidebar {
+    position:
+      relative;
+
+    z-index:
+      300;
+
+    width:
+      min(280px, calc(100vw - 48px));
+
+    box-shadow:
+      4px 0 18px rgba(39, 78, 114, .18);
+  }
+
+
+  .xt-shell__backdrop {
+    position:
+      fixed;
+
+    inset:
+      0;
+
+    z-index:
+      250;
+
+    background:
+      rgba(15, 23, 42, .35);
+  }
+}
+
+
+/*
  * On narrow screens the toolbar moves to a second
  * header row to avoid collisions with the company
  * identity and user controls.

@@ -11,3 +11,15 @@
 footer { flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: .5rem; }
 [role=alert] { color: #b42318; margin: 0; }
 [role=status] { margin: 0; }
+
+/* Modal angosto (celular): cada bodega se muestra como tarjeta con etiqueta y valor */
+.bodegas { container-type: inline-size; container-name: bodegas; }
+@container bodegas (max-width: 560px) {
+  .bodegas__table table, .bodegas__table tbody { display: block; }
+  .bodegas__table thead { display: none; }
+  .bodegas__table tbody tr { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .5rem .75rem; padding: .6rem 0; border-bottom: 1px solid var(--xt-color-border, #e2e8f0); }
+  .bodegas__table td { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0; border: 0; text-align: left !important; }
+  .bodegas__table td[data-label]::before { content: attr(data-label); font-size: 11px; font-weight: 600; color: var(--xt-color-text-secondary, #64748b); }
+  .bodegas__table td[data-label="Bodega"], .bodegas__table td[colspan] { grid-column: 1 / -1; }
+  .bodegas__table td.bodegas__action { justify-content: flex-end; }
+}
