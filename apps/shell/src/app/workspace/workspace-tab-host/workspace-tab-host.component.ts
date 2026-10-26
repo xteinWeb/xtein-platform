@@ -314,6 +314,15 @@ export class WorkspaceTabHostComponent
       return this.tab.remoteEntryUrl;
     }
 
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+      this.tab.remoteEntryUrl &&
+      (this.tab.remoteEntryUrl.includes('localhost') || this.tab.remoteEntryUrl.includes('127.0.0.1'))
+    ) {
+      return this.tab.remoteEntryUrl;
+    }
+
     return `${baseUrl.replace(/\/+$/, '')}/${this.tab.remoteName}/remoteEntry.json`;
   }
 

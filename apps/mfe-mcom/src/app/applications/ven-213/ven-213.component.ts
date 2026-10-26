@@ -1,12 +1,12 @@
 import { XteinLookupComponent, XteinGroupLabelComponent } from '@xtein/ui';
 import { XteinPopupComponent, XteinLabelComponent } from '@xtein/ui';
-import { XteinVen213SelectionComponent } from './components/xtein-ven213-selection/xtein-ven213-selection.component';
-import { XteinVen213BodegasComponent } from './components/xtein-ven213-bodegas/xtein-ven213-bodegas.component';
+import { Ven213SelectionComponent } from './components/ven-213-selection/ven-213-selection.component';
+import { Ven213BodegasComponent } from './components/ven-213-bodegas/ven-213-bodegas.component';
 import { formatNumber } from 'devextreme/localization';
 import { Ven213BusinessService } from './services/ven-213-business.service';
 import { Ven213Lookup, Ven213Details, Ven213SourceLink, Ven213SourceLoad, Ven213SettingResult } from './models/ven-213-business.model';
 import { Ven213ItemBodega } from './models/ven-213.model';
-import { XteinVen213ItemsComponent } from './components/xtein-ven213-items/xtein-ven213-items.component';
+import { Ven213ItemsComponent } from './components/ven-213-items/ven-213-items.component';
 import { XteinButtonComponent } from '@xtein/ui';
 import { ElementRef } from '@angular/core';
 import {
@@ -116,14 +116,13 @@ import {
  * VEN-213 - Devoluciones.
  */
 @Component({
-  selector:
-    'xtein-ven-213',
+  selector: 'ven-213',
 
   standalone:
     true,
 
   imports: [XteinLookupComponent,XteinPopupComponent, XteinLabelComponent, XteinGroupLabelComponent,
-    CommonModule, XteinVen213SelectionComponent, XteinVen213ItemsComponent, XteinVen213BodegasComponent, XteinButtonComponent, ReactiveFormsModule,
+    CommonModule, Ven213SelectionComponent, Ven213ItemsComponent, Ven213BodegasComponent, XteinButtonComponent, ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinRecordReportsComponent,
@@ -854,7 +853,7 @@ export class Ven213Component
     }, 100);
   }
 
-  @ViewChild(XteinVen213ItemsComponent) private itemEditor?: XteinVen213ItemsComponent;
+  @ViewChild(Ven213ItemsComponent) private itemEditor?: Ven213ItemsComponent;
   readonly documents = signal<Ven213Lookup[]>([]);
   readonly clients = signal<Ven213Lookup[]>([]);
   readonly addresses=signal<Ven213Lookup[]>([]);

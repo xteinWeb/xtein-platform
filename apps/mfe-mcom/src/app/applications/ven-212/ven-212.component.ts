@@ -89,10 +89,10 @@ import {
 import { Ven212Service } from './services/ven-212.service';
 import { Ven212BusinessService } from './services/ven-212-business.service';
 import { Ven212ElectronicService } from './services/ven-212-electronic.service';
-import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein-ven212-items.component';
+import { Ven212ItemsComponent } from './components/ven-212-items/ven-212-items.component';
 
 @Component({
-  selector: 'xtein-ven-212',
+  selector: 'ven-212',
   standalone: true,
   imports: [
     CommonModule,
@@ -109,7 +109,7 @@ import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein
     XteinRecordSettingsComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinVen212ItemsComponent
+    Ven212ItemsComponent
   ],
   providers: [
     Ven212Service,

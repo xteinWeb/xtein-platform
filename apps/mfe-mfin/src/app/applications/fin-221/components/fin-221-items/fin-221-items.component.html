@@ -1,0 +1,436 @@
+<div class="fin221-items-container">
+  <!-- Toolbar de ítems con controles oficiales xtein-button -->
+  <div class="grid-toolbar">
+    <!-- Botón Agregar (+) -->
+    <xtein-button
+      icon="plus"
+      text="Agregar Ítem"
+      variant="primary"
+      ariaLabel="Agregar ítem"
+      [disabled]="readOnly || busy() || !!draft()"
+      (clicked)="beginAdd()"
+    />
+
+    <!-- Botones Guardar y Cancelar fila en edición -->
+    @if (!!draft()) {
+      <xtein-button
+        icon="todo"
+        text="Confirmar"
+        variant="success"
+        ariaLabel="Confirmar ítem"
+        [disabled]="busy()"
+        (clicked)="commit()"
+      />
+
+      <xtein-button
+        icon="undo"
+        text="Cancelar"
+        variant="secondary"
+        ariaLabel="Cancelar edición"
+        [disabled]="busy()"
+        (clicked)="cancel()"
+      />
+    }
+
+    <!-- Botón Eliminar Seleccionados (🗑) -->
+    @if (!readOnly && selected().length > 0 && !draft()) {
+      <xtein-button
+        icon="trash"
+        text="Eliminar"
+        variant="danger"
+        ariaLabel="Eliminar seleccionados"
+        [disabled]="busy()"
+        (clicked)="deleteSelected()"
+      />
+    }
+  </div>
+
+  <!-- Tabla de Plazos / Ítems -->
+  <div class="table-scroll">
+    <table class="items-grid-table">
+      <thead>
+        @if (tipoFrecuencia === 'Constante') {
+          <tr>
+            <th class="col-select">
+              <xtein-checkbox
+                ariaLabel="Seleccionar todos"
+                [disabled]="readOnly || busy() || !!draft() || items.length === 0"
+                [checked]="allItemsSelected()"
+                (checkedChange)="toggleAll($event)"
+              />
+            </th>
+            <th class="col-tasa">Tasa Financiera</th>
+            <th class="col-pagos text-center">Pagos</th>
+            <th class="col-pct-tasa text-end">% Tasa</th>
+            <th class="col-factor text-end">Factor</th>
+            <th class="col-ppp text-end">% Des PPP</th>
+            <th class="col-ci text-center">Cuota Inicial</th>
+            <th class="col-tipo-ci">Tipo Valor</th>
+            <th class="col-min-ci text-end">Valor Mínimo</th>
+            <th class="col-dias-ci text-center">Días Plazo</th>
+            <th class="col-diferir-ci text-center">1ra Cuota CI</th>
+            <th class="col-desc-ci text-center">Desc CI</th>
+            <th class="col-condicion">Tipo Condición</th>
+          </tr>
+        } @else {
+          <tr>
+            <th class="col-select">
+              <xtein-checkbox
+                ariaLabel="Seleccionar todos"
+                [disabled]="readOnly || busy() || !!draft() || items.length === 0"
+                [checked]="allItemsSelected()"
+                (checkedChange)="toggleAll($event)"
+              />
+            </th>
+            <th class="col-pagos text-center">Pagos</th>
+            <th class="col-dias text-center">Nº Días</th>
+            <th class="col-pct-grav text-end">% Grav</th>
+            <th class="col-pct-pago text-end">% Pago</th>
+            <th class="col-condicion">Tipo Condición</th>
+          </tr>
+        }
+      </thead>
+      <tbody>
+        <!-- Fila de nuevo ítem en edición si isNewRow -->
+        @if (isNewRow() && draft(); as newRow) {
+          <tr class="row-editing">
+            <td class="col-select"></td>
+            @if (tipoFrecuencia === 'Constante') {
+              <td class="col-tasa">
+                <xtein-select
+                  ariaLabel="Tasa Financiera"
+                  [items]="tasas"
+                  displayExpr="ID_TASA"
+                  valueExpr="ID_TASA"
+                  [searchEnabled]="true"
+                  [ngModel]="newRow.ID_TASA"
+                  (ngModelChange)="onTasaChanged($event)"
+                />
+              </td>
+              <td class="col-pagos">
+                <xtein-select
+                  ariaLabel="Pagos"
+                  [items]="pagosList"
+                  displayExpr="text"
+                  valueExpr="value"
+                  [ngModel]="newRow.PAGO"
+                  (ngModelChange)="onPagoChanged($event)"
+                />
+              </td>
+              <td class="col-pct-tasa">
+                <xtein-number
+                  ariaLabel="% Tasa"
+                  [(ngModel)]="newRow.PORC_TASA"
+                  [min]="0"
+                  format="#,##0.00 '%'"
+                  [readOnly]="newRow.ID_TASA !== 'Manual'"
+                />
+              </td>
+              <td class="col-factor">
+                <xtein-number
+                  ariaLabel="Factor"
+                  [(ngModel)]="newRow.FACTOR"
+                  [min]="0"
+                  format="#,##0.00000000"
+                  [readOnly]="newRow.ID_TASA !== 'Manual'"
+                />
+              </td>
+              <td class="col-ppp">
+                <xtein-number
+                  ariaLabel="% Descuento PPP"
+                  [(ngModel)]="newRow.DESCUENTO_PPP"
+                  [min]="0"
+                  [max]="100"
+                  format="#,##0.00 '%'"
+                />
+              </td>
+              <td class="col-ci">
+                <xtein-select
+                  ariaLabel="Cuota Inicial"
+                  [items]="siNoOptions"
+                  displayExpr="text"
+                  valueExpr="value"
+                  [(ngModel)]="newRow.CUOTA_INICIAL"
+                />
+              </td>
+              <td class="col-tipo-ci">
+                <xtein-select
+                  ariaLabel="Tipo Valor CI"
+                  [items]="tipoCiOptions"
+                  displayExpr="text"
+                  valueExpr="value"
+                  [(ngModel)]="newRow.TIPO_CI"
+                  [disabled]="newRow.CUOTA_INICIAL !== 'Si'"
+                />
+              </td>
+              <td class="col-min-ci">
+                <xtein-number
+                  ariaLabel="Valor Mínimo CI"
+                  [(ngModel)]="newRow.MINIMO_CI"
+                  [min]="0"
+                  [format]="newRow.TIPO_CI === 'Porcentaje' ? '#,##0.00 \'%\'' : '#,##0.00'"
+                  [disabled]="newRow.CUOTA_INICIAL !== 'Si'"
+                />
+              </td>
+              <td class="col-dias-ci">
+                <xtein-number
+                  ariaLabel="Días Plazo CI"
+                  [(ngModel)]="newRow.DIAS_PLAZO_CI"
+                  [min]="0"
+                  format="#,##0"
+                  [disabled]="newRow.CUOTA_INICIAL !== 'Si'"
+                />
+              </td>
+              <td class="col-diferir-ci">
+                <xtein-select
+                  ariaLabel="1ra Cuota CI"
+                  [items]="siNoOptions"
+                  displayExpr="text"
+                  valueExpr="value"
+                  [(ngModel)]="newRow.DIFERIR_CI"
+                  [disabled]="newRow.CUOTA_INICIAL !== 'Si'"
+                />
+              </td>
+              <td class="col-desc-ci">
+                <xtein-select
+                  ariaLabel="Desc CI"
+                  [items]="siNoOptions"
+                  displayExpr="text"
+                  valueExpr="value"
+                  [(ngModel)]="newRow.DESCONTAR_CI"
+                  [disabled]="newRow.CUOTA_INICIAL !== 'Si'"
+                />
+              </td>
+              <td class="col-condicion">
+                <xtein-select
+                  ariaLabel="Tipo Condición"
+                  [items]="condiciones"
+                  displayExpr="ID_CONDICION"
+                  valueExpr="ID_CONDICION"
+                  [searchEnabled]="true"
+                  [(ngModel)]="newRow.ID_CONDICION"
+                />
+              </td>
+            } @else {
+              <td class="col-pagos">
+                <xtein-number ariaLabel="Pagos" [(ngModel)]="newRow.PAGO" [min]="1" format="#,##0" />
+              </td>
+              <td class="col-dias">
+                <xtein-number ariaLabel="Nº Días" [(ngModel)]="newRow.DIAS" [min]="0" format="#,##0" />
+              </td>
+              <td class="col-pct-grav">
+                <xtein-number ariaLabel="% Grav" [(ngModel)]="newRow.PORC_GRAV" [min]="0" format="#,##0.00 '%'" />
+              </td>
+              <td class="col-pct-pago">
+                <xtein-number ariaLabel="% Pago" [(ngModel)]="newRow.PORC_PAGO" [min]="0" format="#,##0.00 '%'" />
+              </td>
+              <td class="col-condicion">
+                <xtein-select
+                  ariaLabel="Tipo Condición"
+                  [items]="condiciones"
+                  displayExpr="ID_CONDICION"
+                  valueExpr="ID_CONDICION"
+                  [searchEnabled]="true"
+                  [(ngModel)]="newRow.ID_CONDICION"
+                />
+              </td>
+            }
+          </tr>
+        }
+
+        <!-- Filas existentes -->
+        @for (item of items; track item.ITEM; let idx = $index) {
+          @if (!isNewRow() && editingItemIndex() === idx && draft(); as editRow) {
+            <!-- Fila en edición existente -->
+            <tr class="row-editing">
+              <td class="col-select"></td>
+              @if (tipoFrecuencia === 'Constante') {
+                <td class="col-tasa">
+                  <xtein-select
+                    ariaLabel="Tasa Financiera"
+                    [items]="tasas"
+                    displayExpr="ID_TASA"
+                    valueExpr="ID_TASA"
+                    [searchEnabled]="true"
+                    [ngModel]="editRow.ID_TASA"
+                    (ngModelChange)="onTasaChanged($event)"
+                  />
+                </td>
+                <td class="col-pagos">
+                  <xtein-select
+                    ariaLabel="Pagos"
+                    [items]="pagosList"
+                    displayExpr="text"
+                    valueExpr="value"
+                    [ngModel]="editRow.PAGO"
+                    (ngModelChange)="onPagoChanged($event)"
+                  />
+                </td>
+                <td class="col-pct-tasa">
+                  <xtein-number
+                    ariaLabel="% Tasa"
+                    [(ngModel)]="editRow.PORC_TASA"
+                    [min]="0"
+                    format="#,##0.00 '%'"
+                    [readOnly]="editRow.ID_TASA !== 'Manual'"
+                  />
+                </td>
+                <td class="col-factor">
+                  <xtein-number
+                    ariaLabel="Factor"
+                    [(ngModel)]="editRow.FACTOR"
+                    [min]="0"
+                    format="#,##0.00000000"
+                    [readOnly]="editRow.ID_TASA !== 'Manual'"
+                  />
+                </td>
+                <td class="col-ppp">
+                  <xtein-number
+                    ariaLabel="% Descuento PPP"
+                    [(ngModel)]="editRow.DESCUENTO_PPP"
+                    [min]="0"
+                    [max]="100"
+                    format="#,##0.00 '%'"
+                  />
+                </td>
+                <td class="col-ci">
+                  <xtein-select
+                    ariaLabel="Cuota Inicial"
+                    [items]="siNoOptions"
+                    displayExpr="text"
+                    valueExpr="value"
+                    [(ngModel)]="editRow.CUOTA_INICIAL"
+                  />
+                </td>
+                <td class="col-tipo-ci">
+                  <xtein-select
+                    ariaLabel="Tipo Valor CI"
+                    [items]="tipoCiOptions"
+                    displayExpr="text"
+                    valueExpr="value"
+                    [(ngModel)]="editRow.TIPO_CI"
+                    [disabled]="editRow.CUOTA_INICIAL !== 'Si'"
+                  />
+                </td>
+                <td class="col-min-ci">
+                  <xtein-number
+                    ariaLabel="Valor Mínimo CI"
+                    [(ngModel)]="editRow.MINIMO_CI"
+                    [min]="0"
+                    [format]="editRow.TIPO_CI === 'Porcentaje' ? '#,##0.00 \'%\'' : '#,##0.00'"
+                    [disabled]="editRow.CUOTA_INICIAL !== 'Si'"
+                  />
+                </td>
+                <td class="col-dias-ci">
+                  <xtein-number
+                    ariaLabel="Días Plazo CI"
+                    [(ngModel)]="editRow.DIAS_PLAZO_CI"
+                    [min]="0"
+                    format="#,##0"
+                    [disabled]="editRow.CUOTA_INICIAL !== 'Si'"
+                  />
+                </td>
+                <td class="col-diferir-ci">
+                  <xtein-select
+                    ariaLabel="1ra Cuota CI"
+                    [items]="siNoOptions"
+                    displayExpr="text"
+                    valueExpr="value"
+                    [(ngModel)]="editRow.DIFERIR_CI"
+                    [disabled]="editRow.CUOTA_INICIAL !== 'Si'"
+                  />
+                </td>
+                <td class="col-desc-ci">
+                  <xtein-select
+                    ariaLabel="Desc CI"
+                    [items]="siNoOptions"
+                    displayExpr="text"
+                    valueExpr="value"
+                    [(ngModel)]="editRow.DESCONTAR_CI"
+                    [disabled]="editRow.CUOTA_INICIAL !== 'Si'"
+                  />
+                </td>
+                <td class="col-condicion">
+                  <xtein-select
+                    ariaLabel="Tipo Condición"
+                    [items]="condiciones"
+                    displayExpr="ID_CONDICION"
+                    valueExpr="ID_CONDICION"
+                    [searchEnabled]="true"
+                    [(ngModel)]="editRow.ID_CONDICION"
+                  />
+                </td>
+              } @else {
+                <td class="col-pagos">
+                  <xtein-number ariaLabel="Pagos" [(ngModel)]="editRow.PAGO" [min]="1" format="#,##0" />
+                </td>
+                <td class="col-dias">
+                  <xtein-number ariaLabel="Nº Días" [(ngModel)]="editRow.DIAS" [min]="0" format="#,##0" />
+                </td>
+                <td class="col-pct-grav">
+                  <xtein-number ariaLabel="% Grav" [(ngModel)]="editRow.PORC_GRAV" [min]="0" format="#,##0.00 '%'" />
+                </td>
+                <td class="col-pct-pago">
+                  <xtein-number ariaLabel="% Pago" [(ngModel)]="editRow.PORC_PAGO" [min]="0" format="#,##0.00 '%'" />
+                </td>
+                <td class="col-condicion">
+                  <xtein-select
+                    ariaLabel="Tipo Condición"
+                    [items]="condiciones"
+                    displayExpr="ID_CONDICION"
+                    valueExpr="ID_CONDICION"
+                    [searchEnabled]="true"
+                    [(ngModel)]="editRow.ID_CONDICION"
+                  />
+                </td>
+              }
+            </tr>
+          } @else {
+            <!-- Fila estándar en modo vista -->
+            <tr
+              [class.row-selected]="isRowSelected(item.ITEM)"
+              (dblclick)="beginEdit(item, idx)"
+            >
+              <td class="col-select">
+                <xtein-checkbox
+                  ariaLabel="Seleccionar ítem"
+                  [disabled]="readOnly || busy() || !!draft()"
+                  [checked]="isRowSelected(item.ITEM)"
+                  (checkedChange)="toggleRow(item.ITEM, $event)"
+                />
+              </td>
+              @if (tipoFrecuencia === 'Constante') {
+                <td class="col-tasa">{{ item.ID_TASA }}</td>
+                <td class="col-pagos text-center">{{ item.PAGO }}</td>
+                <td class="col-pct-tasa text-end">{{ item.PORC_TASA | number:'1.2-2' }}%</td>
+                <td class="col-factor text-end">{{ item.FACTOR | number:'1.8-8' }}</td>
+                <td class="col-ppp text-end">{{ item.DESCUENTO_PPP | number:'1.2-2' }}%</td>
+                <td class="col-ci text-center">{{ item.CUOTA_INICIAL }}</td>
+                <td class="col-tipo-ci">{{ item.CUOTA_INICIAL === 'Si' ? item.TIPO_CI : '-' }}</td>
+                <td class="col-min-ci text-end">{{ item.CUOTA_INICIAL === 'Si' ? (item.MINIMO_CI | number:'1.2-2') : '-' }}</td>
+                <td class="col-dias-ci text-center">{{ item.CUOTA_INICIAL === 'Si' ? item.DIAS_PLAZO_CI : '-' }}</td>
+                <td class="col-diferir-ci text-center">{{ item.CUOTA_INICIAL === 'Si' ? item.DIFERIR_CI : '-' }}</td>
+                <td class="col-desc-ci text-center">{{ item.CUOTA_INICIAL === 'Si' ? item.DESCONTAR_CI : '-' }}</td>
+                <td class="col-condicion">{{ item.ID_CONDICION || '-' }}</td>
+              } @else {
+                <td class="col-pagos text-center">{{ item.PAGO }}</td>
+                <td class="col-dias text-center">{{ item.DIAS }}</td>
+                <td class="col-pct-grav text-end">{{ item.PORC_GRAV | number:'1.2-2' }}%</td>
+                <td class="col-pct-pago text-end">{{ item.PORC_PAGO | number:'1.2-2' }}%</td>
+                <td class="col-condicion">{{ item.ID_CONDICION || '-' }}</td>
+              }
+            </tr>
+          }
+        }
+
+        @if (items.length === 0 && !draft()) {
+          <tr>
+            <td [attr.colspan]="tipoFrecuencia === 'Constante' ? 13 : 6" class="text-center empty-message">
+              No hay plazos o ítems de financiación configurados para este plan.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

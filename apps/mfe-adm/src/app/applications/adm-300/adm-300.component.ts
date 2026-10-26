@@ -13,7 +13,7 @@ import * as demo from './constants/tablero-demo.constants';
 import { TableroPurchase } from './models/tablero-purchase.model';
 
 @Component({
-  selector: 'xtein-adm-300', standalone: true,
+  selector: 'adm-300', standalone: true,
   providers: [TableroDataService],
   imports: [CommonModule, XteinPopupComponent,XteinDataGridComponent,XteinButtonComponent,XteinHtmlEditorComponent,XteinChartComponent,XteinPieChartComponent,XteinBarGaugeComponent,XteinSchedulerComponent],
   templateUrl: './adm-300.component.html', styleUrl: './adm-300.component.scss',

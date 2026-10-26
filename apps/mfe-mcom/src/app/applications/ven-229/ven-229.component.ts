@@ -91,11 +91,11 @@ import {
 import { Ven229Service } from './services/ven-229.service';
 import { Ven229BusinessService } from './services/ven-229-business.service';
 import { Ven229SelectionService } from './services/ven-229-selection.service';
-import { XteinVen229ItemsComponent } from './components/xtein-ven229-items/xtein-ven229-items.component';
-import { XteinVen229SelectionComponent } from './components/xtein-ven229-selection/xtein-ven229-selection.component';
+import { Ven229ItemsComponent } from './components/ven-229-items/ven-229-items.component';
+import { Ven229SelectionComponent } from './components/ven-229-selection/ven-229-selection.component';
 
 @Component({
-  selector: 'xtein-ven-229',
+  selector: 'ven-229',
   standalone: true,
   imports: [
     CommonModule,
@@ -113,8 +113,8 @@ import { XteinVen229SelectionComponent } from './components/xtein-ven229-selecti
     XteinPopupComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinVen229ItemsComponent,
-    XteinVen229SelectionComponent
+    Ven229ItemsComponent,
+    Ven229SelectionComponent
   ],
   providers: [
     Ven229Service,

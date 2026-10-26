@@ -91,8 +91,8 @@ import { Com201ItemsStore } from './services/com-201-items.store';
 import { descendantGroups } from './utils/com-201-groups';
 import { mergeLikeLegacy } from './utils/com-201-merge';
 import { validateHeader } from './utils/com-201-validation';
-import { XteinCom201GroupsComponent } from './components/xtein-com201-groups/xtein-com201-groups.component';
-import { XteinCom201ItemsComponent } from './components/xtein-com201-items/xtein-com201-items.component';
+import { Com201GroupsComponent } from './components/com-201-groups/com-201-groups.component';
+import { Com201ItemsComponent } from './components/com-201-items/com-201-items.component';
 
 
 /**
@@ -100,15 +100,15 @@ import { XteinCom201ItemsComponent } from './components/xtein-com201-items/xtein
  */
 @Component({
   selector:
-    'xtein-com-201',
+    'com-201',
 
   standalone:
     true,
 
   imports: [
     ReactiveFormsModule,
-    XteinCom201GroupsComponent,
-    XteinCom201ItemsComponent,
+    Com201GroupsComponent,
+    Com201ItemsComponent,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinRecordReportsComponent,
@@ -283,7 +283,7 @@ export class Com201Component
     APROXIMACION: new FormControl<number>(1, { nonNullable: true })
   });
 
-  @ViewChild(XteinCom201ItemsComponent) private itemEditor?: XteinCom201ItemsComponent;
+  @ViewChild(Com201ItemsComponent) private itemEditor?: Com201ItemsComponent;
 
   /** ID_LISTA before entering Editing ('' in Creating and Copying), sent as ID_LISTA_PREV. */
   private idListaPrev = '';

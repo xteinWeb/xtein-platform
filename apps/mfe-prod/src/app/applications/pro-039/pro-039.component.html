@@ -218,7 +218,7 @@
         </div>
 
         <!-- Materiales del consumo -->
-        <xtein-pro039-items
+        <pro-039-items
           [items]="items()"
           [products]="itemProducts()"
           [productsLoading]="itemProductsLoading()"
@@ -265,7 +265,7 @@
   (selected)="selectViewedRecord($event)"
 />
 
-<xtein-pro039-export
+<pro-039-export
   [visible]="exportVisible()"
   (visibleChange)="exportVisible.set($event)"
   [current]="currentRecord()?.DOCUMENTO ?? ''"

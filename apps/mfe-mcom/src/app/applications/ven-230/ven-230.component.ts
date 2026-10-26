@@ -1,14 +1,14 @@
 import { XteinLookupComponent, XteinGroupLabelComponent } from '@xtein/ui';
 import { XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent } from '@xtein/ui';
 import { Ven230ElectronicQrEndpoint } from './constants/ven-230-electronic.constants';
-import { XteinVen230SelectionComponent } from './components/xtein-ven230-selection/xtein-ven230-selection.component';
+import { Ven230SelectionComponent } from './components/ven-230-selection/ven-230-selection.component';
 import { formatNumber } from 'devextreme/localization';
 import { Ven230ElectronicService } from './services/ven-230-electronic.service';
 import { Ven230ElectronicDocument, Ven230ElectronicView } from './models/ven-230-electronic.model';
 import { Ven230BusinessService } from './services/ven-230-business.service';
 import { Ven230Lookup, Ven230Details, Ven230SettingResult, Ven230TaxResult, Ven230Header } from './models/ven-230-business.model';
 import { Ven230PrefacturaGrav, Ven230PrefacturaPago } from './models/ven-230.model';
-import { XteinVen230ItemsComponent } from './components/xtein-ven230-items/xtein-ven230-items.component';
+import { Ven230ItemsComponent } from './components/ven-230-items/ven-230-items.component';
 import { XteinButtonComponent } from '@xtein/ui';
 import { ElementRef, ChangeDetectorRef } from '@angular/core';
 import {
@@ -101,14 +101,13 @@ import {
  * VEN-230 - Prefacturación comercial.
  */
 @Component({
-  selector:
-    'xtein-ven-230',
+  selector: 'ven-230',
 
   standalone:
     true,
 
   imports: [XteinLookupComponent,XteinPopupComponent, XteinDataGridComponent, XteinLabelComponent, XteinGroupLabelComponent,
-    CommonModule, XteinVen230SelectionComponent, XteinVen230ItemsComponent, XteinButtonComponent, ReactiveFormsModule,
+    CommonModule, Ven230SelectionComponent, Ven230ItemsComponent, XteinButtonComponent, ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinRecordReportsComponent,
@@ -1137,7 +1136,7 @@ export class Ven230Component
     }, 100);
   }
 
-  @ViewChild(XteinVen230ItemsComponent) private itemEditor?: XteinVen230ItemsComponent;
+  @ViewChild(Ven230ItemsComponent) private itemEditor?: Ven230ItemsComponent;
   readonly documents = signal<Ven230Lookup[]>([]);
   readonly clients = signal<Ven230Lookup[]>([]);
 
