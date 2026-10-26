@@ -1,0 +1,92 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/*======================================================================
+= FIN-224 PAGE
+======================================================================*/
+
+.fin-224 {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 1.25rem;
+  background: #f2f5f9;
+  box-sizing: border-box;
+}
+
+.fin-224__card {
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
+
+  &--items {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+  }
+}
+
+.fin-224__section-title {
+  display: block;
+  margin-bottom: 0.875rem;
+}
+
+/*======================================================================
+= HEADER FORM GRID
+======================================================================*/
+
+.fin-224__header-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1.5rem;
+}
+
+.fin-224__header-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.fin-224__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fin-224__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--xt-color-text-secondary, #475569);
+}
+
+.fin-224__control {
+  min-width: 0;
+}
+
+/*======================================================================
+= RESPONSIVE
+======================================================================*/
+
+@media (max-width: 1100px) {
+  .fin-224__header-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .fin-224__header-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

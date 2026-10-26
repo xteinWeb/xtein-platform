@@ -408,7 +408,7 @@
           </div>
         </div>
 
-        <xtein-ven210-items [items]="items()" [products]="products()" [productsLoading]="productsLoading()" [orderLocked]="orderLocked()"
+        <ven-210-items [items]="items()" [products]="products()" [productsLoading]="productsLoading()" [orderLocked]="orderLocked()"
           [recordKey]="itemRecordKey()" [header]="header()"
           [readOnly]="readOnly()" [ready]="itemsReady()" [busy]="loading()" [conditionType]="conditionType"
           [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'" [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'" [repeatItem]="enabledSpec('REPETIR ITEM')" [editPrice]="enabledSpec('MODIFICAR PRECIO')"
@@ -472,10 +472,10 @@
     @for(option of settings();track option.CLAVE){<xtein-button [text]="option.TITULO" [disabled]="loading()" (clicked)="executeSetting(option)" />}
   </div>
 </xtein-popup>
-<xtein-ven210-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
+<ven-210-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
   [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="loading()" (accepted)="applySelection($event)" />
 
-<xtein-ven210-bodegas [visible]="distributionTarget() !== null" [item]="distributionTarget()" [header]="header()"
+<ven-210-bodegas [visible]="distributionTarget() !== null" [item]="distributionTarget()" [header]="header()"
   [documentKeys]="distributionKeys()" [readOnly]="!distributionEditable()"
   [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
   (applied)="applyDistribution($event)" (cancelled)="cancelDistribution()" />

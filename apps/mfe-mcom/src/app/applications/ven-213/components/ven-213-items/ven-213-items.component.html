@@ -1,0 +1,112 @@
+<xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
+
+<div class="table-scroll">
+  <table class="items-grid-table">
+    <thead>
+      <tr>
+        <th class="col-select">
+          <xtein-checkbox
+            ariaLabel="Seleccionar todos"
+            [disabled]="readOnly || busy || !!draft() || items.length === 0"
+            [checked]="allItemsSelected()"
+            (checkedChange)="toggleAll($event)"
+          />
+        </th>
+        <th class="col-product">Producto</th>
+        <th class="col-name">Nombre del Producto</th>
+        <th class="col-qty text-end">Cant. origen</th>
+        <th class="col-qty text-end">Ya devuelto</th>
+        <th class="col-qty text-end">Máx. devolvible</th>
+        <th class="col-qty text-end">Cantidad a devolver</th>
+        <th class="col-um">UM</th>
+        <th class="col-price text-end">Valor Unitario</th>
+        <th class="col-subtotal text-end">Subtotal</th>
+        <th class="col-subtotal text-end">Impuestos</th>
+        <th class="col-total text-end">Total</th>
+        <th class="col-bodegas">Bodegas</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of items; track row.ITEM) {
+        @if (draft()?.ITEM === row.ITEM) {
+          @if (draft(); as edit) {
+            <tr class="row-editing">
+              <td class="col-select"></td>
+              <td class="col-product">{{ edit.PRODUCTO }}</td>
+              <td class="col-name">{{ edit.NOMBRE_PRODUCTO }}</td>
+              <td class="col-qty text-end">{{ quantity(edit.CANTIDAD_ORIGEN) }}</td>
+              <td class="col-qty text-end">{{ quantity(edit.CANTIDAD_DEVUELTA) }}</td>
+              <td class="col-qty text-end">{{ quantity(edit.CANTIDAD_MAX) }}</td>
+              <td class="col-qty">
+                <xtein-number
+                  class="cell-editor"
+                  ariaLabel="Cantidad a devolver"
+                  [(ngModel)]="edit.CANTIDAD"
+                  (ngModelChange)="onDraftQtyChange()"
+                  [min]="0"
+                  [max]="maxQuantity(edit)"
+                  [disabled]="working() || busy"
+                />
+              </td>
+              <td class="col-um">{{ edit.UDM_VENTA }}</td>
+              <td class="col-price text-end">{{ money(edit.VALOR_UNITARIO) }}</td>
+              <td class="col-subtotal text-end">{{ money(edit.SUB_TOTAL) }}</td>
+              <td class="col-subtotal text-end">{{ money(taxes(edit)) }}</td>
+              <td class="col-total text-end">{{ money(edit.TOTAL) }}</td>
+              <td class="col-bodegas"></td>
+            </tr>
+          }
+        } @else {
+          <tr
+            [class.row-selected]="selected().includes(row.ITEM)"
+            (dblclick)="!readOnly && !draft() && begin(row)"
+          >
+            <td class="col-select">
+              <xtein-checkbox
+                ariaLabel="Seleccionar producto"
+                [disabled]="readOnly || busy || !!draft()"
+                [checked]="selected().includes(row.ITEM)"
+                (checkedChange)="toggle(row.ITEM, $event)"
+              />
+            </td>
+            <td class="col-product">{{ row.PRODUCTO }}</td>
+            <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
+            <td class="col-qty text-end">{{ quantity(row.CANTIDAD_ORIGEN) }}</td>
+            <td class="col-qty text-end">{{ quantity(row.CANTIDAD_DEVUELTA) }}</td>
+            <td class="col-qty text-end">{{ quantity(row.CANTIDAD_MAX) }}</td>
+            <td class="col-qty text-end">{{ quantity(row.CANTIDAD) }}</td>
+            <td class="col-um">{{ row.UDM_VENTA }}</td>
+            <td class="col-price text-end">{{ money(row.VALOR_UNITARIO) }}</td>
+            <td class="col-subtotal text-end">{{ money(row.SUB_TOTAL) }}</td>
+            <td class="col-subtotal text-end">{{ money(taxes(row)) }}</td>
+            <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
+            <td class="col-bodegas">
+              <button
+                type="button"
+                class="btn-cell-bodegas"
+                [class.btn-cell-bodegas--pending]="row.SIN_REPARTO && !row.SIN_INVENTARIO"
+                [title]="row.SIN_INVENTARIO ? withoutInventoryMessage : row.SIN_REPARTO ? 'Sin reparto por bodega' : 'Ver reparto por bodega'"
+                [disabled]="busy || !!draft() || row.SIN_INVENTARIO"
+                (click)="distribute.emit(row.ITEM)"
+              >
+                Bodegas
+              </button>
+              @if (row.SIN_INVENTARIO) {
+                <span class="cell-note" role="note">{{ withoutInventoryMessage }}</span>
+              } @else if (row.SIN_REPARTO) {
+                <span class="cell-warning" role="status">Sin reparto</span>
+              }
+            </td>
+          </tr>
+        }
+      } @empty {
+        <tr>
+          <td colspan="13" class="empty-message">No hay productos asociados. Cargue el documento origen desde Configurar.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+@if (!readOnly && items.length) {
+  <p class="base-unit-note" role="note">Doble clic en una línea para cambiar la cantidad a devolver. Valores e impuestos proporcionales al documento origen; el servidor los confirma al guardar.</p>
+}

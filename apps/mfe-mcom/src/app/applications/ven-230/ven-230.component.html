@@ -440,7 +440,7 @@
           </div>
         </div>
 
-        <xtein-ven230-items
+        <ven-230-items
           [items]="items()"
           [products]="products()"
           [productsLoading]="productsLoading()"
@@ -521,7 +521,7 @@
     @for(option of settings();track $index){<xtein-button [text]="option.VALOR || ''" [disabled]="loading()" (clicked)="executeSetting(option)" />}
   </div>
 </xtein-popup>
-<xtein-ven230-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
+<ven-230-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
   [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="loading()" (accepted)="applySelection($event)" />
 
 <xtein-popup [visible]="electronicVisible()" (visibleChange)="electronicVisible.set($event)" title="Prefactura electrónica" width="min(900px, 95vw)" height="min(600px, 90dvh)" [showCloseButton]="!electronicBusy()" [hideOnOutsideClick]="false">

@@ -83,8 +83,8 @@ import {
 import { Pro039Service } from './services/pro-039.service';
 import { Pro039BusinessService } from './services/pro-039-business.service';
 import { Pro039ExcelHeader, Pro039ExcelService } from './services/pro-039-excel.service';
-import { XteinPro039ItemsComponent } from './components/xtein-pro039-items/xtein-pro039-items.component';
-import { Pro039ExportScope, XteinPro039ExportComponent } from './components/xtein-pro039-export/xtein-pro039-export.component';
+import { Pro039ItemsComponent } from './components/pro-039-items/pro-039-items.component';
+import { Pro039ExportScope, Pro039ExportComponent } from './components/pro-039-export/pro-039-export.component';
 
 /**
  * PRO-039 Consumos: salidas de inventario de tipo CONSUMO de producción.
@@ -92,7 +92,7 @@ import { Pro039ExportScope, XteinPro039ExportComponent } from './components/xtei
  * PRO03904 (entrada por orden de compra) no aplica a consumos.
  */
 @Component({
-  selector: 'xtein-pro-039',
+  selector: 'pro-039',
   standalone: true,
   imports: [
     CommonModule,
@@ -107,8 +107,8 @@ import { Pro039ExportScope, XteinPro039ExportComponent } from './components/xtei
     XteinRecordReportsComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinPro039ItemsComponent,
-    XteinPro039ExportComponent
+    Pro039ItemsComponent,
+    Pro039ExportComponent
   ],
   providers: [
     Pro039Service,

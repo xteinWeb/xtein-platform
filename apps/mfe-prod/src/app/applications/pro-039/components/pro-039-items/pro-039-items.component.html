@@ -1,0 +1,111 @@
+<xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
+
+<div class="table-scroll">
+  <table class="items-grid-table">
+    <thead>
+      <tr>
+        <th class="col-select"></th>
+        <th class="col-product">Producto</th>
+        <th class="col-name">Nombre</th>
+        <th class="col-attr">Atr</th>
+        <th class="col-inv">Tipo inv.</th>
+        <th class="col-um">UM</th>
+        <th class="col-origin">Origen</th>
+        <th class="col-qty text-end">Consumo unit.</th>
+        <th class="col-lot text-end">Lote</th>
+        <th class="col-qty text-end">Total</th>
+        <th class="col-qty-edit text-end">Consumo modificado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Fila nueva: el producto se elige en la misma grilla -->
+      @if (adding()) {
+        <tr class="row-editing">
+          <td class="col-select"></td>
+          <td class="col-product" colspan="2">
+            <dx-drop-down-box
+              class="add-product"
+              valueExpr="PRODUCTO"
+              displayExpr="PRODUCTO"
+              placeholder="Buscar material…"
+              [dataSource]="products"
+              [dropDownOptions]="productDropDownOptions"
+              [(opened)]="productDropdownOpened"
+              [disabled]="busy"
+            >
+              <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
+                <ng-template #productToolbarExtra>
+                  @if (productsLoading) {
+                    <span class="product-loading-indicator" role="status">Cargando…</span>
+                  }
+                </ng-template>
+                <xtein-data-grid
+                  [dataSource]="products"
+                  keyExpr="PRODUCTO"
+                  height="100%"
+                  [toolbarActions]="productToolbarActions()"
+                  [toolbarTemplate]="productToolbarExtra"
+                  (rowClick)="$event.rowType === 'data' && selectProductFromDropdown($event.data)"
+                  (rowActivated)="selectProductFromDropdown($event)"
+                  [columns]="productColumns"
+                  selectionMode="single"
+                  [pageSize]="100"
+                  [allowedPageSizes]="[50, 100, 200]"
+                  [showPager]="true"
+                  searchPlaceholder="Buscar producto…"
+                  [searchWidth]="240"
+                />
+              </div>
+            </dx-drop-down-box>
+          </td>
+          <td colspan="8" class="new-row-hint">Elija el material; se agrega como Adicional y luego indica la cantidad.</td>
+        </tr>
+      }
+      @for (row of items; track row.ITEM) {
+        <tr [class.row-selected]="selected().includes(row.ITEM)" [class.row-zero]="!(row.CANTIDAD > 0)">
+          <td class="col-select">
+            <xtein-checkbox
+              ariaLabel="Seleccionar material"
+              [disabled]="readOnly || busy"
+              [checked]="selected().includes(row.ITEM)"
+              (checkedChange)="toggle(row, $event)"
+            />
+          </td>
+          <td class="col-product">{{ row.PRODUCTO }}</td>
+          <td class="col-name" [title]="row.NOMBRE_PRODUCTO">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td class="col-attr">{{ row.ATRIBUTO }}</td>
+          <td class="col-inv">{{ row.TIPO_INVENTARIO }}</td>
+          <td class="col-um">{{ row.UDM_PRES || row.UDM }}</td>
+          <td class="col-origin">
+            <span class="origin-badge" [class.origin-badge--matrix]="row.ES_MATRIZ">
+              {{ row.ES_MATRIZ ? 'Matriz' : 'Adicional' }}
+            </span>
+          </td>
+          <td class="col-qty text-end">{{ row.ES_MATRIZ ? quantity(row.CONSUMO_BASE) : '' }}</td>
+          <td class="col-lot text-end">{{ row.ES_MATRIZ ? quantity(lot) : '' }}</td>
+          <td class="col-qty text-end">{{ row.ES_MATRIZ ? quantity(row.CONSUMO_BASE * lot) : '' }}</td>
+          <td class="col-qty-edit text-end">
+            @if (readOnly) {
+              {{ quantity(row.CANTIDAD) }}
+            } @else {
+              <xtein-number
+                class="cell-editor"
+                ariaLabel="Consumo modificado"
+                [min]="0"
+                [format]="quantityFormat"
+                [ngModel]="row.CANTIDAD"
+                (ngModelChange)="onQuantity(row, $event)"
+              />
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="11" class="empty-message">
+            Seleccione producto y sección para cargar los materiales de la matriz, o agréguelos con el botón +.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -204,7 +204,7 @@
         <!-- Pestaña 2: Aplicaciones -->
         @if (activeTab() === 'aplicaciones') {
           <div class="adm-015__tab-pane">
-            <xtein-adm015-aplicaciones
+            <adm-015-aplicaciones
               [autorizaciones]="autorizaciones()"
               [readOnly]="readOnly()"
               [availableApps]="availableApps()"
@@ -213,55 +213,55 @@
               (draftChange)="updateApplicationDraft($event)"
               (autorizacionesChange)="updateAuthorizations($event)"
               (refresh)="refreshAuthorizations()"
-            ></xtein-adm015-aplicaciones>
+            ></adm-015-aplicaciones>
           </div>
         }
 
         <!-- Pestaña 3: Permisos Especiales -->
         @if (activeTab() === 'permisos') {
           <div class="adm-015__tab-pane">
-            <xtein-adm015-permisos-especiales
+            <adm-015-permisos-especiales
               [permisosEspeciales]="permisosEspeciales()"
               [readOnly]="readOnly()"
               (permisosEspecialesChange)="permisosEspeciales.set($event); markPendingChanges()"
-            ></xtein-adm015-permisos-especiales>
+            ></adm-015-permisos-especiales>
           </div>
         }
 
         <!-- Pestaña 4: UN Asociadas -->
         @if (activeTab() === 'un') {
           <div class="adm-015__tab-pane">
-            <xtein-adm015-un-asociadas
+            <adm-015-un-asociadas
               [unAsociadas]="unAsociadas()"
               [readOnly]="readOnly()"
               [availableUNs]="availableUNs()"
               [busy]="loading()"
               (unAsociadasChange)="unAsociadas.set($event); markPendingChanges()"
-            ></xtein-adm015-un-asociadas>
+            ></adm-015-un-asociadas>
           </div>
         }
 
         <!-- Pestaña 5: Conexiones -->
         @if (activeTab() === 'conexiones') {
           <div class="adm-015__tab-pane">
-            <xtein-adm015-conexiones
+            <adm-015-conexiones
               [conexiones]="conexiones()"
               [readOnly]="readOnly()"
               [availableConexiones]="availableConexiones()"
               [busy]="loading()"
               (conexionesChange)="conexiones.set($event); markPendingChanges()"
-            ></xtein-adm015-conexiones>
+            ></adm-015-conexiones>
           </div>
         }
 
         <!-- Pestaña 6: Configuraciones Avanzadas -->
         @if (activeTab() === 'configuraciones') {
           <div class="adm-015__tab-pane">
-            <xtein-adm015-configuraciones
+            <adm-015-configuraciones
               [settings]="settings()"
               [readOnly]="readOnly()"
               (settingsChange)="settings.set($event); markPendingChanges()"
-            ></xtein-adm015-configuraciones>
+            ></adm-015-configuraciones>
           </div>
         }
       </div>

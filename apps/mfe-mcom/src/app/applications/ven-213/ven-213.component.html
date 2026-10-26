@@ -323,7 +323,7 @@
           </div>
         </div>
 
-        <xtein-ven213-items [items]="items()" [recordKey]="itemRecordKey()"
+        <ven-213-items [items]="items()" [recordKey]="itemRecordKey()"
           [readOnly]="readOnly()" [busy]="loading()"
           [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'" [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
           [persist]="persistItem" (removedMany)="removeItem($event)" (pending)="onItemPending($event)" (distribute)="openDistribution($event)" />
@@ -386,10 +386,10 @@
     @for(option of settings();track option.CLAVE){<xtein-button [text]="option.TITULO" [disabled]="loading()" (clicked)="executeSetting(option)" />}
   </div>
 </xtein-popup>
-<xtein-ven213-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
+<ven-213-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
   [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="loading()" (accepted)="applySelection($event)" />
 
-<xtein-ven213-bodegas [visible]="distributionTarget() !== null" [item]="distributionTarget()" [header]="header()"
+<ven-213-bodegas [visible]="distributionTarget() !== null" [item]="distributionTarget()" [header]="header()"
   [readOnly]="!distributionEditable()"
   [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'" [moneyFormat]="spec('FORMATO MONEDA')?.FORMATO || '#,##0.00'"
   (applied)="applyDistribution($event)" (cancelled)="cancelDistribution()" />

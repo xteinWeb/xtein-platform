@@ -1,0 +1,148 @@
+<section class="fin-224">
+  <!-- Tarjeta de Encabezado -->
+  <div class="fin-224__card" [formGroup]="form">
+    <xtein-group-label class="fin-224__section-title" label="Condiciones de Negociación"></xtein-group-label>
+
+    <div class="fin-224__header-grid">
+      <!-- Columna 1: Código y Descripción -->
+      <div class="fin-224__header-col">
+        <div class="fin-224__field">
+          <xtein-label class="fin-224__label" for="fin-224-id-condicion" [required]="true">Código</xtein-label>
+          <div class="fin-224__control">
+            <xtein-input
+              id="fin-224-id-condicion"
+              name="ID_CONDICION"
+              placeholder="Código"
+              formControlName="ID_CONDICION"
+              [required]="true"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+
+        <div class="fin-224__field">
+          <xtein-label class="fin-224__label" for="fin-224-descripcion" [required]="true">Descripción</xtein-label>
+          <div class="fin-224__control">
+            <xtein-input
+              id="fin-224-descripcion"
+              name="DESCRIPCION"
+              placeholder="Descripción"
+              formControlName="DESCRIPCION"
+              [required]="true"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 2: Tipo y Estado -->
+      <div class="fin-224__header-col">
+        <div class="fin-224__field">
+          <xtein-label class="fin-224__label" for="fin-224-tipo">Tipo</xtein-label>
+          <div class="fin-224__control">
+            <xtein-select
+              id="fin-224-tipo"
+              [items]="tipoOptions"
+              displayExpr="text"
+              valueExpr="value"
+              formControlName="TIPO"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+
+        <div class="fin-224__field">
+          <xtein-label class="fin-224__label" for="fin-224-estado">Estado</xtein-label>
+          <div class="fin-224__control">
+            <xtein-select
+              id="fin-224-estado"
+              [items]="statusOptions"
+              displayExpr="text"
+              valueExpr="value"
+              formControlName="ESTADO"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 3: Plan de Financiación -->
+      <div class="fin-224__header-col">
+        <div class="fin-224__field">
+          <xtein-label class="fin-224__label" for="fin-224-plan" [required]="true">Plan de Financiación</xtein-label>
+          <div class="fin-224__control">
+            <xtein-select
+              id="fin-224-plan"
+              [items]="planes"
+              displayExpr="DESCRIPCION"
+              valueExpr="ID_PLAN"
+              [searchEnabled]="true"
+              [columns]="['ID_PLAN', 'DESCRIPCION']"
+              [columnHeaders]="['Código', 'Descripción']"
+              formControlName="ID_PLAN"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta de Listas de Precios asociadas -->
+  <div class="fin-224__card fin-224__card--items">
+    <xtein-group-label class="fin-224__section-title" label="Listas de Precios Asociadas"></xtein-group-label>
+
+    <fin-224-items
+      [items]="items()"
+      [listasPrecios]="listasPrecios()"
+      [readOnly]="readOnly()"
+      (itemsChange)="items.set($event)"
+      (changed)="onItemsChanged()"
+    />
+  </div>
+
+  <xtein-loading
+    [visible]="loading() || saving()"
+    [message]="saving() ? 'Guardando condición de negociación…' : 'Cargando datos…'"
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.2"
+    [hideOnOutsideClick]="false"
+  />
+</section>
+
+<!-- Modales estándar de la plataforma -->
+<xtein-record-filter
+  [visible]="filterVisible()"
+  (visibleChange)="filterVisible.set($event)"
+  [tableBase]="tableBase"
+  (search)="searchRecords($event)"
+/>
+
+<xtein-record-view
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="ID_CONDICION"
+  (selected)="selectViewedRecord($event)"
+/>
+
+@if (reportsVisible()) {
+  <xtein-record-reports
+    [visible]="reportsVisible()"
+    (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId"
+    [table]="tableBase"
+    [currentFilter]="currentReportFilter()"
+    [allFilter]="queryFilter()"
+  />
+}
+
+<xtein-record-settings
+  [visible]="settingsVisible()"
+  (visibleChange)="settingsVisible.set($event)"
+  [applicationId]="applicationId"
+  (optionSelected)="executeSetting($event)"
+/>

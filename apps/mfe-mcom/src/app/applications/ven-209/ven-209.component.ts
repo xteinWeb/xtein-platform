@@ -80,11 +80,11 @@ import {
 } from './models/ven-209.model';
 import { Ven209Service } from './services/ven-209.service';
 import { Ven209BusinessService } from './services/ven-209-business.service';
-import { XteinVen209UbicacionesComponent } from './components/xtein-ven209-ubicaciones/xtein-ven209-ubicaciones.component';
-import { XteinVen209FinancierosComponent } from './components/xtein-ven209-financieros/xtein-ven209-financieros.component';
+import { Ven209UbicacionesComponent } from './components/ven-209-ubicaciones/ven-209-ubicaciones.component';
+import { Ven209FinancierosComponent } from './components/ven-209-financieros/ven-209-financieros.component';
 
 @Component({
-  selector: 'app-ven-209',
+  selector: 'ven-209',
   standalone: true,
   imports: [
     CommonModule,
@@ -104,8 +104,8 @@ import { XteinVen209FinancierosComponent } from './components/xtein-ven209-finan
     XteinTagBoxComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinVen209UbicacionesComponent,
-    XteinVen209FinancierosComponent
+    Ven209UbicacionesComponent,
+    Ven209FinancierosComponent
   ],
   providers: [
     Ven209Service,
@@ -528,8 +528,8 @@ export class Ven209Component implements OnInit, OnDestroy {
   @ViewChild('clienteInput') private clienteInput?: XteinInputComponent;
   @ViewChild('idLegalSelect') private idLegalSelect?: XteinSelectComponent;
   @ViewChild('contactoSelect') private contactoSelect?: XteinSelectComponent;
-  @ViewChild(XteinVen209UbicacionesComponent) private locations?: XteinVen209UbicacionesComponent;
-  @ViewChild(XteinVen209FinancierosComponent) private financials?: XteinVen209FinancierosComponent;
+  @ViewChild(Ven209UbicacionesComponent) private locations?: Ven209UbicacionesComponent;
+  @ViewChild(Ven209FinancierosComponent) private financials?: Ven209FinancierosComponent;
 
   private focusFirstControl(): void {
     setTimeout(() => {

@@ -291,7 +291,7 @@
                     searchPlaceholder="Buscar…"
                     [items]="units()"
                     valueExpr="ID_UN"
-                    displayExpr="NOMBRE"
+                    displayExpr="UN_NOMBRE"
                     [columns]="unitColumns"
                     [showClearButton]="true"
                     dropDownWidth="min(480px, 95vw)"
@@ -336,7 +336,7 @@
                     searchPlaceholder="Buscar…"
                     [items]="sellers()"
                     valueExpr="ID_ADC"
-                    displayExpr="NOMBRE_COMPLETO"
+                    displayExpr="NUM_NOMBRE"
                     [columns]="sellerColumns"
                     [showClearButton]="true"
                     dropDownWidth="min(500px, 95vw)"
@@ -372,7 +372,7 @@
                     searchPlaceholder="Buscar…"
                     [items]="warehouses()"
                     valueExpr="ID_UN_BODEGA"
-                    displayExpr="DESCRIPCION"
+                    displayExpr="BODEGA_LABEL"
                     [columns]="warehouseColumns"
                     [showClearButton]="true"
                     dropDownWidth="min(650px, 95vw)"
@@ -478,7 +478,7 @@
         </div>
 
         <!-- Componente de Ítems de Factura -->
-        <xtein-ven212-items
+        <ven-212-items
           [items]="items()"
           [products]="products()"
           [productsLoading]="productsLoading()"

@@ -1,0 +1,63 @@
+<div class="xtein-adm015-permisos">
+  <dx-data-grid
+    #gridPermisosEspeciales
+    keyExpr="TRANSACCION"
+    [dataSource]="permisosEspeciales"
+    [showBorders]="false"
+    [showRowLines]="false"
+    [showColumnLines]="false"
+    [rowAlternationEnabled]="false"
+    [focusedRowEnabled]="true"
+    [hoverStateEnabled]="true"
+    [allowColumnResizing]="true"
+    columnResizingMode="nextColumn"
+    noDataText=""
+  >
+    <dxo-paging [pageSize]="20"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[15, 20, 30, 50]" [showInfo]="true"></dxo-pager>
+
+    <dxi-column
+      dataField="TRANSACCION"
+      caption="Nombre Transacción"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="PERMISO"
+      caption="Permisos"
+      [width]="120"
+      alignment="center"
+      cellTemplate="permisoCell"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="APROBACION"
+      caption="Apro. Permisos"
+      [width]="130"
+      alignment="center"
+      cellTemplate="aprobacionCell"
+    ></dxi-column>
+
+    <dxi-column
+      dataField="NOMBRE"
+      caption="Descripción de la Transacción"
+      [allowEditing]="false"
+    ></dxi-column>
+
+    <div *dxTemplate="let cell of 'permisoCell'">
+      <xtein-checkbox
+        [checked]="!!cell.value"
+        [disabled]="readOnly"
+        (checkedChange)="onPermisoChanged(cell.data, $event)"
+      />
+    </div>
+
+    <div *dxTemplate="let cell of 'aprobacionCell'">
+      <xtein-checkbox
+        [checked]="!!cell.value"
+        [disabled]="readOnly"
+        (checkedChange)="onAprobacionChanged(cell.data, $event)"
+      />
+    </div>
+  </dx-data-grid>
+</div>

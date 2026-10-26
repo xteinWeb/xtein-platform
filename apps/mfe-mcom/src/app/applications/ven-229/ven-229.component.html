@@ -442,7 +442,7 @@
         </div>
 
         <!-- Componente de Ítems de Pedidos -->
-        <xtein-ven229-items
+        <ven-229-items
           [items]="items()"
           [products]="products()"
           [productsLoading]="productsLoading()"
@@ -520,5 +520,5 @@
     }
   </div>
 </xtein-popup>
-<xtein-ven229-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
+<ven-229-selection [visible]="selectionVisible()" (visibleChange)="selectionVisible.set($event)"
   [config]="selection()" [initialKeys]="selectedSettingsKeys" [busy]="busy()" (accepted)="applySelection($event)" />
