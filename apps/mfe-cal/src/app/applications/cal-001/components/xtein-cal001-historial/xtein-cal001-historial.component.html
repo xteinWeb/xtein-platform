@@ -1,0 +1,26 @@
+@if (detalle(); as filas) {
+  <ol class="hs-lista">
+    @for (fila of filas; track $index) {
+      <li>
+        <div class="hs-fila"><b>{{ accion(fila.ACCION) }}</b><span>v{{ fila.VERSION }} · {{ fila.USUARIO }} · {{ fecha(fila.FECHA) }}</span></div>
+        @if (fila.MOTIVO) { <p class="hs-motivo">Motivo: {{ fila.MOTIVO }}</p> }
+        @if (fila.CAMBIOS.length) {
+          <ul class="hs-cambios">@for (cambio of fila.CAMBIOS; track $index) { <li>{{ cambio }}</li> }</ul>
+        }
+      </li>
+    }
+  </ol>
+} @else {
+  <ol class="hs-lista">
+    @for (fila of resumen(); track $index) {
+      <li><div class="hs-fila"><b>{{ accion(fila.ACCION) }}</b><span>v{{ fila.VERSION }} · {{ fila.USUARIO }} · {{ fecha(fila.FECHA) }}</span></div></li>
+    } @empty {
+      <li class="hs-vacio">El historial aparece al guardar el registro.</li>
+    }
+  </ol>
+  @if (idRegistro()) {
+    <button type="button" class="hs-boton" [disabled]="cargando()" (click)="verDetalle()">
+      {{ cargando() ? 'Cargando…' : 'Ver motivos y cambios' }}
+    </button>
+  }
+}
