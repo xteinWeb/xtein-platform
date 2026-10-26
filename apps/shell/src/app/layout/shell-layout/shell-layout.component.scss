@@ -173,9 +173,10 @@
 /*
  * Compact layout (phones and portrait tablets).
  *
- * The grid always reserves the collapsed rail width. When the
- * user expands the sidebar it floats over the workspace with a
- * backdrop instead of shrinking the application area.
+ * The grid reserves no sidebar column: while collapsed only the
+ * hamburger stays visible, in the header's top-left corner. When
+ * the user expands the sidebar it floats over the workspace with
+ * a backdrop instead of shrinking the application area.
  *
  * Keep in sync with SHELL_COMPACT_MEDIA_QUERY.
  */
@@ -187,7 +188,30 @@
   .xt-shell,
   .xt-shell--sidebar-collapsed {
     --xt-sidebar-width:
-      72px;
+      0px;
+
+    /* Height of the header row that holds the hamburger. */
+    --xt-sidebar-toggle-area:
+      64px;
+  }
+
+
+  .xt-shell--sidebar-collapsed
+  .xt-shell__sidebar {
+    position:
+      relative;
+
+    z-index:
+      150;
+
+    align-self:
+      start;
+
+    width:
+      52px;
+
+    height:
+      var(--xt-sidebar-toggle-area);
   }
 
 
@@ -204,6 +228,9 @@
 
     box-shadow:
       4px 0 18px rgba(39, 78, 114, .18);
+
+    animation:
+      xt-sidebar-slide-in .24s cubic-bezier(.4, 0, .2, 1);
   }
 
 
@@ -219,6 +246,48 @@
 
     background:
       rgba(15, 23, 42, .35);
+
+    animation:
+      xt-backdrop-fade-in .24s ease-out;
+  }
+}
+
+
+@keyframes xt-sidebar-slide-in {
+  from {
+    transform:
+      translateX(-100%);
+  }
+
+  to {
+    transform:
+      translateX(0);
+  }
+}
+
+
+@keyframes xt-backdrop-fade-in {
+  from {
+    opacity:
+      0;
+  }
+
+  to {
+    opacity:
+      1;
+  }
+}
+
+
+@media (
+  prefers-reduced-motion:
+    reduce
+) {
+
+  .xt-shell__sidebar,
+  .xt-shell__backdrop {
+    animation:
+      none !important;
   }
 }
 
@@ -236,5 +305,8 @@
   .xt-shell {
     --xt-header-height:
       104px;
+
+    --xt-sidebar-toggle-area:
+      52px;
   }
 }
