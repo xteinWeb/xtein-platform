@@ -189,8 +189,9 @@ export const PlatformToolbarItems:
 
     {
       action: ToolbarAction.Download,
-      label: 'Descargar',
-      iconClass: 'icon-descargar-ol',
+      label: 'Exportar a Excel',
+      // Ícono de DevExtreme (la fuente XTEIN no trae uno de Excel); la descarga de las aplicaciones es a Excel
+      iconClass: 'dx-icon-xlsxfile',
       group: PlatformToolbarGroup.Output,
       responsivePriority: PlatformToolbarResponsivePriority.Extended
     },
@@ -274,8 +275,8 @@ export const PlatformToolbarTooltips: Readonly<Record<string, PlatformToolbarToo
     info: 'Posiciona la consulta en el último registro'
   },
   [ToolbarAction.Download]: {
-    title: 'Descargar datos',
-    info: 'Descargar datos de la consulta o del registro actual'
+    title: 'Exportar a Excel',
+    info: 'Exportar a Excel el registro actual o todos los consultados'
   },
   [ToolbarAction.Print]: {
     title: 'Generación de informes',

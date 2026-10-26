@@ -11,7 +11,7 @@
   [maxHeight]="'92dvh'">
   <div *dxTemplate="let content of 'content'" class="xtein-record-reports" [class.xtein-record-reports--list]="panel() === 'list'">
     @if (error()) { <p class="xtein-record-reports__error" role="alert">{{ error() }}</p> }
-    @if (loading()) { <p class="xtein-record-reports__status" role="status">Procesando informe…</p> }
+    @if (loading()) { <p class="xtein-record-reports__status" role="status">Generando informe… puede tardar unos segundos.</p> }
     @if (status()) { <p class="xtein-record-reports__status" role="status">{{ status() }}</p> }
     @if (panel() === 'list') {
       <div class="xtein-record-reports__list" aria-label="Informes disponibles">
@@ -42,11 +42,14 @@
     } @else if (panel() === 'preview') {
       <div class="xtein-record-reports__navigation">
         <xtein-button text="Volver a los informes" variant="secondary" (clicked)="back()" />
+        <xtein-button text="Imprimir" icon="icon-imprimir-sl" variant="primary" (clicked)="print()" />
+        <xtein-button text="Descargar PDF" icon="icon-pdf-doc-sl" variant="secondary" (clicked)="download()" />
+        <xtein-button text="Abrir en otra pestaña" variant="link" (clicked)="openInTab()" />
       </div>
       <div class="xtein-record-reports__viewer">
-        <dx-report-viewer [reportUrl]="reportUrl()" [isMobile]="isMobile()" height="100%" width="100%">
-          <dxrv-request-options [invokeAction]="viewerAction" [host]="service.host"></dxrv-request-options>
-        </dx-report-viewer>
+        @if (previewUrl(); as url) {
+          <iframe #previewFrame class="xtein-record-reports__pdf" [src]="url" [title]="previewReport()?.NOMBRE ?? 'Informe'"></iframe>
+        }
       </div>
     } @else {
       <xtein-report-email class="xtein-record-reports__email" [defaults]="emailDefaults" [busy]="loading()"

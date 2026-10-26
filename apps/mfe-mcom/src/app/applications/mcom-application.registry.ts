@@ -1,5 +1,7 @@
 import type { McomApplicationRegistration } from '../models/mcom-application-registration.model';
 import { Ven230Application } from './ven-230/constants/ven-230.constants';
+import { Ven210Application } from './ven-210/constants/ven-210.constants';
+import { Ven213Application } from './ven-213/constants/ven-213.constants';
 import { Ven209Application } from './ven-209/constants/ven-209.constants';
 import { Ven229Application } from './ven-229/constants/ven-229.constants';
 import { Ven212Application } from './ven-212/constants/ven-212.constants';
@@ -9,6 +11,14 @@ export const McomApplicationRegistry: readonly McomApplicationRegistration[] = [
   {
     applicationId: Ven230Application.Id,
     load: async () => (await import('./ven-230/ven-230.component')).Ven230Component
+  },
+  {
+    applicationId: Ven210Application.Id,
+    load: async () => (await import('./ven-210/ven-210.component')).Ven210Component
+  },
+  {
+    applicationId: Ven213Application.Id,
+    load: async () => (await import('./ven-213/ven-213.component')).Ven213Component
   },
   {
     applicationId: Ven209Application.Id,

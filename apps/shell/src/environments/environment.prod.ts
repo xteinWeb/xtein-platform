@@ -13,8 +13,9 @@ export const environment = {
   files: 'https://reportes.colchonessunmoon.com',
   dashboard: 'https://dashboard.colchonessunmoon.com',
   dashboardDesigner: '/api/dashboard-designer',
-  userDiseno: 'administratos',
-  passUserDiseno: '2022.Admin',
+  // Each microfrontend is published by the same web server under /<REMOTE_NAME>/,
+  // so the absolute REMOTE_ENTRY_URL stored in the catalog is ignored.
+  remoteEntryBaseUrl: '/',
   apiDiseno: 'https://apidiseno.colchonessunmoon.com/files?command=GetDirContents&arguments=',
   apiArchivos: 'http://181.79.25.235:8556',
   webhookNotifyUrl: 'https://agentes.colchonessunmoon.com/webhook/ac110ada-c289-424d-8660-3b67d0e02f33',
