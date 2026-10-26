@@ -164,6 +164,9 @@ export class Ven212Component implements OnInit, OnDestroy {
   readonly productsLoading = signal<boolean>(false);
   readonly onlyStock = signal<boolean>(false);
 
+  defaultUnit = '';
+  defaultCurrency = '';
+
   // Overlays
   readonly filterVisible = signal<boolean>(false);
   readonly viewVisible = signal<boolean>(false);
@@ -613,8 +616,22 @@ export class Ven212Component implements OnInit, OnDestroy {
       FECHA: this.todayDate(),
       FECHA_REGISTRO: this.todayDate(),
       FECHA_PRIMER_VENC: this.todayDate(),
-      USUARIO: this.business.identity.USUARIO
+      USUARIO: this.business.identity.USUARIO,
+      ID_UN_ITEM: this.defaultUnit,
+      ID_MONEDA: this.defaultCurrency,
+      TIPO_VENTA: 'CONTADO',
+      PLAZO: 0,
+      CUOTA_INICIAL: 0,
+      ESTADO: 'REGISTRADO'
     });
+
+    if (this.documents().length === 1) {
+      this.form.controls.DOCUMENTO.setValue(String(this.documents()[0].DOCUMENTO));
+    }
+
+    if (this.defaultUnit) {
+      void this.onUnitChanged(this.defaultUnit);
+    }
 
     this.enableFormControls(true);
     this.formVersion.update(v => v + 1);
@@ -1138,8 +1155,10 @@ export class Ven212Component implements OnInit, OnDestroy {
       }
 
       const current = this.form.controls.ID_CONDICION.value;
-      if (rows.length === 1 && (!current || !rows.some(r => r.CODIGO === current))) {
-        this.form.patchValue({ ID_CONDICION: rows[0].CODIGO });
+      if (rows.length > 0 && !this.readOnly() && (!current || !rows.some(r => r.CODIGO === current))) {
+        const defaultCond = rows[0].CODIGO;
+        this.form.patchValue({ ID_CONDICION: defaultCond });
+        await this.onConditionChanged(defaultCond);
       } else if (current && !rows.some(r => r.CODIGO === current)) {
         this.form.patchValue({ ID_CONDICION: '' });
         this.terms.set([]);
@@ -1258,13 +1277,14 @@ export class Ven212Component implements OnInit, OnDestroy {
         console.warn('Error loading clients in VEN-212:', e);
       });
 
-      const [docs, sellers, units, currencies, banks, defaultUnit] = await Promise.all([
+      const [docs, sellers, units, currencies, banks, defaultUnit, defaultCurrency] = await Promise.all([
         this.business.catalog('documents', { ID_APLICACION: this.applicationId, USUARIO: this.business.identity.USUARIO }),
         this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
         this.business.catalog('units', { ESTADO: 'ACTIVO', USUARIO: this.business.identity.USUARIO, ID_APLICACION: this.applicationId }),
         this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
         this.business.catalog('bancos', { ID_APLICACION: 'FIN-012', USUARIO: this.business.identity.USUARIO }),
-        this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO })
+        this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO }),
+        this.business.catalog('specifications', { ID_ESPECIFICACION: 'OBJETOS', ID_APLICACION: 'GENERAL', NOMBRE_OBJETO: 'DEF_MONEDA' })
       ]);
 
       await pClients;
@@ -1275,8 +1295,22 @@ export class Ven212Component implements OnInit, OnDestroy {
       this.currencies.set(currencies);
       this.banks.set(banks);
 
-      if (defaultUnit.length > 0 && !this.form.controls.ID_UN_ITEM.value) {
-        this.form.patchValue({ ID_UN_ITEM: String(defaultUnit[0].ID_UN || '') }, { emitEvent: false });
+      if (defaultUnit.length > 0) {
+        this.defaultUnit = String(defaultUnit[0].ID_UN || '');
+      }
+      if (defaultCurrency.length > 0) {
+        this.defaultCurrency = String(defaultCurrency[0].VALOR_DEFECTO || '');
+      }
+
+      if (!this.form.controls.ID_UN_ITEM.value && this.defaultUnit) {
+        this.form.patchValue({ ID_UN_ITEM: this.defaultUnit }, { emitEvent: false });
+        void this.onUnitChanged(this.defaultUnit);
+      }
+      if (!this.form.controls.ID_MONEDA.value && this.defaultCurrency) {
+        this.form.patchValue({ ID_MONEDA: this.defaultCurrency }, { emitEvent: false });
+      }
+      if (!this.form.controls.TIPO_VENTA.value) {
+        this.form.patchValue({ TIPO_VENTA: 'CONTADO' }, { emitEvent: false });
       }
     } catch {
       // Non-critical fallback

@@ -589,14 +589,34 @@ export class Ven230Component
     try {
       const documents=await this.business.catalog('documents',this.business.identity);
       this.documents.set(documents);
-      this.detailsReady.set(true);this.mode.set(RecordToolbarMode.Creating);
-      this.form.reset({...Ven230DefaultRecord, FECHA:this.localDate(), FECHA_REGISTRO:this.localDate(), FECHA_PRIMER_VENC:this.localDate(),
-        USUARIO:this.business.identity.USUARIO,ID_UN_ITEM:this.defaultUnit,ID_MONEDA:this.defaultCurrency}, {emitEvent:false});
-      this.items.set([]);this.taxes.set([]);this.taxItems.set([]);this.payments.set([]);this.addresses.set([]);this.headerLocked.set(false);this.previousCondition="";this.previousWarehouse="";this.products.set([]);this.conditions.set([]);this.terms.set([]);
+      this.form.reset({
+        ...Ven230DefaultRecord,
+        FECHA: this.localDate(),
+        FECHA_REGISTRO: this.localDate(),
+        FECHA_PRIMER_VENC: this.localDate(),
+        USUARIO: this.business.identity.USUARIO,
+        ID_UN_ITEM: this.defaultUnit,
+        ID_MONEDA: this.defaultCurrency,
+        TIPO_VENTA: 'CONTADO',
+        PLAZO: 0,
+        CUOTA_INICIAL: 0,
+        ESTADO: 'REGISTRADO'
+      }, { emitEvent: false });
+      this.items.set([]);
+      this.taxes.set([]);
+      this.taxItems.set([]);
+      this.payments.set([]);
+      this.addresses.set([]);
+      this.headerLocked.set(false);
+      this.previousCondition = '';
+      this.previousWarehouse = '';
+      this.products.set([]);
+      this.conditions.set([]);
+      this.terms.set([]);
       this.enableFormControls();
-      if(documents.length===1)this.selectDocument(String(documents[0].DOCUMENTO));
+      if (documents.length === 1) this.selectDocument(String(documents[0].DOCUMENTO));
       await this.loadWarehouses();
-      this.workspace.setDirty(this.applicationId,false);
+      this.workspace.setDirty(this.applicationId, false);
       this.focusFirstControl();
     } catch(error){this.showError(error);} finally{this.loading.set(false);}
   }
@@ -1074,6 +1094,16 @@ export class Ven230Component
       this.dataLists.set({unidadesNegocio:units.map(r=>({ID_UN:String(r.ID_UN ?? ''),NOMBRE:String(r.NOMBRE ?? r['UN_NOMBRE'] ?? r.ID_UN ?? ''),UN_NOMBRE:String(r['UN_NOMBRE'] ?? `${r.ID_UN} - ${r.NOMBRE ?? ''}`)})),
         monedas:currencies.map(r=>({ID_MONEDA:String(r.ID_MONEDA ?? ''),DESCRIPCION:String(r['DESCRIPCION'] ?? r.ID_MONEDA ?? ''),MONEDA:String(r['DESCRIPCION'] ?? r.ID_MONEDA ?? '')})),
         tiposVenta:saleTypes.map(r=>({TIPO_VENTA:String(r['VALOR2'] ?? ''),DESCRIPCION:String(r['VALOR2'] ?? '')}))});
+      if (!this.form.controls.ID_UN_ITEM.value && this.defaultUnit) {
+        this.form.patchValue({ ID_UN_ITEM: this.defaultUnit }, { emitEvent: false });
+        void this.loadWarehouses();
+      }
+      if (!this.form.controls.ID_MONEDA.value && this.defaultCurrency) {
+        this.form.patchValue({ ID_MONEDA: this.defaultCurrency }, { emitEvent: false });
+      }
+      if (!this.form.controls.TIPO_VENTA.value) {
+        this.form.patchValue({ TIPO_VENTA: 'CONTADO' }, { emitEvent: false });
+      }
     }catch(error){this.showError(error);}finally{this.loading.set(false);}
   }
 
@@ -1262,7 +1292,11 @@ export class Ven230Component
     const id=this.form.controls.ID_UN_ITEM.value;if(!id){this.dataLists.update(d=>({...d,bodegas:[]}));return;}
     const rows=await this.business.catalog('warehouses',{ESTADO:'ACTIVO',MOVIMIENTO:'Prefactura',ID_UN_ITEM:id,USUARIO:this.business.identity.USUARIO});
     if(this.form.controls.ID_UN_ITEM.value!==id)return;
-    this.dataLists.update(d=>({...d,bodegas:rows.map(r=>({ID_UN_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),ID_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),DESCRIPCION:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE_UN:String(r['NOMBRE_UN'] ?? ''),BODEGA_LABEL:String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))}))}));
+    const bodegas = rows.map(r=>({ID_UN_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),ID_BODEGA:String(r['ID_UN_BODEGA'] ?? ''),DESCRIPCION:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE:String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? ''),NOMBRE_UN:String(r['NOMBRE_UN'] ?? ''),BODEGA_LABEL:String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? ''))}));
+    this.dataLists.update(d=>({...d,bodegas}));
+    if(!this.readOnly() && bodegas.length > 0 && !this.form.controls.ID_UN_BODEGA.value) {
+      this.form.controls.ID_UN_BODEGA.setValue(bodegas[0].ID_UN_BODEGA, {emitEvent:false});
+    }
   }
   private async resetConditions():Promise<void> {
     if(this.items().length){
@@ -1299,10 +1333,19 @@ export class Ven230Component
     const rows=await this.business.catalog('conditions',{ID_ADC:h.ID_ADC,TIPO_VENTA:h.TIPO_VENTA,ESTADO:'ACTIVO'});
     if(request !== this.conditionRequest || this.form.controls.ID_ADC.value!==h.ID_ADC || this.form.controls.TIPO_VENTA.value!==h.TIPO_VENTA)return;
     this.conditionSeller=h.ID_ADC;this.conditionSaleType=h.TIPO_VENTA;
-    this.conditions.set(rows.filter(r=>r.CODIGO));
-    this.dataLists.update(d=>({...d,condiciones:rows.filter(r=>r.CODIGO).map(r=>({ID_CONDICION:String(r.CODIGO),CODIGO:String(r.CODIGO),CONDICION:String(r.NOMBRE ?? r.CODIGO),NOMBRE:String(r.NOMBRE ?? r.CODIGO)}))}));
-    if(!rows.some(r=>r.CODIGO) && !this.readOnly())this.notification.warning('El vendedor seleccionado no tiene condiciones de venta asociadas.');
-    this.previousCondition=h.ID_CONDICION ?? '';this.applyCondition(false);await this.loadProducts();
+    const validRows = rows.filter(r=>r.CODIGO);
+    this.conditions.set(validRows);
+    this.dataLists.update(d=>({...d,condiciones:validRows.map(r=>({ID_CONDICION:String(r.CODIGO),CODIGO:String(r.CODIGO),CONDICION:String(r.NOMBRE ?? r.CODIGO),NOMBRE:String(r.NOMBRE ?? r.CODIGO)}))}));
+    if(!validRows.length && !this.readOnly())this.notification.warning('El vendedor seleccionado no tiene condiciones de venta asociadas.');
+    if (!this.readOnly() && validRows.length > 0 && !this.form.controls.ID_CONDICION.value) {
+      const defCond = String(validRows[0].CODIGO);
+      this.form.patchValue({ ID_CONDICION: defCond }, { emitEvent: false });
+      this.previousCondition = defCond;
+      this.applyCondition(false);
+      await this.loadProducts();
+    } else {
+      this.previousCondition=h.ID_CONDICION ?? '';this.applyCondition(false);await this.loadProducts();
+    }
   }
   async handleConditionChange(newCond: string): Promise<void> {
     const value = newCond ?? '';

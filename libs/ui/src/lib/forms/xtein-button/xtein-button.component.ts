@@ -65,8 +65,12 @@ export class XteinButtonComponent {
   /**
    * DevExtreme toma un nombre sin espacios como ícono propio (dx-icon-<nombre>); los íconos de la fuente
    * XTEIN (icon-*) necesitan un espacio para que los pinte como clase CSS de fuente.
+   * Se mapean 'trash' y 'delete' automáticamente a ' icon-eliminar-sl' de la fuente corporativa XTEIN.
    */
   get dxIcon(): string {
+    if (this.icon === 'trash' || this.icon === 'delete') {
+      return ' icon-eliminar-sl';
+    }
     return /^icon-[\w-]+$/.test(this.icon) ? ' ' + this.icon : this.icon;
   }
 

@@ -472,8 +472,13 @@ export class Ven229ItemsComponent implements OnChanges {
   }
 
   async commit(): Promise<void> {
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     const row = this.draft();
     if (!row || this.working() || this.busy) return;
+
+    this.onDraftQtyChange();
 
     const qty = Number(row.CANTIDAD || 0);
     if (!row.PRODUCTO || qty <= 0) {

@@ -15,6 +15,28 @@
   border: 1px solid #dbe4ef;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+
+  xtein-button {
+    display: inline-block;
+
+    .dx-button {
+      min-width: 30px;
+      min-height: 30px;
+      padding: 0 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dx-button-danger {
+      color: #dc2626 !important;
+      border-color: #fca5a5 !important;
+      outline-color: #fca5a5 !important;
+      &:hover {
+        background-color: #fee2e2 !important;
+      }
+    }
+  }
 }
 
 .grid-btn {

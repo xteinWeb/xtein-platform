@@ -33,7 +33,7 @@
   <!-- Botón Eliminar Seleccionados (🗑) -->
   @if (!readOnly && selected().length > 0 && !draft()) {
     <xtein-button
-      icon="trash"
+      icon="icon-eliminar-sl"
       variant="danger"
       ariaLabel="Eliminar seleccionados"
       [disabled]="busy"
@@ -144,6 +144,7 @@
               ariaLabel="Cantidad"
               [(ngModel)]="row.CANTIDAD"
               (ngModelChange)="onDraftQtyChange()"
+              (enterKey)="onEnterKey()"
               (keydown.enter)="onEnterKey()"
               [min]="0"
               [disabled]="working() || busy"
@@ -184,6 +185,7 @@
               [(ngModel)]="row.VALOR_UNITARIO"
               [format]="moneyFormat"
               (ngModelChange)="onDraftQtyChange()"
+              (enterKey)="onEnterKey()"
               (keydown.enter)="onEnterKey()"
               [min]="0"
               [disabled]="!editPrice || working() || busy"
