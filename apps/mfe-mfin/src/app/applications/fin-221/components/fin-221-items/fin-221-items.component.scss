@@ -10,11 +10,9 @@
   width: 100%;
 }
 
-.grid-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0;
+xtein-grid-toolbar {
+  display: inline-block;
+  margin-bottom: 0.25rem;
 }
 
 .grid-btn {

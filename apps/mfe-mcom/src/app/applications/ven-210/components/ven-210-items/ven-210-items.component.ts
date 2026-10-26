@@ -1,4 +1,4 @@
-import { XteinDataGridComponent, XteinButtonComponent,
+import { XteinDataGridComponent, XteinGridToolbarComponent,
     XteinCheckboxComponent, XteinGridColumn, XteinGridToolbarAction } from '@xtein/ui';
 import { formatNumber } from 'devextreme/localization';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, signal, inject } from '@angular/core';
@@ -12,7 +12,7 @@ import { Ven210BusinessService } from '../../services/ven-210-business.service';
 import { baseQuantity } from '../../utils/ven-210-distribution';
 import { validateOrderQuantity } from '../../utils/ven-210-order-load';
 @Component({ selector: 'ven-210-items', standalone: true,
- imports: [XteinButtonComponent, DxDropDownBoxModule, DxTemplateModule, XteinDataGridComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinDateComponent, XteinSelectComponent, XteinNumberComponent],
+ imports: [XteinGridToolbarComponent, DxDropDownBoxModule, DxTemplateModule, XteinDataGridComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinDateComponent, XteinSelectComponent, XteinNumberComponent],
  templateUrl: './ven-210-items.component.html', styleUrl: './ven-210-items.component.scss',
  changeDetection: ChangeDetectionStrategy.OnPush })
 export class Ven210ItemsComponent implements OnChanges {
@@ -41,6 +41,63 @@ export class Ven210ItemsComponent implements OnChanges {
  allItemsSelected(): boolean { return this.items.length > 0 && this.items.every(item => this.selected().includes(item.ITEM)); }
  toggleAll(checked: boolean): void { this.selected.set(checked ? this.items.map(i => i.ITEM) : []); }
  deleteSelected(): void { if (this.selected().length) this.removedMany.emit(this.selected()); }
+ editSelected(): void {
+   if (this.readOnly || this.busy || this.working() || this.draft() || this.selected().length !== 1) return;
+   const target = this.items.find(i => i.ITEM === this.selected()[0]);
+   if (target) {
+     this.begin(target);
+   }
+ }
+ get toolbarActions(): XteinGridToolbarAction[] {
+   const isDraft = !!this.draft();
+   const selCount = this.selected().length;
+   return [
+     {
+       id: 'new-item',
+       icon: 'plus',
+       title: 'Nuevo ítem',
+       variant: 'primary',
+       disabled: this.readOnly || !this.ready || this.busy || isDraft || this.orderLocked,
+       action: () => this.begin()
+     },
+     {
+       id: 'edit-item',
+       icon: 'edit',
+       title: selCount === 1 ? 'Editar ítem' : 'Seleccione un ítem para editar',
+       variant: 'secondary',
+       visible: !isDraft,
+       disabled: this.readOnly || this.busy || selCount !== 1,
+       action: () => this.editSelected()
+     },
+     {
+       id: 'save-item',
+       icon: 'check',
+       title: 'Guardar ítem',
+       variant: 'success',
+       visible: isDraft,
+       disabled: this.working() || this.busy,
+       action: () => { void this.commit(); }
+     },
+     {
+       id: 'cancel-item',
+       icon: 'undo',
+       title: 'Cancelar',
+       variant: 'cancel',
+       visible: isDraft,
+       disabled: this.working() || this.busy,
+       action: () => this.cancel()
+     },
+     {
+       id: 'delete-item',
+       icon: 'trash',
+       title: 'Eliminar seleccionados',
+       variant: 'danger',
+       visible: selCount > 0 && !isDraft && !this.readOnly,
+       disabled: this.busy,
+       action: () => this.deleteSelected()
+     }
+   ];
+ }
  onDraftQtyChange(): void {
    const row = this.draft();
    if (!row) return;

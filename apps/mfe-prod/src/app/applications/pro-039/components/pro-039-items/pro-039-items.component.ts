@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { DxDropDownBoxModule, DxTemplateModule } from 'devextreme-angular';
 import { formatNumber } from 'devextreme/localization';
 import {
-  XteinButtonComponent,
+  XteinGridToolbarComponent,
   XteinCheckboxComponent,
   XteinDataGridComponent,
   XteinGridToolbarAction,
@@ -35,7 +35,7 @@ import { Pro039MovementItem } from '../../models/pro-039.model';
     FormsModule,
     DxDropDownBoxModule,
     DxTemplateModule,
-    XteinButtonComponent,
+    XteinGridToolbarComponent,
     XteinDataGridComponent,
     XteinCheckboxComponent,
     XteinNumberComponent
@@ -141,5 +141,37 @@ export class Pro039ItemsComponent implements OnChanges {
 
   get canAdd(): boolean {
     return !this.readOnly && this.ready && !this.busy;
+  }
+  get toolbarActions(): XteinGridToolbarAction[] {
+    const isAdding = this.adding();
+    const selCount = this.selected().length;
+    return [
+      {
+        id: 'new-item',
+        icon: 'plus',
+        title: 'Agregar material',
+        variant: 'primary',
+        disabled: !this.canAdd || isAdding,
+        action: () => this.beginAdd()
+      },
+      {
+        id: 'cancel-item',
+        icon: 'undo',
+        title: 'Cancelar',
+        variant: 'cancel',
+        visible: isAdding,
+        disabled: this.busy,
+        action: () => this.cancelAdd()
+      },
+      {
+        id: 'delete-item',
+        icon: 'trash',
+        title: 'Eliminar seleccionados',
+        variant: 'danger',
+        visible: selCount > 0 && !isAdding && !this.readOnly,
+        disabled: this.busy,
+        action: () => this.deleteSelected()
+      }
+    ];
   }
 }

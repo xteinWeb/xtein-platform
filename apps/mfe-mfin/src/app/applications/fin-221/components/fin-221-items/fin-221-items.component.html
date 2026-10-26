@@ -1,49 +1,6 @@
 <div class="fin221-items-container">
   <!-- Toolbar de ítems con controles oficiales xtein-button -->
-  <div class="grid-toolbar">
-    <!-- Botón Agregar (+) -->
-    <xtein-button
-      icon="plus"
-      text="Agregar Ítem"
-      variant="primary"
-      ariaLabel="Agregar ítem"
-      [disabled]="readOnly || busy() || !!draft()"
-      (clicked)="beginAdd()"
-    />
-
-    <!-- Botones Guardar y Cancelar fila en edición -->
-    @if (!!draft()) {
-      <xtein-button
-        icon="todo"
-        text="Confirmar"
-        variant="success"
-        ariaLabel="Confirmar ítem"
-        [disabled]="busy()"
-        (clicked)="commit()"
-      />
-
-      <xtein-button
-        icon="undo"
-        text="Cancelar"
-        variant="secondary"
-        ariaLabel="Cancelar edición"
-        [disabled]="busy()"
-        (clicked)="cancel()"
-      />
-    }
-
-    <!-- Botón Eliminar Seleccionados (🗑) -->
-    @if (!readOnly && selected().length > 0 && !draft()) {
-      <xtein-button
-        icon="trash"
-        text="Eliminar"
-        variant="danger"
-        ariaLabel="Eliminar seleccionados"
-        [disabled]="busy()"
-        (clicked)="deleteSelected()"
-      />
-    }
-  </div>
+  <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
   <!-- Tabla de Plazos / Ítems -->
   <div class="table-scroll">

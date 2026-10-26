@@ -12,8 +12,11 @@ export interface Ven212Lookup {
   SUFIJO?: string;
   ID_UN?: string;
   NOMBRE?: string;
+  UN_NOMBRE?: string;
   ID_CLIENTE?: string;
   NOMBRE_COMPLETO?: string;
+  NUM_NOMBRE?: string;
+  BODEGA_LABEL?: string;
   ID_UBICACION?: string;
   DIRECCION?: string;
   ID_ADC?: string;

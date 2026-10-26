@@ -22,7 +22,7 @@ import {
 import { formatNumber } from 'devextreme/localization';
 import {
   XteinDataGridComponent,
-  XteinButtonComponent,
+  XteinGridToolbarComponent,
   XteinCheckboxComponent,
   XteinNumberComponent,
   XteinGridColumn,
@@ -46,7 +46,7 @@ import { Ven229BusinessService } from '../../services/ven-229-business.service';
     DxSelectBoxModule,
     DxPopupModule,
     DxNumberBoxModule,
-    XteinButtonComponent,
+    XteinGridToolbarComponent,
     XteinDataGridComponent,
     XteinCheckboxComponent,
     XteinNumberComponent,
@@ -164,6 +164,65 @@ export class Ven229ItemsComponent implements OnChanges {
     if (this.selected().length) {
       this.removedMany.emit(this.selected());
     }
+  }
+
+  editSelected(): void {
+    if (this.readOnly || this.busy || this.working() || this.draft() || this.selected().length !== 1) return;
+    const target = this.items.find(i => i.ITEM === this.selected()[0]);
+    if (target) {
+      this.begin(target);
+    }
+  }
+
+  get toolbarActions(): XteinGridToolbarAction[] {
+    const isDraft = !!this.draft();
+    const selCount = this.selected().length;
+    return [
+      {
+        id: 'new-item',
+        icon: 'plus',
+        title: 'Nuevo ítem',
+        variant: 'primary',
+        disabled: this.readOnly || !this.ready || this.busy || isDraft,
+        action: () => this.begin()
+      },
+      {
+        id: 'edit-item',
+        icon: 'edit',
+        title: selCount === 1 ? 'Editar ítem' : 'Seleccione un ítem para editar',
+        variant: 'secondary',
+        visible: !isDraft,
+        disabled: this.readOnly || this.busy || selCount !== 1,
+        action: () => this.editSelected()
+      },
+      {
+        id: 'save-item',
+        icon: 'check',
+        title: 'Guardar ítem',
+        variant: 'success',
+        visible: isDraft,
+        disabled: this.working() || this.busy,
+        action: () => { void this.commit(); }
+      },
+      {
+        id: 'cancel-item',
+        icon: 'undo',
+        title: 'Cancelar',
+        variant: 'cancel',
+        visible: isDraft,
+        disabled: this.working() || this.busy,
+        action: () => this.cancel()
+      },
+      {
+        id: 'delete-item',
+        icon: 'trash',
+        title: 'Eliminar seleccionados',
+        variant: 'danger',
+        visible: selCount > 0 && !isDraft && !this.readOnly,
+        disabled: this.busy,
+        action: () => this.deleteSelected()
+      }
+    ];
   }
 
   onDraftQtyChange(): void {

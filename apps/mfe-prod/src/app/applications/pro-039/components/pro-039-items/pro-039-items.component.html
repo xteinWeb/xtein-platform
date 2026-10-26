@@ -1,33 +1,4 @@
-<div class="grid-toolbar">
-  <!-- Nuevo material (+) -->
-  <xtein-button
-    icon="plus"
-    variant="primary"
-    ariaLabel="Agregar material"
-    [disabled]="!canAdd || adding()"
-    (clicked)="beginAdd()"
-  />
-
-  @if (adding()) {
-    <xtein-button
-      icon="undo"
-      variant="secondary"
-      ariaLabel="Cancelar"
-      [disabled]="busy"
-      (clicked)="cancelAdd()"
-    />
-  }
-
-  @if (!readOnly && selected().length > 0 && !adding()) {
-    <xtein-button
-      icon="trash"
-      variant="danger"
-      ariaLabel="Eliminar seleccionados"
-      [disabled]="busy"
-      (clicked)="deleteSelected()"
-    />
-  }
-</div>
+<xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
 <div class="table-scroll">
   <table class="items-grid-table">

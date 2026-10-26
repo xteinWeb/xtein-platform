@@ -1,9 +1,8 @@
-import { XteinButtonComponent, XteinCheckboxComponent } from '@xtein/ui';
+import { XteinCheckboxComponent, XteinGridToolbarComponent, XteinGridToolbarAction, XteinNumberComponent, XteinNotificationService } from '@xtein/ui';
 import { formatNumber } from 'devextreme/localization';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { XteinNumberComponent, XteinNotificationService } from '@xtein/ui';
 import { Ven213DevolucionItem } from '../../models/ven-213.model';
 import { applyAmounts, taxTotal } from '../../utils/ven-213-amounts';
 import { Ven213WithoutInventoryMessage } from '../../utils/ven-213-distribution';
@@ -14,7 +13,7 @@ import { validateReturnQuantity } from '../../utils/ven-213-source-load';
  * added and amounts are read-only (proportional to the source line).
  */
 @Component({ selector: 'ven-213-items', standalone: true,
- imports: [XteinButtonComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinNumberComponent],
+ imports: [XteinGridToolbarComponent, XteinCheckboxComponent, CommonModule, FormsModule, XteinNumberComponent],
  templateUrl: './ven-213-items.component.html', styleUrl: './ven-213-items.component.scss',
  changeDetection: ChangeDetectionStrategy.OnPush })
 export class Ven213ItemsComponent implements OnChanges {
@@ -35,6 +34,55 @@ export class Ven213ItemsComponent implements OnChanges {
  allItemsSelected(): boolean { return this.items.length > 0 && this.items.every(item => this.selected().includes(item.ITEM)); }
  toggleAll(checked: boolean): void { this.selected.set(checked ? this.items.map(i => i.ITEM) : []); }
  deleteSelected(): void { if (this.selected().length) this.removedMany.emit(this.selected()); }
+ editSelected(): void {
+   if (this.readOnly || this.busy || this.working() || this.draft() || this.selected().length !== 1) return;
+   const target = this.items.find(i => i.ITEM === this.selected()[0]);
+   if (target) {
+     this.begin(target);
+   }
+ }
+ get toolbarActions(): XteinGridToolbarAction[] {
+   const isDraft = !!this.draft();
+   const selCount = this.selected().length;
+   return [
+     {
+       id: 'edit-item',
+       icon: 'edit',
+       title: selCount === 1 ? 'Editar ítem' : 'Seleccione un ítem para editar',
+       variant: 'secondary',
+       visible: !isDraft,
+       disabled: this.readOnly || this.busy || selCount !== 1,
+       action: () => this.editSelected()
+     },
+     {
+       id: 'save-item',
+       icon: 'check',
+       title: 'Guardar ítem',
+       variant: 'success',
+       visible: isDraft,
+       disabled: this.working() || this.busy,
+       action: () => { void this.commit(); }
+     },
+     {
+       id: 'cancel-item',
+       icon: 'undo',
+       title: 'Cancelar',
+       variant: 'cancel',
+       visible: isDraft,
+       disabled: this.working() || this.busy,
+       action: () => this.cancel()
+     },
+     {
+       id: 'delete-item',
+       icon: 'trash',
+       title: 'Eliminar seleccionados',
+       variant: 'danger',
+       visible: selCount > 0 && !isDraft && !this.readOnly,
+       disabled: this.busy,
+       action: () => this.deleteSelected()
+     }
+   ];
+ }
  /** Preview of the draft amounts while the quantity changes. */
  onDraftQtyChange(): void {
    const row = this.draft();

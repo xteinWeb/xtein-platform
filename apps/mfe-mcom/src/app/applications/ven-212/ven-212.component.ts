@@ -1353,7 +1353,12 @@ export class Ven212Component implements OnInit, OnDestroy {
         NOMBRE_COMPLETO: String(r.NOMBRE_COMPLETO ?? ''),
         NUM_NOMBRE: String(r['NUM_NOMBRE'] ?? `${r.ID_ADC} - ${r.NOMBRE_COMPLETO ?? ''}`)
       })));
-      this.units.set(units);
+      this.units.set(units.map(r => ({
+        ...r,
+        ID_UN: String(r.ID_UN ?? ''),
+        NOMBRE: String(r.NOMBRE ?? r['UN_NOMBRE'] ?? r.ID_UN ?? ''),
+        UN_NOMBRE: String(r['UN_NOMBRE'] ?? `${r.ID_UN} - ${r.NOMBRE ?? ''}`.trim())
+      })));
       this.currencies.set(currencies);
       this.banks.set(banks);
 

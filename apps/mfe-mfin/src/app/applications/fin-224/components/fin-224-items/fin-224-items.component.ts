@@ -12,7 +12,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import {
-  XteinButtonComponent,
+  XteinGridToolbarComponent,
+  XteinGridToolbarAction,
   XteinCheckboxComponent,
   XteinInputComponent,
   XteinSelectComponent,
@@ -30,7 +31,7 @@ import { Fin224DefaultItem } from '../../constants/fin-224-ui.constants';
   imports: [
     CommonModule,
     FormsModule,
-    XteinButtonComponent,
+    XteinGridToolbarComponent,
     XteinCheckboxComponent,
     XteinInputComponent,
     XteinSelectComponent
@@ -182,5 +183,65 @@ export class Fin224ItemsComponent {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  editSelected(): void {
+    if (this.readOnly || this.busy() || this.draft() || this.selected().length !== 1) return;
+    const selectedId = this.selected()[0];
+    const index = this.items.findIndex(i => i.ID_LISTA === selectedId);
+    if (index >= 0) {
+      this.beginEdit(this.items[index], index);
+    }
+  }
+
+  get toolbarActions(): XteinGridToolbarAction[] {
+    const isDraft = !!this.draft();
+    const selCount = this.selected().length;
+    return [
+      {
+        id: 'new-item',
+        icon: 'plus',
+        title: 'Agregar lista',
+        variant: 'primary',
+        disabled: this.readOnly || this.busy() || isDraft,
+        action: () => this.beginAdd()
+      },
+      {
+        id: 'edit-item',
+        icon: 'edit',
+        title: selCount === 1 ? 'Editar lista' : 'Seleccione una lista para editar',
+        variant: 'secondary',
+        visible: !isDraft,
+        disabled: this.readOnly || this.busy() || selCount !== 1,
+        action: () => this.editSelected()
+      },
+      {
+        id: 'save-item',
+        icon: 'check',
+        title: 'Confirmar',
+        variant: 'success',
+        visible: isDraft,
+        disabled: this.busy(),
+        action: () => this.commit()
+      },
+      {
+        id: 'cancel-item',
+        icon: 'undo',
+        title: 'Cancelar',
+        variant: 'cancel',
+        visible: isDraft,
+        disabled: this.busy(),
+        action: () => this.cancel()
+      },
+      {
+        id: 'delete-item',
+        icon: 'trash',
+        title: 'Eliminar seleccionadas',
+        variant: 'danger',
+        visible: selCount > 0 && !isDraft && !this.readOnly,
+        disabled: this.busy(),
+        action: () => this.deleteSelected()
+      }
+    ];
   }
 }

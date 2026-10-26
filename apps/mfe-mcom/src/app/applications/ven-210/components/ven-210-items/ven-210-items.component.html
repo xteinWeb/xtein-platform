@@ -1,46 +1,4 @@
-<div class="grid-toolbar">
-  <!-- Botón Nuevo Item (+) -->
-  <xtein-button
-    icon="plus"
-    variant="primary"
-    ariaLabel="Nuevo ítem"
-    [disabled]="readOnly || !ready || busy || !!draft() || orderLocked"
-    (clicked)="begin()"
-  />
-
-  <!-- Botón Guardar Item (✓) -->
-  @if (!!draft()) {
-    <xtein-button
-      icon="todo"
-      variant="success"
-      ariaLabel="Guardar ítem"
-      [disabled]="working() || busy"
-      (clicked)="commit()"
-    />
-  }
-
-  <!-- Botón Cancelar Item (↩) -->
-  @if (!!draft()) {
-    <xtein-button
-      icon="undo"
-      variant="secondary"
-      ariaLabel="Cancelar ítem"
-      [disabled]="working() || busy"
-      (clicked)="cancel()"
-    />
-  }
-
-  <!-- Botón Eliminar Seleccionados (🗑) -->
-  @if (!readOnly && selected().length > 0 && !draft()) {
-    <xtein-button
-      icon="trash"
-      variant="danger"
-      ariaLabel="Eliminar seleccionados"
-      [disabled]="busy"
-      (clicked)="deleteSelected()"
-    />
-  }
-</div>
+<xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
 <div class="table-scroll">
   <table class="items-grid-table">

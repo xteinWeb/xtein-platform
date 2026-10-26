@@ -1,49 +1,6 @@
 <div class="fin224-items-container">
   <!-- Toolbar de listas con controles estándar xtein-button -->
-  <div class="grid-toolbar">
-    <!-- Botón Agregar (+) -->
-    <xtein-button
-      icon="plus"
-      text="Agregar Lista"
-      variant="primary"
-      ariaLabel="Agregar lista"
-      [disabled]="readOnly || busy() || !!draft()"
-      (clicked)="beginAdd()"
-    />
-
-    <!-- Botones Guardar y Cancelar fila en edición -->
-    @if (!!draft()) {
-      <xtein-button
-        icon="todo"
-        text="Confirmar"
-        variant="success"
-        ariaLabel="Confirmar lista"
-        [disabled]="busy()"
-        (clicked)="commit()"
-      />
-
-      <xtein-button
-        icon="undo"
-        text="Cancelar"
-        variant="secondary"
-        ariaLabel="Cancelar edición"
-        [disabled]="busy()"
-        (clicked)="cancel()"
-      />
-    }
-
-    <!-- Botón Eliminar Seleccionados (🗑) -->
-    @if (!readOnly && selected().length > 0 && !draft()) {
-      <xtein-button
-        icon="trash"
-        text="Eliminar"
-        variant="danger"
-        ariaLabel="Eliminar seleccionadas"
-        [disabled]="busy()"
-        (clicked)="deleteSelected()"
-      />
-    }
-  </div>
+  <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
   <!-- Tabla de Listas de Precios asociadas -->
   <div class="table-scroll">
