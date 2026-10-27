@@ -151,14 +151,14 @@ export class Pro039Component implements OnInit, OnDestroy {
   readonly documents = signal<Pro039Lookup[]>([]);
   readonly products = signal<Pro039Lookup[]>([]);
   readonly sections = signal<Pro039Lookup[]>([]);
-  /** Productos con materiales en la sección elegida (los que se pueden agregar al consumo). */
-  readonly sectionProducts = signal<Pro039Lookup[]>([]);
   /** Productos del consumo: varios, todos en la misma sección. */
   readonly consumptionProducts = signal<Pro039ConsumptionProduct[]>([]);
   /** Productos que componen cada juego (clase Juego), por código del juego. */
   readonly productComponents = signal<Record<string, Pro039Lookup[]>>({});
   /** Valor del selector "Agregar producto" (se limpia al agregarlo). */
   readonly productToAdd = signal<string | null>(null);
+  /** Fila nueva abierta en la tabla de productos (botón +). */
+  readonly addingProduct = signal(false);
   readonly origins = signal<Pro039Warehouse[]>([]);
   readonly destinations = signal<Pro039Warehouse[]>([]);
   readonly itemProducts = signal<Pro039Lookup[]>([]);
@@ -303,7 +303,7 @@ export class Pro039Component implements OnInit, OnDestroy {
       })
     );
 
-    // Sección: primero se elige; ofrece los productos con materiales en ella
+    // Sección: primero se elige; al cambiarla se recargan los materiales de los productos ya agregados
     this.subscriptions.add(
       this.form.controls.SECCION.valueChanges.subscribe(section => {
         if (!this.readOnly()) void this.onSectionChanged(section ?? '');
@@ -434,7 +434,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     this.currentIndex.set(-1);
     this.setItems([]);
     this.consumptionProducts.set([]);
-    this.sectionProducts.set([]);
+    this.cancelAddProduct();
     void this.loadSections();
 
     // Documentos de PRO-039 de las sedes del usuario (SC100, SC101, SC102) con su consecutivo siguiente
@@ -612,6 +612,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     const list = this.records();
     if (index < 0 || index >= list.length) return;
     const record = list[index];
+    this.cancelAddProduct();
     this.currentIndex.set(index);
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
@@ -782,37 +783,35 @@ export class Pro039Component implements OnInit, OnDestroy {
 
   // ================= Productos del consumo =================
 
-  /** Al cambiar la sección se vacía la lista de productos: sus materiales son de otra sección. */
+  /**
+   * Los productos se conservan al cambiar la sección (la lista ofrece todos, tengan o no matriz en ella):
+   * solo se vuelven a cargar sus materiales de la nueva sección.
+   */
   private async onSectionChanged(section: string): Promise<void> {
-    if (this.consumptionProducts().length) {
-      this.consumptionProducts.set([]);
-      this.syncHeaderProduct();
-      this.notification.info('Cambió la sección: vuelva a agregar los productos.');
-    }
-    this.setItems(this.items().filter(row => !row.ES_MATRIZ));
-    await this.loadSectionProducts(section);
-  }
-
-  /** Productos (de las clases permitidas) que tienen materiales en la sección. */
-  private async loadSectionProducts(section: string): Promise<void> {
     if (!section) {
-      this.sectionProducts.set([]);
+      this.setItems(this.items().filter(row => !row.ES_MATRIZ));
       return;
     }
-    try {
-      const rows = await this.business.catalog('products', { ...this.business.identity, SECCION: section });
-      this.sectionProducts.set(rows.map(r => ({ ...r, PRODUCTO: String(r.PRODUCTO ?? ''), NOMBRE: String(r.NOMBRE ?? ''), LABEL: this.label(r.PRODUCTO, r.NOMBRE) })));
-    } catch (error) {
-      this.sectionProducts.set([]);
-      this.notification.warning(error instanceof Error ? error.message : 'No hay productos con materiales en la sección.');
-    }
+    await this.loadMaterials();
+  }
+
+  /** Botón +: abre una fila para elegir el producto (se puede repetir para agregar varios). */
+  beginAddProduct(): void {
+    if (this.readOnly() || this.busy() || !this.form.controls.SECCION.value) return;
+    this.productToAdd.set(null);
+    this.addingProduct.set(true);
+  }
+
+  cancelAddProduct(): void {
+    this.addingProduct.set(false);
+    this.productToAdd.set(null);
   }
 
   async addConsumptionProduct(code: string | null): Promise<void> {
     const product = String(code ?? '');
-    // El selector queda listo para el siguiente producto
-    setTimeout(() => this.productToAdd.set(null));
-    if (!product || this.readOnly() || this.busy()) return;
+    if (!product) return;
+    this.cancelAddProduct();
+    if (this.readOnly() || this.busy()) return;
     if (this.consumptionProducts().some(p => p.PRODUCTO === product)) {
       this.notification.warning(`El producto ${product} ya está en el consumo.`);
       return;
@@ -862,7 +861,7 @@ export class Pro039Component implements OnInit, OnDestroy {
 
   /** Producto del consumo con su nombre y si es juego, tomados de los catálogos cargados. */
   private productFrom(values: Partial<Pro039ConsumptionProduct> & Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO'>): Pro039ConsumptionProduct {
-    const row = this.sectionProducts().find(p => p.PRODUCTO === values.PRODUCTO) ?? this.products().find(p => p.PRODUCTO === values.PRODUCTO);
+    const row = this.products().find(p => p.PRODUCTO === values.PRODUCTO);
     return {
       NOMBRE: String(row?.NOMBRE ?? ''),
       ES_JUEGO: !!row?.ES_JUEGO,
@@ -926,11 +925,17 @@ export class Pro039Component implements OnInit, OnDestroy {
     try {
       const materials = await this.business.materials(products, h.SECCION, String(h.ID_UN_ORIGEN ?? ''));
       this.busy.set(false);
-      if (!materials.length) throw new Error('No hay materiales en la matriz de los productos elegidos');
+      if (!materials.length) throw new Error(`No hay materiales en la matriz de ${products.length > 1 ? 'los productos elegidos' : products[0].PRODUCTO} para la sección ${h.SECCION}`);
       // Los materiales de la matriz toman ITEM después de los agregados a mano, que conservan el suyo
       const offset = manual.reduce((max, row) => Math.max(max, row.ITEM), 0);
       await this.applyItems([...materials.map((row, index) => ({ ...row, ITEM: offset + index + 1 })), ...manual]);
       this.notification.success(`Se cargaron ${materials.length} material(es) de la matriz.`);
+      // Los productos sin matriz en la sección se pueden dejar: sus materiales se agregan a mano
+      const withMaterials = new Set(materials.flatMap(row => (row.ORIGENES ?? []).map(o => o.PRODUCTO_CONSUMO)));
+      const without = products.filter(p => !withMaterials.has(p.PRODUCTO)).map(p => p.PRODUCTO);
+      if (without.length) {
+        this.notification.warning(`Sin materiales en la matriz de la sección ${h.SECCION}: ${without.join(', ')}. Puede agregarlos manualmente con "+ Agregar material".`);
+      }
     } catch (error) {
       // Se quitan solo los de la matriz anterior: los agregados a mano se conservan
       this.setItems(manual);
@@ -1081,6 +1086,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     }, { emitEvent: false });
     this.setItems([]);
     this.consumptionProducts.set([]);
+    this.cancelAddProduct();
   }
 
   /** Productos que devuelve 'consulta adicionales' (los consumos anteriores traen solo el del encabezado). */

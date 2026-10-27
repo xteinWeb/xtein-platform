@@ -140,28 +140,51 @@
           </div>
         </div>
 
+
+        <!-- Observación (ancho completo) -->
+        <div class="pro-039__full-row">
+          <div class="pro-039__field-inline pro-039__field-inline--full">
+            <xtein-label class="pro-039__label-inline" for="pro-039-detalle">Observación</xtein-label>
+            <div class="pro-039__control-inline">
+              <xtein-input id="pro-039-detalle" name="DETALLE" placeholder="Descripción / observación del consumo..." formControlName="DETALLE" [readOnly]="readOnly()" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FILA INFERIOR: Productos + Materiales (un solo cuadro) ===== -->
+    <div class="pro-039__bottom-row">
+      <div class="pro-039__card-bottom">
         <!-- Productos del consumo: varios, todos de la sección elegida -->
         <div class="pro-039__section-divider">
           <xtein-group-label class="pro-039__section-title" label="Productos"></xtein-group-label>
         </div>
 
         @if (!readOnly()) {
-          <div class="pro-039__products-add">
-            <xtein-lookup
-              ariaLabel="Agregar producto"
-              [placeholder]="form.controls.SECCION.value ? 'Agregar producto…' : 'Elija primero la sección'"
-              searchPlaceholder="Buscar…"
-              [items]="sectionProducts()"
-              valueExpr="PRODUCTO"
-              displayExpr="LABEL"
-              [columns]="productColumns"
-              dropDownWidth="min(760px, 95vw)"
-              [readOnly]="!form.controls.SECCION.value || busy()"
-              [ngModel]="productToAdd()"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="addConsumptionProduct($event)"
-            />
-            <span class="pro-039__products-hint">Solo aparecen los productos con materiales en la sección.</span>
+          <div class="pro-039__products-toolbar">
+            <!-- Nuevo producto (+): abre una fila para elegirlo; se repite para agregar varios -->
+            <button type="button" class="pro-039__grid-btn pro-039__grid-btn--primary"
+              [attr.aria-label]="consumptionProducts().length ? 'Agregar otro producto' : 'Agregar producto'"
+              [title]="form.controls.SECCION.value ? (consumptionProducts().length ? 'Agregar otro producto' : 'Agregar producto') : 'Elija primero la sección'"
+              [disabled]="!form.controls.SECCION.value || addingProduct() || busy()"
+              (click)="beginAddProduct()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            @if (addingProduct()) {
+              <button type="button" class="pro-039__grid-btn pro-039__grid-btn--cancel" aria-label="Cancelar" title="Cancelar" (click)="cancelAddProduct()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 7v6h6"></path>
+                  <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                </svg>
+              </button>
+            }
+            <span class="pro-039__products-hint">
+              {{ form.controls.SECCION.value ? 'Con + agregue uno o varios productos. Si uno no tiene materiales en la sección, se avisa y sus materiales se agregan a mano.' : 'Elija primero la sección para agregar productos.' }}
+            </span>
           </div>
         }
 
@@ -177,6 +200,28 @@
               </tr>
             </thead>
             <tbody>
+              <!-- Fila nueva: el producto se elige en la misma tabla -->
+              @if (addingProduct()) {
+                <tr class="pro-039__row-editing">
+                  <td colspan="2">
+                    <xtein-lookup
+                      ariaLabel="Producto a agregar"
+                      placeholder="Buscar producto…"
+                      searchPlaceholder="Buscar…"
+                      [items]="products()"
+                      valueExpr="PRODUCTO"
+                      displayExpr="LABEL"
+                      [columns]="productColumns"
+                      [autoFocus]="true"
+                      dropDownWidth="min(760px, 95vw)"
+                      [ngModel]="productToAdd()"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="addConsumptionProduct($event)"
+                    />
+                  </td>
+                  <td colspan="3" class="pro-039__products-hint">Elija el producto; luego indique su cantidad de lote.</td>
+                </tr>
+              }
               @for (p of consumptionProducts(); track p.ITEM) {
                 <tr>
                   <td class="col-code">{{ p.PRODUCTO }}</td>
@@ -231,32 +276,22 @@
                   }
                 </tr>
               } @empty {
+                @if (!addingProduct()) {
                 <tr>
                   <td [attr.colspan]="readOnly() ? 4 : 5" class="pro-039__products-empty">
-                    {{ readOnly() ? 'Sin productos.' : 'Elija la sección y agregue uno o varios productos: sus materiales se cargan abajo.' }}
+                    {{ readOnly() ? 'Sin productos.' : 'Elija la sección y agregue uno o varios productos con +: sus materiales se cargan abajo.' }}
                   </td>
                 </tr>
+                }
               }
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
-
-    <!-- ===== FILA INFERIOR: Observación + Materiales ===== -->
-    <div class="pro-039__bottom-row">
-      <div class="pro-039__card-bottom">
-        <!-- Observación (ancho completo) -->
-        <div class="pro-039__full-row">
-          <div class="pro-039__field-inline pro-039__field-inline--full">
-            <xtein-label class="pro-039__label-inline" for="pro-039-detalle">Observación</xtein-label>
-            <div class="pro-039__control-inline">
-              <xtein-input id="pro-039-detalle" name="DETALLE" placeholder="Descripción / observación del consumo..." formControlName="DETALLE" [readOnly]="readOnly()" />
-            </div>
-          </div>
-        </div>
 
         <!-- Materiales del consumo -->
+        <div class="pro-039__section-divider">
+          <xtein-group-label class="pro-039__section-title" label="Materiales"></xtein-group-label>
+        </div>
         <xtein-pro039-items
           [items]="items()"
           [products]="itemProducts()"
