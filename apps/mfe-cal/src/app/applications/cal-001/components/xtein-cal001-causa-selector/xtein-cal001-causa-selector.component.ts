@@ -1,14 +1,17 @@
 import {
-  ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, output, signal, viewChild
+  ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector, afterNextRender, computed, inject, input, output, signal,
+  viewChild
 } from '@angular/core';
 import type { Cal001Causa } from '../../models/cal-001.model';
 import { descripcionVisible, filtrarCausas } from '../../utils/cal-001-causas';
+import { type Cal001UbicacionPanel, ubicarPanel } from '../../utils/cal-001-panel';
 
 let secuencia = 0;
 
 /**
  * Desplegable de causales (ajuste 4): muestra Id, Nombre y Descripción (CAUSAS.DESCRIPCION, solo lectura),
- * busca en los tres campos y deja leer textos largos en varias líneas. En el celular se abre como hoja inferior.
+ * busca en los tres campos y deja leer textos largos en varias líneas. En escritorio se abre hacia arriba si no
+ * cabe abajo; en el celular se abre como hoja inferior.
  */
 @Component({
   selector: 'xtein-cal001-causa-selector',
@@ -19,6 +22,7 @@ let secuencia = 0;
 })
 export class XteinCal001CausaSelectorComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
   readonly causas = input<readonly Cal001Causa[]>([]);
   readonly valor = input<string>('');
   readonly excluidas = input<readonly string[]>([]);
@@ -31,6 +35,7 @@ export class XteinCal001CausaSelectorComponent {
   readonly abierto = signal(false);
   readonly texto = signal('');
   readonly activa = signal(0);
+  readonly ubicacion = signal<Cal001UbicacionPanel>({ arriba: false, alto: null });
   private readonly buscador = viewChild<ElementRef<HTMLInputElement>>('buscador');
 
   readonly actual = computed(() => this.causas().find(c => c.ID_CAUSA === this.valor()) ?? null);
@@ -44,8 +49,12 @@ export class XteinCal001CausaSelectorComponent {
     if (this.deshabilitado()) return;
     this.texto.set('');
     this.activa.set(Math.max(0, this.opciones().findIndex(c => c.ID_CAUSA === this.valor())));
+    this.ubicacion.set(ubicarPanel(this.host.nativeElement));
     this.abierto.set(true);
-    setTimeout(() => this.buscador()?.nativeElement.focus());
+    afterNextRender(() => {
+      this.buscador()?.nativeElement.focus({ preventScroll: true });
+      if (this.ubicacion().alto !== null) this.host.nativeElement.querySelector('.cs-panel')?.scrollIntoView?.({ block: 'nearest' });
+    }, { injector: this.injector });
   }
 
   cerrar(): void {

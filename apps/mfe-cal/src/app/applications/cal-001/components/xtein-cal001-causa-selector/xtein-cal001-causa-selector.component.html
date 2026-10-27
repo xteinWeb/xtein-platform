@@ -12,7 +12,8 @@
 
 @if (abierto()) {
   <div class="cs-fondo" (click)="cerrar()" aria-hidden="true"></div>
-  <div class="cs-panel" role="dialog" [attr.aria-label]="etiqueta()">
+  <div class="cs-panel" role="dialog" [attr.aria-label]="etiqueta()" [class.cs-arriba]="ubicacion().arriba"
+    [style.max-height.px]="ubicacion().alto">
     <div class="cs-cabecera">
       <input #buscador class="cs-buscar" type="search" autocomplete="off" placeholder="Buscar por id, nombre o descripción"
         [attr.aria-controls]="id + '-lista'" aria-label="Buscar no conformidad" [value]="texto()"

@@ -1,4 +1,4 @@
-import type { Pro039ConsumptionProduct, Pro039MaterialOrigin, Pro039MovementGrav, Pro039MovementItem, Pro039MovementRecord, Pro039Presentation, Pro039Total } from './pro-039.model';
+import type { Pro039ConsumptionProduct, Pro039MovementGrav, Pro039MovementItem, Pro039MovementRecord, Pro039Presentation, Pro039Total } from './pro-039.model';
 
 export interface Pro039Lookup {
   [key: string]: unknown;
@@ -42,10 +42,11 @@ export interface Pro039Material {
   UDM?: string;
   ID_SECCION?: string;
   CONSUMO?: number;
-  /** Suma de consumo unitario x lote de cada producto. */
+  /** Consumo unitario x lote de su producto. */
   CANTIDAD?: number;
   VALOR_UNITARIO?: number;
-  ORIGENES?: Pro039MaterialOrigin[] | null;
+  /** Producto del consumo al que pertenece el material. */
+  PRODUCTO_CONSUMO?: string;
 }
 
 /** Datos del producto que devuelve 'EXISTENCIAS PRODUCTO' al agregarlo manualmente. */

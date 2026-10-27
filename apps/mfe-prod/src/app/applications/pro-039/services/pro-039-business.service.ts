@@ -13,7 +13,6 @@ import {
   Pro039TaxResult
 } from '../models/pro-039-business.model';
 import { Pro039ConsumptionProduct, Pro039MovementGrav, Pro039MovementItem, Pro039Presentation, Pro039Total } from '../models/pro-039.model';
-import { matrixTotal } from '../utils/pro-039-lot.utils';
 
 export interface Pro039TaxLiquidation {
   items: Pro039MovementItem[];
@@ -82,9 +81,8 @@ export class Pro039BusinessService {
 
   /**
    * Materiales de la matriz de los productos del consumo en la sección, con el costo de la bodega de origen
-   * (o el de la matriz). El mismo material de varios productos llega sumado y ORIGENES dice cuánto pone cada uno.
-   * Cada producto lleva su lote: CONSUMO_BASE queda como la suma del unitario de la matriz y
-   * CANTIDAD = suma de (unitario x lote de cada producto).
+   * (o el de la matriz). Cada producto trae SUS materiales por separado (PRODUCTO_CONSUMO): si dos productos
+   * usan el mismo material, llega una fila por producto. CONSUMO_BASE = unitario; CANTIDAD = unitario x su lote.
    */
   async materials(products: Pick<Pro039ConsumptionProduct, 'PRODUCTO' | 'COMPONENTE' | 'CANTIDAD_LOTE'>[], section: string, originWarehouse: string): Promise<Pro039MovementItem[]> {
     const rows = await this.action<Pro039Material>('materials', {
@@ -104,25 +102,21 @@ export class Pro039BusinessService {
       CONSUMO_BASE: Number(row.CONSUMO || 0),
       CANTIDAD: Number(row.CANTIDAD ?? row.CONSUMO ?? 0),
       VALOR_UNITARIO: Number(row.VALOR_UNITARIO || 0),
-      ORIGENES: (row.ORIGENES ?? []).map(origin => ({
-        ...origin,
-        CONSUMO: Number(origin.CONSUMO || 0),
-        CANTIDAD_LOTE: Number(origin.CANTIDAD_LOTE) || 1
-      })),
+      PRODUCTO_CONSUMO: String(row.PRODUCTO_CONSUMO ?? ''),
       ES_MATRIZ: true
     }));
   }
 
   /** Fila provisional de un material agregado a mano, mientras llegan sus datos. */
-  pendingItem(product: string, name: string, item: number): Pro039MovementItem {
-    return this.newItem({ ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false });
+  pendingItem(product: string, name: string, item: number, consumptionProduct: string): Pro039MovementItem {
+    return this.newItem({ ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false, PRODUCTO_CONSUMO: consumptionProduct });
   }
 
   /**
    * Producto agregado manualmente: igual que COM-203 ('EXISTENCIAS PRODUCTO'), valida que esté asociado
    * a la bodega de origen y trae nombre, costo y presentación.
    */
-  async productItem(product: string, header: Pro039Header, item: number): Promise<Pro039MovementItem> {
+  async productItem(product: string, header: Pro039Header, item: number, consumptionProduct: string): Promise<Pro039MovementItem> {
     const rows = await this.action<Pro039ProductStock>('stock', {
       PRODUCTO: product,
       PRESENTACION: 'SI',
@@ -144,6 +138,7 @@ export class Pro039BusinessService {
       ATRIBUTO: attribute || 'SIN',
       VALOR_UNITARIO: Number(data.PRECIO || 0),
       PRESENTACIONES: presentations,
+      PRODUCTO_CONSUMO: consumptionProduct,
       CANTIDAD: 0,
       CONSUMO_BASE: 0,
       ES_MATRIZ: false
@@ -156,14 +151,12 @@ export class Pro039BusinessService {
   }
 
   /**
-   * Cambió el lote de un producto del consumo: los materiales de la matriz que salen de él recalculan su cantidad
-   * (suma de unitario x lote de cada producto), sin volver a consultar la matriz.
+   * Cambió el lote de un producto del consumo: sus materiales de la matriz recalculan la cantidad
+   * (unitario x lote), sin volver a consultar la matriz. Los agregados a mano no cambian.
    */
   withProductLot(row: Pro039MovementItem, product: string, lot: number): Pro039MovementItem {
-    if (!row.ES_MATRIZ || !row.ORIGENES?.some(o => o.PRODUCTO_CONSUMO === product)) return row;
-    const origins = row.ORIGENES.map(o => o.PRODUCTO_CONSUMO === product ? { ...o, CANTIDAD_LOTE: lot } : o);
-    const updated = { ...row, ORIGENES: origins };
-    return this.withQuantity(updated, matrixTotal(updated));
+    if (!row.ES_MATRIZ || row.PRODUCTO_CONSUMO !== product) return row;
+    return this.withQuantity(row, Number(row.CONSUMO_BASE || 0) * lot);
   }
 
   /** Aplica la presentación elegida en "UM Pres." (null = sin elegir) y recalcula la cantidad equivalente. */

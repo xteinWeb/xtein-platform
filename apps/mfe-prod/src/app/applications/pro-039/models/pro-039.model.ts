@@ -1,13 +1,3 @@
-/** De qué producto del consumo sale un material de la matriz y cuánto pone (consumo unitario, sin el lote). */
-export interface Pro039MaterialOrigin {
-  PRODUCTO_CONSUMO: string;
-  PRODUCTO_COMPONENTE?: string | null;
-  /** Consumo unitario de la matriz para ese producto. */
-  CONSUMO: number;
-  /** Lote de ese producto: aporta CONSUMO x CANTIDAD_LOTE. */
-  CANTIDAD_LOTE?: number;
-}
-
 /** Producto del consumo (varios por sección). COMPONENTE: el elegido cuando es un juego (vacío = todo el juego). */
 export interface Pro039ConsumptionProduct {
   ITEM: number;
@@ -97,8 +87,8 @@ export interface Pro039MovementItem {
   CANTIDAD_EQUIV: number;
   /** Presentaciones del producto (PRODUCTOS_PRESENTACION), para elegir "UM Pres." como en la salida de COM-203. */
   PRESENTACIONES?: Pro039Presentation[];
-  /** Material de la matriz: productos del consumo de los que sale (el mismo material de varios productos va sumado). */
-  ORIGENES?: Pro039MaterialOrigin[] | null;
+  /** Producto del consumo al que pertenece el material (de su matriz o agregado a mano para él). */
+  PRODUCTO_CONSUMO?: string | null;
   /** Cantidad que indicaba la matriz ("Consumo"). */
   CONSUMO_BASE: number;
   /** Cantidad consumida ("Consumo modificado"). */

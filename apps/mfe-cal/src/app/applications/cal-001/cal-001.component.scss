@@ -2,7 +2,8 @@
 
 .c1 {
   /* Espacio inferior amplio: la última sección (historial) no queda pegada al borde del área de trabajo. */
-  display: flex; flex-direction: column; gap: 12px; min-height: 100%; padding: 16px 20px 48px; box-sizing: border-box;
+  /* position: relative: todo lo absoluto de la pantalla queda dentro de la sección con scroll (una sola barra). */
+  position: relative; display: flex; flex-direction: column; gap: 12px; min-height: 100%; padding: 16px 20px 48px; box-sizing: border-box;
   background: #f2f5f9; color: #1f3b57; font-size: 14px;
 }
 

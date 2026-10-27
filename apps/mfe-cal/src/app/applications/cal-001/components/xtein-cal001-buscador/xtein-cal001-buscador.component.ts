@@ -1,7 +1,9 @@
 import {
-  ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, inject, input, output, signal, viewChild
+  ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector, OnDestroy, afterNextRender, inject, input, output, signal,
+  viewChild
 } from '@angular/core';
 import { mensajeError } from '../../utils/cal-001-errores';
+import { type Cal001UbicacionPanel, ubicarPanel } from '../../utils/cal-001-panel';
 
 export interface Cal001OpcionBusqueda<T> {
   valor: T;
@@ -13,7 +15,8 @@ let secuencia = 0;
 
 /**
  * Búsqueda en el servidor (producto PF, operario o cliente): escribe, espera 300 ms y pide hasta 50 coincidencias.
- * En el celular la lista se abre como hoja inferior.
+ * Al abrir, el foco queda en el campo de búsqueda. En escritorio la lista se abre hacia arriba si no cabe abajo;
+ * en el celular se abre como hoja inferior.
  */
 @Component({
   selector: 'xtein-cal001-buscador',
@@ -24,6 +27,7 @@ let secuencia = 0;
 })
 export class XteinCal001BuscadorComponent<T> implements OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
   readonly buscar = input.required<(texto: string) => Promise<Cal001OpcionBusqueda<T>[]>>();
   /** Texto del valor actual (código · nombre), o vacío. */
   readonly actual = input('');
@@ -39,16 +43,22 @@ export class XteinCal001BuscadorComponent<T> implements OnDestroy {
   readonly cargando = signal(false);
   readonly error = signal('');
   readonly activa = signal(0);
+  readonly ubicacion = signal<Cal001UbicacionPanel>({ arriba: false, alto: null });
   private readonly campo = viewChild<ElementRef<HTMLInputElement>>('campo');
   private temporizador: ReturnType<typeof setTimeout> | null = null;
   private consulta = 0;
 
   abrir(): void {
     if (this.deshabilitado()) return;
+    this.ubicacion.set(ubicarPanel(this.host.nativeElement));
     this.abierto.set(true);
     this.texto.set('');
     void this.consultar('');
-    setTimeout(() => this.campo()?.nativeElement.focus());
+    // Tras pintar el panel (con zone.js y eventCoalescing un setTimeout puede correr antes y no hallar el campo).
+    afterNextRender(() => {
+      this.campo()?.nativeElement.focus({ preventScroll: true });
+      if (this.ubicacion().alto !== null) this.host.nativeElement.querySelector('.cs-panel')?.scrollIntoView?.({ block: 'nearest' });
+    }, { injector: this.injector });
   }
 
   cerrar(): void {

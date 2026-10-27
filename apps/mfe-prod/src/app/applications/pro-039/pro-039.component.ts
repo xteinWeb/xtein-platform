@@ -709,19 +709,21 @@ export class Pro039Component implements OnInit, OnDestroy {
    * La fila aparece al instante con el código y nombre de la lista; precio y presentación
    * ('EXISTENCIAS PRODUCTO') se completan después sin bloquear la pantalla.
    */
-  async addProduct(product: string): Promise<void> {
+  /** Material agregado a mano a un producto del consumo: queda registrado como de ese producto. */
+  async addProduct(change: { material: string; product: string }): Promise<void> {
     if (this.readOnly() || this.busy()) return;
-    if (this.items().some(row => row.PRODUCTO === product)) {
-      this.notification.warning(`El material ${product} ya está en el consumo.`);
+    const { material: product, product: consumptionProduct } = change;
+    if (this.items().some(row => row.PRODUCTO === product && row.PRODUCTO_CONSUMO === consumptionProduct)) {
+      this.notification.warning(`El material ${product} ya está en ${consumptionProduct}.`);
       return;
     }
     const next = this.items().reduce((max, row) => Math.max(max, row.ITEM), 0) + 1;
     const name = String(this.itemProducts().find(p => p.PRODUCTO === product)?.NOMBRE ?? '');
-    this.setItems([...this.items(), this.business.pendingItem(product, name, next)]);
+    this.setItems([...this.items(), this.business.pendingItem(product, name, next, consumptionProduct)]);
     this.workspace.setDirty(this.applicationId, true);
     this.pendingProducts.update(list => [...list, next]);
     try {
-      const row = await this.business.productItem(product, this.header(), next);
+      const row = await this.business.productItem(product, this.header(), next, consumptionProduct);
       // Conserva la cantidad que el usuario haya escrito mientras cargaba
       this.setItems(this.items().map(current => current.ITEM === next
         ? this.business.withQuantity(row, Number(current.CANTIDAD || 0))
@@ -848,8 +850,22 @@ export class Pro039Component implements OnInit, OnDestroy {
     await this.applyItems(this.items().map(row => this.business.withProductLot(row, current.PRODUCTO, lot)));
   }
 
+  /** Quita el producto con todos sus materiales (los de su matriz y los que se le agregaron a mano). */
   async removeConsumptionProduct(item: number): Promise<void> {
     if (this.readOnly() || this.busy()) return;
+    const removed = this.consumptionProducts().find(p => p.ITEM === item);
+    if (!removed) return;
+    if (this.items().some(row => !row.ES_MATRIZ && row.PRODUCTO_CONSUMO === removed.PRODUCTO)) {
+      const answer = await Swal.fire({
+        text: `${removed.PRODUCTO} tiene materiales agregados a mano. ¿Desea quitar el producto con todos sus materiales?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Quitar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!answer.isConfirmed) return;
+    }
+    this.setItems(this.items().filter(row => row.PRODUCTO_CONSUMO !== removed.PRODUCTO));
     this.consumptionProducts.update(list => list.filter(p => p.ITEM !== item));
     this.syncHeaderProduct();
     await this.loadMaterials();
@@ -916,7 +932,8 @@ export class Pro039Component implements OnInit, OnDestroy {
   private async loadMaterials(): Promise<void> {
     const h = this.header();
     const products = this.consumptionProducts();
-    const manual = this.items().filter(row => !row.ES_MATRIZ);
+    // Los agregados a mano se conservan si su producto sigue en el consumo
+    const manual = this.items().filter(row => !row.ES_MATRIZ && products.some(p => p.PRODUCTO === row.PRODUCTO_CONSUMO));
     if (!products.length || !h.SECCION) {
       await this.applyItems(manual);
       return;
@@ -931,10 +948,10 @@ export class Pro039Component implements OnInit, OnDestroy {
       await this.applyItems([...materials.map((row, index) => ({ ...row, ITEM: offset + index + 1 })), ...manual]);
       this.notification.success(`Se cargaron ${materials.length} material(es) de la matriz.`);
       // Los productos sin matriz en la sección se pueden dejar: sus materiales se agregan a mano
-      const withMaterials = new Set(materials.flatMap(row => (row.ORIGENES ?? []).map(o => o.PRODUCTO_CONSUMO)));
+      const withMaterials = new Set(materials.map(row => row.PRODUCTO_CONSUMO));
       const without = products.filter(p => !withMaterials.has(p.PRODUCTO)).map(p => p.PRODUCTO);
       if (without.length) {
-        this.notification.warning(`Sin materiales en la matriz de la sección ${h.SECCION}: ${without.join(', ')}. Puede agregarlos manualmente con "+ Agregar material".`);
+        this.notification.warning(`Sin materiales en la matriz de la sección ${h.SECCION}: ${without.join(', ')}. Puede agregarlos manualmente con el + de cada producto.`);
       }
     } catch (error) {
       // Se quitan solo los de la matriz anterior: los agregados a mano se conservan
@@ -972,9 +989,13 @@ export class Pro039Component implements OnInit, OnDestroy {
     try {
       const detail = await this.business.additional(record.ID_DOCUMENTO, record.CONSECUTIVO);
       if (this.currentRecord() !== record) return;
-      this.consumptionProducts.set(this.detailProducts(detail.PRODUCTOS));
+      const products = this.detailProducts(detail.PRODUCTOS);
+      this.consumptionProducts.set(products);
+      // Consumos anteriores (un producto, sin PRODUCTO_CONSUMO en los materiales): todos son de ese producto
+      const single = products.length === 1 ? products[0].PRODUCTO : null;
       const items = (detail.ITM_MOVIMIENTOS ?? []).map(row => ({
         ...row,
+        PRODUCTO_CONSUMO: row.PRODUCTO_CONSUMO || single,
         ES_MATRIZ: row.ES_MATRIZ === true || Number(row.ES_MATRIZ) === 1,
         CONSUMO_BASE: Number(row.CONSUMO_BASE ?? 0)
       }));
@@ -1159,6 +1180,7 @@ export class Pro039Component implements OnInit, OnDestroy {
       componente: products.map(componentLabel).filter(Boolean).join(', '),
       seccion: String(find(this.sections(), 'ID_SECCION', section)?.LABEL ?? section),
       lote: lot,
+      lotes: Object.fromEntries(products.map(p => [p.PRODUCTO, Number(p.CANTIDAD_LOTE) || 1])),
       origen: String(row.ORIGEN ?? row.ID_UN_ORIGEN ?? ''),
       destino: String(row.DESTINO ?? row.ID_UN_DESTINO ?? ''),
       observacion: String(row.DETALLE ?? '')
@@ -1177,6 +1199,6 @@ export class Pro039Component implements OnInit, OnDestroy {
 
   private warnNoMatrix(err: unknown): void {
     const message = err instanceof Error ? err.message : 'No se pudieron cargar los materiales de la matriz';
-    this.notification.warning(`${message}. Puede agregar los materiales manualmente con "+ Agregar material".`);
+    this.notification.warning(`${message}. Puede agregar los materiales manualmente con el + de cada producto.`);
   }
 }
