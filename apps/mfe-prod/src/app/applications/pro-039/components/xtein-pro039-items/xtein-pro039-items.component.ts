@@ -16,11 +16,13 @@ import {
   XteinCheckboxComponent,
   XteinDataGridComponent,
   XteinGridToolbarAction,
-  XteinNumberComponent
+  XteinNumberComponent,
+  XteinSelectComponent
 } from '@xtein/ui';
 import { Pro039ItemProductColumns } from '../../constants/pro-039-ui.constants';
 import { Pro039Lookup } from '../../models/pro-039-business.model';
-import { Pro039MovementItem } from '../../models/pro-039.model';
+import { Pro039MaterialOrigin, Pro039MovementItem, Pro039Presentation } from '../../models/pro-039.model';
+import { materialLot, matrixTotal, originLot } from '../../utils/pro-039-lot.utils';
 
 /**
  * Materiales del consumo: los de la matriz
@@ -36,7 +38,8 @@ import { Pro039MovementItem } from '../../models/pro-039.model';
     DxTemplateModule,
     XteinDataGridComponent,
     XteinCheckboxComponent,
-    XteinNumberComponent
+    XteinNumberComponent,
+    XteinSelectComponent
   ],
   templateUrl: './xtein-pro039-items.component.html',
   styleUrl: './xtein-pro039-items.component.scss',
@@ -52,10 +55,13 @@ export class XteinPro039ItemsComponent implements OnChanges {
   @Input() ready = false;
   @Input() busy = false;
   @Input() quantityFormat = '#,##0.00';
-  /** Cantidad del lote del consumo: Total = consumo unitario de la matriz x lote. */
+  /** Lote del encabezado: solo para los consumos anteriores, sin lote por producto. */
   @Input() lot = 1;
+  /** Especificación MODIFICAR UM PRES: permite cambiar la presentación aunque ya tenga una (como COM-203). */
+  @Input() presentationEditable = false;
 
   @Output() quantityChanged = new EventEmitter<{ item: number; quantity: number }>();
+  @Output() presentationChanged = new EventEmitter<{ item: number; presentation: Pro039Presentation | null }>();
   @Output() productAdded = new EventEmitter<string>();
   @Output() removedMany = new EventEmitter<number[]>();
   @Output() refreshProducts = new EventEmitter<void>();
@@ -85,6 +91,55 @@ export class XteinPro039ItemsComponent implements OnChanges {
 
   quantity(value: number | string | null | undefined): string {
     return formatNumber(Number(value || 0), this.quantityFormat);
+  }
+
+  readonly originLot = originLot;
+
+  /** Detalle del origen: producto (y componente del juego) y su consumo unitario x su lote. */
+  originTitle(origin: Pro039MaterialOrigin): string {
+    const component = origin.PRODUCTO_COMPONENTE ? ` (componente ${origin.PRODUCTO_COMPONENTE})` : '';
+    const lot = originLot(origin);
+    return `${origin.PRODUCTO_CONSUMO}${component}: ${this.quantity(origin.CONSUMO)} x lote ${this.quantity(lot)} = ${this.quantity(origin.CONSUMO * lot)}`;
+  }
+
+  /** Lote del material: el de su producto, o null si sale de varios productos con lotes distintos. */
+  rowLot(row: Pro039MovementItem): number | null {
+    return materialLot(row, this.lot);
+  }
+
+  /** Total de la matriz: suma de unitario x lote de cada producto. */
+  rowTotal(row: Pro039MovementItem): number {
+    return matrixTotal(row, this.lot);
+  }
+
+  /** Unidad de presentación (como "UM Pres." de COM-203). */
+  presentation(row: Pro039MovementItem): string {
+    return row.UDM_PRESENTACION || row.UDM_PRES || row.UDM || '';
+  }
+
+  /**
+   * "UM Pres." se elige de la lista, como en la salida de COM-203: cuando el producto tiene varias presentaciones
+   * y aún no tiene una, o siempre que la especificación MODIFICAR UM PRES lo permita.
+   */
+  canChoosePresentation(row: Pro039MovementItem): boolean {
+    const options = row.PRESENTACIONES?.length ?? 0;
+    return !this.readOnly && !this.busy && options > 0 && ((options > 1 && !row.UDM_PRES) || this.presentationEditable);
+  }
+
+  onPresentation(row: Pro039MovementItem, unit: string | null): void {
+    if ((unit ?? '') === (row.UDM_PRES ?? '')) return;
+    const presentation = row.PRESENTACIONES?.find(p => p.UDM_COMPRA === unit) ?? null;
+    this.presentationChanged.emit({ item: row.ITEM, presentation });
+  }
+
+  /** Unidad equivalente y su factor (como "UM Equiv" de COM-203): "Ud ≡ 1". */
+  equivalentUnit(row: Pro039MovementItem): string {
+    return `${row.UDM_EQUIV || row.UDM || ''} ≡ ${formatNumber(Number(row.CANTIDAD_EQUIV || 0), '#,##0.####')}`;
+  }
+
+  /** Cantidad convertida que descuenta el kárdex (CANTIDAD_REAL): cantidad x presentación x equivalencia. */
+  equivalentQuantity(row: Pro039MovementItem): number {
+    return Number(row.CANTIDAD || 0) * Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1);
   }
 
   onQuantity(row: Pro039MovementItem, value: number | null): void {

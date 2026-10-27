@@ -179,6 +179,45 @@
     width: 150px;
   }
 
+  .col-um-equiv {
+    white-space: nowrap;
+  }
+
+  /* De qué productos del consumo sale cada material (sumado si lo piden varios) */
+  .col-products {
+    min-width: 130px;
+  }
+
+  .origin-product {
+    display: inline-block;
+    margin: 1px 4px 1px 0;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(18, 94, 220, 0.08);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .origin-none {
+    color: #94a3b8;
+  }
+
+  .cell-select {
+    display: block;
+    min-width: 110px;
+
+    ::ng-deep .dx-texteditor {
+      height: 28px !important;
+      border-radius: 4px;
+    }
+
+    ::ng-deep .dx-texteditor-input {
+      padding: 4px 6px !important;
+      font-size: 13px !important;
+      min-height: 28px !important;
+    }
+  }
+
   .text-end {
     text-align: right;
   }

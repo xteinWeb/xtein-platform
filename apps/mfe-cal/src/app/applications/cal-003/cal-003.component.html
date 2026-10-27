@@ -1,0 +1,42 @@
+<section class="cal-003" [attr.aria-busy]="ctx.busy()">
+  <div class="cal-003__top">
+    <!-- La operación escoge el formulario (antes eran pestañas) -->
+    <div class="cal-003__operacion">
+      <xtein-label class="cal-003__label" for="c3-operacion">Operación</xtein-label>
+      <div class="cal-003__control">
+        <xtein-select id="c3-operacion" ariaLabel="Operación" [items]="tabs" valueExpr="id" displayExpr="label"
+          [ngModel]="activa()" (ngModelChange)="cambiarPestana($event)" />
+      </div>
+    </div>
+  </div>
+
+  <div class="cal-003__panel" id="c3-panel-entrada" [hidden]="activa() !== tab.Entry">
+    <xtein-cal003-entrada />
+  </div>
+  <div class="cal-003__panel" id="c3-panel-traslado" [hidden]="activa() !== tab.Transfer">
+    <xtein-cal003-traslado />
+  </div>
+  <div class="cal-003__panel" id="c3-panel-entrega" [hidden]="activa() !== tab.Delivery">
+    <xtein-cal003-entrega />
+  </div>
+  <div class="cal-003__panel" id="c3-panel-ajuste" [hidden]="activa() !== tab.Adjustment">
+    <xtein-cal003-ajuste />
+  </div>
+  <div class="cal-003__panel" id="c3-panel-precios" [hidden]="activa() !== tab.Prices">
+    <xtein-cal003-precios />
+  </div>
+  <div class="cal-003__panel" id="c3-panel-consultas" [hidden]="activa() !== tab.Queries">
+    <xtein-cal003-consultas />
+  </div>
+
+  <xtein-loading
+    [visible]="ctx.busy()"
+    message="Procesando servicios técnicos..."
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.18"
+    [hideOnOutsideClick]="false"
+  />
+</section>
+

@@ -27,7 +27,7 @@
                 [variant]="scope(report) === 'todos' ? 'primary' : 'link'" [pressed]="scope(report) === 'todos'"
                 [disabled]="loading() || !allFilter.trim()" (clicked)="selectScope(report, 'todos')" />
               <span class="xtein-record-reports__separator" aria-hidden="true"></span>
-              <xtein-button icon="icon-imprimir-sl" ariaLabel="Previsualizar e imprimir" [width]="32" variant="link"
+              <xtein-button icon="icon-imprimir-sl" ariaLabel="Ver e imprimir (pestaña nueva)" [width]="32" variant="link"
                 [disabled]="loading()" (clicked)="open(report, false)" />
               <xtein-button icon="icon-pdf-doc-sl" ariaLabel="Generar PDF" [width]="32" variant="link"
                 [disabled]="loading()" (clicked)="open(report, true)" />
@@ -37,18 +37,6 @@
           </article>
         } @empty {
           @if (!loading() && !error()) { <p class="xtein-record-reports__status">No hay informes disponibles.</p> }
-        }
-      </div>
-    } @else if (panel() === 'preview') {
-      <div class="xtein-record-reports__navigation">
-        <xtein-button text="Volver a los informes" variant="secondary" (clicked)="back()" />
-        <xtein-button text="Imprimir" icon="icon-imprimir-sl" variant="primary" (clicked)="print()" />
-        <xtein-button text="Descargar PDF" icon="icon-pdf-doc-sl" variant="secondary" (clicked)="download()" />
-        <xtein-button text="Abrir en otra pestaña" variant="link" (clicked)="openInTab()" />
-      </div>
-      <div class="xtein-record-reports__viewer">
-        @if (previewUrl(); as url) {
-          <iframe #previewFrame class="xtein-record-reports__pdf" [src]="url" [title]="previewReport()?.NOMBRE ?? 'Informe'"></iframe>
         }
       </div>
     } @else {

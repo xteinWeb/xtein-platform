@@ -61,8 +61,7 @@ export const Pro039ComponentColumns: XteinGridColumn<Pro039Lookup, unknown>[] = 
 
 export const Pro039SectionColumns: XteinGridColumn<Pro039Lookup, unknown>[] = [
   { dataField: 'ID_SECCION', caption: 'Sección', width: 120 },
-  { dataField: 'NOMBRE_SECCION', caption: 'Descripción' },
-  { dataField: 'MATRIZ', caption: 'Matriz', width: 80 }
+  { dataField: 'NOMBRE_SECCION', caption: 'Descripción' }
 ];
 
 export const Pro039OriginColumns: XteinGridColumn<Pro039Warehouse, unknown>[] = [
