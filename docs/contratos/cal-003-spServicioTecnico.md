@@ -94,7 +94,7 @@ Ninguna respuesta lleva `RUTA`.
 
 | Acción | Entrada | Reglas |
 |---|---|---|
-| `entrada nueva` | `ENTRADA:{FECHA, ID_CLIENTE, TIPO_SERVICIO (código del dominio), ID_UN_BODEGA, N_SERVICIO_CLIENTE?, N_ORDEN_DEVOLUCION?, ID_AREA?}`, `PRODUCTOS:[{PRODUCTO, UNIDADES:[{NIVEL PF/PA, PRODUCTO, PARTE, CANTIDAD}]}]` (máx. 20) | `CREAR`. Fecha ≤ hoy. Cada producto = un servicio `STS` `EN INVENTARIO`. Cada unidad debe pertenecer al producto recibido y no pasar la cantidad del catálogo; un producto llega completo (PF) **o** por sus partes (PA). `PARCIAL` y «(llegó una parte)» si es un juego del que no llegó todo. Devuelve `[{ID_SERVICIO, DOCUMENTO, NOMBRE}]` |
+| `entrada nueva` | `ENTRADA:{FECHA, ID_CLIENTE, TIPO_SERVICIO (código del dominio), ID_UN_BODEGA, N_SERVICIO_CLIENTE?, N_ORDEN_DEVOLUCION?, ID_AREA?}`, `PRODUCTOS:[{PRODUCTO, UNIDADES:[{NIVEL PF/PA, PRODUCTO, PARTE, CANTIDAD}]}]` (**un solo producto**) | `CREAR`. Fecha ≤ hoy. El producto = un servicio `STS` `EN INVENTARIO`. Cada unidad debe pertenecer al producto recibido y no pasar la cantidad del catálogo; un producto llega completo (PF) **o** por sus partes (PA). `PARCIAL` y «(llegó una parte)» si es un juego del que no llegó todo. Devuelve `[{ID_SERVICIO, DOCUMENTO, NOMBRE}]` |
 | `entrada anular` | `ID_SERVICIO`, `VERSION`, `OBSERVACION` (obligatoria, ≤ 500) | Rechaza si ya tiene despacho o ajuste. Sin traslados recibidos: `CREAR` → `ANULADO` (anula sus traslados `ENVIADO` y saca las unidades). Con traslados recibidos: `ELIMINAR` → `INACTIVO`; un `INACTIVO` con todas sus partes en una bodega y sin traslados pendientes → `ANULADO` (`ELIMINAR`) |
 | `traslado enviar` | `ID_SERVICIO`, `ID_UN_BODEGA_DESTINO`, `UNIDADES:[ID_UNIDAD]` | `CREAR`, o persona de planta desde sus bodegas. Unidades del servicio, en inventario, sin traslado pendiente y de **una sola** bodega origen ≠ destino. Crea `STT` `ENVIADO`; las unidades siguen en el origen con `ID_TRASLADO_PENDIENTE` |
 | `traslado recibir` / `traslado rechazar` | `ID_TRASLADO` (+ `OBSERVACION` obligatoria al rechazar) | Solo quien está en `BODEGAS_USUARIOS` de la bodega destino. Recibir mueve las unidades al destino; rechazar las deja en el origen |
@@ -122,18 +122,26 @@ Las acciones de escritura devuelven `[{ErrMensaje:"", DOCUMENTO, MENSAJE}]` (el 
 
 ### 2.5 Buscar de la barra (filtro estándar)
 
-Entrada, Traslado, Entrega y Ajuste usan **Buscar** y **Ver** de la barra con los modales estándar de la plataforma (`xtein-record-filter` y `xtein-record-view`, como PRO-039); en pantalla no hay listas de registros.
+- El select **Operación** de la pantalla solo se habilita con **Nuevo** (cambiarla mientras se registra descarta lo que se llevaba y empieza la nueva). Para ver registros se usa **Buscar**.
+- **Buscar** abre un solo modal estándar (`xtein-record-filter`, como PRO-039) con la tabla base `RS_ST_OPERACIONES`. Su campo `OPERACION` (ENTRADA, TRASLADO, ENTREGA, AJUSTE, PRECIOS ESPECIAL, CONSULTAS) escoge el formulario; si no se llena, se busca en el que se ve. PRECIOS ESPECIAL y CONSULTAS solo abren esa vista.
+- La pantalla quita `OPERACION` y manda el resto como `FILTRO` a la consulta de esa operación (`servicios`, `traslados`, `entregas`, `ajustes`). **Ver** muestra lo encontrado (`xtein-record-view`) y la barra navega entre los registros. En pantalla no hay listas de registros.
+- Campos (`ITM_DOMINIOS` `COLUMNAS/FILTRO`, `VALOR3 = RS_ST_OPERACIONES`, seed 55): `VALOR1` = `TABLA.CAMPO`, `VALOR2` = título (`|smalldatetime` para fechas), `VALOR4` = `''`, `listauni|<SQL>` o `lista|<SQL>`. La lista de Estado sale de la vista `RS_ST_ESTADOS` (51).
+- El SP **no arma SQL con el texto**: llena `@FILTRO` y cada consulta aplica los campos que le corresponden e ignora los demás. Texto: contiene. Fecha: `MM/dd/yyyy` o `MM/dd/yyyy..MM/dd/yyyy`. Lista: un valor o arreglo JSON de valores.
 
-- El filtro pide sus campos a `spGenerales 'columnas'` con la tabla base de cada documento. Los campos están en `ITM_DOMINIOS` `COLUMNAS/FILTRO` (seed 55): `VALOR1` = `TABLA.CAMPO`, `VALOR2` = título (`|smalldatetime` para fechas), `VALOR3` = tabla base, `VALOR4` = `''`, `listauni|<SQL>` o `lista|<SQL>`.
-- El filtro devuelve `ESTRUCTURA = [{CAMPO, EXPRESION, TABLA}]` y el front la manda como `FILTRO`.
-- El SP **no arma SQL con el texto**: llena `@FILTRO` y cada consulta aplica solo los campos que conoce (los demás se ignoran). Texto: contiene. Fecha: `MM/dd/yyyy` o `MM/dd/yyyy..MM/dd/yyyy`. Lista: un valor o arreglo JSON de valores.
-
-| Tabla base | Pantalla | Campos |
-|---|---|---|
-| `RS_ST_SERVICIOS` | Entrada | `DOCUMENTO`, `FECHA`, `ID_CLIENTE`, `NOMBRE` (producto), `TIPO_SERVICIO`, `N_SERVICIO_CLIENTE`, `ID_UN_BODEGA_ENTRADA`, `ESTADO` |
-| `RS_ST_TRASLADOS` | Traslado | `DOCUMENTO`, `SERVICIO` (número S), `FECHA_ENVIA`, `ID_UN_BODEGA_ORIGEN`, `ID_UN_BODEGA_DESTINO`, `ESTADO` |
-| `RS_ST_ENTREGAS` | Entrega | `DOCUMENTO`, `FECHA`, `ID_CLIENTE`, `ID_UN_BODEGA`, `ESTADO`, `PENDIENTE_SOPORTE` (`SI`) |
-| `AJUSTES_ST` | Ajuste | `SERVICIO` (número S), `PRODUCTO`, `FECHA_PROPONE`, `DESTINO`, `ESTADO` |
+| Campo | Entrada (`servicios`) | Traslado (`traslados`) | Entrega (`entregas`) | Ajuste (`ajustes`) |
+|---|---|---|---|---|
+| `DOCUMENTO` | número S | número TR | número DE | número S |
+| `SERVICIO` | número S | número S | algún S del despacho | número S |
+| `FECHA` | fecha de entrada | fecha de envío | fecha | fecha de la propuesta |
+| `ID_CLIENTE` | cliente | cliente del servicio | cliente | cliente del servicio |
+| `PRODUCTO` | producto | producto del servicio | algún producto del despacho | producto del servicio |
+| `TIPO_SERVICIO` | tipo | tipo del servicio | algún servicio de ese tipo | tipo del servicio |
+| `N_SERVICIO_CLIENTE` | Nº servicio | Nº servicio | algún Nº servicio del despacho | Nº servicio |
+| `ID_UN_BODEGA` | bodega de entrada | bodega origen | bodega de salida | — |
+| `ID_UN_BODEGA_DESTINO` | — | bodega destino | — | — |
+| `DESTINO` | — | — | — | NUEVO / ESPECIAL / BAJA |
+| `ESTADO` | estado del servicio | estado del traslado | estado del documento | estado del ajuste |
+| `PENDIENTE_SOPORTE` | — | — | `SI` = despachado con líneas activas | — |
 
 Un campo nuevo en el buscador necesita su fila en el seed 55 **y** su condición en el SP.
 

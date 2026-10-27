@@ -1,11 +1,11 @@
 <section class="cal-003" [attr.aria-busy]="ctx.busy()">
   <div class="cal-003__top">
-    <!-- La operación escoge el formulario (antes eran pestañas) -->
+    <!-- La operación escoge el formulario: se habilita con Nuevo; para ver registros, Buscar trae el campo Operación -->
     <div class="cal-003__operacion">
       <xtein-label class="cal-003__label" for="c3-operacion">Operación</xtein-label>
       <div class="cal-003__control">
         <xtein-select id="c3-operacion" ariaLabel="Operación" [items]="tabs" valueExpr="id" displayExpr="label"
-          [ngModel]="activa()" (ngModelChange)="cambiarPestana($event)" />
+          [ngModel]="seleccion()" (ngModelChange)="cambiarOperacion($event)" [readOnly]="!creando()" />
       </div>
     </div>
   </div>
@@ -28,6 +28,14 @@
   <div class="cal-003__panel" id="c3-panel-consultas" [hidden]="activa() !== tab.Queries">
     <xtein-cal003-consultas />
   </div>
+
+  <!-- Buscar de la barra: modal estándar de la plataforma, uno solo para todas las operaciones -->
+  <xtein-record-filter
+    [visible]="filterVisible()"
+    (visibleChange)="filterVisible.set($event)"
+    [tableBase]="filterTable"
+    (search)="buscar($event)"
+  />
 
   <xtein-loading
     [visible]="ctx.busy()"

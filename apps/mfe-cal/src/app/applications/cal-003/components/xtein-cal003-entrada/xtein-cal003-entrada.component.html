@@ -110,14 +110,14 @@
 
   <!-- Productos -->
   <div class="c3-section-divider">
-    <xtein-group-label class="c3-section-title" label="Productos"></xtein-group-label>
+    <xtein-group-label class="c3-section-title" label="Producto"></xtein-group-label>
   </div>
 
   @if (creando()) {
     <div class="grid-toolbar">
       <!-- Nuevo producto (+): abre una fila en la grilla para elegirlo de la lista, como en PRO-039 -->
-      <button type="button" class="grid-btn grid-btn--primary" aria-label="Agregar producto" title="Agregar producto"
-        [disabled]="agregando() || buscandoProducto()" (click)="beginAdd()">
+      <button type="button" class="grid-btn grid-btn--primary" aria-label="Agregar producto" [title]="grupos().length > 0 ? 'La entrada lleva un solo producto: quítalo para cambiarlo' : 'Agregar producto'"
+        [disabled]="agregando() || buscandoProducto() || grupos().length > 0" (click)="beginAdd()">
         <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -267,7 +267,7 @@
         </tbody>
       </table>
     </div>
-    <p class="c3-hint">Con + busca el juego o producto por código interno, código asociado o nombre. Si es un juego, marca qué llega y en qué cantidad. Cada producto agregado queda como un servicio S.</p>
+    <p class="c3-hint">Con + busca el juego o producto por código interno, código asociado o nombre. La entrada lleva un solo producto (queda como un servicio S); para cambiarlo, quítalo con la papelera. Si es un juego, marca qué llega y en qué cantidad.</p>
   } @else if (abierto(); as a) {
     <div class="c3-table-scroll">
       <table class="c3-table">
@@ -307,14 +307,7 @@
   }
 </div>
 
-<!-- Buscar y Ver de la barra: modales estándar de la plataforma -->
-<xtein-record-filter
-  [visible]="filterVisible()"
-  (visibleChange)="filterVisible.set($event)"
-  [tableBase]="filterTable"
-  (search)="buscar($event)"
-/>
-
+<!-- Ver de la barra: modal estándar de la plataforma (Buscar está en la pantalla) -->
 <xtein-record-view
   title="Entradas"
   [visible]="viewVisible()"

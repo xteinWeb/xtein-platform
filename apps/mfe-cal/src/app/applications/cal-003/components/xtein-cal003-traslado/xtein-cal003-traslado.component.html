@@ -146,14 +146,7 @@
   </aside>
 </div>
 
-<!-- Buscar y Ver de la barra: modales estándar de la plataforma -->
-<xtein-record-filter
-  [visible]="filterVisible()"
-  (visibleChange)="filterVisible.set($event)"
-  [tableBase]="filterTable"
-  (search)="buscar($event)"
-/>
-
+<!-- Ver de la barra: modal estándar de la plataforma (Buscar está en la pantalla) -->
 <xtein-record-view
   title="Traslados"
   [visible]="viewVisible()"

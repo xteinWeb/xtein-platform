@@ -9,9 +9,7 @@ import {
   XteinInputComponent,
   XteinLabelComponent,
   XteinLookupComponent,
-  XteinRecordFilterComponent,
   XteinRecordFilterCriterion,
-  XteinRecordFilterResult,
   XteinRecordViewComponent
 } from '@xtein/ui';
 import { Cal003FilterTable, Cal003TransferStatus } from '../../constants/cal-003.constants';
@@ -41,7 +39,6 @@ type Cal003ServicioTrasladable = Cal003ServicioCompleto
     XteinInputComponent,
     XteinLabelComponent,
     XteinLookupComponent,
-    XteinRecordFilterComponent,
     XteinRecordViewComponent
   ],
   templateUrl: './xtein-cal003-traslado.component.html',
@@ -65,10 +62,8 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
   readonly marcadas = signal<number[]>([]);
   readonly destino = signal<string>('');
 
-  // Buscar y Ver de la barra
-  readonly filterTable = Cal003FilterTable.Transfers;
+  // Ver de la barra (Buscar lo maneja la pantalla: un solo buscador con el campo Operación)
   readonly viewColumns = Cal003TrasladoViewColumns;
-  readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
 
   /** Quien gestiona las garantías envía desde cualquier bodega; la persona de planta, desde las suyas. */
@@ -105,7 +100,6 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
       case ToolbarAction.New: return this.nuevo();
       case ToolbarAction.Save: return this.enviar();
       case ToolbarAction.Cancel: return this.cancelar();
-      case ToolbarAction.Search: return this.abrirBuscar();
       case ToolbarAction.View: return this.abrirVer();
       case ToolbarAction.Refresh: return this.refrescar();
       case ToolbarAction.First: return this.irA(0);
@@ -206,11 +200,6 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
 
   // ================= Buscar y Ver de la barra =================
 
-  /** Buscar: el filtro estándar de la plataforma (campos en ITM_DOMINIOS COLUMNAS / FILTRO). */
-  abrirBuscar(): void {
-    if (!this.creando()) this.filterVisible.set(true);
-  }
-
   /** Ver: la lista de lo que trajo Buscar. */
   abrirVer(): void {
     if (this.creando()) return;
@@ -221,9 +210,9 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
     this.viewVisible.set(true);
   }
 
-  async buscar(result: XteinRecordFilterResult): Promise<void> {
-    this.filterVisible.set(false);
-    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.traslados(result?.ESTRUCTURA ?? []));
+  /** Lo llama la pantalla con los criterios del buscador de la barra (sin el campo Operación). */
+  async buscar(criterios: XteinRecordFilterCriterion[]): Promise<void> {
+    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.traslados(criterios));
     if (!encontrados) return;
     if (!encontrados.length) {
       this.ctx.advertir('No se encontraron registros con el criterio especificado.');
@@ -285,7 +274,7 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
   }
 
   private porDocumento(documento: string): XteinRecordFilterCriterion[] {
-    return [{ CAMPO: 'DOCUMENTO', EXPRESION: documento, TABLA: this.filterTable }];
+    return [{ CAMPO: 'DOCUMENTO', EXPRESION: documento, TABLA: Cal003FilterTable }];
   }
 
   private limpiar(): void {

@@ -16,12 +16,11 @@ import {
   XteinLabelComponent,
   XteinLookupComponent,
   XteinNumberComponent,
-  XteinRecordFilterComponent,
-  XteinRecordFilterResult,
+  XteinRecordFilterCriterion,
   XteinRecordViewComponent,
   XteinSelectComponent
 } from '@xtein/ui';
-import { Cal003FilterTable, Cal003Limits, Cal003ServiceStatus } from '../../constants/cal-003.constants';
+import { Cal003Limits, Cal003ServiceStatus } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003EntradaViewColumns, Cal003ProductoColumns } from '../../constants/cal-003-ui.constants';
 import type { Cal003ProductoLista, Cal003Servicio, Cal003ServicioCompleto } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
@@ -57,7 +56,6 @@ import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
     XteinLabelComponent,
     XteinLookupComponent,
     XteinNumberComponent,
-    XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinSelectComponent
   ],
@@ -98,10 +96,8 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     hideOnParentScroll: true
   };
 
-  // Buscar y Ver de la barra
-  readonly filterTable = Cal003FilterTable.Services;
+  // Ver de la barra (Buscar lo maneja la pantalla: un solo buscador con el campo Operación)
   readonly viewColumns = Cal003EntradaViewColumns;
-  readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
@@ -143,7 +139,6 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
       case ToolbarAction.New: return this.nueva();
       case ToolbarAction.Save: return this.guardar();
       case ToolbarAction.Cancel: return this.cancelar();
-      case ToolbarAction.Search: return this.abrirBuscar();
       case ToolbarAction.View: return this.abrirVer();
       case ToolbarAction.Delete: return this.anular();
       case ToolbarAction.Refresh: return this.refrescar();
@@ -208,7 +203,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   }
 
   beginAdd(): void {
-    if (!this.creando() || this.buscandoProducto()) return;
+    if (!this.creando() || this.buscandoProducto() || this.grupos().length > 0) return;
     this.agregando.set(true);
     // La lista se abre sola al aparecer la fila nueva
     setTimeout(() => this.productDropdownOpened = true);
@@ -245,10 +240,11 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     this.buscandoProducto.set(true);
     try {
       const arbol = await this.ctx.api.arbolProducto(codigo);
-      if (this.grupos().some(g => g.raiz === arbol.RAIZ.PRODUCTO)) {
-        this.ctx.advertir(`${arbol.RAIZ.NOMBRE} ya está en la entrada: márcale lo que llega en la misma fila.`);
+      // Una entrada = un producto (un servicio S)
+      if (this.grupos().length > 0) {
+        this.ctx.advertir('La entrada lleva un solo producto: quita el que está para cambiarlo.');
       } else {
-        this.grupos.update(list => [...list, crearGrupo(arbol)]);
+        this.grupos.set([crearGrupo(arbol)]);
       }
     } catch (error) {
       this.ctx.error(error);
@@ -342,11 +338,6 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
 
   // ================= Buscador, navegación y anulación =================
 
-  /** Buscar de la barra: el filtro estándar de la plataforma (campos en ITM_DOMINIOS COLUMNAS / FILTRO). */
-  abrirBuscar(): void {
-    if (!this.creando()) this.filterVisible.set(true);
-  }
-
   /** Ver de la barra: la lista de lo que trajo Buscar. */
   abrirVer(): void {
     if (this.creando()) return;
@@ -357,9 +348,9 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     this.viewVisible.set(true);
   }
 
-  async buscar(result: XteinRecordFilterResult): Promise<void> {
-    this.filterVisible.set(false);
-    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.buscarServicios(result?.ESTRUCTURA ?? []));
+  /** Lo llama la pantalla con los criterios del buscador de la barra (sin el campo Operación). */
+  async buscar(criterios: XteinRecordFilterCriterion[]): Promise<void> {
+    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.buscarServicios(criterios));
     if (!encontrados) return;
     if (!encontrados.length) {
       this.ctx.advertir('No se encontraron registros con el criterio especificado.');

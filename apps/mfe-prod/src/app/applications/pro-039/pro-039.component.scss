@@ -125,6 +125,13 @@
   width: 100%;
   margin-top: 10px;
   margin-bottom: 6px;
+  padding-left: 14px;   /* alineada con los campos de "Consumo de producción" */
+  box-sizing: border-box;
+}
+
+/* Productos y materiales van en el mismo cuadro: el primer título sin margen arriba */
+.pro-039__card-bottom > .pro-039__section-divider:first-child {
+  margin-top: 0;
 }
 
 .pro-039__field-inline--full {
@@ -306,16 +313,76 @@
 = PRODUCTOS DEL CONSUMO (varios por sección)
 ======================================================================*/
 
-.pro-039__products-add {
+.pro-039__products-toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px 14px;
+  gap: 8px 10px;
   padding: 10px 0 8px 14px;
+}
+
+/* Botones de la tabla de productos: los mismos de la grilla de materiales */
+.pro-039__grid-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.18s ease-in-out;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+
+    &:hover:not(:disabled) {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+    }
+  }
+
+  &--cancel {
+    color: #64748b;
+    background: #f8fafc;
+    border-color: #cbd5e1;
+
+    &:hover:not(:disabled) {
+      background: #64748b;
+      color: #ffffff;
+      border-color: #475569;
+    }
+  }
+}
+
+.pro-039__products-table tbody tr.pro-039__row-editing {
+  background-color: #eff6ff;
+  outline: 1px solid #93c5fd;
 
   xtein-lookup {
-    flex: 0 1 420px;
-    min-width: 0;
+    display: block;
+    min-width: 260px;
   }
 }
 
