@@ -1,6 +1,5 @@
 import { XteinExcelColumn, XteinExcelWorkbook } from '@xtein/ui';
 import { Pro039MovementItem } from '../models/pro-039.model';
-import { materialLot, matrixTotal, originLot } from '../utils/pro-039-lot.utils';
 
 /** Datos del encabezado de un consumo para el Excel (código y nombre ya resueltos). */
 export interface Pro039ExcelHeader {
@@ -14,6 +13,8 @@ export interface Pro039ExcelHeader {
   componente: string;
   seccion: string;
   lote: number;
+  /** Lote de cada producto del consumo (por código); los consumos anteriores usan `lote`. */
+  lotes?: Record<string, number>;
   origen: string;
   destino: string;
   observacion: string;
@@ -26,7 +27,7 @@ const MaterialColumns: XteinExcelColumn[] = [
   { header: 'Tipo inv.', key: 'TIPO_INVENTARIO', width: 11 },
   { header: 'UM Pres.', key: 'UDM', width: 9 },
   { header: 'Origen', key: 'ORIGEN', width: 11 },
-  { header: 'De productos', key: 'PRODUCTOS_ORIGEN', width: 28 },
+  { header: 'De producto', key: 'DE_PRODUCTO', width: 16 },
   { header: 'Consumo unit.', key: 'CONSUMO_BASE', width: 14, numeric: true },
   { header: 'Lote', key: 'LOTE', width: 9, numeric: true },
   { header: 'Total', key: 'TOTAL', width: 13, numeric: true },
@@ -50,7 +51,7 @@ const ConsumptionColumns: XteinExcelColumn[] = [
   { header: 'Nombre', key: 'NOMBRE', width: 40 },
   { header: 'UM Pres.', key: 'UDM', width: 9 },
   { header: 'Origen', key: 'ORIGEN', width: 11 },
-  { header: 'De productos', key: 'PRODUCTOS_ORIGEN', width: 28 },
+  { header: 'De producto', key: 'DE_PRODUCTO', width: 16 },
   { header: 'Consumo unit.', key: 'CONSUMO_BASE', width: 13, numeric: true },
   { header: 'Lote', key: 'LOTE', width: 8, numeric: true },
   { header: 'Total', key: 'TOTAL', width: 12, numeric: true },
@@ -60,10 +61,11 @@ const ConsumptionColumns: XteinExcelColumn[] = [
   { header: 'Can Equiv', key: 'CANTIDAD_REAL', width: 13, numeric: true }
 ];
 
-/** Fila de material: unitario, lote y total solo para los de la matriz. */
-function materialRow(item: Pro039MovementItem, lot: number) {
+/** Fila de material: unitario, lote (el de su producto) y total solo para los de la matriz. */
+function materialRow(item: Pro039MovementItem, header: Pro039ExcelHeader) {
   const matrix = !!item.ES_MATRIZ;
   const base = Number(item.CONSUMO_BASE || 0);
+  const lot = (item.PRODUCTO_CONSUMO && header.lotes?.[item.PRODUCTO_CONSUMO]) || header.lote || 1;
   return {
     PRODUCTO: item.PRODUCTO,
     NOMBRE: item.NOMBRE_PRODUCTO,
@@ -71,12 +73,11 @@ function materialRow(item: Pro039MovementItem, lot: number) {
     TIPO_INVENTARIO: item.TIPO_INVENTARIO,
     UDM: item.UDM_PRESENTACION || item.UDM_PRES || item.UDM,
     ORIGEN: matrix ? 'Matriz' : 'Adicional',
-    // De qué productos sale el material: "PF000005: 2 x 3" (unitario de la matriz x lote de ese producto)
-    PRODUCTOS_ORIGEN: (item.ORIGENES ?? []).map(o => `${o.PRODUCTO_CONSUMO}: ${Number(o.CONSUMO || 0)} x ${originLot(o)}`).join(', '),
+    // Producto del consumo al que pertenece el material
+    DE_PRODUCTO: item.PRODUCTO_CONSUMO ?? '',
     CONSUMO_BASE: matrix ? base : null,
-    // Con varios productos de lotes distintos el lote no es uno solo: queda vacío y se ve en "De productos"
-    LOTE: matrix ? materialLot(item, lot) : null,
-    TOTAL: matrix ? matrixTotal(item, lot) : null,
+    LOTE: matrix ? lot : null,
+    TOTAL: matrix ? base * lot : null,
     CANTIDAD: Number(item.CANTIDAD || 0),
     // Conversión a la unidad equivalente, como COM-203 ("UM Equiv" / "Can Equiv")
     UDM_EQUIV: item.UDM_EQUIV || item.UDM,
@@ -106,7 +107,7 @@ export function pro039ConsumptionWorkbook(header: Pro039ExcelHeader, items: read
         { label: 'Observación', value: header.observacion }
       ],
       columns: MaterialColumns,
-      rows: items.map(item => materialRow(item, header.lote))
+      rows: items.map(item => materialRow(item, header))
     }]
   };
 }
@@ -128,7 +129,7 @@ export function pro039ConsumptionsWorkbook(consumptions: readonly { header: Pro0
         BODEGA: header.origen,
         DESTINO: header.destino,
         USUARIO: header.usuario,
-        ...materialRow(item, header.lote)
+        ...materialRow(item, header)
       })))
     }]
   };
