@@ -28,7 +28,8 @@ import { ncPorOperario, filasExportacion } from './utils/cal-001-agrupado';
 import { Cal001AlmacenBorrador, claveBorrador } from './utils/cal-001-borrador';
 import { mensajeError } from './utils/cal-001-errores';
 import { hoyColombia, mostrarFecha, sumarDias } from './utils/cal-001-fecha';
-import { borradorDesdeRegistro, borradorVacio, clonarBorrador, partesDesdeProducto, tieneCaptura } from './utils/cal-001-modelo';
+import { borradorDesdeRegistro, borradorVacio, clonarBorrador, nombreConArea, partesDesdeProducto, tieneCaptura } from './utils/cal-001-modelo';
+import { hayAlgoQueAgregar } from './utils/cal-001-payload';
 import { validarBorrador } from './utils/cal-001-validaciones';
 
 type Cal001Pestana = 'registro' | 'consulta';
@@ -74,6 +75,8 @@ export class Cal001Component implements OnInit, OnDestroy {
   readonly cargando = signal(false);
   readonly pestana = signal<Cal001Pestana>('registro');
   readonly modo = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
+  /** Modo Agregar (fase 2): la barra va en Editing, pero lo guardado queda de solo lectura y solo se anexa. */
+  readonly agregando = signal(false);
   readonly permisos = signal<Cal001Permisos | null>(null);
   readonly errores = signal<string[]>([]);
   readonly registro = signal<Cal001RegistroCompleto | null>(null);
@@ -104,9 +107,11 @@ export class Cal001Component implements OnInit, OnDestroy {
   readonly esGestor = computed(() => Number(this.permisos()?.ES_GESTOR) === 1);
   readonly puedeCrear = computed(() => Number(this.permisos()?.PUEDE_CREAR) === 1);
   readonly creando = computed(() => this.modo() === RecordToolbarMode.Creating);
-  readonly modificando = computed(() => this.modo() === RecordToolbarMode.Editing);
+  readonly modificando = computed(() => this.modo() === RecordToolbarMode.Editing && !this.agregando());
   /** Solo se edita al crear o al modificar (gestor); todo registro guardado se abre en solo lectura (historia 3). */
   readonly editable = computed(() => this.creando() || this.modificando());
+  /** Hay una captura en curso (Nuevo, Modificar o Agregar): Guardar o Cancelar antes de salir. */
+  readonly enCaptura = computed(() => this.editable() || this.agregando());
   readonly esCliente = computed(() => this.borrador()?.ORIGEN === Cal001Origen.Cliente);
   /** Cliente solo para el gestor (historia 6); un registro Cliente ya guardado se muestra igual. */
   readonly permiteCliente = computed(() => this.esGestor() || this.esCliente());
@@ -131,16 +136,35 @@ export class Cal001Component implements OnInit, OnDestroy {
   });
   readonly areas = computed(() => this.opcionesLista(this.listas()?.AREAS_DETECCION ?? [], this.borrador()?.ID_AREA_DETECCION));
   readonly fuentes = computed(() => this.opcionesLista(this.listas()?.FUENTES ?? [], this.borrador()?.FUENTE));
-  readonly puedeAgregarFotos = computed(() => this.editable() || Number(this.registro()?.PUEDE_AGREGAR_FOTOS) === 1);
-  readonly puedeRetirarFotos = computed(() => !this.creando() && Number(this.registro()?.PUEDE_RETIRAR_FOTOS) === 1);
+  /** Fotos solo en edición (C5): en consulta no se suben ni se retiran. */
+  readonly puedeAgregarFotos = computed(() => this.enCaptura() && (this.creando() || Number(this.registro()?.PUEDE_AGREGAR_FOTOS) === 1));
+  readonly puedeRetirarFotos = computed(() => this.modificando() && Number(this.registro()?.PUEDE_RETIRAR_FOTOS) === 1);
+  /** Botón "Agregar a mi registro": el SP decide (creador con CREAR dentro de la ventana de 7 días). */
+  readonly puedeAgregar = computed(() => !this.enCaptura() && Number(this.registro()?.PUEDE_AGREGAR) === 1);
+  readonly agregarHasta = computed(() => mostrarFecha(this.registro()?.AGREGAR_HASTA));
+  /** "Registrado por" (fase 2): nombre · área; en un registro nuevo, el usuario actual. */
+  readonly registradoPor = computed(() => {
+    const registro = this.registro();
+    if (this.creando() || !registro) {
+      const sesion = this.session.session();
+      return sesion?.userName?.trim() || sesion?.userId || '';
+    }
+    return nombreConArea(registro.NOMBRE_USUARIO_CREA, registro.AREA_USUARIO_CREA, registro.REGISTRO.USUARIO_CREA);
+  });
   readonly modoTexto = computed(() => {
     const r = this.registro()?.REGISTRO;
     if (this.creando()) return 'Registro nuevo: elija origen, producto, partes, no conformidades y operarios; luego Guardar. El documento se asigna al guardar.';
-    if (this.modificando() && r) return `Modificando ${r.DOCUMENTO} como gestor de calidad. Al guardar se anota su usuario con fecha y hora; el registro sigue a nombre de ${r.USUARIO_CREA}.`;
+    if (this.modificando() && r) return `Modificando ${r.DOCUMENTO} como gestor de calidad. Al guardar se anota su usuario con fecha y hora; el registro sigue a nombre de ${this.registradoPor()}.`;
+    if (this.agregando() && r) {
+      return `Agregando a ${r.DOCUMENTO}: lo guardado no se puede quitar ni bajar. Puede añadir partes, no conformidades, operarios, ocurrencias y fotos; luego Guardar.`
+        + (this.agregarHasta() ? ` Puede agregar hasta ${this.agregarHasta()}.` : '');
+    }
     if (r) {
-      return `Consultando ${r.DOCUMENTO}, registrado por ${r.USUARIO_CREA}. ` + (this.esGestor()
+      return `Consultando ${r.DOCUMENTO}, registrado por ${this.registradoPor()}. ` + (this.esGestor()
         ? 'Para corregirlo use Modificar en la barra. Los registros no se anulan; se corrigen.'
-        : 'Solo lectura: solo el gestor de calidad modifica registros.');
+        : this.puedeAgregar()
+          ? 'Puede agregar a su registro (nunca quitar); corregir o quitar es del gestor de calidad.'
+          : 'Solo lectura: solo el gestor de calidad modifica registros.');
     }
     return this.puedeCrear() ? 'Use Nuevo para registrar una no conformidad o abra un registro desde Consulta.' : 'Abra un registro desde Consulta.';
   });
@@ -161,7 +185,7 @@ export class Cal001Component implements OnInit, OnDestroy {
     effect(() => this.publicarBarra());
     effect(() => {
       const pendientes = this.fotosPendientes();
-      const editable = this.editable();
+      const editable = this.enCaptura();
       untracked(() => {
         if (pendientes) this.workspace.setDirty(this.applicationId, true);
         else if (!editable) this.workspace.setDirty(this.applicationId, false);
@@ -245,12 +269,15 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   /* ============================ Barra de registro ============================ */
 
+  /** En Agregar la barra va en Editing con Guardar/Cancelar; Modificar sigue siendo solo del gestor (no se ve mientras se edita). */
   private publicarBarra(): void {
+    const agregando = this.agregando();
+    const permisos = permisosBarra(this.permisos());
     const estado = createRecordToolbarState({
       applicationId: this.applicationId,
       mode: this.modo(),
-      permissions: permisosBarra(this.permisos()),
-      capabilities: { ...Cal001ToolbarCapabilities, edit: Number(this.registro()?.PUEDE_MODIFICAR) === 1 },
+      permissions: { ...permisos, edit: permisos.edit || agregando },
+      capabilities: { ...Cal001ToolbarCapabilities, edit: agregando || Number(this.registro()?.PUEDE_MODIFICAR) === 1 },
       currentIndex: Math.max(0, this.indiceActual()),
       totalRecords: this.registro() ? this.registros().length : 0
     });
@@ -279,14 +306,14 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   private navegar(indice: number): void {
     const fila = this.registros()[indice];
-    if (!fila || this.editable() || indice === this.indiceActual()) return;
+    if (!fila || this.enCaptura() || indice === this.indiceActual()) return;
     void this.abrirRegistro(fila.ID_REGISTRO_NC);
   }
 
   /* =============================== Captura ================================== */
 
   nuevo(): void {
-    if (this.editable() || !this.puedeCrear()) return;
+    if (this.enCaptura() || !this.puedeCrear()) return;
     this.empezarCaptura(borradorVacio(this.hoy()));
   }
 
@@ -304,7 +331,7 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   modificar(): void {
     const registro = this.registro();
-    if (this.editable() || !registro || !this.esGestor() || Number(registro.PUEDE_MODIFICAR) !== 1) return;
+    if (this.enCaptura() || !registro || !this.esGestor() || Number(registro.PUEDE_MODIFICAR) !== 1) return;
     this.borrador.set(borradorDesdeRegistro(registro, this.partesRegistro));
     this.errores.set([]);
     this.modo.set(RecordToolbarMode.Editing);
@@ -313,14 +340,35 @@ export class Cal001Component implements OnInit, OnDestroy {
     if (registro.REGISTRO.ORIGEN === Cal001Origen.Cliente) void this.cargarListas();
   }
 
+  /** Modo Agregar (fase 2): lo guardado queda de solo lectura; solo se anexan partes, causas, operarios, ocurrencias y fotos. */
+  agregar(): void {
+    const registro = this.registro();
+    if (!this.puedeAgregar() || !registro) return;
+    this.borrador.set(borradorDesdeRegistro(registro, this.partesRegistro));
+    this.errores.set([]);
+    this.agregando.set(true);
+    this.modo.set(RecordToolbarMode.Editing);
+    this.pestana.set('registro');
+    this.workspace.setDirty(this.applicationId, false);
+  }
+
+  /** Sale de la captura (al guardar o cancelar). */
+  private terminarCaptura(modo: RecordToolbarMode): void {
+    this.agregando.set(false);
+    this.modo.set(modo);
+    this.workspace.setDirty(this.applicationId, false);
+  }
+
   private editar(cambio: (borrador: Cal001Borrador) => Cal001Borrador): void {
     const actual = this.borrador();
-    if (!actual || !this.editable()) return;
+    if (!actual || !this.enCaptura()) return;
     this.borrador.set(cambio(clonarBorrador(actual)));
     this.workspace.setDirty(this.applicationId, true);
   }
 
   campo(nombre: CampoEncabezado, valor: string): void {
+    // El encabezado solo cambia al crear o modificar (en Agregar no cambia).
+    if (!this.editable()) return;
     if (nombre === 'CANTIDAD_REFERENCIA') {
       const numero = valor.trim() === '' ? null : Number(valor);
       this.editar(b => ({ ...b, CANTIDAD_REFERENCIA: numero !== null && Number.isFinite(numero) ? numero : null }));
@@ -366,15 +414,19 @@ export class Cal001Component implements OnInit, OnDestroy {
   }
 
   elegirCliente(cliente: Cal001Cliente): void {
+    if (!this.editable()) return;
     this.editar(b => ({ ...b, ID_CLIENTE: cliente.ID_CLIENTE, NOMBRE_CLIENTE: cliente.NOMBRE }));
   }
 
   elegirCausaCliente(causa: Cal001Causa): void {
+    if (!this.editable()) return;
     this.editar(b => ({ ...b, ID_CAUSA_CLIENTE: causa.ID_CAUSA }));
   }
 
   cambiarPieza(evento: { clave: string; pieza: string }): void {
-    this.editar(b => ({ ...b, PARTES: b.PARTES.map(p => p.CLAVE === evento.clave ? { ...p, PIEZA: evento.pieza } : p) }));
+    // En Agregar solo se escribe la pieza de una parte aún no guardada.
+    const cambia = (p: Cal001ParteBorrador): boolean => p.CLAVE === evento.clave && (this.editable() || p.ID_PARTE_NC === null);
+    this.editar(b => ({ ...b, PARTES: b.PARTES.map(p => cambia(p) ? { ...p, PIEZA: evento.pieza } : p) }));
   }
 
   cambiarParte(parte: Cal001ParteBorrador): void {
@@ -387,22 +439,34 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   async guardar(): Promise<void> {
     const borrador = this.borrador();
-    if (!borrador || !this.editable() || this.cargando()) return;
-    const accion = borrador.ID_REGISTRO_NC ? 'update' : 'new';
+    if (!borrador || !this.enCaptura() || this.cargando()) return;
+    const registro = this.registro();
+    const agregando = this.agregando();
+    const accion = agregando ? 'agregar' : borrador.ID_REGISTRO_NC ? 'update' : 'new';
     const errores = validarBorrador(borrador, this.hoy(), accion);
     this.errores.set(errores);
     if (errores.length) {
       this.notification.warning(errores[0]);
       return;
     }
+    const fotos = this.fotosComponente();
+    // En Agregar puede no haber datos nuevos y sí fotos en cola: entonces solo se suben las fotos.
+    const conDatos = !agregando || (!!registro && hayAlgoQueAgregar(borrador, registro));
+    if (!conDatos && !fotos?.cola().length) {
+      this.notification.warning('No agregó nada.');
+      return;
+    }
     this.cargando.set(true);
-    let guardado: { ID_REGISTRO_NC: number; DOCUMENTO: string } | null = null;
+    let id = borrador.ID_REGISTRO_NC;
     try {
-      guardado = await this.servicio.guardar(borrador);
-      if (accion === 'new') this.almacen.borrar(this.claveBorrador());
-      this.modo.set(RecordToolbarMode.Browsing);
-      this.workspace.setDirty(this.applicationId, false);
-      this.notification.success(accion === 'new' ? `No conformidad ${guardado.DOCUMENTO} registrada.` : `${guardado.DOCUMENTO} modificado.`);
+      if (conDatos) {
+        const guardado = agregando && registro ? await this.servicio.agregar(borrador, registro) : await this.servicio.guardar(borrador);
+        id = guardado.ID_REGISTRO_NC;
+        if (accion === 'new') this.almacen.borrar(this.claveBorrador());
+        this.notification.success(accion === 'new' ? `No conformidad ${guardado.DOCUMENTO} registrada.`
+          : accion === 'update' ? `${guardado.DOCUMENTO} modificado.` : `${guardado.DOCUMENTO} actualizado (versión ${guardado.VERSION}).`);
+      }
+      this.terminarCaptura(RecordToolbarMode.Browsing);
     } catch (error) {
       const { mensaje, conflictoVersion } = mensajeError(error);
       this.errores.set([mensaje]);
@@ -412,11 +476,12 @@ export class Cal001Component implements OnInit, OnDestroy {
     } finally {
       this.cargando.set(false);
     }
-    const fotos = this.fotosComponente();
+    if (!id) return;
     // Las fotos en cola del registro nuevo pasan al documento creado antes de mostrarlo (las demás se descartan).
-    if (accion === 'new') fotos?.adoptar(guardado.ID_REGISTRO_NC);
-    await this.abrirRegistro(guardado.ID_REGISTRO_NC);
-    if (accion === 'new' && fotos?.pendientes().length) await fotos.subirPendientes(guardado.ID_REGISTRO_NC);
+    if (accion === 'new') fotos?.adoptar(id);
+    await this.abrirRegistro(id);
+    // Fotos solo en edición (C5): las elegidas mientras se capturaba se suben al guardar.
+    if (fotos?.pendientes().length) await fotos.subirPendientes(id);
     if (this.consulta()) void this.buscar(this.filtro(), this.consulta()?.PAGINA ?? 1, false);
   }
 
@@ -428,41 +493,40 @@ export class Cal001Component implements OnInit, OnDestroy {
     });
     const id = this.borrador()?.ID_REGISTRO_NC;
     if (!respuesta.isConfirmed || !id) return;
-    this.modo.set(RecordToolbarMode.Browsing);
-    this.workspace.setDirty(this.applicationId, false);
+    this.fotosComponente()?.limpiar();
+    this.terminarCaptura(RecordToolbarMode.Browsing);
     await this.abrirRegistro(id);
   }
 
   async cancelar(): Promise<void> {
-    if (!this.editable() || this.cargando()) return;
+    if (!this.enCaptura() || this.cargando()) return;
     const creando = this.creando();
     const respuesta = await Swal.fire({
       title: this.workspace.getApplicationTitle(this.applicationId),
-      text: creando ? '¿Cancelar el registro nuevo? Se descarta también el borrador guardado en este equipo.' : '¿Cancelar la modificación sin guardar?',
+      text: creando ? '¿Cancelar el registro nuevo? Se descarta también el borrador guardado en este equipo.'
+        : this.agregando() ? '¿Cancelar lo agregado sin guardar? También se descartan las fotos en cola.' : '¿Cancelar la modificación sin guardar?',
       icon: 'warning', showCancelButton: true, confirmButtonColor: '#DF3E3E', cancelButtonColor: '#438ef1',
       cancelButtonText: 'No', confirmButtonText: 'Sí, cancelar'
     });
     if (!respuesta.isConfirmed) return;
-    if (creando) {
-      this.almacen.borrar(this.claveBorrador());
-      this.fotosComponente()?.limpiar();
-    }
+    if (creando) this.almacen.borrar(this.claveBorrador());
+    // Las fotos en cola solo se suben al guardar: al cancelar se descartan.
+    this.fotosComponente()?.limpiar();
     this.errores.set([]);
-    this.workspace.setDirty(this.applicationId, false);
     const registro = this.registro();
     if (registro && !creando) {
       this.borrador.set(borradorDesdeRegistro(registro, this.partesRegistro));
-      this.modo.set(RecordToolbarMode.Browsing);
+      this.terminarCaptura(RecordToolbarMode.Browsing);
     } else {
       this.borrador.set(null);
-      this.modo.set(RecordToolbarMode.Initial);
+      this.terminarCaptura(RecordToolbarMode.Initial);
     }
   }
 
   /* ========================= Abrir registro y consulta ========================= */
 
   async abrirRegistro(idRegistro: number): Promise<void> {
-    if (this.editable()) {
+    if (this.enCaptura()) {
       this.notification.warning('Guarde o cancele el registro en captura antes de abrir otro.');
       return;
     }
@@ -489,15 +553,19 @@ export class Cal001Component implements OnInit, OnDestroy {
     this.borrador.set(borrador);
     this.parteSeleccionada.set((borrador.PARTES.find(p => p.CAUSAS.length) ?? borrador.PARTES[0])?.CLAVE ?? null);
     this.errores.set([]);
+    this.agregando.set(false);
     this.modo.set(RecordToolbarMode.Browsing);
     this.pestana.set('registro');
     const r = registro.REGISTRO;
     if (!this.registros().some(f => f.ID_REGISTRO_NC === r.ID_REGISTRO_NC)) {
       this.registros.update(lista => [{
         ID_REGISTRO_NC: r.ID_REGISTRO_NC, DOCUMENTO: r.DOCUMENTO, ORIGEN: r.ORIGEN, PRODUCTO: r.PRODUCTO, NOMBRE_PRODUCTO: r.NOMBRE_PRODUCTO,
-        FECHA_EVENTO: r.FECHA_EVENTO, FECHA_REGISTRO: r.FECHA_REGISTRO, USUARIO_CREA: r.USUARIO_CREA, USUARIO_MODIFICA: r.USUARIO_MODIFICA,
+        FECHA_EVENTO: r.FECHA_EVENTO, FECHA_REGISTRO: r.FECHA_REGISTRO, USUARIO_CREA: r.USUARIO_CREA,
+        NOMBRE_USUARIO_CREA: registro.NOMBRE_USUARIO_CREA, AREA_USUARIO_CREA: registro.AREA_USUARIO_CREA, USUARIO_MODIFICA: r.USUARIO_MODIFICA,
         FECHA_MODIFICA: r.FECHA_MODIFICA, VERSION: r.VERSION, ID_CLIENTE: r.ID_CLIENTE, NOMBRE_CLIENTE: r.NOMBRE_CLIENTE,
-        N_PARTES: registro.PARTES.length, N_CAUSAS: 0, N_OPERARIOS: 0, TOTAL_OCURRENCIAS: 0, N_FOTOS: registro.FOTOS.length
+        N_PARTES: registro.PARTES.length, N_CAUSAS: 0,
+        CAUSAS: [...new Set(registro.PARTES.flatMap(p => p.CAUSAS.map(c => c.NOMBRE)))].sort().join(', ') || null,
+        N_OPERARIOS: 0, TOTAL_OCURRENCIAS: 0, N_FOTOS: registro.FOTOS.length
       }, ...lista]);
     }
   }
@@ -505,8 +573,8 @@ export class Cal001Component implements OnInit, OnDestroy {
   /** Recarga el registro abierto (fotos nuevas, cambios de otro usuario). */
   async recargarRegistro(): Promise<void> {
     const id = this.registro()?.REGISTRO.ID_REGISTRO_NC;
-    if (id && !this.editable()) await this.abrirRegistro(id);
-    else if (id && this.modificando()) {
+    if (id && !this.enCaptura()) await this.abrirRegistro(id);
+    else if (id && (this.modificando() || this.agregando())) {
       const registro = await this.servicio.registro(id).catch(() => null);
       if (registro) this.registro.update(actual => actual ? { ...actual, FOTOS: registro.FOTOS, HISTORIAL: registro.HISTORIAL } : actual);
     }
@@ -523,7 +591,7 @@ export class Cal001Component implements OnInit, OnDestroy {
     try {
       const resultado = await this.servicio.consulta(filtro, pagina);
       this.consulta.set(resultado);
-      if (!this.editable()) this.registros.set(resultado.FILAS);
+      if (!this.enCaptura()) this.registros.set(resultado.FILAS);
       if (avisarVacio && !resultado.TOTAL) this.notification.info('No hay registros con esos filtros.');
     } catch (error) {
       this.avisar(error);
@@ -534,7 +602,7 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   async refrescar(): Promise<void> {
     if (this.pestana() === 'consulta') await this.buscar(this.filtro(), this.consulta()?.PAGINA ?? 1);
-    else if (!this.editable()) await this.recargarRegistro();
+    else if (!this.enCaptura()) await this.recargarRegistro();
   }
 
   /** Exportación a Excel (plan §10.1): todas las páginas del filtro, una fila por operario y causa. */
@@ -604,7 +672,7 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   private filtroInicial(): Cal001ConsultaFiltro {
     const hoy = hoyColombia();
-    return { FECHA_DESDE: sumarDias(hoy, -30), FECHA_HASTA: hoy, ORIGEN: '', DOCUMENTO: '' };
+    return { FECHA_DESDE: sumarDias(hoy, -30), FECHA_HASTA: hoy, ORIGEN: '', DOCUMENTO: '', ID_EMPLEADO: '' };
   }
 
   /** Hoy en Colombia, recalculado en cada uso (la pantalla puede quedar abierta de un día para otro). */

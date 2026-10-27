@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import type { Cal001FilaExportacion } from '../models/cal-001.model';
 
-const Columnas: { campo: keyof Cal001FilaExportacion; titulo: string; ancho: number; numerica?: boolean }[] = [
+/** Columnas del Excel, en orden (exportadas para las pruebas). */
+export const Cal001ColumnasExcel: readonly { campo: keyof Cal001FilaExportacion; titulo: string; ancho: number; numerica?: boolean }[] = [
   { campo: 'DOCUMENTO', titulo: 'Documento', ancho: 11 },
   { campo: 'ORIGEN', titulo: 'Origen', ancho: 11 },
+  { campo: 'FECHA_REGISTRO', titulo: 'Fecha de registro', ancho: 17 },
   { campo: 'FECHA_EVENTO', titulo: 'Fecha del evento', ancho: 14 },
+  { campo: 'REGISTRADO_POR', titulo: 'Registrado por', ancho: 28 },
   { campo: 'PRODUCTO', titulo: 'Producto', ancho: 13 },
   { campo: 'NOMBRE_PRODUCTO', titulo: 'Nombre del producto', ancho: 36 },
   { campo: 'PARTE', titulo: 'Parte', ancho: 34 },
@@ -26,19 +29,19 @@ export class Cal001ExcelService {
     const { Workbook } = await this.excelJs();
     const libro = new Workbook();
     const hoja = libro.addWorksheet('No conformidades', { pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
-    hoja.columns = Columnas.map(columna => ({ header: columna.titulo, width: columna.ancho }));
+    hoja.columns = Cal001ColumnasExcel.map(columna => ({ header: columna.titulo, width: columna.ancho }));
     const encabezado = hoja.getRow(1);
     encabezado.font = { bold: true, color: { argb: 'FF334155' } };
     encabezado.eachCell(celda => {
       celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
       celda.border = { bottom: { style: 'medium', color: { argb: 'FFCBD5E1' } } };
     });
-    for (const fila of filas) hoja.addRow(Columnas.map(columna => fila[columna.campo]));
-    Columnas.forEach((columna, indice) => {
+    for (const fila of filas) hoja.addRow(Cal001ColumnasExcel.map(columna => fila[columna.campo]));
+    Cal001ColumnasExcel.forEach((columna, indice) => {
       if (columna.numerica) hoja.getColumn(indice + 1).numFmt = '#,##0';
     });
     hoja.views = [{ state: 'frozen', ySplit: 1 }];
-    hoja.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: Columnas.length } };
+    hoja.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: Cal001ColumnasExcel.length } };
     await this.descargar(libro, nombreArchivo);
   }
 

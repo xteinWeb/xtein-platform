@@ -108,3 +108,10 @@ export function tieneCaptura(borrador: Cal001Borrador): boolean {
 export function clonarBorrador(borrador: Cal001Borrador): Cal001Borrador {
   return JSON.parse(JSON.stringify(borrador)) as Cal001Borrador;
 }
+
+/** "Registrado por" (fase 2): nombre · área; sin nombre, el código del usuario. */
+export function nombreConArea(nombre: string | null | undefined, area: string | null | undefined, codigo: string): string {
+  const base = String(nombre ?? '').trim() || codigo;
+  const seccion = String(area ?? '').trim();
+  return seccion ? `${base} · ${seccion}` : base;
+}

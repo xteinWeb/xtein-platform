@@ -6,7 +6,7 @@ import { XteinCal001FotosComponent } from './xtein-cal001-fotos.component';
 describe('XteinCal001FotosComponent', () => {
   let fixture: ComponentFixture<XteinCal001FotosComponent>;
   let componente: XteinCal001FotosComponent;
-  const subirFoto = vi.fn<(id: number, nombre: string, base64: string) => Promise<number>>();
+  const subirFoto = vi.fn<(id: number, nombre: string, base64: string, idOperacion: string) => Promise<number>>();
 
   beforeEach(() => {
     subirFoto.mockReset();
@@ -33,7 +33,7 @@ describe('XteinCal001FotosComponent', () => {
     componente.reintentar();
     await componente.subirPendientes(2);
     expect(subirFoto).toHaveBeenCalledTimes(1);
-    expect(subirFoto).not.toHaveBeenCalledWith(2, expect.anything(), expect.anything());
+    expect(subirFoto).not.toHaveBeenCalledWith(2, expect.anything(), expect.anything(), expect.anything());
   });
 
   it('A1: subirPendientes(id) sube solo las fotos cuyo dueño es id', async () => {
@@ -54,7 +54,7 @@ describe('XteinCal001FotosComponent', () => {
     expect(componente.cola().map(f => [f.dueno, f.nombre])).toEqual([[15, 'nueva.jpg']]);
     subirFoto.mockResolvedValue(3);
     expect(await componente.subirPendientes(15)).toBe(1);
-    expect(subirFoto).toHaveBeenCalledWith(15, 'nueva.jpg', 'QUJD');
+    expect(subirFoto).toHaveBeenCalledWith(15, 'nueva.jpg', 'QUJD', expect.stringMatching(/^[0-9a-f-]{36}$/));
   });
 
   it('M1: dos llamadas concurrentes suben cada foto una sola vez y Reintentar se deshabilita', async () => {
@@ -75,6 +75,35 @@ describe('XteinCal001FotosComponent', () => {
     expect(subirFoto.mock.calls.map(c => c[1])).toEqual(['a.jpg', 'b.jpg']);
   });
 
+  it('fase 2: cada foto lleva su ID_OPERACION (GUID) y lo conserva al reintentar; otra foto lleva otro', async () => {
+    abrir(1);
+    componente.encolar('a.jpg', 'QUJD');
+    componente.encolar('b.jpg', 'QUJD');
+    subirFoto.mockRejectedValueOnce({ status: 0, error: null }).mockResolvedValue(1);
+    await componente.subirPendientes(1);
+    await componente.subirPendientes(1);
+    const [primero, otra, reintento] = subirFoto.mock.calls;
+    expect(primero[1]).toBe('a.jpg');
+    expect(primero[3]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+    expect(reintento[1]).toBe('a.jpg');
+    expect(reintento[3]).toBe(primero[3]);
+    expect(otra[3]).not.toBe(primero[3]);
+  });
+
+  it('fase 2 (C5): sin permiso no se ofrece "Agregar fotos"; mientras se edita, la foto espera a Guardar', () => {
+    abrir(1);
+    expect(fixture.nativeElement.textContent).not.toContain('Agregar fotos');
+    fixture.componentRef.setInput('puedeAgregar', true);
+    fixture.componentRef.setInput('diferirSubida', true);
+    componente.encolar('a.jpg', 'QUJD');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Agregar fotos');
+    expect(fixture.nativeElement.textContent).toContain('Se sube al guardar el registro');
+    expect(fixture.nativeElement.textContent).not.toContain('Reintentar subida');
+    componente.reintentar();
+    expect(subirFoto).not.toHaveBeenCalled();
+  });
+
   it('visor: el foco va a «Cerrar» al abrir y Escape lo cierra', async () => {
     abrir(1);
     componente.encolar('tapa.jpg', 'QUJD');
@@ -93,7 +122,7 @@ describe('XteinCal001FotosComponent', () => {
 
   it('visor: clic en el fondo lo cierra; clic en la foto no', () => {
     abrir(1);
-    componente.verPendiente({ id: 1, dueno: 1, nombre: 'a.jpg', base64: 'QUJD', estado: 'pendiente', mensaje: '' });
+    componente.verPendiente({ id: 1, dueno: 1, nombre: 'a.jpg', base64: 'QUJD', estado: 'pendiente', mensaje: '', operacion: '0f8e1c2a-1111-4222-8333-444455556666' });
     fixture.detectChanges();
     (fixture.nativeElement.querySelector('.ft-visor img') as HTMLElement).click();
     fixture.detectChanges();

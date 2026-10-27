@@ -26,6 +26,9 @@
 .dp-ocurrencias { text-align: right; }
 .dp-invalido { border-color: #d92d20; background: #fff5f5; }
 .dp-nota { margin: 4px 0; color: #7b8fa3; font-size: 13px; }
+/* Modo Agregar: lo guardado no se quita; a un operario guardado se le suman ocurrencias. */
+.dp-guardada { margin-left: auto; padding: 2px 8px; border-radius: 10px; background: #eef2f6; color: #4a6a84; font-size: 12px; white-space: nowrap; }
+.dp-suma { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; .dp-ocurrencias { width: 60px; } }
 .dp-agregar { max-width: 460px; }
 
 @media (max-width: 720px) {

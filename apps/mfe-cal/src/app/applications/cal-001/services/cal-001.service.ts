@@ -20,16 +20,19 @@ import type {
   Cal001RegistroCompleto
 } from '../models/cal-001.model';
 import { Cal001BackendError, decodificar } from '../utils/cal-001-errores';
-import { construirPayload } from '../utils/cal-001-payload';
+import { Cal001OperacionPendiente, construirPayload, payloadAgregar, payloadFoto } from '../utils/cal-001-payload';
 
 /**
  * Llamadas de CAL-001, solo a /api/CAL001N/* y siempre por XteinApiClientService (JSON, sin multipart).
  * La identidad (usuario, empresa, UN) y los permisos los pone el back desde el token: nunca se envían aquí.
+ * Toda escritura lleva ID_OPERACION (contrato §2.5): un reintento de la misma operación reutiliza el ID.
  */
 @Injectable()
 export class Cal001Service {
   private readonly api = inject(XteinApiClientService);
   private readonly log = createCal001Log();
+  /** Guardado (new/update/agregar) pendiente de confirmar: su ID se reutiliza si se reintenta lo mismo. */
+  private readonly operacion = new Cal001OperacionPendiente();
 
   private async ejecutar<T>(endpoint: string, action: string, data: unknown, logContext: LogContext): Promise<T[]> {
     const respuesta = await firstValueFrom(this.api.execute<XteinDataApiResponse<unknown>>({
@@ -80,6 +83,9 @@ export class Cal001Service {
     const datos: Record<string, unknown> = { FECHA_DESDE: filtro.FECHA_DESDE, FECHA_HASTA: filtro.FECHA_HASTA, PAGINA: pagina, TAMANO: tamano };
     if (filtro.ORIGEN) datos['ORIGEN'] = filtro.ORIGEN;
     if (filtro.DOCUMENTO.trim()) datos['DOCUMENTO'] = filtro.DOCUMENTO.trim();
+    // Solo el gestor ve el campo; el SP responde E05 a los demás (DP-L).
+    if (filtro.ID_EMPLEADO?.trim()) datos['ID_EMPLEADO'] = filtro.ID_EMPLEADO.trim();
+    if (filtro.FECHA_BASE) datos['FECHA_BASE'] = filtro.FECHA_BASE;
     return this.primero<Cal001ConsultaResultado>(Cal001Action.Query, datos);
   }
 
@@ -93,15 +99,28 @@ export class Cal001Service {
 
   async guardar(borrador: Cal001Borrador): Promise<Cal001GuardarResultado> {
     const accion = borrador.ID_REGISTRO_NC ? Cal001Action.Update : Cal001Action.New;
-    const [fila] = await this.ejecutar<Cal001GuardarResultado>(Cal001Endpoint.Save, accion,
-      construirPayload(borrador, accion), this.log.Save);
+    const id = this.operacion.para(accion, borrador);
+    return this.escribir(accion, construirPayload(borrador, accion, id));
+  }
+
+  /** Fase 2: anexa al registro guardado solo lo nuevo del borrador (delta). */
+  async agregar(borrador: Cal001Borrador, original: Cal001RegistroCompleto): Promise<Cal001GuardarResultado> {
+    const id = this.operacion.para(Cal001Action.Add, { borrador, VERSION: original.REGISTRO.VERSION });
+    return this.escribir(Cal001Action.Add, payloadAgregar(borrador, original, id));
+  }
+
+  /** REPETIDA: 1 (el SP ya había aplicado este ID_OPERACION) es un éxito normal. */
+  private async escribir(accion: string, datos: unknown): Promise<Cal001GuardarResultado> {
+    const [fila] = await this.ejecutar<Cal001GuardarResultado>(Cal001Endpoint.Save, accion, datos, this.log.Save);
     if (!fila) throw new Cal001BackendError('El servidor no devolvió el resultado del guardado.');
+    this.operacion.confirmar();
     return fila;
   }
 
-  async subirFoto(idRegistro: number, nombre: string, base64: string): Promise<number> {
+  /** `idOperacion` es el de la foto en cola: se conserva en sus reintentos. */
+  async subirFoto(idRegistro: number, nombre: string, base64: string, idOperacion: string): Promise<number> {
     const [fila] = await this.ejecutar<{ ID_FOTO_NC: number }>(Cal001Endpoint.PhotoUpload, Cal001Action.PhotoAdd,
-      { ID_REGISTRO_NC: idRegistro, NOMBRE_ORIGINAL: nombre, BASE64: base64 }, this.log.Photo);
+      payloadFoto(idRegistro, nombre, base64, idOperacion), this.log.Photo);
     return fila?.ID_FOTO_NC ?? 0;
   }
 

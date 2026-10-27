@@ -16,7 +16,7 @@
       </span>
       <span role="cell" class="pt-nombre">{{ parte.NOMBRE_PARTE }}</span>
       <span role="cell" class="pt-pieza" (click)="$event.stopPropagation()">
-        @if (editable()) {
+        @if (editaPieza(parte)) {
           <input type="text" [attr.maxlength]="maximoPieza" [value]="parte.PIEZA"
             [placeholder]="parte.ID_PARTE ? 'Escriba la pieza' : 'Pieza obligatoria'" [required]="!parte.ID_PARTE"
             [attr.aria-label]="'Pieza de ' + parte.NOMBRE_PARTE" (input)="escribirPieza(parte, $any($event.target).value)" />

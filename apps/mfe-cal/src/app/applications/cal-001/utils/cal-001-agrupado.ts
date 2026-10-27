@@ -20,7 +20,8 @@ export function ncPorOperario(borrador: Pick<Cal001Borrador, 'PARTES'>): Cal001N
           fila = { ID_EMPLEADO: operario.ID_EMPLEADO, NOMBRE: operario.NOMBRE, PROCESO: operario.DESCRIPCION_SECCION, TOTAL: 0, CAUSAS: [] };
           porOperario.set(operario.ID_EMPLEADO, fila);
         }
-        const ocurrencias = Number(operario.OCURRENCIAS) || 0;
+        // En modo Agregar se suman las ocurrencias adicionales capturadas para mostrar el total que quedará.
+        const ocurrencias = (Number(operario.OCURRENCIAS) || 0) + (Number(operario.ADICIONALES) || 0);
         const existente = fila.CAUSAS.find(c => c.ID_CAUSA === causa.ID_CAUSA);
         if (existente) existente.OCURRENCIAS += ocurrencias;
         else fila.CAUSAS.push({ ID_CAUSA: causa.ID_CAUSA, NOMBRE: causa.NOMBRE, OCURRENCIAS: ocurrencias });
@@ -32,13 +33,14 @@ export function ncPorOperario(borrador: Pick<Cal001Borrador, 'PARTES'>): Cal001N
 }
 
 /**
- * Exportación de Consulta (plan §10.1, DP-1): una fila por operario y causa, con documento, fecha del evento,
- * producto, parte, causa, operario, proceso y ocurrencias. Una causa sin operarios (origen Cliente) sale en
+ * Exportación de Consulta (plan §10.1, DP-1): una fila por operario y causa, con documento, fecha de registro,
+ * fecha del evento, quién registró (nombre), producto, parte, causa, operario, proceso y ocurrencias. Las causas
+ * salen completas del detalle (no de la cadena recortada CAUSAS de la consulta). Una causa sin operarios (origen Cliente) sale en
  * una fila con el operario y las ocurrencias vacíos, para que el registro no desaparezca del archivo.
  */
 export function filasExportacion(registros: readonly Cal001RegistroCompleto[]): Cal001FilaExportacion[] {
   const filas: Cal001FilaExportacion[] = [];
-  for (const { REGISTRO: r, PARTES } of registros) {
+  for (const { REGISTRO: r, PARTES, NOMBRE_USUARIO_CREA } of registros) {
     for (const parte of PARTES) {
       const nombreParte = parte.ID_PARTE
         ? [parte.ID_PARTE, parte.NOMBRE_PARTE, parte.PIEZA].filter(Boolean).join(' · ')
@@ -46,7 +48,9 @@ export function filasExportacion(registros: readonly Cal001RegistroCompleto[]): 
       for (const causa of parte.CAUSAS) {
         const base = {
           DOCUMENTO: r.DOCUMENTO, ORIGEN: r.ORIGEN === 'CLIENTE' ? 'Cliente' : 'Producción',
-          FECHA_EVENTO: (r.FECHA_EVENTO ?? '').substring(0, 10), PRODUCTO: r.PRODUCTO, NOMBRE_PRODUCTO: r.NOMBRE_PRODUCTO ?? '',
+          FECHA_REGISTRO: (r.FECHA_REGISTRO ?? '').replace('T', ' ').substring(0, 16),
+          FECHA_EVENTO: (r.FECHA_EVENTO ?? '').substring(0, 10),
+          REGISTRADO_POR: String(NOMBRE_USUARIO_CREA ?? '').trim() || r.USUARIO_CREA, PRODUCTO: r.PRODUCTO, NOMBRE_PRODUCTO: r.NOMBRE_PRODUCTO ?? '',
           PARTE: nombreParte, CAUSA: causa.ID_CAUSA, NOMBRE_CAUSA: causa.NOMBRE
         };
         if (!causa.OPERARIOS.length) {

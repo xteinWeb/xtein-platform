@@ -74,6 +74,10 @@ export interface Cal001ConsultaFila {
   FECHA_EVENTO: string;
   FECHA_REGISTRO: string;
   USUARIO_CREA: string;
+  /** Nombre de quien registró (fase 2); el SP devuelve el código si no lo encuentra. */
+  NOMBRE_USUARIO_CREA: string;
+  /** Área padre de su sección principal (DP-D); null sin sección. */
+  AREA_USUARIO_CREA: string | null;
   USUARIO_MODIFICA: string | null;
   FECHA_MODIFICA: string | null;
   VERSION: number;
@@ -81,6 +85,8 @@ export interface Cal001ConsultaFila {
   NOMBRE_CLIENTE: string | null;
   N_PARTES: number;
   N_CAUSAS: number;
+  /** Nombres distintos de las causas separados por ", ", recortados a 400 con "…" (solo para la grilla). */
+  CAUSAS: string | null;
   N_OPERARIOS: number;
   TOTAL_OCURRENCIAS: number;
   N_FOTOS: number;
@@ -98,6 +104,10 @@ export interface Cal001ConsultaFiltro {
   FECHA_HASTA: string;
   ORIGEN: Cal001Origen | '';
   DOCUMENTO: string;
+  /** Cédula exacta de un operario del registro; solo el gestor (DP-L). Vacío = no se envía. */
+  ID_EMPLEADO: string;
+  /** Fecha a la que se aplica el rango (por omisión EVENTO en el SP; no se envía si falta). */
+  FECHA_BASE?: 'EVENTO' | 'REGISTRO';
 }
 
 export interface Cal001RegistroEncabezado {
@@ -180,8 +190,14 @@ export interface Cal001RegistroCompleto {
   FOTOS: Cal001Foto[];
   HISTORIAL: Cal001HistorialResumen[];
   PUEDE_MODIFICAR: number;
+  /** Fase 2: el creador (con CREAR) puede agregar a su registro hasta AGREGAR_HASTA. */
+  PUEDE_AGREGAR: number;
+  /** Fecha-hora de Colombia `yyyy-MM-ddTHH:mm:ss`. */
+  AGREGAR_HASTA: string | null;
   PUEDE_AGREGAR_FOTOS: number;
   PUEDE_RETIRAR_FOTOS: number;
+  NOMBRE_USUARIO_CREA: string;
+  AREA_USUARIO_CREA: string | null;
 }
 
 export interface Cal001GuardarResultado {
@@ -189,6 +205,8 @@ export interface Cal001GuardarResultado {
   DOCUMENTO: string;
   VERSION: number;
   FECHA_REGISTRO?: string;
+  /** 1 = el SP ya había aplicado esta ID_OPERACION y devuelve el resultado original (se trata como éxito). */
+  REPETIDA?: number;
 }
 
 /* =====================================================================
@@ -202,6 +220,8 @@ export interface Cal001OperarioBorrador {
   ID_EMPLEADO: string;
   NOMBRE: string;
   OCURRENCIAS: number | null;
+  /** Modo Agregar: ocurrencias que se suman a un operario ya guardado (el SP las suma). */
+  ADICIONALES?: number | null;
   ID_SECCION: string | null;
   DESCRIPCION_SECCION: string;
   /** Secciones activas del operario (vacío al abrir un registro guardado: se usa la guardada). */
@@ -262,7 +282,9 @@ export interface Cal001NcPorOperario {
 export interface Cal001FilaExportacion {
   DOCUMENTO: string;
   ORIGEN: string;
+  FECHA_REGISTRO: string;
   FECHA_EVENTO: string;
+  REGISTRADO_POR: string;
   PRODUCTO: string;
   NOMBRE_PRODUCTO: string;
   PARTE: string;

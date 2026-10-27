@@ -19,6 +19,12 @@
       {{ modoTexto() }}
       @if (creando() && borradorGuardadoEn()) { <small>Borrador guardado en este equipo a las {{ borradorGuardadoEn() }}.</small> }
     </p>
+    @if (puedeAgregar()) {
+      <div class="c1-agregar">
+        <button type="button" class="c1-boton" [disabled]="cargando()" (click)="agregar()">Agregar a mi registro</button>
+        @if (agregarHasta()) { <small>Puede agregar hasta {{ agregarHasta() }}.</small> }
+      </div>
+    }
 
     @if (borrador(); as b) {
       <div class="c1-cols">
@@ -57,18 +63,22 @@
             <summary>Registro y estado</summary>
             <div class="c1-campos">
               <label class="c1-campo"><span>Estado</span><input type="text" readonly [value]="creando() ? 'NUEVO' : (registro()?.REGISTRO?.ESTADO ?? '')" /></label>
-              <label class="c1-campo"><span>Registrado por</span><input type="text" readonly [value]="registro()?.REGISTRO?.USUARIO_CREA ?? usuario()" /></label>
+              <label class="c1-campo"><span>Registrado por</span>
+                <input type="text" readonly [value]="registradoPor()" [attr.title]="registro()?.REGISTRO?.USUARIO_CREA ?? usuario()" />
+              </label>
               <label class="c1-campo"><span>Fecha de registro</span>
                 <input type="text" readonly [value]="registro() ? fecha(registro()?.REGISTRO?.FECHA_REGISTRO) : 'Al guardar'" />
               </label>
-              <label class="c1-campo"><span>Fecha del evento <abbr title="obligatoria">*</abbr></span>
-                <input type="date" required [max]="hoy()" (focus)="hoy()" [readOnly]="!editable()" [value]="b.FECHA_EVENTO"
+              <label class="c1-campo"><span>Fecha del evento</span>
+                <input type="date" [max]="hoy()" (focus)="hoy()" [readOnly]="!editable()" [value]="b.FECHA_EVENTO"
                   (change)="campo('FECHA_EVENTO', $any($event.target).value)" />
               </label>
-              <label class="c1-campo c1-ancho"><span>Última modificación</span>
-                <input type="text" readonly [value]="registro()?.REGISTRO?.USUARIO_MODIFICA
-                  ? registro()?.REGISTRO?.USUARIO_MODIFICA + ' · ' + fecha(registro()?.REGISTRO?.FECHA_MODIFICA) : 'Sin modificaciones'" />
-              </label>
+              @if (!creando()) {
+                <label class="c1-campo c1-ancho"><span>Última modificación</span>
+                  <input type="text" readonly [value]="registro()?.REGISTRO?.USUARIO_MODIFICA
+                    ? registro()?.REGISTRO?.USUARIO_MODIFICA + ' · ' + fecha(registro()?.REGISTRO?.FECHA_MODIFICA) : 'Sin modificaciones'" />
+                </label>
+              }
             </div>
           </details>
 
@@ -118,11 +128,11 @@
             @if (b.PRODUCTO) {
               <p class="c1-hint">Partes PA de {{ b.PRODUCTO }} en Productos-Partes. Toque una parte para ver y capturar sus no conformidades.</p>
             }
-            <xtein-cal001-partes [partes]="b.PARTES" [seleccionada]="parteActual()?.CLAVE ?? null" [editable]="editable()"
+            <xtein-cal001-partes [partes]="b.PARTES" [seleccionada]="parteActual()?.CLAVE ?? null" [editable]="editable()" [agregando]="agregando()"
               (seleccionar)="seleccionarParte($event)" (piezaCambio)="cambiarPieza($event)" />
             @if (parteActual(); as parte) {
               <xtein-cal001-detalle-parte class="c1-detalle" [parte]="parte" [causas]="causasProduccion()" [origen]="b.ORIGEN"
-                [editable]="editable()" [buscarOperarios]="buscarOperarios" (cambio)="cambiarParte($event)" (aviso)="aviso($event)" />
+                [editable]="editable()" [agregando]="agregando()" [buscarOperarios]="buscarOperarios" (cambio)="cambiarParte($event)" (aviso)="aviso($event)" />
             }
           </details>
 
@@ -152,7 +162,7 @@
           <xtein-cal001-nc-operario [filas]="ncOperario()" [cliente]="esCliente()" />
           <h2 class="c1-banda">Evidencia del registro</h2>
           <xtein-cal001-fotos [fotos]="registro()?.FOTOS ?? []" [idRegistro]="registro()?.REGISTRO?.ID_REGISTRO_NC ?? null"
-            [puedeAgregar]="puedeAgregarFotos()" [puedeRetirar]="puedeRetirarFotos()" (cambiaron)="recargarRegistro()" (hayPendientes)="fotosPendientes.set($event)" (aviso)="aviso($event)" />
+            [puedeAgregar]="puedeAgregarFotos()" [puedeRetirar]="puedeRetirarFotos()" [diferirSubida]="enCaptura()" (cambiaron)="recargarRegistro()" (hayPendientes)="fotosPendientes.set($event)" (aviso)="aviso($event)" />
         </aside>
       </div>
     } @else {
@@ -161,7 +171,7 @@
   </div>
 
   <div class="c1-panel" id="c1-panel-consulta" role="tabpanel" aria-labelledby="c1-tab-consulta" [hidden]="pestana() !== 'consulta'">
-    <xtein-cal001-consulta [resultado]="consulta()" [filtroInicial]="filtro()" [usuario]="usuario()" [cargando]="consultando()"
+    <xtein-cal001-consulta [resultado]="consulta()" [filtroInicial]="filtro()" [usuario]="usuario()" [esGestor]="esGestor()" [cargando]="consultando()"
       [exportando]="exportando()" [abiertoId]="registro()?.REGISTRO?.ID_REGISTRO_NC ?? null"
       (buscar)="buscar($event, 1)" (pagina)="buscar(filtro(), $event)" (abrir)="abrirRegistro($event.ID_REGISTRO_NC)" (exportar)="exportar()" />
   </div>
