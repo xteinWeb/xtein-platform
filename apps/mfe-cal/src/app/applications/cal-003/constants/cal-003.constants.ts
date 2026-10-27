@@ -12,15 +12,25 @@ export const Cal003Application = {
 } as const;
 
 /**
- * Tablas base del buscador estándar de la barra (xtein-record-filter). Sus campos están en
- * ITM_DOMINIOS COLUMNAS / FILTRO (apiRest sql/seed/55_cal003_filtros.sql) y el SP aplica sus criterios.
+ * Tabla base del buscador de la barra (xtein-record-filter): uno solo para toda la pantalla, con el campo
+ * OPERACION para escoger qué documentos buscar. Sus campos están en ITM_DOMINIOS COLUMNAS / FILTRO
+ * (apiRest sql/seed/55_cal003_filtros.sql) y el SP aplica los criterios.
  */
-export const Cal003FilterTable = {
-  Services: 'RS_ST_SERVICIOS',
-  Transfers: 'RS_ST_TRASLADOS',
-  Deliveries: 'RS_ST_ENTREGAS',
-  Adjustments: 'AJUSTES_ST'
-} as const;
+export const Cal003FilterTable = 'RS_ST_OPERACIONES';
+export const Cal003FilterOperationField = 'OPERACION';
+
+/** Valor del campo OPERACION del buscador → operación que se abre. */
+export const Cal003FilterOperations: Readonly<Record<string, Cal003Tab>> = {
+  ENTRADA: 'entrada',
+  TRASLADO: 'traslado',
+  ENTREGA: 'entrega',
+  AJUSTE: 'ajuste',
+  'PRECIOS ESPECIAL': 'precios',
+  CONSULTAS: 'consultas'
+};
+
+/** Operaciones que se crean con Nuevo y se buscan con Buscar. */
+export const Cal003RecordTabs: readonly Cal003Tab[] = ['entrada', 'traslado', 'entrega', 'ajuste'];
 
 export const Cal003Endpoint = {
   Query: `/${Cal003Application.BackendId}/consulta`,
@@ -154,6 +164,6 @@ export const Cal003ToolbarCapabilities: Readonly<Record<Cal003Tab, Partial<Recor
   [Cal003Tab.Transfer]: { create: true, edit: false, delete: false, search: true, refresh: true, copy: false, view: true, sort: false, navigation: true, download: false, print: false, configure: false },
   [Cal003Tab.Delivery]: { create: true, edit: false, delete: true, search: true, refresh: true, copy: false, view: true, sort: false, navigation: true, download: false, print: true, configure: false },
   [Cal003Tab.Adjustment]: { create: true, edit: false, delete: false, search: true, refresh: true, copy: false, view: true, sort: false, navigation: true, download: false, print: false, configure: false },
-  [Cal003Tab.Prices]: { create: false, edit: true, delete: false, search: false, refresh: true, copy: false, view: false, sort: false, navigation: false, download: false, print: false, configure: false },
-  [Cal003Tab.Queries]: { create: false, edit: false, delete: false, search: false, refresh: true, copy: false, view: false, sort: false, navigation: false, download: false, print: false, configure: false }
+  [Cal003Tab.Prices]: { create: true, edit: true, delete: false, search: true, refresh: true, copy: false, view: false, sort: false, navigation: false, download: false, print: false, configure: false },
+  [Cal003Tab.Queries]: { create: true, edit: false, delete: false, search: true, refresh: true, copy: false, view: false, sort: false, navigation: false, download: false, print: false, configure: false }
 };

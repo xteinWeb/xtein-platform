@@ -9,11 +9,10 @@ import {
   XteinLabelComponent,
   XteinLookupComponent,
   XteinPopupComponent,
-  XteinRecordFilterComponent,
-  XteinRecordFilterResult,
+  XteinRecordFilterCriterion,
   XteinRecordViewComponent
 } from '@xtein/ui';
-import { Cal003DeliveryStatus, Cal003FilterTable, Cal003Limits, Cal003ServiceType } from '../../constants/cal-003.constants';
+import { Cal003DeliveryStatus, Cal003Limits, Cal003ServiceType } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003EntregaViewColumns, Cal003ServicioEntregableColumns } from '../../constants/cal-003-ui.constants';
 import type { Cal003Entrega, Cal003EntregaCompleta, Cal003ServicioEntregable, Cal003Unidad } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
@@ -47,7 +46,6 @@ interface Cal003LineaVista {
     XteinLabelComponent,
     XteinLookupComponent,
     XteinPopupComponent,
-    XteinRecordFilterComponent,
     XteinRecordViewComponent
   ],
   templateUrl: './xtein-cal003-entrega.component.html',
@@ -80,9 +78,7 @@ export class XteinCal003EntregaComponent implements Cal003Pestana {
   readonly seleccionada = signal<number | null>(null);
 
   // Ventanas
-  readonly filterTable = Cal003FilterTable.Deliveries;
   readonly viewColumns = Cal003EntregaViewColumns;
-  readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
   readonly impresionVisible = signal(false);
 
@@ -110,7 +106,6 @@ export class XteinCal003EntregaComponent implements Cal003Pestana {
       case ToolbarAction.New: return this.nuevo();
       case ToolbarAction.Save: return this.despachar();
       case ToolbarAction.Cancel: return this.cancelar();
-      case ToolbarAction.Search: return this.abrirBuscar();
       case ToolbarAction.View: return this.abrirVer();
       case ToolbarAction.Delete: return this.anularLinea();
       case ToolbarAction.Print: return this.verImpresion();
@@ -210,11 +205,6 @@ export class XteinCal003EntregaComponent implements Cal003Pestana {
 
   // ================= Documento abierto =================
 
-  /** Buscar de la barra: el filtro estándar de la plataforma (campos en ITM_DOMINIOS COLUMNAS / FILTRO). */
-  abrirBuscar(): void {
-    if (!this.creando()) this.filterVisible.set(true);
-  }
-
   /** Ver de la barra: la lista de lo que trajo Buscar. */
   abrirVer(): void {
     if (this.creando()) return;
@@ -225,9 +215,9 @@ export class XteinCal003EntregaComponent implements Cal003Pestana {
     this.viewVisible.set(true);
   }
 
-  async buscar(result: XteinRecordFilterResult): Promise<void> {
-    this.filterVisible.set(false);
-    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.entregas(result?.ESTRUCTURA ?? []));
+  /** Lo llama la pantalla con los criterios del buscador de la barra (sin el campo Operación). */
+  async buscar(criterios: XteinRecordFilterCriterion[]): Promise<void> {
+    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.entregas(criterios));
     if (!encontrados) return;
     if (!encontrados.length) {
       this.ctx.advertir('No se encontraron registros con el criterio especificado.');

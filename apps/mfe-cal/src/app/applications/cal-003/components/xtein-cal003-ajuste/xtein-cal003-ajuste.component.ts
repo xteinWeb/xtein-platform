@@ -9,9 +9,7 @@ import {
   XteinInputComponent,
   XteinLabelComponent,
   XteinLookupComponent,
-  XteinRecordFilterComponent,
   XteinRecordFilterCriterion,
-  XteinRecordFilterResult,
   XteinRecordViewComponent,
   XteinSelectComponent
 } from '@xtein/ui';
@@ -37,7 +35,6 @@ import { estadoBadge } from '../../utils/cal-003-formato';
     XteinInputComponent,
     XteinLabelComponent,
     XteinLookupComponent,
-    XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinSelectComponent
   ],
@@ -62,10 +59,8 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
   readonly idServicio = signal<number | null>(null);
   readonly destino = signal<Cal003Destino | ''>('');
 
-  // Buscar y Ver de la barra
-  readonly filterTable = Cal003FilterTable.Adjustments;
+  // Ver de la barra (Buscar lo maneja la pantalla: un solo buscador con el campo Operación)
   readonly viewColumns = Cal003AjusteViewColumns;
-  readonly filterVisible = signal(false);
   readonly viewVisible = signal(false);
 
   readonly usuario = this.session.current?.userId ?? '';
@@ -88,7 +83,6 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
       case ToolbarAction.New: return this.nuevo();
       case ToolbarAction.Save: return this.proponer();
       case ToolbarAction.Cancel: return this.cancelar();
-      case ToolbarAction.Search: return this.abrirBuscar();
       case ToolbarAction.View: return this.abrirVer();
       case ToolbarAction.Refresh: return this.refrescar();
       case ToolbarAction.First: return this.irA(0);
@@ -165,11 +159,6 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
 
   // ================= Buscar y Ver de la barra =================
 
-  /** Buscar: el filtro estándar de la plataforma (campos en ITM_DOMINIOS COLUMNAS / FILTRO). */
-  abrirBuscar(): void {
-    if (!this.creando()) this.filterVisible.set(true);
-  }
-
   /** Ver: la lista de lo que trajo Buscar. */
   abrirVer(): void {
     if (this.creando()) return;
@@ -180,9 +169,9 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
     this.viewVisible.set(true);
   }
 
-  async buscar(result: XteinRecordFilterResult): Promise<void> {
-    this.filterVisible.set(false);
-    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.ajustes(result?.ESTRUCTURA ?? []));
+  /** Lo llama la pantalla con los criterios del buscador de la barra (sin el campo Operación). */
+  async buscar(criterios: XteinRecordFilterCriterion[]): Promise<void> {
+    const encontrados = await this.ctx.ejecutar(() => this.ctx.api.ajustes(criterios));
     if (!encontrados) return;
     if (!encontrados.length) {
       this.ctx.advertir('No se encontraron registros con el criterio especificado.');
@@ -242,7 +231,7 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
   }
 
   private porServicio(documento: string): XteinRecordFilterCriterion[] {
-    return [{ CAMPO: 'SERVICIO', EXPRESION: documento, TABLA: this.filterTable }];
+    return [{ CAMPO: 'SERVICIO', EXPRESION: documento, TABLA: Cal003FilterTable }];
   }
 
   private limpiar(): void {

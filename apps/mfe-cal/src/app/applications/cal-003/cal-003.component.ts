@@ -14,9 +14,31 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ToolbarRuntimeService } from '@xtein/runtime';
-import { DeniedRecordToolbarPermissions, RecordToolbarPermissions, ToolbarCommand, createRecordToolbarState } from '@xtein/sdk';
-import { XteinLabelComponent, XteinLoadingComponent, XteinSelectComponent } from '@xtein/ui';
-import { Cal003Application, Cal003Tab, Cal003Tabs, Cal003ToolbarCapabilities } from './constants/cal-003.constants';
+import {
+  DeniedRecordToolbarPermissions,
+  RecordToolbarMode,
+  RecordToolbarPermissions,
+  ToolbarAction,
+  ToolbarCommand,
+  createRecordToolbarState
+} from '@xtein/sdk';
+import {
+  XteinLabelComponent,
+  XteinLoadingComponent,
+  XteinRecordFilterComponent,
+  XteinRecordFilterResult,
+  XteinSelectComponent
+} from '@xtein/ui';
+import {
+  Cal003Application,
+  Cal003FilterOperationField,
+  Cal003FilterOperations,
+  Cal003FilterTable,
+  Cal003RecordTabs,
+  Cal003Tab,
+  Cal003Tabs,
+  Cal003ToolbarCapabilities
+} from './constants/cal-003.constants';
 import { Cal003Service } from './services/cal-003.service';
 import { Cal003BarraVacia, Cal003ContextoService, Cal003Pestana } from './services/cal-003-contexto.service';
 import { XteinCal003EntradaComponent } from './components/xtein-cal003-entrada/xtein-cal003-entrada.component';
@@ -29,7 +51,8 @@ import { XteinCal003ConsultasComponent } from './components/xtein-cal003-consult
 /**
  * CAL-003 Servicios técnicos: inventario de los productos que los clientes devuelven por garantía (SG)
  * o reparación (SR). El select Operación escoge el formulario (Entrada, Traslado, Salida · Entrega,
- * Salida · Ajuste, Precios ESPECIAL o Consultas); la barra de acciones actúa sobre el formulario activo.
+ * Salida · Ajuste, Precios ESPECIAL o Consultas) y solo se habilita con Nuevo; Buscar (aquí, uno solo)
+ * lleva el campo Operación. El resto de la barra actúa sobre el formulario activo.
  * Pre-facturas y la factura de las SR son de otros módulos.
  */
 @Component({
@@ -40,6 +63,7 @@ import { XteinCal003ConsultasComponent } from './components/xtein-cal003-consult
     FormsModule,
     XteinLabelComponent,
     XteinLoadingComponent,
+    XteinRecordFilterComponent,
     XteinSelectComponent,
     XteinCal003EntradaComponent,
     XteinCal003TrasladoComponent,
@@ -62,7 +86,10 @@ export class Cal003Component implements OnInit, OnDestroy {
   private readonly toolbar = inject(ToolbarRuntimeService);
 
   readonly activa = signal<Cal003Tab>(Cal003Tab.Entry);
-  /** Pestañas ya abiertas: se cargan la primera vez que se muestran. */
+  /** Valor del select Operación (aparte de activa para poder devolverlo si no se descarta lo que se registra). */
+  readonly seleccion = signal<Cal003Tab>(Cal003Tab.Entry);
+  readonly filterTable = Cal003FilterTable;
+  readonly filterVisible = signal(false);
 
   private readonly entrada = viewChild(XteinCal003EntradaComponent);
   private readonly traslado = viewChild(XteinCal003TrasladoComponent);
@@ -70,6 +97,9 @@ export class Cal003Component implements OnInit, OnDestroy {
   private readonly ajuste = viewChild(XteinCal003AjusteComponent);
   private readonly precios = viewChild(XteinCal003PreciosComponent);
   private readonly consultas = viewChild(XteinCal003ConsultasComponent);
+
+  /** La operación activa está registrando algo nuevo: solo entonces se puede cambiar de operación. */
+  readonly creando = computed(() => this.pestana()?.barra().mode === RecordToolbarMode.Creating);
 
   readonly pestana = computed<Cal003Pestana | undefined>(() => {
     switch (this.activa()) {
@@ -90,8 +120,8 @@ export class Cal003Component implements OnInit, OnDestroy {
     const p = this.ctx.permisos();
     if (!p) return DeniedRecordToolbarPermissions;
     const ver = p.PUEDE_VER === 1;
-    // El traslado también lo envía la persona de planta desde sus bodegas
-    const crea = p.PUEDE_CREAR === 1 || (this.activa() === Cal003Tab.Transfer && (p.BODEGAS ?? []).length > 0);
+    // La persona de planta también crea: envía traslados desde sus bodegas
+    const crea = p.PUEDE_CREAR === 1 || (p.BODEGAS ?? []).length > 0;
     return {
       create: crea,
       edit: p.PUEDE_PRECIO === 1,
@@ -126,7 +156,7 @@ export class Cal003Component implements OnInit, OnDestroy {
         .commandsForApplication(this.applicationId)
         .subscribe(command => void this.comando(command))
     );
-    void this.ctx.cargar().then(() => this.visitar(this.activa(), true));
+    void this.ctx.cargar();
   }
 
   ngOnDestroy(): void {
@@ -134,27 +164,73 @@ export class Cal003Component implements OnInit, OnDestroy {
     this.toolbar.removeApplication(this.applicationId);
   }
 
-  cambiarPestana(tab: Cal003Tab | null): void {
-    if (!tab || tab === this.activa()) return;
-    this.activa.set(tab);
-    void this.visitar(tab);
-  }
-
   /**
-   * Entrada y Entrega esperan Buscar o Nuevo. Las demás quedan vivas (ocultas) al cambiar de operación,
-   * así que se recargan cada vez que se entra a ellas, para ver lo registrado en otra (p. ej. una entrada nueva).
-   * Al abrir la pantalla, Traslado, Ajuste y Precios ya cargaron solos al crearse.
+   * El select solo se habilita mientras se crea: cambiar de operación descarta lo que se estaba
+   * registrando (la operación pide confirmar si ya había datos) y empieza la nueva.
    */
-  private async visitar(tab: Cal003Tab, alAbrir = false): Promise<void> {
-    if (tab === Cal003Tab.Queries) await this.consultas()?.refrescar();
-    else if (alAbrir) return;
-    else if (tab === Cal003Tab.Transfer) await this.traslado()?.refrescar();
-    else if (tab === Cal003Tab.Adjustment) await this.ajuste()?.refrescar();
-    else if (tab === Cal003Tab.Prices) await this.precios()?.refrescar();
+  async cambiarOperacion(tab: Cal003Tab | null): Promise<void> {
+    if (!tab || tab === this.activa()) return;
+    const actual = this.pestana();
+    if (actual && this.creando()) {
+      await actual.ejecutar(ToolbarAction.Cancel);
+      if (actual.barra().mode === RecordToolbarMode.Creating) {
+        // No quiso descartar: el select vuelve a la operación que se está registrando
+        this.seleccion.set(tab);
+        setTimeout(() => this.seleccion.set(this.activa()));
+        return;
+      }
+    }
+    await this.mostrar(tab);
+    if (Cal003RecordTabs.includes(tab)) await this.pestana()?.ejecutar(ToolbarAction.New);
   }
 
   private async comando(command: ToolbarCommand): Promise<void> {
     if (this.ctx.busy()) return;
-    await this.pestana()?.ejecutar(command.action, command.payload);
+    switch (command.action) {
+      case ToolbarAction.New: return this.nuevo();
+      case ToolbarAction.Search:
+        if (!this.creando()) this.filterVisible.set(true);
+        return;
+      default:
+        await this.pestana()?.ejecutar(command.action, command.payload);
+    }
+  }
+
+  /** Nuevo: la operación que se ve si se crea; si no, Entrada (o Traslado para la persona de planta). */
+  private async nuevo(): Promise<void> {
+    let tab = this.activa();
+    if (!Cal003RecordTabs.includes(tab)) tab = Cal003Tab.Entry;
+    if (tab !== Cal003Tab.Transfer && !this.ctx.puedeCrear() && this.ctx.misBodegas().length > 0) tab = Cal003Tab.Transfer;
+    if (tab !== this.activa()) await this.mostrar(tab);
+    await this.pestana()?.ejecutar(ToolbarAction.New);
+  }
+
+  /** Buscar: el campo Operación escoge el formulario (si no viene, el que se ve) y el resto de criterios va a él. */
+  async buscar(result: XteinRecordFilterResult): Promise<void> {
+    this.filterVisible.set(false);
+    const criterios = result?.ESTRUCTURA ?? [];
+    const operacion = criterios.find(c => c.CAMPO === Cal003FilterOperationField)?.EXPRESION?.trim() ?? '';
+    const tab = operacion ? Cal003FilterOperations[operacion] : this.activa();
+    if (!tab) {
+      this.ctx.advertir(`Operación no válida: ${operacion}.`);
+      return;
+    }
+    await this.mostrar(tab);
+    const resto = criterios.filter(c => c.CAMPO !== Cal003FilterOperationField);
+    switch (tab) {
+      case Cal003Tab.Entry: return this.entrada()?.buscar(resto);
+      case Cal003Tab.Transfer: return this.traslado()?.buscar(resto);
+      case Cal003Tab.Delivery: return this.entrega()?.buscar(resto);
+      case Cal003Tab.Adjustment: return this.ajuste()?.buscar(resto);
+      default: return; // Precios y Consultas solo se abren
+    }
+  }
+
+  /** Muestra la operación. Precios y Consultas se recargan al entrar: quedan vivas (ocultas) entre visitas. */
+  private async mostrar(tab: Cal003Tab): Promise<void> {
+    this.activa.set(tab);
+    this.seleccion.set(tab);
+    if (tab === Cal003Tab.Queries) await this.consultas()?.refrescar();
+    else if (tab === Cal003Tab.Prices) await this.precios()?.refrescar();
   }
 }
