@@ -143,8 +143,6 @@ export interface Cal003Traslado {
   ESTADO: string;
   ENVIO: string;
   RESPUESTA: string | null;
-  /** El usuario recibe en la bodega destino: puede recibir o rechazar. */
-  PUEDE_RESPONDER: number;
 }
 
 /** Servicio candidato para el despacho: OK = 1 si sale como llegó desde la bodega de salida. */
@@ -158,7 +156,19 @@ export interface Cal003ServicioEntregable {
   OK: number;
   /** Qué falta reunir cuando OK = 0. */
   MOTIVO: string | null;
+  /** Producto registrado, estado del servicio (tipo depósito) y saldo: servicios de ese producto del cliente aún en DEPOSITO. */
+  PRODUCTO?: string;
+  ESTADO_SERVICIO?: string;
+  SALDO?: number;
+  /** Lo que se muestra: el producto registrado si llegó completo; si no, lo que llegó (productos completos y partes). */
+  PIEZAS: Cal003Pieza[];
   UNIDADES: Cal003Unidad[];
+}
+
+/** Fila de la entrega: producto completo o parte suelta (dbo.FN_ST_PIEZAS). */
+export interface Cal003Pieza {
+  NOMBRE: string;
+  CANTIDAD: number;
 }
 
 export interface Cal003Entrega {
@@ -184,6 +194,11 @@ export interface Cal003LineaEntrega {
   TIPO_SERVICIO: Cal003ServiceType;
   ESTADO: 'ACTIVA' | 'ANULADA';
   OBSERVACION_ANULA: string | null;
+  /** Producto registrado, estado del servicio (tipo depósito) y saldo: servicios de ese producto del cliente aún en DEPOSITO. */
+  PRODUCTO?: string;
+  ESTADO_SERVICIO?: string;
+  SALDO?: number;
+  PIEZAS: Cal003Pieza[];
   UNIDADES: Cal003Unidad[];
 }
 

@@ -27,7 +27,7 @@ export function pesos(valor: number | null | undefined): string {
 export function estadoBadge(estado: string | null | undefined): string {
   const e = String(estado ?? '').toUpperCase();
   if (['ANULADO', 'ANULADA', 'RECHAZADO'].includes(e)) return 'c3-badge--danger';
-  if (['INACTIVO', 'ENVIADO', 'PROPUESTO', 'AJUSTE PROPUESTO', 'DESPACHADO'].includes(e)) return 'c3-badge--warn';
-  if (['RECIBIDO', 'AUTORIZADO', 'ENTREGADO', 'CERRADO', 'AJUSTADO', 'REGISTRADO'].includes(e)) return 'c3-badge--ok';
+  if (['INACTIVO', 'REGISTRADO', 'PROPUESTO', 'AJUSTE PROPUESTO', 'DESPACHADO'].includes(e)) return 'c3-badge--warn';
+  if (['AUTORIZADO', 'ENTREGADO', 'CERRADO', 'AJUSTADO'].includes(e)) return 'c3-badge--ok';
   return '';
 }

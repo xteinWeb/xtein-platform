@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RecordToolbarMode, ToolbarAction } from '@xtein/sdk';
 import {
-  XteinButtonComponent,
   XteinCheckboxComponent,
   XteinGroupLabelComponent,
   XteinInputComponent,
@@ -23,9 +22,9 @@ type Cal003ServicioTrasladable = Cal003ServicioCompleto
   & { LABEL: string };
 
 /**
- * Traslado: mueve el producto o algunas de sus partes a otra bodega. Queda hecho solo cuando quien
- * recibe en la bodega destino lo autoriza; mientras tanto sigue en el origen.
- * Como en la Entrada: Nuevo para enviar uno, Buscar para ver, recibir o rechazar los existentes.
+ * Traslado: mueve el producto o algunas de sus partes a otra bodega. Como los consumos de PRO-039, queda
+ * REGISTRADO y pendiente en Autorizaciones (ADM-225); allí quien recibe en la bodega destino (con Aprobar
+ * en CAL-003) lo autoriza o rechaza. Mientras tanto sigue en el origen. Aquí: Nuevo para enviar uno, Buscar para verlos.
  */
 @Component({
   selector: 'xtein-cal003-traslado',
@@ -33,7 +32,6 @@ type Cal003ServicioTrasladable = Cal003ServicioCompleto
   imports: [
     CommonModule,
     FormsModule,
-    XteinButtonComponent,
     XteinCheckboxComponent,
     XteinGroupLabelComponent,
     XteinInputComponent,
@@ -238,34 +236,10 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
     this.mode.set(RecordToolbarMode.Browsing);
   }
 
-  // ================= Recibir / rechazar el traslado abierto =================
-
-  async recibir(): Promise<void> {
-    const t = this.abierto();
-    if (!t) return;
-    if (!(await this.ctx.confirmar(`¿Recibir <b>${t.DOCUMENTO}</b> en ${t.BODEGA_DESTINO}?<br>${t.QUE_SE_TRASLADA}`, 'Sí, recibir'))) return;
-    const resultado = await this.ctx.ejecutar(() => this.ctx.api.trasladoRecibir(t.ID_TRASLADO));
-    if (!resultado) return;
-    this.ctx.exito(resultado.MENSAJE);
-    await this.refrescar();
-  }
-
-  async rechazar(): Promise<void> {
-    const t = this.abierto();
-    if (!t) return;
-    const observacion = await this.ctx.pedirObservacion(`Rechazar ${t.DOCUMENTO}`,
-      `<p>El producto se queda en ${t.BODEGA_ORIGEN} y se avisa a quien envió.</p>`, 'Rechazar', 'Por qué se rechaza');
-    if (!observacion) return;
-    const resultado = await this.ctx.ejecutar(() => this.ctx.api.trasladoRechazar(t.ID_TRASLADO, observacion));
-    if (!resultado) return;
-    this.ctx.exito(resultado.MENSAJE);
-    await this.refrescar();
-  }
-
   // ================= Utilidades =================
 
   estadoTexto(estado: string): string {
-    return estado === Cal003TransferStatus.Sent ? 'Enviado, pendiente de recibir' : estado;
+    return estado === Cal003TransferStatus.Registered ? 'REGISTRADO, pendiente en Autorizaciones' : estado;
   }
 
   nombreUnidad(u: Cal003Unidad): string {

@@ -142,14 +142,6 @@ export class Cal003Service {
     return this.guardar(Cal003Action.TransferSend, { ID_SERVICIO: idServicio, ID_UN_BODEGA_DESTINO: destino, UNIDADES: unidades });
   }
 
-  trasladoRecibir(idTraslado: number): Promise<Cal003Resultado> {
-    return this.guardar(Cal003Action.TransferReceive, { ID_TRASLADO: idTraslado });
-  }
-
-  trasladoRechazar(idTraslado: number, observacion: string): Promise<Cal003Resultado> {
-    return this.guardar(Cal003Action.TransferReject, { ID_TRASLADO: idTraslado, OBSERVACION: observacion });
-  }
-
   // ================= Salida · Entrega =================
 
   serviciosEntregables(idCliente: string, bodega: string): Promise<Cal003ServicioEntregable[]> {
@@ -202,14 +194,6 @@ export class Cal003Service {
 
   ajusteProponer(idServicio: number, destino: Cal003Destino): Promise<Cal003Resultado> {
     return this.guardar(Cal003Action.AdjustmentPropose, { ID_SERVICIO: idServicio, DESTINO: destino });
-  }
-
-  ajusteAutorizar(idAjuste: number): Promise<Cal003Resultado> {
-    return this.guardar(Cal003Action.AdjustmentAuthorize, { ID_AJUSTE: idAjuste });
-  }
-
-  ajusteRechazar(idAjuste: number, observacion: string): Promise<Cal003Resultado> {
-    return this.guardar(Cal003Action.AdjustmentReject, { ID_AJUSTE: idAjuste, OBSERVACION: observacion });
   }
 
   // ================= Precios ESPECIAL =================

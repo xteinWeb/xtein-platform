@@ -1,5 +1,22 @@
 @use '../../cal-003-comun';
 
+// Separación entre los datos del documento, la sección de servicios, la tabla y la nota
+.c3-d-servicios {
+  margin-top: 22px;
+}
+
+.c3-d-agregar {
+  margin-bottom: 14px;
+}
+
+.c3-d-tabla {
+  margin-top: 12px;
+}
+
+.c3-d-nota {
+  margin-top: 14px;
+}
+
 .c3-buscador__pie {
   justify-content: flex-end;
 }

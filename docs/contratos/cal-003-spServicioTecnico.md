@@ -5,7 +5,7 @@ Contrato entre el front (`apps/mfe-cal`, aplicación `CAL-003`), las rutas de ap
 Archivos en apiRest:
 - BD: `sql/ddl/50_cal003_servicios_tecnicos.sql` (tablas), `sql/seed/52_cal003_documentos.sql` (STS/STT/STD y áreas), `sql/seed/54_cal003_tipos_servicio.sql` (tipos de servicio), `sql/sp/51_spServicioTecnico.sql` (vistas `RS_ST_*` y SP), `sql/seed/53_menu_cal003.sql` (menú y permisos de XTEIN), `sql/seed/55_cal003_filtros.sql` (campos del buscador de la barra), `sql/rollback/91_rollback_cal003.sql`.
 - Rutas: `src/routes/CAL003.routes.js`, `src/controllers/CAL003/CAL003.controller.js`, `src/controllers/CAL003/soportes.js`, `src/tests/CAL003.test.js`. Variable `RUTA_ARCHIVOS_CAL003` (`.env.example`).
-- Orden de ejecución: **50 → 52 → 54 → 51 → 53 → 55**.
+- Orden de ejecución: **50 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58** (57 = `spAutorizaciones`, compartido; 58 = migra los estados de traslados ya creados).
 
 Archivos en el front: `apps/mfe-cal/src/app/applications/cal-003/**` y su entrada en `cal-application.registry.ts`.
 
@@ -31,10 +31,12 @@ Las mismas de CAL-001 (`cal-001-spNoConformidad.md` §1):
 |---|---|---|
 | Quien gestiona las garantías | `CREAR` | Entrada, anular entrada sin traslados recibidos, enviar traslados desde cualquier bodega, despachar, anular líneas, adjuntar soporte, proponer ajustes |
 | Persona de facturación | `ELIMINAR` | Anular un servicio con traslados recibidos (queda `INACTIVO`) y, ya reunidas sus partes, anularlo completo |
-| Quien hace las devoluciones | `EXCLUSIVA` | Autorizar o rechazar ajustes |
+| Quien hace las devoluciones | `EXCLUSIVA` | Recibe el aviso de ajustes por autorizar |
+| Quien autoriza ajustes | `USUARIOS_AUTORIZACIONES.APROBAR` en CAL-003 | Autorizar o rechazar ajustes en Autorizaciones (ADM-225), sin importar la bodega |
 | Responsable de costos | `MODIFICAR` | Poner el precio de los ESPECIAL |
 | Ver | `LISTAR` o `BUSCAR` | Consultas |
-| Persona de planta | `BODEGAS_USUARIOS` | Recibir o rechazar traslados hacia sus bodegas; enviar desde ellas; ver solo sus bodegas |
+| Persona de planta | `BODEGAS_USUARIOS` | Enviar traslados desde sus bodegas; ver solo sus bodegas |
+| Quien autoriza traslados | `USUARIOS_AUTORIZACIONES.APROBAR` en CAL-003 **y** la bodega destino en `BODEGAS_USUARIOS` | Autorizar o rechazar en Autorizaciones (ADM-225) los traslados hacia sus bodegas |
 
 `VE_TODAS = 1` si tiene `CREAR`, `ELIMINAR`, `EXCLUSIVA`, `MODIFICAR` o `CONFIGURAR`; si no, traslados y consultas se limitan a sus bodegas. La barra de acciones del front usa estos papeles (no los permisos genéricos de ADM015): Nuevo/Guardar = `PUEDE_CREAR`, Eliminar (anular) = `PUEDE_CREAR` o `PUEDE_ANULAR_RECIBIDO`, Guardar en Precios = `PUEDE_PRECIO`.
 
@@ -57,7 +59,7 @@ Acción fuera de la lista de su ruta → **400 sin llamar al SP**. `DATA_JSON` =
 | Ruta | Acciones |
 |---|---|
 | `POST /api/CAL003/consulta` | `permisos`, `clientes`, `bodegas`, `areas`, `tipos servicio`, `productos`, `producto arbol`, `servicios`, `servicio`, `servicios trasladables`, `traslados`, `servicios entregables`, `entregas`, `entrega`, `servicios ajustables`, `ajustes`, `precios especial`, `inventario bodega`, `servicios cliente`, `historial`, `avisos` |
-| `POST /api/CAL003/save` | `entrada nueva`, `entrada anular`, `traslado enviar`, `traslado recibir`, `traslado rechazar`, `entrega despachar`, `entrega anular linea`, `ajuste proponer`, `ajuste autorizar`, `ajuste rechazar`, `precios guardar` |
+| `POST /api/CAL003/save` | `entrada nueva`, `entrada anular`, `traslado enviar`, `entrega despachar`, `entrega anular linea`, `ajuste proponer`, `precios guardar` (autorizar o rechazar traslados y ajustes solo en Autorizaciones, §2.6) |
 | `POST /api/CAL003/soporte-subir` | `soporte adjuntar` |
 | `POST /api/CAL003/soporte` | `soporte ver` |
 
@@ -77,42 +79,42 @@ Ninguna respuesta lleva `RUTA`.
 | `producto arbol` | `CODIGO` (interno o `CODIGO_ASOCIADO`) | `[{CODIGO_BUSCADO, PRODUCTO_BUSCADO, RAIZ:{NIVEL, PRODUCTO, CODIGO_ASOCIADO, NOMBRE, CANTIDAD, HIJOS:[…]}}]`. Juego (`JU%`) → productos de `PRODUCTOS_KITS` → partes de `PRODUCTOS_PARTES` (cantidad de la parte × la del producto). Si el código es de un producto que pertenece a **un solo** juego, la raíz es ese juego y `PRODUCTO_BUSCADO` indica el producto que llegó |
 | `servicios` | `TEXTO?`, `FECHA_DESDE?` (90 días), `FECHA_HASTA?` (hoy), `FILTRO?` (§2.5; con él no hay rango por defecto) | Hasta 200 servicios (`Cal003Servicio`) |
 | `servicio` | `ID_SERVICIO` | `[{SERVICIO, UNIDADES:[Cal003Unidad]}]` |
-| `servicios trasladables` | — | `[{SERVICIO, UNIDADES}]` en `EN INVENTARIO` o `INACTIVO`, con unidades en bodegas visibles |
-| `traslados` | `FILTRO?` (§2.5) | Hasta 200, primero los `ENVIADO`; `PUEDE_RESPONDER = 1` si el usuario recibe en la bodega destino |
-| `servicios entregables` | `ID_CLIENTE`, `ID_UN_BODEGA` | Servicios del cliente `EN INVENTARIO` con `OK` (todas sus unidades en esa bodega y sin traslado pendiente) y `MOTIVO` (qué falta reunir) |
+| `servicios trasladables` | — | `[{SERVICIO, UNIDADES}]` en `DEPOSITO` o `INACTIVO`, con unidades en bodegas visibles |
+| `traslados` | `FILTRO?` (§2.5) | Hasta 200, primero los `REGISTRADO` |
+| `servicios entregables` | `ID_CLIENTE`, `ID_UN_BODEGA` | Servicios del cliente `DEPOSITO` con `OK` (todas sus unidades en esa bodega y sin traslado pendiente) y `MOTIVO` (qué falta reunir) |
 | `entregas` | `PENDIENTES?` (1 = solo `DESPACHADO` con líneas activas), `FILTRO?` (§2.5) | Hasta 200 documentos de entrega |
-| `entrega` | `ID_ENTREGA` | `[{ENTREGA, LINEAS:[{…, ESTADO ACTIVA/ANULADA, UNIDADES}]}]` |
-| `servicios ajustables` | — | `EN INVENTARIO` sin traslados pendientes |
+| `entrega` | `ID_ENTREGA` | `[{ENTREGA, LINEAS:[{…, ESTADO ACTIVA/ANULADA, PIEZAS:[{NOMBRE, CANTIDAD}], UNIDADES}]}]`. `PIEZAS` (`dbo.FN_ST_PIEZAS`) es lo que se muestra: el producto registrado si llegó completo; si llegaron solo partes, cada producto completo y las partes sueltas. `servicios entregables` también trae `PIEZAS`. Ambas traen `PRODUCTO`, `ESTADO_SERVICIO` (tipo depósito) y `SALDO` (servicios de ese producto que le quedan al cliente en `DEPOSITO`) |
+| `servicios ajustables` | — | `DEPOSITO` sin traslados pendientes |
 | `ajustes` | `FILTRO?` (§2.5) | Hasta 200, primero los `PROPUESTO` |
 | `precios especial` | — | `[{SIN_PRECIO:[{…, DIAS_HABILES}], CON_PRECIO:[…]}]`. Días hábiles = lunes a viernes, sin festivos |
 | `inventario bodega` | `ID_UN_BODEGA` (visible) | Unidades en la bodega con servicio, cliente y días en inventario |
 | `servicios cliente` | `ID_CLIENTE` | Servicios con dónde está cada unidad |
 | `historial` | `ID_SERVICIO` | `LOG_SERVICIOS_TECNICOS` en orden |
-| `avisos` | — | `[{TITULO, DETALLE}]` según el papel: traslados por recibir (sus bodegas); traslados rechazados, soportes pendientes y ajustes rechazados (garantías); ajustes por autorizar (devoluciones); ESPECIAL sin precio (costos). Se cierran solos al resolverse |
+| `avisos` | — | `[{TITULO, DETALLE}]` según el papel: traslados por autorizar en Autorizaciones (sus bodegas); traslados rechazados, soportes pendientes y ajustes rechazados (garantías); ajustes por autorizar en Autorizaciones (devoluciones); ESPECIAL sin precio (costos). Se cierran solos al resolverse |
 
 ### 2.2 Escritura
 
 | Acción | Entrada | Reglas |
 |---|---|---|
-| `entrada nueva` | `ENTRADA:{FECHA, ID_CLIENTE, TIPO_SERVICIO (código del dominio), ID_UN_BODEGA, N_SERVICIO_CLIENTE?, N_ORDEN_DEVOLUCION?, ID_AREA?}`, `PRODUCTOS:[{PRODUCTO, UNIDADES:[{NIVEL PF/PA, PRODUCTO, PARTE, CANTIDAD}]}]` (**un solo producto**) | `CREAR`. Fecha ≤ hoy. El producto = un servicio `STS` `EN INVENTARIO`. Cada unidad debe pertenecer al producto recibido y no pasar la cantidad del catálogo; un producto llega completo (PF) **o** por sus partes (PA). `PARCIAL` y «(llegó una parte)» si es un juego del que no llegó todo. Devuelve `[{ID_SERVICIO, DOCUMENTO, NOMBRE}]` |
-| `entrada anular` | `ID_SERVICIO`, `VERSION`, `OBSERVACION` (obligatoria, ≤ 500) | Rechaza si ya tiene despacho o ajuste. Sin traslados recibidos: `CREAR` → `ANULADO` (anula sus traslados `ENVIADO` y saca las unidades). Con traslados recibidos: `ELIMINAR` → `INACTIVO`; un `INACTIVO` con todas sus partes en una bodega y sin traslados pendientes → `ANULADO` (`ELIMINAR`) |
-| `traslado enviar` | `ID_SERVICIO`, `ID_UN_BODEGA_DESTINO`, `UNIDADES:[ID_UNIDAD]` | `CREAR`, o persona de planta desde sus bodegas. Unidades del servicio, en inventario, sin traslado pendiente y de **una sola** bodega origen ≠ destino. Crea `STT` `ENVIADO`; las unidades siguen en el origen con `ID_TRASLADO_PENDIENTE` |
-| `traslado recibir` / `traslado rechazar` | `ID_TRASLADO` (+ `OBSERVACION` obligatoria al rechazar) | Solo quien está en `BODEGAS_USUARIOS` de la bodega destino. Recibir mueve las unidades al destino; rechazar las deja en el origen |
-| `entrega despachar` | `ID_CLIENTE`, `ID_UN_BODEGA`, `SERVICIOS:[ID_SERVICIO]` | `CREAR`. Servicios del cliente `EN INVENTARIO` que salen como llegaron desde esa bodega. Crea `STD` `DESPACHADO`; servicios `DESPACHADO` (siguen en la bodega hasta el soporte) |
-| `entrega anular linea` | `ID_ENTREGA`, `ID_SERVICIO`, `OBSERVACION` | `CREAR`. Solo en `DESPACHADO`. La línea queda `ANULADA` y el servicio vuelve a `EN INVENTARIO` (devuelto por el cliente) |
-| `ajuste proponer` | `ID_SERVICIO`, `DESTINO` NUEVO/ESPECIAL/BAJA | `CREAR`. `EN INVENTARIO` sin traslados pendientes → `AJUSTE PROPUESTO`. Un solo ajuste propuesto por servicio |
-| `ajuste autorizar` | `ID_AJUSTE`, `OBSERVACION?` | `EXCLUSIVA`. Servicio `AJUSTADO`, sale del inventario de Calidad; ESPECIAL crea su fila en `PRECIOS_ESPECIAL_ST` |
-| `ajuste rechazar` | `ID_AJUSTE`, `OBSERVACION` | `EXCLUSIVA`. BAJA rechazada → pasa sola a ESPECIAL (como autorizada a ESPECIAL). NUEVO o ESPECIAL rechazado → el servicio vuelve a `EN INVENTARIO` para tipificarlo otra vez |
+| `entrada nueva` | `ENTRADA:{FECHA, ID_CLIENTE, TIPO_SERVICIO (código del dominio), ID_UN_BODEGA, N_SERVICIO_CLIENTE?, N_ORDEN_DEVOLUCION?, ID_AREA?}`, `PRODUCTOS:[{PRODUCTO, UNIDADES:[{NIVEL PF/PA, PRODUCTO, PARTE, CANTIDAD}]}]` (**un solo producto**) | `CREAR`. Fecha ≤ hoy. El producto = un servicio `STS` `DEPOSITO`. Cada unidad debe pertenecer al producto recibido y no pasar la cantidad del catálogo; un producto llega completo (PF) **o** por sus partes (PA). `PARCIAL` y «(llegó una parte)» si es un juego del que no llegó todo. Devuelve `[{ID_SERVICIO, DOCUMENTO, NOMBRE}]` |
+| `entrada anular` | `ID_SERVICIO`, `VERSION`, `OBSERVACION` (obligatoria, ≤ 500) | Rechaza si ya tiene despacho o ajuste. Sin traslados autorizados: `CREAR` → `ANULADO` (anula sus traslados `REGISTRADO` y sus NAU, como al anular un consumo de PRO-039, y saca las unidades). Con traslados autorizados: `ELIMINAR` → `INACTIVO`; un `INACTIVO` con todas sus partes en una bodega y sin traslados pendientes → `ANULADO` (`ELIMINAR`) |
+| `traslado enviar` | `ID_SERVICIO`, `ID_UN_BODEGA_DESTINO`, `UNIDADES:[ID_UNIDAD]` | `CREAR`, o persona de planta desde sus bodegas. Unidades del servicio, en inventario, sin traslado pendiente y de **una sola** bodega origen ≠ destino. Crea `STT` `REGISTRADO`; las unidades siguen en el origen con `ID_TRASLADO_PENDIENTE`. Deja una NAU pendiente en Autorizaciones (§2.6) |
+| `traslado autorizar` / `traslado rechazar` | Solo desde Autorizaciones (callback `autorizacion`, §2.6); desde CAL-003 responden "Los traslados se autorizan o rechazan en Autorizaciones" | `APROBAR` en CAL-003 (`USUARIOS_AUTORIZACIONES`) y la bodega destino en `BODEGAS_USUARIOS`. Autorizar mueve las unidades al destino; rechazar las deja en el origen. Observación opcional, como en PRO-039 |
+| `entrega despachar` | `ID_CLIENTE`, `ID_UN_BODEGA`, `SERVICIOS:[ID_SERVICIO]` | `CREAR`. Servicios del cliente `DEPOSITO` que salen como llegaron desde esa bodega. Crea `STD` `DESPACHADO`; servicios `DESPACHADO` (siguen en la bodega hasta el soporte) |
+| `entrega anular linea` | `ID_ENTREGA`, `ID_SERVICIO`, `OBSERVACION` | `CREAR`. Solo en `DESPACHADO`. La línea queda `ANULADA` y el servicio vuelve a `DEPOSITO` (devuelto por el cliente) |
+| `ajuste proponer` | `ID_SERVICIO`, `DESTINO` NUEVO/ESPECIAL/BAJA | `CREAR`. `DEPOSITO` sin traslados pendientes → `AJUSTE PROPUESTO`. Un solo ajuste propuesto por servicio. Deja una NAU pendiente en Autorizaciones con `SOPORTE` `AJ-<ID_AJUSTE>` (5 dígitos) (§2.6) |
+| `ajuste autorizar` | Solo desde Autorizaciones (callback `autorizacion`, §2.6) | `APROBAR` en CAL-003. Servicio `AJUSTADO`, sale del inventario de Calidad; ESPECIAL crea su fila en `PRECIOS_ESPECIAL_ST` |
+| `ajuste rechazar` | Solo desde Autorizaciones (callback `autorizacion`, §2.6); observación opcional | `APROBAR` en CAL-003. BAJA rechazada → pasa sola a ESPECIAL (como autorizada a ESPECIAL). NUEVO o ESPECIAL rechazado → el servicio vuelve a `DEPOSITO` para tipificarlo otra vez |
 | `precios guardar` | `PRECIOS:[{ID_SERVICIO, PRECIO > 0}]` | `MODIFICAR`. Solo ESPECIAL sin precio |
 
 Las acciones de escritura devuelven `[{ErrMensaje:"", DOCUMENTO, MENSAJE}]` (el front muestra `MENSAJE`), salvo `entrada nueva` y `entrega despachar`, que devuelven lo creado.
 
 ### 2.3 Estados
 
-- Servicio: `EN INVENTARIO` → (`AJUSTE PROPUESTO` → `AJUSTADO` | `EN INVENTARIO`) · (`DESPACHADO` → `ENTREGADO` | `EN INVENTARIO`) · `INACTIVO` → `ANULADO` · `ANULADO`.
-- Traslado: `ENVIADO` → `RECIBIDO` | `RECHAZADO` | `ANULADO` (con la entrada).
+- Servicio: `DEPOSITO` → (`AJUSTE PROPUESTO` → `AJUSTADO` | `DEPOSITO`) · (`DESPACHADO` → `ENTREGADO` | `DEPOSITO`) · `INACTIVO` → `ANULADO` · `ANULADO`.
+- Traslado (como los consumos de PRO-039): `REGISTRADO` → `AUTORIZADO` | `RECHAZADO` (solo en Autorizaciones) | `ANULADO` (con la entrada).
 - Entrega: `DESPACHADO` → `CERRADO` (soporte). Línea: `ACTIVA` | `ANULADA`.
-- Ajuste: `PROPUESTO` → `AUTORIZADO` | `RECHAZADO` (`DESTINO_FINAL` = ESPECIAL si era BAJA).
+- Ajuste: `PROPUESTO` → `AUTORIZADO` | `RECHAZADO` (solo en Autorizaciones; `DESTINO_FINAL` = ESPECIAL si era BAJA).
 
 ### 2.4 Soporte firmado
 
@@ -144,6 +146,24 @@ Las acciones de escritura devuelven `[{ErrMensaje:"", DOCUMENTO, MENSAJE}]` (el 
 | `PENDIENTE_SOPORTE` | — | — | `SI` = despachado con líneas activas | — |
 
 Un campo nuevo en el buscador necesita su fila en el seed 55 **y** su condición en el SP.
+
+### 2.6 Traslados en Autorizaciones (ADM-225)
+
+Mismo manejo que los consumos de PRO-039, para traslados y salidas por ajuste: el documento queda pendiente (`REGISTRADO` / `PROPUESTO`) con su NAU y solo Autorizaciones lo cambia; la pantalla de CAL-003 solo muestra el estado (sin botones). Traslado: `SOPORTE` = número TR, autoriza quien tiene `APROBAR` y la bodega destino. Ajuste: `SOPORTE` = `AJ-<ID_AJUSTE>`, autoriza quien tiene `APROBAR`. El callback decide por el prefijo del `SOPORTE`.
+
+
+- `traslado enviar` crea en la misma transacción una NAU (`AUTORIZACION_WEB` + `ITM_AUTORIZACION_WEB`, UN raíz, `ID_APLICACION = 'CAL-003'`, `SOPORTE` = número TR, `ESTADO = 'REGISTRADO'`), igual que `spAutorizaciones 'GENERAR AUTORIZACION'` pero escrita en el SP para no anidar `INSERT…EXEC`. `DATOS`: `DOCUMENTO`, `SERVICIO`, `CLIENTE`, `QUE_SE_TRASLADA`, `BODEGA_ORIGEN`, `BODEGA_DESTINO`.
+- La ven en Autorizaciones los usuarios con **Aprobar** en CAL-003 (`USUARIOS_AUTORIZACIONES`, se da en ADM-015).
+- Al autorizar o rechazar allí, `spAutorizaciones 'UPDATE AUTORIZACION'` ejecuta lo configurado en `ITM_CONFIG_AUTORIZ` (seed 56): `spServicioTecnico 'autorizacion', {ENCABEZADO, ITEMS}`. El SP busca el traslado por el `SOPORTE` de la NAU y hace `traslado autorizar` o `traslado rechazar` con `USUARIO_AUTORIZA` (que tenga `APROBAR` en CAL-003, la bodega destino en `BODEGAS_USUARIOS` y que el traslado siga `REGISTRADO`). Si falla, deshace también la NAU y Autorizaciones muestra el mensaje.
+- Anular la entrada deja su NAU pendiente en `ANULADO` (como `spMovimientosConsumos 'delete'`).
+- `sql/sp/57_spAutorizaciones_cal003.sql` agrega a `spAutorizaciones 'AUTORIZACIONES PENDIENTES'` una condición solo para CAL-003: salen las NAU `REGISTRADO` sin autorizar ni rechazar (no salen las autorizadas, rechazadas ni anuladas). Las demás aplicaciones siguen igual. Rollback: `sql/rollback/91b_rollback_spAutorizaciones.sql`.
+- `autorizacion` no está en las acciones del controlador de CAL-003: solo llega desde `spAutorizaciones`.
+
+### 2.7 Reporte del documento de entrega (`CAL-003-001`)
+
+- Acción `CAL-003-001` de `spServicioTecnico`, para el servidor de reportes DevExpress (como `PRO-039-001`): se llama sin token, con `{"filtro":"{\"FILTRO\":\"(ID_ENTREGA=n)\"}"}` o `{"FILTRO":"ID_ENTREGA IN (n, …)"}`. No arma SQL con el filtro: solo acepta `ID_ENTREGA` con números.
+- Devuelve 3 conjuntos: empresa (`NOMBRE`, `NIT`, `DIR_EMP`, `TEL_EMP`); encabezados (`RS_ST_ENTREGAS`); líneas activas con `PRODUCTO`, `CANTIDAD`, `TIPO_DEPOSITO` (estado del servicio), `SOPORTE` (número S), `BODEGA`, `TIPO_ENTRADA` (SG / SR), `SALDO`, más `ITEM`, `N_SERVICIO_CLIENTE` y `CODIGO_ASOCIADO`.
+- **Pendiente:** el diseño `.repx` en el servidor de reportes y su fila en `REPORTES` (`ID_APLICACION = 'CAL-003'`, `ID_REPORTE = 'CAL-003-001'`, `ARCHIVO` = nombre del diseño). Mientras tanto la pantalla usa su vista de impresión con las mismas columnas.
 
 ## 3. Pendiente por definir
 

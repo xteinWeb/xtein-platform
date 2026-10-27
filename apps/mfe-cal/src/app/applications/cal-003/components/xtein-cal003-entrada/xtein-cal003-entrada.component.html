@@ -291,7 +291,7 @@
               <td class="text-end">{{ u.CANTIDAD }}</td>
               <td>
                 {{ u.BODEGA || 'Fuera del inventario' }}
-                @if (u.TRASLADO_PENDIENTE) { <span class="pending">traslado {{ u.TRASLADO_PENDIENTE }} sin recibir</span> }
+                @if (u.TRASLADO_PENDIENTE) { <span class="pending">traslado {{ u.TRASLADO_PENDIENTE }} sin autorizar</span> }
               </td>
             </tr>
           }

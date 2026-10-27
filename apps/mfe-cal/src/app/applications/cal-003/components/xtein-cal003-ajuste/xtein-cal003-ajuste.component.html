@@ -45,12 +45,8 @@
         </div>
       </div>
 
-      @if (puedeResponder()) {
-        <p class="c3-hint">El movimiento de inventario se hace solo después de autorizar.</p>
-        <div class="c3-actions">
-          <xtein-button text="Autorizar" variant="success" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="autorizar()" />
-          <xtein-button text="Rechazar" variant="danger" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="rechazar()" />
-        </div>
+      @if (a.ESTADO === estados.Proposed) {
+        <p class="c3-hint">Pendiente en <b>Autorizaciones</b> como <b>{{ autorizacion() }}</b>: allí se autoriza o rechaza. El movimiento de inventario se hace solo después de autorizar.</p>
       }
     } @else if (creando()) {
       <!-- Ajuste nuevo -->
@@ -86,14 +82,14 @@
           <div class="c3-field">
             <xtein-label class="c3-label">Estado</xtein-label>
             <div class="c3-control c3-control--shaded">
-              <xtein-input ariaLabel="Estado" placeholder="Se registra como salida, pendiente de autorizar" [readOnly]="true" />
+              <xtein-input ariaLabel="Estado" placeholder="Queda pendiente en Autorizaciones" [readOnly]="true" />
             </div>
           </div>
         </div>
       </div>
       <p class="c3-hint">Solo servicios en el inventario y sin traslados pendientes. Propón con Guardar en la barra de acciones.</p>
     } @else {
-      <p class="c3-hint">Usa <b>Nuevo</b> en la barra para proponer un ajuste, o <b>Buscar</b> para ver, autorizar o rechazar uno.</p>
+      <p class="c3-hint">Usa <b>Nuevo</b> en la barra para proponer un ajuste, o <b>Buscar</b> para ver uno. Se autorizan o rechazan en <b>Autorizaciones</b>.</p>
     }
   </div>
 

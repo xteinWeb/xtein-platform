@@ -58,7 +58,7 @@
                 <td>{{ f.NOMBRE_PRODUCTO }}</td>
                 <td>{{ f.NOMBRE_PARTE || '—' }}</td>
                 <td class="text-end">{{ f.CANTIDAD }}</td>
-                <td class="nowrap">{{ f.SERVICIO }} @if (f.TRASLADO_PENDIENTE) { <span class="pending">{{ f.TRASLADO_PENDIENTE }} sin recibir</span> }</td>
+                <td class="nowrap">{{ f.SERVICIO }} @if (f.TRASLADO_PENDIENTE) { <span class="pending">{{ f.TRASLADO_PENDIENTE }} sin autorizar</span> }</td>
                 <td>{{ f.NOMBRE_CLIENTE }}</td>
                 <td class="text-end">{{ f.DIAS_INVENTARIO }}</td>
               </tr>
