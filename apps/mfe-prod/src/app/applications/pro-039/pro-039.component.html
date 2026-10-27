@@ -69,7 +69,7 @@
           </div>
         </div>
 
-        <!-- Sección Consumo de producción -->
+        <!-- Consumo de producción: primero la sección, la bodega origen y el destino -->
         <div class="pro-039__section-divider">
           <xtein-group-label class="pro-039__section-title" label="Consumo de producción"></xtein-group-label>
         </div>
@@ -77,50 +77,7 @@
         <div class="pro-039__client-grid">
           <div class="pro-039__client-col">
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-producto">Producto</xtein-label>
-              <div class="pro-039__control-inline">
-                <xtein-lookup
-                  id="pro-039-producto"
-                  ariaLabel="Producto"
-                  placeholder="Producto"
-                  searchPlaceholder="Buscar…"
-                  [items]="products()"
-                  valueExpr="PRODUCTO"
-                  displayExpr="LABEL"
-                  [columns]="productColumns"
-                  [required]="true"
-                  dropDownWidth="min(760px, 95vw)"
-                  formControlName="PRODUCTO"
-                  [readOnly]="readOnly()"
-                />
-              </div>
-            </div>
-
-            @if (isJuego()) {
-              <div class="pro-039__field-inline">
-                <xtein-label class="pro-039__label-inline" for="pro-039-componente">Componente</xtein-label>
-                <div class="pro-039__control-inline">
-                  <xtein-lookup
-                    id="pro-039-componente"
-                    ariaLabel="Componente del juego"
-                    placeholder="Todo el juego"
-                    searchPlaceholder="Buscar…"
-                    [items]="components()"
-                    valueExpr="PRODUCTO"
-                    displayExpr="LABEL"
-                    [columns]="componentColumns"
-                    dropDownWidth="min(650px, 95vw)"
-                    formControlName="COMPONENTE"
-                    [readOnly]="readOnly()"
-                  />
-                </div>
-              </div>
-            }
-          </div>
-
-          <div class="pro-039__client-col">
-            <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-seccion">Sección</xtein-label>
+              <xtein-label class="pro-039__label-inline" for="pro-039-seccion" [required]="true">Sección</xtein-label>
               <div class="pro-039__control-inline">
                 <xtein-lookup
                   id="pro-039-seccion"
@@ -131,82 +88,164 @@
                   valueExpr="ID_SECCION"
                   displayExpr="LABEL"
                   [columns]="sectionColumns"
+                  [required]="true"
                   dropDownWidth="min(560px, 95vw)"
                   formControlName="SECCION"
                   [readOnly]="readOnly()"
                 />
               </div>
             </div>
+          </div>
+
+          <div class="pro-039__client-col">
+            <div class="pro-039__field-inline">
+              <xtein-label class="pro-039__label-inline" for="pro-039-origen" [required]="true">Bodega Origen</xtein-label>
+              <div class="pro-039__control-inline">
+                <xtein-lookup
+                  id="pro-039-origen"
+                  ariaLabel="Bodega Origen"
+                  placeholder="Bodega"
+                  searchPlaceholder="Buscar…"
+                  [items]="origins()"
+                  valueExpr="ID_UN_ORIGEN"
+                  displayExpr="ORIGEN"
+                  [columns]="originColumns"
+                  [required]="true"
+                  dropDownWidth="min(650px, 95vw)"
+                  formControlName="ID_UN_ORIGEN"
+                  [readOnly]="readOnly()"
+                />
+              </div>
+            </div>
 
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-lote">Cantidad lote</xtein-label>
+              <xtein-label class="pro-039__label-inline" for="pro-039-destino" [required]="true">Destino</xtein-label>
               <div class="pro-039__control-inline">
-                <xtein-number
-                  id="pro-039-lote"
-                  ariaLabel="Cantidad del lote"
-                  [min]="0"
-                  formControlName="CANTIDAD_LOTE"
+                <xtein-lookup
+                  id="pro-039-destino"
+                  ariaLabel="Destino"
+                  placeholder="Unidad de negocio"
+                  searchPlaceholder="Buscar…"
+                  [items]="destinations()"
+                  valueExpr="ID_UN_DESTINO"
+                  displayExpr="DESTINO"
+                  [columns]="destinationColumns"
+                  [required]="true"
+                  dropDownWidth="min(550px, 95vw)"
+                  formControlName="ID_UN_DESTINO"
                   [readOnly]="readOnly()"
                 />
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Productos del consumo: varios, todos de la sección elegida -->
+        <div class="pro-039__section-divider">
+          <xtein-group-label class="pro-039__section-title" label="Productos"></xtein-group-label>
+        </div>
+
+        @if (!readOnly()) {
+          <div class="pro-039__products-add">
+            <xtein-lookup
+              ariaLabel="Agregar producto"
+              [placeholder]="form.controls.SECCION.value ? 'Agregar producto…' : 'Elija primero la sección'"
+              searchPlaceholder="Buscar…"
+              [items]="sectionProducts()"
+              valueExpr="PRODUCTO"
+              displayExpr="LABEL"
+              [columns]="productColumns"
+              dropDownWidth="min(760px, 95vw)"
+              [readOnly]="!form.controls.SECCION.value || busy()"
+              [ngModel]="productToAdd()"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="addConsumptionProduct($event)"
+            />
+            <span class="pro-039__products-hint">Solo aparecen los productos con materiales en la sección.</span>
+          </div>
+        }
+
+        <div class="pro-039__products-scroll">
+          <table class="pro-039__products-table">
+            <thead>
+              <tr>
+                <th class="col-code">Producto</th>
+                <th>Nombre</th>
+                <th class="col-component">Componente (juegos)</th>
+                <th class="col-lot">Cantidad lote</th>
+                @if (!readOnly()) { <th class="col-remove"><span class="sr-only">Quitar</span></th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of consumptionProducts(); track p.ITEM) {
+                <tr>
+                  <td class="col-code">{{ p.PRODUCTO }}</td>
+                  <td>{{ p.NOMBRE }}</td>
+                  <td class="col-component">
+                    @if (!p.ES_JUEGO) {
+                      <span class="pro-039__muted">—</span>
+                    } @else if (readOnly()) {
+                      {{ p.COMPONENTE ? p.COMPONENTE + (p.NOMBRE_COMPONENTE ? ' - ' + p.NOMBRE_COMPONENTE : '') : 'Todo el juego' }}
+                    } @else {
+                      <xtein-lookup
+                        [ariaLabel]="'Componente de ' + p.PRODUCTO"
+                        placeholder="Todo el juego"
+                        searchPlaceholder="Buscar…"
+                        [items]="componentsOf(p.PRODUCTO)"
+                        valueExpr="PRODUCTO"
+                        displayExpr="LABEL"
+                        [columns]="componentColumns"
+                        [showClearButton]="true"
+                        dropDownWidth="min(650px, 95vw)"
+                        [readOnly]="busy()"
+                        [ngModel]="p.COMPONENTE || null"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setProductComponent(p.ITEM, $event)"
+                      />
+                    }
+                  </td>
+                  <td class="col-lot">
+                    @if (readOnly()) {
+                      {{ p.CANTIDAD_LOTE }}
+                    } @else {
+                      <xtein-number
+                        [ariaLabel]="'Cantidad del lote de ' + p.PRODUCTO"
+                        [min]="0"
+                        [readOnly]="busy()"
+                        [ngModel]="p.CANTIDAD_LOTE"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setProductLot(p.ITEM, $event)"
+                      />
+                    }
+                  </td>
+                  @if (!readOnly()) {
+                    <td class="col-remove">
+                      <button type="button" class="pro-039__remove-btn" [attr.aria-label]="'Quitar ' + p.PRODUCTO" [title]="'Quitar ' + p.PRODUCTO"
+                        [disabled]="busy()" (click)="removeConsumptionProduct(p.ITEM)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td [attr.colspan]="readOnly() ? 4 : 5" class="pro-039__products-empty">
+                    {{ readOnly() ? 'Sin productos.' : 'Elija la sección y agregue uno o varios productos: sus materiales se cargan abajo.' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- ===== FILA INFERIOR: Origen / Destino + Materiales ===== -->
+    <!-- ===== FILA INFERIOR: Observación + Materiales ===== -->
     <div class="pro-039__bottom-row">
       <div class="pro-039__card-bottom">
-        <div class="pro-039__params-row">
-          <div class="pro-039__params-section">
-            <div class="pro-039__section-divider">
-              <xtein-group-label class="pro-039__section-title" label="Origen / Destino"></xtein-group-label>
-            </div>
-            <div class="pro-039__params-grid">
-              <div class="pro-039__field-inline">
-                <xtein-label class="pro-039__label-inline" for="pro-039-origen">Bodega Origen</xtein-label>
-                <div class="pro-039__control-inline">
-                  <xtein-lookup
-                    id="pro-039-origen"
-                    ariaLabel="Bodega Origen"
-                    placeholder="Bodega"
-                    searchPlaceholder="Buscar…"
-                    [items]="origins()"
-                    valueExpr="ID_UN_ORIGEN"
-                    displayExpr="ORIGEN"
-                    [columns]="originColumns"
-                    [required]="true"
-                    dropDownWidth="min(650px, 95vw)"
-                    formControlName="ID_UN_ORIGEN"
-                    [readOnly]="readOnly()"
-                  />
-                </div>
-              </div>
-
-              <div class="pro-039__field-inline">
-                <xtein-label class="pro-039__label-inline" for="pro-039-destino">Destino</xtein-label>
-                <div class="pro-039__control-inline">
-                  <xtein-lookup
-                    id="pro-039-destino"
-                    ariaLabel="Destino"
-                    placeholder="Unidad de negocio"
-                    searchPlaceholder="Buscar…"
-                    [items]="destinations()"
-                    valueExpr="ID_UN_DESTINO"
-                    displayExpr="DESTINO"
-                    [columns]="destinationColumns"
-                    [required]="true"
-                    dropDownWidth="min(550px, 95vw)"
-                    formControlName="ID_UN_DESTINO"
-                    [readOnly]="readOnly()"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Observación (ancho completo) -->
         <div class="pro-039__full-row">
           <div class="pro-039__field-inline pro-039__field-inline--full">
@@ -228,7 +267,9 @@
           [busy]="busy()"
           [quantityFormat]="spec('FORMATO CANTIDAD')?.FORMATO || '#,##0.00'"
           [lot]="lot()"
+          [presentationEditable]="!!spec('MODIFICAR UM PRES')?.ACTIVADO"
           (quantityChanged)="onQuantityChanged($event)"
+          (presentationChanged)="onPresentationChanged($event)"
           (productAdded)="addProduct($event)"
           (removedMany)="removeItems($event)"
           (refreshProducts)="loadItemProducts()"
@@ -265,7 +306,8 @@
   (selected)="selectViewedRecord($event)"
 />
 
-<xtein-pro039-export
+<xtein-record-export
+  title="Consumos"
   [visible]="exportVisible()"
   (visibleChange)="exportVisible.set($event)"
   [current]="currentRecord()?.DOCUMENTO ?? ''"

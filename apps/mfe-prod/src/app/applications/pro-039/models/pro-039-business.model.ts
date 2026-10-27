@@ -1,4 +1,4 @@
-import type { Pro039MovementGrav, Pro039MovementItem, Pro039MovementRecord, Pro039Total } from './pro-039.model';
+import type { Pro039ConsumptionProduct, Pro039MaterialOrigin, Pro039MovementGrav, Pro039MovementItem, Pro039MovementRecord, Pro039Presentation, Pro039Total } from './pro-039.model';
 
 export interface Pro039Lookup {
   [key: string]: unknown;
@@ -42,7 +42,10 @@ export interface Pro039Material {
   UDM?: string;
   ID_SECCION?: string;
   CONSUMO?: number;
+  /** Suma de consumo unitario x lote de cada producto. */
+  CANTIDAD?: number;
   VALOR_UNITARIO?: number;
+  ORIGENES?: Pro039MaterialOrigin[] | null;
 }
 
 /** Datos del producto que devuelve 'EXISTENCIAS PRODUCTO' al agregarlo manualmente. */
@@ -53,7 +56,7 @@ export interface Pro039ProductStock {
   PRODUCTO_KIT?: string;
   UBICACION?: string;
   PRECIO?: number;
-  PRESENTACION?: { UDM_COMPRA?: string; CANTIDAD_PRES?: number; UDM_EQUIV?: string; CANTIDAD_EQUIV?: number }[];
+  PRESENTACION?: Pro039Presentation[];
   ATRIBUTOS?: { ATRIBUTO?: string }[];
   ErrMensaje?: string;
 }
@@ -70,6 +73,8 @@ export interface Pro039AdditionalResult {
   ITM_MOVIMIENTOS?: Pro039MovementItem[];
   MOVIMIENTOS_GRAV?: Pro039MovementGrav[];
   TOTALES?: Pro039Total[];
+  /** Productos del consumo (los anteriores, de un solo producto, traen el del encabezado). */
+  PRODUCTOS?: Partial<Pro039ConsumptionProduct>[] | null;
 }
 
 export type Pro039Header = Partial<Pro039MovementRecord>;
