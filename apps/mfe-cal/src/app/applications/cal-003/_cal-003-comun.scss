@@ -139,9 +139,20 @@
   gap: 8px;
   padding: 6px 0;
 
+  > span:first-child {
+    flex-shrink: 0;
+  }
+
   b {
     font-size: 15px;
     font-weight: 500;
+  }
+
+  // En la columna angosta el estado largo baja de línea en vez de salirse de la tarjeta
+  .c3-badge {
+    min-width: 0;
+    white-space: normal;
+    text-align: right;
   }
 }
 

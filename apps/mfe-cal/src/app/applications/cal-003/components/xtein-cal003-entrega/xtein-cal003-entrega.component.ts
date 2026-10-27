@@ -14,7 +14,7 @@ import {
 } from '@xtein/ui';
 import { Cal003DeliveryStatus, Cal003Limits, Cal003ServiceType } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003EntregaViewColumns, Cal003ServicioEntregableColumns } from '../../constants/cal-003-ui.constants';
-import type { Cal003Entrega, Cal003EntregaCompleta, Cal003ServicioEntregable, Cal003Unidad } from '../../models/cal-003.model';
+import type { Cal003Entrega, Cal003EntregaCompleta, Cal003Pieza, Cal003ServicioEntregable, Cal003Unidad } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
 import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
 
@@ -26,7 +26,11 @@ interface Cal003LineaVista {
   TIPO_SERVICIO: string;
   ESTADO: string;
   OBSERVACION_ANULA: string | null;
-  UNIDADES: Cal003Unidad[];
+  PRODUCTO?: string;
+  ESTADO_SERVICIO?: string;
+  SALDO?: number;
+  PIEZAS?: Cal003Pieza[];
+  UNIDADES?: Cal003Unidad[];
 }
 
 /**
@@ -320,8 +324,24 @@ export class XteinCal003EntregaComponent implements Cal003Pestana {
     ventana.print();
   }
 
-  nombreUnidad(u: Cal003Unidad): string {
-    return u.NOMBRE_PARTE ? `${u.NOMBRE_PRODUCTO} · ${u.NOMBRE_PARTE}` : u.NOMBRE_PRODUCTO;
+  /** Saldo pendiente por entregar del producto: en el borrador se descuentan los servicios que ya van en él. */
+  saldo(l: Cal003LineaVista): number | null {
+    if (l.SALDO == null) return null;
+    if (!this.creando()) return l.SALDO;
+    return Math.max(l.SALDO - this.lineas().filter(x => x.PRODUCTO === l.PRODUCTO).length, 0);
+  }
+
+  bodegaSalida(): string {
+    return this.abierta()?.ENTREGA?.BODEGA ?? this.ctx.bodega(this.bodega());
+  }
+
+  /** Filas de la línea: PIEZAS del SP; si un SP anterior no las trae, sus unidades una por una. */
+  piezas(l: Cal003LineaVista): Cal003Pieza[] {
+    if (l.PIEZAS?.length) return l.PIEZAS;
+    return (l.UNIDADES ?? []).map(u => ({
+      NOMBRE: u.NOMBRE_PARTE ? `${u.NOMBRE_PRODUCTO} · ${u.NOMBRE_PARTE}` : u.NOMBRE_PRODUCTO,
+      CANTIDAD: u.CANTIDAD
+    }));
   }
 
   nombreCliente(): string {

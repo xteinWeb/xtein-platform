@@ -49,8 +49,13 @@
       </div>
     </div>
 
+    <!-- Servicios del despacho: separados de los datos del documento -->
+    <div class="c3-section-divider c3-d-servicios">
+      <xtein-group-label class="c3-section-title" label="Servicios"></xtein-group-label>
+    </div>
+
     @if (creando()) {
-      <div class="c3-field c3-field--narrow">
+      <div class="c3-field c3-field--narrow c3-d-agregar">
         <xtein-label class="c3-label" for="c3-d-agregar">Agregar servicio</xtein-label>
         <div class="c3-control">
           <xtein-lookup id="c3-d-agregar" ariaLabel="Agregar servicio"
@@ -62,7 +67,7 @@
       </div>
     }
 
-    <div class="c3-table-scroll">
+    <div class="c3-table-scroll c3-d-tabla">
       <table class="c3-table">
         <thead>
           <tr>
@@ -73,13 +78,13 @@
         </thead>
         <tbody>
           @for (l of vista(); track l.ID_SERVICIO) {
-            @for (u of l.UNIDADES; track u.ID_UNIDAD; let primera = $first) {
+            @for (u of piezas(l); track $index; let primera = $first) {
               <tr class="row-selectable" [class.row-selected]="seleccionada() === l.ID_SERVICIO" [class.row-muted]="l.ESTADO === 'ANULADA'"
                 [class.row-voided]="l.ESTADO === 'ANULADA'" (click)="seleccionada.set(l.ID_SERVICIO)">
                 <td class="nowrap strike">{{ primera ? l.DOCUMENTO : '' }}</td>
                 <td>{{ primera ? (l.N_SERVICIO_CLIENTE || '—') : '' }}</td>
                 <td class="nowrap">{{ primera ? (l.CODIGO_ASOCIADO || '—') : '' }}</td>
-                <td class="strike">{{ nombreUnidad(u) }}</td>
+                <td class="strike">{{ u.NOMBRE }}</td>
                 <td class="text-end">{{ u.CANTIDAD }}</td>
                 <td>{{ primera ? l.TIPO_SERVICIO : '' }}</td>
                 <td>
@@ -117,7 +122,7 @@
         </tbody>
       </table>
     </div>
-    <p class="c3-hint">Solo entra un servicio que sale como llegó: las mismas partes y cantidades de la entrada, todas en la bodega de salida y sin traslados pendientes. Para devolver una línea despachada, selecciónala y usa Eliminar en la barra.</p>
+    <p class="c3-hint c3-d-nota">Solo entra un servicio que sale como llegó: las mismas partes y cantidades de la entrada, todas en la bodega de salida y sin traslados pendientes. Para devolver una línea despachada, selecciónala y usa Eliminar en la barra.</p>
   </div>
 
   <aside class="c3-card">
@@ -162,20 +167,27 @@
     <h3>Documento de entrega {{ abierta()?.ENTREGA?.DOCUMENTO ?? '(borrador)' }}</h3>
     <p class="c3-hint">
       Fecha {{ creando() ? fecha(hoy()) : fecha(abierta()?.ENTREGA?.FECHA) }} · Cliente {{ nombreCliente() }} ·
-      Bodega de salida {{ abierta()?.ENTREGA?.BODEGA ?? ctx.bodega(bodega()) }}
+      Bodega de salida {{ bodegaSalida() }}
     </p>
+    <!-- Mismas columnas que el reporte CAL-003-001 de spServicioTecnico (el diseño DevExpress queda pendiente) -->
     <table class="c3-table">
-      <thead><tr><th>Número S</th><th>Nº servicio cliente</th><th>Código asociado</th><th>Producto o parte</th><th class="text-end">Cant.</th><th>Tipo</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Producto</th><th class="text-end">Cant.</th><th>Tipo depósito</th><th>Soporte</th><th>Bodega</th>
+          <th>Tipo entrada</th><th class="text-end">Saldo</th>
+        </tr>
+      </thead>
       <tbody>
         @for (l of activas(); track l.ID_SERVICIO) {
-          @for (u of l.UNIDADES; track u.ID_UNIDAD; let primera = $first) {
+          @for (u of piezas(l); track $index; let primera = $first) {
             <tr>
-              <td>{{ primera ? l.DOCUMENTO : '' }}</td>
-              <td>{{ primera ? (l.N_SERVICIO_CLIENTE || '—') : '' }}</td>
-              <td>{{ primera ? (l.CODIGO_ASOCIADO || '—') : '' }}</td>
-              <td>{{ nombreUnidad(u) }}</td>
+              <td>{{ u.NOMBRE }}</td>
               <td class="text-end">{{ u.CANTIDAD }}</td>
+              <td>{{ primera ? (l.ESTADO_SERVICIO || '—') : '' }}</td>
+              <td class="nowrap">{{ primera ? l.DOCUMENTO : '' }}</td>
+              <td>{{ primera ? bodegaSalida() : '' }}</td>
               <td>{{ primera ? l.TIPO_SERVICIO : '' }}</td>
+              <td class="text-end">{{ primera ? (saldo(l) ?? '—') : '' }}</td>
             </tr>
           }
         }

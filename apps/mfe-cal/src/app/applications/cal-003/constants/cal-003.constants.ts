@@ -67,13 +67,9 @@ export const Cal003Action = {
   EntryNew: 'entrada nueva',
   EntryVoid: 'entrada anular',
   TransferSend: 'traslado enviar',
-  TransferReceive: 'traslado recibir',
-  TransferReject: 'traslado rechazar',
   DeliveryDispatch: 'entrega despachar',
   DeliveryVoidLine: 'entrega anular linea',
   AdjustmentPropose: 'ajuste proponer',
-  AdjustmentAuthorize: 'ajuste autorizar',
-  AdjustmentReject: 'ajuste rechazar',
   PricesSave: 'precios guardar',
   // /soporte-subir y /soporte
   SupportAttach: 'soporte adjuntar',
@@ -111,7 +107,7 @@ export const Cal003ServiceType = {
 export type Cal003ServiceType = string;
 
 export const Cal003ServiceStatus = {
-  InStock: 'EN INVENTARIO',
+  Deposit: 'DEPOSITO',
   Inactive: 'INACTIVO',
   Voided: 'ANULADO',
   AdjustmentProposed: 'AJUSTE PROPUESTO',
@@ -120,9 +116,10 @@ export const Cal003ServiceStatus = {
   Adjusted: 'AJUSTADO'
 } as const;
 
+/** Como los consumos de PRO-039: REGISTRADO hasta que se autoriza o rechaza en Autorizaciones (ADM-225). */
 export const Cal003TransferStatus = {
-  Sent: 'ENVIADO',
-  Received: 'RECIBIDO',
+  Registered: 'REGISTRADO',
+  Authorized: 'AUTORIZADO',
   Rejected: 'RECHAZADO',
   Voided: 'ANULADO'
 } as const;

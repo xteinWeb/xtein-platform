@@ -41,9 +41,9 @@
             <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Envió" [placeholder]="t.ENVIO" [readOnly]="true" /></div>
           </div>
           <div class="c3-field">
-            <xtein-label class="c3-label">Recibió o rechazó</xtein-label>
+            <xtein-label class="c3-label">Autorizó o rechazó</xtein-label>
             <div class="c3-control c3-control--shaded">
-              <xtein-input ariaLabel="Recibió o rechazó" [placeholder]="t.RESPUESTA || 'Pendiente'" [readOnly]="true" />
+              <xtein-input ariaLabel="Autorizó o rechazó" [placeholder]="t.RESPUESTA || 'Pendiente'" [readOnly]="true" />
             </div>
           </div>
         </div>
@@ -56,12 +56,8 @@
         </table>
       </div>
 
-      @if (t.PUEDE_RESPONDER === 1) {
-        <p class="c3-hint">Está en tu bodega destino: recíbelo cuando llegue, o recházalo si no corresponde.</p>
-        <div class="c3-actions">
-          <xtein-button text="Recibir" variant="success" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="recibir()" />
-          <xtein-button text="Rechazar" variant="danger" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="rechazar()" />
-        </div>
+      @if (t.ESTADO === estados.Registered) {
+        <p class="c3-hint">Pendiente en <b>Autorizaciones</b>: quien recibe en {{ t.BODEGA_DESTINO }} lo autoriza o rechaza allí.</p>
       }
     } @else if (creando()) {
       <!-- Traslado nuevo -->
@@ -123,7 +119,7 @@
                 <td><span class="level">{{ u.NIVEL }}</span></td>
                 <td>
                   {{ nombreUnidad(u) }}
-                  @if (u.TRASLADO_PENDIENTE) { <span class="pending">traslado {{ u.TRASLADO_PENDIENTE }} sin recibir</span> }
+                  @if (u.TRASLADO_PENDIENTE) { <span class="pending">traslado {{ u.TRASLADO_PENDIENTE }} sin autorizar</span> }
                 </td>
                 <td>{{ u.ID_UN_BODEGA }} · {{ u.BODEGA }}</td>
                 <td class="text-end">{{ u.CANTIDAD }}</td>
@@ -135,14 +131,14 @@
         </table>
       </div>
     } @else {
-      <p class="c3-hint">Usa <b>Nuevo</b> en la barra para enviar un traslado, o <b>Buscar</b> para ver, recibir o rechazar uno.</p>
+      <p class="c3-hint">Usa <b>Nuevo</b> en la barra para enviar un traslado, o <b>Buscar</b> para ver uno. Se autorizan o rechazan en <b>Autorizaciones</b>.</p>
     }
   </div>
 
   <aside class="c3-card">
     <div class="c3-band">Cómo funciona</div>
-    <p class="c3-hint">El traslado queda hecho solo cuando <b>quien recibe</b> lo autoriza. Mientras tanto el producto sigue en la bodega de origen.</p>
-    <p class="c3-hint">Al enviar (Guardar en la barra), quien recibe lo encuentra con Buscar, de primero en la lista. Si lo rechaza, el producto se queda en el origen y se avisa a quien envió.</p>
+    <p class="c3-hint">Como los consumos de PRO-039: al guardar queda <b>REGISTRADO</b> y pendiente en <b>Autorizaciones</b>. Mientras tanto el producto sigue en la bodega de origen.</p>
+    <p class="c3-hint">Quien recibe en la bodega destino (con permiso de autorizar en CAL-003) lo autoriza (pasa a <b>AUTORIZADO</b> y el producto queda en el destino) o lo rechaza (<b>RECHAZADO</b>: se queda en el origen y se avisa a quien envió).</p>
   </aside>
 </div>
 

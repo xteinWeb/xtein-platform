@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { SessionService } from '@xtein/session';
 import { RecordToolbarMode, ToolbarAction } from '@xtein/sdk';
 import {
-  XteinButtonComponent,
   XteinGroupLabelComponent,
   XteinInputComponent,
   XteinLabelComponent,
@@ -20,9 +19,9 @@ import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../s
 import { estadoBadge } from '../../utils/cal-003-formato';
 
 /**
- * Salida · Ajuste: quien gestiona las garantías propone NUEVO, ESPECIAL o BAJA y quien hace las
- * devoluciones lo autoriza o rechaza. El servicio sale del inventario solo al autorizar.
- * Como en la Entrada: Nuevo para proponer, Buscar para ver, autorizar o rechazar los existentes.
+ * Salida · Ajuste: quien gestiona las garantías propone NUEVO, ESPECIAL o BAJA. Como los traslados, queda
+ * pendiente en Autorizaciones (ADM-225, AJ-<ID_AJUSTE>) y solo allí se autoriza o rechaza. El servicio sale del
+ * inventario solo al autorizar. Aquí: Nuevo para proponer, Buscar para verlos.
  */
 @Component({
   selector: 'xtein-cal003-ajuste',
@@ -30,7 +29,6 @@ import { estadoBadge } from '../../utils/cal-003-formato';
   imports: [
     CommonModule,
     FormsModule,
-    XteinButtonComponent,
     XteinGroupLabelComponent,
     XteinInputComponent,
     XteinLabelComponent,
@@ -67,8 +65,11 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
   readonly abierto = computed(() => this.mode() === RecordToolbarMode.Browsing ? this.records()[this.currentIndex()] ?? null : null);
-  readonly puedeResponder = computed(() =>
-    this.ctx.puedeAutorizar() && this.abierto()?.ESTADO === Cal003AdjustmentStatus.Proposed);
+  /** Número con el que aparece en Autorizaciones (SOPORTE de su NAU). */
+  readonly autorizacion = computed(() => {
+    const a = this.abierto();
+    return a ? `AJ-${String(a.ID_AJUSTE).padStart(5, '0')}` : '';
+  });
 
   readonly barra = computed<Cal003EstadoBarra>(() => ({
     mode: this.mode(),
@@ -197,37 +198,10 @@ export class XteinCal003AjusteComponent implements Cal003Pestana {
     this.mode.set(RecordToolbarMode.Browsing);
   }
 
-  // ================= Autorizar / rechazar el ajuste abierto =================
-
-  async autorizar(): Promise<void> {
-    const a = this.abierto();
-    if (!a) return;
-    const resultado = this.destinos.find(d => d.valor === a.DESTINO)?.resultado ?? '';
-    if (!(await this.ctx.confirmar(`¿Autorizar el ajuste de <b>${a.SERVICIO}</b> a <b>${a.DESTINO}</b>?<br>${resultado}.`, 'Sí, autorizar'))) return;
-    const r = await this.ctx.ejecutar(() => this.ctx.api.ajusteAutorizar(a.ID_AJUSTE));
-    if (!r) return;
-    this.ctx.exito(r.MENSAJE);
-    await this.refrescar();
-  }
-
-  async rechazar(): Promise<void> {
-    const a = this.abierto();
-    if (!a) return;
-    const efecto = a.DESTINO === 'BAJA'
-      ? 'Una BAJA rechazada pasa sola a ESPECIAL (entra a ARTDECON sin precio).'
-      : 'Vuelve a quien gestiona las garantías para tipificarlo otra vez.';
-    const observacion = await this.ctx.pedirObservacion(`Rechazar el ajuste de ${a.SERVICIO}`, `<p>${efecto}</p>`, 'Rechazar', 'Por qué se rechaza');
-    if (!observacion) return;
-    const r = await this.ctx.ejecutar(() => this.ctx.api.ajusteRechazar(a.ID_AJUSTE, observacion));
-    if (!r) return;
-    this.ctx.exito(r.MENSAJE);
-    await this.refrescar();
-  }
-
   // ================= Utilidades =================
 
   estadoTexto(estado: string): string {
-    return estado === Cal003AdjustmentStatus.Proposed ? 'Propuesto, pendiente de autorizar' : estado;
+    return estado === Cal003AdjustmentStatus.Proposed ? 'Propuesto, pendiente en Autorizaciones' : estado;
   }
 
   private porServicio(documento: string): XteinRecordFilterCriterion[] {

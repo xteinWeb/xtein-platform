@@ -411,8 +411,8 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     const inactivo = actual.ESTADO === Cal003ServiceStatus.Inactive;
     const html = inactivo
       ? `<p>${actual.DOCUMENTO} está INACTIVO. Si ya reuniste sus partes en una sola bodega, se anula completo.</p>`
-      : `<p>La entrada queda en el historial con su número, quién, cuándo y por qué. Si tiene un traslado enviado sin recibir, se anula también.</p>
-         <p>Si ya tiene traslados recibidos, solo la persona de facturación puede anularla: queda <b>INACTIVO</b> hasta reunir sus partes.</p>`;
+      : `<p>La entrada queda en el historial con su número, quién, cuándo y por qué. Si tiene un traslado REGISTRADO sin autorizar, se anula también y sale de Autorizaciones.</p>
+         <p>Si ya tiene traslados autorizados, solo la persona de facturación puede anularla: queda <b>INACTIVO</b> hasta reunir sus partes.</p>`;
     const observacion = await this.ctx.pedirObservacion(`Anular ${actual.DOCUMENTO}`, html, 'Anular');
     if (!observacion) return;
     const resultado = await this.ctx.ejecutar(() => this.ctx.api.entradaAnular(actual.ID_SERVICIO, actual.VERSION, observacion));
