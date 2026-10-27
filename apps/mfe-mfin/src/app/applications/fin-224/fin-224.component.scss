@@ -43,50 +43,62 @@
 }
 
 /*======================================================================
-= HEADER FORM GRID
+= HEADER FORM GRID (Legacy 2-column layout with left labels)
 ======================================================================*/
 
 .fin-224__header-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 2.5rem;
+  align-items: start;
 }
 
 .fin-224__header-col {
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 0.75rem;
   min-width: 0;
 }
 
 .fin-224__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .fin-224__label {
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--xt-color-text-secondary, #475569);
+  white-space: nowrap;
+
+  ::ng-deep label,
+  ::ng-deep .form-label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
 }
 
 .fin-224__control {
   min-width: 0;
+  width: 100%;
 }
 
 /*======================================================================
 = RESPONSIVE
 ======================================================================*/
 
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
   .fin-224__header-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }
 
-@media (max-width: 640px) {
-  .fin-224__header-grid {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 500px) {
+  .fin-224__field {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
   }
 }

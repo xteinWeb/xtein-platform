@@ -138,6 +138,26 @@ export class Fin224BusinessService {
   }
 
   /**
+   * Checks whether a negotiation condition code already exists in the database.
+   */
+  async exists(idCondicion: string): Promise<boolean> {
+    const code = idCondicion?.trim().toUpperCase();
+    if (!code) return false;
+    try {
+      const payload = {
+        CONDICIONES_NEGOCIACION: [
+          { CAMPO: 'ID_CONDICION', EXPRESION: code, TABLA: 'CONDICIONES_NEGOCIACION' }
+        ]
+      };
+      const response = await firstValueFrom(this.api.query(Fin224Action.Query, payload));
+      const records = this.decode<Fin224CondicionRecord>(response);
+      return Array.isArray(records) && records.some(r => r.ID_CONDICION?.trim().toUpperCase() === code);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Deletes a negotiation condition by code.
    */
   async deleteCondicion(idCondicion: string): Promise<void> {
