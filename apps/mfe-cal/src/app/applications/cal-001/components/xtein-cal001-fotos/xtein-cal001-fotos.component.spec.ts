@@ -122,7 +122,7 @@ describe('XteinCal001FotosComponent', () => {
 
   it('visor: clic en el fondo lo cierra; clic en la foto no', () => {
     abrir(1);
-    componente.verPendiente({ id: 1, dueno: 1, nombre: 'a.jpg', base64: 'QUJD', estado: 'pendiente', mensaje: '' });
+    componente.verPendiente({ id: 1, dueno: 1, nombre: 'a.jpg', base64: 'QUJD', estado: 'pendiente', mensaje: '', operacion: '0f8e1c2a-1111-4222-8333-444455556666' });
     fixture.detectChanges();
     (fixture.nativeElement.querySelector('.ft-visor img') as HTMLElement).click();
     fixture.detectChanges();
