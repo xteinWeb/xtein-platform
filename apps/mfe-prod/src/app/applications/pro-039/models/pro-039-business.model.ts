@@ -47,6 +47,8 @@ export interface Pro039Material {
   VALOR_UNITARIO?: number;
   /** Producto del consumo al que pertenece el material. */
   PRODUCTO_CONSUMO?: string;
+  /** Línea del consumo (producto o componente del juego). */
+  ITEM_PRODUCTO?: number;
 }
 
 /** Datos del producto que devuelve 'EXISTENCIAS PRODUCTO' al agregarlo manualmente. */

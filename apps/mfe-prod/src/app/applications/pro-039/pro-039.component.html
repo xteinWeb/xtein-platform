@@ -195,7 +195,7 @@
                 <th class="col-code">Producto</th>
                 <th>Nombre</th>
                 <th class="col-component">Componente (juegos)</th>
-                <th class="col-lot">Cantidad lote</th>
+                <th class="col-lot">Cantidad</th>
                 @if (!readOnly()) { <th class="col-remove"><span class="sr-only">Quitar</span></th> }
               </tr>
             </thead>
@@ -222,59 +222,143 @@
                   <td colspan="3" class="pro-039__products-hint">Elija el producto; luego indique su cantidad de lote.</td>
                 </tr>
               }
-              @for (p of consumptionProducts(); track p.ITEM) {
-                <tr>
-                  <td class="col-code">{{ p.PRODUCTO }}</td>
-                  <td>{{ p.NOMBRE }}</td>
-                  <td class="col-component">
-                    @if (!p.ES_JUEGO) {
-                      <span class="pro-039__muted">—</span>
-                    } @else if (readOnly()) {
-                      {{ p.COMPONENTE ? p.COMPONENTE + (p.NOMBRE_COMPONENTE ? ' - ' + p.NOMBRE_COMPONENTE : '') : 'Todo el juego' }}
-                    } @else {
-                      <xtein-lookup
-                        [ariaLabel]="'Componente de ' + p.PRODUCTO"
-                        placeholder="Todo el juego"
-                        searchPlaceholder="Buscar…"
-                        [items]="componentsOf(p.PRODUCTO)"
-                        valueExpr="PRODUCTO"
-                        displayExpr="LABEL"
-                        [columns]="componentColumns"
-                        [showClearButton]="true"
-                        dropDownWidth="min(650px, 95vw)"
-                        [readOnly]="busy()"
-                        [ngModel]="p.COMPONENTE || null"
-                        [ngModelOptions]="{ standalone: true }"
-                        (ngModelChange)="setProductComponent(p.ITEM, $event)"
-                      />
-                    }
-                  </td>
-                  <td class="col-lot">
-                    @if (readOnly()) {
-                      {{ p.CANTIDAD_LOTE }}
-                    } @else {
-                      <xtein-number
-                        [ariaLabel]="'Cantidad del lote de ' + p.PRODUCTO"
-                        [min]="0"
-                        [readOnly]="busy()"
-                        [ngModel]="p.CANTIDAD_LOTE"
-                        [ngModelOptions]="{ standalone: true }"
-                        (ngModelChange)="setProductLot(p.ITEM, $event)"
-                      />
-                    }
-                  </td>
-                  @if (!readOnly()) {
-                    <td class="col-remove">
-                      <button type="button" class="pro-039__remove-btn" [attr.aria-label]="'Quitar ' + p.PRODUCTO" [title]="'Quitar ' + p.PRODUCTO"
-                        [disabled]="busy()" (click)="removeConsumptionProduct(p.ITEM)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              @for (g of productGroups(); track g.PRODUCTO) {
+                @if (!g.ES_JUEGO) {
+                  @for (p of g.lines; track p.ITEM) {
+                    <tr>
+                      <td class="col-code">{{ p.PRODUCTO }}</td>
+                      <td>{{ p.NOMBRE }}</td>
+                      <td class="col-component"><span class="pro-039__muted">—</span></td>
+                      <td class="col-lot">
+                        @if (readOnly()) {
+                          {{ p.CANTIDAD_LOTE }}
+                        } @else {
+                          <xtein-number
+                            [ariaLabel]="'Cantidad de ' + (p.COMPONENTE || p.PRODUCTO)"
+                            [min]="0"
+                            [readOnly]="busy()"
+                            [ngModel]="p.CANTIDAD_LOTE"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="setProductLot(p.ITEM, $event)"
+                          />
+                        }
+                      </td>
+                      @if (!readOnly()) {
+                        <td class="col-remove">
+                          <button type="button" class="pro-039__remove-btn" [attr.aria-label]="'Quitar ' + p.PRODUCTO" [title]="'Quitar ' + p.PRODUCTO"
+                            [disabled]="busy()" (click)="removeConsumptionProduct(p.ITEM)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <polyline points="3 6 5 6 21 6"></polyline>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
-                      </button>
-                    </td>
+                          </button>
+                        </td>
+                      }
+                    </tr>
                   }
-                </tr>
+                } @else {
+                  <!-- Juego: su fila y debajo una línea por componente, cada una con su cantidad -->
+                  <tr class="pro-039__game-row">
+                    <td class="col-code">{{ g.PRODUCTO }}</td>
+                    <td>{{ g.NOMBRE }}</td>
+                    <td class="col-component">
+                      @if (!readOnly()) {
+                        <button type="button" class="pro-039__link-btn" [disabled]="busy() || addingComponentFor() !== null"
+                          [title]="'Agregar otro componente de ' + g.PRODUCTO" (click)="beginAddComponent(g.PRODUCTO)">+ Componente</button>
+                      } @else {
+                        <span class="pro-039__muted">{{ g.lines.length }} línea(s)</span>
+                      }
+                    </td>
+                    <td class="col-lot"></td>
+                    @if (!readOnly()) {
+                      <td class="col-remove">
+                        <button type="button" class="pro-039__remove-btn" [attr.aria-label]="'Quitar ' + g.PRODUCTO + ' con sus componentes'"
+                          [title]="'Quitar ' + g.PRODUCTO + ' con sus componentes'" [disabled]="busy()" (click)="removeProduct(g.PRODUCTO)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                  @if (addingComponentFor() === g.PRODUCTO) {
+                    <tr class="pro-039__row-editing">
+                      <td></td>
+                      <td colspan="2">
+                        <xtein-lookup
+                          [ariaLabel]="'Componente a agregar a ' + g.PRODUCTO"
+                          placeholder="Buscar componente…"
+                          searchPlaceholder="Buscar…"
+                          [items]="componentsOf(g.PRODUCTO)"
+                          valueExpr="PRODUCTO"
+                          displayExpr="LABEL"
+                          [columns]="componentColumns"
+                          [autoFocus]="true"
+                          dropDownWidth="min(650px, 95vw)"
+                          [ngModel]="componentToAdd()"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="addComponentLine(g.PRODUCTO, $event)"
+                        />
+                      </td>
+                      <td colspan="2">
+                        <button type="button" class="pro-039__link-btn" (click)="cancelAddComponent()">Cancelar</button>
+                      </td>
+                    </tr>
+                  }
+                  @for (p of g.lines; track p.ITEM) {
+                    <tr class="pro-039__component-row">
+                      <td></td>
+                      <td class="pro-039__component-name">↳ {{ p.COMPONENTE ? componentLabel(p) : 'Todo el juego' }}</td>
+                      <td class="col-component">
+                        @if (readOnly()) {
+                          {{ p.COMPONENTE || 'Todo el juego' }}
+                        } @else {
+                          <xtein-lookup
+                            [ariaLabel]="'Componente de ' + p.PRODUCTO"
+                            placeholder="Todo el juego"
+                            searchPlaceholder="Buscar…"
+                            [items]="componentsOf(p.PRODUCTO)"
+                            valueExpr="PRODUCTO"
+                            displayExpr="LABEL"
+                            [columns]="componentColumns"
+                            [showClearButton]="true"
+                            dropDownWidth="min(650px, 95vw)"
+                            [readOnly]="busy()"
+                            [ngModel]="p.COMPONENTE || null"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="setProductComponent(p.ITEM, $event)"
+                          />
+                        }
+                      </td>
+                      <td class="col-lot">
+                        @if (readOnly()) {
+                          {{ p.CANTIDAD_LOTE }}
+                        } @else {
+                          <xtein-number
+                            [ariaLabel]="'Cantidad de ' + (p.COMPONENTE || p.PRODUCTO)"
+                            [min]="0"
+                            [readOnly]="busy()"
+                            [ngModel]="p.CANTIDAD_LOTE"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="setProductLot(p.ITEM, $event)"
+                          />
+                        }
+                      </td>
+                      @if (!readOnly()) {
+                        <td class="col-remove">
+                          <button type="button" class="pro-039__remove-btn" [attr.aria-label]="'Quitar ' + (p.COMPONENTE || 'todo el juego')"
+                            [title]="'Quitar ' + (p.COMPONENTE || 'todo el juego')" [disabled]="busy()" (click)="removeConsumptionProduct(p.ITEM)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                          </button>
+                        </td>
+                      }
+                    </tr>
+                  }
+                }
               } @empty {
                 @if (!addingProduct()) {
                 <tr>

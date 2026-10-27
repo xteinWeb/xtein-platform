@@ -44,24 +44,19 @@
         <tr class="group-row">
           <td colspan="13">
             <div class="group-head">
-              <span class="group-title">
-                {{ group.product ? group.product.PRODUCTO + (group.product.NOMBRE ? ' - ' + group.product.NOMBRE : '') : 'Sin producto asignado' }}
-              </span>
-              @if (group.product?.COMPONENTE) {
-                <span class="group-meta">Componente {{ group.product?.COMPONENTE }}</span>
-              }
+              <span class="group-title">{{ groupTitle(group) }}</span>
               @if (group.product) {
-                <span class="group-meta">Lote {{ quantity(group.product.CANTIDAD_LOTE) }}</span>
+                <span class="group-meta">Cantidad {{ quantity(group.product.CANTIDAD_LOTE) }}</span>
               }
               <span class="group-meta">{{ group.rows.length }} material(es)</span>
               @if (group.product && canAdd) {
                 <button
                   type="button"
                   class="grid-btn grid-btn--primary group-add"
-                  [attr.aria-label]="'Agregar material a ' + group.product.PRODUCTO"
-                  [title]="'Agregar material a ' + group.product.PRODUCTO"
+                  [attr.aria-label]="'Agregar material a ' + (group.product.COMPONENTE || group.product.PRODUCTO)"
+                  [title]="'Agregar material a ' + (group.product.COMPONENTE || group.product.PRODUCTO)"
                   [disabled]="adding() !== null"
-                  (click)="beginAdd(group.product.PRODUCTO)"
+                  (click)="beginAdd(group.product.ITEM)"
                 >
                   <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -121,7 +116,7 @@
                 </div>
               </dx-drop-down-box>
             </td>
-            <td colspan="10" class="new-row-hint">Elija el material: se agrega como Adicional de {{ group.product.PRODUCTO }} y luego indica la cantidad.</td>
+            <td colspan="10" class="new-row-hint">Elija el material: se agrega como Adicional de {{ group.product.COMPONENTE || group.product.PRODUCTO }} y luego indica la cantidad.</td>
           </tr>
         }
 

@@ -84,9 +84,9 @@ export class Pro039BusinessService {
    * (o el de la matriz). Cada producto trae SUS materiales por separado (PRODUCTO_CONSUMO): si dos productos
    * usan el mismo material, llega una fila por producto. CONSUMO_BASE = unitario; CANTIDAD = unitario x su lote.
    */
-  async materials(products: Pick<Pro039ConsumptionProduct, 'PRODUCTO' | 'COMPONENTE' | 'CANTIDAD_LOTE'>[], section: string, originWarehouse: string): Promise<Pro039MovementItem[]> {
+  async materials(products: Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO' | 'COMPONENTE' | 'CANTIDAD_LOTE'>[], section: string, originWarehouse: string): Promise<Pro039MovementItem[]> {
     const rows = await this.action<Pro039Material>('materials', {
-      PRODUCTOS: products.map(p => ({ PRODUCTO: p.PRODUCTO, COMPONENTE: p.COMPONENTE || '', CANTIDAD_LOTE: Number(p.CANTIDAD_LOTE) || 1 })),
+      PRODUCTOS: products.map(p => ({ ITEM: p.ITEM, PRODUCTO: p.PRODUCTO, COMPONENTE: p.COMPONENTE || '', CANTIDAD_LOTE: Number(p.CANTIDAD_LOTE) || 1 })),
       SECCION: section || '',
       ID_UN_ORIGEN: originWarehouse || '',
       ...this.identity
@@ -103,20 +103,24 @@ export class Pro039BusinessService {
       CANTIDAD: Number(row.CANTIDAD ?? row.CONSUMO ?? 0),
       VALOR_UNITARIO: Number(row.VALOR_UNITARIO || 0),
       PRODUCTO_CONSUMO: String(row.PRODUCTO_CONSUMO ?? ''),
+      ITEM_PRODUCTO: Number(row.ITEM_PRODUCTO) || null,
       ES_MATRIZ: true
     }));
   }
 
   /** Fila provisional de un material agregado a mano, mientras llegan sus datos. */
-  pendingItem(product: string, name: string, item: number, consumptionProduct: string): Pro039MovementItem {
-    return this.newItem({ ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false, PRODUCTO_CONSUMO: consumptionProduct });
+  pendingItem(product: string, name: string, item: number, line: Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO'>): Pro039MovementItem {
+    return this.newItem({
+      ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false,
+      PRODUCTO_CONSUMO: line.PRODUCTO, ITEM_PRODUCTO: line.ITEM
+    });
   }
 
   /**
    * Producto agregado manualmente: igual que COM-203 ('EXISTENCIAS PRODUCTO'), valida que esté asociado
    * a la bodega de origen y trae nombre, costo y presentación.
    */
-  async productItem(product: string, header: Pro039Header, item: number, consumptionProduct: string): Promise<Pro039MovementItem> {
+  async productItem(product: string, header: Pro039Header, item: number, line: Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO'>): Promise<Pro039MovementItem> {
     const rows = await this.action<Pro039ProductStock>('stock', {
       PRODUCTO: product,
       PRESENTACION: 'SI',
@@ -138,7 +142,8 @@ export class Pro039BusinessService {
       ATRIBUTO: attribute || 'SIN',
       VALOR_UNITARIO: Number(data.PRECIO || 0),
       PRESENTACIONES: presentations,
-      PRODUCTO_CONSUMO: consumptionProduct,
+      PRODUCTO_CONSUMO: line.PRODUCTO,
+      ITEM_PRODUCTO: line.ITEM,
       CANTIDAD: 0,
       CONSUMO_BASE: 0,
       ES_MATRIZ: false
@@ -154,8 +159,8 @@ export class Pro039BusinessService {
    * Cambió el lote de un producto del consumo: sus materiales de la matriz recalculan la cantidad
    * (unitario x lote), sin volver a consultar la matriz. Los agregados a mano no cambian.
    */
-  withProductLot(row: Pro039MovementItem, product: string, lot: number): Pro039MovementItem {
-    if (!row.ES_MATRIZ || row.PRODUCTO_CONSUMO !== product) return row;
+  withProductLot(row: Pro039MovementItem, line: number, lot: number): Pro039MovementItem {
+    if (!row.ES_MATRIZ || row.ITEM_PRODUCTO !== line) return row;
     return this.withQuantity(row, Number(row.CONSUMO_BASE || 0) * lot);
   }
 

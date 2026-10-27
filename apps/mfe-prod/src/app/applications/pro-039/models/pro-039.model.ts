@@ -1,4 +1,7 @@
-/** Producto del consumo (varios por sección). COMPONENTE: el elegido cuando es un juego (vacío = todo el juego). */
+/**
+ * Línea del consumo (varias por sección): un producto o, si es un juego, uno de sus componentes
+ * (COMPONENTE vacío = todo el juego). Un juego puede tener varias líneas, una por componente, cada una con su cantidad.
+ */
 export interface Pro039ConsumptionProduct {
   ITEM: number;
   PRODUCTO: string;
@@ -89,6 +92,8 @@ export interface Pro039MovementItem {
   PRESENTACIONES?: Pro039Presentation[];
   /** Producto del consumo al que pertenece el material (de su matriz o agregado a mano para él). */
   PRODUCTO_CONSUMO?: string | null;
+  /** Línea del consumo (ITEM de la línea: producto o componente del juego) a la que pertenece el material. */
+  ITEM_PRODUCTO?: number | null;
   /** Cantidad que indicaba la matriz ("Consumo"). */
   CONSUMO_BASE: number;
   /** Cantidad consumida ("Consumo modificado"). */
