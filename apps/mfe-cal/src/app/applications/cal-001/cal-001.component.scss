@@ -26,6 +26,16 @@
   small { display: block; color: #4a6a84; }
 }
 
+.c1-agregar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: -4px 0 10px;
+  small { color: #4a6a84; }
+}
+.c1-boton {
+  min-height: 38px; padding: 6px 14px; border: 1px solid #0a3960; border-radius: 6px; background: #0a3960; color: #fff;
+  font: inherit; font-weight: 600; cursor: pointer;
+  &:disabled { opacity: .55; cursor: default; }
+}
+
 .c1-cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 .c1-principal, .c1-lateral { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .c1-lateral, .c1-sec { padding: 14px 16px; border: 1px solid #dfe6ef; border-radius: 10px; background: #fff; box-sizing: border-box; }

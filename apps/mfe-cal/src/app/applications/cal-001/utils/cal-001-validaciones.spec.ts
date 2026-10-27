@@ -55,12 +55,24 @@ describe('CAL-001 validaciones (reglas del contrato §2.3)', () => {
     expect(validarBorrador(borradorProduccion(), HoyPrueba, 'new')).toEqual([]);
   });
 
-  it('la fecha del evento es obligatoria y no puede ser posterior a hoy (ajuste 1)', () => {
+  it('fase 2: la fecha del evento es opcional (vacía → hoy en el SP), pero no puede ser posterior a hoy', () => {
     const sinFecha = { ...borradorProduccion(), FECHA_EVENTO: '' };
-    expect(validarBorrador(sinFecha, HoyPrueba, 'new')).toContain('La fecha del evento es obligatoria.');
+    expect(validarBorrador(sinFecha, HoyPrueba, 'new')).toEqual([]);
+    expect(validarBorrador({ ...borradorProduccion(), FECHA_EVENTO: '2026-02-30' }, HoyPrueba, 'new')).toContain('La fecha del evento no es válida.');
     const futura = { ...borradorProduccion(), FECHA_EVENTO: '2026-10-27' };
     expect(validarBorrador(futura, HoyPrueba, 'new')).toContain('La fecha del evento no puede ser posterior a hoy.');
     expect(validarBorrador({ ...borradorProduccion(), FECHA_EVENTO: HoyPrueba }, HoyPrueba, 'new')).toEqual([]);
+  });
+
+  it('agregar: las ocurrencias adicionales son enteras y el total no pasa de 999', () => {
+    const borrador = borradorProduccion();
+    const operario = borrador.PARTES[0].CAUSAS[0].OPERARIOS[0];
+    operario.ADICIONALES = 3;
+    expect(validarBorrador(borrador, HoyPrueba, 'agregar')).toEqual([]);
+    operario.ADICIONALES = 1.5;
+    expect(validarBorrador(borrador, HoyPrueba, 'agregar').join(' ')).toContain('ocurrencias adicionales deben ser un entero');
+    operario.ADICIONALES = 998;
+    expect(validarBorrador(borrador, HoyPrueba, 'agregar').join(' ')).toContain('supera 999');
   });
 
   it('en Producción cada no conformidad necesita al menos un operario (historia 5)', () => {

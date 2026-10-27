@@ -17,7 +17,7 @@
           @switch (foto.estado) {
             @case ('subiendo') { Subiendo… }
             @case ('error') { {{ foto.mensaje }} }
-            @default { {{ idRegistro() ? 'En cola' : 'Se sube al guardar el registro' }} }
+            @default { {{ idRegistro() && !diferirSubida() ? 'En cola' : 'Se sube al guardar el registro' }} }
           }
         </small>
       </span>
@@ -39,7 +39,7 @@
       {{ procesando() ? 'Comprimiendo…' : 'Agregar fotos' }}
     </label>
   }
-  @if (idRegistro() && cola().length) {
+  @if (idRegistro() && cola().length && !diferirSubida()) {
     <button type="button" class="ft-boton" [disabled]="subiendo()" (click)="reintentar()">{{ subiendo() ? 'Subiendo…' : 'Reintentar subida' }}</button>
   }
   <small class="ft-nota">Fotos del registro completo (no de una parte). Máximo {{ maximo }}; se comprimen antes de subir.</small>

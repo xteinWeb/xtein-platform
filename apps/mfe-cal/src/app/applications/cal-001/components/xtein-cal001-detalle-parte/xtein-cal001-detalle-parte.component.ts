@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { Cal001Limits, Cal001Origen } from '../../constants/cal-001.constants';
 import type { Cal001Causa, Cal001CausaBorrador, Cal001Operario, Cal001OperarioBorrador, Cal001ParteBorrador } from '../../models/cal-001.model';
 import { operarioDesdeMaestro } from '../../utils/cal-001-modelo';
@@ -8,6 +8,8 @@ import { XteinCal001CausaSelectorComponent } from '../xtein-cal001-causa-selecto
 /**
  * No conformidades de una parte (nivel 3) y, por cada una, sus operarios con ocurrencias 1-999 (nivel 4).
  * El proceso del operario sale de su sección principal (historia 4). Emite la parte completa ya modificada.
+ * Modo Agregar (fase 2): lo guardado queda de solo lectura (no se quita ni se baja); se añaden no conformidades
+ * y operarios, y a un operario guardado se le suman "ocurrencias adicionales".
  */
 @Component({
   selector: 'xtein-cal001-detalle-parte',
@@ -22,12 +24,14 @@ export class XteinCal001DetalleParteComponent {
   readonly causas = input<readonly Cal001Causa[]>([]);
   readonly origen = input<Cal001Origen>(Cal001Origen.Produccion);
   readonly editable = input(false);
+  readonly agregando = input(false);
   readonly buscarOperarios = input.required<(texto: string) => Promise<Cal001OpcionBusqueda<Cal001Operario>[]>>();
   readonly cambio = output<Cal001ParteBorrador>();
   readonly aviso = output<string>();
 
   readonly limites = Cal001Limits;
-  readonly agregando = signal(false);
+  /** Se puede añadir no conformidades y operarios (crear, modificar o agregar). */
+  readonly anexa = computed(() => this.editable() || this.agregando());
   readonly esCliente = computed(() => this.origen() === Cal001Origen.Cliente);
   readonly usadas = computed(() => this.parte().CAUSAS.map(c => c.ID_CAUSA));
 
@@ -39,8 +43,17 @@ export class XteinCal001DetalleParteComponent {
     this.emitir(this.parte().CAUSAS.map((causa, i) => i === indice ? cambio(causa) : causa));
   }
 
+  /** No conformidad editable o que se puede quitar: en Agregar, solo la que aún no está guardada. */
+  editaCausa(causa: Cal001CausaBorrador): boolean {
+    return this.editable() || (this.agregando() && causa.ID_CAUSA_NC === null);
+  }
+
+  /** Operario editable o que se puede quitar: en Agregar, solo el que aún no está guardado. */
+  editaOperario(operario: Cal001OperarioBorrador): boolean {
+    return this.editable() || (this.agregando() && operario.ID_OPERARIO_NC === null);
+  }
+
   agregarCausa(causa: Cal001Causa): void {
-    this.agregando.set(false);
     if (this.parte().CAUSAS.length >= Cal001Limits.CausesPerPart) {
       this.aviso.emit(`Máximo ${Cal001Limits.CausesPerPart} no conformidades por parte.`);
       return;
@@ -87,6 +100,18 @@ export class XteinCal001DetalleParteComponent {
   cambiarOcurrencias(indice: number, posicion: number, texto: string): void {
     const valor = texto.trim() === '' ? null : Number(texto);
     this.actualizarOperario(indice, posicion, { OCURRENCIAS: valor !== null && Number.isFinite(valor) ? valor : null });
+  }
+
+  /** Modo Agregar: ocurrencias que se suman a un operario guardado (vacío = ninguna). */
+  cambiarAdicionales(indice: number, posicion: number, texto: string): void {
+    const valor = texto.trim() === '' ? null : Number(texto);
+    this.actualizarOperario(indice, posicion, { ADICIONALES: valor !== null && Number.isFinite(valor) ? valor : null });
+  }
+
+  adicionalesInvalidas(operario: Cal001OperarioBorrador): boolean {
+    const valor = operario.ADICIONALES;
+    if (valor === null || valor === undefined) return false;
+    return !Number.isInteger(valor) || valor < 0 || (operario.OCURRENCIAS ?? 0) + valor > Cal001Limits.MaxOccurrences;
   }
 
   cambiarSeccion(indice: number, posicion: number, operario: Cal001OperarioBorrador, idSeccion: string): void {

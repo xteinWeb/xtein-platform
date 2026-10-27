@@ -26,8 +26,9 @@ export function partesConCausas(borrador: Cal001Borrador): Cal001ParteBorrador[]
 /**
  * Valida el borrador con las mismas reglas del SP (contrato §2.3, reglas 1-10) para avisar antes de enviar.
  * Devuelve la lista de problemas en orden; vacía = se puede guardar. El SP vuelve a validar todo.
+ * En `agregar` se valida el árbol resultante (lo guardado + lo nuevo) y las ocurrencias adicionales.
  */
-export function validarBorrador(borrador: Cal001Borrador, hoy: string, accion: 'new' | 'update'): string[] {
+export function validarBorrador(borrador: Cal001Borrador, hoy: string, accion: 'new' | 'update' | 'agregar'): string[] {
   const errores: string[] = [];
   const cliente = borrador.ORIGEN === Cal001Origen.Cliente;
 
@@ -37,7 +38,8 @@ export function validarBorrador(borrador: Cal001Borrador, hoy: string, accion: '
   if (cantidad !== null && (!Number.isFinite(cantidad) || cantidad < 0 || Number(cantidad.toFixed(2)) !== cantidad)) {
     errores.push('La cantidad de referencia debe ser un número mayor o igual a 0, con máximo 2 decimales.');
   }
-  if (!esFechaValida(borrador.FECHA_EVENTO)) errores.push('La fecha del evento es obligatoria.');
+  // Fase 2: la fecha del evento es opcional (vacía → el SP pone hoy); si viene, válida y no posterior a hoy.
+  if (borrador.FECHA_EVENTO && !esFechaValida(borrador.FECHA_EVENTO)) errores.push('La fecha del evento no es válida.');
   else if (borrador.FECHA_EVENTO > hoy) errores.push('La fecha del evento no puede ser posterior a hoy.');
   if (borrador.OBSERVACION.length > Cal001Limits.Observation) {
     errores.push(`La observación supera ${Cal001Limits.Observation} caracteres.`);
@@ -94,6 +96,13 @@ export function validarBorrador(borrador: Cal001Borrador, hoy: string, accion: '
           errores.push(`${nombre}: las ocurrencias deben ser un entero de 1 a 999.`);
         }
         if (!operario.ID_SECCION) errores.push(`${nombre}: elija el proceso (no tiene una única sección principal).`);
+        const extra = operario.ADICIONALES;
+        if (accion === 'agregar' && extra !== null && extra !== undefined) {
+          if (!Number.isInteger(extra) || extra < 0) errores.push(`${nombre}: las ocurrencias adicionales deben ser un entero mayor o igual a 1.`);
+          else if ((ocurrencias ?? 0) + extra > Cal001Limits.MaxOccurrences) {
+            errores.push(`${nombre}: con las adicionales el total de ocurrencias supera ${Cal001Limits.MaxOccurrences}.`);
+          }
+        }
       }
     }
   }

@@ -6,6 +6,7 @@ import { Cal001Service } from '../../services/cal-001.service';
 import { mensajeError } from '../../utils/cal-001-errores';
 import { mostrarFecha } from '../../utils/cal-001-fecha';
 import { comprimirImagen } from '../../utils/cal-001-imagen';
+import { nuevoIdOperacion } from '../../utils/cal-001-payload';
 
 export interface Cal001FotoPendiente {
   id: number;
@@ -13,6 +14,8 @@ export interface Cal001FotoPendiente {
   dueno: number | null;
   nombre: string;
   base64: string;
+  /** ID_OPERACION de esta foto (contrato §2.5): el mismo en todos sus reintentos. */
+  operacion: string;
   estado: 'pendiente' | 'subiendo' | 'error';
   mensaje: string;
 }
@@ -25,6 +28,8 @@ let secuencia = 0;
  * En un registro nuevo quedan en cola y se suben después de guardar; una subida fallida se puede reintentar.
  * Cada foto en cola lleva su registro dueño: al cambiar de registro se descartan las ajenas, y nunca se sube una
  * foto a un registro distinto del suyo.
+ * Fase 2 (C5): solo se agregan fotos en edición (Nuevo, Modificar o Agregar) y quedan en cola hasta Guardar
+ * (`diferirSubida`); el padre las sube después de guardar y las descarta si se cancela.
  */
 @Component({
   selector: 'xtein-cal001-fotos',
@@ -39,6 +44,8 @@ export class XteinCal001FotosComponent {
   readonly idRegistro = input<number | null>(null);
   readonly puedeAgregar = input(false);
   readonly puedeRetirar = input(false);
+  /** true mientras se edita: las fotos elegidas esperan a Guardar en vez de subirse al instante. */
+  readonly diferirSubida = input(false);
   /** Se emite cuando cambian las fotos guardadas, para que el registro se recargue. */
   readonly cambiaron = output<void>();
   readonly aviso = output<string>();
@@ -72,7 +79,9 @@ export class XteinCal001FotosComponent {
 
   /** Agrega una foto ya comprimida a la cola del registro actual. */
   encolar(nombre: string, base64: string): void {
-    this.pendientes.update(lista => [...lista, { id: ++secuencia, dueno: this.idRegistro(), nombre, base64, estado: 'pendiente', mensaje: '' }]);
+    this.pendientes.update(lista => [...lista, {
+      id: ++secuencia, dueno: this.idRegistro(), nombre, base64, operacion: nuevoIdOperacion(), estado: 'pendiente', mensaje: ''
+    }]);
   }
 
   /**
@@ -105,7 +114,7 @@ export class XteinCal001FotosComponent {
       this.procesando.set(false);
     }
     const id = this.idRegistro();
-    if (id) await this.subirPendientes(id);
+    if (id && !this.diferirSubida()) await this.subirPendientes(id);
   }
 
   /**
@@ -125,7 +134,7 @@ export class XteinCal001FotosComponent {
           if (!this.pendientes().some(f => f.id === foto.id)) continue;
           this.marcar(foto.id, 'subiendo', '');
           try {
-            await this.servicio.subirFoto(idRegistro, foto.nombre, foto.base64);
+            await this.servicio.subirFoto(idRegistro, foto.nombre, foto.base64, foto.operacion);
             this.pendientes.update(lista => lista.filter(f => f.id !== foto.id));
             subidas++;
           } catch (error) {
@@ -144,7 +153,7 @@ export class XteinCal001FotosComponent {
 
   reintentar(): void {
     const id = this.idRegistro();
-    if (id && !this.subiendo()) void this.subirPendientes(id);
+    if (id && !this.subiendo() && !this.diferirSubida()) void this.subirPendientes(id);
   }
 
   descartar(id: number): void {

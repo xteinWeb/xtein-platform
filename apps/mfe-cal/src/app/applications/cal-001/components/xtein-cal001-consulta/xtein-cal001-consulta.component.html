@@ -1,4 +1,4 @@
-<form class="cq-filtros" (submit)="enviar($event)" aria-label="Filtros de la consulta">
+<form class="cq-filtros" [class.cq-gestor]="esGestor()" (submit)="enviar($event)" aria-label="Filtros de la consulta">
   <label>Desde <input type="date" [value]="filtro().FECHA_DESDE" (change)="cambiar('FECHA_DESDE', $any($event.target).value)" /></label>
   <label>Hasta <input type="date" [value]="filtro().FECHA_HASTA" (change)="cambiar('FECHA_HASTA', $any($event.target).value)" /></label>
   <label>Origen
@@ -9,6 +9,12 @@
     </select>
   </label>
   <label>Documento <input type="search" placeholder="NC-0001" [value]="filtro().DOCUMENTO" (input)="cambiar('DOCUMENTO', $any($event.target).value)" /></label>
+  @if (esGestor()) {
+    <label>Cédula del operario
+      <input type="search" inputmode="numeric" maxlength="20" placeholder="Cédula exacta" [value]="filtro().ID_EMPLEADO"
+        (input)="cambiar('ID_EMPLEADO', $any($event.target).value)" />
+    </label>
+  }
   <div class="cq-botones">
     <button type="submit" class="cq-boton cq-principal" [disabled]="cargando()">{{ cargando() ? 'Buscando…' : 'Buscar' }}</button>
     <button type="button" class="cq-boton" [disabled]="cargando() || !!exportando() || !resultado()?.TOTAL" (click)="exportar.emit()">
@@ -25,6 +31,7 @@
 <div class="cq-tabla" role="table" aria-label="Registros de no conformidades">
   <div class="cq-fila cq-titulos" role="row">
     <span role="columnheader">Documento</span><span role="columnheader">Origen</span><span role="columnheader">Producto</span>
+    <span role="columnheader">No conformidad</span>
     <span role="columnheader">Fecha del evento</span><span role="columnheader">Registrado por</span>
     <span role="columnheader">Última modificación</span><span role="columnheader" class="cq-num">Oper.</span>
     <span role="columnheader" class="cq-num">Ocurr.</span><span role="columnheader" class="cq-num">Fotos</span>
@@ -35,8 +42,9 @@
       <span role="cell" class="cq-doc">{{ fila.DOCUMENTO }}</span>
       <span role="cell"><span class="cq-origen" [class.cq-cliente]="fila.ORIGEN === origenes.Cliente">{{ origen(fila.ORIGEN) }}</span></span>
       <span role="cell" class="cq-producto">{{ fila.PRODUCTO }} · {{ fila.NOMBRE_PRODUCTO }}</span>
+      <span role="cell" class="cq-causas" data-titulo="No conformidad" [attr.title]="fila.CAUSAS || null">{{ fila.CAUSAS || '—' }}</span>
       <span role="cell" data-titulo="Evento">{{ fecha(fila.FECHA_EVENTO) }}</span>
-      <span role="cell" data-titulo="Por">{{ fila.USUARIO_CREA }}@if (fila.USUARIO_CREA.toUpperCase() === usuario().toUpperCase()) { <small>(tú)</small> }</span>
+      <span role="cell" data-titulo="Por" [attr.title]="fila.USUARIO_CREA">{{ registradoPor(fila) }}@if (fila.USUARIO_CREA.toUpperCase() === usuario().toUpperCase()) {<small> (tú)</small>}</span>
       <span role="cell" data-titulo="Modificó">{{ fila.USUARIO_MODIFICA ? fila.USUARIO_MODIFICA + ' · ' + fecha(fila.FECHA_MODIFICA) : '—' }}</span>
       <span role="cell" class="cq-num" data-titulo="Oper.">{{ fila.N_OPERARIOS }}</span>
       <span role="cell" class="cq-num" data-titulo="Ocurr.">{{ fila.TOTAL_OCURRENCIAS }}</span>

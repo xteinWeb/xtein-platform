@@ -1,5 +1,5 @@
 import type {
-  Cal001Borrador, Cal001Causa, Cal001Operario, Cal001PartesProducto, Cal001RegistroCompleto
+  Cal001Borrador, Cal001Causa, Cal001ConsultaFila, Cal001Operario, Cal001PartesProducto, Cal001RegistroCompleto
 } from '../models/cal-001.model';
 import { borradorVacio, operarioDesdeMaestro, partesDesdeProducto } from '../utils/cal-001-modelo';
 
@@ -67,7 +67,8 @@ export function borradorCliente(): Cal001Borrador {
 }
 
 /** Registro guardado (respuesta de `consulta registro`). */
-export function registroGuardado(cambios: Partial<Pick<Cal001RegistroCompleto, 'PUEDE_MODIFICAR' | 'PUEDE_AGREGAR_FOTOS' | 'PUEDE_RETIRAR_FOTOS'>> = {}): Cal001RegistroCompleto {
+export function registroGuardado(cambios: Partial<Pick<Cal001RegistroCompleto,
+  'PUEDE_MODIFICAR' | 'PUEDE_AGREGAR' | 'AGREGAR_HASTA' | 'PUEDE_AGREGAR_FOTOS' | 'PUEDE_RETIRAR_FOTOS'>> = {}): Cal001RegistroCompleto {
   return {
     REGISTRO: {
       ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', ORIGEN: 'PRODUCCION', PRODUCTO: 'PF-2201', NOMBRE_PRODUCTO: 'Nochero Duna',
@@ -83,7 +84,20 @@ export function registroGuardado(cambios: Partial<Pick<Cal001RegistroCompleto, '
     }],
     FOTOS: [],
     HISTORIAL: [{ VERSION: 1, ACCION: 'CREAR', USUARIO: 'INSPECTOR', FECHA: '2026-10-20T09:15:00' }],
-    PUEDE_MODIFICAR: 0, PUEDE_AGREGAR_FOTOS: 0, PUEDE_RETIRAR_FOTOS: 0,
+    PUEDE_MODIFICAR: 0, PUEDE_AGREGAR: 0, AGREGAR_HASTA: '2026-10-27T09:15:00', PUEDE_AGREGAR_FOTOS: 0, PUEDE_RETIRAR_FOTOS: 0,
+    NOMBRE_USUARIO_CREA: 'Edgardo Alcazar', AREA_USUARIO_CREA: 'Producción',
+    ...cambios
+  };
+}
+
+/** Fila de la acción `consulta` (fase 2: CAUSAS, NOMBRE_USUARIO_CREA, AREA_USUARIO_CREA). */
+export function filaConsulta(cambios: Partial<Cal001ConsultaFila> = {}): Cal001ConsultaFila {
+  return {
+    ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', ORIGEN: 'PRODUCCION', PRODUCTO: 'PF-2201', NOMBRE_PRODUCTO: 'Nochero Duna',
+    FECHA_EVENTO: '2026-10-20', FECHA_REGISTRO: '2026-10-20T09:15:00', USUARIO_CREA: '1002000697',
+    NOMBRE_USUARIO_CREA: 'Edgardo Alcazar', AREA_USUARIO_CREA: 'Producción', USUARIO_MODIFICA: null, FECHA_MODIFICA: null,
+    VERSION: 1, ID_CLIENTE: null, NOMBRE_CLIENTE: null, N_PARTES: 1, N_CAUSAS: 2, CAUSAS: 'Arenilla, Grado', N_OPERARIOS: 2,
+    TOTAL_OCURRENCIAS: 5, N_FOTOS: 0,
     ...cambios
   };
 }

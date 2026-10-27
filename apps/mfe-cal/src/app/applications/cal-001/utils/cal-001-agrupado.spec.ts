@@ -1,5 +1,6 @@
 import { borradorCliente, borradorProduccion, registroGuardado } from '../testing/cal-001.fixtures';
 import type { Cal001RegistroCompleto } from '../models/cal-001.model';
+import { Cal001ColumnasExcel } from '../services/cal-001-excel.service';
 import { filasExportacion, ncPorOperario } from './cal-001-agrupado';
 import { descripcionVisible, filtrarCausas } from './cal-001-causas';
 import { CausasPrueba } from '../testing/cal-001.fixtures';
@@ -19,6 +20,12 @@ describe('CAL-001 "No conformidades por operario" (ajuste 3)', () => {
     ]);
   });
 
+  it('en modo Agregar suma las ocurrencias adicionales capturadas', () => {
+    const borrador = borradorProduccion();
+    borrador.PARTES[0].CAUSAS[0].OPERARIOS[0].ADICIONALES = 3;
+    expect(ncPorOperario(borrador)[0]).toMatchObject({ ID_EMPLEADO: '1001', TOTAL: 5, CAUSAS: [{ ID_CAUSA: 'NC-01', OCURRENCIAS: 5 }] });
+  });
+
   it('un registro de Cliente sin operarios no tiene filas', () => {
     expect(ncPorOperario(borradorCliente())).toEqual([]);
   });
@@ -31,13 +38,33 @@ describe('CAL-001 exportación de Consulta (plan §10.1)', () => {
       ID_SECCION: 'S20', DESCRIPCION_SECCION: 'Pintura' });
     const filas = filasExportacion([registro]);
     expect(filas).toEqual([
-      { DOCUMENTO: 'NC-0007', ORIGEN: 'Producción', FECHA_EVENTO: '2026-10-20', PRODUCTO: 'PF-2201', NOMBRE_PRODUCTO: 'Nochero Duna',
+      { DOCUMENTO: 'NC-0007', ORIGEN: 'Producción', FECHA_REGISTRO: '2026-10-20 09:15', FECHA_EVENTO: '2026-10-20',
+        REGISTRADO_POR: 'Edgardo Alcazar', PRODUCTO: 'PF-2201', NOMBRE_PRODUCTO: 'Nochero Duna',
         PARTE: 'PA-501 · Tapa superior · Tapa', CAUSA: 'NC-01', NOMBRE_CAUSA: 'Grado', OPERARIO: '1001', NOMBRE_OPERARIO: 'Óscar Villa',
         PROCESO: 'Ebanistería', OCURRENCIAS: 2 },
-      { DOCUMENTO: 'NC-0007', ORIGEN: 'Producción', FECHA_EVENTO: '2026-10-20', PRODUCTO: 'PF-2201', NOMBRE_PRODUCTO: 'Nochero Duna',
+      { DOCUMENTO: 'NC-0007', ORIGEN: 'Producción', FECHA_REGISTRO: '2026-10-20 09:15', FECHA_EVENTO: '2026-10-20',
+        REGISTRADO_POR: 'Edgardo Alcazar', PRODUCTO: 'PF-2201', NOMBRE_PRODUCTO: 'Nochero Duna',
         PARTE: 'PA-501 · Tapa superior · Tapa', CAUSA: 'NC-01', NOMBRE_CAUSA: 'Grado', OPERARIO: '1002', NOMBRE_OPERARIO: 'Diana Mesa',
         PROCESO: 'Pintura', OCURRENCIAS: 5 }
     ]);
+  });
+
+  it('fase 2: el Excel trae "Fecha de registro", "Fecha del evento" y "Registrado por" con el nombre (o el código si no hay)', () => {
+    const titulos = Cal001ColumnasExcel.map(c => c.titulo);
+    expect(titulos.slice(0, 5)).toEqual(['Documento', 'Origen', 'Fecha de registro', 'Fecha del evento', 'Registrado por']);
+    expect(Cal001ColumnasExcel.map(c => c.campo)).toEqual(expect.arrayContaining(['FECHA_REGISTRO', 'FECHA_EVENTO', 'REGISTRADO_POR', 'NOMBRE_CAUSA']));
+    const sinNombre = { ...registroGuardado(), NOMBRE_USUARIO_CREA: '' };
+    expect(filasExportacion([sinNombre])[0].REGISTRADO_POR).toBe('INSPECTOR');
+  });
+
+  it('las causas salen completas desde el detalle, una por fila', () => {
+    const registro = registroGuardado();
+    const largo = 'Corte de la madera en grado que no corresponde '.repeat(12).trim();
+    registro.PARTES[0].CAUSAS.push({ ID_CAUSA_NC: 22, ID_CAUSA: 'NC-09', NOMBRE: largo, DESCRIPCION: largo,
+      OPERARIOS: [{ ID_OPERARIO_NC: 32, ID_EMPLEADO: '1001', NOMBRE: 'Óscar Villa', OCURRENCIAS: 1, ID_SECCION: 'S10', DESCRIPCION_SECCION: 'Ebanistería' }] });
+    const filas = filasExportacion([registro]);
+    expect(filas.map(f => f.NOMBRE_CAUSA)).toEqual(['Grado', largo]);
+    expect(largo.length).toBeGreaterThan(400);
   });
 
   it('una causa sin operarios (Cliente) sale en una fila con el operario vacío; "Producto completo" usa la pieza', () => {

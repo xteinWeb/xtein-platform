@@ -2,12 +2,13 @@
 
 Contrato vinculante entre el front (`apps/mfe-cal`, aplicación `CAL-001`), las rutas de apiRest `POST /api/CAL001N/*` y el procedimiento almacenado `dbo.spNoConformidad` (ARTDECON). El SP se implementa en F2 (`sql/sp/41_spNoConformidad.sql`); este documento lo fija antes.
 
-Plan: `xtein-platform/.omc/plans/cal-001-plan.md` §3, §4, §9.2 y §10. Evidencia F0: `xtein-platform/.omc/research/cal-001-p0.md`.
+Plan: `xtein-platform/.omc/plans/cal-001-plan.md` §3, §4, §9.2 y §10. Evidencia F0: `xtein-platform/.omc/research/cal-001-p0.md`. **Fase 2** (acción `agregar`, idempotencia, consulta ampliada): `xtein-platform/.omc/plans/cal-001-fase2-plan.md` §3-§5.
 
 Archivos en apiRest:
 - BD (F1): `sql/ddl/40_cal001_registros_nc.sql`, `sql/seed/42_cal001_documento.sql`, `sql/rollback/93_rollback_cal001.sql`, `sql/verificacion/92_verificar_cal001.sql`.
 - SP y pruebas (F2): `sql/sp/41_spNoConformidad.sql`, `sql/pruebas/41_pruebas_spNoConformidad_{consultas,escritura}.sql`, `sql/pruebas/41_concurrencia_consecutivo.mjs`, `sql/rollback/95c_limpiar_prueba_concurrencia_cal001.sql` (limpieza de la prueba de concurrencia) y `sql/rollback/93b_rollback_spNoConformidad.sql` (rollback solo del SP).
 - Rutas (F3): `src/routes/CAL001N.routes.js`, `src/controllers/CAL001N/CAL001N.controller.js`, `src/controllers/CAL001N/fotos.js`, `scripts/limpiar-fotos-cal001.mjs`, `src/tests/CAL001N.test.js` (§6).
+- **Fase 2:** `sql/ddl/44_cal001_f2_log_agregar.sql` (CK_LRNC_ACC con `AGREGAR`, `LOG_REGISTROS_NC.ID_OPERACION` + `UQ_LRNC_OPERACION`), `sql/verificacion/92b_verificar_cal001_f2.sql`, `sql/rollback/93c_rollback_spNoConformidad_f2.sql` (SP de fase 1) y `93d_rollback_cal001_f2_ddl.sql` (orden de rollback: 93c → 93d), `sql/pruebas/44_concurrencia_operacion.mjs` + `sql/rollback/95d_limpiar_prueba_concurrencia_cal001_f2.sql`. Orden de despliegue: 44 → SP 41 → 92 y 92b en OK.
 
 **Esquema (F1):** `REGISTROS_NC` (encabezado) → `ITM_REGISTROS_NC_PARTES` → `ITM_REGISTROS_NC_CAUSAS` → `ITM_REGISTROS_NC_OPERARIOS`; `ITM_REGISTROS_NC_FOTOS`; `LOG_REGISTROS_NC`. Lee `USUARIOS_APLICACIONES`, `PRODUCTOS`, `PRODUCTOS_PARTES`, `CAUSAS`, `EMPLEADOS`, `ITM_EMPLEADOS_SECCIONES`, `SECCIONES`, `CLIENTES`, `DOMINIOS`/`ITM_DOMINIOS`, `DOCUMENTOS`. **Nunca escribe `CALIDAD`** ni usa `spDocumentos`.
 
@@ -33,7 +34,7 @@ Archivos en apiRest:
    - `PUEDE_VER = ISNULL(LISTAR,0)=1 OR ISNULL(BUSCAR,0)=1`;
    - `PUEDE_CREAR = ISNULL(CREAR,0)=1`;
    - `ES_GESTOR = ISNULL(CONFIGURAR,0)=1` (DP-3; se asigna en ADM015, columna "OPC"). `MODIFICAR` no se usa.
-6. **Sin `ES_GESTOR` todo registro guardado es de solo lectura, también los propios.** Única excepción: la regla de fotos del creador (§2.4).
+6. **Sin `ES_GESTOR` todo registro guardado es de solo lectura, también los propios.** Excepciones (fase 2): el **creador** puede **agregar** a su registro (acción `agregar`, §2.3) y subir fotos (§2.4) mientras tenga `CREAR` y esté dentro de la ventana de **7 días** desde `FECHA_CREA` (`@DIAS_AGREGAR_CREADOR`, DP-A). Nunca quita ni baja nada; corregir o quitar sigue siendo del gestor (`update`).
 7. **Reloj único:** al inicio del SP, `@AHORA = DATEADD(HOUR, -5, SYSUTCDATETIME())` (Colombia, UTC−5 fijo) y `@HOY = CAST(@AHORA AS DATE)`. Todas las reglas de fecha y todos los sellos (`FECHA_REGISTRO`, `FECHA_CREA`, `FECHA_MODIFICA`, `FECHA_RETIRA`, `LOG.FECHA`, la ventana de 24 h de fotos) usan esas dos variables.
 
 ### 1.2 Documento y numeración
@@ -50,12 +51,12 @@ Cualquier `prmAccion` fuera de la lista de su ruta → **HTTP 400 sin llamar al 
 | Ruta | Acciones permitidas |
 |---|---|
 | `POST /api/CAL001N/consulta` | `causas`, `productos`, `partes producto`, `operarios`, `clientes`, `listas cliente`, `permisos`, `consulta`, `consulta registro`, `historial` |
-| `POST /api/CAL001N/save` | `new`, `update` |
+| `POST /api/CAL001N/save` | `new`, `update`, `agregar` (fase 2) |
 | `POST /api/CAL001N/foto-subir` | `foto agregar` (el `DATA_JSON` lo arma el controlador, §2.4) |
 | `POST /api/CAL001N/foto` | `foto ruta` (el controlador lee el archivo y nunca devuelve `RUTA`) |
 | `POST /api/CAL001N/foto-retirar` | `foto retirar` |
 
-- `DATA_JSON` = solo los campos permitidos de la acción (columna "Entrada" de §2, copiados por nombre; el resto se descarta) + `identidadSp(req)` al final.
+- `DATA_JSON` = solo los campos permitidos de la acción (columna "Entrada" de §2, copiados por nombre; el resto se descarta) + `identidadSp(req)` al final. **Fase 2:** en `agregar`, las claves de primer nivel `REGISTRO` y `MOTIVO` no se descartan en silencio: → **HTTP 400** `Campo no permitido en la petición: <campo>` sin llamar al SP. Las claves anidadas (`ID_PARTE_NC`, `ID_CAUSA_NC`, `ID_OPERARIO_NC`) llegan al SP, que responde E06. `ID_OPERACION` se copia en `new`, `update`, `agregar` y `foto agregar`; `consulta` admite además `ID_EMPLEADO` y `FECHA_BASE`.
 - La conexión es la de `req.identidad.empresa` (como `sp.empresa(...)` en AGT001), nunca `prmConexion.EMPRESA`.
 - El controlador **no** calcula permisos.
 - Respuesta: `{ data, token: res.locals.newToken }`. En `/foto`: `{ data: { MIME, BASE64 }, token }`.
@@ -102,15 +103,18 @@ Complementan las reglas de §2; los textos de error son los de §3.
 
 | prmAccion | Permiso | Entrada | DATOS |
 |---|---|---|---|
-| `consulta` | VER | `{FECHA_DESDE?, FECHA_HASTA?, ORIGEN?, PRODUCTO?, USUARIO_CREA?, DOCUMENTO?, PAGINA?, TAMANO?}` | `[{TOTAL, PAGINA, TAMANO, FILAS:[{ID_REGISTRO_NC, DOCUMENTO, ORIGEN, PRODUCTO, NOMBRE_PRODUCTO, FECHA_EVENTO, FECHA_REGISTRO, USUARIO_CREA, USUARIO_MODIFICA, FECHA_MODIFICA, VERSION, ID_CLIENTE, NOMBRE_CLIENTE, N_PARTES, N_CAUSAS, N_OPERARIOS, TOTAL_OCURRENCIAS, N_FOTOS}]}]` |
+| `consulta` | VER | `{FECHA_DESDE?, FECHA_HASTA?, FECHA_BASE?, ORIGEN?, PRODUCTO?, USUARIO_CREA?, ID_EMPLEADO?, DOCUMENTO?, PAGINA?, TAMANO?}` | `[{TOTAL, PAGINA, TAMANO, FILAS:[{ID_REGISTRO_NC, DOCUMENTO, ORIGEN, PRODUCTO, NOMBRE_PRODUCTO, FECHA_EVENTO, FECHA_REGISTRO, USUARIO_CREA, NOMBRE_USUARIO_CREA, AREA_USUARIO_CREA, USUARIO_MODIFICA, FECHA_MODIFICA, VERSION, ID_CLIENTE, NOMBRE_CLIENTE, N_PARTES, N_CAUSAS, CAUSAS, N_OPERARIOS, TOTAL_OCURRENCIAS, N_FOTOS}]}]` |
 | `consulta registro` | VER | `{ID_REGISTRO_NC}` | ver abajo |
 | `historial` | VER | `{ID_REGISTRO_NC}` | `[{VERSION, ACCION, USUARIO, FECHA, MOTIVO, DATOS_ANTES, DATOS_DESPUES}]` ordenado por `ID_LOG`; `DATOS_*` como objetos JSON (no texto). |
 
 Reglas de `consulta`:
 - Registros de **todos los usuarios** de `@ID_UN` (historia 9); SQL estático, sin SQL dinámico.
-- `FECHA_DESDE` por omisión `DATEADD(DAY,-30,@HOY)`, `FECHA_HASTA` por omisión `@HOY`; filtran `FECHA_EVENTO`. `DESDE > HASTA` o rango mayor de 366 días → E06.
+- `FECHA_DESDE` por omisión `DATEADD(DAY,-30,@HOY)`, `FECHA_HASTA` por omisión `@HOY`. `DESDE > HASTA` o rango mayor de 366 días → E06.
+- **`FECHA_BASE`** (fase 2) ∈ {`EVENTO` (por omisión), `REGISTRO`}: decide sobre qué fecha se aplican `FECHA_DESDE`/`FECHA_HASTA` y el orden. "Mis reportes" usa `REGISTRO` + `USUARIO_CREA`. El filtro es **semiabierto** en las dos bases: `fecha >= DESDE AND fecha < DATEADD(DAY, 1, HASTA)` (así `FECHA_REGISTRO`, que es `DATETIME2`, incluye todo el día `HASTA`), aplicado igual en `TOTAL` y en `FILAS`. Otro valor → E06.
 - `ORIGEN` ∈ {`PRODUCCION`,`CLIENTE`}; `PRODUCTO` y `USUARIO_CREA` exactos; `DOCUMENTO` acepta `NC-0001`, `0001` o `1` (compara `CONSECUTIVO`).
-- `PAGINA` ≥ 1 (por omisión 1), `TAMANO` 1–100 (por omisión 50). Orden `FECHA_EVENTO DESC, ID_REGISTRO_NC DESC`, `OFFSET/FETCH`.
+- **`ID_EMPLEADO`** (fase 2, DP-L): cédula exacta (≤ 20) de un operario del registro (`EXISTS` sobre `ITM_REGISTROS_NC_OPERARIOS`, también en `TOTAL`). **Solo el gestor**: sin `ES_GESTOR` → E05 `Sin permiso para filtrar por operario`. El front oculta el campo a los demás.
+- `PAGINA` ≥ 1 (por omisión 1), `TAMANO` 1–100 (por omisión 50). Orden `FECHA_EVENTO DESC, ID_REGISTRO_NC DESC` (con `FECHA_BASE = REGISTRO`, primero `FECHA_REGISTRO DESC`), `OFFSET/FETCH`.
+- **Columnas nuevas (fase 2):** `CAUSAS` = nombres **distintos** de las causas del registro separados por `, ` (`STRING_AGG` sobre `NVARCHAR(MAX)`, ordenados por nombre), **recortados a 400 caracteres** con `…` para la grilla; el Excel usa las causas completas de `consulta registro`. `NOMBRE_USUARIO_CREA` = `USUARIOS.NOMBRE` → `RS_EMPLEADOS_ID.NOMBRE_COMPLETO` (de `@ID_UN`) → el código. `AREA_USUARIO_CREA` (DP-D) = descripción de la sección **padre** de la sección `PRINCIPAL` activa del empleado en `@ID_UN` (si no hay padre, la sección; sin sección → `null`).
 
 `consulta registro` devuelve (registro de otra UN o inexistente → E08):
 
@@ -129,12 +133,15 @@ Reglas de `consulta`:
                                                "ID_SECCION": "", "DESCRIPCION_SECCION": "" } ] } ] } ],
   "FOTOS": [ { "ID_FOTO_NC": 5, "NOMBRE_ORIGINAL": "", "MIME": "image/jpeg", "USUARIO_CREA": "", "FECHA_CREA": "" } ],
   "HISTORIAL": [ { "VERSION": 1, "ACCION": "CREAR", "USUARIO": "", "FECHA": "" } ],
-  "PUEDE_MODIFICAR": 0, "PUEDE_AGREGAR_FOTOS": 1, "PUEDE_RETIRAR_FOTOS": 0
+  "PUEDE_MODIFICAR": 0, "PUEDE_AGREGAR": 1, "AGREGAR_HASTA": "2026-11-02T09:15:00",
+  "PUEDE_AGREGAR_FOTOS": 1, "PUEDE_RETIRAR_FOTOS": 0,
+  "NOMBRE_USUARIO_CREA": "Edgardo Alcazar", "AREA_USUARIO_CREA": "Producción"
 }]
 ```
 
 - `FOTOS` solo las `ACTIVO`, **sin `RUTA`**.
-- `PUEDE_MODIFICAR = ES_GESTOR`; `PUEDE_RETIRAR_FOTOS = ES_GESTOR`; `PUEDE_AGREGAR_FOTOS` = regla de §2.4 evaluada con `@AHORA`.
+- `PUEDE_MODIFICAR = ES_GESTOR`; `PUEDE_RETIRAR_FOTOS = ES_GESTOR`.
+- **Fase 2:** `PUEDE_AGREGAR` = 1 si `USUARIO_CREA = USUARIO_TOKEN`, `PUEDE_CREAR = 1` y `@AHORA < AGREGAR_HASTA`; `AGREGAR_HASTA = DATEADD(DAY, 7, FECHA_CREA)` (se muestra "puedes agregar hasta …"). `PUEDE_AGREGAR_FOTOS = ES_GESTOR OR PUEDE_AGREGAR` (regla de §2.4). `NOMBRE_USUARIO_CREA` y `AREA_USUARIO_CREA` como en `consulta`.
 - El historial resumido no trae antes/después (DP-10); el detalle sale de `historial`.
 
 ### 2.3 Guardar (`/save`)
@@ -153,17 +160,20 @@ Entrada (claves exactas; en `new` los `ID_*_NC` van `null` o se omiten; `ITEM` d
 }
 ```
 
-`ID_REGISTRO_NC`, `VERSION` y `MOTIVO` solo en `update`. Los textos vacíos se normalizan a NULL (`NULLIF(TRIM(x), '')`).
+`ID_REGISTRO_NC`, `VERSION` y `MOTIVO` solo en `update` (`ID_REGISTRO_NC` y `VERSION` también en `agregar`). Los textos vacíos se normalizan a NULL (`NULLIF(TRIM(x), '')`). **`ID_OPERACION`** (GUID, §2.5) en las tres acciones; desde el web de fase 2 se envía **siempre**.
 
 | prmAccion | Permiso | DATOS |
 |---|---|---|
-| `new` | CREAR; además GESTOR si `ORIGEN='CLIENTE'` | `[{ErrMensaje:"", ID_REGISTRO_NC, ID_DOCUMENTO:"NCC", CONSECUTIVO, DOCUMENTO, VERSION:1, FECHA_REGISTRO}]`. Inserta encabezado (`ESTADO='REGISTRADO'`, `USUARIO_CREA=USUARIO_TOKEN`, `FECHA_CREA=FECHA_REGISTRO=@AHORA`) e hijos; log `CREAR` (`DATOS_ANTES` NULL, `DATOS_DESPUES` = registro completo). |
-| `update` | GESTOR | `[{ErrMensaje:"", ID_REGISTRO_NC, DOCUMENTO, VERSION}]` con `VERSION+1`, `USUARIO_MODIFICA=USUARIO_TOKEN`, `FECHA_MODIFICA=@AHORA`; log `MODIFICAR` con antes/después completos y `MOTIVO`. `USUARIO_CREA`, `FECHA_CREA`, `FECHA_REGISTRO`, UN y documento no cambian (además lo impide `TR_REGISTROS_NC_INMUTABLE`). |
+| `new` | CREAR; además GESTOR si `ORIGEN='CLIENTE'` | `[{ErrMensaje:"", ID_REGISTRO_NC, ID_DOCUMENTO:"NCC", CONSECUTIVO, DOCUMENTO, VERSION:1, FECHA_REGISTRO, REPETIDA:0}]`. Inserta encabezado (`ESTADO='REGISTRADO'`, `USUARIO_CREA=USUARIO_TOKEN`, `FECHA_CREA=FECHA_REGISTRO=@AHORA`) e hijos; log `CREAR` (`DATOS_ANTES` NULL, `DATOS_DESPUES` = registro completo). |
+| `update` | GESTOR | `[{ErrMensaje:"", ID_REGISTRO_NC, DOCUMENTO, VERSION, REPETIDA:0}]` con `VERSION+1`, `USUARIO_MODIFICA=USUARIO_TOKEN`, `FECHA_MODIFICA=@AHORA`; log `MODIFICAR` con antes/después completos y `MOTIVO`. `USUARIO_CREA`, `FECHA_CREA`, `FECHA_REGISTRO`, UN y documento no cambian (además lo impide `TR_REGISTROS_NC_INMUTABLE`). |
+| `agregar` (fase 2) | **creador** (`USUARIO_CREA = USUARIO_TOKEN`) con CREAR y `@AHORA < FECHA_CREA + 7 días`; si no → E05 `Sin permiso para agregar a este registro` | `[{ErrMensaje:"", ID_REGISTRO_NC, DOCUMENTO, VERSION, REPETIDA:0}]` con `VERSION+1`, `USUARIO_MODIFICA`, `FECHA_MODIFICA`; log `AGREGAR` (antes/después completos, `MOTIVO` NULL, `ID_OPERACION`). Ver "Acción `agregar`" más abajo. |
+
+**Acción `agregar` (fase 2):** entrada `{ID_REGISTRO_NC, VERSION, ID_OPERACION, PARTES:[{ID_PARTE, ITEM_PRODUCTO_PARTE, PIEZA?, CAUSAS:[{ID_CAUSA, OPERARIOS:[{ID_EMPLEADO, OCURRENCIAS, ID_SECCION?}]}]}]}` = **solo lo nuevo (delta)**. Si aparecen `REGISTRO` o `MOTIVO` en la raíz, o `ID_PARTE_NC`/`ID_CAUSA_NC`/`ID_OPERARIO_NC` a cualquier profundidad → E06 `Parámetro inválido: <clave>` (el controlador ya devuelve 400 para `REGISTRO`/`MOTIVO`). El SP carga el árbol actual desde la BD y **fusiona** el delta por claves naturales: parte por `ID_PARTE` + `ITEM_PRODUCTO_PARTE` ("Producto completo" por `PIEZA`); causa por `ID_CAUSA` dentro de su parte; operario por `ID_EMPLEADO` dentro de su causa, **sumando** `OCURRENCIAS` (total ≤ 999 → si no, E18) y conservando el `ID_SECCION` guardado. Las filas nuevas van con `ITEM = MAX + 1`; las existentes conservan `ITEM` e IDs. Las Reglas 4-6 de "maestro activo" se aplican **solo a las filas nuevas** (un operario retirado o una causa inactivada después no bloquean); las estructurales (repetidos, 1-999, E13, límites E24) al árbol resultante. El **encabezado no cambia** (ni pasa por las Reglas 1-3 ni 8: un PF o un cliente inactivados después no bloquean). Delta sin nada nuevo → E13. `VERSION` distinta de la actual → E22. **Por construcción no puede borrar ni bajar nada.**
 
 Validaciones (`new` y `update`; la primera que falla devuelve su `ErrMensaje`):
 1. `ORIGEN` ∈ {`PRODUCCION`,`CLIENTE`} (`MATERIALES`/`NORMAS` → E11); `CLIENTE` sin `ES_GESTOR` → E05.
 2. `PRODUCTO` es PF (`LIKE 'PF%'`) activo de `@ID_UN` → si no, E07. `CANTIDAD_REFERENCIA` NULL o ≥ 0.
-3. `FECHA_EVENTO` obligatoria y `≤ @HOY` → E12. `FECHA_RECLAMO` `≤ @HOY` → E12.
+3. `FECHA_EVENTO` **opcional (fase 2)**: en `new`, vacía o ausente → `@HOY` (hoy en Colombia); en `update`, ausente → se conserva la actual. Si viene: formato `yyyy-MM-dd` y `≤ @HOY`, si no → E12 (el texto de E12 no cambia). `FECHA_RECLAMO` `≤ @HOY` → E12.
 4. ≥ 1 parte; cada parte con ≥ 1 causa (E13). `ID_PARTE` + `ITEM_PRODUCTO_PARTE` pertenecen a las partes activas del PF; `ID_PARTE` NULL solo si el PF no tiene partes y `PIEZA` viene llena (E14). `PIEZA` ≤ 50 caracteres: si no, E15 (**no se trunca**). Sin partes repetidas (E16).
 5. Cada causa existe en `CAUSAS` (`@ID_UN`, `CAL-001`, `TIPO='PRODUCCION'`, `ACTIVO`) y no se repite en su parte (E17).
 6. Cada operario existe y está activo en `EMPLEADOS` de `@ID_UN`; `OCURRENCIAS` entero 1–999; no se repite en su causa; `ID_SECCION` es una sección activa suya (E18).
@@ -180,18 +190,30 @@ Validaciones (`new` y `update`; la primera que falla devuelve su `ErrMensaje`):
 
 | prmAccion | Ruta | Permiso | Entrada | DATOS |
 |---|---|---|---|---|
-| `foto agregar` | `/foto-subir` | regla de fotos | `{ID_REGISTRO_NC, NOMBRE_ORIGINAL, EXTENSION}` (los arma el controlador) | `[{ErrMensaje:"", ID_FOTO_NC, RUTA, MIME}]` |
+| `foto agregar` | `/foto-subir` | regla de fotos | `{ID_REGISTRO_NC, NOMBRE_ORIGINAL, EXTENSION, ID_OPERACION?}` (los arma el controlador) | `[{ErrMensaje:"", ID_FOTO_NC, RUTA, MIME, REPETIDA:0}]`; repetida: `[{…, ID_FOTO_NC, RUTA, MIME, ESTADO, REPETIDA:1}]` (§2.5) |
 | `foto retirar` | `/foto-retirar` | GESTOR | `{ID_FOTO_NC, MOTIVO?}` | `[{ErrMensaje:"", ID_FOTO_NC, ESTADO:"RETIRADO"}]` |
 | `foto ruta` | `/foto` | VER | `{ID_FOTO_NC}` | `[{ErrMensaje:"", RUTA, MIME}]` solo si la foto está `ACTIVO` y su registro es de `@ID_UN` (si no, E08) |
 
 **Regla de fotos:**
-- Agregar: el gestor siempre; el **creador** (`USUARIO_CREA = USUARIO_TOKEN`) solo si `VERSION = 1` y `@AHORA < DATEADD(HOUR, 24, FECHA_CREA)` (DP-11). Otro caso → E05. Máximo 10 fotos `ACTIVO` por registro: la 11.ª → E26 (se cuenta bajo `UPDLOCK` del encabezado).
+- Agregar: el gestor siempre; el **creador** (`USUARIO_CREA = USUARIO_TOKEN`) con `PUEDE_CREAR` y `@AHORA < DATEADD(DAY, 7, FECHA_CREA)` (fase 2, DP-A; antes era `VERSION = 1` y 24 h). Otro caso → E05. Máximo 10 fotos `ACTIVO` por registro: la 11.ª → E26 (se cuenta bajo `UPDLOCK` del encabezado). El SP no conoce el modo de edición del front: que las fotos solo se suban en Nuevo / Modificar / Agregar (C5) lo decide el web.
 - Retirar: solo el gestor.
 - `EXTENSION` ∈ {`jpg`,`png`,`webp`} (E27); la detecta el controlador por los bytes mágicos. El SP fija `MIME` (`image/jpeg`, `image/png`, `image/webp`) y genera `RUTA = <ID_UN>/<yyyy de @AHORA>/<ID_REGISTRO_NC>/<NEWID() en minúsculas>.<ext>`. `NOMBRE_ORIGINAL` se guarda solo como texto (≤ 260; vacío → `foto.<ext>`); nunca entra en la ruta.
 - BD: `CK_RNCF_RUTA` rechaza `..`, `:`, `\` y `/` inicial; `UQ_RNCF_RUTA` impide duplicados.
 - Log: `FOTO_AGREGAR` / `FOTO_RETIRAR` con la `VERSION` vigente del encabezado (las fotos **no** suben la versión). El JSON del log lleva `ID_FOTO_NC, NOMBRE_ORIGINAL, MIME, ESTADO` y **nunca `RUTA`**. `foto retirar` llena `USUARIO_RETIRA`/`FECHA_RETIRA`.
 
 **Flujo del controlador (F3):** decodifica el base64 (> 3 MB → 413), valida bytes mágicos (si no → 415), escribe `<RAIZ>/_tmp/<uuid>.tmp`, llama `foto agregar`; si hay `ErrMensaje` borra el `.tmp`; si no, exige que `path.resolve(RAIZ, RUTA)` quede dentro de `RAIZ` (si no → 500 por fallo de integridad y borra el `.tmp`) y hace `rename`. `RAIZ` = `<RUTA_ARCHIVOS_CAL001>/<EMPRESA del token>` (§6.2), fuera de `/img`. `foto` aplica la misma comprobación de prefijo antes de leer. Detalle vigente en §6.
+
+### 2.5 Idempotencia por `ID_OPERACION` (fase 2)
+
+La red móvil y el navegador reintentan; cada escritura debe poder repetirse sin duplicar.
+
+- `ID_OPERACION` es un **GUID** (36 caracteres) que genera el cliente **una sola vez por operación** y reutiliza en todos los reintentos de esa misma operación (`crypto.randomUUID()` en el web). Lo admiten `new`, `update`, `agregar` y `foto agregar`. **Desde el web de fase 2 es obligatorio** (el front no envía ninguna de esas acciones sin él); el SP tolera su ausencia solo para clientes anteriores al cambio, sin idempotencia (follow-up: retirar la tolerancia al desplegar F3 en producción). Si viene y no es un GUID → E06 `Parámetro inválido: ID_OPERACION`.
+- Cada escritura deja exactamente una fila en `LOG_REGISTROS_NC` con su `ID_OPERACION` (`UQ_LRNC_OPERACION`, único filtrado). El log es el registro de operaciones.
+- **Coincidencia:** si el `ID_OPERACION` ya está en el log con el mismo `USUARIO`, la misma `ACCION` del log (`CREAR` ↔ `new`, `MODIFICAR` ↔ `update`, `AGREGAR` ↔ `agregar`, `FOTO_AGREGAR` ↔ `foto agregar`) y, salvo en `new`, el mismo `ID_REGISTRO_NC`, el SP **no escribe** y devuelve el resultado original con **`REPETIDA: 1`**: `new` → `ID_REGISTRO_NC`, `ID_DOCUMENTO`, `CONSECUTIVO`, `DOCUMENTO`, `VERSION`, `FECHA_REGISTRO`; `update`/`agregar` → `ID_REGISTRO_NC`, `DOCUMENTO`, `VERSION` (la de esa fila del log); `foto agregar` → `ID_FOTO_NC`, `RUTA`, `MIME`, `ESTADO` (`RUTA` y `ESTADO` son solo para el controlador, §6.2). Si el ID existe con **otro usuario, otra acción u otro registro** → E06 `Parámetro inválido: ID_OPERACION`.
+- **El mismo ID con otro payload** (misma acción y registro) devuelve el resultado original y **no aplica el payload nuevo**: el ID identifica la operación, no su contenido. El cliente debe generar un ID nuevo por cada operación distinta.
+- **Orden:** la búsqueda va inmediatamente después de E00, E09/E02 y E01/E03/E04, y **antes de** permisos (E05, incluida la ventana de 7 días), E22 (`VERSION`), E13, E24, E26 y la validación de datos. Así un reintento de una operación ya aplicada nunca recibe un rechazo causado por su propio efecto. En `update`, `agregar` y `foto agregar` la búsqueda **se repite bajo el `UPDLOCK, HOLDLOCK` del encabezado**, antes de E22/E05/E26: si el primer intento confirmó mientras el reintento esperaba el bloqueo, el reintento recibe `REPETIDA`, no E22. **Un E22 es siempre un conflicto real** (otro usuario modificó el registro).
+- **Carrera** (dos llamadas simultáneas con el mismo ID): la segunda choca con `UQ_LRNC_OPERACION`. Sin transacción del llamador (apiRest) el SP deshace la suya, relee el log y responde el resultado de la primera con `REPETIDA: 1`; con transacción del llamador (pruebas) responde E25.
+- Las respuestas normales llevan `REPETIDA: 0`.
 
 ## 3. Catálogo de errores (`ErrMensaje`)
 
@@ -204,8 +226,8 @@ Los textos son estables: las pruebas de F2 y F3 los comparan por prefijo.
 | E02 | `Campo no permitido en la petición: <campo>` |
 | E03 | `Sin acceso a CAL-001` |
 | E04 | `Usuario con varias UN en CAL-001; no soportado` |
-| E05 | `Sin permiso para <operación>` |
-| E06 | `Parámetro inválido: <campo>` |
+| E05 | `Sin permiso para <operación>` (fase 2: `… agregar a este registro`, `… filtrar por operario`) |
+| E06 | `Parámetro inválido: <campo>` (fase 2: también `ID_OPERACION`, `FECHA_BASE`, `ID_EMPLEADO`, y en `agregar` `REGISTRO`, `MOTIVO`, `ID_PARTE_NC`, `ID_CAUSA_NC`, `ID_OPERARIO_NC`) |
 | E07 | `El producto <PRODUCTO> no es un PF activo` |
 | E08 | `El registro no existe` (también para otra UN; no se revela que exista) |
 | E09 | `JSON inválido` |
@@ -228,6 +250,7 @@ Los textos son estables: las pruebas de F2 y F3 los comparan por prefijo.
 | E26 | `Máximo 10 fotos activas por registro` |
 | E27 | `Extensión de foto no permitida: <EXTENSION>` |
 | E99 | `Error interno (<número>)` para errores no previstos de SQL; el detalle va al log del servidor, no al cliente |
+| E90 | `E90 Fuera de la red de la empresa` (HTTP 403, lo emite el middleware `soloRedInterna`, §6.6; solo para `X-Xtein-Cliente: movil`) |
 
 ## 4. Efecto sobre el Legacy: primeras FK hacia maestros
 
@@ -297,6 +320,15 @@ curl -s -X POST "$API/CAL001N/foto" -H 'Content-Type: application/json' \
 ```
 
 En Postman: `POST`, cuerpo raw JSON con `prmAccion`, `prmDatos` (texto JSON u objeto) y `prmTokenDatos.TOKEN`.
+
+### 6.6 Red interna para la app móvil (fase 2, plan §4.0 y §6.8b)
+
+`src/middleware/soloRedInterna.js`, aplicado a `/api/CAL001N/*` y a `/api/usuarioLogin`:
+- Si la petición trae la cabecera **`X-Xtein-Cliente: movil`** (la envía la app en todas sus llamadas) y `req.ip` no cae en ningún rango de **`RED_INTERNA_CIDR`** (`.env`, lista CIDR separada por comas, IPv4 o IPv6; una IPv4 mapeada en IPv6 se compara como IPv4) → **403** `{ ErrMensaje: "E90 Fuera de la red de la empresa" }` sin llamar al SP ni escribir nada.
+- Sin la cabecera (web) o con otro valor, nada cambia.
+- `RED_INTERNA_CIDR` vacío → el middleware deja pasar y registra un aviso al arrancar (`[soloRedInterna] RED_INTERNA_CIDR vacío…`).
+- `req.ip` solo confía en el proxy interno indicado en **`TRUST_PROXY`** (`app.set('trust proxy', …)`); sin la variable no se confía en `X-Forwarded-For`.
+- Los rangos los entrega TI (DP-P). Pruebas en `src/tests/CAL001N.test.js` (IP dentro pasa, fuera 403, sin cabecera pasa, vacío pasa, parseo de CIDR).
 
 ### 6.5 Follow-ups (no se hacen en F3)
 

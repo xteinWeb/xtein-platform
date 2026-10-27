@@ -6,7 +6,7 @@ import { ToolbarRuntimeService, WorkspaceRuntimeService } from '@xtein/runtime';
 import { SessionService } from '@xtein/session';
 import { XteinNotificationService } from '@xtein/ui';
 import { Cal001Component } from './cal-001.component';
-import type { Cal001Permisos } from './models/cal-001.model';
+import type { Cal001Borrador, Cal001Permisos, Cal001RegistroCompleto } from './models/cal-001.model';
 import { Cal001Service } from './services/cal-001.service';
 import { CausasPrueba, PartesPrueba, borradorProduccion, registroGuardado } from './testing/cal-001.fixtures';
 import { Cal001BackendError } from './utils/cal-001-errores';
@@ -36,6 +36,7 @@ describe('Cal001Component', () => {
   let fixture: ComponentFixture<Cal001Component>;
   let component: Cal001Component;
   let estados: ToolbarState[];
+  let notificacion: Record<'success' | 'info' | 'warning' | 'error', ReturnType<typeof vi.fn>>;
   const servicio = {
     permisos: vi.fn<() => Promise<Cal001Permisos>>(),
     causas: vi.fn(async () => CausasPrueba),
@@ -43,7 +44,8 @@ describe('Cal001Component', () => {
     partesProducto: vi.fn(async () => PartesPrueba),
     registro: vi.fn(async () => registroGuardado()),
     consulta: vi.fn(),
-    guardar: vi.fn()
+    guardar: vi.fn(),
+    agregar: vi.fn()
   };
 
   async function crear(permisos: Cal001Permisos, antes: () => void = () => undefined): Promise<void> {
@@ -51,15 +53,17 @@ describe('Cal001Component', () => {
     antes();
     swal.fire.mockClear();
     servicio.guardar.mockReset();
+    servicio.agregar.mockReset();
     servicio.permisos.mockResolvedValue(permisos);
     estados = [];
+    notificacion = { success: vi.fn(), info: vi.fn(), warning: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
       imports: [Cal001Component],
       providers: [
         { provide: ToolbarRuntimeService, useValue: { setState: (s: ToolbarState) => estados.push(s), removeApplication: vi.fn(), commandsForApplication: () => new Subject() } },
         { provide: WorkspaceRuntimeService, useValue: { setDirty: vi.fn(), getApplicationTitle: () => 'No Conformidades' } },
-        { provide: SessionService, useValue: { session: signal({ userId: 'LAURA', companyId: '00' }) } },
-        { provide: XteinNotificationService, useValue: { success: vi.fn(), info: vi.fn(), warning: vi.fn(), error: vi.fn() } }
+        { provide: SessionService, useValue: { session: signal({ userId: 'LAURA', userName: 'Laura Gómez', companyId: '00' }) } },
+        { provide: XteinNotificationService, useValue: notificacion }
       ]
     });
     TestBed.overrideComponent(Cal001Component, { set: { providers: [{ provide: Cal001Service, useValue: servicio }] } });
@@ -218,5 +222,154 @@ describe('Cal001Component', () => {
     await new Promise(r => setTimeout(r));
     expect(swal.fire).toHaveBeenCalledWith(expect.objectContaining({ title: 'Borrador sin guardar' }));
     expect(localStorage.getItem(clave)).toBeNull();
+  });
+
+  /* ================================ Fase 2 ================================ */
+
+  const botones = (patron: RegExp): HTMLButtonElement[] =>
+    Array.from(panel().querySelectorAll<HTMLButtonElement>('button')).filter(b => patron.test(b.textContent ?? ''));
+  const conFoto = (cambios: Parameters<typeof registroGuardado>[0]) => ({
+    ...registroGuardado(cambios),
+    FOTOS: [{ ID_FOTO_NC: 5, NOMBRE_ORIGINAL: 'tapa.jpg', MIME: 'image/jpeg', USUARIO_CREA: 'INSPECTOR', FECHA_CREA: '2026-10-20T09:20:00' }]
+  });
+
+  it('C5: en consulta no aparecen subir ni retirar fotos; aparecen al pulsar Modificar', async () => {
+    servicio.registro.mockResolvedValueOnce(conFoto({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR_FOTOS: 1, PUEDE_RETIRAR_FOTOS: 1 }));
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    await component.abrirRegistro(7);
+    fixture.detectChanges();
+    expect(component.puedeAgregarFotos()).toBe(false);
+    expect(component.puedeRetirarFotos()).toBe(false);
+    expect(panel().textContent).toContain('tapa.jpg');
+    expect(panel().textContent).not.toContain('Agregar fotos');
+    expect(botones(/Retirar/)).toEqual([]);
+
+    component.modificar();
+    fixture.detectChanges();
+    expect(panel().textContent).toContain('Agregar fotos');
+    expect(botones(/Retirar/).length).toBe(1);
+  });
+
+  it('C5: al crear se pueden agregar fotos, pero no retirar', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.nuevo();
+    fixture.detectChanges();
+    expect(component.puedeAgregarFotos()).toBe(true);
+    expect(component.puedeRetirarFotos()).toBe(false);
+  });
+
+  it('C6: un registro nuevo no muestra "Última modificación"; "Registrado por" es el usuario actual', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.nuevo();
+    fixture.detectChanges();
+    const etiquetas = Array.from(panel().querySelectorAll('.c1-campo > span')).map(e => e.textContent?.trim());
+    expect(etiquetas).not.toContain('Última modificación');
+    expect(etiquetas).toContain('Registrado por');
+    const campo = Array.from(panel().querySelectorAll<HTMLLabelElement>('label.c1-campo')).find(l => l.textContent?.includes('Registrado por'));
+    expect(campo?.querySelector('input')?.value).toBe('Laura Gómez');
+    // La fecha del evento ya no es obligatoria (vacía → hoy en el SP).
+    expect(panel().querySelector('input[type=date][required]')).toBeNull();
+  });
+
+  it('C6: un registro guardado muestra "Última modificación" y "Registrado por" con nombre · área (código en title)', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado(), PartesPrueba);
+    fixture.detectChanges();
+    const campos = Array.from(panel().querySelectorAll<HTMLLabelElement>('label.c1-campo'));
+    expect(campos.some(l => l.textContent?.includes('Última modificación'))).toBe(true);
+    const registrado = campos.find(l => l.textContent?.includes('Registrado por'))?.querySelector('input');
+    expect(registrado?.value).toBe('Edgardo Alcazar · Producción');
+    expect(registrado?.getAttribute('title')).toBe('INSPECTOR');
+    expect(panel().textContent).toContain('registrado por Edgardo Alcazar · Producción');
+  });
+
+  it('"Agregar a mi registro" solo aparece con PUEDE_AGREGAR = 1, con el aviso de hasta cuándo', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 0 }), PartesPrueba);
+    fixture.detectChanges();
+    expect(botones(/Agregar a mi registro/)).toEqual([]);
+
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1, AGREGAR_HASTA: '2026-10-27T09:15:00' }), PartesPrueba);
+    fixture.detectChanges();
+    expect(botones(/Agregar a mi registro/).length).toBe(1);
+    expect(panel().textContent).toContain('Puede agregar hasta 27/10/2026 09:15.');
+  });
+
+  it('modo Agregar: lo guardado queda de solo lectura, la barra ofrece Guardar sin Modificar y "No agregó nada" si no hay cambios', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1, PUEDE_AGREGAR_FOTOS: 1 }), PartesPrueba);
+    fixture.detectChanges();
+    botones(/Agregar a mi registro/)[0].click();
+    fixture.detectChanges();
+
+    expect(component.agregando()).toBe(true);
+    expect(component.editable()).toBe(false);
+    expect(component.modificando()).toBe(false);
+    expect(ultimoEstado().actions[ToolbarAction.Save]?.enabled).toBe(true);
+    expect(ultimoEstado().actions[ToolbarAction.Cancel]?.enabled).toBe(true);
+    expect(ultimoEstado().actions[ToolbarAction.Edit]?.visible ?? false).toBe(false);
+    expect(botones(/Agregar a mi registro/)).toEqual([]);
+    expect(component.puedeAgregarFotos()).toBe(true);
+    expect(component.puedeRetirarFotos()).toBe(false);
+    // Encabezado de solo lectura; la causa guardada no se puede quitar ni bajar sus ocurrencias.
+    const detalle = panel().querySelector('xtein-cal001-detalle-parte') as HTMLElement;
+    expect(detalle.textContent).toContain('Guardada');
+    expect(Array.from(detalle.querySelectorAll('button')).some(b => /Quitar|✕/.test(b.textContent ?? ''))).toBe(false);
+    expect(detalle.querySelector('[aria-label="Ocurrencias de Óscar Villa"]')).toBeNull();
+    expect(detalle.querySelector('[aria-label="Ocurrencias adicionales de Óscar Villa"]')).not.toBeNull();
+    expect(panel().querySelector<HTMLTextAreaElement>('textarea[aria-label="Observación"]')?.readOnly).toBe(true);
+    component.campo('OBSERVACION', 'cambio');
+    expect(component.borrador()?.OBSERVACION).toBe('Lote revisado');
+
+    await component.guardar();
+    expect(servicio.agregar).not.toHaveBeenCalled();
+    expect(notificacion.warning).toHaveBeenCalledWith('No agregó nada.');
+    expect(component.agregando()).toBe(true);
+  });
+
+  it('modo Agregar: Guardar envía agregar, avisa "actualizado (versión N)", vuelve a consulta y recarga el registro', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1 }), PartesPrueba);
+    component.agregar();
+    fixture.detectChanges();
+    const adicionales = panel().querySelector<HTMLInputElement>('[aria-label="Ocurrencias adicionales de Óscar Villa"]') as HTMLInputElement;
+    adicionales.value = '2';
+    adicionales.dispatchEvent(new Event('input'));
+    servicio.agregar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 2, REPETIDA: 0 });
+    servicio.registro.mockClear();
+
+    await component.guardar();
+    expect(servicio.agregar).toHaveBeenCalledTimes(1);
+    const [borrador, original] = servicio.agregar.mock.calls[0] as [Cal001Borrador, Cal001RegistroCompleto];
+    expect(borrador.PARTES[0].CAUSAS[0].OPERARIOS[0].ADICIONALES).toBe(2);
+    expect(original.REGISTRO.ID_REGISTRO_NC).toBe(7);
+    expect(notificacion.success).toHaveBeenCalledWith('NC-0007 actualizado (versión 2).');
+    expect(component.agregando()).toBe(false);
+    expect(component.modo()).toBe('browsing');
+    expect(servicio.registro).toHaveBeenCalledWith(7);
+  });
+
+  it('modo Agregar con E22: ofrece recargar y, si sigue, conserva lo capturado', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1 }), PartesPrueba);
+    component.agregar();
+    const parte = component.borrador()!.PARTES[0];
+    component.cambiarParte({ ...parte, CAUSAS: parte.CAUSAS.map(c => ({ ...c, OPERARIOS: c.OPERARIOS.map(o => ({ ...o, ADICIONALES: 1 })) })) });
+    servicio.agregar.mockRejectedValueOnce(new Cal001BackendError('Modificado por ANDRES el 2026-10-26T10:00:00; recargue'));
+    await component.guardar();
+    expect(swal.fire).toHaveBeenCalledWith(expect.objectContaining({ title: 'El registro cambió', confirmButtonText: 'Recargar registro' }));
+    expect(component.agregando()).toBe(true);
+    expect(component.borrador()?.PARTES[0].CAUSAS[0].OPERARIOS[0].ADICIONALES).toBe(1);
+  });
+
+  it('cancelar Agregar vuelve a consulta sin cambios', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1 }), PartesPrueba);
+    component.agregar();
+    swal.fire.mockResolvedValueOnce({ isConfirmed: true });
+    await component.cancelar();
+    expect(component.agregando()).toBe(false);
+    expect(component.modo()).toBe('browsing');
+    expect(component.enCaptura()).toBe(false);
   });
 });

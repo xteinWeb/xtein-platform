@@ -29,6 +29,8 @@ export const Cal001Action = {
   History: 'historial',
   New: 'new',
   Update: 'update',
+  /** Fase 2: el creador anexa a su registro (solo lo nuevo; nunca quita ni baja). */
+  Add: 'agregar',
   PhotoAdd: 'foto agregar',
   PhotoPath: 'foto ruta',
   PhotoRemove: 'foto retirar'

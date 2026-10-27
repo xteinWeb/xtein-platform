@@ -5,6 +5,7 @@ import type { Cal001ParteBorrador } from '../../models/cal-001.model';
 /**
  * Grilla de partes del PF (historia 2): Parte (PA), nombre, Pieza de texto libre (máx. 50) y conteos.
  * Tocar una fila abre sus no conformidades. En el celular cada parte es una tarjeta.
+ * En modo Agregar solo se escribe la Pieza de las partes que aún no están guardadas.
  */
 @Component({
   selector: 'xtein-cal001-partes',
@@ -17,9 +18,15 @@ export class XteinCal001PartesComponent {
   readonly partes = input<readonly Cal001ParteBorrador[]>([]);
   readonly seleccionada = input<string | null>(null);
   readonly editable = input(false);
+  readonly agregando = input(false);
   readonly seleccionar = output<string>();
   readonly piezaCambio = output<{ clave: string; pieza: string }>();
   readonly maximoPieza = Cal001Limits.Piece;
+
+  /** Pieza editable: al crear o modificar, o en Agregar si la parte aún no está guardada. */
+  editaPieza(parte: Cal001ParteBorrador): boolean {
+    return this.editable() || (this.agregando() && parte.ID_PARTE_NC === null);
+  }
 
   operarios(parte: Cal001ParteBorrador): number {
     return new Set(parte.CAUSAS.flatMap(causa => causa.OPERARIOS.map(o => o.ID_EMPLEADO))).size;
