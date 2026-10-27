@@ -1,0 +1,32 @@
+<dx-popup
+  [visible]="visible" (visibleChange)="!$event && close()"
+  title="Exportar a Excel"
+  [showTitle]="isMobile()" [showCloseButton]="!busy"
+  [shading]="isMobile()"
+  [hideOnOutsideClick]="!busy"
+  [position]="position()"
+  width="min(560px, 96vw)" height="auto">
+  <div *dxTemplate="let content of 'content'" class="xtein-record-export">
+    @if (busy) { <p class="xtein-record-export__status" role="status">Generando Excel… puede tardar unos segundos.</p> }
+    <article class="xtein-record-export__item" [attr.aria-label]="title + ' en Excel'">
+      <i class="dx-icon-xlsxfile xtein-record-export__icon" aria-hidden="true"></i>
+      <h3 class="xtein-record-export__name">
+        {{ title }}
+        <span class="xtein-record-export__detail">
+          {{ scope() === 'actual' ? (current || 'Registro actual') : 'Todos los consultados (' + total + ')' }}
+        </span>
+      </h3>
+      <div class="xtein-record-export__actions">
+        <xtein-button icon="icon-seleccionada-ol" ariaLabel="Solo registro actual" [width]="32"
+          [variant]="scope() === 'actual' ? 'primary' : 'link'" [pressed]="scope() === 'actual'"
+          [disabled]="busy" (clicked)="select('actual')" />
+        <xtein-button icon="icon-seleccionar-todas-alt-sl" ariaLabel="Todos los registros consultados" [width]="32"
+          [variant]="scope() === 'todos' ? 'primary' : 'link'" [pressed]="scope() === 'todos'"
+          [disabled]="busy || total < 1" (clicked)="select('todos')" />
+        <span class="xtein-record-export__separator" aria-hidden="true"></span>
+        <xtein-button icon="xlsxfile" ariaLabel="Descargar Excel" [width]="32" variant="link"
+          [disabled]="busy" (clicked)="export()" />
+      </div>
+    </article>
+  </div>
+</dx-popup>

@@ -6,7 +6,7 @@ export interface XteinReportDefinition {
 
 export type XteinReportScope = 'actual' | 'todos';
 
-export type XteinReportPanel = 'list' | 'preview' | 'email';
+export type XteinReportPanel = 'list' | 'email';
 
 export interface XteinReportEmail {
   ORIGEN: string;
