@@ -40,3 +40,14 @@
   .pt-num::before { content: attr(data-titulo) ' '; color: #7b8fa3; font-size: 11px; }
   .pt-pieza input { min-height: 40px; font-size: 16px; }
 }
+
+/* Celular: fila 1 código PA + nombre a todo el ancho, fila 2 Pieza, fila 3 No conf. y Operarios. */
+@media (max-width: 600px) {
+  .pt-fila {
+    grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'parte nombre' 'pieza pieza' 'nc op';
+    column-gap: 10px;
+  }
+  .pt-num { text-align: left; }
+  .pt-num:nth-last-child(2) { grid-area: nc; }
+  .pt-num:last-child { grid-area: op; text-align: right; }
+}

@@ -75,6 +75,34 @@ describe('XteinCal001FotosComponent', () => {
     expect(subirFoto.mock.calls.map(c => c[1])).toEqual(['a.jpg', 'b.jpg']);
   });
 
+  it('visor: el foco va a «Cerrar» al abrir y Escape lo cierra', async () => {
+    abrir(1);
+    componente.encolar('tapa.jpg', 'QUJD');
+    fixture.detectChanges();
+    const ver = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).find(b => b.textContent?.trim() === 'Ver');
+    ver?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const visor = fixture.nativeElement.querySelector('.ft-visor') as HTMLElement;
+    expect(visor).toBeTruthy();
+    expect(document.activeElement?.textContent?.trim()).toBe('Cerrar');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ft-visor')).toBeNull();
+  });
+
+  it('visor: clic en el fondo lo cierra; clic en la foto no', () => {
+    abrir(1);
+    componente.verPendiente({ id: 1, dueno: 1, nombre: 'a.jpg', base64: 'QUJD', estado: 'pendiente', mensaje: '' });
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.ft-visor img') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ft-visor')).toBeTruthy();
+    (fixture.nativeElement.querySelector('.ft-visor') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ft-visor')).toBeNull();
+  });
+
   it('M6: avisa mientras queden fotos en cola', async () => {
     const avisos: boolean[] = [];
     componente.hayPendientes.subscribe(v => avisos.push(v));
