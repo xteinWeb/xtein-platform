@@ -1,0 +1,165 @@
+<div class="c3-cols">
+  <div class="c3-card">
+    @if (abierto(); as t) {
+      <!-- Traslado abierto desde Buscar -->
+      <div class="c3-grid">
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Traslado"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Documento</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Documento" [placeholder]="t.DOCUMENTO" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Servicio</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Servicio" [placeholder]="t.SERVICIO" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Estado</xtein-label>
+            <div class="c3-control"><span class="c3-badge" [ngClass]="badge(t.ESTADO)">{{ estadoTexto(t.ESTADO) }}</span></div>
+          </div>
+        </div>
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Bodegas"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Bodega origen</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Bodega origen" [placeholder]="t.ID_UN_BODEGA_ORIGEN + ' · ' + t.BODEGA_ORIGEN" [readOnly]="true" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Bodega destino</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Bodega destino" [placeholder]="t.ID_UN_BODEGA_DESTINO + ' · ' + t.BODEGA_DESTINO" [readOnly]="true" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Envió</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Envió" [placeholder]="t.ENVIO" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Recibió o rechazó</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Recibió o rechazó" [placeholder]="t.RESPUESTA || 'Pendiente'" [readOnly]="true" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="c3-table-scroll">
+        <table class="c3-table">
+          <thead><tr><th>Qué se traslada</th></tr></thead>
+          <tbody><tr><td>{{ t.QUE_SE_TRASLADA }}</td></tr></tbody>
+        </table>
+      </div>
+
+      @if (t.PUEDE_RESPONDER === 1) {
+        <p class="c3-hint">Está en tu bodega destino: recíbelo cuando llegue, o recházalo si no corresponde.</p>
+        <div class="c3-actions">
+          <xtein-button text="Recibir" variant="success" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="recibir()" />
+          <xtein-button text="Rechazar" variant="danger" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="rechazar()" />
+        </div>
+      }
+    } @else if (creando()) {
+      <!-- Traslado nuevo -->
+      <div class="c3-grid">
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Nuevo traslado"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Documento</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Documento" placeholder="Se asigna al enviar" [readOnly]="true" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-t-servicio" [required]="true">Servicio</xtein-label>
+            <div class="c3-control">
+              <xtein-lookup id="c3-t-servicio" ariaLabel="Servicio" placeholder="Escoge el servicio" searchPlaceholder="Buscar…"
+                [items]="servicios()" valueExpr="ID_SERVICIO" displayExpr="LABEL" [columns]="servicioColumns" dropDownWidth="min(760px, 95vw)"
+                [ngModel]="idServicio()" (ngModelChange)="elegirServicio($event)" />
+            </div>
+          </div>
+        </div>
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Bodegas"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Bodega origen</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Bodega origen" [placeholder]="origenTexto() || 'Sale de lo que marques'" [readOnly]="true" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-t-destino" [required]="true">Bodega destino</xtein-label>
+            <div class="c3-control">
+              <xtein-lookup id="c3-t-destino" ariaLabel="Bodega destino" placeholder="Escoge la bodega destino" searchPlaceholder="Buscar…"
+                [items]="destinos()" valueExpr="ID_UN_BODEGA" displayExpr="LABEL" [columns]="bodegaColumns"
+                dropDownWidth="min(560px, 95vw)" [ngModel]="destino()" (ngModelChange)="destino.set($event ?? '')"
+                [readOnly]="!marcadas().length" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="c3-hint">Solo bodegas que ya existen en el sistema. Marca el producto o las partes que se trasladan: cada parte puede ir a una bodega distinta, en traslados separados.</p>
+      <div class="c3-table-scroll">
+        <table class="c3-table">
+          <thead>
+            <tr><th class="col-select">Trasladar</th><th>Nivel</th><th>Juego / producto / parte</th><th>Está en</th><th class="text-end">Cantidad</th></tr>
+          </thead>
+          <tbody>
+            @for (u of servicio()?.UNIDADES ?? []; track u.ID_UNIDAD) {
+              <tr [class.row-muted]="!!u.TRASLADO_PENDIENTE">
+                <td class="col-select">
+                  <xtein-checkbox [ariaLabel]="'Trasladar ' + nombreUnidad(u)" [disabled]="!!u.TRASLADO_PENDIENTE"
+                    [checked]="marcadas().includes(u.ID_UNIDAD)" (checkedChange)="marcar(u, $event)" />
+                </td>
+                <td><span class="level">{{ u.NIVEL }}</span></td>
+                <td>
+                  {{ nombreUnidad(u) }}
+                  @if (u.TRASLADO_PENDIENTE) { <span class="pending">traslado {{ u.TRASLADO_PENDIENTE }} sin recibir</span> }
+                </td>
+                <td>{{ u.ID_UN_BODEGA }} · {{ u.BODEGA }}</td>
+                <td class="text-end">{{ u.CANTIDAD }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="empty-message">Escoge un servicio para ver lo que llegó y dónde está.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="c3-hint">Usa <b>Nuevo</b> en la barra para enviar un traslado, o <b>Buscar</b> para ver, recibir o rechazar uno.</p>
+    }
+  </div>
+
+  <aside class="c3-card">
+    <div class="c3-band">Cómo funciona</div>
+    <p class="c3-hint">El traslado queda hecho solo cuando <b>quien recibe</b> lo autoriza. Mientras tanto el producto sigue en la bodega de origen.</p>
+    <p class="c3-hint">Al enviar (Guardar en la barra), quien recibe lo encuentra con Buscar, de primero en la lista. Si lo rechaza, el producto se queda en el origen y se avisa a quien envió.</p>
+  </aside>
+</div>
+
+<!-- Buscar y Ver de la barra: modales estándar de la plataforma -->
+<xtein-record-filter
+  [visible]="filterVisible()"
+  (visibleChange)="filterVisible.set($event)"
+  [tableBase]="filterTable"
+  (search)="buscar($event)"
+/>
+
+<xtein-record-view
+  title="Traslados"
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="ID_TRASLADO"
+  (selected)="verRegistro($event)"
+/>
