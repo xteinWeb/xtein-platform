@@ -14,7 +14,7 @@ import {
 } from '@xtein/ui';
 import { Cal003DeliveryStatus, Cal003Limits, Cal003ServiceType } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003EntregaViewColumns, Cal003ServicioEntregableColumns } from '../../constants/cal-003-ui.constants';
-import type { Cal003Entrega, Cal003EntregaCompleta, Cal003Pieza, Cal003ServicioEntregable, Cal003Unidad } from '../../models/cal-003.model';
+import type { Cal003Cabecera, Cal003Entrega, Cal003EntregaCompleta, Cal003Pieza, Cal003ServicioEntregable, Cal003Unidad } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
 import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
 
@@ -87,6 +87,12 @@ export class XteinCal003EntregaComponent implements Cal003Pestana {
   readonly impresionVisible = signal(false);
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
+
+  /** Cabecera común de la pantalla con la salida abierta (documento SSA y estado del documento). */
+  readonly cabecera = computed<Cal003Cabecera | null>(() => {
+    const e = this.creando() ? null : this.abierta()?.ENTREGA;
+    return e ? { documento: e.DOCUMENTO, estado: e.ESTADO_DOCUMENTO ?? '', usuario: e.USUARIO_CREA, fechaRegistro: e.FECHA_CREA ?? null } : null;
+  });
 
   readonly barra = computed<Cal003EstadoBarra>(() => ({
     mode: this.mode(),

@@ -1,11 +1,42 @@
 <section class="cal-003" [attr.aria-busy]="ctx.busy()">
+  <!-- Cabecera: Movimiento | Estado · Documento | Usuario · Fecha de registro. El Movimiento se habilita con Nuevo;
+       para ver registros, Buscar trae el campo Operación (Ajuste, Precios y Consultas se abren desde ahí). -->
   <div class="cal-003__top">
-    <!-- La operación escoge el formulario: se habilita con Nuevo; para ver registros, Buscar trae el campo Operación -->
-    <div class="cal-003__operacion">
-      <xtein-label class="cal-003__label" for="c3-operacion">Operación</xtein-label>
-      <div class="cal-003__control">
-        <xtein-select id="c3-operacion" ariaLabel="Operación" [items]="tabs" valueExpr="id" displayExpr="label"
-          [ngModel]="seleccion()" (ngModelChange)="cambiarOperacion($event)" [readOnly]="!creando()" />
+    <div class="cal-003__cabecera">
+      <div class="cal-003__campo">
+        <xtein-label class="cal-003__label" for="c3-movimiento">Movimiento</xtein-label>
+        <div class="cal-003__control">
+          <xtein-select id="c3-movimiento" ariaLabel="Movimiento" [items]="movimientos" valueExpr="id" displayExpr="label"
+            [placeholder]="otraOperacion()" [ngModel]="seleccion()" (ngModelChange)="cambiarOperacion($event)" [readOnly]="!creando()" />
+        </div>
+      </div>
+      <div class="cal-003__campo">
+        <xtein-label class="cal-003__label">Estado</xtein-label>
+        <div class="cal-003__control">
+          @if (cabecera().estado) {
+            <span class="c3-badge" [ngClass]="badge(cabecera().estado)">{{ cabecera().estado }}</span>
+          } @else {
+            <span class="cal-003__vacio">—</span>
+          }
+        </div>
+      </div>
+      <div class="cal-003__campo">
+        <xtein-label class="cal-003__label" for="c3-documento">Documento</xtein-label>
+        <div class="cal-003__control">
+          <xtein-input id="c3-documento" ariaLabel="Documento" [placeholder]="cabecera().documento || (creando() ? 'Consultando…' : '')" [readOnly]="true" />
+        </div>
+      </div>
+      <div class="cal-003__campo">
+        <xtein-label class="cal-003__label" for="c3-usuario">Usuario</xtein-label>
+        <div class="cal-003__control">
+          <xtein-input id="c3-usuario" ariaLabel="Usuario" [placeholder]="cabecera().usuario" [readOnly]="true" />
+        </div>
+      </div>
+      <div class="cal-003__campo">
+        <xtein-label class="cal-003__label" for="c3-fecha-registro">Fecha de registro</xtein-label>
+        <div class="cal-003__control">
+          <xtein-input id="c3-fecha-registro" ariaLabel="Fecha de registro" [placeholder]="fecha(cabecera().fechaRegistro)" [readOnly]="true" />
+        </div>
       </div>
     </div>
   </div>

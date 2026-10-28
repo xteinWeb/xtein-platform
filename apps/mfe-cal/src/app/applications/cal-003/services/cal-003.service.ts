@@ -3,10 +3,11 @@ import { firstValueFrom } from 'rxjs';
 import { XteinApiAccessMode, XteinApiClientService, XteinDataApiResponse } from '@xtein/api-client';
 import type { LogContext } from '@xtein/logging';
 import type { XteinRecordFilterCriterion } from '@xtein/ui';
-import { Cal003Action, Cal003Endpoint, Cal003Limits } from '../constants/cal-003.constants';
+import { Cal003Action, Cal003Application, Cal003Endpoint, Cal003Limits } from '../constants/cal-003.constants';
 import { createCal003Log } from '../constants/cal-003-logging.constants';
 import type {
   Cal003Ajuste,
+  Cal003Consecutivo,
   Cal003ArbolProducto,
   Cal003Area,
   Cal003Aviso,
@@ -78,6 +79,12 @@ export class Cal003Service {
 
   bodegas(): Promise<Cal003Bodega[]> {
     return this.consultar<Cal003Bodega>(Cal003Action.Warehouses);
+  }
+
+  /** Documento que tendrá el próximo registro del movimiento (ENTRADA, TRASLADO o SALIDA). */
+  async consecutivo(movimiento: string): Promise<Cal003Consecutivo | null> {
+    const filas = await this.consultar<Cal003Consecutivo>(Cal003Action.NextDocument, { MOVIMIENTO: movimiento, ID_APLICACION: Cal003Application.Id });
+    return filas[0] ?? null;
   }
 
   areas(): Promise<Cal003Area[]> {

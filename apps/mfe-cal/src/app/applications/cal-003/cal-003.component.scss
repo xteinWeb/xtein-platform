@@ -26,19 +26,60 @@
   margin-bottom: 16px;
 }
 
-/* Select de operación: tarjeta y campo en línea como los de PRO-039 */
-.cal-003__operacion {
-  display: flex;
+/* Cabecera: tarjeta con dos columnas de campos en línea, como los de PRO-039 */
+.cal-003__cabecera {
+  display: grid;
   flex: 1 1 auto;
-  align-items: center;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 28px;
   min-width: 0;
-  min-height: 34px;
-  padding: 12px 24px;
+  padding: 14px 24px;
   border: 1px solid #dfe6ef;
   border-radius: 10px;
   background: #ffffff;
   box-sizing: border-box;
+}
+
+.cal-003__campo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 34px;
+}
+
+.cal-003__vacio {
+  color: #94a3b8;
+}
+
+/* Insignia de estado (misma paleta que la de los formularios) */
+.c3-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: #e3f2fd;
+  color: #1565c0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &--ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &--warn {
+    background: #fff3e0;
+    color: #9a6312;
+  }
+
+  &--danger {
+    background: #fdecea;
+    color: #c62828;
+  }
 }
 
 .cal-003__label {
@@ -61,10 +102,14 @@
     padding: 12px;
   }
 
-  .cal-003__operacion {
+  .cal-003__cabecera {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+  }
+
+  .cal-003__campo {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px 16px;
   }
 
   .cal-003__label {

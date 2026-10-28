@@ -42,6 +42,23 @@ export interface Cal003TipoServicio {
   LABEL?: string;
 }
 
+/** Próximo documento del movimiento (acción 'consecutivo'): SEN-1, STR-1, SSA-1. */
+export interface Cal003Consecutivo {
+  MOVIMIENTO: string;
+  ID_DOCUMENTO: string;
+  CONSECUTIVO: number;
+  DOCUMENTO: string;
+  USUARIO: string;
+}
+
+/** Cabecera común de la pantalla: estado del documento REGISTRADO / ANULADO / AUTORIZADO. */
+export interface Cal003Cabecera {
+  documento: string;
+  estado: string;
+  usuario: string;
+  fechaRegistro: string | null;
+}
+
 export interface Cal003Area {
   ID_AREA: string;
   DESCRIPCION: string;
@@ -91,6 +108,8 @@ export interface Cal003Servicio {
   NOMBRE: string;
   PARCIAL: number;
   ESTADO: string;
+  /** Estado del documento SEN: REGISTRADO o ANULADO. */
+  ESTADO_DOCUMENTO?: string;
   ULTIMO_MOVIMIENTO: string;
   DETALLE_MOVIMIENTO: string;
   OBSERVACION_ANULA: string | null;
@@ -141,6 +160,10 @@ export interface Cal003Traslado {
   ID_UN_BODEGA_DESTINO: string;
   BODEGA_DESTINO: string;
   ESTADO: string;
+  /** Estado del documento STR: REGISTRADO, AUTORIZADO o ANULADO. */
+  ESTADO_DOCUMENTO?: string;
+  USUARIO_ENVIA?: string;
+  FECHA_ENVIA?: string;
   ENVIO: string;
   RESPUESTA: string | null;
 }
@@ -180,6 +203,9 @@ export interface Cal003Entrega {
   ID_UN_BODEGA: string;
   BODEGA: string;
   ESTADO: string;
+  /** Estado del documento SSA: REGISTRADO, AUTORIZADO (soporte firmado) o ANULADO. */
+  ESTADO_DOCUMENTO?: string;
+  FECHA_CREA?: string;
   LINEAS_SG: number;
   LINEAS_SR: number;
   SOPORTE: string | null;

@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import { RecordToolbarMode } from '@xtein/sdk';
 import { XteinNotificationService } from '@xtein/ui';
 import { Cal003Service } from './cal-003.service';
-import type { Cal003Area, Cal003Aviso, Cal003Bodega, Cal003Cliente, Cal003Permisos, Cal003TipoServicio } from '../models/cal-003.model';
+import type { Cal003Area, Cal003Aviso, Cal003Bodega, Cal003Cabecera, Cal003Cliente, Cal003Permisos, Cal003TipoServicio } from '../models/cal-003.model';
 import { mensajeError } from '../utils/cal-003-errores';
 
 /** Lo que cada pestaña publica en la barra de acciones de la plataforma. */
@@ -16,6 +16,8 @@ export interface Cal003EstadoBarra {
 /** Contrato entre la pantalla y cada pestaña: la barra la maneja la pantalla y le pasa la acción a la pestaña activa. */
 export interface Cal003Pestana {
   readonly barra: Signal<Cal003EstadoBarra>;
+  /** Documento abierto para la cabecera común (Entrada, Traslado y Salida). */
+  readonly cabecera?: Signal<Cal003Cabecera | null>;
   ejecutar(accion: string, payload?: unknown): Promise<void>;
   refrescar(): Promise<void>;
 }
