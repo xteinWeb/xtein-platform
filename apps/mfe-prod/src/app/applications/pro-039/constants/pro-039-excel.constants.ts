@@ -13,8 +13,10 @@ export interface Pro039ExcelHeader {
   componente: string;
   seccion: string;
   lote: number;
-  /** Lote de cada producto del consumo (por código); los consumos anteriores usan `lote`. */
+  /** Cantidad de cada línea del consumo (por ITEM de la línea); los consumos anteriores usan `lote`. */
   lotes?: Record<string, number>;
+  /** Producto (y componente) de cada línea, por ITEM. */
+  lineas?: Record<string, string>;
   origen: string;
   destino: string;
   observacion: string;
@@ -65,7 +67,8 @@ const ConsumptionColumns: XteinExcelColumn[] = [
 function materialRow(item: Pro039MovementItem, header: Pro039ExcelHeader) {
   const matrix = !!item.ES_MATRIZ;
   const base = Number(item.CONSUMO_BASE || 0);
-  const lot = (item.PRODUCTO_CONSUMO && header.lotes?.[item.PRODUCTO_CONSUMO]) || header.lote || 1;
+  const line = item.ITEM_PRODUCTO != null ? String(item.ITEM_PRODUCTO) : '';
+  const lot = (line && header.lotes?.[line]) || header.lote || 1;
   return {
     PRODUCTO: item.PRODUCTO,
     NOMBRE: item.NOMBRE_PRODUCTO,
@@ -74,7 +77,7 @@ function materialRow(item: Pro039MovementItem, header: Pro039ExcelHeader) {
     UDM: item.UDM_PRESENTACION || item.UDM_PRES || item.UDM,
     ORIGEN: matrix ? 'Matriz' : 'Adicional',
     // Producto del consumo al que pertenece el material
-    DE_PRODUCTO: item.PRODUCTO_CONSUMO ?? '',
+    DE_PRODUCTO: (line && header.lineas?.[line]) || item.PRODUCTO_CONSUMO || '',
     CONSUMO_BASE: matrix ? base : null,
     LOTE: matrix ? lot : null,
     TOTAL: matrix ? base * lot : null,

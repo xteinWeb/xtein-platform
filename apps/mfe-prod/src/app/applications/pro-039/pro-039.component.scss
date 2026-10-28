@@ -493,3 +493,41 @@
     width: auto;
   }
 }
+
+/* Juegos: la fila del juego y debajo una línea por componente */
+.pro-039__products-table {
+  tr.pro-039__game-row td {
+    font-weight: 600;
+    background: #f8fafc;
+  }
+
+  tr.pro-039__component-row td {
+    border-bottom-style: dashed;
+  }
+
+  .pro-039__component-name {
+    padding-left: 22px !important;
+    color: #334155;
+  }
+}
+
+.pro-039__link-btn {
+  padding: 2px 8px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #2563eb;
+    color: #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

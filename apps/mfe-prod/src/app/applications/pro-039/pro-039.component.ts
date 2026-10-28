@@ -159,6 +159,9 @@ export class Pro039Component implements OnInit, OnDestroy {
   readonly productToAdd = signal<string | null>(null);
   /** Fila nueva abierta en la tabla de productos (botón +). */
   readonly addingProduct = signal(false);
+  /** Juego al que se le está agregando un componente (fila nueva debajo del juego). */
+  readonly addingComponentFor = signal<string | null>(null);
+  readonly componentToAdd = signal<string | null>(null);
   readonly origins = signal<Pro039Warehouse[]>([]);
   readonly destinations = signal<Pro039Warehouse[]>([]);
   readonly itemProducts = signal<Pro039Lookup[]>([]);
@@ -522,7 +525,7 @@ export class Pro039Component implements OnInit, OnDestroy {
         ITM_MOVIMIENTOS: liquidation.items,
         MOVIMIENTOS_GRAV: liquidation.taxes,
         // Productos del consumo (MOVIMIENTOS_PRO_PRODUCTOS); el encabezado lleva el primero
-        PRODUCTOS: this.consumptionProducts().map(p => ({ PRODUCTO: p.PRODUCTO, COMPONENTE: p.COMPONENTE || '', CANTIDAD_LOTE: Number(p.CANTIDAD_LOTE) || 1 })),
+        PRODUCTOS: this.consumptionProducts().map(p => ({ ITEM: p.ITEM, PRODUCTO: p.PRODUCTO, COMPONENTE: p.COMPONENTE || '', CANTIDAD_LOTE: Number(p.CANTIDAD_LOTE) || 1 })),
         ID_APLICACION: Pro039Application.Id,
         USUARIO: this.business.identity.USUARIO
       };
@@ -710,11 +713,13 @@ export class Pro039Component implements OnInit, OnDestroy {
    * ('EXISTENCIAS PRODUCTO') se completan después sin bloquear la pantalla.
    */
   /** Material agregado a mano a un producto del consumo: queda registrado como de ese producto. */
-  async addProduct(change: { material: string; product: string }): Promise<void> {
+  async addProduct(change: { material: string; line: number }): Promise<void> {
     if (this.readOnly() || this.busy()) return;
-    const { material: product, product: consumptionProduct } = change;
-    if (this.items().some(row => row.PRODUCTO === product && row.PRODUCTO_CONSUMO === consumptionProduct)) {
-      this.notification.warning(`El material ${product} ya está en ${consumptionProduct}.`);
+    const product = change.material;
+    const consumptionProduct = this.consumptionProducts().find(p => p.ITEM === change.line);
+    if (!consumptionProduct) return;
+    if (this.items().some(row => row.PRODUCTO === product && row.ITEM_PRODUCTO === consumptionProduct.ITEM)) {
+      this.notification.warning(`El material ${product} ya está en ${consumptionProduct.COMPONENTE || consumptionProduct.PRODUCTO}.`);
       return;
     }
     const next = this.items().reduce((max, row) => Math.max(max, row.ITEM), 0) + 1;
@@ -807,6 +812,8 @@ export class Pro039Component implements OnInit, OnDestroy {
   cancelAddProduct(): void {
     this.addingProduct.set(false);
     this.productToAdd.set(null);
+    this.addingComponentFor.set(null);
+    this.componentToAdd.set(null);
   }
 
   async addConsumptionProduct(code: string | null): Promise<void> {
@@ -833,6 +840,10 @@ export class Pro039Component implements OnInit, OnDestroy {
     const value = String(component ?? '');
     const current = this.consumptionProducts().find(p => p.ITEM === item);
     if (!current || current.COMPONENTE === value) return;
+    if (this.consumptionProducts().some(p => p.ITEM !== item && p.PRODUCTO === current.PRODUCTO && p.COMPONENTE === value)) {
+      this.notification.warning(value ? `El componente ${value} ya está en ${current.PRODUCTO}.` : `${current.PRODUCTO} ya tiene la línea "Todo el juego".`);
+      return;
+    }
     const name = String(this.componentsOf(current.PRODUCTO).find(c => c.PRODUCTO === value)?.NOMBRE ?? '');
     this.consumptionProducts.update(list => list.map(p => p.ITEM === item ? { ...p, COMPONENTE: value, NOMBRE_COMPONENTE: name } : p));
     this.syncHeaderProduct();
@@ -847,17 +858,18 @@ export class Pro039Component implements OnInit, OnDestroy {
     if (!current || !(lot > 0) || lot === current.CANTIDAD_LOTE) return;
     this.consumptionProducts.update(list => list.map(p => p.ITEM === item ? { ...p, CANTIDAD_LOTE: lot } : p));
     this.syncHeaderProduct();
-    await this.applyItems(this.items().map(row => this.business.withProductLot(row, current.PRODUCTO, lot)));
+    await this.applyItems(this.items().map(row => this.business.withProductLot(row, current.ITEM, lot)));
   }
 
-  /** Quita el producto con todos sus materiales (los de su matriz y los que se le agregaron a mano). */
+  /** Quita una línea (producto o componente del juego) con todos sus materiales (de su matriz y agregados a mano). */
   async removeConsumptionProduct(item: number): Promise<void> {
     if (this.readOnly() || this.busy()) return;
     const removed = this.consumptionProducts().find(p => p.ITEM === item);
     if (!removed) return;
-    if (this.items().some(row => !row.ES_MATRIZ && row.PRODUCTO_CONSUMO === removed.PRODUCTO)) {
+    if (this.items().some(row => !row.ES_MATRIZ && row.ITEM_PRODUCTO === removed.ITEM)) {
+      const label = removed.COMPONENTE ? `${removed.PRODUCTO} / ${removed.COMPONENTE}` : removed.PRODUCTO;
       const answer = await Swal.fire({
-        text: `${removed.PRODUCTO} tiene materiales agregados a mano. ¿Desea quitar el producto con todos sus materiales?`,
+        text: `${label} tiene materiales agregados a mano. ¿Desea quitarlo con todos sus materiales?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Quitar',
@@ -865,7 +877,7 @@ export class Pro039Component implements OnInit, OnDestroy {
       });
       if (!answer.isConfirmed) return;
     }
-    this.setItems(this.items().filter(row => row.PRODUCTO_CONSUMO !== removed.PRODUCTO));
+    this.setItems(this.items().filter(row => row.ITEM_PRODUCTO !== removed.ITEM));
     this.consumptionProducts.update(list => list.filter(p => p.ITEM !== item));
     this.syncHeaderProduct();
     await this.loadMaterials();
@@ -873,6 +885,87 @@ export class Pro039Component implements OnInit, OnDestroy {
 
   componentsOf(product: string): Pro039Lookup[] {
     return this.productComponents()[product] ?? [];
+  }
+
+  /** Líneas agrupadas por producto, en el orden en que se agregaron (un juego reúne sus componentes). */
+  productGroups(): { PRODUCTO: string; NOMBRE: string; ES_JUEGO: boolean; lines: Pro039ConsumptionProduct[] }[] {
+    const groups = new Map<string, { PRODUCTO: string; NOMBRE: string; ES_JUEGO: boolean; lines: Pro039ConsumptionProduct[] }>();
+    for (const line of this.consumptionProducts()) {
+      const group = groups.get(line.PRODUCTO) ?? { PRODUCTO: line.PRODUCTO, NOMBRE: line.NOMBRE, ES_JUEGO: line.ES_JUEGO, lines: [] };
+      group.lines.push(line);
+      groups.set(line.PRODUCTO, group);
+    }
+    return [...groups.values()];
+  }
+
+  componentLabel(line: Pro039ConsumptionProduct): string {
+    const name = line.NOMBRE_COMPONENTE || String(this.componentsOf(line.PRODUCTO).find(c => c.PRODUCTO === line.COMPONENTE)?.NOMBRE ?? '');
+    return name ? `${line.COMPONENTE} - ${name}` : line.COMPONENTE;
+  }
+
+  /** "+ Componente" de un juego: abre una fila para elegir otro componente (cada uno con su cantidad). */
+  beginAddComponent(product: string): void {
+    if (this.readOnly() || this.busy()) return;
+    this.componentToAdd.set(null);
+    this.addingComponentFor.set(product);
+    void this.loadComponents(product);
+  }
+
+  cancelAddComponent(): void {
+    this.addingComponentFor.set(null);
+    this.componentToAdd.set(null);
+  }
+
+  /**
+   * Agrega un componente al juego. Si el juego estaba como "Todo el juego" (una sola línea sin componente),
+   * esa línea pasa a ser la del componente; si no, se crea una línea nueva con cantidad 1.
+   */
+  async addComponentLine(product: string, component: string | null): Promise<void> {
+    const value = String(component ?? '');
+    if (!value) return;
+    this.cancelAddComponent();
+    if (this.readOnly() || this.busy()) return;
+    const lines = this.consumptionProducts().filter(p => p.PRODUCTO === product);
+    if (lines.some(p => p.COMPONENTE === value)) {
+      this.notification.warning(`El componente ${value} ya está en ${product}.`);
+      return;
+    }
+    const whole = lines.length === 1 && !lines[0].COMPONENTE ? lines[0] : null;
+    if (whole) {
+      await this.setProductComponent(whole.ITEM, value);
+      return;
+    }
+    const name = String(this.componentsOf(product).find(c => c.PRODUCTO === value)?.NOMBRE ?? '');
+    const next = this.consumptionProducts().reduce((max, p) => Math.max(max, p.ITEM), 0) + 1;
+    const added = this.productFrom({ ITEM: next, PRODUCTO: product, COMPONENTE: value, NOMBRE_COMPONENTE: name });
+    // La línea nueva va junto a las demás del mismo juego
+    const list = [...this.consumptionProducts()];
+    const lastIndex = list.map(p => p.PRODUCTO).lastIndexOf(product);
+    list.splice(lastIndex + 1, 0, added);
+    this.consumptionProducts.set(list);
+    this.syncHeaderProduct();
+    this.workspace.setDirty(this.applicationId, true);
+    await this.loadMaterials();
+  }
+
+  /** Quita el juego (o producto) con todas sus líneas y sus materiales. */
+  async removeProduct(product: string): Promise<void> {
+    if (this.readOnly() || this.busy()) return;
+    const lines = this.consumptionProducts().filter(p => p.PRODUCTO === product).map(p => p.ITEM);
+    if (this.items().some(row => !row.ES_MATRIZ && lines.includes(Number(row.ITEM_PRODUCTO)))) {
+      const answer = await Swal.fire({
+        text: `${product} tiene materiales agregados a mano. ¿Desea quitarlo con todos sus componentes y materiales?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Quitar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!answer.isConfirmed) return;
+    }
+    this.setItems(this.items().filter(row => !lines.includes(Number(row.ITEM_PRODUCTO))));
+    this.consumptionProducts.update(list => list.filter(p => p.PRODUCTO !== product));
+    this.syncHeaderProduct();
+    await this.loadMaterials();
   }
 
   /** Producto del consumo con su nombre y si es juego, tomados de los catálogos cargados. */
@@ -933,7 +1026,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     const h = this.header();
     const products = this.consumptionProducts();
     // Los agregados a mano se conservan si su producto sigue en el consumo
-    const manual = this.items().filter(row => !row.ES_MATRIZ && products.some(p => p.PRODUCTO === row.PRODUCTO_CONSUMO));
+    const manual = this.items().filter(row => !row.ES_MATRIZ && products.some(p => p.ITEM === row.ITEM_PRODUCTO));
     if (!products.length || !h.SECCION) {
       await this.applyItems(manual);
       return;
@@ -948,8 +1041,8 @@ export class Pro039Component implements OnInit, OnDestroy {
       await this.applyItems([...materials.map((row, index) => ({ ...row, ITEM: offset + index + 1 })), ...manual]);
       this.notification.success(`Se cargaron ${materials.length} material(es) de la matriz.`);
       // Los productos sin matriz en la sección se pueden dejar: sus materiales se agregan a mano
-      const withMaterials = new Set(materials.map(row => row.PRODUCTO_CONSUMO));
-      const without = products.filter(p => !withMaterials.has(p.PRODUCTO)).map(p => p.PRODUCTO);
+      const withMaterials = new Set(materials.map(row => row.ITEM_PRODUCTO));
+      const without = products.filter(p => !withMaterials.has(p.ITEM)).map(p => p.COMPONENTE ? `${p.PRODUCTO} / ${p.COMPONENTE}` : p.PRODUCTO);
       if (without.length) {
         this.notification.warning(`Sin materiales en la matriz de la sección ${h.SECCION}: ${without.join(', ')}. Puede agregarlos manualmente con el + de cada producto.`);
       }
@@ -992,10 +1085,11 @@ export class Pro039Component implements OnInit, OnDestroy {
       const products = this.detailProducts(detail.PRODUCTOS);
       this.consumptionProducts.set(products);
       // Consumos anteriores (un producto, sin PRODUCTO_CONSUMO en los materiales): todos son de ese producto
-      const single = products.length === 1 ? products[0].PRODUCTO : null;
+      const single = products.length === 1 ? products[0] : null;
       const items = (detail.ITM_MOVIMIENTOS ?? []).map(row => ({
         ...row,
-        PRODUCTO_CONSUMO: row.PRODUCTO_CONSUMO || single,
+        PRODUCTO_CONSUMO: row.PRODUCTO_CONSUMO || single?.PRODUCTO || null,
+        ITEM_PRODUCTO: Number(row.ITEM_PRODUCTO) || single?.ITEM || null,
         ES_MATRIZ: row.ES_MATRIZ === true || Number(row.ES_MATRIZ) === 1,
         CONSUMO_BASE: Number(row.CONSUMO_BASE ?? 0)
       }));
@@ -1167,7 +1261,8 @@ export class Pro039Component implements OnInit, OnDestroy {
     const date = (value: unknown) => value ? String(value).slice(0, 10) : '';
     const section = row.SECCION || row.ID_SECCION || '';
     // Varios productos por consumo: "PF000005 - Cama..., JU000001 - Alcoba... (PF000010)"
-    const productLabel = (p: Pro039ConsumptionProduct) => `${this.label(p.PRODUCTO, p.NOMBRE)} (lote ${p.CANTIDAD_LOTE})`;
+    const productLabel = (p: Pro039ConsumptionProduct) =>
+      `${this.label(p.PRODUCTO, p.NOMBRE)}${p.COMPONENTE ? ' / ' + p.COMPONENTE : ''} (cantidad ${p.CANTIDAD_LOTE})`;
     const componentLabel = (p: Pro039ConsumptionProduct) => p.COMPONENTE ? this.label(p.COMPONENTE, p.NOMBRE_COMPONENTE) : '';
     return {
       documento: String(row.DOCUMENTO || `${row.ID_DOCUMENTO ?? ''}-${row.CONSECUTIVO ?? ''}`),
@@ -1180,7 +1275,8 @@ export class Pro039Component implements OnInit, OnDestroy {
       componente: products.map(componentLabel).filter(Boolean).join(', '),
       seccion: String(find(this.sections(), 'ID_SECCION', section)?.LABEL ?? section),
       lote: lot,
-      lotes: Object.fromEntries(products.map(p => [p.PRODUCTO, Number(p.CANTIDAD_LOTE) || 1])),
+      lotes: Object.fromEntries(products.map(p => [String(p.ITEM), Number(p.CANTIDAD_LOTE) || 1])),
+      lineas: Object.fromEntries(products.map(p => [String(p.ITEM), p.COMPONENTE ? `${p.PRODUCTO} / ${p.COMPONENTE}` : p.PRODUCTO])),
       origen: String(row.ORIGEN ?? row.ID_UN_ORIGEN ?? ''),
       destino: String(row.DESTINO ?? row.ID_UN_DESTINO ?? ''),
       observacion: String(row.DETALLE ?? '')

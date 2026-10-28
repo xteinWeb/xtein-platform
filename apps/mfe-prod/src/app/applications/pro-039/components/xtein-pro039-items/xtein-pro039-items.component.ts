@@ -23,9 +23,9 @@ import { Pro039ItemProductColumns } from '../../constants/pro-039-ui.constants';
 import { Pro039Lookup } from '../../models/pro-039-business.model';
 import { Pro039ConsumptionProduct, Pro039MovementItem, Pro039Presentation } from '../../models/pro-039.model';
 
-/** Materiales de un producto del consumo (o los que no tienen producto: consumos anteriores). */
+/** Materiales de una línea del consumo: producto o componente del juego (o sin línea: consumos anteriores). */
 export interface Pro039ItemsGroup {
-  key: string;
+  key: number;
   product: Pro039ConsumptionProduct | null;
   rows: Pro039MovementItem[];
 }
@@ -53,7 +53,7 @@ export interface Pro039ItemsGroup {
 })
 export class XteinPro039ItemsComponent implements OnChanges {
   @Input() items: Pro039MovementItem[] = [];
-  /** Productos del consumo: un grupo de materiales por cada uno. */
+  /** Líneas del consumo (producto o componente de un juego): un grupo de materiales por cada una. */
   @Input() consumptionProducts: Pro039ConsumptionProduct[] = [];
   /** Materiales que se pueden agregar a mano (bodega de origen). */
   @Input() products: Pro039Lookup[] = [];
@@ -71,14 +71,14 @@ export class XteinPro039ItemsComponent implements OnChanges {
 
   @Output() quantityChanged = new EventEmitter<{ item: number; quantity: number }>();
   @Output() presentationChanged = new EventEmitter<{ item: number; presentation: Pro039Presentation | null }>();
-  /** Material agregado a mano a un producto del consumo. */
-  @Output() productAdded = new EventEmitter<{ material: string; product: string }>();
+  /** Material agregado a mano a una línea del consumo (ITEM de la línea). */
+  @Output() productAdded = new EventEmitter<{ material: string; line: number }>();
   @Output() removedMany = new EventEmitter<number[]>();
   @Output() refreshProducts = new EventEmitter<void>();
 
   readonly selected = signal<number[]>([]);
-  /** Producto del consumo al que se le está agregando un material (fila nueva abierta en su grupo). */
-  readonly adding = signal<string | null>(null);
+  /** Línea del consumo a la que se le está agregando un material (fila nueva abierta en su grupo). */
+  readonly adding = signal<number | null>(null);
   readonly productColumns = Pro039ItemProductColumns;
   productDropdownOpened = false;
 
@@ -108,20 +108,29 @@ export class XteinPro039ItemsComponent implements OnChanges {
    * (consumos grabados antes de los varios productos) van en un grupo aparte al final.
    */
   groups(): Pro039ItemsGroup[] {
-    const known = new Set(this.consumptionProducts.map(p => p.PRODUCTO));
+    const known = new Set(this.consumptionProducts.map(p => p.ITEM));
     const groups: Pro039ItemsGroup[] = this.consumptionProducts.map(product => ({
-      key: product.PRODUCTO,
+      key: product.ITEM,
       product,
-      rows: this.items.filter(row => row.PRODUCTO_CONSUMO === product.PRODUCTO)
+      rows: this.items.filter(row => row.ITEM_PRODUCTO === product.ITEM)
     }));
-    const orphans = this.items.filter(row => !row.PRODUCTO_CONSUMO || !known.has(row.PRODUCTO_CONSUMO));
-    if (orphans.length) groups.push({ key: '', product: null, rows: orphans });
+    const orphans = this.items.filter(row => row.ITEM_PRODUCTO == null || !known.has(row.ITEM_PRODUCTO));
+    if (orphans.length) groups.push({ key: 0, product: null, rows: orphans });
     return groups;
   }
 
-  /** Lote del producto al que pertenece el material (el del encabezado en los consumos anteriores). */
+  /** Título del grupo: producto y, si es un componente de un juego, el componente. */
+  groupTitle(group: Pro039ItemsGroup): string {
+    const p = group.product;
+    if (!p) return 'Sin producto asignado';
+    const product = p.PRODUCTO + (p.NOMBRE ? ' - ' + p.NOMBRE : '');
+    if (!p.COMPONENTE) return p.ES_JUEGO ? `${product} · Todo el juego` : product;
+    return `${product} › ${p.COMPONENTE}${p.NOMBRE_COMPONENTE ? ' - ' + p.NOMBRE_COMPONENTE : ''}`;
+  }
+
+  /** Cantidad de la línea a la que pertenece el material (el lote del encabezado en los consumos anteriores). */
   lotOf(row: Pro039MovementItem): number {
-    const lot = Number(this.consumptionProducts.find(p => p.PRODUCTO === row.PRODUCTO_CONSUMO)?.CANTIDAD_LOTE);
+    const lot = Number(this.consumptionProducts.find(p => p.ITEM === row.ITEM_PRODUCTO)?.CANTIDAD_LOTE);
     return lot > 0 ? lot : this.lot;
   }
 
@@ -172,10 +181,10 @@ export class XteinPro039ItemsComponent implements OnChanges {
     this.removedMany.emit([...this.selected()]);
   }
 
-  beginAdd(product: string): void {
-    if (!this.canAdd || !product) return;
+  beginAdd(line: number): void {
+    if (!this.canAdd || !line) return;
     this.selected.set([]);
-    this.adding.set(product);
+    this.adding.set(line);
     // La lista se abre sola al aparecer la fila nueva
     setTimeout(() => this.productDropdownOpened = true);
   }
@@ -187,10 +196,10 @@ export class XteinPro039ItemsComponent implements OnChanges {
 
   selectProductFromDropdown(data: Pro039Lookup): void {
     const material = String(data?.PRODUCTO ?? '');
-    const product = this.adding();
-    if (!material || !product || this.busy) return;
+    const line = this.adding();
+    if (!material || !line || this.busy) return;
     this.cancelAdd();
-    this.productAdded.emit({ material, product });
+    this.productAdded.emit({ material, line });
   }
 
   productToolbarActions(): XteinGridToolbarAction[] {
