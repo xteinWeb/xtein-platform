@@ -400,7 +400,7 @@
 
         <!-- Pestaña 2: Ubicaciones -->
         <div class="ven-209__tab-pane" [hidden]="activeMainTab() !== 'ubicaciones'">
-          <xtein-ven209-ubicaciones
+          <ven-209-ubicaciones
             (pendingChange)="markPendingChanges()"
             [readOnly]="readOnly()"
             [direcciones]="direcciones()"
@@ -411,12 +411,12 @@
             (telefonosChange)="telefonos.set($event); markPendingChanges()"
             (emailsChange)="emails.set($event); markPendingChanges()"
             (contactoAdicionalChange)="contactoAdicional.set($event); markPendingChanges()"
-          ></xtein-ven209-ubicaciones>
+          ></ven-209-ubicaciones>
         </div>
 
         <!-- Pestaña 3: Financieros -->
         <div class="ven-209__tab-pane" [hidden]="activeMainTab() !== 'financieros'">
-          <xtein-ven209-financieros (pendingChange)="markPendingChanges()"
+          <ven-209-financieros (pendingChange)="markPendingChanges()"
             [readOnly]="readOnly()"
             [cupoCredito]="form.controls.CUPO_CREDITO.value ?? 0"
             [estadoCupo]="form.controls.ESTADO_CUPO.value ?? ''"
@@ -433,7 +433,7 @@
             (cupoCuotaChange)="form.controls.CUPO_CUOTA.setValue($event); markPendingChanges()"
             (tiempoEntregaChange)="form.controls.TIEMPO_ENTREGA.setValue($event); markPendingChanges()"
             (condicionesChange)="condiciones.set($event); markPendingChanges()"
-          ></xtein-ven209-financieros>
+          ></ven-209-financieros>
         </div>
 
         <!-- Pestaña 4: Datos Ventas -->

@@ -1,7 +1,9 @@
 import {
   Component,
+  EventEmitter,
   forwardRef,
-  Input
+  Input,
+  Output
 } from '@angular/core';
 
 import {
@@ -120,6 +122,20 @@ export class XteinNumberComponent
   showSpinButtons = false;
 
   /**
+   * DOM events on which DevExtreme synchronizes the numeric value.
+   * Defaulting to 'keyup input change focusout' ensures immediate synchronization
+   * when typing or pressing Enter.
+   */
+  @Input()
+  valueChangeEvent = 'keyup input change focusout';
+
+  /**
+   * Emitted when Enter key is pressed inside the numeric editor.
+   */
+  @Output()
+  readonly enterKey = new EventEmitter<unknown>();
+
+  /**
    * Current numeric value.
    *
    * Null represents an empty numeric field and must be preserved
@@ -235,6 +251,13 @@ export class XteinNumberComponent
     this.onChange(
       newValue
     );
+  }
+
+  /**
+   * Handles Enter key event from DevExtreme.
+   */
+  onEnterKey(event: unknown): void {
+    this.enterKey.emit(event);
   }
 
   /**

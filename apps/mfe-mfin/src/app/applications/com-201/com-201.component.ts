@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -91,8 +92,8 @@ import { Com201ItemsStore } from './services/com-201-items.store';
 import { descendantGroups } from './utils/com-201-groups';
 import { mergeLikeLegacy } from './utils/com-201-merge';
 import { validateHeader } from './utils/com-201-validation';
-import { XteinCom201GroupsComponent } from './components/xtein-com201-groups/xtein-com201-groups.component';
-import { XteinCom201ItemsComponent } from './components/xtein-com201-items/xtein-com201-items.component';
+import { Com201GroupsComponent } from './components/com-201-groups/com-201-groups.component';
+import { Com201ItemsComponent } from './components/com-201-items/com-201-items.component';
 
 
 /**
@@ -100,15 +101,15 @@ import { XteinCom201ItemsComponent } from './components/xtein-com201-items/xtein
  */
 @Component({
   selector:
-    'xtein-com-201',
+    'com-201',
 
   standalone:
     true,
 
   imports: [
     ReactiveFormsModule,
-    XteinCom201GroupsComponent,
-    XteinCom201ItemsComponent,
+    Com201GroupsComponent,
+    Com201ItemsComponent,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinRecordReportsComponent,
@@ -283,7 +284,7 @@ export class Com201Component
     APROXIMACION: new FormControl<number>(1, { nonNullable: true })
   });
 
-  @ViewChild(XteinCom201ItemsComponent) private itemEditor?: XteinCom201ItemsComponent;
+  @ViewChild(Com201ItemsComponent) private itemEditor?: Com201ItemsComponent;
 
   /** ID_LISTA before entering Editing ('' in Creating and Copying), sent as ID_LISTA_PREV. */
   private idListaPrev = '';
@@ -298,7 +299,8 @@ export class Com201Component
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly registry: ApplicationRegistryService,
-    private readonly notification: XteinNotificationService
+    private readonly notification: XteinNotificationService,
+    private readonly elementRef: ElementRef
   ) {
     // Synchronize toolbar state whenever mode, index, records, loading or permissions change.
     effect(() => {
@@ -463,6 +465,7 @@ export class Com201Component
     this.form.enable({ emitEvent: false });
     void this.prepareEdition();
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   /**
@@ -484,7 +487,55 @@ export class Com201Component
       await this.store.load(record.ID_LISTA).catch(() => undefined);
     } finally {
       this.loading.set(false);
+      this.focusFirstControl();
     }
+  }
+
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const initialInput = host.querySelector<HTMLInputElement>(
+        '#com-201-id-lista input:not([readonly]):not([disabled]), #com-201-descripcion input:not([readonly]):not([disabled])'
+      );
+      if (initialInput) {
+        initialInput.focus();
+        initialInput.select?.();
+        return true;
+      }
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .com-201__card') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
   }
 
   /**

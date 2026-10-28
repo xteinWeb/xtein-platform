@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   OnDestroy,
@@ -88,10 +89,10 @@ import {
 import { Ven212Service } from './services/ven-212.service';
 import { Ven212BusinessService } from './services/ven-212-business.service';
 import { Ven212ElectronicService } from './services/ven-212-electronic.service';
-import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein-ven212-items.component';
+import { Ven212ItemsComponent } from './components/ven-212-items/ven-212-items.component';
 
 @Component({
-  selector: 'xtein-ven-212',
+  selector: 'ven-212',
   standalone: true,
   imports: [
     CommonModule,
@@ -108,7 +109,7 @@ import { XteinVen212ItemsComponent } from './components/xtein-ven212-items/xtein
     XteinRecordSettingsComponent,
     XteinLoadingComponent,
     XteinGroupLabelComponent,
-    XteinVen212ItemsComponent
+    Ven212ItemsComponent
   ],
   providers: [
     Ven212Service,
@@ -162,6 +163,9 @@ export class Ven212Component implements OnInit, OnDestroy {
   readonly products = signal<Ven212Lookup[]>([]);
   readonly productsLoading = signal<boolean>(false);
   readonly onlyStock = signal<boolean>(false);
+
+  defaultUnit = '';
+  defaultCurrency = '';
 
   // Overlays
   readonly filterVisible = signal<boolean>(false);
@@ -321,7 +325,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     VALOR_DESCUENTO: new FormControl<number>(0),
     VALOR_COSTOS: new FormControl<number>(0),
     TOTAL: new FormControl<number>(0),
-    USUARIO: new FormControl<string>(''),
+    USUARIO: new FormControl<string>(this.business.identity.USUARIO),
     ESTADO: new FormControl<string>('REGISTRADO'),
     CUFE: new FormControl<string>(''),
     FECHA_ULT_VENC: new FormControl<string | null>(null),
@@ -344,7 +348,8 @@ export class Ven212Component implements OnInit, OnDestroy {
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
-    private readonly elementRef: ElementRef
+    private readonly elementRef: ElementRef,
+    private readonly cdr: ChangeDetectorRef
   ) {
     // Toolbar state synchronization
     effect(() => {
@@ -588,7 +593,21 @@ export class Ven212Component implements OnInit, OnDestroy {
 
   private indexBeforeNew = -1;
 
-  newRecord(): void {
+  selectDocument(value: string): void {
+    const row = this.documents().find(d => d.DOCUMENTO === value);
+    if (!row) return;
+    this.form.patchValue({
+      DOCUMENTO: value,
+      ID_DOCUMENTO: String(row.ID_DOCUMENTO || ''),
+      CONSECUTIVO: Number(row.CONSECUTIVO || 0),
+      PREFIJO: String(row.PREFIJO || ''),
+      SUFIJO: String(row.SUFIJO || ''),
+      DOCUMENTO_FAC: value
+    }, { emitEvent: false });
+    this.formVersion.update(v => v + 1);
+  }
+
+  async newRecord(): Promise<void> {
     if (this.busy() || !this.readOnly() || !this.permissions().create) return;
     this.indexBeforeNew = this.currentIndex();
     this.mode.set(RecordToolbarMode.Creating);
@@ -606,17 +625,47 @@ export class Ven212Component implements OnInit, OnDestroy {
     this.payments.set([]);
     this.addresses.set([]);
 
+    try {
+      const docs = await this.business.catalog('documents', {
+        ID_APLICACION: this.applicationId,
+        USUARIO: this.business.identity.USUARIO
+      }, true);
+      this.documents.set(docs);
+    } catch (e) {
+      console.warn('Error refreshing documents on new record:', e);
+    }
+
     this.form.reset({
       ...Ven212DefaultRecord,
       FECHA: this.todayDate(),
       FECHA_REGISTRO: this.todayDate(),
       FECHA_PRIMER_VENC: this.todayDate(),
-      USUARIO: this.business.identity.USUARIO
+      USUARIO: this.business.identity.USUARIO,
+      ID_UN_ITEM: this.defaultUnit,
+      ID_MONEDA: this.defaultCurrency,
+      TIPO_VENTA: 'CONTADO',
+      PLAZO: 0,
+      CUOTA_INICIAL: 0,
+      ESTADO: 'REGISTRADO'
     });
+
+    if (this.documents().length === 1) {
+      this.selectDocument(String(this.documents()[0].DOCUMENTO));
+    }
+
+    if (this.defaultUnit) {
+      await this.onUnitChanged(this.defaultUnit);
+    }
+
+    const matchingSeller = this.sellers().find(s => String(s.ID_ADC || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase() || String(s['USUARIO'] || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase());
+    const defaultSeller = matchingSeller ? matchingSeller.ID_ADC : (this.sellers().length === 1 ? this.sellers()[0].ID_ADC : '');
+    if (defaultSeller) {
+      this.form.patchValue({ ID_ADC: defaultSeller });
+      void this.loadConditions();
+    }
 
     this.enableFormControls(true);
     this.formVersion.update(v => v + 1);
-    void this.loadConditions();
     this.workspace.setDirty(this.applicationId, false);
     this.focusFirstControl();
   }
@@ -1031,14 +1080,41 @@ export class Ven212Component implements OnInit, OnDestroy {
   }
 
   async onUnitChanged(unitId: string): Promise<void> {
+    const cleanId = String(unitId || '').trim();
+    if (!cleanId) {
+      this.warehouses.set([]);
+      this.form.patchValue({ ID_UN_BODEGA: '' }, { emitEvent: false });
+      this.products.set([]);
+      this.formVersion.update(v => v + 1);
+      return;
+    }
     try {
-      const warehouses = await this.business.catalog('warehouses', { ID_UN: unitId });
-      this.warehouses.set(warehouses);
-      if (warehouses.length > 0) {
-        this.form.patchValue({ ID_UN_BODEGA: String(warehouses[0]['ID_UN_BODEGA'] || '') }, { emitEvent: false });
+      const warehouses = await this.business.catalog('warehouses', {
+        ESTADO: 'ACTIVO',
+        MOVIMIENTO: 'FACTURA',
+        ID_UN_ITEM: cleanId,
+        USUARIO: this.business.identity.USUARIO
+      }, true);
+      const formatted = (warehouses || []).map(r => ({
+        ...r,
+        ID_UN_BODEGA: String(r['ID_UN_BODEGA'] ?? '').trim(),
+        DESCRIPCION: String(r['DESCRIPCION'] ?? r['ID_UN_BODEGA'] ?? '').trim(),
+        NOMBRE_UN: String(r['NOMBRE_UN'] ?? '').trim(),
+        BODEGA_LABEL: String(r['DESCRIPCION'] ? `${r['ID_UN_BODEGA']} - ${r['DESCRIPCION']}` : (r['ID_UN_BODEGA'] ?? '')).trim()
+      })).filter(r => r.ID_UN_BODEGA);
+      this.warehouses.set(formatted);
+      if (formatted.length > 0 && (!this.form.controls.ID_UN_BODEGA.value || !this.readOnly())) {
+        this.form.patchValue({ ID_UN_BODEGA: formatted[0].ID_UN_BODEGA }, { emitEvent: false });
       }
     } catch {
-      // Non-critical
+      this.warehouses.set([]);
+      this.form.patchValue({ ID_UN_BODEGA: '' }, { emitEvent: false });
+    } finally {
+      this.formVersion.update(v => v + 1);
+      this.cdr.markForCheck();
+      if (!this.readOnly() && this.form.controls.ID_CONDICION.value) {
+        void this.loadProducts();
+      }
     }
   }
 
@@ -1119,11 +1195,13 @@ export class Ven212Component implements OnInit, OnDestroy {
       }, true);
       const rows = raw.map(r => {
         const code = String(r['CODIGO'] ?? r['ID_CONDICION'] ?? '');
+        const desc = String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code);
         return {
           ...r,
           CODIGO: code,
           ID_CONDICION: code,
-          NOMBRE: String(r['NOMBRE'] ?? r['DESCRIPCION'] ?? code)
+          NOMBRE: desc,
+          DESCRIPCION: desc
         };
       }).filter(r => r.CODIGO && r.CODIGO !== 'null');
 
@@ -1134,8 +1212,10 @@ export class Ven212Component implements OnInit, OnDestroy {
       }
 
       const current = this.form.controls.ID_CONDICION.value;
-      if (rows.length === 1 && (!current || !rows.some(r => r.CODIGO === current))) {
-        this.form.patchValue({ ID_CONDICION: rows[0].CODIGO });
+      if (rows.length > 0 && !this.readOnly() && (!current || !rows.some(r => r.CODIGO === current))) {
+        const defaultCond = rows[0].CODIGO;
+        this.form.patchValue({ ID_CONDICION: defaultCond });
+        await this.onConditionChanged(defaultCond);
       } else if (current && !rows.some(r => r.CODIGO === current)) {
         this.form.patchValue({ ID_CONDICION: '' });
         this.terms.set([]);
@@ -1194,26 +1274,32 @@ export class Ven212Component implements OnInit, OnDestroy {
     await this.loadProducts();
   }
 
-  async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
+    async loadProducts(stockOnly = this.onlyStock()): Promise<void> {
     this.onlyStock.set(stockOnly);
     const req = ++this.productRequest;
-    const h = this.header();
-    if (!h.ID_CONDICION) {
+    const condId = String(this.form.controls.ID_CONDICION.value || '').trim();
+    if (!condId) {
       this.products.set([]);
       this.productsLoading.set(false);
+      this.cdr.markForCheck();
       return;
     }
     this.productsLoading.set(true);
+    this.cdr.markForCheck();
     try {
+      const tipo = this.conditionType();
+      const plazoVal = this.form.controls.PLAZO.value ?? 0;
+      const bodegaVal = String(this.form.controls.ID_UN_BODEGA.value || '').trim();
+
       const items = await this.business.catalog('products', {
-        ID_LISTA: h.ID_CONDICION,
-        TIPO: this.conditionType(),
-        PLAZO: h.PLAZO,
+        ID_LISTA: condId,
+        TIPO: tipo || 'CONDICION',
+        PLAZO: Number(plazoVal) || 0,
         CON_EXIS: stockOnly ? 'SI' : undefined,
-        ID_UN_BODEGA: h.ID_UN_BODEGA
+        ID_UN_BODEGA: bodegaVal || undefined
       }, true);
       if (req === this.productRequest) {
-        this.products.set(items);
+        this.products.set(items || []);
       }
     } catch {
       if (req === this.productRequest) {
@@ -1222,6 +1308,7 @@ export class Ven212Component implements OnInit, OnDestroy {
     } finally {
       if (req === this.productRequest) {
         this.productsLoading.set(false);
+        this.cdr.markForCheck();
       }
     }
   }
@@ -1247,26 +1334,75 @@ export class Ven212Component implements OnInit, OnDestroy {
         console.warn('Error loading clients in VEN-212:', e);
       });
 
-      const [docs, sellers, units, currencies, banks, defaultUnit] = await Promise.all([
+      const [docs, sellers, units, currencies, banks, defaultUnit, defaultCurrency] = await Promise.all([
         this.business.catalog('documents', { ID_APLICACION: this.applicationId, USUARIO: this.business.identity.USUARIO }),
         this.business.catalog('sellers', { ESTADO: 'ACTIVO' }),
         this.business.catalog('units', { ESTADO: 'ACTIVO', USUARIO: this.business.identity.USUARIO, ID_APLICACION: this.applicationId }),
         this.business.catalog('currencies', { ESTADO: 'ACTIVO' }),
         this.business.catalog('bancos', { ID_APLICACION: 'FIN-012', USUARIO: this.business.identity.USUARIO }),
-        this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO })
+        this.business.catalog('defaultUnit', { USUARIO: this.business.identity.USUARIO }),
+        this.business.catalog('specifications', { ID_ESPECIFICACION: 'OBJETOS', ID_APLICACION: 'GENERAL', NOMBRE_OBJETO: 'DEF_MONEDA' })
       ]);
 
       await pClients;
 
       this.documents.set(docs);
-      this.sellers.set(sellers);
-      this.units.set(units);
+      this.sellers.set(sellers.map(r => ({
+        ...r,
+        ID_ADC: String(r.ID_ADC ?? ''),
+        NOMBRE_COMPLETO: String(r.NOMBRE_COMPLETO ?? ''),
+        NUM_NOMBRE: String(r['NUM_NOMBRE'] ?? `${r.ID_ADC} - ${r.NOMBRE_COMPLETO ?? ''}`)
+      })));
+      this.units.set(units.map(r => ({
+        ...r,
+        ID_UN: String(r.ID_UN ?? ''),
+        NOMBRE: String(r.NOMBRE ?? r['UN_NOMBRE'] ?? r.ID_UN ?? ''),
+        UN_NOMBRE: String(r['UN_NOMBRE'] ?? `${r.ID_UN} - ${r.NOMBRE ?? ''}`.trim())
+      })));
       this.currencies.set(currencies);
       this.banks.set(banks);
 
-      if (defaultUnit.length > 0 && !this.form.controls.ID_UN_ITEM.value) {
-        this.form.patchValue({ ID_UN_ITEM: String(defaultUnit[0].ID_UN || '') }, { emitEvent: false });
+      if (docs.length === 1 && !this.form.controls.DOCUMENTO.value) {
+        this.selectDocument(String(docs[0].DOCUMENTO));
       }
+
+      if (defaultUnit.length > 0) {
+        this.defaultUnit = String(defaultUnit[0].ID_UN || '');
+      }
+      if (defaultCurrency.length > 0) {
+        this.defaultCurrency = String(defaultCurrency[0].VALOR_DEFECTO || '');
+      }
+
+      if (!this.form.controls.ID_UN_ITEM.value && this.defaultUnit) {
+        this.form.patchValue({ ID_UN_ITEM: this.defaultUnit }, { emitEvent: false });
+        await this.onUnitChanged(this.defaultUnit);
+      }
+      if (!this.form.controls.ID_MONEDA.value && this.defaultCurrency) {
+        this.form.patchValue({ ID_MONEDA: this.defaultCurrency }, { emitEvent: false });
+      }
+      if (!this.form.controls.TIPO_VENTA.value) {
+        this.form.patchValue({ TIPO_VENTA: 'CONTADO' }, { emitEvent: false });
+      }
+      if (!this.form.controls.USUARIO.value) {
+        this.form.patchValue({ USUARIO: this.business.identity.USUARIO }, { emitEvent: false });
+      }
+      if (!this.form.controls.FECHA.value) {
+        this.form.patchValue({ FECHA: this.todayDate() }, { emitEvent: false });
+      }
+      if (!this.form.controls.FECHA_REGISTRO.value) {
+        this.form.patchValue({ FECHA_REGISTRO: this.todayDate() }, { emitEvent: false });
+      }
+      if (!this.form.controls.FECHA_PRIMER_VENC.value) {
+        this.form.patchValue({ FECHA_PRIMER_VENC: this.todayDate() }, { emitEvent: false });
+      }
+
+      const matchingSeller = this.sellers().find(s => String(s.ID_ADC || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase() || String(s['USUARIO'] || '').toUpperCase() === this.business.identity.USUARIO.toUpperCase());
+      const defaultSeller = matchingSeller ? matchingSeller.ID_ADC : (this.sellers().length === 1 ? this.sellers()[0].ID_ADC : '');
+      if (defaultSeller && !this.form.controls.ID_ADC.value) {
+        this.form.patchValue({ ID_ADC: defaultSeller }, { emitEvent: false });
+        void this.loadConditions();
+      }
+      this.formVersion.update(v => v + 1);
     } catch {
       // Non-critical fallback
     }

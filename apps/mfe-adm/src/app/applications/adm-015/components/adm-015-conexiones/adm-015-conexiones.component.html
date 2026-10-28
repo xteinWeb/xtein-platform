@@ -1,0 +1,107 @@
+<div class="xtein-adm015-conn">
+  <xtein-data-grid
+    #connGrid
+    class="xtein-adm015-conn__grid"
+    [dataSource]="rows"
+    keyExpr="ID_CONEXION"
+    [columns]="columns"
+    height="auto"
+    [searchEnabled]="false"
+    [filterEnabled]="false"
+    [selectionMode]="readOnly ? 'none' : 'multiple'"
+    [selectedRowKeys]="selected"
+    showCheckBoxesMode="always"
+    (selectionChanged)="onSelectionChanged($event.selectedRowKeys)"
+    [disabled]="busy"
+    [toolbarVisible]="!readOnly"
+    [toolbarActions]="toolbarActions"
+    [toolbarTemplate]="listTrigger"
+    [groupTemplate]="connCell"
+    [pageSize]="20"
+  />
+</div>
+
+<ng-template #listTrigger>
+  @if (!readOnly) {
+    <xtein-drop-down-panel
+      class="xtein-adm015-conn__list-trigger"
+      placeholder="Lista de Conexiones"
+      [opened]="listOpened"
+      (openedChange)="openList($event)"
+      [disabled]="busy || !!draft"
+      [contentTemplate]="connList"
+    />
+  }
+</ng-template>
+
+<ng-template #connCell let-cell>
+  @if (cell.column.dataField === 'ULTIMA') {
+    <div class="xtein-adm015-conn__switch-cell">
+      <xtein-switch
+        [value]="!!cell.value"
+        [disabled]="readOnly || busy"
+        (valueChange)="onToggleDefault(cell.data, $event)"
+      />
+    </div>
+  } @else if (cell.column.dataField === 'ID_CONEXION') {
+    @if (draft && cell.data === draft) {
+      <xtein-lookup
+        [items]="selectableConexiones"
+        [columns]="lookupColumns"
+        valueExpr="ID_CONEXION"
+        displayExpr="ID_CONEXION"
+        placeholder="Conexión"
+        ariaLabel="Conexión a asociar"
+        dropDownWidth="300px"
+        [autoFocus]="!draft.originalConexionId"
+        [ngModel]="draft.ID_CONEXION === '__draft__' ? null : draft.ID_CONEXION"
+        (ngModelChange)="chooseConexion($event)"
+        [disabled]="busy"
+      />
+    } @else if (!readOnly) {
+      <button
+        type="button"
+        class="xtein-adm015-conn__code-btn"
+        [disabled]="busy || !!draft"
+        [attr.aria-label]="'Editar conexión ' + cell.value"
+        (click)="beginEdit(cell.data)"
+      >
+        {{ cell.value }}
+      </button>
+    } @else {
+      {{ cell.value }}
+    }
+  }
+</ng-template>
+
+<ng-template #connList>
+  <div class="xtein-adm015-conn__list-grid">
+    <xtein-data-grid
+      [dataSource]="choices"
+      keyExpr="ID_CONEXION"
+      [columns]="choiceColumns"
+      selectionMode="multiple"
+      [selectedRowKeys]="choiceKeys"
+      (selectionChanged)="choiceKeys = $event.selectedRowKeys"
+      showCheckBoxesMode="always"
+      [searchEnabled]="true"
+      [filterEnabled]="false"
+      [searchWidth]="300"
+      [pageSize]="10"
+      [allowedPageSizes]="[5, 10, 20]"
+      [disabled]="busy || readOnly"
+    />
+  </div>
+  <div class="xtein-adm015-conn__list-actions">
+    <xtein-button
+      text="Aceptar"
+      [disabled]="!choiceKeys.length || busy || readOnly"
+      (clicked)="acceptList()"
+    />
+    <xtein-button
+      text="Cancelar"
+      variant="secondary"
+      (clicked)="openList(false)"
+    />
+  </div>
+</ng-template>

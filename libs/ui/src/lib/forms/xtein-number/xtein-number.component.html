@@ -17,6 +17,8 @@
   [showSpinButtons]="showSpinButtons"
   [showClearButton]="!required && !readOnly && !disabled"
   [stylingMode]="stylingMode"
+  [valueChangeEvent]="valueChangeEvent"
   (onValueChanged)="onValueChanged($event)"
+  (onEnterKey)="onEnterKey($event)"
   (onFocusOut)="onFocusOut()">
 </dx-number-box>
