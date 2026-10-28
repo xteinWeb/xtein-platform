@@ -34,6 +34,7 @@ import {
   unidadesEntrada
 } from '../../utils/cal-003-arbol';
 import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
+import { XteinCal003NcComponent } from '../xtein-cal003-nc/xtein-cal003-nc.component';
 
 /**
  * Entrada: registra lo que llegó del cliente. Cada producto agregado queda como un servicio S.
@@ -57,7 +58,8 @@ import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
     XteinLookupComponent,
     XteinNumberComponent,
     XteinRecordViewComponent,
-    XteinSelectComponent
+    XteinSelectComponent,
+    XteinCal003NcComponent
   ],
   templateUrl: './xtein-cal003-entrada.component.html',
   styleUrl: './xtein-cal003-entrada.component.scss',
@@ -101,6 +103,14 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   readonly viewVisible = signal(false);
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
+
+  /** No conformidad obligatoria: se abre al guardar la entrada y con el botón de una entrada que no la tiene. */
+  readonly ncVisible = signal(false);
+  /** La entrada abierta no tiene su no conformidad (y no está anulada). */
+  readonly faltaNc = computed(() => {
+    const s = this.mode() === RecordToolbarMode.Browsing ? this.abierto()?.SERVICIO : null;
+    return !!s && !s.ID_REGISTRO_NC && s.ESTADO !== 'ANULADO';
+  });
 
   /** Cabecera común de la pantalla con la entrada abierta (documento SEN, estado del documento, quién y cuándo). */
   readonly cabecera = computed<Cal003Cabecera | null>(() => {
@@ -323,7 +333,11 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
       return;
     }
     const numero = (v.N_SERVICIO_CLIENTE ?? '').trim();
-    if (numero && !/^\d+$/.test(numero)) {
+    if (!numero) {
+      this.ctx.advertir('Falta el número de servicio del cliente: lo pide la no conformidad.');
+      return;
+    }
+    if (!/^\d+$/.test(numero)) {
       this.ctx.advertir('El número de servicio debe ser solo numérico.');
       return;
     }
@@ -344,13 +358,25 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     }, vivos.map(unidadesEntrada)));
     if (!creados) return;
 
-    this.ctx.exito(`Entrada guardada: ${creados.map(c => c.DOCUMENTO).join(', ')}. Registra en CAL-001 la no conformidad (origen Cliente) con este número.`);
+    this.ctx.exito(`Entrada guardada: ${creados.map(c => c.DOCUMENTO).join(', ')}. Ahora registra su no conformidad.`);
     this.grupos.set([]);
     this.form.disable({ emitEvent: false });
     const servicios = await this.ctx.ejecutar(() => Promise.all(creados.map(c => this.ctx.api.servicio(c.ID_SERVICIO))));
     this.records.set((servicios ?? []).map(s => s.SERVICIO));
-    if (this.records().length) await this.abrir(0);
-    else this.mode.set(RecordToolbarMode.Initial);
+    if (this.records().length) {
+      await this.abrir(0);
+      // La no conformidad es obligatoria: se pide en seguida
+      if (this.faltaNc()) this.ncVisible.set(true);
+    } else this.mode.set(RecordToolbarMode.Initial);
+  }
+
+  registrarNc(): void {
+    if (this.faltaNc()) this.ncVisible.set(true);
+  }
+
+  async ncRegistrada(): Promise<void> {
+    this.ncVisible.set(false);
+    await this.abrir(this.currentIndex());
   }
 
   // ================= Buscador, navegación y anulación =================

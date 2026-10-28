@@ -71,6 +71,7 @@ export const Cal003Action = {
   DeliveryDispatch: 'entrega despachar',
   DeliveryVoidLine: 'entrega anular linea',
   AdjustmentPropose: 'ajuste proponer',
+  ServiceNc: 'servicio nc',
   PricesSave: 'precios guardar',
   // /soporte-subir y /soporte
   SupportAttach: 'soporte adjuntar',

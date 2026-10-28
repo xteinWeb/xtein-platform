@@ -5,7 +5,7 @@ Contrato entre el front (`apps/mfe-cal`, aplicación `CAL-003`), las rutas de ap
 Archivos en apiRest:
 - BD: `sql/ddl/50_cal003_servicios_tecnicos.sql` (tablas), `sql/seed/52_cal003_documentos.sql` (STS/STT/STD y áreas), `sql/seed/54_cal003_tipos_servicio.sql` (tipos de servicio), `sql/sp/51_spServicioTecnico.sql` (vistas `RS_ST_*` y SP), `sql/seed/53_menu_cal003.sql` (menú y permisos de XTEIN), `sql/seed/55_cal003_filtros.sql` (campos del buscador de la barra), `sql/rollback/91_rollback_cal003.sql`.
 - Rutas: `src/routes/CAL003.routes.js`, `src/controllers/CAL003/CAL003.controller.js`, `src/controllers/CAL003/soportes.js`, `src/tests/CAL003.test.js`. Variable `RUTA_ARCHIVOS_CAL003` (`.env.example`).
-- Orden de ejecución: **50 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58 → 59** (57 = `spAutorizaciones`, compartido; 58 = estados de traslados, servicios y ajustes ya creados; 59 = documentos SEN / STR / SSA para lo ya creado).
+- Orden de ejecución: **50 → 60 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58 → 59** (60 = columna de la no conformidad y dominio de bodegas; en una BD que ya tiene CAL-003: 60 y luego 51) (57 = `spAutorizaciones`, compartido; 58 = estados de traslados, servicios y ajustes ya creados; 59 = documentos SEN / STR / SSA para lo ya creado).
 
 Archivos en el front: `apps/mfe-cal/src/app/applications/cal-003/**` y su entrada en `cal-application.registry.ts`.
 
@@ -177,6 +177,12 @@ Mismo manejo que los consumos de PRO-039, para traslados y salidas por ajuste: e
   El estado del servicio en inventario (DEPOSITO, DESPACHADO, AJUSTADO…) sigue aparte.
 - **`areas servicio`** (antes `areas`): lista del campo "Área que solicita".
 - **`entrada nueva`:** el Nº de servicio del cliente es solo numérico y no se repite para el mismo cliente (las entradas anuladas no cuentan; se valida con el bloqueo de la numeración). Las partes llegan en cantidad 0 por defecto; las que siguen en 0 no se guardan y si todas están en 0 se rechaza.
+
+### 2.9 Bodegas de servicio técnico y no conformidad obligatoria
+
+- **Bodegas:** CAL-003 solo trabaja con las del dominio `CALIDAD / BODEGAS_SERVICIO_TECNICO` (`VALOR1` = `ID_UN_BODEGA`; script 60 con PP 500 / 501 / 502 y PT 700 / 701 / 702). Se aplica a `bodegas`, a las bodegas del usuario (`permisos`, filtros de lo que ve) y a la bodega de `entrada nueva`, el destino de `traslado enviar` y la bodega de `entrega despachar`. Dominio vacío = sin restricción.
+- **No conformidad (CAL-001, origen CLIENTE) obligatoria por entrada:** el Nº de servicio del cliente pasa a ser obligatorio (lo pide la NC). Al guardar la entrada, la pantalla abre el formulario de la NC (producto PF, fechas del evento y del reclamo, área de detección, fuente, causa del cliente, partes afectadas con su causa o la pieza si el PF no tiene partes) y la crea con `POST /api/CAL001N/save` `new`; luego la liga con **`servicio nc`** (`ID_SERVICIO`, `ID_REGISTRO_NC`): la NC debe ser de origen CLIENTE, del mismo cliente y Nº de servicio, y no estar ligada a otra entrada. Queda en `SERVICIOS_TECNICOS.ID_REGISTRO_NC` (FK, índice único) y se ve como `NC_DOCUMENTO` en `servicios` / `servicio`. Mientras falte, `avisos` muestra "Entrada sin no conformidad" y la entrada abierta trae el botón para registrarla. Registrar la NC pide en CAL-001 los permisos Crear y OPC (gestor).
+- **Salida:** `servicios entregables`, `entrega` y el reporte `CAL-003-001` traen también `N_ORDEN_DEVOLUCION`; la vista de impresión muestra Nº servicio y Nº orden devolución.
 
 ## 3. Pendiente por definir
 

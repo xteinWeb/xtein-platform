@@ -1,4 +1,12 @@
 <div class="c3-card" [formGroup]="form">
+  <!-- La no conformidad es obligatoria: si la entrada abierta no la tiene, se avisa y se registra desde aquí -->
+  @if (faltaNc()) {
+    <div class="c3-msg c3-e-nc">
+      <span>Esta entrada no tiene su no conformidad. Es obligatoria.</span>
+      <button type="button" class="c3-e-nc__btn" (click)="registrarNc()">Registrar no conformidad</button>
+    </div>
+  }
+
   <!-- Datos del servicio (documento, estado, usuario y fecha de registro van en la cabecera de la pantalla) -->
   <div class="c3-section-divider">
     <xtein-group-label class="c3-section-title" label="Datos del servicio"></xtein-group-label>
@@ -38,9 +46,9 @@
 
     <div class="c3-col">
       <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-sc">Nº servicio del cliente</xtein-label>
+        <xtein-label class="c3-label" for="c3-e-sc" [required]="true">Nº servicio del cliente</xtein-label>
         <div class="c3-control">
-          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Opcional: solo números" [maxLength]="limits.ClientServiceNumber"
+          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Solo números" [maxLength]="limits.ClientServiceNumber"
             formControlName="N_SERVICIO_CLIENTE" [readOnly]="!creando()" />
         </div>
       </div>
@@ -58,6 +66,12 @@
             valueExpr="ID_AREA" displayExpr="DESCRIPCION" [showClearButton]="true" formControlName="ID_AREA" [readOnly]="!creando()" />
         </div>
       </div>
+      @if (abierto()?.SERVICIO?.NC_DOCUMENTO; as nc) {
+        <div class="c3-field">
+          <xtein-label class="c3-label">No conformidad</xtein-label>
+          <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="No conformidad" [placeholder]="nc" [readOnly]="true" /></div>
+        </div>
+      }
     </div>
   </div>
 
@@ -270,3 +284,6 @@
   keyField="ID_SERVICIO"
   (selected)="verRegistro($event)"
 />
+
+<!-- No conformidad de cliente (CAL-001), obligatoria por entrada -->
+<xtein-cal003-nc [visible]="ncVisible()" [servicio]="abierto()" (registrada)="ncRegistrada()" (cerrado)="ncVisible.set(false)" />

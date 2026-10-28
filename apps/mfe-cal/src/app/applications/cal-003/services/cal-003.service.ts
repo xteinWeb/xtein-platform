@@ -8,6 +8,8 @@ import { createCal003Log } from '../constants/cal-003-logging.constants';
 import type {
   Cal003Ajuste,
   Cal003Consecutivo,
+  Cal003NcCreada,
+  Cal003NcPermisos,
   Cal003ArbolProducto,
   Cal003Area,
   Cal003Aviso,
@@ -34,6 +36,8 @@ import type {
   Cal003Traslado
 } from '../models/cal-003.model';
 import { Cal003BackendError, decodificar } from '../utils/cal-003-errores';
+import { Cal001Endpoint } from '../../cal-001/constants/cal-001.constants';
+import type { Cal001Causa, Cal001ListasCliente, Cal001PartesProducto } from '../../cal-001/models/cal-001.model';
 
 /**
  * Llamadas de CAL-003, solo a /api/CAL003/* por XteinApiClientService.
@@ -65,6 +69,40 @@ export class Cal003Service {
     const [fila] = await this.ejecutar<Cal003Resultado>(Cal003Endpoint.Save, action, data, this.log.Save);
     if (!fila) throw new Cal003BackendError('El servidor no devolvió el resultado.');
     return fila;
+  }
+
+  // ================= No conformidad (API de CAL-001, origen CLIENTE) =================
+
+  private ncConsultar<T>(action: string, data: unknown = {}): Promise<T[]> {
+    return this.ejecutar<T>(Cal001Endpoint.Query, action, data, this.log.Query);
+  }
+
+  async ncPermisos(): Promise<Cal003NcPermisos | null> {
+    return (await this.ncConsultar<Cal003NcPermisos>('permisos'))[0] ?? null;
+  }
+
+  ncCausas(): Promise<Cal001Causa[]> {
+    return this.ncConsultar<Cal001Causa>('causas');
+  }
+
+  async ncListasCliente(): Promise<Cal001ListasCliente> {
+    return (await this.ncConsultar<Cal001ListasCliente>('listas cliente'))[0] ?? { AREAS_DETECCION: [], FUENTES: [] };
+  }
+
+  async ncPartesProducto(producto: string): Promise<Cal001PartesProducto | null> {
+    return (await this.ncConsultar<Cal001PartesProducto>('partes producto', { PRODUCTO: producto }))[0] ?? null;
+  }
+
+  /** Crea la NC en CAL-001 (prmAccion 'new'); el payload sigue el contrato de CAL-001 §2.3. */
+  async ncCrear(payload: unknown): Promise<Cal003NcCreada> {
+    const [fila] = await this.ejecutar<Cal003NcCreada>(Cal001Endpoint.Save, 'new', payload, this.log.Save);
+    if (!fila) throw new Cal003BackendError('CAL-001 no devolvió la no conformidad creada.');
+    return fila;
+  }
+
+  /** Liga a la entrada la no conformidad recién creada. */
+  servicioNc(idServicio: number, idRegistroNc: number): Promise<Cal003Resultado> {
+    return this.guardar(Cal003Action.ServiceNc, { ID_SERVICIO: idServicio, ID_REGISTRO_NC: idRegistroNc });
   }
 
   // ================= Listas de apoyo =================

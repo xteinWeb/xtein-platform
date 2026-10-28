@@ -1,0 +1,127 @@
+<!-- No conformidad de cliente (CAL-001) de la entrada: obligatoria, solo se cierra si no se puede registrar aquí -->
+<xtein-popup [title]="'No conformidad de ' + (servicio()?.SERVICIO?.DOCUMENTO ?? '')" [visible]="visible()"
+  [showCloseButton]="!!bloqueo()" width="min(920px, 96vw)" height="auto" (visibleChange)="!$event && cerrado.emit()">
+  @if (servicio(); as s) {
+    @if (bloqueo()) {
+      <p class="c3-msg">{{ bloqueo() }}</p>
+    } @else if (cargando()) {
+      <p class="c3-hint">Preparando la no conformidad…</p>
+    } @else {
+      <p class="c3-hint">Toda entrada lleva su no conformidad (origen Cliente). Se guarda en CAL-001 y queda ligada a {{ s.SERVICIO.DOCUMENTO }}.</p>
+
+      <div class="c3-grid">
+        <div class="c3-col">
+          <div class="c3-field">
+            <xtein-label class="c3-label">Cliente</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Cliente" [placeholder]="s.SERVICIO.NOMBRE_CLIENTE" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Nº servicio</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Nº servicio" [placeholder]="s.SERVICIO.N_SERVICIO_CLIENTE ?? ''" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-producto" [required]="true">Producto</xtein-label>
+            <div class="c3-control">
+              <xtein-select id="c3-nc-producto" ariaLabel="Producto" [items]="productos()" valueExpr="PRODUCTO" displayExpr="LABEL"
+                [ngModel]="producto()" (ngModelChange)="elegirProducto($event)" [readOnly]="productos().length < 2" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-fevento" [required]="true">Fecha del evento</xtein-label>
+            <div class="c3-control">
+              <xtein-date id="c3-nc-fevento" name="FECHA_EVENTO" [ngModel]="fechaEvento()" (ngModelChange)="fechaEvento.set($event)" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-freclamo" [required]="true">Fecha del reclamo</xtein-label>
+            <div class="c3-control">
+              <xtein-date id="c3-nc-freclamo" name="FECHA_RECLAMO" [ngModel]="fechaReclamo()" (ngModelChange)="fechaReclamo.set($event)" />
+            </div>
+          </div>
+        </div>
+        <div class="c3-col">
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-area" [required]="true">Área de detección</xtein-label>
+            <div class="c3-control">
+              <xtein-select id="c3-nc-area" ariaLabel="Área de detección" placeholder="Escoge el área" [items]="areas()" valueExpr="VALOR" displayExpr="VALOR"
+                [ngModel]="area()" (ngModelChange)="area.set($event ?? '')" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-fuente" [required]="true">Fuente</xtein-label>
+            <div class="c3-control">
+              <xtein-select id="c3-nc-fuente" ariaLabel="Fuente" placeholder="Escoge la fuente" [items]="fuentes()" valueExpr="VALOR" displayExpr="VALOR"
+                [ngModel]="fuente()" (ngModelChange)="fuente.set($event ?? '')" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-causa" [required]="true">Causa del cliente</xtein-label>
+            <div class="c3-control">
+              <xtein-select id="c3-nc-causa" ariaLabel="Causa del cliente" placeholder="Escoge la causa" [items]="causasCliente()" valueExpr="ID_CAUSA" displayExpr="DESCRIPCION"
+                [ngModel]="causaCliente()" (ngModelChange)="causaCliente.set($event ?? '')" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-nc-obs">Observación</xtein-label>
+            <div class="c3-control">
+              <xtein-input id="c3-nc-obs" name="OBSERVACION" placeholder="Opcional" [maxLength]="1000"
+                [ngModel]="observacion()" (ngModelChange)="observacion.set($event ?? '')" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="c3-section-divider">
+        <span class="c3-section-title">Partes afectadas</span>
+      </div>
+      @if (sinPartes()) {
+        <div class="c3-grid">
+          <div class="c3-col">
+            <div class="c3-field">
+              <xtein-label class="c3-label" for="c3-nc-pieza" [required]="true">Pieza</xtein-label>
+              <div class="c3-control">
+                <xtein-input id="c3-nc-pieza" name="PIEZA" placeholder="El producto no tiene partes: escribe la pieza" [maxLength]="50"
+                  [ngModel]="pieza()" (ngModelChange)="pieza.set($event ?? '')" />
+              </div>
+            </div>
+          </div>
+          <div class="c3-col">
+            <div class="c3-field">
+              <xtein-label class="c3-label" for="c3-nc-causa-pieza" [required]="true">Causa</xtein-label>
+              <div class="c3-control">
+                <xtein-select id="c3-nc-causa-pieza" ariaLabel="Causa" placeholder="Escoge la causa" [items]="causasProduccion()" valueExpr="ID_CAUSA" displayExpr="DESCRIPCION"
+                  [ngModel]="causaPieza()" (ngModelChange)="causaPieza.set($event ?? '')" />
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="c3-table-scroll">
+          <table class="c3-table">
+            <thead><tr><th class="col-select">Afectada</th><th>Parte</th><th>Causa</th></tr></thead>
+            <tbody>
+              @for (p of partes(); track p.ID_PARTE + '|' + p.ITEM_PRODUCTO_PARTE; let i = $index) {
+                <tr [class.row-muted]="!p.marcada">
+                  <td class="col-select">
+                    <xtein-checkbox [ariaLabel]="'Afectada ' + p.NOMBRE" [checked]="p.marcada" (checkedChange)="marcar(i, $event)" />
+                  </td>
+                  <td>{{ p.NOMBRE }}</td>
+                  <td class="c3-nc-causa">
+                    <xtein-select [ariaLabel]="'Causa de ' + p.NOMBRE" placeholder="Escoge la causa" [items]="causasProduccion()" valueExpr="ID_CAUSA"
+                      displayExpr="DESCRIPCION" [ngModel]="p.causa" (ngModelChange)="causa(i, $event)" />
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="empty-message">Escoge el producto para ver sus partes.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="c3-actions c3-nc-pie">
+        <xtein-button text="Guardar no conformidad" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="guardar()" />
+      </div>
+    }
+  }
+</xtein-popup>
