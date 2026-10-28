@@ -66,6 +66,8 @@ export class XteinCal001FotosComponent {
   readonly cargandoVista = signal<number | null>(null);
   readonly fecha = mostrarFecha;
   readonly maximo = Cal001Limits.MaxPhotos;
+  /** La foto activa es la única: no se puede retirar (el SP responde E28); primero se agrega y guarda otra. */
+  readonly esUnica = computed(() => this.fotos().length <= 1);
   readonly cupo = computed(() => Cal001Limits.MaxPhotos - this.fotos().length - this.cola().length);
 
   constructor() {
@@ -170,6 +172,11 @@ export class XteinCal001FotosComponent {
     this.pendientes.set([]);
   }
 
+  /** Descarta las fotos sin subir cuyo dueño no es `destino` (el usuario confirmó descartarlas). */
+  descartarAjenas(destino: number | null): void {
+    this.pendientes.update(lista => lista.filter(f => f.dueno === destino));
+  }
+
   private marcar(id: number, estado: Cal001FotoPendiente['estado'], mensaje: string): void {
     this.pendientes.update(lista => lista.map(f => f.id === id ? { ...f, estado, mensaje } : f));
   }
@@ -222,6 +229,8 @@ export class XteinCal001FotosComponent {
       this.cambiaron.emit();
     } catch (error) {
       this.aviso.emit(mensajeError(error).mensaje);
+      // E28 u otro gestor retiró antes: se refresca la lista para mostrar las fotos vigentes.
+      this.cambiaron.emit();
     }
   }
 }

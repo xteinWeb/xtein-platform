@@ -196,7 +196,8 @@ Validaciones (`new` y `update`; la primera que falla devuelve su `ErrMensaje`):
 
 **Regla de fotos:**
 - Agregar: el gestor siempre; el **creador** (`USUARIO_CREA = USUARIO_TOKEN`) con `PUEDE_CREAR` y `@AHORA < DATEADD(DAY, 7, FECHA_CREA)` (fase 2, DP-A; antes era `VERSION = 1` y 24 h). Otro caso → E05. Máximo 10 fotos `ACTIVO` por registro: la 11.ª → E26 (se cuenta bajo `UPDLOCK` del encabezado). El SP no conoce el modo de edición del front: que las fotos solo se suban en Nuevo / Modificar / Agregar (C5) lo decide el web.
-- Retirar: solo el gestor.
+- Retirar: solo el gestor, y nunca la última foto activa del registro: si el registro tiene una sola foto `ACTIVO` (la cuenta se hace bajo `UPDLOCK, HOLDLOCK`) → E28 `El registro debe conservar al menos una foto activa`. Orden de errores de `foto retirar`: permiso (E05) → parámetro (E06) → E08 (foto inexistente, ya retirada o de otra UN) → E28. Retirar una foto ya retirada devuelve E08, no E28.
+- Foto obligatoria (cliente): el SP no puede exigir foto en `new` (la foto se sube después, con `foto agregar`). Por eso **web y móvil deben exigir al menos una foto antes de guardar** un `new`, y también un `update`/`agregar` de un registro que no tenga fotos activas. E28 solo garantiza que, una vez con foto, el registro no se quede sin ella.
 - `EXTENSION` ∈ {`jpg`,`png`,`webp`} (E27); la detecta el controlador por los bytes mágicos. El SP fija `MIME` (`image/jpeg`, `image/png`, `image/webp`) y genera `RUTA = <ID_UN>/<yyyy de @AHORA>/<ID_REGISTRO_NC>/<NEWID() en minúsculas>.<ext>`. `NOMBRE_ORIGINAL` se guarda solo como texto (≤ 260; vacío → `foto.<ext>`); nunca entra en la ruta.
 - BD: `CK_RNCF_RUTA` rechaza `..`, `:`, `\` y `/` inicial; `UQ_RNCF_RUTA` impide duplicados.
 - Log: `FOTO_AGREGAR` / `FOTO_RETIRAR` con la `VERSION` vigente del encabezado (las fotos **no** suben la versión). El JSON del log lleva `ID_FOTO_NC, NOMBRE_ORIGINAL, MIME, ESTADO` y **nunca `RUTA`**. `foto retirar` llena `USUARIO_RETIRA`/`FECHA_RETIRA`.
@@ -249,6 +250,7 @@ Los textos son estables: las pruebas de F2 y F3 los comparan por prefijo.
 | E25 | `Recurso ocupado; intente de nuevo` |
 | E26 | `Máximo 10 fotos activas por registro` |
 | E27 | `Extensión de foto no permitida: <EXTENSION>` |
+| E28 | `El registro debe conservar al menos una foto activa` (`foto retirar` de la última foto `ACTIVO`) |
 | E99 | `Error interno (<número>)` para errores no previstos de SQL; el detalle va al log del servidor, no al cliente |
 | E90 | `E90 Fuera de la red de la empresa` (HTTP 403, lo emite el middleware `soloRedInterna`, §6.6; solo para `X-Xtein-Cliente: movil`) |
 
