@@ -75,14 +75,14 @@ import { Adm015Service } from './services/adm-015.service';
 import { Adm015BusinessService } from './services/adm-015-business.service';
 import { Adm015AuthorizationDraft } from './models/adm-015-application-permissions.model';
 
-import { XteinAdm015AplicacionesComponent } from './components/xtein-adm015-aplicaciones/xtein-adm015-aplicaciones.component';
-import { XteinAdm015PermisosEspecialesComponent } from './components/xtein-adm015-permisos-especiales/xtein-adm015-permisos-especiales.component';
-import { XteinAdm015UnAsociadasComponent } from './components/xtein-adm015-un-asociadas/xtein-adm015-un-asociadas.component';
-import { XteinAdm015ConexionesComponent } from './components/xtein-adm015-conexiones/xtein-adm015-conexiones.component';
-import { XteinAdm015ConfiguracionesComponent } from './components/xtein-adm015-configuraciones/xtein-adm015-configuraciones.component';
+import { Adm015AplicacionesComponent } from './components/adm-015-aplicaciones/adm-015-aplicaciones.component';
+import { Adm015PermisosEspecialesComponent } from './components/adm-015-permisos-especiales/adm-015-permisos-especiales.component';
+import { Adm015UnAsociadasComponent } from './components/adm-015-un-asociadas/adm-015-un-asociadas.component';
+import { Adm015ConexionesComponent } from './components/adm-015-conexiones/adm-015-conexiones.component';
+import { Adm015ConfiguracionesComponent } from './components/adm-015-configuraciones/adm-015-configuraciones.component';
 
 @Component({
-  selector: 'app-adm-015',
+  selector: 'adm-015',
   standalone: true,
   imports: [
     CommonModule,
@@ -100,11 +100,11 @@ import { XteinAdm015ConfiguracionesComponent } from './components/xtein-adm015-c
     XteinRecordViewComponent,
     XteinRecordFilterComponent,
     XteinRecordReportsComponent,
-    XteinAdm015AplicacionesComponent,
-    XteinAdm015PermisosEspecialesComponent,
-    XteinAdm015UnAsociadasComponent,
-    XteinAdm015ConexionesComponent,
-    XteinAdm015ConfiguracionesComponent
+    Adm015AplicacionesComponent,
+    Adm015PermisosEspecialesComponent,
+    Adm015UnAsociadasComponent,
+    Adm015ConexionesComponent,
+    Adm015ConfiguracionesComponent
   ],
   providers: [
     Adm015Service,

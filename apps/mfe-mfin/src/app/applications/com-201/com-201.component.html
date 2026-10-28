@@ -169,7 +169,7 @@
   <!-- Árbol de grupos | ítems de la lista -->
   <div class="com-201__panels">
     <div class="com-201__card com-201__card--groups">
-      <xtein-com201-groups
+      <com-201-groups
         [groups]="groups()"
         [selectedId]="selectedGroupId()"
         [disabled]="loading()"
@@ -178,7 +178,7 @@
     </div>
 
     <div class="com-201__card com-201__card--items">
-      <xtein-com201-items
+      <com-201-items
         [header]="header()"
         [editable]="!readOnly()"
         [busy]="loading() || store.loading()"

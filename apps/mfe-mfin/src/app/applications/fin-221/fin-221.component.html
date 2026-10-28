@@ -1,0 +1,192 @@
+<section class="fin-221">
+  <!-- Tarjeta de Encabezado -->
+  <div class="fin-221__card" [formGroup]="form">
+    <xtein-group-label class="fin-221__section-title" label="Planes de Financiación"></xtein-group-label>
+
+    <div class="fin-221__header-grid">
+      <!-- Columna 1: Código y Estado -->
+      <div class="fin-221__header-col">
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-id-plan" [required]="true">Id Plan</xtein-label>
+          <div class="fin-221__control">
+            <xtein-input
+              id="fin-221-id-plan"
+              name="ID_PLAN"
+              placeholder="Id Plan"
+              formControlName="ID_PLAN"
+              [required]="true"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-estado">Estado</xtein-label>
+          <div class="fin-221__control">
+            <xtein-select
+              id="fin-221-estado"
+              [items]="statusOptions"
+              displayExpr="text"
+              valueExpr="value"
+              formControlName="ESTADO"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 2: Descripción y Frecuencia -->
+      <div class="fin-221__header-col">
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-descripcion" [required]="true">Descripción</xtein-label>
+          <div class="fin-221__control">
+            <xtein-input
+              id="fin-221-descripcion"
+              name="DESCRIPCION"
+              placeholder="Descripción"
+              formControlName="DESCRIPCION"
+              [required]="true"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-frecuencia">Frecuencia</xtein-label>
+          <div class="fin-221__control">
+            <xtein-select
+              id="fin-221-frecuencia"
+              [items]="frecuenciaOptions"
+              displayExpr="text"
+              valueExpr="value"
+              formControlName="TIPO_FRECUENCIA"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 3: Días o Frecuencia numérica y Días 1ra Cuota -->
+      <div class="fin-221__header-col">
+        @if (form.controls.TIPO_FRECUENCIA.value === 'Constante') {
+          <div class="fin-221__field">
+            <xtein-label class="fin-221__label" for="fin-221-dias-frecuencia">Nº Días</xtein-label>
+            <div class="fin-221__control">
+              <xtein-number
+                id="fin-221-dias-frecuencia"
+                placeholder="Nº Días"
+                format="#,##0"
+                formControlName="FRECUENCIA"
+                [readOnly]="readOnly()"
+              />
+            </div>
+          </div>
+        }
+
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-dias-primera-cuota">Días 1ra Cuota</xtein-label>
+          <div class="fin-221__control">
+            <xtein-number
+              id="fin-221-dias-primera-cuota"
+              placeholder="Días 1ra Cuota"
+              format="#,##0"
+              formControlName="DIAS_PRIMERA_CUOTA"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 4: Financiar Gravamen y Número de Pagos -->
+      <div class="fin-221__header-col">
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-financiar-grav">Financiar Grav</xtein-label>
+          <div class="fin-221__control">
+            <xtein-select
+              id="fin-221-financiar-grav"
+              [items]="financiarGravOptions"
+              displayExpr="text"
+              valueExpr="value"
+              formControlName="FINANCIAR_GRAV"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+
+        <div class="fin-221__field">
+          <xtein-label class="fin-221__label" for="fin-221-numero-pagos" [required]="true">Número de Pagos</xtein-label>
+          <div class="fin-221__control">
+            <xtein-number
+              id="fin-221-numero-pagos"
+              placeholder="Número de Pagos"
+              format="#,##0"
+              formControlName="NUMERO_PAGOS"
+              [readOnly]="readOnly()"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta de Plazos e Ítems -->
+  <div class="fin-221__card fin-221__card--items">
+    <xtein-group-label class="fin-221__section-title" label="Plazos / Configuración de Cuotas"></xtein-group-label>
+
+    <fin-221-items
+      [items]="items()"
+      [tipoFrecuencia]="form.controls.TIPO_FRECUENCIA.value"
+      [numeroPagos]="form.controls.NUMERO_PAGOS.value"
+      [readOnly]="readOnly()"
+      [tasas]="tasas()"
+      [condiciones]="condiciones()"
+      (itemsChange)="items.set($event)"
+      (changed)="onItemsChanged()"
+    />
+  </div>
+
+  <xtein-loading
+    [visible]="loading() || saving()"
+    [message]="saving() ? 'Guardando plan de financiación…' : 'Cargando datos…'"
+    [showPane]="true"
+    [showIndicator]="true"
+    [shading]="true"
+    [shadingOpacity]="0.2"
+    [hideOnOutsideClick]="false"
+  />
+</section>
+
+<!-- Modales estándar de la plataforma -->
+<xtein-record-filter
+  [visible]="filterVisible()"
+  (visibleChange)="filterVisible.set($event)"
+  [tableBase]="tableBase"
+  (search)="searchRecords($event)"
+/>
+
+<xtein-record-view
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="ID_PLAN"
+  (selected)="selectViewedRecord($event)"
+/>
+
+@if (reportsVisible()) {
+  <xtein-record-reports
+    [visible]="reportsVisible()"
+    (visibleChange)="reportsVisible.set($event)"
+    [applicationId]="applicationId"
+    [table]="tableBase"
+    [currentFilter]="currentReportFilter()"
+    [allFilter]="queryFilter()"
+  />
+}
+
+<xtein-record-settings
+  [visible]="settingsVisible()"
+  (visibleChange)="settingsVisible.set($event)"
+  [applicationId]="applicationId"
+  (optionSelected)="executeSetting($event)"
+/>

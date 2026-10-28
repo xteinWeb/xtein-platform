@@ -1,12 +1,12 @@
 import { XteinLookupComponent, XteinGroupLabelComponent } from '@xtein/ui';
 import { XteinPopupComponent, XteinLabelComponent } from '@xtein/ui';
-import { XteinVen210SelectionComponent } from './components/xtein-ven210-selection/xtein-ven210-selection.component';
-import { XteinVen210BodegasComponent, Ven210DocumentKeys } from './components/xtein-ven210-bodegas/xtein-ven210-bodegas.component';
+import { Ven210SelectionComponent } from './components/ven-210-selection/ven-210-selection.component';
+import { Ven210BodegasComponent, Ven210DocumentKeys } from './components/ven-210-bodegas/ven-210-bodegas.component';
 import { formatNumber } from 'devextreme/localization';
 import { Ven210BusinessService } from './services/ven-210-business.service';
 import { Ven210Lookup, Ven210Details, Ven210OrderLink, Ven210OrderLoad, Ven210SettingResult } from './models/ven-210-business.model';
 import { Ven210ItemBodega, Ven210RemisionPago } from './models/ven-210.model';
-import { XteinVen210ItemsComponent } from './components/xtein-ven210-items/xtein-ven210-items.component';
+import { Ven210ItemsComponent } from './components/ven-210-items/ven-210-items.component';
 import { XteinButtonComponent } from '@xtein/ui';
 import { ElementRef } from '@angular/core';
 import {
@@ -117,14 +117,13 @@ import {
  * VEN-210 - Remisiones.
  */
 @Component({
-  selector:
-    'xtein-ven-210',
+  selector: 'ven-210',
 
   standalone:
     true,
 
   imports: [XteinLookupComponent,XteinPopupComponent, XteinLabelComponent, XteinGroupLabelComponent,
-    CommonModule, XteinVen210SelectionComponent, XteinVen210ItemsComponent, XteinVen210BodegasComponent, XteinButtonComponent, ReactiveFormsModule,
+    CommonModule, Ven210SelectionComponent, Ven210ItemsComponent, Ven210BodegasComponent, XteinButtonComponent, ReactiveFormsModule,
     XteinRecordFilterComponent,
     XteinRecordViewComponent,
     XteinRecordReportsComponent,
@@ -916,7 +915,7 @@ export class Ven210Component
     }, 100);
   }
 
-  @ViewChild(XteinVen210ItemsComponent) private itemEditor?: XteinVen210ItemsComponent;
+  @ViewChild(Ven210ItemsComponent) private itemEditor?: Ven210ItemsComponent;
   readonly documents = signal<Ven210Lookup[]>([]);
   readonly clients = signal<Ven210Lookup[]>([]);
 

@@ -1,0 +1,109 @@
+<div class="fin224-items-container">
+  <!-- Toolbar de listas con controles estándar xtein-button -->
+  <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
+
+  <!-- Tabla de Listas de Precios asociadas -->
+  <div class="table-scroll">
+    <table class="items-grid-table">
+      <thead>
+        <tr>
+          <th class="col-select">
+            <xtein-checkbox
+              ariaLabel="Seleccionar todas"
+              [disabled]="readOnly || busy() || !!draft() || items.length === 0"
+              [checked]="allItemsSelected()"
+              (checkedChange)="toggleAll($event)"
+            />
+          </th>
+          <th class="col-lista">Lista</th>
+          <th class="col-descripcion">Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Fila nueva en edición si isNewRow -->
+        @if (isNewRow() && draft(); as newRow) {
+          <tr class="row-editing">
+            <td class="col-select"></td>
+            <td class="col-lista">
+              <xtein-select
+                ariaLabel="Lista de Precios"
+                [items]="listasPrecios"
+                displayExpr="ID_LISTA"
+                valueExpr="ID_LISTA"
+                [searchEnabled]="true"
+                [columns]="['ID_LISTA', 'DESCRIPCION']"
+                [columnHeaders]="['Código', 'Descripción']"
+                [ngModel]="newRow.ID_LISTA"
+                (ngModelChange)="onListaChanged($event)"
+              />
+            </td>
+            <td class="col-descripcion">
+              <xtein-input
+                ariaLabel="Descripción"
+                placeholder="Descripción"
+                [readOnly]="true"
+                [(ngModel)]="newRow.DESCRIPCION"
+              />
+            </td>
+          </tr>
+        }
+
+        <!-- Filas existentes -->
+        @for (item of items; track item.ID_LISTA; let idx = $index) {
+          @if (!isNewRow() && editingIndex() === idx && draft(); as editRow) {
+            <!-- Fila en edición existente -->
+            <tr class="row-editing">
+              <td class="col-select"></td>
+              <td class="col-lista">
+                <xtein-select
+                  ariaLabel="Lista de Precios"
+                  [items]="listasPrecios"
+                  displayExpr="ID_LISTA"
+                  valueExpr="ID_LISTA"
+                  [searchEnabled]="true"
+                  [columns]="['ID_LISTA', 'DESCRIPCION']"
+                  [columnHeaders]="['Código', 'Descripción']"
+                  [ngModel]="editRow.ID_LISTA"
+                  (ngModelChange)="onListaChanged($event)"
+                />
+              </td>
+              <td class="col-descripcion">
+                <xtein-input
+                  ariaLabel="Descripción"
+                  placeholder="Descripción"
+                  [readOnly]="true"
+                  [(ngModel)]="editRow.DESCRIPCION"
+                />
+              </td>
+            </tr>
+          } @else {
+            <!-- Fila estándar en modo vista -->
+            <tr
+              [class.row-selected]="isRowSelected(item.ID_LISTA)"
+              (dblclick)="beginEdit(item, idx)"
+            >
+              <td class="col-select">
+                <xtein-checkbox
+                  ariaLabel="Seleccionar lista"
+                  [disabled]="readOnly || busy() || !!draft()"
+                  [checked]="isRowSelected(item.ID_LISTA)"
+                  (checkedChange)="toggleRow(item.ID_LISTA, $event)"
+                />
+              </td>
+              <td class="col-lista fw-semibold">{{ item.ID_LISTA }}</td>
+              <td class="col-descripcion">{{ item.DESCRIPCION || '-' }}</td>
+            </tr>
+          }
+        }
+
+        @if (items.length === 0 && !draft()) {
+          <tr>
+            <td colspan="3" class="text-center empty-message">
+              No hay listas de precios asociadas a esta condición de negociación.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

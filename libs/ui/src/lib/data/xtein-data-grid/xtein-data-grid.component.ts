@@ -3,7 +3,8 @@ import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { DxDataGridModule, DxDataGridComponent, DxTemplateModule } from 'devextreme-angular';
 import type { KeyDownEvent } from 'devextreme/ui/data_grid';
 import { XteinGridColumn, XteinGridSelectionEvent, XteinGridEditingEvent, XteinGridRowEvent, XteinGridToolbarAction } from './models/xtein-data-grid.model';
-@Component({selector:'xtein-data-grid',standalone:true,imports:[DxDataGridModule,DxTemplateModule,NgTemplateOutlet,CommonModule],
+import { XteinGridToolbarComponent } from '../xtein-grid-toolbar/xtein-grid-toolbar.component';
+@Component({selector:'xtein-data-grid',standalone:true,imports:[DxDataGridModule,DxTemplateModule,NgTemplateOutlet,CommonModule,XteinGridToolbarComponent],
   templateUrl:'./xtein-data-grid.component.html',styleUrl:'./xtein-data-grid.component.scss'})
 export class XteinDataGridComponent<T = unknown, K = unknown> implements OnChanges, OnInit {
   @Input() dataSource: T[] = [];
