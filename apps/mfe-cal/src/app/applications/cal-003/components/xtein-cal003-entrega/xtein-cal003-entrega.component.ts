@@ -22,6 +22,7 @@ interface Cal003LineaVista {
   ID_SERVICIO: number;
   DOCUMENTO: string;
   N_SERVICIO_CLIENTE: string | null;
+  N_ORDEN_DEVOLUCION?: string | null;
   CODIGO_ASOCIADO: string | null;
   TIPO_SERVICIO: string;
   ESTADO: string;

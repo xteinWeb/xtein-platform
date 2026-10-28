@@ -51,6 +51,19 @@ export interface Cal003Consecutivo {
   USUARIO: string;
 }
 
+/** Lo que devuelve CAL-001 al crear la no conformidad. */
+export interface Cal003NcCreada {
+  ID_REGISTRO_NC: number;
+  DOCUMENTO: string;
+}
+
+/** Permisos de CAL-001 (crear una NC de cliente pide PUEDE_CREAR y ES_GESTOR). */
+export interface Cal003NcPermisos {
+  PUEDE_VER: number;
+  PUEDE_CREAR: number;
+  ES_GESTOR: number;
+}
+
 /** Cabecera común de la pantalla: estado del documento REGISTRADO / ANULADO / AUTORIZADO. */
 export interface Cal003Cabecera {
   documento: string;
@@ -110,6 +123,9 @@ export interface Cal003Servicio {
   ESTADO: string;
   /** Estado del documento SEN: REGISTRADO o ANULADO. */
   ESTADO_DOCUMENTO?: string;
+  /** No conformidad de CAL-001 ligada (obligatoria): mientras sea null, la entrada la pide. */
+  ID_REGISTRO_NC?: number | null;
+  NC_DOCUMENTO?: string | null;
   ULTIMO_MOVIMIENTO: string;
   DETALLE_MOVIMIENTO: string;
   OBSERVACION_ANULA: string | null;
@@ -175,6 +191,7 @@ export interface Cal003ServicioEntregable {
   NOMBRE: string;
   TIPO_SERVICIO: Cal003ServiceType;
   N_SERVICIO_CLIENTE: string | null;
+  N_ORDEN_DEVOLUCION?: string | null;
   CODIGO_ASOCIADO: string | null;
   OK: number;
   /** Qué falta reunir cuando OK = 0. */
@@ -216,6 +233,7 @@ export interface Cal003LineaEntrega {
   ID_SERVICIO: number;
   DOCUMENTO: string;
   N_SERVICIO_CLIENTE: string | null;
+  N_ORDEN_DEVOLUCION?: string | null;
   CODIGO_ASOCIADO: string | null;
   TIPO_SERVICIO: Cal003ServiceType;
   ESTADO: 'ACTIVA' | 'ANULADA';

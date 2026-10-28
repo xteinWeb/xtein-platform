@@ -162,3 +162,22 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
 }
+
+// Aviso de entrada sin no conformidad (obligatoria)
+.c3-e-nc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.c3-e-nc__btn {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #1565c0;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
