@@ -109,6 +109,7 @@ export class Fin224Component implements OnInit, OnDestroy {
   readonly viewColumns = Fin224RecordViewColumns;
   readonly planColumns = ['ID_PLAN', 'DESCRIPCION'];
   readonly planHeaders = ['Código', 'Descripción'];
+  readonly planDropDownOptions = { width: 450, minWidth: 400 };
   readonly RecordToolbarMode = RecordToolbarMode;
 
   private readonly service = inject(Fin224Service);
@@ -365,12 +366,28 @@ export class Fin224Component implements OnInit, OnDestroy {
         iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
         confirmButtonColor: '#0F4C81',
         confirmButtonText: 'Entendido',
-        allowOutsideClick: false
+        allowOutsideClick: false,
+        returnFocus: false
       });
 
       this.form.controls.ID_CONDICION.setValue('');
-      this.focusFirstControl();
+      this.focusCodigoInput();
     }
+  }
+
+  private focusCodigoInput(): void {
+    const focusFn = () => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const input = host.querySelector<HTMLInputElement>('#fin-224-id-condicion input');
+      if (input) {
+        input.focus();
+        input.select?.();
+      }
+    };
+
+    setTimeout(focusFn, 50);
+    setTimeout(focusFn, 150);
+    setTimeout(focusFn, 300);
   }
 
   private focusFirstControl(): void {
@@ -482,10 +499,11 @@ export class Fin224Component implements OnInit, OnDestroy {
           iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
           confirmButtonColor: '#0F4C81',
           confirmButtonText: 'Entendido',
-          allowOutsideClick: false
+          allowOutsideClick: false,
+          returnFocus: false
         });
         this.form.controls.ID_CONDICION.setValue('');
-        this.focusFirstControl();
+        this.focusCodigoInput();
         return;
       }
     }

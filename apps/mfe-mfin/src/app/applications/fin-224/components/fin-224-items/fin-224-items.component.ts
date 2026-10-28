@@ -57,6 +57,17 @@ export class Fin224ItemsComponent {
   readonly editingIndex = signal<number | null>(null);
   readonly busy = signal<boolean>(false);
 
+  readonly listaDropDownOptions = {
+    width: 480,
+    minWidth: 420
+  };
+
+  handleKeydownEnter(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.commit();
+  }
+
   allItemsSelected(): boolean {
     return this.items.length > 0 && this.selected().length === this.items.length;
   }

@@ -22,7 +22,7 @@
       <tbody>
         <!-- Fila nueva en edición si isNewRow -->
         @if (isNewRow() && draft(); as newRow) {
-          <tr class="row-editing">
+          <tr class="row-editing" (keydown.enter)="handleKeydownEnter($event)">
             <td class="col-select"></td>
             <td class="col-lista">
               <xtein-select
@@ -33,8 +33,10 @@
                 [searchEnabled]="true"
                 [columns]="['ID_LISTA', 'DESCRIPCION']"
                 [columnHeaders]="['Código', 'Descripción']"
+                [dropDownOptions]="listaDropDownOptions"
                 [ngModel]="newRow.ID_LISTA"
                 (ngModelChange)="onListaChanged($event)"
+                (enterKey)="commit()"
               />
             </td>
             <td class="col-descripcion">
@@ -43,6 +45,7 @@
                 placeholder="Descripción"
                 [readOnly]="true"
                 [(ngModel)]="newRow.DESCRIPCION"
+                (enterKey)="commit()"
               />
             </td>
           </tr>
@@ -52,7 +55,7 @@
         @for (item of items; track item.ID_LISTA; let idx = $index) {
           @if (!isNewRow() && editingIndex() === idx && draft(); as editRow) {
             <!-- Fila en edición existente -->
-            <tr class="row-editing">
+            <tr class="row-editing" (keydown.enter)="handleKeydownEnter($event)">
               <td class="col-select"></td>
               <td class="col-lista">
                 <xtein-select
@@ -63,8 +66,10 @@
                   [searchEnabled]="true"
                   [columns]="['ID_LISTA', 'DESCRIPCION']"
                   [columnHeaders]="['Código', 'Descripción']"
+                  [dropDownOptions]="listaDropDownOptions"
                   [ngModel]="editRow.ID_LISTA"
                   (ngModelChange)="onListaChanged($event)"
+                  (enterKey)="commit()"
                 />
               </td>
               <td class="col-descripcion">
@@ -73,6 +78,7 @@
                   placeholder="Descripción"
                   [readOnly]="true"
                   [(ngModel)]="editRow.DESCRIPCION"
+                  (enterKey)="commit()"
                 />
               </td>
             </tr>

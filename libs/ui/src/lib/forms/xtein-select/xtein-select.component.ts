@@ -75,6 +75,7 @@ export class XteinSelectComponent
   @Input() pageSize = 20;
   @Input() tabIndex = 0;
   @Output() readonly refreshRequested = new EventEmitter<void>();
+  @Output() readonly enterKey = new EventEmitter<void>();
 
   private lastPopupOptions?: Record<string, unknown>;
   private lastRefreshEnabled?: boolean;
@@ -83,6 +84,7 @@ export class XteinSelectComponent
 
   get resolvedDropDownOptions(): Record<string, unknown> {
     const hasHeaders = !!(this.columnHeaders && this.columnHeaders.length > 0);
+    const isMultiColumn = !!(this.columns && this.columns.length > 1);
     if (
       this.lastPopupOptions !== this.dropDownOptions ||
       this.lastRefreshEnabled !== this.refreshEnabled ||
@@ -114,9 +116,13 @@ export class XteinSelectComponent
           }
         });
       }
+      const baseOptions: Record<string, unknown> = isMultiColumn && !this.dropDownOptions['width'] && !this.dropDownOptions['minWidth']
+        ? { minWidth: 420, width: 450, ...this.dropDownOptions }
+        : { ...this.dropDownOptions };
+
       this.popupOptions = toolbarItems.length > 0
-        ? { ...this.dropDownOptions, toolbarItems }
-        : this.dropDownOptions;
+        ? { ...baseOptions, toolbarItems }
+        : baseOptions;
     }
     return this.popupOptions;
   }
@@ -380,6 +386,10 @@ export class XteinSelectComponent
     } else {
       event.customItem = event.text;
     }
+  }
+
+  handleEnterKey(event: any): void {
+    this.enterKey.emit();
   }
 
   handleFocusOut(): void {

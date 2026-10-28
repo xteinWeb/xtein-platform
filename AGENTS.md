@@ -21,3 +21,9 @@ En **todas las aplicaciones** del ERP XTEIN (migradas actualmente y todas las qu
 
 - Toda grid o tabla de detalles (como ítems de facturas, pedidos, traslados, direcciones, teléfonos, etc.) debe usar el componente estandarizado `<xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />`.
 - Debe conservar la misma apariencia, íconos SVG estilizados (`plus`, `edit`, `check`, `undo`, `trash`), variantes y orden estándar que la de Direcciones y Teléfonos de Clientes.
+
+## Regla de Confirmación de Fila con Tecla Enter en Grids Hijas (Detalles / Ítems)
+
+- En **todas las aplicaciones** del ERP XTEIN (migradas actualmente y todas las que se migren de ahora en adelante):
+  - Al estar editando o agregando una fila en cualquier grid o tabla de detalles (`row-editing` / `draft`), presionar la tecla **Enter** (`(keydown.enter)` o evento `(enterKey)`) **DEBE** equivaler a hacer clic en el botón de confirmar la fila (ícono `check` / método `commit()` / `applyDraft()`).
+  - La fila debe validarse y agregarse/actualizarse en la tabla, cerrando el modo de edición de la fila actual para que el usuario pueda ingresar datos de forma rápida y ágil con el teclado.

@@ -14,3 +14,9 @@ En **todas las aplicaciones** del ERP XTEIN (migradas actualmente y todas las qu
    - Inyectar `ElementRef`.
    - Implementar método privado `focusFirstControl()` con un reintento breve (`setTimeout(..., 100)` y `150ms`) para asegurar que el ciclo de detección de cambios y renderizado de Angular / DevExtreme haya habilitado los inputs.
    - Buscar primero el campo clave inicial no readonly (`input:not([readonly]):not([disabled])`), y como fallback el primer candidato `input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])` que esté visible y editable.
+
+## Regla de Confirmación de Fila con Tecla Enter en Grids Hijas (Detalles / Ítems)
+
+En **todas las grids o tablas de detalle** (ítems de facturas, pedidos, listas asociadas, ubicaciones, contactos, etc.):
+- Al estar editando o agregando una fila (`row-editing` / `draft`), presionar la tecla **Enter** (`(keydown.enter)` o evento `(enterKey)`) **DEBE** equivaler a hacer clic en el botón de confirmar la fila (ícono `check` / método `commit()` / `applyDraft()`).
+- La fila debe validarse y agregarse/actualizarse en la tabla, cerrando el modo de edición de la fila actual para que el usuario pueda ingresar datos de forma rápida y ágil con el teclado.

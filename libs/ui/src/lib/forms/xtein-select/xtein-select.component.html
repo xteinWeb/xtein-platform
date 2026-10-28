@@ -23,7 +23,8 @@
   [inputAttr]="inputAttributes"
   (onValueChanged)="handleValueChanged($event)"
   (onCustomItemCreating)="handleCustomItemCreating($event)"
-  (onFocusOut)="handleFocusOut()">
+  (onFocusOut)="handleFocusOut()"
+  (onEnterKey)="handleEnterKey($event)">
   @if (itemTemplate) {
     <div *dxTemplate="let item of 'customItem'">
       <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
