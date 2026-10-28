@@ -1,4 +1,27 @@
 /**
+ * Línea del consumo (varias por sección): un producto o, si es un juego, uno de sus componentes
+ * (COMPONENTE vacío = todo el juego). Un juego puede tener varias líneas, una por componente, cada una con su cantidad.
+ */
+export interface Pro039ConsumptionProduct {
+  ITEM: number;
+  PRODUCTO: string;
+  NOMBRE: string;
+  ES_JUEGO: boolean;
+  COMPONENTE: string;
+  NOMBRE_COMPONENTE?: string;
+  /** Cantidad del lote de este producto: el consumo de sus materiales es el unitario de la matriz x este lote. */
+  CANTIDAD_LOTE: number;
+}
+
+/** Presentación de un producto (PRODUCTOS_PRESENTACION): unidad de compra y su equivalencia. */
+export interface Pro039Presentation {
+  UDM_COMPRA?: string;
+  CANTIDAD_PRES?: number;
+  UDM_EQUIV?: string;
+  CANTIDAD_EQUIV?: number;
+}
+
+/**
  * Encabezado del consumo (MOVIMIENTOS_PRO). Conserva los nombres del backend.
  * PRODUCTO/SECCION son el producto y la sección de producción del consumo;
  * al consultar, la sección llega como ID_SECCION.
@@ -65,6 +88,12 @@ export interface Pro039MovementItem {
   CANTIDAD_PRES: number;
   UDM_EQUIV: string;
   CANTIDAD_EQUIV: number;
+  /** Presentaciones del producto (PRODUCTOS_PRESENTACION), para elegir "UM Pres." como en la salida de COM-203. */
+  PRESENTACIONES?: Pro039Presentation[];
+  /** Producto del consumo al que pertenece el material (de su matriz o agregado a mano para él). */
+  PRODUCTO_CONSUMO?: string | null;
+  /** Línea del consumo (ITEM de la línea: producto o componente del juego) a la que pertenece el material. */
+  ITEM_PRODUCTO?: number | null;
   /** Cantidad que indicaba la matriz ("Consumo"). */
   CONSUMO_BASE: number;
   /** Cantidad consumida ("Consumo modificado"). */

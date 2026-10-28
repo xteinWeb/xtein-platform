@@ -1,0 +1,15 @@
+:host { display: block; }
+
+.hs-lista { margin: 0; padding: 0; list-style: none; > li { padding: 6px 0; border-bottom: 1px solid #eef2f6; } }
+.hs-fila {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; color: #1f3b57;
+  span { color: #4a6a84; font-size: 13px; }
+}
+.hs-motivo { margin: 4px 0 0; color: #334155; font-size: 13px; overflow-wrap: anywhere; }
+.hs-cambios { margin: 4px 0 0; padding-left: 18px; color: #4a6a84; font-size: 12.5px; overflow-wrap: anywhere; }
+.hs-vacio { color: #7b8fa3; font-size: 13px; }
+.hs-boton {
+  margin-top: 8px; min-height: 34px; padding: 4px 12px; border: 1px solid #c9d6e3; border-radius: 6px;
+  background: #fff; color: #0a3960; font: inherit; cursor: pointer;
+  &:disabled { opacity: .6; }
+}

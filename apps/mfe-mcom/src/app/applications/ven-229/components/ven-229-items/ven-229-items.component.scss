@@ -454,3 +454,111 @@ xtein-grid-toolbar {
     }
   }
 }
+
+/* Espacio angosto (celular, tablet vertical): cada fila se muestra como tarjeta con etiqueta y valor */
+:host {
+  container-type: inline-size;
+  container-name: items-grid;
+}
+
+@container items-grid (max-width: 640px) {
+  .table-scroll {
+    overflow-x: visible;
+    border: 0;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .items-grid-table {
+    display: block;
+    min-width: 0;
+
+    thead,
+    thead tr {
+      display: block;
+      border: 0;
+      background-color: transparent;
+    }
+
+    th {
+      display: none;
+
+      &.col-select {
+        display: block;
+        width: auto;
+        padding: 0 0 6px;
+        border: 0;
+        text-align: left;
+      }
+    }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    tbody tr {
+      display: grid;
+      /* 2 columnas en celular, 4 en tablet vertical */
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px 12px;
+      padding: 10px 12px;
+      border: 1px solid #dbe4ef;
+      border-radius: 8px;
+      background-color: #ffffff;
+
+      &:nth-child(even),
+      &:hover {
+        background-color: #ffffff;
+      }
+    }
+
+    td {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
+
+      &[data-label]::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+      }
+
+      &.col-select {
+        grid-column: 1 / -1;
+        align-items: flex-start;
+        padding: 0;
+
+        &:empty {
+          display: none;
+        }
+      }
+
+      &.col-product,
+      &.col-name,
+      &[colspan] {
+        grid-column: 1 / -1;
+      }
+    }
+
+    /* Las celdas numéricas tienen reglas propias más específicas que las alinean a la derecha. */
+    td,
+    .text-end {
+      align-items: flex-start;
+      text-align: left !important;
+    }
+
+    .product-cell-box,
+    .cell-editor {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+}

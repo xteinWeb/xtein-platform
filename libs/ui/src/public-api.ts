@@ -26,6 +26,9 @@ export * from './lib/record-tools/xtein-record-reports/models/xtein-record-repor
 export * from './lib/record-tools/xtein-record-reports/configuration/xtein-record-reports.config';
 export * from './lib/record-tools/xtein-record-reports/services/xtein-record-reports.service';
 export * from './lib/record-tools/xtein-record-reports/xtein-record-reports.component';
+export * from './lib/record-tools/xtein-record-export/models/xtein-record-export.model';
+export * from './lib/record-tools/xtein-record-export/services/xtein-excel-export.service';
+export * from './lib/record-tools/xtein-record-export/xtein-record-export.component';
 export * from './lib/record-tools/xtein-record-settings/models/xtein-record-settings.model';
 export * from './lib/record-tools/xtein-record-settings/services/xtein-record-settings.service';
 export * from './lib/record-tools/xtein-record-settings/xtein-record-settings.component';

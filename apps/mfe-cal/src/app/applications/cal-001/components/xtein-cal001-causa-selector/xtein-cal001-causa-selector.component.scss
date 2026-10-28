@@ -1,0 +1,64 @@
+:host { display: block; position: relative; min-width: 0; }
+
+.cs-boton {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 6px 10px;
+  border: 1px solid #c9d6e3; border-radius: 6px; background: #fff; color: #1f3b57;
+  font: inherit; text-align: left; cursor: pointer; box-sizing: border-box;
+  &:focus-visible { outline: 2px solid #2f6db3; outline-offset: 1px; }
+  &:disabled { background: #f2f5f9; color: #4a6a84; cursor: default; }
+  &:disabled .cs-flecha { display: none; }
+}
+.cs-valor { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cs-placeholder { flex: 1; color: #7b8fa3; }
+.cs-flecha { color: #4a6a84; }
+
+.cs-fondo { display: none; }
+.cs-panel {
+  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: max(100%, 620px); max-width: min(820px, 96vw);
+  display: flex; flex-direction: column; max-height: 360px; border: 1px solid #c9d6e3; border-radius: 8px;
+  background: #fff; box-shadow: 0 8px 24px rgba(10, 57, 96, .18);
+  /* Sin espacio debajo del disparador: se abre hacia arriba (el alto lo limita ubicarPanel). */
+  &.cs-arriba { top: auto; bottom: calc(100% + 4px); box-shadow: 0 -8px 24px rgba(10, 57, 96, .18); }
+}
+.cs-cabecera { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid #e3eaf2; }
+.cs-buscar {
+  flex: 1; min-width: 0; min-height: 36px; padding: 6px 10px; border: 1px solid #c9d6e3; border-radius: 6px; font: inherit;
+  &:focus { outline: 2px solid #2f6db3; outline-offset: 0; }
+}
+.cs-cerrar { width: 36px; border: 0; border-radius: 6px; background: #eef3f8; color: #1f3b57; cursor: pointer; }
+.cs-columnas {
+  display: grid; grid-template-columns: 72px minmax(140px, 1fr) minmax(200px, 2fr); gap: 8px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; color: #4a6a84; background: #f6f9fc;
+}
+/* En escritorio la rueda sigue desplazando la página al llegar al final de la lista (sin overscroll-behavior). */
+.cs-lista { min-height: 0; margin: 0; padding: 0; list-style: none; overflow-y: auto; }
+.cs-lista li {
+  display: grid; grid-template-columns: 72px minmax(140px, 1fr) minmax(200px, 2fr); gap: 8px; padding: 8px 12px; border-bottom: 1px solid #eef2f6; cursor: pointer;
+  &.cs-activa { background: #e8f1fb; }
+  &[aria-selected='true'] .cs-id { color: #0a3960; }
+}
+.cs-id { font-weight: 700; color: #244d73; overflow-wrap: anywhere; }
+.cs-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cs-nombre { color: #1f3b57; overflow-wrap: anywhere; }
+.cs-descripcion { font-size: 12.5px; line-height: 1.35; color: #4a6a84; white-space: normal; overflow-wrap: anywhere; }
+.cs-lista li.cs-vacio { display: block; color: #7b8fa3; cursor: default; }
+
+/* Buscador (producto, operario, cliente): código + nombre. La cédula (hasta 12 dígitos) no se parte en dos líneas. */
+.cs-buscador .cs-lista li { grid-template-columns: auto minmax(0, 1fr); }
+.cs-buscador .cs-id { min-width: 12ch; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Celular: hoja inferior a todo el ancho, con texto largo legible. */
+@media (max-width: 600px) {
+  .cs-fondo { display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(10, 30, 50, .4); }
+  .cs-panel {
+    position: fixed; z-index: 1001; top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: none;
+    max-height: 80dvh; border-radius: 14px 14px 0 0;
+  }
+  .cs-lista { overscroll-behavior: contain; }
+  .cs-buscar { font-size: 16px; }
+  .cs-columnas { grid-template-columns: 64px 1fr; span:last-child { display: none; } }
+  /* Apilado: Id + Nombre arriba, Descripción debajo en varias líneas. */
+  .cs-lista li { grid-template-columns: 64px 1fr; padding: 12px; .cs-descripcion { grid-column: 2; } }
+  .cs-descripcion { font-size: 14px; }
+  .cs-repetida { display: none; }
+}

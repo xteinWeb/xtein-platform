@@ -83,8 +83,10 @@
 .com201-items__pager-nav,
 .com201-items__pager-size {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .com201-items__pager-info {

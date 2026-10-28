@@ -1,0 +1,105 @@
+<div class="c3-card">
+  <div class="c3-grid">
+    <div class="c3-col">
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-c-tipo">Consulta</xtein-label>
+        <div class="c3-control">
+          <xtein-select id="c3-c-tipo" ariaLabel="Consulta" [items]="opciones" valueExpr="valor" displayExpr="texto"
+            [ngModel]="tipo()" (ngModelChange)="cambiarTipo($event)" />
+        </div>
+      </div>
+    </div>
+    <div class="c3-col">
+      @switch (tipo()) {
+        @case ('bodega') {
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-c-bodega">Bodega</xtein-label>
+            <div class="c3-control">
+              <xtein-lookup id="c3-c-bodega" ariaLabel="Bodega" placeholder="Escoge la bodega" searchPlaceholder="Buscar…"
+                [items]="ctx.bodegasVisibles()" valueExpr="ID_UN_BODEGA" displayExpr="LABEL" [columns]="bodegaColumns"
+                dropDownWidth="min(560px, 95vw)" [ngModel]="bodega()" (ngModelChange)="elegirBodega($event)" />
+            </div>
+          </div>
+        }
+        @case ('cliente') {
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-c-cliente">Cliente</xtein-label>
+            <div class="c3-control">
+              <xtein-lookup id="c3-c-cliente" ariaLabel="Cliente" placeholder="Escoge el cliente" searchPlaceholder="Buscar…"
+                [items]="ctx.clientes()" valueExpr="ID_CLIENTE" displayExpr="LABEL" [columns]="clienteColumns"
+                dropDownWidth="min(640px, 95vw)" [ngModel]="cliente()" (ngModelChange)="elegirCliente($event)" />
+            </div>
+          </div>
+        }
+        @default {
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-c-servicio">Servicio</xtein-label>
+            <div class="c3-control">
+              <xtein-lookup id="c3-c-servicio" ariaLabel="Servicio" placeholder="Escoge el servicio" searchPlaceholder="Buscar…"
+                [items]="servicios()" valueExpr="ID_SERVICIO" displayExpr="LABEL" [columns]="servicioColumns" dropDownWidth="min(760px, 95vw)"
+                [ngModel]="idServicio()" (ngModelChange)="elegirServicio($event)" />
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+  <p class="c3-hint">{{ nota() }}</p>
+
+  <div class="c3-table-scroll">
+    <table class="c3-table">
+      @switch (tipo()) {
+        @case ('bodega') {
+          <thead><tr><th>Juego</th><th>Producto</th><th>Parte</th><th class="text-end">Cantidad</th><th>Servicio</th><th>Cliente</th><th class="text-end">Días en inventario</th></tr></thead>
+          <tbody>
+            @for (f of inventario(); track $index) {
+              <tr>
+                <td>{{ f.NOMBRE_JUEGO || '—' }}</td>
+                <td>{{ f.NOMBRE_PRODUCTO }}</td>
+                <td>{{ f.NOMBRE_PARTE || '—' }}</td>
+                <td class="text-end">{{ f.CANTIDAD }}</td>
+                <td class="nowrap">{{ f.SERVICIO }} @if (f.TRASLADO_PENDIENTE) { <span class="pending">{{ f.TRASLADO_PENDIENTE }} sin autorizar</span> }</td>
+                <td>{{ f.NOMBRE_CLIENTE }}</td>
+                <td class="text-end">{{ f.DIAS_INVENTARIO }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="empty-message">Sin datos</td></tr>
+            }
+          </tbody>
+        }
+        @case ('cliente') {
+          <thead><tr><th>Número S</th><th>Producto</th><th>Tipo</th><th>Dónde está</th><th>Estado</th><th class="text-end">Días en inventario</th></tr></thead>
+          <tbody>
+            @for (s of porCliente(); track s.SERVICIO) {
+              <tr>
+                <td class="nowrap">{{ s.SERVICIO }}</td>
+                <td>{{ s.NOMBRE }}</td>
+                <td>{{ s.TIPO_SERVICIO }}</td>
+                <td>{{ s.DONDE }}</td>
+                <td><span class="c3-badge" [ngClass]="badge(s.ESTADO)">{{ s.ESTADO }}</span></td>
+                <td class="text-end">{{ s.DIAS_INVENTARIO ?? '—' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="empty-message">Sin datos</td></tr>
+            }
+          </tbody>
+        }
+        @default {
+          <thead><tr><th>Fecha</th><th>Movimiento</th><th>Detalle</th><th>Quién</th></tr></thead>
+          <tbody>
+            @for (h of historial(); track $index) {
+              <tr>
+                <td class="nowrap">{{ fecha(h.FECHA, true) }}</td>
+                <td class="nowrap">{{ h.MOVIMIENTO }}</td>
+                <td>{{ h.DETALLE }}</td>
+                <td>{{ h.USUARIO }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-message">Sin datos</td></tr>
+            }
+          </tbody>
+        }
+      }
+    </table>
+  </div>
+</div>

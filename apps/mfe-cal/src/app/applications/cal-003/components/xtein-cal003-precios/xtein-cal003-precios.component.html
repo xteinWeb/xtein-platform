@@ -1,0 +1,50 @@
+<div class="c3-card">
+  <div class="c3-section-divider">
+    <xtein-group-label class="c3-section-title" label="Productos ESPECIAL sin precio"></xtein-group-label>
+  </div>
+  <p class="c3-hint">Escribe el precio y guarda con la barra de acciones. El aviso se cierra solo al poner el precio. Solo la persona de costos puede ponerlo.</p>
+  <div class="c3-table-scroll">
+    <table class="c3-table">
+      <thead><tr><th>Servicio</th><th>Producto</th><th>Autorizado como ESPECIAL</th><th class="text-end">Días hábiles esperando</th><th class="text-end">Precio</th></tr></thead>
+      <tbody>
+        @for (p of datos().SIN_PRECIO; track p.ID_SERVICIO) {
+          <tr>
+            <td class="nowrap">{{ p.SERVICIO }}</td>
+            <td>{{ p.PRODUCTO }}</td>
+            <td class="nowrap">{{ fecha(p.FECHA_AUTORIZA) }}</td>
+            <td class="text-end"><span class="c3-badge" [ngClass]="claseDias(p.DIAS_HABILES)">{{ p.DIAS_HABILES }} {{ p.DIAS_HABILES === 1 ? 'día' : 'días' }}</span></td>
+            <td class="text-end">
+              <xtein-number class="cell-editor" [ariaLabel]="'Precio de ' + p.SERVICIO" [min]="0" [step]="1000" format="$ #,##0"
+                [readOnly]="!ctx.puedePrecio()" [ngModel]="escritos()[p.ID_SERVICIO] ?? null" (ngModelChange)="escribir(p.ID_SERVICIO, $event)" />
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty-message">Sin datos: ningún producto ESPECIAL espera precio.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="c3-msg">Avisos (propuesta por validar): al autorizarse como ESPECIAL, aviso inmediato; si al día 1 hábil no hay precio, recordatorio; al día 3 hábil, aviso también al jefe registrado en áreas funcionales.</div>
+
+  <div class="c3-section-divider">
+    <xtein-group-label class="c3-section-title" label="Con precio"></xtein-group-label>
+  </div>
+  <div class="c3-table-scroll">
+    <table class="c3-table">
+      <thead><tr><th>Servicio</th><th>Producto</th><th class="text-end">Precio</th><th>Quién</th><th>Cuándo</th></tr></thead>
+      <tbody>
+        @for (p of datos().CON_PRECIO; track p.ID_SERVICIO) {
+          <tr>
+            <td class="nowrap">{{ p.SERVICIO }}</td>
+            <td>{{ p.PRODUCTO }}</td>
+            <td class="text-end nowrap">{{ pesos(p.PRECIO) }}</td>
+            <td>{{ p.USUARIO }}</td>
+            <td class="nowrap">{{ fecha(p.FECHA) }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty-message">Sin datos</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -16,7 +16,7 @@ export const Fin224EmptyRecord: Fin224CondicionRecord = {
   ID_CONDICION: '',
   DESCRIPCION: '',
   TIPO_CONDICION: null,
-  TIPO: 'VENTAS',
+  TIPO: '',
   ID_LISTA: null,
   ID_PLAN: '',
   ID_DESCUENTO: null,

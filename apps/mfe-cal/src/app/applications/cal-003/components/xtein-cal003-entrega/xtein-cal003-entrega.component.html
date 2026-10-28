@@ -1,0 +1,202 @@
+<div class="c3-cols">
+  <div class="c3-card">
+    <div class="c3-grid">
+      <div class="c3-col">
+        <div class="c3-section-divider">
+          <xtein-group-label class="c3-section-title" label="Documento de entrega"></xtein-group-label>
+        </div>
+        <div class="c3-field">
+          <xtein-label class="c3-label">Consecutivo</xtein-label>
+          <div class="c3-control c3-control--shaded">
+            <xtein-input ariaLabel="Consecutivo" [placeholder]="creando() ? 'Se asigna al despachar' : (abierta()?.ENTREGA?.DOCUMENTO ?? '')" [readOnly]="true" />
+          </div>
+        </div>
+        <div class="c3-field">
+          <xtein-label class="c3-label">Fecha</xtein-label>
+          <div class="c3-control c3-control--shaded">
+            <xtein-input ariaLabel="Fecha" [placeholder]="creando() ? fecha(hoy()) : fecha(abierta()?.ENTREGA?.FECHA)" [readOnly]="true" />
+          </div>
+        </div>
+      </div>
+      <div class="c3-col">
+        <div class="c3-section-divider">
+          <xtein-group-label class="c3-section-title" label="Despacho"></xtein-group-label>
+        </div>
+        <div class="c3-field">
+          <xtein-label class="c3-label" for="c3-d-cliente" [required]="true">Cliente</xtein-label>
+          <div class="c3-control">
+            @if (creando()) {
+              <xtein-lookup id="c3-d-cliente" ariaLabel="Cliente" placeholder="Escoge el cliente" searchPlaceholder="Buscar…"
+                [items]="ctx.clientes()" valueExpr="ID_CLIENTE" displayExpr="LABEL" [columns]="clienteColumns"
+                dropDownWidth="min(640px, 95vw)" [ngModel]="cliente()" (ngModelChange)="elegirCliente($event)" />
+            } @else {
+              <xtein-input ariaLabel="Cliente" [placeholder]="abierta()?.ENTREGA?.NOMBRE_CLIENTE ?? ''" [readOnly]="true" />
+            }
+          </div>
+        </div>
+        <div class="c3-field">
+          <xtein-label class="c3-label" for="c3-d-bodega" [required]="true">Bodega de salida</xtein-label>
+          <div class="c3-control">
+            @if (creando()) {
+              <xtein-lookup id="c3-d-bodega" ariaLabel="Bodega de salida" placeholder="Desde dónde sale" searchPlaceholder="Buscar…"
+                [items]="ctx.bodegas()" valueExpr="ID_UN_BODEGA" displayExpr="LABEL" [columns]="bodegaColumns"
+                dropDownWidth="min(560px, 95vw)" [ngModel]="bodega()" (ngModelChange)="elegirBodega($event)" />
+            } @else {
+              <xtein-input ariaLabel="Bodega de salida" [placeholder]="abierta()?.ENTREGA?.BODEGA ?? ''" [readOnly]="true" />
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Servicios del despacho: separados de los datos del documento -->
+    <div class="c3-section-divider c3-d-servicios">
+      <xtein-group-label class="c3-section-title" label="Servicios"></xtein-group-label>
+    </div>
+
+    @if (creando()) {
+      <div class="c3-field c3-field--narrow c3-d-agregar">
+        <xtein-label class="c3-label" for="c3-d-agregar">Agregar servicio</xtein-label>
+        <div class="c3-control">
+          <xtein-lookup id="c3-d-agregar" ariaLabel="Agregar servicio"
+            [placeholder]="cliente() && bodega() ? 'Escoge un servicio del cliente' : 'Primero cliente y bodega'"
+            searchPlaceholder="Buscar…" [items]="candidatos()" valueExpr="ID_SERVICIO" displayExpr="LABEL"
+            [columns]="servicioColumns" dropDownWidth="min(760px, 95vw)" [readOnly]="!cliente() || !bodega()"
+            [ngModel]="agregar()" (ngModelChange)="agregarServicio($event)" />
+        </div>
+      </div>
+    }
+
+    <div class="c3-table-scroll c3-d-tabla">
+      <table class="c3-table">
+        <thead>
+          <tr>
+            <th>Número S</th><th>Nº servicio cliente</th><th>Código asociado</th><th>Producto o parte</th>
+            <th class="text-end">Cant.</th><th>Tipo</th><th>Estado de la línea</th>
+            @if (creando()) { <th class="col-select"></th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of vista(); track l.ID_SERVICIO) {
+            @for (u of piezas(l); track $index; let primera = $first) {
+              <tr class="row-selectable" [class.row-selected]="seleccionada() === l.ID_SERVICIO" [class.row-muted]="l.ESTADO === 'ANULADA'"
+                [class.row-voided]="l.ESTADO === 'ANULADA'" (click)="seleccionada.set(l.ID_SERVICIO)">
+                <td class="nowrap strike">{{ primera ? l.DOCUMENTO : '' }}</td>
+                <td>{{ primera ? (l.N_SERVICIO_CLIENTE || '—') : '' }}</td>
+                <td class="nowrap">{{ primera ? (l.CODIGO_ASOCIADO || '—') : '' }}</td>
+                <td class="strike">{{ u.NOMBRE }}</td>
+                <td class="text-end">{{ u.CANTIDAD }}</td>
+                <td>{{ primera ? l.TIPO_SERVICIO : '' }}</td>
+                <td>
+                  @if (primera) {
+                    @if (l.ESTADO === 'ANULADA') {
+                      <span class="c3-badge c3-badge--danger">Anulada</span> <small>«{{ l.OBSERVACION_ANULA }}»</small>
+                    } @else if (creando()) {
+                      <span class="c3-badge">Por despachar</span>
+                    } @else if (estado() === estados.Closed) {
+                      <span class="c3-badge c3-badge--ok">Entregado</span>
+                    } @else {
+                      <span class="c3-badge c3-badge--warn">Despachado, pendiente de soporte</span>
+                    }
+                  }
+                </td>
+                @if (creando()) {
+                  <td class="col-select">
+                    @if (primera) {
+                      <button type="button" class="grid-btn" [attr.aria-label]="'Quitar ' + l.DOCUMENTO" [title]="'Quitar ' + l.DOCUMENTO" (click)="quitarLinea(l.ID_SERVICIO)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          } @empty {
+            <tr><td [attr.colspan]="creando() ? 8 : 7" class="empty-message">
+              {{ creando() ? 'Sin servicios. Escoge cliente y bodega de salida, y agrégalos.' : 'Usa Nuevo para armar un despacho, o Buscar para abrir uno.' }}
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="c3-hint c3-d-nota">Solo entra un servicio que sale como llegó: las mismas partes y cantidades de la entrada, todas en la bodega de salida y sin traslados pendientes. Para devolver una línea despachada, selecciónala y usa Eliminar en la barra.</p>
+  </div>
+
+  <aside class="c3-card">
+    <div class="c3-sum"><span>Estado</span><span class="c3-badge" [ngClass]="badge(estado())">{{ estado() === 'DESPACHADO' ? 'Despachado, pendiente de soporte' : (estado() || '—') }}</span></div>
+    <div class="c3-sum"><span>Líneas SG</span><b>{{ lineasSg() }}</b></div>
+    <div class="c3-sum"><span>Líneas SR</span><b>{{ lineasSr() }}</b></div>
+    <div class="c3-band">Pre-factura (solo SR)</div>
+    <p class="c3-hint">Las líneas SR generan su pre-factura en el módulo de pre-facturas. Las SG no generan cobro.</p>
+    <div class="c3-band">Soporte firmado</div>
+    @if (abierta()?.ENTREGA; as e) {
+      @if (e.ESTADO === estados.Closed) {
+        <div class="c3-sum"><span>{{ e.SOPORTE }}</span><span class="c3-badge c3-badge--ok">Adjunto</span></div>
+        <p class="c3-hint">Los servicios salieron del inventario y quedaron cerrados.</p>
+        <div class="c3-actions"><xtein-button text="Ver soporte" variant="secondary" [width]="'auto'" (clicked)="verSoporte()" /></div>
+      } @else {
+        <p class="c3-hint">Pendiente. Mientras no se adjunte, los servicios no se pueden trasladar, ajustar ni incluir en otro documento.</p>
+        <div class="c3-actions">
+          <xtein-button text="Adjuntar soporte firmado" [width]="'auto'" [disabled]="ctx.busy() || !ctx.puedeCrear()" (clicked)="elegirArchivo()" />
+        </div>
+        <input #archivo type="file" accept="application/pdf,image/jpeg,image/png" hidden (change)="adjuntarSoporte($event)" />
+      }
+    } @else {
+      <p class="c3-hint">Se adjunta cuando el transportador lo trae. Hasta entonces los servicios siguen en el inventario.</p>
+    }
+  </aside>
+</div>
+
+<!-- Ver de la barra: modal estándar de la plataforma (Buscar está en la pantalla) -->
+<xtein-record-view
+  title="Documentos de entrega"
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="ID_ENTREGA"
+  (selected)="verRegistro($event)"
+/>
+
+<!-- Vista de impresión -->
+<xtein-popup title="Vista de impresión" [visible]="impresionVisible()" (visibleChange)="impresionVisible.set($event)" width="min(860px, 95vw)" height="auto">
+  <div class="c3-doc" id="c3-doc-entrega">
+    <h3>Documento de entrega {{ abierta()?.ENTREGA?.DOCUMENTO ?? '(borrador)' }}</h3>
+    <p class="c3-hint">
+      Fecha {{ creando() ? fecha(hoy()) : fecha(abierta()?.ENTREGA?.FECHA) }} · Cliente {{ nombreCliente() }} ·
+      Bodega de salida {{ bodegaSalida() }}
+    </p>
+    <!-- Mismas columnas que el reporte CAL-003-001 de spServicioTecnico (el diseño DevExpress queda pendiente) -->
+    <table class="c3-table">
+      <thead>
+        <tr>
+          <th>Producto</th><th class="text-end">Cant.</th><th>Tipo depósito</th><th>Soporte</th><th>Bodega</th>
+          <th>Tipo entrada</th><th class="text-end">Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of activas(); track l.ID_SERVICIO) {
+          @for (u of piezas(l); track $index; let primera = $first) {
+            <tr>
+              <td>{{ u.NOMBRE }}</td>
+              <td class="text-end">{{ u.CANTIDAD }}</td>
+              <td>{{ primera ? (l.ESTADO_SERVICIO || '—') : '' }}</td>
+              <td class="nowrap">{{ primera ? l.DOCUMENTO : '' }}</td>
+              <td>{{ primera ? bodegaSalida() : '' }}</td>
+              <td>{{ primera ? l.TIPO_SERVICIO : '' }}</td>
+              <td class="text-end">{{ primera ? (saldo(l) ?? '—') : '' }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+    <div class="firmas"><div>Firma de entrega</div><div>Firma de recibido (cliente)</div></div>
+  </div>
+  <div class="c3-actions c3-buscador__pie">
+    <xtein-button text="Cerrar" variant="secondary" [width]="'auto'" (clicked)="impresionVisible.set(false)" />
+    <xtein-button text="Imprimir" [width]="'auto'" (clicked)="imprimir()" />
+  </div>
+</xtein-popup>

@@ -1,0 +1,115 @@
+<div class="c3-cols">
+  <div class="c3-card">
+    @if (abierto(); as a) {
+      <!-- Ajuste abierto desde Buscar -->
+      <div class="c3-grid">
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Ajuste"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Servicio</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Servicio" [placeholder]="a.SERVICIO" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Producto</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Producto" [placeholder]="a.PRODUCTO" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Destino</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Destino" [placeholder]="a.DESTINO" [readOnly]="true" /></div>
+          </div>
+        </div>
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Registro"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Estado</xtein-label>
+            <div class="c3-control"><span class="c3-badge" [ngClass]="badge(a.ESTADO)">{{ estadoTexto(a.ESTADO) }}</span></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Propuso</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Propuso" [placeholder]="a.PROPUSO" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Autorizó o rechazó</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Autorizó o rechazó" [placeholder]="a.RESPUESTA || 'Pendiente'" [readOnly]="true" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Resultado</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Resultado" [placeholder]="a.RESULTADO || '—'" [readOnly]="true" /></div>
+          </div>
+        </div>
+      </div>
+
+      @if (a.ESTADO === estados.Proposed) {
+        <p class="c3-hint">Pendiente en <b>Autorizaciones</b> como <b>{{ autorizacion() }}</b>: allí se autoriza o rechaza. El movimiento de inventario se hace solo después de autorizar.</p>
+      }
+    } @else if (creando()) {
+      <!-- Ajuste nuevo -->
+      <div class="c3-grid">
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Proponer ajuste"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-a-servicio" [required]="true">Servicio</xtein-label>
+            <div class="c3-control">
+              <xtein-lookup id="c3-a-servicio" ariaLabel="Servicio" placeholder="Escoge el servicio" searchPlaceholder="Buscar…"
+                [items]="servicios()" valueExpr="ID_SERVICIO" displayExpr="LABEL" [columns]="servicioColumns" dropDownWidth="min(760px, 95vw)"
+                [ngModel]="idServicio()" (ngModelChange)="idServicio.set($event ?? null)" />
+            </div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label" for="c3-a-destino" [required]="true">Destino</xtein-label>
+            <div class="c3-control">
+              <xtein-select id="c3-a-destino" ariaLabel="Destino" placeholder="Escoge el destino" [items]="destinos"
+                valueExpr="valor" displayExpr="texto" [ngModel]="destino()" (ngModelChange)="destino.set($event ?? '')" />
+            </div>
+          </div>
+        </div>
+        <div class="c3-col">
+          <div class="c3-section-divider">
+            <xtein-group-label class="c3-section-title" label="Registro"></xtein-group-label>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Propone</xtein-label>
+            <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="Propone" [placeholder]="usuario" [readOnly]="true" /></div>
+          </div>
+          <div class="c3-field">
+            <xtein-label class="c3-label">Estado</xtein-label>
+            <div class="c3-control c3-control--shaded">
+              <xtein-input ariaLabel="Estado" placeholder="Queda pendiente en Autorizaciones" [readOnly]="true" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="c3-hint">Solo servicios en el inventario y sin traslados pendientes. Propón con Guardar en la barra de acciones.</p>
+    } @else {
+      <p class="c3-hint">Usa <b>Nuevo</b> en la barra para proponer un ajuste, o <b>Buscar</b> para ver uno. Se autorizan o rechazan en <b>Autorizaciones</b>.</p>
+    }
+  </div>
+
+  <aside class="c3-card">
+    <div class="c3-band">Qué pasa al autorizar</div>
+    @for (d of destinos; track d.valor) {
+      <div class="c3-sum"><span>{{ d.texto }}</span><span>{{ d.resultado }}</span></div>
+    }
+    <div class="c3-band">Si se rechaza</div>
+    <p class="c3-hint">Una BAJA rechazada pasa sola a ESPECIAL. Un NUEVO o ESPECIAL rechazado vuelve a quien gestiona las garantías para tipificarlo otra vez.</p>
+  </aside>
+</div>
+
+<!-- Ver de la barra: modal estándar de la plataforma (Buscar está en la pantalla) -->
+<xtein-record-view
+  title="Ajustes"
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="ID_AJUSTE"
+  (selected)="verRegistro($event)"
+/>

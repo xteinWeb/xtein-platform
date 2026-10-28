@@ -1,0 +1,88 @@
+<h3 class="dp-titulo">
+  No conformidades en {{ parte().ID_PARTE ? parte().ID_PARTE + ' · ' + parte().NOMBRE_PARTE : 'Producto completo' }}
+  @if (parte().PIEZA) { <small>({{ parte().PIEZA }})</small> }
+</h3>
+
+@for (causa of parte().CAUSAS; track $index; let i = $index) {
+  <article class="dp-causa">
+    <header class="dp-cabecera">
+      @if (editaCausa(causa)) {
+        <xtein-cal001-causa-selector class="dp-selector" [causas]="causas()" [valor]="causa.ID_CAUSA" [excluidas]="usadas()"
+          etiqueta="No conformidad" (elegida)="cambiarCausa(i, $event)" />
+        <button type="button" class="dp-quitar" [attr.aria-label]="'Quitar no conformidad ' + causa.ID_CAUSA" (click)="quitarCausa(i)">Quitar</button>
+      } @else {
+        <div class="dp-causa-texto"><span><b>{{ causa.ID_CAUSA }}</b> {{ causa.NOMBRE }}</span>
+          @if (causa.DESCRIPCION && causa.DESCRIPCION !== causa.NOMBRE) { <small>{{ causa.DESCRIPCION }}</small> }
+        </div>
+        @if (agregando()) { <span class="dp-guardada" title="Guardada: no se puede quitar">Guardada</span> }
+      }
+    </header>
+
+    <div class="dp-operarios" role="table" [attr.aria-label]="'Operarios de ' + causa.ID_CAUSA">
+      <div class="dp-op dp-op-titulos" role="row">
+        <span role="columnheader">Operario</span><span role="columnheader">Proceso</span>
+        <span role="columnheader" class="dp-num">Ocurrencias</span>@if (anexa()) {<span role="columnheader"></span>}
+      </div>
+      @for (operario of causa.OPERARIOS; track operario.ID_EMPLEADO; let j = $index) {
+        <div class="dp-op" role="row">
+          <span role="cell" class="dp-nombre"><b>{{ operario.NOMBRE }}</b> <small>{{ operario.ID_EMPLEADO }}</small></span>
+          <span role="cell">
+            @if (editaOperario(operario) && operario.SECCIONES.length > 1) {
+              <select class="dp-campo" [attr.aria-label]="'Proceso de ' + operario.NOMBRE" [value]="operario.ID_SECCION ?? ''"
+                (change)="cambiarSeccion(i, j, operario, $any($event.target).value)">
+                <option value="" [selected]="!operario.ID_SECCION">Elegir proceso…</option>
+                @for (seccion of operario.SECCIONES; track seccion.ID_SECCION) {
+                  <option [value]="seccion.ID_SECCION" [selected]="seccion.ID_SECCION === operario.ID_SECCION">{{ seccion.DESCRIPCION }}</option>
+                }
+              </select>
+            } @else {
+              <span class="dp-proceso">{{ operario.DESCRIPCION_SECCION || 'Sin proceso' }}</span>
+            }
+          </span>
+          <span role="cell" class="dp-num">
+            @if (editaOperario(operario)) {
+              <input class="dp-campo dp-ocurrencias" type="number" inputmode="numeric" min="1" max="999" step="1"
+                [class.dp-invalido]="ocurrenciasInvalidas(operario.OCURRENCIAS)" [value]="operario.OCURRENCIAS ?? ''"
+                [attr.aria-label]="'Ocurrencias de ' + operario.NOMBRE" (input)="cambiarOcurrencias(i, j, $any($event.target).value)" />
+            } @else if (agregando()) {
+              <span class="dp-suma">{{ operario.OCURRENCIAS }} +
+                <input class="dp-campo dp-ocurrencias" type="number" inputmode="numeric" min="1" max="999" step="1" placeholder="0"
+                  [class.dp-invalido]="adicionalesInvalidas(operario)" [value]="operario.ADICIONALES ?? ''"
+                  [attr.aria-label]="'Ocurrencias adicionales de ' + operario.NOMBRE" (input)="cambiarAdicionales(i, j, $any($event.target).value)" />
+              </span>
+            } @else {
+              {{ operario.OCURRENCIAS }}
+            }
+          </span>
+          @if (anexa()) {
+            <span role="cell">
+              @if (editaOperario(operario)) {
+                <button type="button" class="dp-quitar" [attr.aria-label]="'Quitar operario ' + operario.NOMBRE" (click)="quitarOperario(i, j)">✕</button>
+              }
+            </span>
+          }
+        </div>
+      } @empty {
+        <p class="dp-nota">
+          @if (esCliente()) { Sin operario causante (permitido en origen Cliente). } @else { En Producción hace falta al menos un operario. }
+        </p>
+      }
+    </div>
+
+    @if (anexa()) {
+      <div class="dp-agregar">
+        <xtein-cal001-buscador [buscar]="buscarOperarios()" placeholder="Agregar operario (nombre o cédula)" etiqueta="Agregar operario"
+          (elegido)="agregarOperario(i, $event)" />
+      </div>
+    }
+  </article>
+} @empty {
+  <p class="dp-nota">Esta parte no tiene no conformidades.</p>
+}
+
+@if (anexa()) {
+  <div class="dp-agregar dp-nueva">
+    <xtein-cal001-causa-selector [causas]="causas()" valor="" [excluidas]="usadas()" placeholder="+ Agregar no conformidad a esta parte"
+      etiqueta="Agregar no conformidad" (elegida)="agregarCausa($event)" />
+  </div>
+}

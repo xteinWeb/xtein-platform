@@ -1,0 +1,39 @@
+<button type="button" class="cs-boton" [id]="id" [disabled]="deshabilitado()" [attr.aria-label]="etiqueta()"
+  aria-haspopup="listbox" [attr.aria-expanded]="abierto()" (click)="abierto() ? cerrar() : abrir()">
+  @if (actual()) {
+    <span class="cs-valor">{{ actual() }}</span>
+  } @else {
+    <span class="cs-placeholder">{{ placeholder() }}</span>
+  }
+  <span class="cs-flecha" aria-hidden="true">▾</span>
+</button>
+
+@if (abierto()) {
+  <div class="cs-fondo" (click)="cerrar()" aria-hidden="true"></div>
+  <div class="cs-panel cs-buscador" role="dialog" [attr.aria-label]="etiqueta()" [class.cs-arriba]="ubicacion().arriba"
+    [style.max-height.px]="ubicacion().alto">
+    <div class="cs-cabecera">
+      <input #campo class="cs-buscar" type="search" autocomplete="off" [placeholder]="placeholder()"
+        [attr.aria-label]="etiqueta()" [attr.aria-controls]="id + '-lista'" [value]="texto()"
+        (input)="escribir($any($event.target).value)" (keydown)="teclado($event)" />
+      <button type="button" class="cs-cerrar" aria-label="Cerrar" (click)="cerrar()">✕</button>
+    </div>
+    <ul class="cs-lista" role="listbox" [id]="id + '-lista'" [attr.aria-label]="etiqueta()" [attr.aria-busy]="cargando()">
+      @if (cargando()) {
+        <li class="cs-vacio" role="presentation">Buscando…</li>
+      } @else if (error()) {
+        <li class="cs-vacio" role="alert">{{ error() }}</li>
+      } @else {
+        @for (opcion of opciones(); track opcion.codigo; let i = $index) {
+          <li role="option" [class.cs-activa]="i === activa()" [attr.aria-selected]="i === activa()"
+            (click)="elegir(opcion)" (pointerenter)="activa.set(i)">
+            <span class="cs-id">{{ opcion.codigo }}</span>
+            <span class="cs-texto"><span class="cs-nombre">{{ opcion.nombre }}</span></span>
+          </li>
+        } @empty {
+          <li class="cs-vacio" role="presentation">Sin coincidencias. Escriba parte del código o del nombre.</li>
+        }
+      }
+    </ul>
+  </div>
+}

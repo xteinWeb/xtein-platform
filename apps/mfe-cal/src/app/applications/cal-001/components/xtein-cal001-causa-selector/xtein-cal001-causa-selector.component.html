@@ -1,0 +1,37 @@
+<button type="button" class="cs-boton" [id]="id" [disabled]="deshabilitado()" [attr.aria-label]="etiqueta()"
+  aria-haspopup="listbox" [attr.aria-expanded]="abierto()" (click)="abierto() ? cerrar() : abrir()">
+  @if (actual(); as causa) {
+    <span class="cs-valor"><b>{{ causa.ID_CAUSA }}</b> {{ causa.NOMBRE }}</span>
+  } @else if (valor()) {
+    <span class="cs-valor"><b>{{ valor() }}</b></span>
+  } @else {
+    <span class="cs-placeholder">{{ placeholder() }}</span>
+  }
+  <span class="cs-flecha" aria-hidden="true">▾</span>
+</button>
+
+@if (abierto()) {
+  <div class="cs-fondo" (click)="cerrar()" aria-hidden="true"></div>
+  <div class="cs-panel" role="dialog" [attr.aria-label]="etiqueta()" [class.cs-arriba]="ubicacion().arriba"
+    [style.max-height.px]="ubicacion().alto">
+    <div class="cs-cabecera">
+      <input #buscador class="cs-buscar" type="search" autocomplete="off" placeholder="Buscar por id, nombre o descripción"
+        [attr.aria-controls]="id + '-lista'" aria-label="Buscar no conformidad" [value]="texto()"
+        (input)="buscar($any($event.target).value)" (keydown)="teclado($event)" />
+      <button type="button" class="cs-cerrar" aria-label="Cerrar" (click)="cerrar()">✕</button>
+    </div>
+    <div class="cs-columnas" aria-hidden="true"><span>Id</span><span>Nombre</span><span>Descripción</span></div>
+    <ul class="cs-lista" role="listbox" [id]="id + '-lista'" [attr.aria-label]="etiqueta()">
+      @for (causa of opciones(); track causa.ID_CAUSA; let i = $index) {
+        <li role="option" [id]="id + '-op-' + i" [class.cs-activa]="i === activa()" [attr.aria-selected]="causa.ID_CAUSA === valor()"
+          (click)="elegir(causa)" (pointerenter)="activa.set(i)">
+          <span class="cs-id">{{ causa.ID_CAUSA }}</span>
+          <span class="cs-nombre">{{ causa.NOMBRE }}</span>
+          <span class="cs-descripcion" [class.cs-repetida]="!descripcion(causa)">{{ causa.DESCRIPCION }}</span>
+        </li>
+      } @empty {
+        <li class="cs-vacio" role="presentation">Ninguna no conformidad coincide con «{{ texto() }}».</li>
+      }
+    </ul>
+  </div>
+}

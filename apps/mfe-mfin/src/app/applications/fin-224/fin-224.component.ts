@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnDestroy,
   OnInit,
   computed,
@@ -37,7 +38,6 @@ import {
 
 import {
   XteinApplicationSetting,
-  XteinGroupLabelComponent,
   XteinInputComponent,
   XteinLabelComponent,
   XteinLoadingComponent,
@@ -87,7 +87,6 @@ import { Fin224ItemsComponent } from './components/fin-224-items/fin-224-items.c
     XteinRecordViewComponent,
     XteinRecordReportsComponent,
     XteinRecordSettingsComponent,
-    XteinGroupLabelComponent,
     XteinInputComponent,
     XteinLabelComponent,
     XteinLoadingComponent,
@@ -108,12 +107,16 @@ export class Fin224Component implements OnInit, OnDestroy {
   readonly statusOptions = Fin224StatusOptions;
   readonly tipoOptions = Fin224TipoOptions;
   readonly viewColumns = Fin224RecordViewColumns;
+  readonly planColumns = ['ID_PLAN', 'DESCRIPCION'];
+  readonly planHeaders = ['Código', 'Descripción'];
+  readonly RecordToolbarMode = RecordToolbarMode;
 
   private readonly service = inject(Fin224Service);
   readonly business = inject(Fin224BusinessService);
   private readonly toolbar = inject(ToolbarRuntimeService);
   private readonly permissionsService = inject(RecordToolbarPermissionsService);
   private readonly workspace = inject(WorkspaceRuntimeService);
+  private readonly elementRef = inject(ElementRef);
   private readonly notification = inject(XteinNotificationService);
 
   private readonly subscriptions = new Subscription();
@@ -158,8 +161,8 @@ export class Fin224Component implements OnInit, OnDestroy {
   readonly form = new FormGroup({
     ID_CONDICION: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     DESCRIPCION: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    TIPO: new FormControl<string>('VENTAS', { nonNullable: true }),
-    ID_PLAN: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    TIPO: new FormControl<string>('', { nonNullable: true }),
+    ID_PLAN: new FormControl<string>('', { nonNullable: true }),
     ESTADO: new FormControl<string>('ACTIVO', { nonNullable: true })
   });
 
@@ -322,6 +325,7 @@ export class Fin224Component implements OnInit, OnDestroy {
     this.items.set([]);
     this.form.enable({ emitEvent: false });
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
   }
 
   editRecord(): void {
@@ -331,7 +335,89 @@ export class Fin224Component implements OnInit, OnDestroy {
     this.idCondicionPrev = record.ID_CONDICION;
     this.mode.set(RecordToolbarMode.Editing);
     this.form.enable({ emitEvent: false });
+    this.form.controls.ID_CONDICION.disable({ emitEvent: false });
     this.workspace.setDirty(this.applicationId, false);
+    this.focusFirstControl();
+  }
+
+  async checkCode(): Promise<void> {
+    if (this.readOnly() || this.mode() !== RecordToolbarMode.Creating) {
+      return;
+    }
+
+    const rawCode = this.form.controls.ID_CONDICION.value?.trim().toUpperCase();
+    if (!rawCode) return;
+
+    const existsLocally = this.records().some(r => r.ID_CONDICION?.trim().toUpperCase() === rawCode);
+    let existsInDb = false;
+    if (!existsLocally) {
+      try {
+        existsInDb = await this.business.exists(rawCode);
+      } catch {
+        existsInDb = false;
+      }
+    }
+
+    if (existsLocally || existsInDb) {
+      await Swal.fire({
+        title: 'Código ya existe',
+        text: `La condición con código "${rawCode}" ya está registrada en el sistema. No se puede usar este código.`,
+        iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
+        confirmButtonColor: '#0F4C81',
+        confirmButtonText: 'Entendido',
+        allowOutsideClick: false
+      });
+
+      this.form.controls.ID_CONDICION.setValue('');
+      this.focusFirstControl();
+    }
+  }
+
+  private focusFirstControl(): void {
+    const doFocus = (): boolean => {
+      const host = this.elementRef.nativeElement as HTMLElement;
+      const initialInput = host.querySelector<HTMLInputElement>(
+        '#fin-224-id-condicion input:not([readonly]):not([disabled]), #fin-224-descripcion input:not([readonly]):not([disabled])'
+      );
+      if (initialInput) {
+        initialInput.focus();
+        initialInput.select?.();
+        return true;
+      }
+      const formEl = host.querySelector<HTMLElement>('form, [formGroup], .fin-224__card') || host;
+      const candidates = formEl.querySelectorAll<HTMLElement>(
+        'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent === null) continue;
+        if ((el as HTMLInputElement).disabled) continue;
+        const dxContainer = el.closest('.dx-widget');
+        if (dxContainer) {
+          if (
+            dxContainer.classList.contains('dx-state-disabled') ||
+            dxContainer.classList.contains('dx-state-readonly') ||
+            dxContainer.getAttribute('aria-disabled') === 'true' ||
+            dxContainer.getAttribute('aria-readonly') === 'true'
+          ) {
+            continue;
+          }
+        } else if ((el as HTMLInputElement).readOnly) {
+          continue;
+        }
+        el.focus();
+        if (el instanceof HTMLInputElement && typeof el.select === 'function') {
+          el.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    setTimeout(() => {
+      if (!doFocus()) {
+        setTimeout(doFocus, 150);
+      }
+    }, 100);
   }
 
   async cancelEdit(): Promise<void> {
@@ -381,14 +467,25 @@ export class Fin224Component implements OnInit, OnDestroy {
     // Check duplicate code if creating or if code changed
     if (this.mode() === RecordToolbarMode.Creating || idCondicion !== this.idCondicionPrev) {
       const existsLocally = this.records().some(r => r.ID_CONDICION.toUpperCase() === idCondicion);
-      if (existsLocally) {
-        Swal.fire({
-          title: 'Condición ya existe',
-          text: `La condición con código "${idCondicion}" ya está registrada.`,
+      let existsInDb = false;
+      if (!existsLocally) {
+        try {
+          existsInDb = await this.business.exists(idCondicion);
+        } catch {
+          existsInDb = false;
+        }
+      }
+      if (existsLocally || existsInDb) {
+        await Swal.fire({
+          title: 'Código ya existe',
+          text: `La condición con código "${idCondicion}" ya está registrada en el sistema. No se puede usar este código.`,
           iconHtml: "<i class='icon-cancelar-ol error-color'></i>",
           confirmButtonColor: '#0F4C81',
-          confirmButtonText: 'Entendido'
+          confirmButtonText: 'Entendido',
+          allowOutsideClick: false
         });
+        this.form.controls.ID_CONDICION.setValue('');
+        this.focusFirstControl();
         return;
       }
     }
@@ -552,7 +649,7 @@ export class Fin224Component implements OnInit, OnDestroy {
     this.form.reset({
       ID_CONDICION: record.ID_CONDICION ?? '',
       DESCRIPCION: record.DESCRIPCION ?? '',
-      TIPO: record.TIPO ?? 'VENTAS',
+      TIPO: record.TIPO ?? '',
       ID_PLAN: record.ID_PLAN ?? '',
       ESTADO: record.ESTADO ?? 'ACTIVO'
     }, { emitEvent: false });

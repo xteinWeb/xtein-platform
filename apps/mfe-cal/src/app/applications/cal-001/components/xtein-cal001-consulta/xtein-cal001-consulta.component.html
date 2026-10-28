@@ -1,0 +1,64 @@
+<form class="cq-filtros" [class.cq-gestor]="esGestor()" (submit)="enviar($event)" aria-label="Filtros de la consulta">
+  <label>Desde <input type="date" [value]="filtro().FECHA_DESDE" (change)="cambiar('FECHA_DESDE', $any($event.target).value)" /></label>
+  <label>Hasta <input type="date" [value]="filtro().FECHA_HASTA" (change)="cambiar('FECHA_HASTA', $any($event.target).value)" /></label>
+  <label>Origen
+    <select (change)="cambiar('ORIGEN', $any($event.target).value)">
+      <option value="" [selected]="!filtro().ORIGEN">Todos</option>
+      <option [value]="origenes.Produccion" [selected]="filtro().ORIGEN === origenes.Produccion">Producción</option>
+      <option [value]="origenes.Cliente" [selected]="filtro().ORIGEN === origenes.Cliente">Cliente</option>
+    </select>
+  </label>
+  <label>Documento <input type="search" placeholder="NC-0001" [value]="filtro().DOCUMENTO" (input)="cambiar('DOCUMENTO', $any($event.target).value)" /></label>
+  @if (esGestor()) {
+    <label>Cédula del operario
+      <input type="search" inputmode="numeric" maxlength="20" placeholder="Cédula exacta" [value]="filtro().ID_EMPLEADO"
+        (input)="cambiar('ID_EMPLEADO', $any($event.target).value)" />
+    </label>
+  }
+  <div class="cq-botones">
+    <button type="submit" class="cq-boton cq-principal" [disabled]="cargando()">{{ cargando() ? 'Buscando…' : 'Buscar' }}</button>
+    <button type="button" class="cq-boton" [disabled]="cargando() || !!exportando() || !resultado()?.TOTAL" (click)="exportar.emit()">
+      {{ exportando() || 'Exportar a Excel' }}
+    </button>
+  </div>
+</form>
+
+<p class="cq-nota">
+  Registros de todos los usuarios, filtrados por fecha del evento.
+  Abrir uno ajeno es solo consulta; modificar es solo del gestor de calidad. La exportación trae una fila por operario y causa.
+</p>
+
+<div class="cq-tabla" role="table" aria-label="Registros de no conformidades">
+  <div class="cq-fila cq-titulos" role="row">
+    <span role="columnheader">Documento</span><span role="columnheader">Origen</span><span role="columnheader">Producto</span>
+    <span role="columnheader">No conformidad</span>
+    <span role="columnheader">Fecha del evento</span><span role="columnheader">Registrado por</span>
+    <span role="columnheader">Última modificación</span><span role="columnheader" class="cq-num">Oper.</span>
+    <span role="columnheader" class="cq-num">Ocurr.</span><span role="columnheader" class="cq-num">Fotos</span>
+  </div>
+  @for (fila of resultado()?.FILAS ?? []; track fila.ID_REGISTRO_NC) {
+    <button type="button" class="cq-fila" role="row" [class.cq-abierto]="fila.ID_REGISTRO_NC === abiertoId()" (click)="abrir.emit(fila)"
+      [attr.aria-label]="'Abrir ' + fila.DOCUMENTO">
+      <span role="cell" class="cq-doc">{{ fila.DOCUMENTO }}</span>
+      <span role="cell"><span class="cq-origen" [class.cq-cliente]="fila.ORIGEN === origenes.Cliente">{{ origen(fila.ORIGEN) }}</span></span>
+      <span role="cell" class="cq-producto">{{ fila.PRODUCTO }} · {{ fila.NOMBRE_PRODUCTO }}</span>
+      <span role="cell" class="cq-causas" data-titulo="No conformidad" [attr.title]="fila.CAUSAS || null">{{ fila.CAUSAS || '—' }}</span>
+      <span role="cell" data-titulo="Evento">{{ fecha(fila.FECHA_EVENTO) }}</span>
+      <span role="cell" data-titulo="Por" [attr.title]="fila.USUARIO_CREA">{{ registradoPor(fila) }}@if (fila.USUARIO_CREA.toUpperCase() === usuario().toUpperCase()) {<small> (tú)</small>}</span>
+      <span role="cell" data-titulo="Modificó">{{ fila.USUARIO_MODIFICA ? fila.USUARIO_MODIFICA + ' · ' + fecha(fila.FECHA_MODIFICA) : '—' }}</span>
+      <span role="cell" class="cq-num" data-titulo="Oper.">{{ fila.N_OPERARIOS }}</span>
+      <span role="cell" class="cq-num" data-titulo="Ocurr.">{{ fila.TOTAL_OCURRENCIAS }}</span>
+      <span role="cell" class="cq-num" data-titulo="Fotos">{{ fila.N_FOTOS }}</span>
+    </button>
+  } @empty {
+    <p class="cq-vacio">{{ cargando() ? 'Buscando…' : resultado() ? 'No hay registros con esos filtros.' : 'Use Buscar para ver los registros.' }}</p>
+  }
+</div>
+
+@if (resultado(); as r) {
+  <nav class="cq-paginas" aria-label="Paginación">
+    <button type="button" class="cq-boton" [disabled]="cargando() || r.PAGINA <= 1" (click)="pagina.emit(r.PAGINA - 1)">Anterior</button>
+    <span>Página {{ r.PAGINA }} de {{ paginas() }} · {{ r.TOTAL }} registros</span>
+    <button type="button" class="cq-boton" [disabled]="cargando() || r.PAGINA >= paginas()" (click)="pagina.emit(r.PAGINA + 1)">Siguiente</button>
+  </nav>
+}

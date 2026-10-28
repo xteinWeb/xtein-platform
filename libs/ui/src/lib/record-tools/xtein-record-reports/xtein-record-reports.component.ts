@@ -1,6 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnChanges, OnDestroy, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, inject, Input, OnChanges, OnDestroy, Output, signal, SimpleChanges } from '@angular/core';
 import { DxPopupModule, DxTemplateModule } from 'devextreme-angular';
 import type { PositionConfig } from 'devextreme/common/core/animation';
 import { Subscription } from 'rxjs';
@@ -28,18 +27,10 @@ export class XteinRecordReportsComponent implements OnChanges, OnDestroy {
   @Output() readonly visibleChange = new EventEmitter<boolean>();
   readonly service = inject(XteinRecordReportsService);
   private readonly document = inject(DOCUMENT);
-  private readonly sanitizer = inject(DomSanitizer);
-  @ViewChild('previewFrame') private previewFrame?: ElementRef<HTMLIFrameElement>;
   readonly reports = signal<XteinReportDefinition[]>([]);
   readonly error = signal('');
   readonly status = signal('');
   readonly loading = signal(false);
-  /**
-   * La vista previa muestra el PDF que genera el servidor de reportes (api/ApiReport/ExportPDF):
-   * el visor web de DevExpress de la platform (25.2) no es compatible con el servidor (22.2).
-   */
-  readonly previewUrl = signal<SafeResourceUrl | null>(null);
-  readonly previewReport = signal<XteinReportDefinition | null>(null);
   readonly isMobile = signal(false);
   readonly panel = signal<XteinReportPanel>('list');
   readonly scopes = signal<Record<string, XteinReportScope>>({});
@@ -55,7 +46,6 @@ export class XteinRecordReportsComponent implements OnChanges, OnDestroy {
     this.request?.unsubscribe();
     this.loading.set(false);
     this.panel.set('list');
-    this.clearPreview();
     this.emailParameters = undefined;
     this.error.set('');
     this.status.set('');
@@ -85,29 +75,37 @@ export class XteinRecordReportsComponent implements OnChanges, OnDestroy {
     return this.service.parameters(report, this.applicationId, this.table, filter);
   }
 
-  /** pdf = true descarga el archivo; pdf = false lo muestra en la ventana para revisarlo e imprimirlo. */
+  /**
+   * Genera el PDF en el servidor de reportes (api/ApiReport/ExportPDF): el visor web de DevExpress de la
+   * platform (25.2) no es compatible con el servidor (22.2).
+   * pdf = true lo descarga; pdf = false lo abre en una pestaña nueva con el visor del navegador (ver e imprimir).
+   */
   open(report: XteinReportDefinition, pdf: boolean): void {
     if (this.loading()) return;
     this.error.set('');
     this.status.set('');
     try {
       const parameters = this.parameters(report);
+      // La pestaña se abre en el mismo clic (si se abre al llegar el PDF, el navegador la bloquea como emergente)
+      const tab = pdf ? null : this.openLoadingTab(report);
       this.loading.set(true);
       this.request = this.service.exportPdf(parameters).subscribe({
         next: blob => {
-          if (this.pdfUrl) URL.revokeObjectURL(this.pdfUrl);
+          this.releasePdf();
           this.pdfUrl = URL.createObjectURL(blob);
           this.loading.set(false);
           if (pdf) {
             this.download(report);
             this.status.set('PDF generado.');
-            return;
+          } else if (tab && !tab.closed) {
+            tab.location.href = this.pdfUrl;
+          } else {
+            this.status.set('El navegador bloqueó la pestaña nueva: se descargó el PDF.');
+            this.download(report);
           }
-          this.previewReport.set(report);
-          this.previewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfUrl));
-          this.panel.set('preview');
         },
         error: () => {
+          tab?.close();
           this.error.set('No fue posible generar el informe: el servidor de reportes no respondió o falló al consultar los datos.');
           this.loading.set(false);
         }
@@ -117,28 +115,28 @@ export class XteinRecordReportsComponent implements OnChanges, OnDestroy {
     }
   }
 
-  print(): void {
-    const frame = this.previewFrame?.nativeElement.contentWindow;
-    if (!frame) return;
-    try {
-      frame.focus();
-      frame.print();
-    } catch {
-      // Algunos navegadores no permiten imprimir el visor de PDF incrustado: se abre en otra pestaña
-      this.openInTab();
-    }
+  private openLoadingTab(report: XteinReportDefinition): Window | null {
+    const tab = this.document.defaultView?.open('', '_blank') ?? null;
+    if (!tab) return null;
+    const name = report.NOMBRE.replace(/[<>&]/g, '');
+    tab.document.title = name;
+    tab.document.body.innerHTML = `<p style="font-family:sans-serif;margin:2rem;color:#1b506f">Generando informe ${name}… puede tardar unos segundos.</p>`;
+    return tab;
   }
 
-  openInTab(): void {
-    if (this.pdfUrl) this.document.defaultView?.open(this.pdfUrl, '_blank');
-  }
-
-  download(report = this.previewReport()): void {
-    if (!this.pdfUrl || !report) return;
+  private download(report: XteinReportDefinition): void {
+    if (!this.pdfUrl) return;
     const link = this.document.createElement('a');
     link.href = this.pdfUrl;
     link.download = report.ARCHIVO + '.pdf';
     link.click();
+  }
+
+  /** La pestaña nueva puede seguir cargando el PDF: el enlace se libera con un margen. */
+  private releasePdf(): void {
+    const url = this.pdfUrl;
+    this.pdfUrl = undefined;
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
   composeEmail(report: XteinReportDefinition): void {
@@ -175,7 +173,6 @@ export class XteinRecordReportsComponent implements OnChanges, OnDestroy {
   back(): void {
     if (this.loading()) return;
     this.panel.set('list');
-    this.clearPreview();
     this.emailParameters = undefined;
     this.error.set('');
     this.updateViewport();
@@ -190,14 +187,9 @@ export class XteinRecordReportsComponent implements OnChanges, OnDestroy {
     Object.assign(event, { cancel: this.loading() });
   }
 
-  private clearPreview(): void {
-    this.previewUrl.set(null);
-    this.previewReport.set(null);
-  }
-
   ngOnDestroy(): void {
     this.request?.unsubscribe();
-    if (this.pdfUrl) URL.revokeObjectURL(this.pdfUrl);
+    this.releasePdf();
   }
 
   @HostListener('window:resize')

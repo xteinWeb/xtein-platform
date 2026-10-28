@@ -7,7 +7,8 @@
     "@angular/forms": "^21.2.0",
     "devextreme": "^25.2.8",
     "devextreme-angular": "^25.2.8",
-    "devexpress-reporting-angular": "~25.2.9"
+    "devexpress-reporting-angular": "~25.2.9",
+    "exceljs": "^4.4.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

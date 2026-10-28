@@ -1,0 +1,164 @@
+@use '../../cal-003-comun';
+
+/* Barra y fila de "agregar producto": las de la grilla de materiales de PRO-039 */
+.grid-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+
+  .grid-btn {
+    width: 30px;
+    height: 30px;
+    transition: all 0.18s ease-in-out;
+
+    .grid-btn-icon {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &--primary {
+      color: #2563eb;
+      background: #eff6ff;
+      border-color: #bfdbfe;
+
+      &:hover:not(:disabled) {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #1d4ed8;
+      }
+    }
+
+    &--cancel {
+      color: #64748b;
+      background: #f8fafc;
+      border-color: #cbd5e1;
+
+      &:hover:not(:disabled) {
+        background: #64748b;
+        color: #ffffff;
+        border-color: #475569;
+      }
+    }
+
+    &--tree {
+      color: #1b506f;
+      background: #f8fafc;
+      border-color: #cbd5e1;
+
+      &:hover:not(:disabled) {
+        background: #1b506f;
+        color: #ffffff;
+        border-color: #1b506f;
+      }
+    }
+  }
+
+  .grid-toolbar-spacer {
+    flex: 1;
+  }
+}
+
+/* Árbol juego → productos → partes: cada padre despliega o recoge sus hijos */
+.c3-table tbody tr.row-parent {
+  font-weight: 600;
+}
+
+.tree-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tree-toggle,
+.tree-toggle-spacer {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.tree-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #1b506f;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.15s ease-in-out;
+  }
+
+  &--closed svg {
+    transform: rotate(-90deg);
+  }
+
+  &:hover {
+    background: rgba(18, 94, 220, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 1px;
+  }
+}
+
+.tree-count {
+  font-weight: 400;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.c3-table tbody tr.row-editing {
+  background-color: #eff6ff !important;
+  outline: 1px solid #93c5fd;
+}
+
+.add-product {
+  width: 100%;
+  min-width: 220px;
+}
+
+.new-row-hint {
+  color: #64748b;
+  font-style: italic;
+}
+
+.product-loading-indicator {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.product-dropdown-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  xtein-data-grid {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

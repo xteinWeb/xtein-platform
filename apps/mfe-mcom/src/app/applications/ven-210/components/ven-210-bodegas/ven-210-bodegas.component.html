@@ -24,7 +24,7 @@
         <tbody>
           @for (row of rows(); track $index) {
             <tr>
-              <td>
+              <td data-label="Bodega">
                 @if (readOnly) {
                   {{ row.ID_UN_BODEGA }} {{ row.DESCRIPCION ? '· ' + row.DESCRIPCION : '' }}
                 } @else {
@@ -32,17 +32,17 @@
                     [ngModel]="row.ID_UN_BODEGA" (ngModelChange)="selectWarehouse(row, $event)" [disabled]="loading()" />
                 }
               </td>
-              <td class="text-end">{{ quantity(row.EXISTENCIA) }} {{ stockUnit(row) }}</td>
-              <td class="text-end">
+              <td data-label="Existencia (unidad base)" class="text-end">{{ quantity(row.EXISTENCIA) }} {{ stockUnit(row) }}</td>
+              <td [attr.data-label]="'Cantidad (' + (unitLabel || 'presentación') + ')'" class="text-end">
                 @if (readOnly) {
                   {{ quantity(row.CANTIDAD) }}
                 } @else {
                   <xtein-number ariaLabel="Cantidad de la bodega" [(ngModel)]="row.CANTIDAD" [min]="0" [disabled]="loading()" />
                 }
               </td>
-              <td class="text-end">{{ quantity(base(row)) }}</td>
+              <td data-label="Equivalente base" class="text-end">{{ quantity(base(row)) }}</td>
               @if (!readOnly) {
-                <td><xtein-button text="Quitar" variant="secondary" [disabled]="loading()" (clicked)="removeRow($index)" /></td>
+                <td class="bodegas__action"><xtein-button text="Quitar" variant="secondary" [disabled]="loading()" (clicked)="removeRow($index)" /></td>
               }
             </tr>
           } @empty {

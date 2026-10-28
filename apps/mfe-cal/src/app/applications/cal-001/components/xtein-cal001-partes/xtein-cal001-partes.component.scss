@@ -1,0 +1,53 @@
+:host { display: block; min-width: 0; }
+
+.pt-grilla { border: 1px solid #dfe6ef; border-radius: 8px; overflow: hidden; background: #fff; }
+.pt-fila {
+  display: grid; grid-template-columns: 110px minmax(120px, 1fr) minmax(160px, 1.2fr) 72px 80px; gap: 8px;
+  align-items: center; padding: 6px 10px; border-top: 1px solid #eef2f6; cursor: pointer;
+  &:hover { background: #f6f9fc; }
+  &.pt-sel { background: #e8f1fb; box-shadow: inset 3px 0 0 #2f6db3; }
+  &.pt-con .pt-parte button { font-weight: 700; }
+}
+.pt-titulos {
+  border-top: 0; background: #f1f5f9; font-size: 12.5px; font-weight: 600; color: #334155; cursor: default;
+  &:hover { background: #f1f5f9; }
+}
+.pt-num { text-align: right; font-variant-numeric: tabular-nums; }
+.pt-nombre { min-width: 0; overflow-wrap: anywhere; }
+.pt-abrir {
+  padding: 4px 8px; border: 1px solid #c9d6e3; border-radius: 6px; background: #fff; color: #0a3960; font: inherit; cursor: pointer;
+  &[aria-pressed='true'] { background: #0a3960; color: #fff; border-color: #0a3960; }
+}
+.pt-pieza { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.pt-pieza input {
+  flex: 1; min-width: 0; min-height: 34px; padding: 4px 8px; border: 1px solid #c9d6e3; border-radius: 6px; font: inherit;
+  &:focus { outline: 2px solid #2f6db3; outline-offset: 0; }
+  &:required:placeholder-shown { border-color: #d97706; }
+}
+.pt-contador { color: #7b8fa3; font-size: 11px; white-space: nowrap; }
+.pt-vacio { margin: 0; padding: 14px; color: #7b8fa3; }
+
+/* Celular y tableta angosta: una tarjeta por parte. */
+@media (max-width: 720px) {
+  .pt-titulos { display: none; }
+  .pt-fila {
+    grid-template-columns: auto 1fr auto auto; grid-template-areas: 'parte nombre nc op' 'pieza pieza pieza pieza';
+    row-gap: 6px; padding: 10px;
+  }
+  .pt-parte { grid-area: parte; }
+  .pt-nombre { grid-area: nombre; }
+  .pt-pieza { grid-area: pieza; }
+  .pt-num::before { content: attr(data-titulo) ' '; color: #7b8fa3; font-size: 11px; }
+  .pt-pieza input { min-height: 40px; font-size: 16px; }
+}
+
+/* Celular: fila 1 código PA + nombre a todo el ancho, fila 2 Pieza, fila 3 No conf. y Operarios. */
+@media (max-width: 600px) {
+  .pt-fila {
+    grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'parte nombre' 'pieza pieza' 'nc op';
+    column-gap: 10px;
+  }
+  .pt-num { text-align: left; }
+  .pt-num:nth-last-child(2) { grid-area: nc; }
+  .pt-num:last-child { grid-area: op; text-align: right; }
+}

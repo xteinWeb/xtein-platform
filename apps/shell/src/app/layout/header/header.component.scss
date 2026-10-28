@@ -752,3 +752,15 @@
       16px;
   }
 }
+
+/* ============================================================
+   COMPACT LAYOUT, SIDEBAR COLLAPSED
+   The sidebar's hamburger sits over the header's top-left
+   corner, so the company brand leaves room for it.
+   ============================================================ */
+
+:host-context(.xt-shell--compact.xt-shell--sidebar-collapsed)
+.xt-header__brand {
+  padding-left:
+    40px;
+}

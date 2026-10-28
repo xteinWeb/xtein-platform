@@ -1,0 +1,319 @@
+<div class="c3-card" [formGroup]="form">
+  <!-- Cabecera de la entrada -->
+  <div class="c3-grid">
+    <div class="c3-col">
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-numero">Número S</xtein-label>
+        <div class="c3-control c3-control--shaded">
+          @if (creando()) {
+            <xtein-input id="c3-e-numero" name="NUMERO" placeholder="Se asigna al guardar" [readOnly]="true" />
+          } @else {
+            <xtein-input id="c3-e-numero" name="NUMERO" formControlName="NUMERO" [readOnly]="true" />
+          }
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-fecha" [required]="true">Fecha</xtein-label>
+        <div class="c3-control">
+          <xtein-date id="c3-e-fecha" name="FECHA" placeholder="YYYY-MM-DD" formControlName="FECHA" [max]="form.controls.FECHA_REGISTRO.value" [required]="true" [readOnly]="!creando()" />
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-freg">Fecha de registro</xtein-label>
+        <div class="c3-control c3-control--shaded">
+          <xtein-date id="c3-e-freg" name="FECHA_REGISTRO" formControlName="FECHA_REGISTRO" [readOnly]="true" />
+        </div>
+      </div>
+    </div>
+
+    <div class="c3-col">
+      <div class="c3-field">
+        <xtein-label class="c3-label">Estado</xtein-label>
+        <div class="c3-control">
+          @if (creando()) {
+            <span class="c3-badge">Borrador</span>
+          } @else if (abierto(); as a) {
+            <span class="c3-badge" [ngClass]="badge(a.SERVICIO.ESTADO)">{{ a.SERVICIO.ESTADO }}</span>
+          }
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label">Movimiento</xtein-label>
+        <div class="c3-control c3-control--shaded">
+          <xtein-input name="MOVIMIENTO" ariaLabel="Movimiento" placeholder="ENTRADA" [readOnly]="true" />
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-usuario">Usuario</xtein-label>
+        <div class="c3-control c3-control--shaded">
+          <xtein-input id="c3-e-usuario" name="USUARIO" formControlName="USUARIO" [readOnly]="true" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datos del servicio -->
+  <div class="c3-section-divider">
+    <xtein-group-label class="c3-section-title" label="Datos del servicio"></xtein-group-label>
+  </div>
+  <div class="c3-grid">
+    <div class="c3-col">
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-cliente" [required]="true">Cliente</xtein-label>
+        <div class="c3-control">
+          <xtein-lookup id="c3-e-cliente" ariaLabel="Cliente" placeholder="Escoge el cliente" searchPlaceholder="Buscar…"
+            [items]="ctx.clientes()" valueExpr="ID_CLIENTE" displayExpr="LABEL" [columns]="clienteColumns"
+            dropDownWidth="min(640px, 95vw)" formControlName="ID_CLIENTE" [required]="true" [readOnly]="!creando()" />
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-tipo" [required]="true">Tipo de servicio</xtein-label>
+        <div class="c3-control">
+          <xtein-select id="c3-e-tipo" ariaLabel="Tipo de servicio" placeholder="Escoge el tipo de servicio" [items]="ctx.tiposServicio()"
+            valueExpr="TIPO_SERVICIO" displayExpr="LABEL" formControlName="TIPO_SERVICIO" [required]="true" [readOnly]="!creando()" />
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-bodega" [required]="true">Bodega</xtein-label>
+        <div class="c3-control">
+          <xtein-lookup id="c3-e-bodega" ariaLabel="Bodega" placeholder="Bodega donde llega" searchPlaceholder="Buscar…"
+            [items]="ctx.bodegas()" valueExpr="ID_UN_BODEGA" displayExpr="LABEL" [columns]="bodegaColumns"
+            dropDownWidth="min(560px, 95vw)" formControlName="ID_UN_BODEGA" [required]="true" [readOnly]="!creando()" />
+        </div>
+      </div>
+    </div>
+
+    <div class="c3-col">
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-sc">Nº servicio del cliente</xtein-label>
+        <div class="c3-control">
+          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Opcional: vacío si no viene" [maxLength]="limits.ClientServiceNumber"
+            formControlName="N_SERVICIO_CLIENTE" [readOnly]="!creando()" />
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-od">Nº orden de devolución</xtein-label>
+        <div class="c3-control">
+          <xtein-input id="c3-e-od" name="N_ORDEN_DEVOLUCION" placeholder="Opcional" [maxLength]="limits.ReturnOrderNumber"
+            formControlName="N_ORDEN_DEVOLUCION" [readOnly]="!creando()" />
+        </div>
+      </div>
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-area">Área que lo pide</xtein-label>
+        <div class="c3-control">
+          <xtein-select id="c3-e-area" ariaLabel="Área que lo pide" placeholder="Sin área" [items]="ctx.areas()"
+            valueExpr="ID_AREA" displayExpr="DESCRIPCION" [showClearButton]="true" formControlName="ID_AREA" [readOnly]="!creando()" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Productos -->
+  <div class="c3-section-divider">
+    <xtein-group-label class="c3-section-title" label="Producto"></xtein-group-label>
+  </div>
+
+  @if (creando()) {
+    <div class="grid-toolbar">
+      <!-- Nuevo producto (+): abre una fila en la grilla para elegirlo de la lista, como en PRO-039 -->
+      <button type="button" class="grid-btn grid-btn--primary" aria-label="Agregar producto" [title]="grupos().length > 0 ? 'La entrada lleva un solo producto: quítalo para cambiarlo' : 'Agregar producto'"
+        [disabled]="agregando() || buscandoProducto() || grupos().length > 0" (click)="beginAdd()">
+        <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+      @if (agregando()) {
+        <button type="button" class="grid-btn grid-btn--cancel" aria-label="Cancelar" title="Cancelar" (click)="cancelAdd()">
+          <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7v6h6"></path>
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+          </svg>
+        </button>
+      }
+      @if (buscandoProducto()) { <span class="product-loading-indicator" role="status">Cargando producto…</span> }
+      @if (grupos().length) {
+        <span class="grid-toolbar-spacer"></span>
+        <button type="button" class="grid-btn grid-btn--tree" aria-label="Desplegar todo" title="Desplegar todo" (click)="desplegarTodo()">
+          <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="7 8 12 13 17 8"></polyline>
+            <polyline points="7 14 12 19 17 14"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="grid-btn grid-btn--tree" aria-label="Recoger todo" title="Recoger todo" (click)="recogerTodo()">
+          <svg class="grid-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="7 11 12 6 17 11"></polyline>
+            <polyline points="7 17 12 12 17 17"></polyline>
+          </svg>
+        </button>
+      }
+    </div>
+
+    <div class="c3-table-scroll">
+      <table class="c3-table">
+        <thead>
+          <tr>
+            <th class="col-select">Llega</th>
+            <th>Nivel</th>
+            <th>Nombre</th>
+            <th>Código</th>
+            <th>Código asociado</th>
+            <th class="text-end">Cantidad</th>
+            <th class="col-select"><span class="sr-only">Quitar</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Fila nueva: el producto se elige en la misma grilla -->
+          @if (agregando()) {
+            <tr class="row-editing">
+              <td class="col-select"></td>
+              <td colspan="3">
+                <dx-drop-down-box
+                  class="add-product"
+                  valueExpr="PRODUCTO"
+                  displayExpr="PRODUCTO"
+                  placeholder="Buscar juego o producto…"
+                  [dataSource]="productos()"
+                  [dropDownOptions]="productDropDownOptions"
+                  [(opened)]="productDropdownOpened"
+                >
+                  <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
+                    <ng-template #productToolbarExtra>
+                      @if (productosCargando()) {
+                        <span class="product-loading-indicator" role="status">Cargando…</span>
+                      }
+                    </ng-template>
+                    <xtein-data-grid
+                      [dataSource]="productos()"
+                      keyExpr="PRODUCTO"
+                      height="100%"
+                      [toolbarActions]="productToolbarActions()"
+                      [toolbarTemplate]="productToolbarExtra"
+                      (rowClick)="$event.rowType === 'data' && selectProductFromDropdown($event.data)"
+                      (rowActivated)="selectProductFromDropdown($event)"
+                      [columns]="productoColumns"
+                      selectionMode="single"
+                      [pageSize]="100"
+                      [allowedPageSizes]="[50, 100, 200]"
+                      [showPager]="true"
+                      searchPlaceholder="Buscar por código, nombre o código asociado…"
+                      [searchWidth]="300"
+                    />
+                  </div>
+                </dx-drop-down-box>
+              </td>
+              <td colspan="3" class="new-row-hint">Elige el juego o producto; luego marca qué llega y en qué cantidad.</td>
+            </tr>
+          }
+          @for (grupo of grupos(); track grupo.raiz; let gi = $index) {
+            @for (fila of grupo.filas; track $index; let fi = $index) {
+              @if (visible(grupo, fi)) {
+              <tr [class.row-muted]="!fila.llega" [class.row-parent]="fila.hijos.length > 0">
+                <td class="col-select">
+                  <xtein-checkbox [ariaLabel]="'Llega ' + fila.nombre" [checked]="fila.llega" (checkedChange)="marcar(gi, fi, $event)" />
+                </td>
+                <td><span class="level">{{ fila.nivel }}</span></td>
+                <td [class.indent-pf]="fila.nivel === 'PF' && fi > 0" [class.indent-pa]="fila.nivel === 'PA'">
+                  <span class="tree-cell">
+                    @if (fila.hijos.length) {
+                      <button type="button" class="tree-toggle" [class.tree-toggle--closed]="recogido(grupo, fi)"
+                        [attr.aria-expanded]="!recogido(grupo, fi)"
+                        [attr.aria-label]="(recogido(grupo, fi) ? 'Desplegar ' : 'Recoger ') + fila.nombre"
+                        [title]="recogido(grupo, fi) ? 'Desplegar (' + fila.hijos.length + ')' : 'Recoger'"
+                        (click)="alternar(grupo, fi)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                    } @else {
+                      <span class="tree-toggle-spacer"></span>
+                    }
+                    <span>
+                      {{ fila.nombre }}
+                      @if (recogido(grupo, fi)) { <span class="tree-count">({{ fila.hijos.length }})</span> }
+                      @if (fi === 0 && parcial(grupo)) { <span class="pending">· llega una parte</span> }
+                    </span>
+                  </span>
+                </td>
+                <td class="nowrap">{{ fila.producto }}</td>
+                <td class="nowrap">{{ fila.codigoAsociado || '—' }}</td>
+                <td class="text-end">
+                  @if (fila.nivel === 'JU') {
+                    1
+                  } @else {
+                    <xtein-number class="cell-editor" [ariaLabel]="'Cantidad de ' + fila.nombre" [min]="1" [max]="fila.cantidadMax"
+                      [readOnly]="!fila.llega" [ngModel]="fila.cantidad" [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="cantidad(gi, fi, $event)" />
+                  }
+                </td>
+                <td class="col-select">
+                  @if (fi === 0) {
+                    <button type="button" class="grid-btn" [attr.aria-label]="'Quitar ' + fila.nombre" [title]="'Quitar ' + fila.nombre" (click)="quitarProducto(gi)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  }
+                </td>
+              </tr>
+              }
+            }
+          } @empty {
+            @if (!agregando()) {
+              <tr><td colspan="7" class="empty-message">Sin productos. Agrégalos con el botón +.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="c3-hint">Con + busca el juego o producto por código interno, código asociado o nombre. La entrada lleva un solo producto (queda como un servicio S); para cambiarlo, quítalo con la papelera. Si es un juego, marca qué llega y en qué cantidad.</p>
+  } @else if (abierto(); as a) {
+    <div class="c3-table-scroll">
+      <table class="c3-table">
+        <thead>
+          <tr>
+            <th>Nivel</th>
+            <th>Producto o parte</th>
+            <th>Código asociado</th>
+            <th class="text-end">Cantidad</th>
+            <th>Dónde está</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of a.UNIDADES; track u.ID_UNIDAD) {
+            <tr>
+              <td><span class="level">{{ u.NIVEL }}</span></td>
+              <td [class.indent-pa]="u.NIVEL === 'PA'">
+                {{ u.NOMBRE_JUEGO ? u.NOMBRE_JUEGO + ' › ' : '' }}{{ u.NOMBRE_PRODUCTO }}{{ u.NOMBRE_PARTE ? ' · ' + u.NOMBRE_PARTE : '' }}
+              </td>
+              <td class="nowrap">{{ u.CODIGO_ASOCIADO || '—' }}</td>
+              <td class="text-end">{{ u.CANTIDAD }}</td>
+              <td>
+                {{ u.BODEGA || 'Fuera del inventario' }}
+                @if (u.TRASLADO_PENDIENTE) { <span class="pending">traslado {{ u.TRASLADO_PENDIENTE }} sin autorizar</span> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="c3-msg" [class.c3-msg--danger]="a.SERVICIO.ESTADO === 'ANULADO' || a.SERVICIO.ESTADO === 'INACTIVO'">
+      {{ a.SERVICIO.DOCUMENTO }} a nombre de <b>{{ a.SERVICIO.NOMBRE }}</b> ·
+      {{ a.SERVICIO.OBSERVACION_ANULA ? 'Anotación: «' + a.SERVICIO.OBSERVACION_ANULA + '»' : a.SERVICIO.DETALLE_MOVIMIENTO }}
+    </div>
+  } @else {
+    <p class="c3-hint">Usa <b>Nuevo</b> en la barra para registrar una entrada, o <b>Buscar</b> para ver o anular una existente.</p>
+  }
+</div>
+
+<!-- Ver de la barra: modal estándar de la plataforma (Buscar está en la pantalla) -->
+<xtein-record-view
+  title="Entradas"
+  [visible]="viewVisible()"
+  (visibleChange)="viewVisible.set($event)"
+  [records]="records()"
+  [columns]="viewColumns"
+  keyField="ID_SERVICIO"
+  (selected)="verRegistro($event)"
+/>

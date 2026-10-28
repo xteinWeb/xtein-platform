@@ -1,0 +1,49 @@
+@use '../../cal-003-comun';
+
+// Separación entre los datos del documento, la sección de servicios, la tabla y la nota
+.c3-d-servicios {
+  margin-top: 22px;
+}
+
+.c3-d-agregar {
+  margin-bottom: 14px;
+}
+
+.c3-d-tabla {
+  margin-top: 12px;
+}
+
+.c3-d-nota {
+  margin-top: 14px;
+}
+
+.c3-buscador__pie {
+  justify-content: flex-end;
+}
+
+.c3-doc {
+  padding: 18px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0a3960;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+  }
+
+  .firmas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 46px;
+
+    div {
+      padding-top: 4px;
+      border-top: 1px solid #0a3960;
+      text-align: center;
+      font-size: 12px;
+    }
+  }
+}

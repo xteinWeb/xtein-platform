@@ -1,0 +1,184 @@
+<section class="c1" [attr.aria-busy]="cargando()">
+  <div class="c1-tabs" role="tablist" aria-label="CAL-001">
+    <button type="button" role="tab" id="c1-tab-registro" aria-controls="c1-panel-registro"
+      [attr.aria-selected]="pestana() === 'registro'" (click)="pestana.set('registro')">No conformidad</button>
+    <button type="button" role="tab" id="c1-tab-consulta" aria-controls="c1-panel-consulta"
+      [attr.aria-selected]="pestana() === 'consulta'" (click)="irAConsulta()">Consulta</button>
+    @if (cargando()) { <span class="c1-cargando" role="status">Cargando…</span> }
+  </div>
+
+  @if (errores().length) {
+    <div class="c1-msg" role="alert">
+      <b>Revise antes de continuar:</b>
+      <ul>@for (error of errores(); track $index) { <li>{{ error }}</li> }</ul>
+    </div>
+  }
+
+  <div class="c1-panel" id="c1-panel-registro" role="tabpanel" aria-labelledby="c1-tab-registro" [hidden]="pestana() !== 'registro'">
+    @if (modoTexto() || (creando() && borradorGuardadoEn())) {
+      <p class="c1-modo" role="status">
+        {{ modoTexto() }}
+        @if (creando() && borradorGuardadoEn()) { <small>Borrador guardado en este equipo a las {{ borradorGuardadoEn() }}.</small> }
+      </p>
+    }
+    @if (puedeAgregar()) {
+      <div class="c1-agregar">
+        <button type="button" class="c1-boton" [disabled]="cargando()" (click)="agregar()">Agregar a mi registro</button>
+        @if (agregarHasta()) { <small>Puede agregar hasta {{ agregarHasta() }}.</small> }
+      </div>
+    }
+
+    @if (borrador(); as b) {
+      <div class="c1-cols">
+        <div class="c1-principal">
+          <details class="c1-sec" open>
+            <summary>Datos principales</summary>
+            <div class="c1-campos">
+              @if (!creando()) {
+                <label class="c1-campo"><span>Documento</span>
+                  <input type="text" readonly [value]="b.DOCUMENTO" />
+                </label>
+              }
+              <label class="c1-campo"><span>Origen</span>
+                <select [disabled]="!editable()" (change)="campo('ORIGEN', $any($event.target).value)">
+                  <option [value]="origenes.Produccion" [selected]="b.ORIGEN === origenes.Produccion">Producción</option>
+                  @if (permiteCliente()) {
+                    <option [value]="origenes.Cliente" [selected]="b.ORIGEN === origenes.Cliente">Cliente</option>
+                  }
+                </select>
+              </label>
+              <div class="c1-campo c1-ancho"><span id="c1-producto">Producto (PF)</span>
+                @if (editable()) {
+                  <xtein-cal001-buscador aria-labelledby="c1-producto" [buscar]="buscarProductos" [actual]="productoActual()"
+                    [deshabilitado]="cargandoProducto()" placeholder="Buscar PF por código o nombre" etiqueta="Producto (PF)" (elegido)="elegirProducto($event)" />
+                } @else {
+                  <input type="text" readonly aria-labelledby="c1-producto" [value]="productoActual()" />
+                }
+              </div>
+              <label class="c1-campo"><span>Cantidad (referencia)</span>
+                <input type="number" inputmode="decimal" min="0" step="0.01" [readOnly]="!editable()" [value]="b.CANTIDAD_REFERENCIA ?? ''"
+                  (input)="campo('CANTIDAD_REFERENCIA', $any($event.target).value)" />
+              </label>
+            </div>
+            <p class="c1-hint">La cantidad es solo de referencia: no se reparte entre los operarios.</p>
+          </details>
+
+          <details class="c1-sec" open>
+            <summary>Registro y estado</summary>
+            <div class="c1-campos">
+              <label class="c1-campo"><span>Estado</span><input type="text" readonly [value]="creando() ? 'NUEVO' : (registro()?.REGISTRO?.ESTADO ?? '')" /></label>
+              <label class="c1-campo"><span>Registrado por</span>
+                <input type="text" readonly [value]="registradoPor()" [attr.title]="registro()?.REGISTRO?.USUARIO_CREA ?? usuario()" />
+              </label>
+              @if (!creando()) {
+                <label class="c1-campo"><span>Fecha de registro</span>
+                  <input type="text" readonly [value]="fecha(registro()?.REGISTRO?.FECHA_REGISTRO)" />
+                </label>
+              }
+              <label class="c1-campo"><span>Fecha del evento</span>
+                <input type="date" [max]="hoy()" (focus)="hoy()" [readOnly]="!editable()" [value]="b.FECHA_EVENTO"
+                  (change)="campo('FECHA_EVENTO', $any($event.target).value)" />
+              </label>
+              @if (!creando()) {
+                <label class="c1-campo c1-ancho"><span>Última modificación</span>
+                  <input type="text" readonly [value]="registro()?.REGISTRO?.USUARIO_MODIFICA
+                    ? registro()?.REGISTRO?.USUARIO_MODIFICA + ' · ' + fecha(registro()?.REGISTRO?.FECHA_MODIFICA) : 'Sin modificaciones'" />
+                </label>
+              }
+            </div>
+          </details>
+
+          @if (esCliente()) {
+            <details class="c1-sec" open>
+              <summary>Datos de la garantía (origen Cliente)</summary>
+              <div class="c1-campos">
+                <div class="c1-campo c1-ancho"><span id="c1-cliente">Cliente</span>
+                  @if (editable()) {
+                    <xtein-cal001-buscador aria-labelledby="c1-cliente" [buscar]="buscarClientes" [actual]="clienteActual()"
+                      placeholder="Buscar cliente por nit o nombre" etiqueta="Cliente" (elegido)="elegirCliente($event)" />
+                  } @else {
+                    <input type="text" readonly aria-labelledby="c1-cliente" [value]="clienteActual()" />
+                  }
+                </div>
+                <label class="c1-campo"><span>Número de servicio</span>
+                  <input type="text" [attr.maxlength]="limites.ServiceNumber" [readOnly]="!editable()" [value]="b.N_SERVICIO"
+                    (input)="campo('N_SERVICIO', $any($event.target).value)" />
+                </label>
+                <label class="c1-campo"><span>Área de detección</span>
+                  <select [disabled]="!editable()" (change)="campo('ID_AREA_DETECCION', $any($event.target).value)">
+                    <option value="" [selected]="!b.ID_AREA_DETECCION">Elegir…</option>
+                    @for (area of areas(); track area) { <option [value]="area" [selected]="area === b.ID_AREA_DETECCION">{{ area }}</option> }
+                  </select>
+                </label>
+                <label class="c1-campo"><span>Fuente</span>
+                  <select [disabled]="!editable()" (change)="campo('FUENTE', $any($event.target).value)">
+                    <option value="" [selected]="!b.FUENTE">Elegir…</option>
+                    @for (fuente of fuentes(); track fuente) { <option [value]="fuente" [selected]="fuente === b.FUENTE">{{ fuente }}</option> }
+                  </select>
+                </label>
+                <label class="c1-campo"><span>Fecha del reclamo</span>
+                  <input type="date" [max]="hoy()" (focus)="hoy()" [readOnly]="!editable()" [value]="b.FECHA_RECLAMO"
+                    (change)="campo('FECHA_RECLAMO', $any($event.target).value)" />
+                </label>
+                <div class="c1-campo c1-ancho"><span>Causa del cliente</span>
+                  <xtein-cal001-causa-selector [causas]="causasCliente()" [valor]="b.ID_CAUSA_CLIENTE" [deshabilitado]="!editable()"
+                    etiqueta="Causa del cliente" placeholder="Elegir causa del cliente" (elegida)="elegirCausaCliente($event)" />
+                </div>
+              </div>
+              <p class="c1-hint">Sin operario causante obligatorio: los operarios de cada no conformidad son opcionales en origen Cliente.</p>
+            </details>
+          }
+
+          <details class="c1-sec" open>
+            <summary>Partes del producto</summary>
+            @if (b.PRODUCTO) {
+              <p class="c1-hint">Partes PA de {{ b.PRODUCTO }} en Productos-Partes. Toque una parte para ver y capturar sus no conformidades.</p>
+            }
+            <xtein-cal001-partes [partes]="b.PARTES" [seleccionada]="parteActual()?.CLAVE ?? null" [editable]="editable()" [agregando]="agregando()"
+              (seleccionar)="seleccionarParte($event)" (piezaCambio)="cambiarPieza($event)" />
+            @if (parteActual(); as parte) {
+              <xtein-cal001-detalle-parte class="c1-detalle" [parte]="parte" [causas]="causasProduccion()" [origen]="b.ORIGEN"
+                [editable]="editable()" [agregando]="agregando()" [buscarOperarios]="buscarOperarios" (cambio)="cambiarParte($event)" (aviso)="aviso($event)" />
+            }
+          </details>
+
+          <details class="c1-sec" open>
+            <summary>Descripción / Observación</summary>
+            <textarea class="c1-texto" aria-label="Observación" [attr.maxlength]="limites.Observation" [readOnly]="!editable()"
+              [value]="b.OBSERVACION" (input)="campo('OBSERVACION', $any($event.target).value)"></textarea>
+            @if (modificando()) {
+              <label class="c1-campo c1-motivo"><span>Motivo de la modificación (opcional)</span>
+                <textarea class="c1-texto" [attr.maxlength]="limites.Reason" [value]="b.MOTIVO" (input)="campo('MOTIVO', $any($event.target).value)"></textarea>
+              </label>
+            }
+          </details>
+
+          <details class="c1-sec">
+            <summary>Historial de modificaciones</summary>
+            <xtein-cal001-historial [resumen]="registro()?.HISTORIAL ?? []" [idRegistro]="registro()?.REGISTRO?.ID_REGISTRO_NC ?? null"
+              (aviso)="aviso($event)" />
+          </details>
+        </div>
+
+        <aside class="c1-lateral">
+          <div class="c1-resumen">
+            <div><span>Producto</span><b>{{ b.PRODUCTO || '—' }}</b></div>
+            <div><span>Cantidad del producto</span><b>{{ b.CANTIDAD_REFERENCIA ?? '—' }}</b></div>
+          </div>
+          <xtein-cal001-nc-operario [filas]="ncOperario()" [cliente]="esCliente()" />
+          <h2 class="c1-banda">Evidencia del registro</h2>
+          <xtein-cal001-fotos [fotos]="registro()?.FOTOS ?? []" [idRegistro]="registro()?.REGISTRO?.ID_REGISTRO_NC ?? null"
+            [puedeAgregar]="puedeAgregarFotos()" [puedeRetirar]="puedeRetirarFotos()" [diferirSubida]="enCaptura()" (cambiaron)="recargarRegistro()" (hayPendientes)="fotosPendientes.set($event)" (aviso)="aviso($event)" />
+        </aside>
+      </div>
+    } @else {
+      <div class="c1-vacio">Sin registro abierto.</div>
+    }
+  </div>
+
+  <div class="c1-panel" id="c1-panel-consulta" role="tabpanel" aria-labelledby="c1-tab-consulta" [hidden]="pestana() !== 'consulta'">
+    <xtein-cal001-consulta [resultado]="consulta()" [filtroInicial]="filtro()" [usuario]="usuario()" [esGestor]="esGestor()" [cargando]="consultando()"
+      [exportando]="exportando()" [abiertoId]="registro()?.REGISTRO?.ID_REGISTRO_NC ?? null"
+      (buscar)="buscar($event, 1)" (pagina)="buscar(filtro(), $event)" (abrir)="abrirRegistro($event.ID_REGISTRO_NC)" (exportar)="exportar()" />
+  </div>
+</section>

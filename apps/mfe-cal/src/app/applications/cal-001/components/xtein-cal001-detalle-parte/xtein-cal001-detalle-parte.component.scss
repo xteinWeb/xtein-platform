@@ -1,0 +1,46 @@
+:host { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+.dp-titulo { margin: 4px 0 0; font-size: 14px; color: #0a3960; small { font-weight: 400; color: #4a6a84; } }
+.dp-causa { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid #dfe6ef; border-radius: 8px; background: #fbfcfe; }
+.dp-cabecera { display: flex; gap: 8px; align-items: flex-start; }
+.dp-selector { flex: 1; min-width: 0; }
+.dp-causa-texto {
+  display: flex; flex-direction: column; gap: 2px; color: #1f3b57; overflow-wrap: anywhere;
+  small { color: #4a6a84; font-size: 12.5px; }
+}
+.dp-quitar {
+  min-height: 34px; padding: 4px 10px; border: 1px solid #f1c4c4; border-radius: 6px; background: #fff; color: #b42318; font: inherit; cursor: pointer;
+}
+.dp-op {
+  display: grid; grid-template-columns: minmax(140px, 1.4fr) minmax(120px, 1fr) 110px 44px; gap: 8px; align-items: center;
+  padding: 6px 4px; border-top: 1px solid #eef2f6;
+}
+.dp-op-titulos { border-top: 0; font-size: 12.5px; font-weight: 600; color: #334155; }
+.dp-nombre { min-width: 0; overflow-wrap: anywhere; small { margin-left: 6px; color: #7b8fa3; } }
+.dp-num { text-align: right; }
+.dp-proceso { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #e6eef7; color: #244d73; font-size: 12.5px; }
+.dp-campo {
+  width: 100%; min-height: 34px; padding: 4px 8px; border: 1px solid #c9d6e3; border-radius: 6px; font: inherit; box-sizing: border-box;
+  &:focus { outline: 2px solid #2f6db3; outline-offset: 0; }
+}
+.dp-ocurrencias { text-align: right; }
+.dp-invalido { border-color: #d92d20; background: #fff5f5; }
+.dp-nota { margin: 4px 0; color: #7b8fa3; font-size: 13px; }
+/* Modo Agregar: lo guardado no se quita; a un operario guardado se le suman ocurrencias. */
+.dp-guardada { margin-left: auto; padding: 2px 8px; border-radius: 10px; background: #eef2f6; color: #4a6a84; font-size: 12px; white-space: nowrap; }
+.dp-suma { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; .dp-ocurrencias { width: 60px; } }
+.dp-agregar { max-width: 460px; }
+
+@media (max-width: 720px) {
+  .dp-op-titulos { display: none; }
+  .dp-op {
+    grid-template-columns: 1fr 96px 44px; grid-template-areas: 'nombre ocurr quitar' 'proceso proceso proceso';
+    padding: 8px 2px;
+    > :nth-child(1) { grid-area: nombre; }
+    > :nth-child(2) { grid-area: proceso; }
+    > :nth-child(3) { grid-area: ocurr; }
+    > :nth-child(4) { grid-area: quitar; }
+  }
+  .dp-campo { min-height: 40px; font-size: 16px; }
+  .dp-agregar { max-width: none; }
+}

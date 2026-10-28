@@ -125,6 +125,13 @@
   width: 100%;
   margin-top: 10px;
   margin-bottom: 6px;
+  padding-left: 14px;   /* alineada con los campos de "Consumo de producción" */
+  box-sizing: border-box;
+}
+
+/* Productos y materiales van en el mismo cuadro: el primer título sin margen arriba */
+.pro-039__card-bottom > .pro-039__section-divider:first-child {
+  margin-top: 0;
 }
 
 .pro-039__field-inline--full {
@@ -287,4 +294,240 @@
 .pro-039__badge-status[data-estado='AUTORIZADO'] {
   background: #e3f2fd;
   color: #1565c0;
+}
+
+/* Fila de ancho completo (Descripción): al apilarse, la etiqueta no debe conservar su base de 140px como alto */
+@media (max-width: 768px) {
+  .pro-039__field-inline--full {
+    align-items: stretch;
+    gap: 4px;
+
+    .pro-039__label-inline {
+      flex: none;
+      width: 100%;
+    }
+  }
+}
+
+/*======================================================================
+= PRODUCTOS DEL CONSUMO (varios por sección)
+======================================================================*/
+
+.pro-039__products-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 10px 0 8px 14px;
+}
+
+/* Botones de la tabla de productos: los mismos de la grilla de materiales */
+.pro-039__grid-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.18s ease-in-out;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+
+    &:hover:not(:disabled) {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+    }
+  }
+
+  &--cancel {
+    color: #64748b;
+    background: #f8fafc;
+    border-color: #cbd5e1;
+
+    &:hover:not(:disabled) {
+      background: #64748b;
+      color: #ffffff;
+      border-color: #475569;
+    }
+  }
+}
+
+.pro-039__products-table tbody tr.pro-039__row-editing {
+  background-color: #eff6ff;
+  outline: 1px solid #93c5fd;
+
+  xtein-lookup {
+    display: block;
+    min-width: 260px;
+  }
+}
+
+.pro-039__products-hint {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.pro-039__products-scroll {
+  width: 100%;
+  min-width: 0;
+  padding-left: 14px;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.pro-039__products-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #e5eaf1;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f6f8fb;
+    color: #1b506f;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .col-code {
+    width: 110px;
+    white-space: nowrap;
+  }
+
+  .col-component {
+    width: 320px;
+  }
+
+  .col-remove {
+    width: 40px;
+    text-align: center;
+  }
+
+  .col-lot {
+    width: 140px;
+    text-align: right;
+
+    xtein-number {
+      display: block;
+      width: 120px;
+      margin-left: auto;
+    }
+  }
+}
+
+.pro-039__products-empty {
+  padding: 1rem !important;
+  text-align: center !important;
+  color: #64748b;
+  font-style: italic;
+}
+
+.pro-039__muted {
+  color: #94a3b8;
+}
+
+.pro-039__remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@media (max-width: 768px) {
+  .pro-039__products-table .col-component {
+    width: auto;
+  }
+}
+
+/* Juegos: la fila del juego y debajo una línea por componente */
+.pro-039__products-table {
+  tr.pro-039__game-row td {
+    font-weight: 600;
+    background: #f8fafc;
+  }
+
+  tr.pro-039__component-row td {
+    border-bottom-style: dashed;
+  }
+
+  .pro-039__component-name {
+    padding-left: 22px !important;
+    color: #334155;
+  }
+}
+
+.pro-039__link-btn {
+  padding: 2px 8px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #2563eb;
+    color: #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }

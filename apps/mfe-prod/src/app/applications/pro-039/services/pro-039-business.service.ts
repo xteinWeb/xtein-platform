@@ -12,7 +12,7 @@ import {
   Pro039ProductStock,
   Pro039TaxResult
 } from '../models/pro-039-business.model';
-import { Pro039MovementGrav, Pro039MovementItem, Pro039Total } from '../models/pro-039.model';
+import { Pro039ConsumptionProduct, Pro039MovementGrav, Pro039MovementItem, Pro039Presentation, Pro039Total } from '../models/pro-039.model';
 
 export interface Pro039TaxLiquidation {
   items: Pro039MovementItem[];
@@ -79,14 +79,16 @@ export class Pro039BusinessService {
     return this.decode<T>(await firstValueFrom(this.api.request(endpoint, action, data)));
   }
 
-  /** Materiales de la matriz del producto/sección, con el costo de la bodega de origen (o el de la matriz). */
-  /** CONSUMO_BASE queda unitario (matriz); CANTIDAD = unitario x lote. */
-  async materials(product: string, section: string, originWarehouse: string, component = '', lot = 1): Promise<Pro039MovementItem[]> {
+  /**
+   * Materiales de la matriz de los productos del consumo en la sección, con el costo de la bodega de origen
+   * (o el de la matriz). Cada producto trae SUS materiales por separado (PRODUCTO_CONSUMO): si dos productos
+   * usan el mismo material, llega una fila por producto. CONSUMO_BASE = unitario; CANTIDAD = unitario x su lote.
+   */
+  async materials(products: Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO' | 'COMPONENTE' | 'CANTIDAD_LOTE'>[], section: string, originWarehouse: string): Promise<Pro039MovementItem[]> {
     const rows = await this.action<Pro039Material>('materials', {
-      PRODUCTO: product,
+      PRODUCTOS: products.map(p => ({ ITEM: p.ITEM, PRODUCTO: p.PRODUCTO, COMPONENTE: p.COMPONENTE || '', CANTIDAD_LOTE: Number(p.CANTIDAD_LOTE) || 1 })),
       SECCION: section || '',
       ID_UN_ORIGEN: originWarehouse || '',
-      COMPONENTE: component || '',
       ...this.identity
     });
     return rows.map((row, index) => this.newItem({
@@ -98,22 +100,27 @@ export class Pro039BusinessService {
       UDM_PRESENTACION: row.UDM || 'UND',
       UDM_EQUIV: row.UDM || 'UND',
       CONSUMO_BASE: Number(row.CONSUMO || 0),
-      CANTIDAD: Number(row.CONSUMO || 0) * lot,
+      CANTIDAD: Number(row.CANTIDAD ?? row.CONSUMO ?? 0),
       VALOR_UNITARIO: Number(row.VALOR_UNITARIO || 0),
+      PRODUCTO_CONSUMO: String(row.PRODUCTO_CONSUMO ?? ''),
+      ITEM_PRODUCTO: Number(row.ITEM_PRODUCTO) || null,
       ES_MATRIZ: true
     }));
   }
 
   /** Fila provisional de un material agregado a mano, mientras llegan sus datos. */
-  pendingItem(product: string, name: string, item: number): Pro039MovementItem {
-    return this.newItem({ ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false });
+  pendingItem(product: string, name: string, item: number, line: Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO'>): Pro039MovementItem {
+    return this.newItem({
+      ITEM: item, PRODUCTO: product, NOMBRE_PRODUCTO: name, CANTIDAD: 0, CONSUMO_BASE: 0, ES_MATRIZ: false,
+      PRODUCTO_CONSUMO: line.PRODUCTO, ITEM_PRODUCTO: line.ITEM
+    });
   }
 
   /**
    * Producto agregado manualmente: igual que COM-203 ('EXISTENCIAS PRODUCTO'), valida que esté asociado
    * a la bodega de origen y trae nombre, costo y presentación.
    */
-  async productItem(product: string, header: Pro039Header, item: number): Promise<Pro039MovementItem> {
+  async productItem(product: string, header: Pro039Header, item: number, line: Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO'>): Promise<Pro039MovementItem> {
     const rows = await this.action<Pro039ProductStock>('stock', {
       PRODUCTO: product,
       PRESENTACION: 'SI',
@@ -123,9 +130,9 @@ export class Pro039BusinessService {
       ID_UN_DESTINO: header.ID_UN_DESTINO
     });
     const data = rows[0] ?? {};
-    const presentation = data.PRESENTACION?.length === 1 ? data.PRESENTACION[0] : undefined;
+    const presentations = data.PRESENTACION ?? [];
     const attribute = data.ATRIBUTOS?.length === 1 ? data.ATRIBUTOS[0].ATRIBUTO : undefined;
-    return this.newItem({
+    const row = this.newItem({
       ITEM: item,
       PRODUCTO: product,
       NOMBRE_PRODUCTO: data.NOMBRE ?? '',
@@ -134,15 +141,40 @@ export class Pro039BusinessService {
       UBICACION: data.UBICACION ?? '',
       ATRIBUTO: attribute || 'SIN',
       VALOR_UNITARIO: Number(data.PRECIO || 0),
-      UDM_PRES: presentation?.UDM_COMPRA || 'UND',
-      UDM_PRESENTACION: presentation?.UDM_COMPRA || 'UND',
-      CANTIDAD_PRES: Number(presentation?.CANTIDAD_PRES || 1),
-      UDM_EQUIV: presentation?.UDM_EQUIV || 'UND',
-      CANTIDAD_EQUIV: Number(presentation?.CANTIDAD_EQUIV || 1),
+      PRESENTACIONES: presentations,
+      PRODUCTO_CONSUMO: line.PRODUCTO,
+      ITEM_PRODUCTO: line.ITEM,
       CANTIDAD: 0,
       CONSUMO_BASE: 0,
       ES_MATRIZ: false
     });
+    // Como la salida de COM-203: con una sola presentación se asigna; con varias, el usuario la elige en "UM Pres.".
+    // Sin presentaciones queda la unidad por defecto (UND x 1), que es la que el SP exige como mínimo.
+    if (presentations.length === 1) return this.withPresentation(row, presentations[0]);
+    if (presentations.length > 1) return this.withPresentation(row, null);
+    return row;
+  }
+
+  /**
+   * Cambió el lote de un producto del consumo: sus materiales de la matriz recalculan la cantidad
+   * (unitario x lote), sin volver a consultar la matriz. Los agregados a mano no cambian.
+   */
+  withProductLot(row: Pro039MovementItem, line: number, lot: number): Pro039MovementItem {
+    if (!row.ES_MATRIZ || row.ITEM_PRODUCTO !== line) return row;
+    return this.withQuantity(row, Number(row.CONSUMO_BASE || 0) * lot);
+  }
+
+  /** Aplica la presentación elegida en "UM Pres." (null = sin elegir) y recalcula la cantidad equivalente. */
+  withPresentation(row: Pro039MovementItem, presentation: Pro039Presentation | null): Pro039MovementItem {
+    const unit = presentation?.UDM_COMPRA ?? '';
+    return this.withQuantity({
+      ...row,
+      UDM_PRES: unit,
+      UDM_PRESENTACION: unit,
+      CANTIDAD_PRES: Number(presentation?.CANTIDAD_PRES ?? 0),
+      UDM_EQUIV: presentation?.UDM_EQUIV ?? '',
+      CANTIDAD_EQUIV: Number(presentation?.CANTIDAD_EQUIV ?? 0)
+    }, Number(row.CANTIDAD || 0));
   }
 
   /**
@@ -186,26 +218,32 @@ export class Pro039BusinessService {
     return {
       ...row,
       CANTIDAD: qty,
-      CANTIDAD_REAL: qty * Number(row.CANTIDAD_PRES || 1) * Number(row.CANTIDAD_EQUIV || 1),
+      // Sin presentación elegida (factores en 0) la cantidad equivalente es 0, como en COM-203
+      CANTIDAD_REAL: qty * Number(row.CANTIDAD_PRES ?? 1) * Number(row.CANTIDAD_EQUIV ?? 1),
       SUB_TOTAL: subtotal,
       TOTAL: subtotal + Number(row.VALOR_IVA || 0)
     };
   }
 
-  validate(header: Pro039Header, items: Pro039MovementItem[]): string {
+  validate(header: Pro039Header, items: Pro039MovementItem[], products: Pro039ConsumptionProduct[]): string {
     const fields: [keyof Pro039Header, string][] = [
       ['DOCUMENTO', 'Documento'],
       ['FECHA', 'Fecha'],
-      ['PRODUCTO', 'Producto'],
+      ['SECCION', 'Sección'],
       ['ID_UN_ORIGEN', 'Bodega origen'],
       ['ID_UN_DESTINO', 'Destino']
     ];
     const missing = fields.filter(([key]) => !header[key]).map(([, label]) => label);
+    if (!products.length) missing.push('al menos un producto');
     if (missing.length) return 'Faltan datos obligatorios: ' + missing.join(', ');
+    const noLot = products.filter(p => !(Number(p.CANTIDAD_LOTE) > 0)).map(p => p.PRODUCTO);
+    if (noLot.length) return 'La cantidad del lote debe ser mayor a 0: ' + noLot.join(', ');
     if (!items.some(row => Number(row.CANTIDAD) > 0)) return 'Debe haber al menos un material con cantidad mayor a 0.';
     if (items.some(row => !row.ES_MATRIZ && !(Number(row.CANTIDAD) > 0))) {
       return 'Los materiales adicionales deben tener una cantidad mayor a 0.';
     }
+    const noPresentation = items.filter(row => !row.UDM_PRES).map(row => row.PRODUCTO);
+    if (noPresentation.length) return 'Debe seleccionar una unidad de presentación: ' + noPresentation.join(', ');
     return '';
   }
 

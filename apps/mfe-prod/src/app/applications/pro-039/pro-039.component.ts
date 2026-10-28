@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import {
   FormGroup,
   FormControl,
+  FormsModule,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
@@ -48,7 +49,10 @@ import {
   XteinNotificationService,
   XteinRecordFilterResult,
   XteinRecordViewColumn,
-  XteinGroupLabelComponent
+  XteinGroupLabelComponent,
+  XteinExcelExportService,
+  XteinExportScope,
+  XteinRecordExportComponent
 } from '@xtein/ui';
 
 import {
@@ -68,9 +72,11 @@ import {
 } from './constants/pro-039-ui.constants';
 
 import {
+  Pro039ConsumptionProduct,
   Pro039MovementGrav,
   Pro039MovementItem,
   Pro039MovementRecord,
+  Pro039Presentation,
   Pro039Total
 } from './models/pro-039.model';
 
@@ -82,9 +88,8 @@ import {
 
 import { Pro039Service } from './services/pro-039.service';
 import { Pro039BusinessService } from './services/pro-039-business.service';
-import { Pro039ExcelHeader, Pro039ExcelService } from './services/pro-039-excel.service';
+import { Pro039ExcelHeader, pro039ConsumptionWorkbook, pro039ConsumptionsWorkbook } from './constants/pro-039-excel.constants';
 import { Pro039ItemsComponent } from './components/pro-039-items/pro-039-items.component';
-import { Pro039ExportScope, Pro039ExportComponent } from './components/pro-039-export/pro-039-export.component';
 
 /**
  * PRO-039 Consumos: salidas de inventario de tipo CONSUMO de producción.
@@ -96,6 +101,7 @@ import { Pro039ExportScope, Pro039ExportComponent } from './components/pro-039-e
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     XteinInputComponent,
     XteinNumberComponent,
@@ -108,7 +114,7 @@ import { Pro039ExportScope, Pro039ExportComponent } from './components/pro-039-e
     XteinLoadingComponent,
     XteinGroupLabelComponent,
     Pro039ItemsComponent,
-    Pro039ExportComponent
+    XteinRecordExportComponent
   ],
   providers: [
     Pro039Service,
@@ -145,8 +151,17 @@ export class Pro039Component implements OnInit, OnDestroy {
   readonly documents = signal<Pro039Lookup[]>([]);
   readonly products = signal<Pro039Lookup[]>([]);
   readonly sections = signal<Pro039Lookup[]>([]);
-  /** Productos que componen el juego (solo si el producto es un JU). */
-  readonly components = signal<Pro039Lookup[]>([]);
+  /** Productos del consumo: varios, todos en la misma sección. */
+  readonly consumptionProducts = signal<Pro039ConsumptionProduct[]>([]);
+  /** Productos que componen cada juego (clase Juego), por código del juego. */
+  readonly productComponents = signal<Record<string, Pro039Lookup[]>>({});
+  /** Valor del selector "Agregar producto" (se limpia al agregarlo). */
+  readonly productToAdd = signal<string | null>(null);
+  /** Fila nueva abierta en la tabla de productos (botón +). */
+  readonly addingProduct = signal(false);
+  /** Juego al que se le está agregando un componente (fila nueva debajo del juego). */
+  readonly addingComponentFor = signal<string | null>(null);
+  readonly componentToAdd = signal<string | null>(null);
   readonly origins = signal<Pro039Warehouse[]>([]);
   readonly destinations = signal<Pro039Warehouse[]>([]);
   readonly itemProducts = signal<Pro039Lookup[]>([]);
@@ -257,7 +272,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     private readonly permissionsService: RecordToolbarPermissionsService,
     private readonly workspace: WorkspaceRuntimeService,
     private readonly notification: XteinNotificationService,
-    private readonly excel: Pro039ExcelService,
+    private readonly excel: XteinExcelExportService,
     private readonly elementRef: ElementRef
   ) {
     effect(() => {
@@ -291,37 +306,10 @@ export class Pro039Component implements OnInit, OnDestroy {
       })
     );
 
-    // Producto de producción: si es un juego, carga sus componentes; recarga las secciones
+    // Sección: primero se elige; al cambiarla se recargan los materiales de los productos ya agregados
     this.subscriptions.add(
-      this.form.controls.PRODUCTO.valueChanges.subscribe(product => {
-        if (this.readOnly()) return;
-        this.form.patchValue({ SECCION: '', COMPONENTE: '' }, { emitEvent: false });
-        this.setItems([]);
-        void this.loadComponents(product ?? '');
-        void this.loadSections(product ?? '', '');
-      })
-    );
-
-    // Componente del juego: la matriz sale solo de ese producto
-    this.subscriptions.add(
-      this.form.controls.COMPONENTE.valueChanges.subscribe(component => {
-        if (this.readOnly()) return;
-        void this.loadSections(this.form.controls.PRODUCTO.value ?? '', component ?? '')
-          .then(() => this.form.controls.SECCION.value ? this.loadMaterials() : undefined);
-      })
-    );
-
-    // Sección: carga los materiales de la matriz
-    this.subscriptions.add(
-      this.form.controls.SECCION.valueChanges.subscribe(() => {
-        if (!this.readOnly()) void this.loadMaterials();
-      })
-    );
-
-    // Cantidad del lote: recalcula el consumo de los materiales de la matriz (unitario x lote)
-    this.subscriptions.add(
-      this.form.controls.CANTIDAD_LOTE.valueChanges.subscribe(() => {
-        if (!this.readOnly()) void this.applyLot();
+      this.form.controls.SECCION.valueChanges.subscribe(section => {
+        if (!this.readOnly()) void this.onSectionChanged(section ?? '');
       })
     );
 
@@ -448,8 +436,9 @@ export class Pro039Component implements OnInit, OnDestroy {
     this.mode.set(RecordToolbarMode.Creating);
     this.currentIndex.set(-1);
     this.setItems([]);
-    this.sections.set([]);
-    this.components.set([]);
+    this.consumptionProducts.set([]);
+    this.cancelAddProduct();
+    void this.loadSections();
 
     // Documentos de PRO-039 de las sedes del usuario (SC100, SC101, SC102) con su consecutivo siguiente
     try {
@@ -518,7 +507,7 @@ export class Pro039Component implements OnInit, OnDestroy {
       TIPO: Pro039Application.Type,
       ID_APLICACION: Pro039Application.Id
     };
-    const validationError = this.business.validate(headerData, this.items());
+    const validationError = this.business.validate(headerData, this.items(), this.consumptionProducts());
     if (validationError) {
       this.notification.warning(validationError);
       return;
@@ -535,6 +524,8 @@ export class Pro039Component implements OnInit, OnDestroy {
         MOVIMIENTOS: headerData,
         ITM_MOVIMIENTOS: liquidation.items,
         MOVIMIENTOS_GRAV: liquidation.taxes,
+        // Productos del consumo (MOVIMIENTOS_PRO_PRODUCTOS); el encabezado lleva el primero
+        PRODUCTOS: this.consumptionProducts().map(p => ({ ITEM: p.ITEM, PRODUCTO: p.PRODUCTO, COMPONENTE: p.COMPONENTE || '', CANTIDAD_LOTE: Number(p.CANTIDAD_LOTE) || 1 })),
         ID_APLICACION: Pro039Application.Id,
         USUARIO: this.business.identity.USUARIO
       };
@@ -624,6 +615,7 @@ export class Pro039Component implements OnInit, OnDestroy {
     const list = this.records();
     if (index < 0 || index >= list.length) return;
     const record = list[index];
+    this.cancelAddProduct();
     this.currentIndex.set(index);
     this.mode.set(RecordToolbarMode.Browsing);
     this.disableFormControls();
@@ -649,10 +641,14 @@ export class Pro039Component implements OnInit, OnDestroy {
 
     this.setItems([]);
     this.workspace.setDirty(this.applicationId, false);
-    // Para mostrar código y nombre de la sección y del componente guardados
-    const component = String(record.PRODUCTO_COMPONENTE ?? '');
-    void this.loadComponents(record.PRODUCTO);
-    void this.loadSections(record.PRODUCTO, component);
+    // Mientras llega el detalle se muestra el producto del encabezado; el detalle trae todos
+    this.consumptionProducts.set(record.PRODUCTO ? [this.productFrom({
+      ITEM: 1,
+      PRODUCTO: record.PRODUCTO,
+      COMPONENTE: String(record.PRODUCTO_COMPONENTE ?? ''),
+      CANTIDAD_LOTE: Number(record.CANTIDAD_LOTE ?? 1) || 1
+    })] : []);
+    void this.loadSections();
     void this.loadRecordDetail(record);
   }
 
@@ -705,23 +701,34 @@ export class Pro039Component implements OnInit, OnDestroy {
     await this.applyItems(list);
   }
 
+  /** "UM Pres." elegida en la grilla: actualiza la equivalencia y la cantidad que descuenta el kárdex. */
+  async onPresentationChanged(change: { item: number; presentation: Pro039Presentation | null }): Promise<void> {
+    if (this.readOnly()) return;
+    const list = this.items().map(row => row.ITEM === change.item ? this.business.withPresentation(row, change.presentation) : row);
+    await this.applyItems(list);
+  }
+
   /**
    * La fila aparece al instante con el código y nombre de la lista; precio y presentación
    * ('EXISTENCIAS PRODUCTO') se completan después sin bloquear la pantalla.
    */
-  async addProduct(product: string): Promise<void> {
+  /** Material agregado a mano a un producto del consumo: queda registrado como de ese producto. */
+  async addProduct(change: { material: string; line: number }): Promise<void> {
     if (this.readOnly() || this.busy()) return;
-    if (this.items().some(row => row.PRODUCTO === product)) {
-      this.notification.warning(`El material ${product} ya está en el consumo.`);
+    const product = change.material;
+    const consumptionProduct = this.consumptionProducts().find(p => p.ITEM === change.line);
+    if (!consumptionProduct) return;
+    if (this.items().some(row => row.PRODUCTO === product && row.ITEM_PRODUCTO === consumptionProduct.ITEM)) {
+      this.notification.warning(`El material ${product} ya está en ${consumptionProduct.COMPONENTE || consumptionProduct.PRODUCTO}.`);
       return;
     }
     const next = this.items().reduce((max, row) => Math.max(max, row.ITEM), 0) + 1;
     const name = String(this.itemProducts().find(p => p.PRODUCTO === product)?.NOMBRE ?? '');
-    this.setItems([...this.items(), this.business.pendingItem(product, name, next)]);
+    this.setItems([...this.items(), this.business.pendingItem(product, name, next, consumptionProduct)]);
     this.workspace.setDirty(this.applicationId, true);
     this.pendingProducts.update(list => [...list, next]);
     try {
-      const row = await this.business.productItem(product, this.header(), next);
+      const row = await this.business.productItem(product, this.header(), next, consumptionProduct);
       // Conserva la cantidad que el usuario haya escrito mientras cargaba
       this.setItems(this.items().map(current => current.ITEM === next
         ? this.business.withQuantity(row, Number(current.CANTIDAD || 0))
@@ -781,38 +788,229 @@ export class Pro039Component implements OnInit, OnDestroy {
     }
   }
 
-  /** Producto JU: el consumo se puede hacer por uno de los productos que lo componen. */
-  isJuego(): boolean {
-    const product = this.form.controls.PRODUCTO.value ?? '';
-    const row = this.products().find(p => p.PRODUCTO === product);
-    return row ? !!row.ES_JUEGO : product.toUpperCase().startsWith('JU');
+  // ================= Productos del consumo =================
+
+  /**
+   * Los productos se conservan al cambiar la sección (la lista ofrece todos, tengan o no matriz en ella):
+   * solo se vuelven a cargar sus materiales de la nueva sección.
+   */
+  private async onSectionChanged(section: string): Promise<void> {
+    if (!section) {
+      this.setItems(this.items().filter(row => !row.ES_MATRIZ));
+      return;
+    }
+    await this.loadMaterials();
+  }
+
+  /** Botón +: abre una fila para elegir el producto (se puede repetir para agregar varios). */
+  beginAddProduct(): void {
+    if (this.readOnly() || this.busy() || !this.form.controls.SECCION.value) return;
+    this.productToAdd.set(null);
+    this.addingProduct.set(true);
+  }
+
+  cancelAddProduct(): void {
+    this.addingProduct.set(false);
+    this.productToAdd.set(null);
+    this.addingComponentFor.set(null);
+    this.componentToAdd.set(null);
+  }
+
+  async addConsumptionProduct(code: string | null): Promise<void> {
+    const product = String(code ?? '');
+    if (!product) return;
+    this.cancelAddProduct();
+    if (this.readOnly() || this.busy()) return;
+    if (this.consumptionProducts().some(p => p.PRODUCTO === product)) {
+      this.notification.warning(`El producto ${product} ya está en el consumo.`);
+      return;
+    }
+    const next = this.consumptionProducts().reduce((max, p) => Math.max(max, p.ITEM), 0) + 1;
+    const added = this.productFrom({ ITEM: next, PRODUCTO: product, COMPONENTE: '' });
+    this.consumptionProducts.update(list => [...list, added]);
+    this.syncHeaderProduct();
+    this.workspace.setDirty(this.applicationId, true);
+    if (added.ES_JUEGO) void this.loadComponents(product);
+    await this.loadMaterials();
+  }
+
+  /** Componente de un juego: sus materiales salen solo de la matriz de ese componente (vacío = todo el juego). */
+  async setProductComponent(item: number, component: string | null): Promise<void> {
+    if (this.readOnly()) return;
+    const value = String(component ?? '');
+    const current = this.consumptionProducts().find(p => p.ITEM === item);
+    if (!current || current.COMPONENTE === value) return;
+    if (this.consumptionProducts().some(p => p.ITEM !== item && p.PRODUCTO === current.PRODUCTO && p.COMPONENTE === value)) {
+      this.notification.warning(value ? `El componente ${value} ya está en ${current.PRODUCTO}.` : `${current.PRODUCTO} ya tiene la línea "Todo el juego".`);
+      return;
+    }
+    const name = String(this.componentsOf(current.PRODUCTO).find(c => c.PRODUCTO === value)?.NOMBRE ?? '');
+    this.consumptionProducts.update(list => list.map(p => p.ITEM === item ? { ...p, COMPONENTE: value, NOMBRE_COMPONENTE: name } : p));
+    this.syncHeaderProduct();
+    await this.loadMaterials();
+  }
+
+  /** Lote de un producto: sus materiales de la matriz recalculan la cantidad (unitario x lote) sin volver a consultar. */
+  async setProductLot(item: number, value: number | null): Promise<void> {
+    if (this.readOnly()) return;
+    const lot = Number(value);
+    const current = this.consumptionProducts().find(p => p.ITEM === item);
+    if (!current || !(lot > 0) || lot === current.CANTIDAD_LOTE) return;
+    this.consumptionProducts.update(list => list.map(p => p.ITEM === item ? { ...p, CANTIDAD_LOTE: lot } : p));
+    this.syncHeaderProduct();
+    await this.applyItems(this.items().map(row => this.business.withProductLot(row, current.ITEM, lot)));
+  }
+
+  /** Quita una línea (producto o componente del juego) con todos sus materiales (de su matriz y agregados a mano). */
+  async removeConsumptionProduct(item: number): Promise<void> {
+    if (this.readOnly() || this.busy()) return;
+    const removed = this.consumptionProducts().find(p => p.ITEM === item);
+    if (!removed) return;
+    if (this.items().some(row => !row.ES_MATRIZ && row.ITEM_PRODUCTO === removed.ITEM)) {
+      const label = removed.COMPONENTE ? `${removed.PRODUCTO} / ${removed.COMPONENTE}` : removed.PRODUCTO;
+      const answer = await Swal.fire({
+        text: `${label} tiene materiales agregados a mano. ¿Desea quitarlo con todos sus materiales?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Quitar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!answer.isConfirmed) return;
+    }
+    this.setItems(this.items().filter(row => row.ITEM_PRODUCTO !== removed.ITEM));
+    this.consumptionProducts.update(list => list.filter(p => p.ITEM !== item));
+    this.syncHeaderProduct();
+    await this.loadMaterials();
+  }
+
+  componentsOf(product: string): Pro039Lookup[] {
+    return this.productComponents()[product] ?? [];
+  }
+
+  /** Líneas agrupadas por producto, en el orden en que se agregaron (un juego reúne sus componentes). */
+  productGroups(): { PRODUCTO: string; NOMBRE: string; ES_JUEGO: boolean; lines: Pro039ConsumptionProduct[] }[] {
+    const groups = new Map<string, { PRODUCTO: string; NOMBRE: string; ES_JUEGO: boolean; lines: Pro039ConsumptionProduct[] }>();
+    for (const line of this.consumptionProducts()) {
+      const group = groups.get(line.PRODUCTO) ?? { PRODUCTO: line.PRODUCTO, NOMBRE: line.NOMBRE, ES_JUEGO: line.ES_JUEGO, lines: [] };
+      group.lines.push(line);
+      groups.set(line.PRODUCTO, group);
+    }
+    return [...groups.values()];
+  }
+
+  componentLabel(line: Pro039ConsumptionProduct): string {
+    const name = line.NOMBRE_COMPONENTE || String(this.componentsOf(line.PRODUCTO).find(c => c.PRODUCTO === line.COMPONENTE)?.NOMBRE ?? '');
+    return name ? `${line.COMPONENTE} - ${name}` : line.COMPONENTE;
+  }
+
+  /** "+ Componente" de un juego: abre una fila para elegir otro componente (cada uno con su cantidad). */
+  beginAddComponent(product: string): void {
+    if (this.readOnly() || this.busy()) return;
+    this.componentToAdd.set(null);
+    this.addingComponentFor.set(product);
+    void this.loadComponents(product);
+  }
+
+  cancelAddComponent(): void {
+    this.addingComponentFor.set(null);
+    this.componentToAdd.set(null);
+  }
+
+  /**
+   * Agrega un componente al juego. Si el juego estaba como "Todo el juego" (una sola línea sin componente),
+   * esa línea pasa a ser la del componente; si no, se crea una línea nueva con cantidad 1.
+   */
+  async addComponentLine(product: string, component: string | null): Promise<void> {
+    const value = String(component ?? '');
+    if (!value) return;
+    this.cancelAddComponent();
+    if (this.readOnly() || this.busy()) return;
+    const lines = this.consumptionProducts().filter(p => p.PRODUCTO === product);
+    if (lines.some(p => p.COMPONENTE === value)) {
+      this.notification.warning(`El componente ${value} ya está en ${product}.`);
+      return;
+    }
+    const whole = lines.length === 1 && !lines[0].COMPONENTE ? lines[0] : null;
+    if (whole) {
+      await this.setProductComponent(whole.ITEM, value);
+      return;
+    }
+    const name = String(this.componentsOf(product).find(c => c.PRODUCTO === value)?.NOMBRE ?? '');
+    const next = this.consumptionProducts().reduce((max, p) => Math.max(max, p.ITEM), 0) + 1;
+    const added = this.productFrom({ ITEM: next, PRODUCTO: product, COMPONENTE: value, NOMBRE_COMPONENTE: name });
+    // La línea nueva va junto a las demás del mismo juego
+    const list = [...this.consumptionProducts()];
+    const lastIndex = list.map(p => p.PRODUCTO).lastIndexOf(product);
+    list.splice(lastIndex + 1, 0, added);
+    this.consumptionProducts.set(list);
+    this.syncHeaderProduct();
+    this.workspace.setDirty(this.applicationId, true);
+    await this.loadMaterials();
+  }
+
+  /** Quita el juego (o producto) con todas sus líneas y sus materiales. */
+  async removeProduct(product: string): Promise<void> {
+    if (this.readOnly() || this.busy()) return;
+    const lines = this.consumptionProducts().filter(p => p.PRODUCTO === product).map(p => p.ITEM);
+    if (this.items().some(row => !row.ES_MATRIZ && lines.includes(Number(row.ITEM_PRODUCTO)))) {
+      const answer = await Swal.fire({
+        text: `${product} tiene materiales agregados a mano. ¿Desea quitarlo con todos sus componentes y materiales?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Quitar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!answer.isConfirmed) return;
+    }
+    this.setItems(this.items().filter(row => !lines.includes(Number(row.ITEM_PRODUCTO))));
+    this.consumptionProducts.update(list => list.filter(p => p.PRODUCTO !== product));
+    this.syncHeaderProduct();
+    await this.loadMaterials();
+  }
+
+  /** Producto del consumo con su nombre y si es juego, tomados de los catálogos cargados. */
+  private productFrom(values: Partial<Pro039ConsumptionProduct> & Pick<Pro039ConsumptionProduct, 'ITEM' | 'PRODUCTO'>): Pro039ConsumptionProduct {
+    const row = this.products().find(p => p.PRODUCTO === values.PRODUCTO);
+    return {
+      NOMBRE: String(row?.NOMBRE ?? ''),
+      ES_JUEGO: !!row?.ES_JUEGO,
+      COMPONENTE: '',
+      CANTIDAD_LOTE: 1,
+      ...values
+    };
+  }
+
+  /** MOVIMIENTOS_PRO.PRODUCTO / PRODUCTO_COMPONENTE / CANTIDAD_LOTE guardan el primer producto (consultas y reportes anteriores). */
+  private syncHeaderProduct(): void {
+    const first = this.consumptionProducts()[0];
+    this.form.patchValue({
+      PRODUCTO: first?.PRODUCTO ?? '',
+      COMPONENTE: first?.COMPONENTE ?? '',
+      CANTIDAD_LOTE: first?.CANTIDAD_LOTE ?? 1
+    }, { emitEvent: false });
   }
 
   private async loadComponents(product: string): Promise<void> {
-    this.components.set([]);
-    if (!product || !product.toUpperCase().startsWith('JU')) return;
+    if (!product || this.productComponents()[product]) return;
     try {
       const rows = await this.business.catalog('components', { PRODUCTO: product, ...this.business.identity });
-      this.components.set(rows.map(row => ({ ...row, PRODUCTO: String(row.PRODUCTO ?? ''), LABEL: this.label(row.PRODUCTO, row.NOMBRE) })));
+      const list = rows.map(row => ({ ...row, PRODUCTO: String(row.PRODUCTO ?? ''), LABEL: this.label(row.PRODUCTO, row.NOMBRE) }));
+      this.productComponents.update(map => ({ ...map, [product]: list }));
     } catch (error) {
       this.warnNoMatrix(error);
     }
   }
 
-  /** Secciones marcadas como "Asignable materiales"; MATRIZ indica si el producto tiene materiales en ella. */
-  private async loadSections(product: string, component: string): Promise<void> {
-    if (!product) {
-      this.sections.set([]);
-      return;
-    }
+  /** Secciones marcadas como "Asignable materiales" (se elige la sección antes que los productos). */
+  private async loadSections(): Promise<void> {
+    if (this.sections().length) return;
     try {
-      const rows = await this.business.catalog('sections', { PRODUCTO: product, COMPONENTE: component, ...this.business.identity });
+      const rows = await this.business.catalog('sections', { PRODUCTO: '', COMPONENTE: '', ...this.business.identity });
       this.sections.set(rows.map(row => ({
         ...row,
         ID_SECCION: String(row.ID_SECCION ?? ''),
         NOMBRE_SECCION: String(row.NOMBRE_SECCION ?? ''),
-        LABEL: this.label(row.ID_SECCION, row.NOMBRE_SECCION),
-        MATRIZ: row.TIENE_MATRIZ ? 'Sí' : ''
+        LABEL: this.label(row.ID_SECCION, row.NOMBRE_SECCION)
       })));
     } catch (error) {
       this.sections.set([]);
@@ -820,40 +1018,47 @@ export class Pro039Component implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Materiales de la matriz de todos los productos en la sección (el mismo material de varios productos
+   * llega sumado, con su origen). Los agregados a mano se conservan.
+   */
   private async loadMaterials(): Promise<void> {
     const h = this.header();
-    if (!h.PRODUCTO || !h.SECCION) {
-      this.setItems([]);
+    const products = this.consumptionProducts();
+    // Los agregados a mano se conservan si su producto sigue en el consumo
+    const manual = this.items().filter(row => !row.ES_MATRIZ && products.some(p => p.ITEM === row.ITEM_PRODUCTO));
+    if (!products.length || !h.SECCION) {
+      await this.applyItems(manual);
       return;
     }
     this.busy.set(true);
     try {
-      const materials = await this.business.materials(h.PRODUCTO, h.SECCION, String(h.ID_UN_ORIGEN ?? ''), String(h.COMPONENTE ?? ''), this.lot());
+      const materials = await this.business.materials(products, h.SECCION, String(h.ID_UN_ORIGEN ?? ''));
       this.busy.set(false);
-      if (!materials.length) throw new Error(`No hay materiales en la matriz para ${h.COMPONENTE || h.PRODUCTO}`);
-      await this.applyItems(materials);
+      if (!materials.length) throw new Error(`No hay materiales en la matriz de ${products.length > 1 ? 'los productos elegidos' : products[0].PRODUCTO} para la sección ${h.SECCION}`);
+      // Los materiales de la matriz toman ITEM después de los agregados a mano, que conservan el suyo
+      const offset = manual.reduce((max, row) => Math.max(max, row.ITEM), 0);
+      await this.applyItems([...materials.map((row, index) => ({ ...row, ITEM: offset + index + 1 })), ...manual]);
       this.notification.success(`Se cargaron ${materials.length} material(es) de la matriz.`);
+      // Los productos sin matriz en la sección se pueden dejar: sus materiales se agregan a mano
+      const withMaterials = new Set(materials.map(row => row.ITEM_PRODUCTO));
+      const without = products.filter(p => !withMaterials.has(p.ITEM)).map(p => p.COMPONENTE ? `${p.PRODUCTO} / ${p.COMPONENTE}` : p.PRODUCTO);
+      if (without.length) {
+        this.notification.warning(`Sin materiales en la matriz de la sección ${h.SECCION}: ${without.join(', ')}. Puede agregarlos manualmente con el + de cada producto.`);
+      }
     } catch (error) {
       // Se quitan solo los de la matriz anterior: los agregados a mano se conservan
-      this.setItems(this.items().filter(row => !row.ES_MATRIZ));
+      this.setItems(manual);
       this.warnNoMatrix(error);
     } finally {
       this.busy.set(false);
     }
   }
 
-  /** Cantidad del lote (1 si está vacía o no es válida). */
+  /** Lote del encabezado (el del primer producto): solo lo usan los consumos anteriores, de un producto. */
   lot(): number {
     const value = Number(this.form.controls.CANTIDAD_LOTE.value);
     return value > 0 ? value : 1;
-  }
-
-  private async applyLot(): Promise<void> {
-    const lot = this.lot();
-    if (!this.items().some(row => row.ES_MATRIZ)) return;
-    await this.applyItems(this.items().map(row => row.ES_MATRIZ
-      ? this.business.withQuantity(row, Number(row.CONSUMO_BASE || 0) * lot)
-      : row));
   }
 
   async loadItemProducts(): Promise<void> {
@@ -877,8 +1082,14 @@ export class Pro039Component implements OnInit, OnDestroy {
     try {
       const detail = await this.business.additional(record.ID_DOCUMENTO, record.CONSECUTIVO);
       if (this.currentRecord() !== record) return;
+      const products = this.detailProducts(detail.PRODUCTOS);
+      this.consumptionProducts.set(products);
+      // Consumos anteriores (un producto, sin PRODUCTO_CONSUMO en los materiales): todos son de ese producto
+      const single = products.length === 1 ? products[0] : null;
       const items = (detail.ITM_MOVIMIENTOS ?? []).map(row => ({
         ...row,
+        PRODUCTO_CONSUMO: row.PRODUCTO_CONSUMO || single?.PRODUCTO || null,
+        ITEM_PRODUCTO: Number(row.ITEM_PRODUCTO) || single?.ITEM || null,
         ES_MATRIZ: row.ES_MATRIZ === true || Number(row.ES_MATRIZ) === 1,
         CONSUMO_BASE: Number(row.CONSUMO_BASE ?? 0)
       }));
@@ -989,19 +1200,34 @@ export class Pro039Component implements OnInit, OnDestroy {
       FECHA_VENCIMIENTO: this.todayDate()
     }, { emitEvent: false });
     this.setItems([]);
+    this.consumptionProducts.set([]);
+    this.cancelAddProduct();
+  }
+
+  /** Productos que devuelve 'consulta adicionales' (los consumos anteriores traen solo el del encabezado). */
+  private detailProducts(rows: Partial<Pro039ConsumptionProduct>[] | null | undefined): Pro039ConsumptionProduct[] {
+    return (rows ?? []).map((row, index) => ({
+      ITEM: Number(row.ITEM ?? index + 1),
+      PRODUCTO: String(row.PRODUCTO ?? ''),
+      NOMBRE: String(row.NOMBRE ?? ''),
+      ES_JUEGO: row.ES_JUEGO === true || Number(row.ES_JUEGO) === 1,
+      COMPONENTE: String(row.COMPONENTE ?? ''),
+      NOMBRE_COMPONENTE: String(row.NOMBRE_COMPONENTE ?? ''),
+      CANTIDAD_LOTE: Number(row.CANTIDAD_LOTE ?? 1) || 1
+    })).filter(row => row.PRODUCTO);
   }
 
   /**
    * Exportar a Excel (ventana de exportación): el consumo actual o, como en los informes,
    * todos los consumos de la búsqueda.
    */
-  async exportExcel(scope: Pro039ExportScope): Promise<void> {
+  async exportExcel(scope: XteinExportScope): Promise<void> {
     const record = this.currentRecord();
     if (!record || this.busy()) return;
     const all = this.records();
     try {
       if (scope === 'actual') {
-        await this.excel.export(this.excelHeader({ ...record, ...this.header() }, this.lot()), this.items());
+        await this.excel.export(pro039ConsumptionWorkbook(this.excelHeader({ ...record, ...this.header() }, this.lot(), this.consumptionProducts()), this.items()));
         this.exportVisible.set(false);
         return;
       }
@@ -1016,11 +1242,11 @@ export class Pro039Component implements OnInit, OnDestroy {
             ES_MATRIZ: item.ES_MATRIZ === true || Number(item.ES_MATRIZ) === 1,
             CONSUMO_BASE: Number(item.CONSUMO_BASE ?? 0)
           }));
-          return { header: this.excelHeader(row, Number(row.CANTIDAD_LOTE ?? 1) || 1), items };
+          return { header: this.excelHeader(row, Number(row.CANTIDAD_LOTE ?? 1) || 1, this.detailProducts(detail.PRODUCTOS)), items };
         }));
         consumptions.push(...block);
       }
-      await this.excel.exportMany(consumptions);
+      await this.excel.export(pro039ConsumptionsWorkbook(consumptions));
       this.exportVisible.set(false);
     } catch (error) {
       this.showError(error);
@@ -1030,11 +1256,14 @@ export class Pro039Component implements OnInit, OnDestroy {
   }
 
   /** Encabezado del consumo para el Excel, con código y nombre cuando están en los catálogos cargados. */
-  private excelHeader(row: Partial<Pro039MovementRecord>, lot: number): Pro039ExcelHeader {
+  private excelHeader(row: Partial<Pro039MovementRecord>, lot: number, products: Pro039ConsumptionProduct[]): Pro039ExcelHeader {
     const find = (list: Pro039Lookup[], key: string, value: unknown) => list.find(item => String(item[key] ?? '') === String(value ?? ''));
     const date = (value: unknown) => value ? String(value).slice(0, 10) : '';
     const section = row.SECCION || row.ID_SECCION || '';
-    const component = row.COMPONENTE || row.PRODUCTO_COMPONENTE || '';
+    // Varios productos por consumo: "PF000005 - Cama..., JU000001 - Alcoba... (PF000010)"
+    const productLabel = (p: Pro039ConsumptionProduct) =>
+      `${this.label(p.PRODUCTO, p.NOMBRE)}${p.COMPONENTE ? ' / ' + p.COMPONENTE : ''} (cantidad ${p.CANTIDAD_LOTE})`;
+    const componentLabel = (p: Pro039ConsumptionProduct) => p.COMPONENTE ? this.label(p.COMPONENTE, p.NOMBRE_COMPONENTE) : '';
     return {
       documento: String(row.DOCUMENTO || `${row.ID_DOCUMENTO ?? ''}-${row.CONSECUTIVO ?? ''}`),
       fecha: date(row.FECHA),
@@ -1042,10 +1271,12 @@ export class Pro039Component implements OnInit, OnDestroy {
       estado: String(row.ESTADO ?? ''),
       movimiento: `${row.MOVIMIENTO ?? ''} ${row.TIPO ?? ''}`.trim(),
       usuario: String(row.USUARIO ?? ''),
-      producto: String(find(this.products(), 'PRODUCTO', row.PRODUCTO)?.LABEL ?? row.PRODUCTO ?? ''),
-      componente: String(find(this.products(), 'PRODUCTO', component)?.LABEL ?? find(this.components(), 'PRODUCTO', component)?.LABEL ?? component),
+      producto: products.length ? products.map(productLabel).join(', ') : String(find(this.products(), 'PRODUCTO', row.PRODUCTO)?.LABEL ?? row.PRODUCTO ?? ''),
+      componente: products.map(componentLabel).filter(Boolean).join(', '),
       seccion: String(find(this.sections(), 'ID_SECCION', section)?.LABEL ?? section),
       lote: lot,
+      lotes: Object.fromEntries(products.map(p => [String(p.ITEM), Number(p.CANTIDAD_LOTE) || 1])),
+      lineas: Object.fromEntries(products.map(p => [String(p.ITEM), p.COMPONENTE ? `${p.PRODUCTO} / ${p.COMPONENTE}` : p.PRODUCTO])),
       origen: String(row.ORIGEN ?? row.ID_UN_ORIGEN ?? ''),
       destino: String(row.DESTINO ?? row.ID_UN_DESTINO ?? ''),
       observacion: String(row.DETALLE ?? '')
@@ -1064,6 +1295,6 @@ export class Pro039Component implements OnInit, OnDestroy {
 
   private warnNoMatrix(err: unknown): void {
     const message = err instanceof Error ? err.message : 'No se pudieron cargar los materiales de la matriz';
-    this.notification.warning(`${message}. Puede agregar los materiales manualmente con "+ Agregar material".`);
+    this.notification.warning(`${message}. Puede agregar los materiales manualmente con el + de cada producto.`);
   }
 }

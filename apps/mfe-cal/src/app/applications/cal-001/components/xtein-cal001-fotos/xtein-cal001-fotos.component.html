@@ -1,0 +1,56 @@
+<ul class="ft-lista">
+  @for (foto of fotos(); track foto.ID_FOTO_NC) {
+    <li class="ft-foto">
+      <span class="ft-nombre">{{ foto.NOMBRE_ORIGINAL }}<small>{{ foto.USUARIO_CREA }} · {{ fecha(foto.FECHA_CREA) }}</small></span>
+      <button type="button" class="ft-boton" [disabled]="cargandoVista() === foto.ID_FOTO_NC" (click)="ver(foto)">
+        {{ cargandoVista() === foto.ID_FOTO_NC ? 'Cargando…' : 'Ver' }}
+      </button>
+      @if (puedeRetirar()) {
+        <button type="button" class="ft-boton ft-peligro" [attr.aria-label]="'Retirar ' + foto.NOMBRE_ORIGINAL" (click)="retirar(foto)">Retirar</button>
+      }
+    </li>
+  }
+  @for (foto of cola(); track foto.id) {
+    <li class="ft-foto ft-pendiente" [class.ft-error]="foto.estado === 'error'">
+      <span class="ft-nombre">{{ foto.nombre }}
+        <small>
+          @switch (foto.estado) {
+            @case ('subiendo') { Subiendo… }
+            @case ('error') { {{ foto.mensaje }} }
+            @default { {{ idRegistro() && !diferirSubida() ? 'En cola' : 'Se sube al guardar el registro' }} }
+          }
+        </small>
+      </span>
+      <button type="button" class="ft-boton" (click)="verPendiente(foto)">Ver</button>
+      @if (foto.estado !== 'subiendo') {
+        <button type="button" class="ft-boton ft-peligro" [attr.aria-label]="'Descartar ' + foto.nombre" (click)="descartar(foto.id)">Descartar</button>
+      }
+    </li>
+  }
+  @if (!fotos().length && !cola().length) {
+    <li class="ft-vacio">Sin fotos de evidencia.</li>
+  }
+</ul>
+
+<div class="ft-acciones">
+  @if (puedeAgregar() && cupo() > 0) {
+    <label class="ft-boton ft-principal" [class.ft-ocupado]="procesando()">
+      <input type="file" accept="image/jpeg,image/png,image/webp" multiple [disabled]="procesando()" (change)="elegirArchivos($any($event.target))" />
+      {{ procesando() ? 'Comprimiendo…' : 'Agregar fotos' }}
+    </label>
+  }
+  @if (idRegistro() && cola().length && !diferirSubida()) {
+    <button type="button" class="ft-boton" [disabled]="subiendo()" (click)="reintentar()">{{ subiendo() ? 'Subiendo…' : 'Reintentar subida' }}</button>
+  }
+  <small class="ft-nota">Fotos del registro completo (no de una parte). Máximo {{ maximo }}; se comprimen antes de subir.</small>
+</div>
+
+@if (vista(); as foto) {
+  <div class="ft-visor" role="dialog" aria-modal="true" [attr.aria-label]="foto.titulo" (click)="cerrarVista()">
+    <figure (click)="$event.stopPropagation()">
+      <img [src]="foto.url" [alt]="foto.titulo" />
+      <figcaption><span class="ft-titulo">{{ foto.titulo }}</span>
+        <button #cerrarVisor type="button" class="ft-boton" (click)="cerrarVista()">Cerrar</button></figcaption>
+    </figure>
+  </div>
+}

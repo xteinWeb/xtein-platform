@@ -13,34 +13,41 @@ import {
 } from '@angular/core';
 import { DxPopupModule, DxTemplateModule } from 'devextreme-angular';
 import type { PositionConfig } from 'devextreme/common/core/animation';
-import { XteinButtonComponent } from '@xtein/ui';
+import { XteinButtonComponent } from '../../forms/xtein-button/xtein-button.component';
+import { XteinExportScope } from './models/xtein-record-export.model';
 
-export type Pro039ExportScope = 'actual' | 'todos';
+/** Botón Descargar de la barra (ToolbarAction.Download), al que se ancla la ventana. */
+export const XteinExportAnchorSelector = '[data-xtein-toolbar-action="download"]';
 
 /**
- * Exportar a Excel: misma ventana que la de informes (xtein-record-reports), anclada al botón
- * Descargar de la barra, con la elección del registro actual o de todos los consultados.
+ * Ventana estándar de "Exportar a Excel", con el mismo estilo y posición que la de informes
+ * (xtein-record-reports): elige el registro actual o todos los consultados y emite `exported`.
+ * La aplicación arma el libro con XteinExcelExportService. Ver README.md de esta carpeta.
  */
 @Component({
-  selector: 'pro-039-export',
+  selector: 'xtein-record-export',
   standalone: true,
   imports: [DxPopupModule, DxTemplateModule, XteinButtonComponent],
-  templateUrl: './pro-039-export.component.html',
-  styleUrl: './pro-039-export.component.scss',
+  templateUrl: './xtein-record-export.component.html',
+  styleUrl: './xtein-record-export.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Pro039ExportComponent implements OnChanges {
+export class XteinRecordExportComponent implements OnChanges {
   @Input() visible = false;
-  /** Documento del registro actual (SC100-1). */
+  /** Nombre de lo que se exporta (por ejemplo "Consumos"). */
+  @Input() title = 'Datos';
+  /** Identificación del registro actual (por ejemplo "SC100-1"). */
   @Input() current = '';
-  /** Cantidad de consumos de la búsqueda. */
+  /** Cantidad de registros de la consulta. */
   @Input() total = 0;
+  /** Mientras la aplicación genera el archivo. */
   @Input() busy = false;
+  @Input() anchorSelector = XteinExportAnchorSelector;
   @Output() readonly visibleChange = new EventEmitter<boolean>();
-  @Output() readonly exported = new EventEmitter<Pro039ExportScope>();
+  @Output() readonly exported = new EventEmitter<XteinExportScope>();
 
   private readonly document = inject(DOCUMENT);
-  readonly scope = signal<Pro039ExportScope>('actual');
+  readonly scope = signal<XteinExportScope>('actual');
   readonly isMobile = signal(false);
   readonly position = signal<PositionConfig>({ my: 'center', at: 'center' });
 
@@ -51,7 +58,7 @@ export class Pro039ExportComponent implements OnChanges {
     }
   }
 
-  select(scope: Pro039ExportScope): void {
+  select(scope: XteinExportScope): void {
     if (this.busy || (scope === 'todos' && this.total < 1)) return;
     this.scope.set(scope);
   }
@@ -69,7 +76,7 @@ export class Pro039ExportComponent implements OnChanges {
   @HostListener('window:resize')
   updateViewport(): void {
     this.isMobile.set((this.document.defaultView?.innerWidth ?? 1024) <= 768);
-    const button = this.document.querySelector<HTMLElement>('[data-xtein-toolbar-action="download"]') ??
+    const button = this.document.querySelector<HTMLElement>(this.anchorSelector) ??
       this.document.querySelector<HTMLElement>('[data-xtein-toolbar-overflow]');
     this.position.set(button && !this.isMobile()
       ? { my: 'left top', at: 'left bottom', of: button, collision: 'fit flip', offset: '0 6' }
