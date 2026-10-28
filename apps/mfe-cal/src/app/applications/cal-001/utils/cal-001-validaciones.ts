@@ -24,6 +24,15 @@ export function partesConCausas(borrador: Cal001Borrador): Cal001ParteBorrador[]
 }
 
 /**
+ * Evidencia obligatoria: el registro no se guarda sin al menos una foto (activa o elegida para subir al guardar).
+ * El SP no puede exigirla en `new` porque las fotos se suben después de crear el registro; por eso se valida aquí.
+ */
+export function validarEvidencia(accion: 'new' | 'update' | 'agregar', activas: number, enCola: number): string[] {
+  if (activas + enCola > 0) return [];
+  return [accion === 'new' ? 'Agregue al menos una foto de evidencia.' : 'El registro no tiene fotos: agregue al menos una foto de evidencia.'];
+}
+
+/**
  * Valida el borrador con las mismas reglas del SP (contrato §2.3, reglas 1-10) para avisar antes de enviar.
  * Devuelve la lista de problemas en orden; vacía = se puede guardar. El SP vuelve a validar todo.
  * En `agregar` se valida el árbol resultante (lo guardado + lo nuevo) y las ocurrencias adicionales.

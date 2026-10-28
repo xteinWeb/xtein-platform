@@ -1,7 +1,7 @@
 import { HoyPrueba, PartesPrueba, borradorCliente, borradorProduccion, registroGuardado } from '../testing/cal-001.fixtures';
 import { esFechaValida, hoyColombia, mostrarFecha, sumarDias } from './cal-001-fecha';
 import { borradorDesdeRegistro, borradorVacio, operarioDesdeMaestro, partesDesdeProducto, tieneCaptura } from './cal-001-modelo';
-import { cabeEnCp1252, partesConCausas, validarBorrador } from './cal-001-validaciones';
+import { cabeEnCp1252, partesConCausas, validarBorrador, validarEvidencia } from './cal-001-validaciones';
 
 describe('CAL-001 modelo del borrador', () => {
   it('un registro nuevo arranca en Producción con la fecha del evento de hoy y sin partes', () => {
@@ -165,5 +165,24 @@ describe('CAL-001 fechas en hora de Colombia', () => {
     expect(esFechaValida('2026-10-26')).toBe(true);
     expect(sumarDias('2026-10-26', -30)).toBe('2026-09-26');
     expect(mostrarFecha('2026-10-20T09:15:00')).toBe('20/10/2026 09:15');
+  });
+});
+
+describe('CAL-001 foto de evidencia obligatoria', () => {
+  it('un registro nuevo exige al menos una foto elegida', () => {
+    expect(validarEvidencia('new', 0, 0)).toEqual(['Agregue al menos una foto de evidencia.']);
+    expect(validarEvidencia('new', 0, 1)).toEqual([]);
+  });
+
+  it('Modificar o Agregar un registro sin fotos activas exige una', () => {
+    const mensaje = ['El registro no tiene fotos: agregue al menos una foto de evidencia.'];
+    expect(validarEvidencia('update', 0, 0)).toEqual(mensaje);
+    expect(validarEvidencia('agregar', 0, 0)).toEqual(mensaje);
+    expect(validarEvidencia('update', 0, 2)).toEqual([]);
+  });
+
+  it('con fotos activas no se exige otra', () => {
+    expect(validarEvidencia('update', 1, 0)).toEqual([]);
+    expect(validarEvidencia('agregar', 3, 0)).toEqual([]);
   });
 });

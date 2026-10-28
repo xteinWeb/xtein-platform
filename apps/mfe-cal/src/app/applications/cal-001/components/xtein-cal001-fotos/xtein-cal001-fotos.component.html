@@ -6,9 +6,13 @@
         {{ cargandoVista() === foto.ID_FOTO_NC ? 'Cargando…' : 'Ver' }}
       </button>
       @if (puedeRetirar()) {
-        <button type="button" class="ft-boton ft-peligro" [attr.aria-label]="'Retirar ' + foto.NOMBRE_ORIGINAL" (click)="retirar(foto)">Retirar</button>
+        <button type="button" class="ft-boton ft-peligro" [attr.aria-label]="'Retirar ' + foto.NOMBRE_ORIGINAL"
+          [disabled]="esUnica()" [attr.aria-describedby]="esUnica() ? 'ft-unica-' + foto.ID_FOTO_NC : null" (click)="retirar(foto)">Retirar</button>
       }
     </li>
+  }
+  @if (puedeRetirar() && fotos().length === 1) {
+    <li class="ft-aviso" [id]="'ft-unica-' + fotos()[0].ID_FOTO_NC">Es la única foto del registro; agregue y guarde otra antes de retirarla.</li>
   }
   @for (foto of cola(); track foto.id) {
     <li class="ft-foto ft-pendiente" [class.ft-error]="foto.estado === 'error'">

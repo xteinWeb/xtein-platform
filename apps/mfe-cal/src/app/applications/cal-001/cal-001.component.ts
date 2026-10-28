@@ -30,7 +30,7 @@ import { mensajeError } from './utils/cal-001-errores';
 import { hoyColombia, mostrarFecha, sumarDias } from './utils/cal-001-fecha';
 import { borradorDesdeRegistro, borradorVacio, clonarBorrador, nombreConArea, partesDesdeProducto, tieneCaptura } from './utils/cal-001-modelo';
 import { hayAlgoQueAgregar } from './utils/cal-001-payload';
-import { validarBorrador } from './utils/cal-001-validaciones';
+import { validarBorrador, validarEvidencia } from './utils/cal-001-validaciones';
 
 type Cal001Pestana = 'registro' | 'consulta';
 type CampoEncabezado = 'ORIGEN' | 'CANTIDAD_REFERENCIA' | 'FECHA_EVENTO' | 'OBSERVACION' | 'N_SERVICIO' | 'ID_AREA_DETECCION'
@@ -314,7 +314,34 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   nuevo(): void {
     if (this.enCaptura() || !this.puedeCrear()) return;
-    this.empezarCaptura(borradorVacio(this.hoy()));
+    const confirmado = this.confirmarDescarteFotos(null);
+    if (confirmado === true) this.empezarCaptura(borradorVacio(this.hoy()));
+    else void confirmado.then(si => { if (si && !this.enCaptura()) this.empezarCaptura(borradorVacio(this.hoy())); });
+  }
+
+  /**
+   * Fotos elegidas y sin subir (p. ej. tras una subida fallida) que se descartarían al pasar a `destino`
+   * (otro registro, o `null` = registro nuevo). Sin fotos así responde `true` sin esperar (camino síncrono);
+   * con ellas pregunta antes de descartarlas.
+   */
+  private confirmarDescarteFotos(destino: number | null): true | Promise<boolean> {
+    const ajenas = this.fotosComponente()?.pendientes().filter(f => f.dueno !== destino) ?? [];
+    if (!ajenas.length) return true;
+    const dueno = ajenas[0].dueno;
+    const abierto = this.registro()?.REGISTRO;
+    const documento = this.registros().find(f => f.ID_REGISTRO_NC === dueno)?.DOCUMENTO
+      ?? (abierto?.ID_REGISTRO_NC === dueno ? abierto?.DOCUMENTO : undefined) ?? 'el registro abierto';
+    const n = ajenas.length;
+    return Swal.fire({
+      title: 'Fotos sin subir',
+      text: `Hay ${n} foto${n === 1 ? '' : 's'} sin subir de ${documento}. Si continúa se descarta${n === 1 ? '' : 'n'}.`,
+      icon: 'warning', showCancelButton: true, confirmButtonColor: '#DF3E3E', cancelButtonColor: '#438ef1',
+      confirmButtonText: 'Descartar y continuar', cancelButtonText: 'Volver'
+    }).then(respuesta => {
+      // Se descartan aquí y no por el cambio de registro: si la carga del destino falla, no deben quedar huérfanas.
+      if (respuesta.isConfirmed) this.fotosComponente()?.descartarAjenas(destino);
+      return respuesta.isConfirmed;
+    });
   }
 
   private empezarCaptura(borrador: Cal001Borrador): void {
@@ -456,12 +483,21 @@ export class Cal001Component implements OnInit, OnDestroy {
       this.notification.warning('No agregó nada.');
       return;
     }
+    // Foto de evidencia obligatoria: activas del registro + elegidas para subir al guardar.
+    const sinEvidencia = validarEvidencia(accion, registro?.FOTOS.length ?? 0, fotos?.cola().length ?? 0);
+    if (sinEvidencia.length) {
+      this.errores.set(sinEvidencia);
+      this.notification.warning(sinEvidencia[0]);
+      return;
+    }
     this.cargando.set(true);
     let id = borrador.ID_REGISTRO_NC;
+    let documento = registro?.REGISTRO.DOCUMENTO ?? '';
     try {
       if (conDatos) {
         const guardado = agregando && registro ? await this.servicio.agregar(borrador, registro) : await this.servicio.guardar(borrador);
         id = guardado.ID_REGISTRO_NC;
+        documento = guardado.DOCUMENTO;
         if (accion === 'new') this.almacen.borrar(this.claveBorrador());
         this.notification.success(accion === 'new' ? `No conformidad ${guardado.DOCUMENTO} registrada.`
           : accion === 'update' ? `${guardado.DOCUMENTO} modificado.` : `${guardado.DOCUMENTO} actualizado (versión ${guardado.VERSION}).`);
@@ -479,10 +515,24 @@ export class Cal001Component implements OnInit, OnDestroy {
     if (!id) return;
     // Las fotos en cola del registro nuevo pasan al documento creado antes de mostrarlo (las demás se descartan).
     if (accion === 'new') fotos?.adoptar(id);
-    await this.abrirRegistro(id);
+    await this.cargarRegistro(id);
     // Fotos solo en edición (C5): las elegidas mientras se capturaba se suben al guardar.
-    if (fotos?.pendientes().length) await fotos.subirPendientes(id);
+    if (fotos && !fotos.subiendo() && fotos.pendientes().some(f => f.dueno === id)) {
+      const activas = this.registro()?.FOTOS.length ?? 0;
+      const subidas = await fotos.subirPendientes(id);
+      // Ninguna se subió y el registro no tiene otra: se dice explícitamente (con 0 subidas no hay recarga que borre el aviso).
+      if (activas + subidas === 0) this.avisarSinFoto(id, documento, accion, conDatos);
+    }
     if (this.consulta()) void this.buscar(this.filtro(), this.consulta()?.PAGINA ?? 1, false);
+  }
+
+  private avisarSinFoto(id: number, documento: string, accion: 'new' | 'update' | 'agregar', conDatos: boolean): void {
+    const reintentar = this.registro()?.REGISTRO.ID_REGISTRO_NC === id ? ' Pulse «Reintentar subida» antes de salir.'
+      : ` Abra ${documento} para reintentar la subida.`;
+    const mensaje = (!conDatos ? `Las fotos de ${documento} no se subieron.`
+      : accion === 'new' ? `${documento} quedó guardado sin foto: la subida falló.` : `${documento} sigue sin foto: la subida falló.`) + reintentar;
+    this.errores.set([mensaje]);
+    this.notification.error(mensaje);
   }
 
   /** E22: otro usuario guardó antes. Se ofrece recargar la versión vigente (los cambios de esta pantalla se pierden). */
@@ -495,16 +545,19 @@ export class Cal001Component implements OnInit, OnDestroy {
     if (!respuesta.isConfirmed || !id) return;
     this.fotosComponente()?.limpiar();
     this.terminarCaptura(RecordToolbarMode.Browsing);
-    await this.abrirRegistro(id);
+    await this.cargarRegistro(id);
   }
 
   async cancelar(): Promise<void> {
     if (!this.enCaptura() || this.cargando()) return;
     const creando = this.creando();
+    // `limpiar()` descarta todas las fotos sin subir: se cuentan todas.
+    const enCola = this.fotosComponente()?.pendientes().length ?? 0;
+    const fotosEnCola = enCola ? ` Se descarta${enCola === 1 ? '' : 'n'} ${enCola} foto${enCola === 1 ? '' : 's'} sin subir.` : '';
     const respuesta = await Swal.fire({
       title: this.workspace.getApplicationTitle(this.applicationId),
-      text: creando ? '¿Cancelar el registro nuevo? Se descarta también el borrador guardado en este equipo.'
-        : this.agregando() ? '¿Cancelar lo agregado sin guardar? También se descartan las fotos en cola.' : '¿Cancelar la modificación sin guardar?',
+      text: (creando ? '¿Cancelar el registro nuevo? Se descarta también el borrador guardado en este equipo.'
+        : this.agregando() ? '¿Cancelar lo agregado sin guardar?' : '¿Cancelar la modificación sin guardar?') + fotosEnCola,
       icon: 'warning', showCancelButton: true, confirmButtonColor: '#DF3E3E', cancelButtonColor: '#438ef1',
       cancelButtonText: 'No', confirmButtonText: 'Sí, cancelar'
     });
@@ -525,11 +578,19 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   /* ========================= Abrir registro y consulta ========================= */
 
+  /** Abre un registro a pedido del usuario (consulta, navegación): pregunta antes de descartar fotos sin subir de otro. */
   async abrirRegistro(idRegistro: number): Promise<void> {
     if (this.enCaptura()) {
       this.notification.warning('Guarde o cancele el registro en captura antes de abrir otro.');
       return;
     }
+    const confirmado = this.confirmarDescarteFotos(idRegistro);
+    if (confirmado !== true && (!(await confirmado) || this.enCaptura())) return;
+    await this.cargarRegistro(idRegistro);
+  }
+
+  /** Carga y muestra un registro sin preguntar (flujos internos: tras guardar, recargar o conflicto). */
+  private async cargarRegistro(idRegistro: number): Promise<void> {
     const version = ++this.version;
     this.cargando.set(true);
     try {
@@ -573,7 +634,7 @@ export class Cal001Component implements OnInit, OnDestroy {
   /** Recarga el registro abierto (fotos nuevas, cambios de otro usuario). */
   async recargarRegistro(): Promise<void> {
     const id = this.registro()?.REGISTRO.ID_REGISTRO_NC;
-    if (id && !this.enCaptura()) await this.abrirRegistro(id);
+    if (id && !this.enCaptura()) await this.cargarRegistro(id);
     else if (id && (this.modificando() || this.agregando())) {
       const registro = await this.servicio.registro(id).catch(() => null);
       if (registro) this.registro.update(actual => actual ? { ...actual, FOTOS: registro.FOTOS, HISTORIAL: registro.HISTORIAL } : actual);
