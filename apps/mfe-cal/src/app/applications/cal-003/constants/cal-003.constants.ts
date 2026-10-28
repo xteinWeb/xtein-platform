@@ -43,9 +43,10 @@ export const Cal003Endpoint = {
 export const Cal003Action = {
   // /consulta
   Permissions: 'permisos',
+  NextDocument: 'consecutivo',
   Clients: 'clientes',
   Warehouses: 'bodegas',
-  Areas: 'areas',
+  Areas: 'areas servicio',
   ServiceTypes: 'tipos servicio',
   Products: 'productos',
   ProductTree: 'producto arbol',
@@ -86,6 +87,16 @@ export const Cal003Tab = {
   Queries: 'consultas'
 } as const;
 export type Cal003Tab = typeof Cal003Tab[keyof typeof Cal003Tab];
+
+/**
+ * Select Movimiento de la cabecera: ENTRADA (SEN), TRASLADO (STR) y SALIDA (SSA, la entrega). Ajuste, Precios
+ * ESPECIAL y Consultas se abren desde Buscar → Operación.
+ */
+export const Cal003Movimientos: readonly { id: Cal003Tab; label: string }[] = [
+  { id: Cal003Tab.Entry, label: 'ENTRADA' },
+  { id: Cal003Tab.Transfer, label: 'TRASLADO' },
+  { id: Cal003Tab.Delivery, label: 'SALIDA' }
+];
 
 export const Cal003Tabs: readonly { id: Cal003Tab; label: string }[] = [
   { id: Cal003Tab.Entry, label: 'Entrada' },

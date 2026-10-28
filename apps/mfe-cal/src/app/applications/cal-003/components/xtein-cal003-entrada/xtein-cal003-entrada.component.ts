@@ -22,7 +22,7 @@ import {
 } from '@xtein/ui';
 import { Cal003Limits, Cal003ServiceStatus } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003EntradaViewColumns, Cal003ProductoColumns } from '../../constants/cal-003-ui.constants';
-import type { Cal003ProductoLista, Cal003Servicio, Cal003ServicioCompleto } from '../../models/cal-003.model';
+import type { Cal003Cabecera, Cal003ProductoLista, Cal003Servicio, Cal003ServicioCompleto } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
 import {
   Cal003GrupoEntrada,
@@ -101,6 +101,13 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   readonly viewVisible = signal(false);
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
+
+  /** Cabecera común de la pantalla con la entrada abierta (documento SEN, estado del documento, quién y cuándo). */
+  readonly cabecera = computed<Cal003Cabecera | null>(() => {
+    const s = this.mode() === RecordToolbarMode.Browsing ? this.abierto()?.SERVICIO : null;
+    return s ? { documento: s.DOCUMENTO, estado: s.ESTADO_DOCUMENTO ?? (s.ESTADO === 'ANULADO' ? 'ANULADO' : 'REGISTRADO'),
+                 usuario: s.USUARIO_CREA, fechaRegistro: s.FECHA_REGISTRO } : null;
+  });
 
   readonly barra = computed<Cal003EstadoBarra>(() => ({
     mode: this.mode(),
@@ -262,7 +269,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   }
 
   cantidad(grupo: number, fila: number, valor: number | null): void {
-    this.grupos.update(list => list.map((g, i) => i === grupo ? cambiarCantidad(g, fila, Number(valor ?? 1)) : g));
+    this.grupos.update(list => list.map((g, i) => i === grupo ? cambiarCantidad(g, fila, Number(valor ?? 0)) : g));
   }
 
   parcial(grupo: Cal003GrupoEntrada): boolean {
@@ -313,6 +320,16 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     if (!vivos.length) faltan.push('al menos un producto con cantidad');
     if (faltan.length) {
       this.ctx.advertir(`Falta: ${faltan.join(', ')}.`);
+      return;
+    }
+    const numero = (v.N_SERVICIO_CLIENTE ?? '').trim();
+    if (numero && !/^\d+$/.test(numero)) {
+      this.ctx.advertir('El número de servicio debe ser solo numérico.');
+      return;
+    }
+    // Las partes empiezan en cero: no se guarda si todo lo marcado sigue en cero.
+    if (vivos.every(g => unidadesEntrada(g).UNIDADES.every(u => !u.CANTIDAD))) {
+      this.ctx.advertir('Las cantidades están todas en cero: escribe la cantidad de lo que llegó.');
       return;
     }
 

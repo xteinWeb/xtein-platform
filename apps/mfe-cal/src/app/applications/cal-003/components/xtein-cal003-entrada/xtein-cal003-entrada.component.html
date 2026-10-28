@@ -1,63 +1,16 @@
 <div class="c3-card" [formGroup]="form">
-  <!-- Cabecera de la entrada -->
+  <!-- Datos del servicio (documento, estado, usuario y fecha de registro van en la cabecera de la pantalla) -->
+  <div class="c3-section-divider">
+    <xtein-group-label class="c3-section-title" label="Datos del servicio"></xtein-group-label>
+  </div>
   <div class="c3-grid">
     <div class="c3-col">
-      <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-numero">Número S</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          @if (creando()) {
-            <xtein-input id="c3-e-numero" name="NUMERO" placeholder="Se asigna al guardar" [readOnly]="true" />
-          } @else {
-            <xtein-input id="c3-e-numero" name="NUMERO" formControlName="NUMERO" [readOnly]="true" />
-          }
-        </div>
-      </div>
       <div class="c3-field">
         <xtein-label class="c3-label" for="c3-e-fecha" [required]="true">Fecha</xtein-label>
         <div class="c3-control">
           <xtein-date id="c3-e-fecha" name="FECHA" placeholder="YYYY-MM-DD" formControlName="FECHA" [max]="form.controls.FECHA_REGISTRO.value" [required]="true" [readOnly]="!creando()" />
         </div>
       </div>
-      <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-freg">Fecha de registro</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          <xtein-date id="c3-e-freg" name="FECHA_REGISTRO" formControlName="FECHA_REGISTRO" [readOnly]="true" />
-        </div>
-      </div>
-    </div>
-
-    <div class="c3-col">
-      <div class="c3-field">
-        <xtein-label class="c3-label">Estado</xtein-label>
-        <div class="c3-control">
-          @if (creando()) {
-            <span class="c3-badge">Borrador</span>
-          } @else if (abierto(); as a) {
-            <span class="c3-badge" [ngClass]="badge(a.SERVICIO.ESTADO)">{{ a.SERVICIO.ESTADO }}</span>
-          }
-        </div>
-      </div>
-      <div class="c3-field">
-        <xtein-label class="c3-label">Movimiento</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          <xtein-input name="MOVIMIENTO" ariaLabel="Movimiento" placeholder="ENTRADA" [readOnly]="true" />
-        </div>
-      </div>
-      <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-usuario">Usuario</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          <xtein-input id="c3-e-usuario" name="USUARIO" formControlName="USUARIO" [readOnly]="true" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Datos del servicio -->
-  <div class="c3-section-divider">
-    <xtein-group-label class="c3-section-title" label="Datos del servicio"></xtein-group-label>
-  </div>
-  <div class="c3-grid">
-    <div class="c3-col">
       <div class="c3-field">
         <xtein-label class="c3-label" for="c3-e-cliente" [required]="true">Cliente</xtein-label>
         <div class="c3-control">
@@ -87,7 +40,7 @@
       <div class="c3-field">
         <xtein-label class="c3-label" for="c3-e-sc">Nº servicio del cliente</xtein-label>
         <div class="c3-control">
-          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Opcional: vacío si no viene" [maxLength]="limits.ClientServiceNumber"
+          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Opcional: solo números" [maxLength]="limits.ClientServiceNumber"
             formControlName="N_SERVICIO_CLIENTE" [readOnly]="!creando()" />
         </div>
       </div>
@@ -99,9 +52,9 @@
         </div>
       </div>
       <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-area">Área que lo pide</xtein-label>
+        <xtein-label class="c3-label" for="c3-e-area">Área que solicita</xtein-label>
         <div class="c3-control">
-          <xtein-select id="c3-e-area" ariaLabel="Área que lo pide" placeholder="Sin área" [items]="ctx.areas()"
+          <xtein-select id="c3-e-area" ariaLabel="Área que solicita" placeholder="Sin área" [items]="ctx.areas()"
             valueExpr="ID_AREA" displayExpr="DESCRIPCION" [showClearButton]="true" formControlName="ID_AREA" [readOnly]="!creando()" />
         </div>
       </div>
@@ -241,7 +194,7 @@
                   @if (fila.nivel === 'JU') {
                     1
                   } @else {
-                    <xtein-number class="cell-editor" [ariaLabel]="'Cantidad de ' + fila.nombre" [min]="1" [max]="fila.cantidadMax"
+                    <xtein-number class="cell-editor" [ariaLabel]="'Cantidad de ' + fila.nombre" [min]="fila.nivel === 'PA' ? 0 : 1" [max]="fila.cantidadMax"
                       [readOnly]="!fila.llega" [ngModel]="fila.cantidad" [ngModelOptions]="{ standalone: true }"
                       (ngModelChange)="cantidad(gi, fi, $event)" />
                   }

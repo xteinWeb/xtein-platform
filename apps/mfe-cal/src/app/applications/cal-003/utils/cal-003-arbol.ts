@@ -8,7 +8,7 @@ export interface Cal003FilaArbol {
   nombre: string;
   /** Cantidad del catálogo: tope de lo que puede llegar. */
   cantidadMax: number;
-  /** Lo que llega (1..cantidadMax). */
+  /** Lo que llega: las partes empiezan en 0 (0..cantidadMax); el resto en su cantidad (1..cantidadMax). */
   cantidad: number;
   llega: boolean;
   /** Índice del padre en `filas` (-1 en la raíz). */
@@ -38,7 +38,7 @@ export function crearGrupo(arbol: Cal003ArbolProducto): Cal003GrupoEntrada {
       codigoAsociado: nodo.CODIGO_ASOCIADO ?? '',
       nombre: nodo.NOMBRE,
       cantidadMax: cantidad,
-      cantidad,
+      cantidad: nodo.NIVEL === 'PA' ? 0 : cantidad,
       llega: true,
       padre,
       hijos: []
@@ -52,7 +52,7 @@ export function crearGrupo(arbol: Cal003ArbolProducto): Cal003GrupoEntrada {
   if (filas[0].nivel === 'JU' && buscado > 0) {
     filas.forEach((fila, i) => {
       fila.llega = i === 0 || i === buscado || fila.padre === buscado;
-      fila.cantidad = 1;
+      fila.cantidad = fila.nivel === 'PA' ? 0 : 1;
     });
   }
   return { raiz: arbol.RAIZ.PRODUCTO, nombre: arbol.RAIZ.NOMBRE, filas };
@@ -72,7 +72,7 @@ export function marcarLlega(grupo: Cal003GrupoEntrada, indice: number, llega: bo
 
 export function cambiarCantidad(grupo: Cal003GrupoEntrada, indice: number, cantidad: number): Cal003GrupoEntrada {
   const filas = grupo.filas.map((f, i) => i === indice
-    ? { ...f, cantidad: Math.max(1, Math.min(Math.trunc(Number(cantidad) || 1), f.cantidadMax)) }
+    ? { ...f, cantidad: Math.max(f.nivel === 'PA' ? 0 : 1, Math.min(Math.trunc(Number(cantidad) || 0), f.cantidadMax)) }
     : f);
   return { ...grupo, filas };
 }

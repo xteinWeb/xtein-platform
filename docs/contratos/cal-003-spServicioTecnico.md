@@ -5,7 +5,7 @@ Contrato entre el front (`apps/mfe-cal`, aplicación `CAL-003`), las rutas de ap
 Archivos en apiRest:
 - BD: `sql/ddl/50_cal003_servicios_tecnicos.sql` (tablas), `sql/seed/52_cal003_documentos.sql` (STS/STT/STD y áreas), `sql/seed/54_cal003_tipos_servicio.sql` (tipos de servicio), `sql/sp/51_spServicioTecnico.sql` (vistas `RS_ST_*` y SP), `sql/seed/53_menu_cal003.sql` (menú y permisos de XTEIN), `sql/seed/55_cal003_filtros.sql` (campos del buscador de la barra), `sql/rollback/91_rollback_cal003.sql`.
 - Rutas: `src/routes/CAL003.routes.js`, `src/controllers/CAL003/CAL003.controller.js`, `src/controllers/CAL003/soportes.js`, `src/tests/CAL003.test.js`. Variable `RUTA_ARCHIVOS_CAL003` (`.env.example`).
-- Orden de ejecución: **50 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58** (57 = `spAutorizaciones`, compartido; 58 = migra los estados de traslados ya creados).
+- Orden de ejecución: **50 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58 → 59** (57 = `spAutorizaciones`, compartido; 58 = estados de traslados, servicios y ajustes ya creados; 59 = documentos SEN / STR / SSA para lo ya creado).
 
 Archivos en el front: `apps/mfe-cal/src/app/applications/cal-003/**` y su entrada en `cal-application.registry.ts`.
 
@@ -58,7 +58,7 @@ Acción fuera de la lista de su ruta → **400 sin llamar al SP**. `DATA_JSON` =
 
 | Ruta | Acciones |
 |---|---|
-| `POST /api/CAL003/consulta` | `permisos`, `clientes`, `bodegas`, `areas`, `tipos servicio`, `productos`, `producto arbol`, `servicios`, `servicio`, `servicios trasladables`, `traslados`, `servicios entregables`, `entregas`, `entrega`, `servicios ajustables`, `ajustes`, `precios especial`, `inventario bodega`, `servicios cliente`, `historial`, `avisos` |
+| `POST /api/CAL003/consulta` | `permisos`, `consecutivo`, `clientes`, `bodegas`, `areas servicio`, `tipos servicio`, `productos`, `producto arbol`, `servicios`, `servicio`, `servicios trasladables`, `traslados`, `servicios entregables`, `entregas`, `entrega`, `servicios ajustables`, `ajustes`, `precios especial`, `inventario bodega`, `servicios cliente`, `historial`, `avisos` |
 | `POST /api/CAL003/save` | `entrada nueva`, `entrada anular`, `traslado enviar`, `entrega despachar`, `entrega anular linea`, `ajuste proponer`, `precios guardar` (autorizar o rechazar traslados y ajustes solo en Autorizaciones, §2.6) |
 | `POST /api/CAL003/soporte-subir` | `soporte adjuntar` |
 | `POST /api/CAL003/soporte` | `soporte ver` |
@@ -74,7 +74,7 @@ Ninguna respuesta lleva `RUTA`.
 | `permisos` | — | `[{PUEDE_VER, PUEDE_CREAR, PUEDE_ANULAR_RECIBIDO, PUEDE_AUTORIZAR, PUEDE_PRECIO, VE_TODAS, BODEGAS:[ID_UN_BODEGA]}]` |
 | `clientes` | `TEXTO?`, `TOP?` (1–5000) | `[{ID_CLIENTE, NOMBRE}]` activos (`CLIENTES` + `R_CLIENTES_ID`) |
 | `bodegas` | — | `[{ID_UN_BODEGA, DESCRIPCION, PROPIA}]` activas de `BODEGAS` |
-| `areas` | — | `[{ID_AREA, DESCRIPCION}]` de `ITM_DOMINIOS` `CALIDAD/AREAS_SERVICIO_TECNICO` (`VALOR1`) |
+| `areas servicio` | — | `[{ID_AREA, DESCRIPCION}]` de `ITM_DOMINIOS` `CALIDAD/AREAS_SERVICIO_TECNICO` (`VALOR1`) |
 | `tipos servicio` | — | `[{TIPO_SERVICIO, DESCRIPCION}]` de `ITM_DOMINIOS` `CALIDAD/TIPOS_SERVICIO_TECNICO` (`VALOR1` = código, `VALOR2` = descripción). SG (sin cobro) y SR (genera pre-factura) conservan su significado en el despacho |
 | `producto arbol` | `CODIGO` (interno o `CODIGO_ASOCIADO`) | `[{CODIGO_BUSCADO, PRODUCTO_BUSCADO, RAIZ:{NIVEL, PRODUCTO, CODIGO_ASOCIADO, NOMBRE, CANTIDAD, HIJOS:[…]}}]`. Juego (`JU%`) → productos de `PRODUCTOS_KITS` → partes de `PRODUCTOS_PARTES` (cantidad de la parte × la del producto). Si el código es de un producto que pertenece a **un solo** juego, la raíz es ese juego y `PRODUCTO_BUSCADO` indica el producto que llegó |
 | `servicios` | `TEXTO?`, `FECHA_DESDE?` (90 días), `FECHA_HASTA?` (hoy), `FILTRO?` (§2.5; con él no hay rango por defecto) | Hasta 200 servicios (`Cal003Servicio`) |
@@ -164,6 +164,19 @@ Mismo manejo que los consumos de PRO-039, para traslados y salidas por ajuste: e
 - Acción `CAL-003-001` de `spServicioTecnico`, para el servidor de reportes DevExpress (como `PRO-039-001`): se llama sin token, con `{"filtro":"{\"FILTRO\":\"(ID_ENTREGA=n)\"}"}` o `{"FILTRO":"ID_ENTREGA IN (n, …)"}`. No arma SQL con el filtro: solo acepta `ID_ENTREGA` con números.
 - Devuelve 3 conjuntos: empresa (`NOMBRE`, `NIT`, `DIR_EMP`, `TEL_EMP`); encabezados (`RS_ST_ENTREGAS`); líneas activas con `PRODUCTO`, `CANTIDAD`, `TIPO_DEPOSITO` (estado del servicio), `SOPORTE` (número S), `BODEGA`, `TIPO_ENTRADA` (SG / SR), `SALDO`, más `ITEM`, `N_SERVICIO_CLIENTE` y `CODIGO_ASOCIADO`.
 - **Pendiente:** el diseño `.repx` en el servidor de reportes y su fila en `REPORTES` (`ID_APLICACION = 'CAL-003'`, `ID_REPORTE = 'CAL-003-001'`, `ARCHIVO` = nombre del diseño). Mientras tanto la pantalla usa su vista de impresión con las mismas columnas.
+
+### 2.8 Cabecera, documentos por movimiento y validaciones de la entrada
+
+- **Cabecera de la pantalla:** Movimiento (ENTRADA, TRASLADO, SALIDA = entrega) · Estado · Documento · Usuario · Fecha de registro. El Movimiento solo se habilita con Nuevo; Ajuste, Precios ESPECIAL y Consultas se abren desde Buscar → Operación.
+- **Documentos:** uno por movimiento, sin ceros a la izquierda: `SEN-1` (entrada), `STR-1` (traslado), `SSA-1` (salida). Reemplazan a STS / STT / STD (seed 52; lo ya creado lo pasa el 59 y deja los viejos INACTIVO). Las ajustes siguen como `AJ-00001` en Autorizaciones.
+- **`consecutivo`** (consulta): `MOVIMIENTO` (ENTRADA / TRASLADO / SALIDA), `ID_APLICACION?` (`CAL-003`); el usuario sale del token. Devuelve `[{MOVIMIENTO, ID_DOCUMENTO, CONSECUTIVO, DOCUMENTO, USUARIO}]`, con la misma regla que al guardar (mayor entre `NC_DOCUMENTO` y el último usado, más uno). Es una vista previa: el número se asigna al guardar.
+- **Estado del documento** (`ESTADO_DOCUMENTO` en las vistas y consultas), solo REGISTRADO / ANULADO / AUTORIZADO:
+  - Entrada: REGISTRADO o ANULADO.
+  - Traslado: REGISTRADO, AUTORIZADO o ANULADO (rechazado o anulado).
+  - Salida: REGISTRADO al despachar, AUTORIZADO con el soporte firmado, ANULADO sin líneas activas.
+  El estado del servicio en inventario (DEPOSITO, DESPACHADO, AJUSTADO…) sigue aparte.
+- **`areas servicio`** (antes `areas`): lista del campo "Área que solicita".
+- **`entrada nueva`:** el Nº de servicio del cliente es solo numérico y no se repite para el mismo cliente (las entradas anuladas no cuentan; se valida con el bloqueo de la numeración). Las partes llegan en cantidad 0 por defecto; las que siguen en 0 no se guardan y si todas están en 0 se rechaza.
 
 ## 3. Pendiente por definir
 
