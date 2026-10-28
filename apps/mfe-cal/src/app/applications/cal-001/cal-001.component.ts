@@ -153,7 +153,7 @@ export class Cal001Component implements OnInit, OnDestroy {
   });
   readonly modoTexto = computed(() => {
     const r = this.registro()?.REGISTRO;
-    if (this.creando()) return 'Registro nuevo: elija origen, producto, partes, no conformidades y operarios; luego Guardar. El documento se asigna al guardar.';
+    if (this.creando()) return '';   // ajuste del usuario: en un registro nuevo no hace falta aviso; el formulario se explica solo
     if (this.modificando() && r) return `Modificando ${r.DOCUMENTO} como gestor de calidad. Al guardar se anota su usuario con fecha y hora; el registro sigue a nombre de ${this.registradoPor()}.`;
     if (this.agregando() && r) {
       return `Agregando a ${r.DOCUMENTO}: lo guardado no se puede quitar ni bajar. Puede añadir partes, no conformidades, operarios, ocurrencias y fotos; luego Guardar.`

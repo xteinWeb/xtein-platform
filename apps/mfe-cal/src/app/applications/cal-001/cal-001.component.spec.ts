@@ -258,12 +258,18 @@ describe('Cal001Component', () => {
     expect(component.puedeRetirarFotos()).toBe(false);
   });
 
-  it('C6: un registro nuevo no muestra "Última modificación"; "Registrado por" es el usuario actual', async () => {
+  it('C6: un registro nuevo no muestra "Documento", "Fecha de registro", "Última modificación" ni el aviso de modo; "Registrado por" es el usuario actual', async () => {
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
     component.nuevo();
     fixture.detectChanges();
     const etiquetas = Array.from(panel().querySelectorAll('.c1-campo > span')).map(e => e.textContent?.trim());
+    expect(etiquetas).not.toContain('Documento');
+    expect(etiquetas).not.toContain('Fecha de registro');
     expect(etiquetas).not.toContain('Última modificación');
+    expect(panel().textContent).not.toContain('Se asigna al guardar');
+    expect(panel().textContent).not.toContain('Al guardar');
+    expect(panel().textContent).not.toContain('Registro nuevo:');
+    expect(panel().querySelector('.c1-modo')).toBeNull();
     expect(etiquetas).toContain('Registrado por');
     const campo = Array.from(panel().querySelectorAll<HTMLLabelElement>('label.c1-campo')).find(l => l.textContent?.includes('Registrado por'));
     expect(campo?.querySelector('input')?.value).toBe('Laura Gómez');
@@ -277,6 +283,12 @@ describe('Cal001Component', () => {
     fixture.detectChanges();
     const campos = Array.from(panel().querySelectorAll<HTMLLabelElement>('label.c1-campo'));
     expect(campos.some(l => l.textContent?.includes('Última modificación'))).toBe(true);
+    const documento = campos.find(l => l.textContent?.includes('Documento'))?.querySelector('input');
+    expect(documento?.value).toBe(registroGuardado().REGISTRO.DOCUMENTO);
+    expect(panel().querySelector('.c1-modo')?.textContent).toContain('Consultando');
+    const fechaRegistro = campos.find(l => l.textContent?.includes('Fecha de registro'))?.querySelector('input');
+    expect(fechaRegistro?.value).toBeTruthy();
+    expect(fechaRegistro?.value).not.toBe('Al guardar');
     const registrado = campos.find(l => l.textContent?.includes('Registrado por'))?.querySelector('input');
     expect(registrado?.value).toBe('Edgardo Alcazar · Producción');
     expect(registrado?.getAttribute('title')).toBe('INSPECTOR');

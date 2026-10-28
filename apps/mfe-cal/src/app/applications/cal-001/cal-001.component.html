@@ -15,10 +15,12 @@
   }
 
   <div class="c1-panel" id="c1-panel-registro" role="tabpanel" aria-labelledby="c1-tab-registro" [hidden]="pestana() !== 'registro'">
-    <p class="c1-modo" role="status">
-      {{ modoTexto() }}
-      @if (creando() && borradorGuardadoEn()) { <small>Borrador guardado en este equipo a las {{ borradorGuardadoEn() }}.</small> }
-    </p>
+    @if (modoTexto() || (creando() && borradorGuardadoEn())) {
+      <p class="c1-modo" role="status">
+        {{ modoTexto() }}
+        @if (creando() && borradorGuardadoEn()) { <small>Borrador guardado en este equipo a las {{ borradorGuardadoEn() }}.</small> }
+      </p>
+    }
     @if (puedeAgregar()) {
       <div class="c1-agregar">
         <button type="button" class="c1-boton" [disabled]="cargando()" (click)="agregar()">Agregar a mi registro</button>
@@ -32,9 +34,11 @@
           <details class="c1-sec" open>
             <summary>Datos principales</summary>
             <div class="c1-campos">
-              <label class="c1-campo"><span>Documento</span>
-                <input type="text" readonly [value]="b.DOCUMENTO || 'Se asigna al guardar'" />
-              </label>
+              @if (!creando()) {
+                <label class="c1-campo"><span>Documento</span>
+                  <input type="text" readonly [value]="b.DOCUMENTO" />
+                </label>
+              }
               <label class="c1-campo"><span>Origen</span>
                 <select [disabled]="!editable()" (change)="campo('ORIGEN', $any($event.target).value)">
                   <option [value]="origenes.Produccion" [selected]="b.ORIGEN === origenes.Produccion">Producción</option>
@@ -66,9 +70,11 @@
               <label class="c1-campo"><span>Registrado por</span>
                 <input type="text" readonly [value]="registradoPor()" [attr.title]="registro()?.REGISTRO?.USUARIO_CREA ?? usuario()" />
               </label>
-              <label class="c1-campo"><span>Fecha de registro</span>
-                <input type="text" readonly [value]="registro() ? fecha(registro()?.REGISTRO?.FECHA_REGISTRO) : 'Al guardar'" />
-              </label>
+              @if (!creando()) {
+                <label class="c1-campo"><span>Fecha de registro</span>
+                  <input type="text" readonly [value]="fecha(registro()?.REGISTRO?.FECHA_REGISTRO)" />
+                </label>
+              }
               <label class="c1-campo"><span>Fecha del evento</span>
                 <input type="date" [max]="hoy()" (focus)="hoy()" [readOnly]="!editable()" [value]="b.FECHA_EVENTO"
                   (change)="campo('FECHA_EVENTO', $any($event.target).value)" />
