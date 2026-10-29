@@ -21,12 +21,6 @@
         @if (creando() && borradorGuardadoEn()) { <small>Borrador guardado en este equipo a las {{ borradorGuardadoEn() }}.</small> }
       </p>
     }
-    @if (puedeAgregar()) {
-      <div class="c1-agregar">
-        <button type="button" class="c1-boton" [disabled]="cargando()" (click)="agregar()">Agregar a mi registro</button>
-        @if (agregarHasta()) { <small>Puede agregar hasta {{ agregarHasta() }}.</small> }
-      </div>
-    }
 
     @if (borrador(); as b) {
       <div class="c1-cols">

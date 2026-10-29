@@ -73,6 +73,8 @@ export class Cal001Component implements OnInit, OnDestroy {
   readonly fecha = mostrarFecha;
 
   readonly cargando = signal(false);
+  /** Tras Guardar, mientras se suben las fotos nuevas y se aplican los retiros marcados. */
+  readonly guardandoFotos = signal(false);
   readonly pestana = signal<Cal001Pestana>('registro');
   readonly modo = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
   /** Modo Agregar (fase 2): la barra va en Editing, pero lo guardado queda de solo lectura y solo se anexa. */
@@ -139,8 +141,10 @@ export class Cal001Component implements OnInit, OnDestroy {
   /** Fotos solo en edición (C5): en consulta no se suben ni se retiran. */
   readonly puedeAgregarFotos = computed(() => this.enCaptura() && (this.creando() || Number(this.registro()?.PUEDE_AGREGAR_FOTOS) === 1));
   readonly puedeRetirarFotos = computed(() => this.modificando() && Number(this.registro()?.PUEDE_RETIRAR_FOTOS) === 1);
-  /** Botón "Agregar a mi registro": el SP decide (creador con CREAR dentro de la ventana de 7 días). */
+  /** Agregar a su registro con el lápiz de la barra: el SP decide (creador con CREAR dentro de la ventana de 7 días). */
   readonly puedeAgregar = computed(() => !this.enCaptura() && Number(this.registro()?.PUEDE_AGREGAR) === 1);
+  /** El lápiz de la barra modifica (gestor) o, si no puede modificar, entra a Agregar. */
+  readonly puedeModificar = computed(() => this.esGestor() && Number(this.registro()?.PUEDE_MODIFICAR) === 1);
   readonly agregarHasta = computed(() => mostrarFecha(this.registro()?.AGREGAR_HASTA));
   /** "Registrado por" (fase 2): nombre · área; en un registro nuevo, el usuario actual. */
   readonly registradoPor = computed(() => {
@@ -160,10 +164,11 @@ export class Cal001Component implements OnInit, OnDestroy {
         + (this.agregarHasta() ? ` Puede agregar hasta ${this.agregarHasta()}.` : '');
     }
     if (r) {
-      return `Consultando ${r.DOCUMENTO}, registrado por ${this.registradoPor()}. ` + (this.esGestor()
+      return `Consultando ${r.DOCUMENTO}, registrado por ${this.registradoPor()}. ` + (this.puedeModificar()
         ? 'Para corregirlo use Modificar en la barra. Los registros no se anulan; se corrigen.'
         : this.puedeAgregar()
-          ? 'Puede agregar a su registro (nunca quitar); corregir o quitar es del gestor de calidad.'
+          ? 'Para agregar a su registro use Modificar en la barra (solo se agrega, nunca se quita); corregir o quitar es del gestor de calidad.'
+            + (this.agregarHasta() ? ` Puede agregar hasta ${this.agregarHasta()}.` : '')
           : 'Solo lectura: solo el gestor de calidad modifica registros.');
     }
     return this.puedeCrear() ? 'Use Nuevo para registrar una no conformidad o abra un registro desde Consulta.' : 'Abra un registro desde Consulta.';
@@ -269,15 +274,19 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   /* ============================ Barra de registro ============================ */
 
-  /** En Agregar la barra va en Editing con Guardar/Cancelar; Modificar sigue siendo solo del gestor (no se ve mientras se edita). */
+  /**
+   * El lápiz (Modificar) sirve al gestor para corregir y al creador para Agregar a su registro (PUEDE_AGREGAR);
+   * en Agregar la barra va en Editing con Guardar/Cancelar (el lápiz no se ve mientras se edita).
+   */
   private publicarBarra(): void {
     const agregando = this.agregando();
+    const lapiz = agregando || this.puedeModificar() || this.puedeAgregar();
     const permisos = permisosBarra(this.permisos());
     const estado = createRecordToolbarState({
       applicationId: this.applicationId,
       mode: this.modo(),
-      permissions: { ...permisos, edit: permisos.edit || agregando },
-      capabilities: { ...Cal001ToolbarCapabilities, edit: agregando || Number(this.registro()?.PUEDE_MODIFICAR) === 1 },
+      permissions: { ...permisos, edit: permisos.edit || lapiz },
+      capabilities: { ...Cal001ToolbarCapabilities, edit: lapiz },
       currentIndex: Math.max(0, this.indiceActual()),
       totalRecords: this.registro() ? this.registros().length : 0
     });
@@ -285,10 +294,13 @@ export class Cal001Component implements OnInit, OnDestroy {
   }
 
   private comando(comando: ToolbarCommand): void {
-    if (this.cargando()) return;
+    if (this.cargando() || this.guardandoFotos()) return;
     switch (comando.action) {
       case ToolbarAction.New: this.nuevo(); break;
-      case ToolbarAction.Edit: this.modificar(); break;
+      case ToolbarAction.Edit:
+        if (this.puedeModificar()) this.modificar();
+        else this.agregar();
+        break;
       case ToolbarAction.Save: void this.guardar(); break;
       case ToolbarAction.Cancel: void this.cancelar(); break;
       case ToolbarAction.Search: this.irAConsulta(); break;
@@ -358,7 +370,7 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   modificar(): void {
     const registro = this.registro();
-    if (this.enCaptura() || !registro || !this.esGestor() || Number(registro.PUEDE_MODIFICAR) !== 1) return;
+    if (this.enCaptura() || !registro || !this.puedeModificar()) return;
     this.borrador.set(borradorDesdeRegistro(registro, this.partesRegistro));
     this.errores.set([]);
     this.modo.set(RecordToolbarMode.Editing);
@@ -483,8 +495,11 @@ export class Cal001Component implements OnInit, OnDestroy {
       this.notification.warning('No agregó nada.');
       return;
     }
-    // Foto de evidencia obligatoria: activas del registro + elegidas para subir al guardar.
-    const sinEvidencia = validarEvidencia(accion, registro?.FOTOS.length ?? 0, fotos?.cola().length ?? 0);
+    // Foto de evidencia obligatoria: las que siguen (sin las marcadas para retirar) + elegidas para subir al guardar.
+    const marcas = fotos?.porRetirar() ?? [];
+    const sinEvidencia = marcas.length && fotos && !fotos.vigentes().length && !fotos.cola().length
+      ? ['El registro no puede quedar sin fotos: deshaga el retiro o agregue otra foto.']
+      : validarEvidencia(accion, fotos ? fotos.vigentes().length : registro?.FOTOS.length ?? 0, fotos?.cola().length ?? 0);
     if (sinEvidencia.length) {
       this.errores.set(sinEvidencia);
       this.notification.warning(sinEvidencia[0]);
@@ -513,15 +528,32 @@ export class Cal001Component implements OnInit, OnDestroy {
       this.cargando.set(false);
     }
     if (!id) return;
-    // Las fotos en cola del registro nuevo pasan al documento creado antes de mostrarlo (las demás se descartan).
-    if (accion === 'new') fotos?.adoptar(id);
-    await this.cargarRegistro(id);
-    // Fotos solo en edición (C5): las elegidas mientras se capturaba se suben al guardar.
-    if (fotos && !fotos.subiendo() && fotos.pendientes().some(f => f.dueno === id)) {
-      const activas = this.registro()?.FOTOS.length ?? 0;
-      const subidas = await fotos.subirPendientes(id);
-      // Ninguna se subió y el registro no tiene otra: se dice explícitamente (con 0 subidas no hay recarga que borre el aviso).
-      if (activas + subidas === 0) this.avisarSinFoto(id, documento, accion, conDatos);
+    // Mientras se suben las fotos y se aplican los retiros, la barra no acepta comandos: una edición nueva en medio
+    // vería las marcas de este guardado como propias.
+    this.guardandoFotos.set(true);
+    try {
+      // Las fotos en cola del registro nuevo pasan al documento creado antes de mostrarlo (las demás se descartan).
+      if (accion === 'new') fotos?.adoptar(id);
+      await this.cargarRegistro(id);
+      // Fotos solo en edición (C5): las elegidas mientras se capturaba se suben al guardar.
+      if (fotos && !fotos.subiendo() && fotos.pendientes().some(f => f.dueno === id)) {
+        const activas = this.registro()?.FOTOS.length ?? 0;
+        const subidas = await fotos.subirPendientes(id);
+        // Ninguna se subió y el registro no tiene otra: se dice explícitamente (con 0 subidas no hay recarga que borre el aviso).
+        if (activas + subidas === 0) this.avisarSinFoto(id, documento, accion, conDatos);
+      }
+      // Retiros marcados al editar (la copia tomada al pulsar Guardar): solo después de subir las nuevas, y solo si
+      // todas subieron (si no, podría quedar sin la foto que reemplazaba). El SP igual impide dejar el registro sin fotos (E28).
+      if (fotos && marcas.length) {
+        if (fotos.pendientes().some(f => f.dueno === id)) {
+          fotos.olvidarRetiros(marcas);
+          this.notification.warning('No se retiró ninguna foto porque alguna foto nueva no se subió. Reintente la subida y luego retire.');
+        } else if (!(await fotos.retirarMarcadas(marcas))) {
+          this.notification.success(marcas.length === 1 ? 'Foto retirada.' : `${marcas.length} fotos retiradas.`);
+        }
+      }
+    } finally {
+      this.guardandoFotos.set(false);
     }
     if (this.consulta()) void this.buscar(this.filtro(), this.consulta()?.PAGINA ?? 1, false);
   }
@@ -580,6 +612,10 @@ export class Cal001Component implements OnInit, OnDestroy {
 
   /** Abre un registro a pedido del usuario (consulta, navegación): pregunta antes de descartar fotos sin subir de otro. */
   async abrirRegistro(idRegistro: number): Promise<void> {
+    if (this.guardandoFotos()) {
+      this.notification.info('Espere a que terminen de subirse las fotos del registro guardado.');
+      return;
+    }
     if (this.enCaptura()) {
       this.notification.warning('Guarde o cancele el registro en captura antes de abrir otro.');
       return;
