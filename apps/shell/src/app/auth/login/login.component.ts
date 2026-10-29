@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   signal,
   ViewEncapsulation
 } from '@angular/core';
@@ -71,7 +72,17 @@ type LoginView =
   encapsulation:
     ViewEncapsulation.None
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
+
+  /**
+   * Seconds left before a new sign-in attempt is allowed after
+   * too many wrong passwords; 0 when sign-in is available.
+   */
+  readonly retrySeconds =
+    signal(0);
+
+  private retryTimer?:
+    ReturnType<typeof setInterval>;
 
   readonly view =
     signal<LoginView>(
@@ -404,6 +415,12 @@ export class LoginComponent {
    */
   submit(): void {
 
+    if (
+      this.retrySeconds() > 0
+    ) {
+      return;
+    }
+
     this.errorMessage.set('');
     this.successMessage.set('');
 
@@ -491,6 +508,18 @@ export class LoginComponent {
           if (
             !result.isAuthenticated
           ) {
+
+            if (
+              result.retryAfterSeconds &&
+              result.retryAfterSeconds > 0
+            ) {
+
+              this.startRetryCountdown(
+                result.retryAfterSeconds
+              );
+
+              return;
+            }
 
             this.errorMessage.set(
               result.errorMessage ??
@@ -1003,5 +1032,78 @@ export class LoginComponent {
     }
 
     return fallbackMessage;
+  }
+
+  ngOnDestroy(): void {
+    this.stopRetryCountdown();
+  }
+
+  /**
+   * Blocks sign-in for the seconds the backend requires after too many
+   * wrong passwords, and enables it again when the countdown ends.
+   */
+  private startRetryCountdown(
+    seconds: number
+  ): void {
+
+    this.stopRetryCountdown();
+
+    this.retrySeconds.set(
+      Math.ceil(seconds)
+    );
+
+    this.showRetryMessage();
+
+    this.retryTimer =
+      setInterval(() => {
+
+        const remaining =
+          this.retrySeconds() - 1;
+
+        this.retrySeconds.set(
+          Math.max(remaining, 0)
+        );
+
+        if (remaining <= 0) {
+
+          this.stopRetryCountdown();
+
+          this.errorMessage.set('');
+
+          return;
+        }
+
+        this.showRetryMessage();
+      }, 1000);
+  }
+
+  /**
+   * Shows the lockout message with the remaining time as m:ss,
+   * refreshed every second while the countdown runs.
+   */
+  private showRetryMessage(): void {
+
+    const seconds =
+      this.retrySeconds();
+
+    const remaining =
+      `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+
+    this.errorMessage.set(
+      `Demasiados intentos fallidos. Podrá intentarlo de nuevo en ${remaining}.`
+    );
+  }
+
+  private stopRetryCountdown(): void {
+
+    if (this.retryTimer) {
+
+      clearInterval(
+        this.retryTimer
+      );
+
+      this.retryTimer =
+        undefined;
+    }
   }
 }

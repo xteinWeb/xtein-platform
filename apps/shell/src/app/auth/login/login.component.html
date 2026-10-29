@@ -201,7 +201,8 @@
                   [submit]="true"
                   [disabled]="
                     isSubmitting() ||
-                    isValidatingUser()
+                    isValidatingUser() ||
+                    retrySeconds() > 0
                   ">
                 </xtein-button>
 

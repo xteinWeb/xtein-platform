@@ -76,7 +76,9 @@ export class AuthService {
             return {
               isAuthenticated: false,
               errorMessage:
-                result.errorMessage
+                result.errorMessage,
+              retryAfterSeconds:
+                result.retryAfterSeconds
             };
           }
 
@@ -130,8 +132,21 @@ export class AuthService {
 
   /**
    * Ends the current XTEIN session.
+   *
+   * The backend is notified first, while the token is still available,
+   * so it revokes the session; the local session is cleared even when
+   * that call fails (for example, without network).
    */
   logout(): void {
+
+    if (this.sessionService.current) {
+      this.authApi
+        .logout()
+        .subscribe({
+          error: () => undefined
+        });
+    }
+
     this.sessionService.clearSession();
   }
 }

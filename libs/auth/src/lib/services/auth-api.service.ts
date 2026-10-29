@@ -67,6 +67,11 @@ export interface AuthenticationApiResult {
    * Session timeout returned by the backend in minutes.
    */
   sessionTimeoutMinutes?: number;
+
+  /**
+   * Seconds until a new attempt is allowed, when the login is locked.
+   */
+  retryAfterSeconds?: number;
 }
 
 /**
@@ -92,6 +97,12 @@ export class AuthApiService {
 
   private static readonly loginAction =
     'USUARIO CREDENCIALES';
+
+  private static readonly logoutEndpoint =
+    '/auth/logout';
+
+  private static readonly logoutAction =
+    'LOGOUT';
 
   constructor(
     private readonly apiClient:
@@ -177,6 +188,29 @@ export class AuthApiService {
           )
         )
       );
+  }
+
+  /**
+   * Closes the session in the backend: revokes the refresh cookie
+   * and invalidates every access token of the current session.
+   *
+   * Requires an active session, because the token travels in the request.
+   */
+  logout(): Observable<unknown> {
+
+    return this.apiClient
+      .execute<unknown>({
+        endpoint:
+          AuthApiService.logoutEndpoint,
+
+        action:
+          AuthApiService.logoutAction,
+
+        data: {},
+
+        accessMode:
+          XteinApiAccessMode.Authenticated
+      });
   }
 
   /**
@@ -292,7 +326,13 @@ export class AuthApiService {
 
         errorMessage:
           backendMessage ??
-          'The XTEIN backend rejected the authentication request.'
+          'The XTEIN backend rejected the authentication request.',
+
+        retryAfterSeconds:
+          this.getOptionalNumber(
+            record,
+            'ESPERA_SEGUNDOS'
+          )
       };
     }
 

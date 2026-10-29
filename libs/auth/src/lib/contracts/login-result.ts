@@ -12,4 +12,10 @@ export interface LoginResult {
    * Optional authentication error message.
    */
   errorMessage?: string;
+
+  /**
+   * Seconds until a new attempt is allowed, when too many
+   * wrong passwords locked the login.
+   */
+  retryAfterSeconds?: number;
 }
