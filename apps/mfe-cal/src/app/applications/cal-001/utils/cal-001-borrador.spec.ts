@@ -121,6 +121,14 @@ describe('CAL-001 mensajes de error legibles', () => {
     expect(mensajeError(new Cal001BackendError('Error interno (2627)')).mensaje).toContain('avise a soporte');
   });
 
+  it('el 500 del controlador muestra su motivo; sin motivo o con HTML del proxy, el genérico', () => {
+    const sinRaiz = { status: 500, error: { data: '[{"ErrMensaje":"El almacenamiento de fotos no está configurado"}]', error: 'El almacenamiento de fotos no está configurado' } };
+    expect(mensajeError(sinRaiz).mensaje).toBe('El almacenamiento de fotos no está configurado (error 500). Intente de nuevo; si persiste, avise a soporte.');
+    expect(mensajeError({ status: 502, error: '<html>Bad Gateway</html>' }).mensaje).toBe('Error del servidor (502). Intente de nuevo; si persiste, avise a soporte.');
+    expect(mensajeError({ status: 504, error: 'upstream connect error, reset reason: connection failure' }).mensaje).toBe('Error del servidor (504). Intente de nuevo; si persiste, avise a soporte.');
+    expect(mensajeError({ status: 500, error: null }).mensaje).toBe('Error del servidor (500). Intente de nuevo; si persiste, avise a soporte.');
+  });
+
   it('decodifica data como texto JSON y lanza el ErrMensaje del SP', () => {
     expect(decodificar<{ A: number }>({ data: '[{"A":1,"ErrMensaje":""}]', token: 't' })).toEqual([{ A: 1, ErrMensaje: '' }]);
     expect(decodificar({ data: { MIME: 'image/jpeg', BASE64: 'AA==' } })).toEqual([{ MIME: 'image/jpeg', BASE64: 'AA==' }]);

@@ -8,6 +8,11 @@
 }
 .ft-error small { color: #b42318; }
 .ft-pendiente { opacity: .9; }
+.ft-retirada .ft-nombre { color: #4a6a84; text-decoration: line-through; }
+.ft-aviso:empty { display: none; }
+.ft-aviso.ft-bloquea { color: #b42318; font-weight: 600; }
+/* inline-block + ancho completo: sigue en su propia línea y no hereda el tachado del nombre. */
+.ft-retirada .ft-nombre small { display: inline-block; width: 100%; color: #b42318; }
 .ft-vacio { padding: 6px 0; color: #7b8fa3; font-size: 13px; }
 .ft-aviso { padding: 4px 0 6px; color: #7b8fa3; font-size: 12px; }
 .ft-boton {

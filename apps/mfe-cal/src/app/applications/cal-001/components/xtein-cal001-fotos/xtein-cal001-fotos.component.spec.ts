@@ -154,22 +154,86 @@ describe('XteinCal001FotosComponent', () => {
   const botonRetirar = (): HTMLButtonElement[] =>
     Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).filter(b => b.textContent?.trim() === 'Retirar');
 
-  it('foto obligatoria: la única foto activa no se puede retirar y se explica por qué', () => {
+  it('en edición, retirar solo marca (sin llamar al servidor); se puede deshacer y avisa si quedaría sin fotos', async () => {
     fixture.componentRef.setInput('fotos', [foto(1)]);
     fixture.componentRef.setInput('puedeRetirar', true);
+    fixture.componentRef.setInput('diferirSubida', true);
     abrir(1);
-    const [boton] = botonRetirar();
-    expect(boton.disabled).toBe(true);
-    const aviso = fixture.nativeElement.querySelector('#' + boton.getAttribute('aria-describedby')) as HTMLElement;
-    expect(aviso.textContent).toContain('Es la única foto del registro; agregue y guarde otra antes de retirarla.');
+    expect(botonRetirar()[0].disabled).toBe(false);
+    swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: ' borrosa ' });
+    await componente.retirar(foto(1));
+    fixture.detectChanges();
+    expect(retirarFoto).not.toHaveBeenCalled();
+    expect(componente.porRetirar()).toEqual([{ id: 1, motivo: 'borrosa' }]);
+    expect(componente.vigentes()).toEqual([]);
+    expect(fixture.nativeElement.textContent).toContain('Se retira al guardar');
+    expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain('El registro no puede quedar sin fotos: deshaga un retiro antes de guardar.');
+    fixture.componentRef.setInput('puedeAgregar', true);
+    fixture.detectChanges();
+    expect(componente.estadoRetiro()).toBe('El registro no puede quedar sin fotos: agregue otra o deshaga el retiro antes de guardar.');
+
+    componente.encolar('nueva.jpg', 'QUJD');
+    fixture.detectChanges();
+    expect(componente.quedariaSinFotos()).toBe(false);
+    expect(fixture.nativeElement.textContent).not.toContain('no puede quedar sin fotos');
+
+    const deshacer = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).find(b => b.textContent?.trim() === 'Deshacer');
+    deshacer?.click();
+    expect(componente.porRetirar()).toEqual([]);
   });
 
-  it('foto obligatoria: con dos fotos se puede retirar; si el SP rechaza (E28) avisa y refresca la lista', async () => {
+  it('Retirar y Deshacer son el mismo botón (el foco no se pierde); con 10 fotos explica que primero se guarde el retiro', async () => {
+    fixture.componentRef.setInput('fotos', Array.from({ length: 10 }, (_, i) => foto(i + 1)));
+    fixture.componentRef.setInput('puedeRetirar', true);
+    fixture.componentRef.setInput('puedeAgregar', true);
+    fixture.componentRef.setInput('diferirSubida', true);
+    abrir(1);
+    const boton = botonRetirar()[0];
+    boton.focus();
+    await componente.retirar(foto(1));
+    fixture.detectChanges();
+    expect(boton.isConnected).toBe(true);
+    expect(boton.textContent?.trim()).toBe('Deshacer');
+    expect(document.activeElement).toBe(boton);
+    expect(fixture.nativeElement.textContent).not.toContain('Agregar fotos');
+    expect(componente.estadoRetiro()).toBe('Con el máximo de 10 fotos, guarde primero el retiro y luego agregue la nueva.');
+    boton.click();
+    fixture.detectChanges();
+    expect(boton.textContent?.trim()).toBe('Retirar');
+    expect(componente.estadoRetiro()).toBe('');
+  });
+
+  it('retirarMarcadas aplica los retiros, avisa los rechazos (E28) y refresca; limpiar y cambiar de registro los desmarcan', async () => {
+    fixture.componentRef.setInput('fotos', [foto(1), foto(2)]);
+    fixture.componentRef.setInput('puedeRetirar', true);
+    fixture.componentRef.setInput('diferirSubida', true);
+    abrir(1);
+    await componente.retirar(foto(1));
+    await componente.retirar(foto(2));
+    const avisos: string[] = [];
+    let cambios = 0;
+    componente.aviso.subscribe(m => avisos.push(m));
+    componente.cambiaron.subscribe(() => cambios++);
+    retirarFoto.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Cal001BackendError('El registro debe conservar al menos una foto activa'));
+    expect(await componente.retirarMarcadas()).toBe(1);
+    expect(retirarFoto.mock.calls).toEqual([[1, ''], [2, '']]);
+    expect(avisos).toEqual(['El registro debe conservar al menos una foto activa']);
+    expect(cambios).toBe(1);
+    expect(componente.porRetirar()).toEqual([]);
+
+    await componente.retirar(foto(1));
+    componente.limpiar();
+    expect(componente.porRetirar()).toEqual([]);
+    await componente.retirar(foto(1));
+    abrir(2);
+    expect(componente.porRetirar()).toEqual([]);
+  });
+
+  it('fuera de edición, con dos fotos se retira al instante; si el SP rechaza (E28) avisa y refresca la lista', async () => {
     fixture.componentRef.setInput('fotos', [foto(1), foto(2)]);
     fixture.componentRef.setInput('puedeRetirar', true);
     abrir(1);
     expect(botonRetirar().map(b => b.disabled)).toEqual([false, false]);
-    expect(fixture.nativeElement.textContent).not.toContain('Es la única foto');
     const avisos: string[] = [];
     let cambios = 0;
     componente.aviso.subscribe(m => avisos.push(m));
