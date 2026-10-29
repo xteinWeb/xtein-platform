@@ -1,18 +1,19 @@
 <ul class="ft-lista">
   @for (foto of fotos(); track foto.ID_FOTO_NC) {
-    <li class="ft-foto">
-      <span class="ft-nombre">{{ foto.NOMBRE_ORIGINAL }}<small>{{ foto.USUARIO_CREA }} · {{ fecha(foto.FECHA_CREA) }}</small></span>
+    @let marcada = marcadas().has(foto.ID_FOTO_NC);
+    <li class="ft-foto" [class.ft-retirada]="marcada">
+      <span class="ft-nombre">{{ foto.NOMBRE_ORIGINAL }}
+        <small>{{ marcada ? 'Se retira al guardar' : foto.USUARIO_CREA + ' · ' + fecha(foto.FECHA_CREA) }}</small></span>
       <button type="button" class="ft-boton" [disabled]="cargandoVista() === foto.ID_FOTO_NC" (click)="ver(foto)">
         {{ cargandoVista() === foto.ID_FOTO_NC ? 'Cargando…' : 'Ver' }}
       </button>
       @if (puedeRetirar()) {
-        <button type="button" class="ft-boton ft-peligro" [attr.aria-label]="'Retirar ' + foto.NOMBRE_ORIGINAL"
-          [disabled]="esUnica()" [attr.aria-describedby]="esUnica() ? 'ft-unica-' + foto.ID_FOTO_NC : null" (click)="retirar(foto)">Retirar</button>
+        <!-- Un solo botón que cambia de texto: el foco no se pierde al marcar o deshacer. -->
+        <button type="button" class="ft-boton" [class.ft-peligro]="!marcada"
+          [attr.aria-label]="(marcada ? 'Deshacer retiro de ' : 'Retirar ') + foto.NOMBRE_ORIGINAL"
+          (click)="marcada ? deshacerRetiro(foto.ID_FOTO_NC) : retirar(foto)">{{ marcada ? 'Deshacer' : 'Retirar' }}</button>
       }
     </li>
-  }
-  @if (puedeRetirar() && fotos().length === 1) {
-    <li class="ft-aviso" [id]="'ft-unica-' + fotos()[0].ID_FOTO_NC">Es la única foto del registro; agregue y guarde otra antes de retirarla.</li>
   }
   @for (foto of cola(); track foto.id) {
     <li class="ft-foto ft-pendiente" [class.ft-error]="foto.estado === 'error'">
@@ -35,6 +36,8 @@
     <li class="ft-vacio">Sin fotos de evidencia.</li>
   }
 </ul>
+<!-- Región viva fija (existe siempre): anuncia los retiros marcados y por qué no se podría guardar. -->
+<p class="ft-aviso" [class.ft-bloquea]="quedariaSinFotos()" role="status">{{ estadoRetiro() }}</p>
 
 <div class="ft-acciones">
   @if (puedeAgregar() && cupo() > 0) {

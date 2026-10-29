@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
-import { ToolbarAction, type ToolbarState } from '@xtein/sdk';
+import { ToolbarAction, type ToolbarCommand, type ToolbarState } from '@xtein/sdk';
 import { ToolbarRuntimeService, WorkspaceRuntimeService } from '@xtein/runtime';
 import { SessionService } from '@xtein/session';
 import { XteinNotificationService } from '@xtein/ui';
@@ -31,13 +31,14 @@ vi.mock('devexpress-dashboard-angular', () => clases(['DxDashboardControlModule'
 vi.mock('devextreme/ui/notify', () => ({ default: () => undefined }));
 vi.mock('devextreme/data/custom_store', () => ({ default: class {} }));
 vi.mock('devextreme/data/data_source', () => ({ default: class {} }));
-const swal = vi.hoisted(() => ({ fire: vi.fn(async () => ({ isConfirmed: false })) }));
+const swal = vi.hoisted(() => ({ fire: vi.fn(async (): Promise<{ isConfirmed: boolean; value?: string }> => ({ isConfirmed: false })) }));
 vi.mock('sweetalert2', () => ({ default: swal }));
 
 describe('Cal001Component', () => {
   let fixture: ComponentFixture<Cal001Component>;
   let component: Cal001Component;
   let estados: ToolbarState[];
+  let comandosBarra: Subject<ToolbarCommand>;
   let notificacion: Record<'success' | 'info' | 'warning' | 'error', ReturnType<typeof vi.fn>>;
   const servicio = {
     permisos: vi.fn<() => Promise<Cal001Permisos>>(),
@@ -63,11 +64,12 @@ describe('Cal001Component', () => {
     servicio.retirarFoto.mockClear();
     servicio.permisos.mockResolvedValue(permisos);
     estados = [];
+    comandosBarra = new Subject<ToolbarCommand>();
     notificacion = { success: vi.fn(), info: vi.fn(), warning: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
       imports: [Cal001Component],
       providers: [
-        { provide: ToolbarRuntimeService, useValue: { setState: (s: ToolbarState) => estados.push(s), removeApplication: vi.fn(), commandsForApplication: () => new Subject() } },
+        { provide: ToolbarRuntimeService, useValue: { setState: (s: ToolbarState) => estados.push(s), removeApplication: vi.fn(), commandsForApplication: () => comandosBarra } },
         { provide: WorkspaceRuntimeService, useValue: { setDirty: vi.fn(), getApplicationTitle: () => 'No Conformidades' } },
         { provide: SessionService, useValue: { session: signal({ userId: 'LAURA', userName: 'Laura Gómez', companyId: '00' }) } },
         { provide: XteinNotificationService, useValue: notificacion }
@@ -311,23 +313,37 @@ describe('Cal001Component', () => {
     expect(panel().textContent).toContain('registrado por Edgardo Alcazar · Producción');
   });
 
-  it('"Agregar a mi registro" solo aparece con PUEDE_AGREGAR = 1, con el aviso de hasta cuándo', async () => {
+  it('agregar a su registro va por el lápiz de la barra: solo con PUEDE_AGREGAR = 1, con el aviso de hasta cuándo y sin botón propio', async () => {
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
     component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 0 }), PartesPrueba);
     fixture.detectChanges();
-    expect(botones(/Agregar a mi registro/)).toEqual([]);
+    expect(ultimoEstado().actions[ToolbarAction.Edit]?.visible ?? false).toBe(false);
+    comandosBarra.next({ applicationId: 'x', action: ToolbarAction.Edit });
+    expect(component.agregando()).toBe(false);
 
     component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1, AGREGAR_HASTA: '2026-10-27T09:15:00' }), PartesPrueba);
     fixture.detectChanges();
-    expect(botones(/Agregar a mi registro/).length).toBe(1);
+    expect(ultimoEstado().actions[ToolbarAction.Edit]?.visible).toBe(true);
+    expect(ultimoEstado().actions[ToolbarAction.Edit]?.enabled).toBe(true);
+    expect(botones(/Agregar a mi registro/)).toEqual([]);
+    expect(panel().textContent).toContain('use Modificar en la barra');
     expect(panel().textContent).toContain('Puede agregar hasta 27/10/2026 09:15.');
+  });
+
+  it('el gestor con PUEDE_MODIFICAR y PUEDE_AGREGAR: el lápiz modifica, no agrega', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR: 1 }), PartesPrueba);
+    fixture.detectChanges();
+    comandosBarra.next({ applicationId: 'x', action: ToolbarAction.Edit });
+    expect(component.modificando()).toBe(true);
+    expect(component.agregando()).toBe(false);
   });
 
   it('modo Agregar: lo guardado queda de solo lectura, la barra ofrece Guardar sin Modificar y "No agregó nada" si no hay cambios', async () => {
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
     component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1, PUEDE_AGREGAR_FOTOS: 1 }), PartesPrueba);
     fixture.detectChanges();
-    botones(/Agregar a mi registro/)[0].click();
+    comandosBarra.next({ applicationId: 'x', action: ToolbarAction.Edit });
     fixture.detectChanges();
 
     expect(component.agregando()).toBe(true);
@@ -336,7 +352,6 @@ describe('Cal001Component', () => {
     expect(ultimoEstado().actions[ToolbarAction.Save]?.enabled).toBe(true);
     expect(ultimoEstado().actions[ToolbarAction.Cancel]?.enabled).toBe(true);
     expect(ultimoEstado().actions[ToolbarAction.Edit]?.visible ?? false).toBe(false);
-    expect(botones(/Agregar a mi registro/)).toEqual([]);
     expect(component.puedeAgregarFotos()).toBe(true);
     expect(component.puedeRetirarFotos()).toBe(false);
     // Encabezado de solo lectura; la causa guardada no se puede quitar ni bajar sus ocurrencias.
@@ -425,6 +440,99 @@ describe('Cal001Component', () => {
     expect(servicio.guardar).not.toHaveBeenCalled();
     expect(component.errores()).toEqual(['El registro no tiene fotos: agregue al menos una foto de evidencia.']);
     expect(component.modificando()).toBe(true);
+  });
+
+  it('retirar la única foto al modificar: sin otra no deja guardar; al cancelar la foto se conserva', async () => {
+    servicio.registro.mockResolvedValueOnce(conFoto({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR_FOTOS: 1, PUEDE_RETIRAR_FOTOS: 1 }));
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    await component.abrirRegistro(7);
+    component.modificar();
+    component.borrador.update(b => b ? { ...b, FECHA_EVENTO: hoyColombia() } : b);
+    fixture.detectChanges();
+    swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: '' });
+    await componenteFotos().retirar(component.registro()!.FOTOS[0]);
+    await component.guardar();
+    expect(servicio.guardar).not.toHaveBeenCalled();
+    expect(servicio.retirarFoto).not.toHaveBeenCalled();
+    expect(component.errores()).toEqual(['El registro no puede quedar sin fotos: deshaga el retiro o agregue otra foto.']);
+
+    swal.fire.mockResolvedValueOnce({ isConfirmed: true });
+    await component.cancelar();
+    fixture.detectChanges();
+    expect(componenteFotos().porRetirar()).toEqual([]);
+    expect(servicio.retirarFoto).not.toHaveBeenCalled();
+    expect(panel().textContent).toContain('tapa.jpg');
+    expect(panel().textContent).not.toContain('Se retira al guardar');
+  });
+
+  it('mientras se suben las fotos de un guardado, la barra no abre otra edición', async () => {
+    const { restaurar } = await reemplazarUnicaFoto('');
+    try {
+      let liberar: () => void = () => undefined;
+      servicio.subirFoto.mockImplementation(() => new Promise<number>(r => { liberar = () => r(9); }));
+      const guardado = component.guardar();
+      await vi.waitFor(() => expect(servicio.subirFoto).toHaveBeenCalled());
+      expect(component.guardandoFotos()).toBe(true);
+      comandosBarra.next({ applicationId: 'x', action: ToolbarAction.Edit });
+      expect(component.modificando()).toBe(false);
+      liberar();
+      await guardado;
+      expect(component.guardandoFotos()).toBe(false);
+      expect(servicio.retirarFoto).toHaveBeenCalledWith(5, '');
+      expect(notificacion.success).toHaveBeenCalledWith('Foto retirada.');
+    } finally {
+      restaurar();
+    }
+  });
+
+  /**
+   * Modificar un registro con una sola foto, marcarla para retirar y elegir otra. El registro (con su foto) se
+   * devuelve en todas las cargas; `restaurar()` vuelve los mocks a su estado por defecto para las pruebas siguientes.
+   */
+  async function reemplazarUnicaFoto(motivo: string): Promise<{ restaurar: () => void }> {
+    servicio.registro.mockResolvedValue(conFoto({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR_FOTOS: 1, PUEDE_RETIRAR_FOTOS: 1 }));
+    const restaurar = (): void => {
+      servicio.registro.mockReset();
+      servicio.registro.mockImplementation(async () => registroGuardado());
+      servicio.retirarFoto.mockReset();
+      servicio.retirarFoto.mockImplementation(async () => undefined);
+    };
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    await component.abrirRegistro(7);
+    component.modificar();
+    component.borrador.update(b => b ? { ...b, FECHA_EVENTO: hoyColombia() } : b);
+    fixture.detectChanges();
+    swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: motivo });
+    await componenteFotos().retirar(component.registro()!.FOTOS[0]);
+    elegirFoto('nueva.jpg');
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 2 });
+    return { restaurar };
+  }
+
+  it('reemplazar la única foto al modificar: Guardar sube la nueva y después retira la vieja', async () => {
+    const { restaurar } = await reemplazarUnicaFoto('borrosa');
+    try {
+      const orden: string[] = [];
+      servicio.subirFoto.mockImplementation(async () => { orden.push('subir'); return 9; });
+      servicio.retirarFoto.mockImplementation(async () => { orden.push('retirar'); });
+      await component.guardar();
+      expect(orden).toEqual(['subir', 'retirar']);
+      expect(servicio.retirarFoto).toHaveBeenCalledWith(5, 'borrosa');
+    } finally {
+      restaurar();
+    }
+  });
+
+  it('reemplazar la única foto: si la nueva no se sube, no se retira la vieja', async () => {
+    const { restaurar } = await reemplazarUnicaFoto('');
+    try {
+      servicio.subirFoto.mockRejectedValue({ status: 0, error: null });
+      await component.guardar();
+      expect(servicio.retirarFoto).not.toHaveBeenCalled();
+      expect(notificacion.warning).toHaveBeenCalledWith(expect.stringContaining('No se retiró ninguna foto'));
+    } finally {
+      restaurar();
+    }
   });
 
   it('foto obligatoria: si la única foto de un registro nuevo no se sube, avisa con el documento y deja Reintentar', async () => {

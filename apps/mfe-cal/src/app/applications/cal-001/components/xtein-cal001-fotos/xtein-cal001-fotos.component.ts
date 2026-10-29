@@ -66,9 +66,31 @@ export class XteinCal001FotosComponent {
   readonly cargandoVista = signal<number | null>(null);
   readonly fecha = mostrarFecha;
   readonly maximo = Cal001Limits.MaxPhotos;
-  /** La foto activa es la única: no se puede retirar (el SP responde E28); primero se agrega y guarda otra. */
-  readonly esUnica = computed(() => this.fotos().length <= 1);
+  /**
+   * Fotos guardadas marcadas para retirar (con su motivo). En edición el retiro no es inmediato: se aplica al Guardar,
+   * después de subir las nuevas, y Cancelar lo deshace. Así se puede reemplazar la única foto en una sola edición.
+   */
+  readonly porRetirar = signal<{ id: number; motivo: string }[]>([]);
+  readonly marcadas = computed(() => new Set(this.porRetirar().map(m => m.id)));
+  /** Fotos guardadas que siguen al guardar (sin las marcadas para retirar). */
+  readonly vigentes = computed(() => this.fotos().filter(f => !this.marcadas().has(f.ID_FOTO_NC)));
+  /** Retirando todo sin agregar otra: el registro quedaría sin evidencia (Guardar lo impide). */
+  readonly quedariaSinFotos = computed(() => this.porRetirar().length > 0 && this.vigentes().length + this.cola().length === 0);
+  /** Las nuevas se suben antes de retirar (E26: máximo 10 activas), así que las marcadas cuentan para el cupo. */
   readonly cupo = computed(() => Cal001Limits.MaxPhotos - this.fotos().length - this.cola().length);
+  readonly estadoRetiro = computed(() => {
+    const n = this.porRetirar().length;
+    if (!n) return '';
+    const puedeAgregarOtra = this.puedeAgregar() && this.cupo() > 0;
+    if (this.quedariaSinFotos()) {
+      return puedeAgregarOtra ? 'El registro no puede quedar sin fotos: agregue otra o deshaga el retiro antes de guardar.'
+        : 'El registro no puede quedar sin fotos: deshaga un retiro antes de guardar.';
+    }
+    if (this.puedeAgregar() && this.cupo() <= 0) {
+      return `Con el máximo de ${Cal001Limits.MaxPhotos} fotos, guarde primero el retiro y luego agregue la nueva.`;
+    }
+    return n === 1 ? '1 foto se retira al guardar.' : `${n} fotos se retiran al guardar.`;
+  });
 
   constructor() {
     // Al cambiar de registro se descartan las fotos en cola de otros registros.
@@ -76,6 +98,7 @@ export class XteinCal001FotosComponent {
       const id = this.idRegistro();
       untracked(() => {
         if (this.pendientes().some(f => f.dueno !== id)) this.pendientes.update(lista => lista.filter(f => f.dueno === id));
+        if (this.porRetirar().length) this.porRetirar.set([]);
       });
     });
     effect(() => {
@@ -167,9 +190,40 @@ export class XteinCal001FotosComponent {
     this.pendientes.update(lista => lista.filter(f => f.id !== id));
   }
 
-  /** Vacía la cola (al cancelar un registro nuevo). */
+  /** Vacía la cola y desmarca los retiros (al cancelar). */
   limpiar(): void {
     this.pendientes.set([]);
+    this.porRetirar.set([]);
+  }
+
+  deshacerRetiro(id: number): void {
+    this.porRetirar.update(lista => lista.filter(m => m.id !== id));
+  }
+
+  /** Desmarca, sin aplicarlos, los retiros `marcas` (p. ej. si falló la subida de las nuevas). */
+  olvidarRetiros(marcas: readonly { id: number }[] = this.porRetirar()): void {
+    const ids = new Set(marcas.map(m => m.id));
+    this.porRetirar.update(lista => lista.filter(m => !ids.has(m.id)));
+  }
+
+  /**
+   * Al Guardar, después de subir las nuevas: retira de a una las fotos `marcas` (la copia tomada al pulsar Guardar,
+   * no las que se marquen después). El SP sigue impidiendo dejar el registro sin fotos (E28).
+   * Devuelve cuántas no se pudieron retirar (cada fallo se avisa).
+   */
+  async retirarMarcadas(marcas: readonly { id: number; motivo: string }[] = this.porRetirar()): Promise<number> {
+    this.olvidarRetiros(marcas);
+    let fallidas = 0;
+    for (const marca of marcas) {
+      try {
+        await this.servicio.retirarFoto(marca.id, marca.motivo);
+      } catch (error) {
+        fallidas++;
+        this.aviso.emit(mensajeError(error).mensaje);
+      }
+    }
+    if (marcas.length) this.cambiaron.emit();
+    return fallidas;
   }
 
   /** Descarta las fotos sin subir cuyo dueño no es `destino` (el usuario confirmó descartarlas). */
@@ -210,9 +264,11 @@ export class XteinCal001FotosComponent {
   }
 
   async retirar(foto: Cal001Foto): Promise<void> {
+    const diferir = this.diferirSubida();
     const respuesta = await Swal.fire({
       title: 'Retirar foto',
-      text: `¿Retirar ${foto.NOMBRE_ORIGINAL} de la evidencia? Queda registrado quién la retiró.`,
+      text: `¿Retirar ${foto.NOMBRE_ORIGINAL} de la evidencia? Queda registrado quién la retiró.`
+        + (diferir ? ' Se retira al guardar; el registro debe conservar al menos una foto.' : ''),
       input: 'text',
       inputPlaceholder: 'Motivo (opcional)',
       inputAttributes: { maxlength: String(Cal001Limits.Reason) },
@@ -224,8 +280,13 @@ export class XteinCal001FotosComponent {
       cancelButtonText: 'Cancelar'
     });
     if (!respuesta.isConfirmed) return;
+    const motivo = String(respuesta.value ?? '').trim();
+    if (diferir) {
+      if (!this.marcadas().has(foto.ID_FOTO_NC)) this.porRetirar.update(lista => [...lista, { id: foto.ID_FOTO_NC, motivo }]);
+      return;
+    }
     try {
-      await this.servicio.retirarFoto(foto.ID_FOTO_NC, String(respuesta.value ?? '').trim());
+      await this.servicio.retirarFoto(foto.ID_FOTO_NC, motivo);
       this.cambiaron.emit();
     } catch (error) {
       this.aviso.emit(mensajeError(error).mensaje);

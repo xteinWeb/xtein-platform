@@ -49,7 +49,11 @@ function mensajeHttp(status: number, cuerpo: string): string {
     case 415: return 'Formato de foto no permitido. Use JPG, PNG o WEBP.';
     case 429: return 'Hay demasiadas fotos subiéndose al mismo tiempo. Espere unos segundos e intente de nuevo.';
     case 503: return 'El servicio de No Conformidades no está disponible en este momento. Intente más tarde.';
-    default: return cuerpo && status < 500 ? cuerpo : `Error del servidor (${status}). Intente de nuevo; si persiste, avise a soporte.`;
+    // En 5xx el controlador manda un motivo sin detalles internos (p. ej. "El almacenamiento de fotos no está
+    // configurado"): se muestra para que soporte sepa qué falla. Sin motivo (o HTML del proxy), el genérico.
+    default:
+      if (!cuerpo) return `Error del servidor (${status}). Intente de nuevo; si persiste, avise a soporte.`;
+      return status < 500 ? cuerpo : `${cuerpo.replace(/[.;\s]+$/, '')} (error ${status}). Intente de nuevo; si persiste, avise a soporte.`;
   }
 }
 
@@ -79,7 +83,9 @@ export function mensajeError(error: unknown): Cal001MensajeError {
   if (esErrorHttp(error)) {
     const cuerpo = mensajeCuerpo(error.error);
     if (error.status === 200 && cuerpo) return mensajeNegocio(cuerpo);
-    return { mensaje: mensajeHttp(error.status, cuerpo), conflictoVersion: false };
+    // En 5xx solo se confía en el JSON del controlador; el texto suelto de un proxy puede traer detalles internos.
+    const motivo = error.status < 500 || (error.error && typeof error.error === 'object') ? cuerpo.slice(0, 200) : '';
+    return { mensaje: mensajeHttp(error.status, motivo), conflictoVersion: false };
   }
   if (error instanceof Error && error.message) return { mensaje: error.message, conflictoVersion: false };
   return { mensaje: 'No se pudo completar la operación.', conflictoVersion: false };
