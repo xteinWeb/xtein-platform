@@ -15,14 +15,16 @@ import {
   XteinInputComponent,
   XteinLabelComponent,
   XteinLookupComponent,
+  XteinButtonComponent,
   XteinNumberComponent,
+  XteinPopupComponent,
   XteinRecordFilterCriterion,
   XteinRecordViewComponent,
   XteinSelectComponent
 } from '@xtein/ui';
 import { Cal003Limits, Cal003ServiceStatus } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003EntradaViewColumns, Cal003ProductoColumns } from '../../constants/cal-003-ui.constants';
-import type { Cal003ProductoLista, Cal003Servicio, Cal003ServicioCompleto } from '../../models/cal-003.model';
+import type { Cal003Cabecera, Cal003ProductoLista, Cal003Servicio, Cal003ServicioCompleto } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
 import {
   Cal003GrupoEntrada,
@@ -33,7 +35,8 @@ import {
   marcarLlega,
   unidadesEntrada
 } from '../../utils/cal-003-arbol';
-import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
+import { diasEntrega, estadoBadge, fecha, hoy, resumenEntrega } from '../../utils/cal-003-formato';
+import { XteinCal003NcComponent } from '../xtein-cal003-nc/xtein-cal003-nc.component';
 
 /**
  * Entrada: registra lo que llegó del cliente. Cada producto agregado queda como un servicio S.
@@ -55,9 +58,12 @@ import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
     XteinInputComponent,
     XteinLabelComponent,
     XteinLookupComponent,
+    XteinButtonComponent,
     XteinNumberComponent,
+    XteinPopupComponent,
     XteinRecordViewComponent,
-    XteinSelectComponent
+    XteinSelectComponent,
+    XteinCal003NcComponent
   ],
   templateUrl: './xtein-cal003-entrada.component.html',
   styleUrl: './xtein-cal003-entrada.component.scss',
@@ -73,6 +79,8 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   readonly limits = Cal003Limits;
   readonly fecha = fecha;
   readonly badge = estadoBadge;
+  readonly diasEntrega = diasEntrega;
+  readonly hoy = hoy;
 
   readonly mode = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
   readonly records = signal<Cal003Servicio[]>([]);
@@ -99,8 +107,34 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   // Ver de la barra (Buscar lo maneja la pantalla: un solo buscador con el campo Operación)
   readonly viewColumns = Cal003EntradaViewColumns;
   readonly viewVisible = signal(false);
+  /** Lo que muestra Ver: cada entrada con su fecha de entrega y semáforo en texto. */
+  readonly viewRecords = computed(() => this.records().map(r => ({ ...r, ENTREGA: resumenEntrega(r) })));
+
+  /** Reprogramar la fecha de entrega: solo mientras el servicio espera en DEPOSITO. */
+  readonly puedeReprogramar = computed(() => {
+    const s = this.mode() === RecordToolbarMode.Browsing ? this.abierto()?.SERVICIO : null;
+    return !!s && s.ESTADO === Cal003ServiceStatus.Deposit && this.ctx.puedeCrear();
+  });
+  readonly reprogramarVisible = signal(false);
+  readonly nuevaFechaEntrega = signal<string | null>(null);
+  readonly motivoReprogramar = signal('');
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
+
+  /** No conformidad obligatoria: se abre al guardar la entrada y con el botón de una entrada que no la tiene. */
+  readonly ncVisible = signal(false);
+  /** La entrada abierta no tiene su no conformidad (y no está anulada). */
+  readonly faltaNc = computed(() => {
+    const s = this.mode() === RecordToolbarMode.Browsing ? this.abierto()?.SERVICIO : null;
+    return !!s && !s.ID_REGISTRO_NC && s.ESTADO !== 'ANULADO';
+  });
+
+  /** Cabecera común de la pantalla con la entrada abierta (documento SEN, estado del documento, quién y cuándo). */
+  readonly cabecera = computed<Cal003Cabecera | null>(() => {
+    const s = this.mode() === RecordToolbarMode.Browsing ? this.abierto()?.SERVICIO : null;
+    return s ? { documento: s.DOCUMENTO, estado: s.ESTADO_DOCUMENTO ?? (s.ESTADO === 'ANULADO' ? 'ANULADO' : 'REGISTRADO'),
+                 usuario: s.USUARIO_CREA, fechaRegistro: s.FECHA_REGISTRO } : null;
+  });
 
   readonly barra = computed<Cal003EstadoBarra>(() => ({
     mode: this.mode(),
@@ -111,6 +145,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   readonly form = new FormGroup({
     FECHA: new FormControl<string | null>(hoy()),
     FECHA_REGISTRO: new FormControl<string | null>(hoy()),
+    FECHA_ENTREGA: new FormControl<string | null>(null),
     ID_CLIENTE: new FormControl<string>(''),
     TIPO_SERVICIO: new FormControl<string>(''),
     ID_UN_BODEGA: new FormControl<string>(''),
@@ -262,7 +297,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   }
 
   cantidad(grupo: number, fila: number, valor: number | null): void {
-    this.grupos.update(list => list.map((g, i) => i === grupo ? cambiarCantidad(g, fila, Number(valor ?? 1)) : g));
+    this.grupos.update(list => list.map((g, i) => i === grupo ? cambiarCantidad(g, fila, Number(valor ?? 0)) : g));
   }
 
   parcial(grupo: Cal003GrupoEntrada): boolean {
@@ -307,6 +342,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     const vivos = this.grupos().filter(g => lleganDe(g).length > 0);
     const faltan: string[] = [];
     if (!v.FECHA) faltan.push('fecha');
+    if (!v.FECHA_ENTREGA) faltan.push('fecha de entrega');
     if (!v.ID_CLIENTE) faltan.push('cliente');
     if (!v.TIPO_SERVICIO) faltan.push('tipo de servicio (SG o SR)');
     if (!v.ID_UN_BODEGA) faltan.push('bodega');
@@ -315,9 +351,28 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
       this.ctx.advertir(`Falta: ${faltan.join(', ')}.`);
       return;
     }
+    if (String(v.FECHA_ENTREGA).slice(0, 10) < String(v.FECHA).slice(0, 10)) {
+      this.ctx.advertir('La fecha de entrega no puede ser anterior a la fecha de la entrada.');
+      return;
+    }
+    const numero = (v.N_SERVICIO_CLIENTE ?? '').trim();
+    if (!numero) {
+      this.ctx.advertir('Falta el número de servicio del cliente: lo pide la no conformidad.');
+      return;
+    }
+    if (!/^\d+$/.test(numero)) {
+      this.ctx.advertir('El número de servicio debe ser solo numérico.');
+      return;
+    }
+    // Las partes empiezan en cero: no se guarda si todo lo marcado sigue en cero.
+    if (vivos.every(g => unidadesEntrada(g).UNIDADES.every(u => !u.CANTIDAD))) {
+      this.ctx.advertir('Las cantidades están todas en cero: escribe la cantidad de lo que llegó.');
+      return;
+    }
 
     const creados = await this.ctx.ejecutar(() => this.ctx.api.entradaNueva({
       FECHA: String(v.FECHA).slice(0, 10),
+      FECHA_ENTREGA: String(v.FECHA_ENTREGA).slice(0, 10),
       ID_CLIENTE: v.ID_CLIENTE ?? '',
       TIPO_SERVICIO: v.TIPO_SERVICIO ?? '',
       ID_UN_BODEGA: v.ID_UN_BODEGA ?? '',
@@ -327,13 +382,62 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     }, vivos.map(unidadesEntrada)));
     if (!creados) return;
 
-    this.ctx.exito(`Entrada guardada: ${creados.map(c => c.DOCUMENTO).join(', ')}. Registra en CAL-001 la no conformidad (origen Cliente) con este número.`);
+    this.ctx.exito(`Entrada guardada: ${creados.map(c => c.DOCUMENTO).join(', ')}. Ahora registra su no conformidad.`);
     this.grupos.set([]);
     this.form.disable({ emitEvent: false });
     const servicios = await this.ctx.ejecutar(() => Promise.all(creados.map(c => this.ctx.api.servicio(c.ID_SERVICIO))));
     this.records.set((servicios ?? []).map(s => s.SERVICIO));
-    if (this.records().length) await this.abrir(0);
-    else this.mode.set(RecordToolbarMode.Initial);
+    if (this.records().length) {
+      await this.abrir(0);
+      // La no conformidad es obligatoria: se pide en seguida
+      if (this.faltaNc()) this.ncVisible.set(true);
+    } else this.mode.set(RecordToolbarMode.Initial);
+  }
+
+  registrarNc(): void {
+    if (this.faltaNc()) this.ncVisible.set(true);
+  }
+
+  async ncRegistrada(): Promise<void> {
+    this.ncVisible.set(false);
+    await this.abrir(this.currentIndex());
+  }
+
+  // ================= Fecha de entrega =================
+
+  abrirReprogramar(): void {
+    const s = this.abierto()?.SERVICIO;
+    if (!s || !this.puedeReprogramar()) return;
+    this.nuevaFechaEntrega.set(s.FECHA_ENTREGA?.slice(0, 10) ?? null);
+    this.motivoReprogramar.set('');
+    this.reprogramarVisible.set(true);
+  }
+
+  async reprogramar(): Promise<void> {
+    const s = this.abierto()?.SERVICIO;
+    if (!s) return;
+    const nueva = this.nuevaFechaEntrega() ? String(this.nuevaFechaEntrega()).slice(0, 10) : '';
+    const motivo = this.motivoReprogramar().trim();
+    const faltan: string[] = [];
+    if (!nueva) faltan.push('nueva fecha de entrega');
+    if (!motivo) faltan.push('motivo');
+    if (faltan.length) {
+      this.ctx.advertir(`Falta: ${faltan.join(', ')}.`);
+      return;
+    }
+    if (nueva < hoy()) {
+      this.ctx.advertir('La nueva fecha de entrega no puede ser anterior a hoy.');
+      return;
+    }
+    if (nueva === s.FECHA_ENTREGA?.slice(0, 10)) {
+      this.ctx.advertir('La nueva fecha de entrega es la misma que ya tiene.');
+      return;
+    }
+    const resultado = await this.ctx.ejecutar(() => this.ctx.api.entradaReprogramar(s.ID_SERVICIO, s.VERSION, nueva, motivo));
+    if (!resultado) return;
+    this.reprogramarVisible.set(false);
+    this.ctx.exito(resultado.MENSAJE);
+    await this.abrir(this.currentIndex());
   }
 
   // ================= Buscador, navegación y anulación =================
@@ -386,6 +490,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     this.form.reset({
       FECHA: s.FECHA?.slice(0, 10) ?? null,
       FECHA_REGISTRO: s.FECHA_REGISTRO?.slice(0, 10) ?? null,
+      FECHA_ENTREGA: s.FECHA_ENTREGA?.slice(0, 10) ?? null,
       ID_CLIENTE: s.ID_CLIENTE,
       TIPO_SERVICIO: s.TIPO_SERVICIO,
       ID_UN_BODEGA: s.ID_UN_BODEGA_ENTRADA,
@@ -432,6 +537,8 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     this.form.reset({
       FECHA: hoy(),
       FECHA_REGISTRO: hoy(),
+      // La escribe quien registra: es el compromiso con el cliente
+      FECHA_ENTREGA: null,
       ID_CLIENTE: '',
       TIPO_SERVICIO: '',
       ID_UN_BODEGA: bodegas.length === 1 ? bodegas[0].ID_UN_BODEGA : '',

@@ -1,11 +1,13 @@
 import { signal } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { ToolbarAction, type ToolbarState } from '@xtein/sdk';
 import { ToolbarRuntimeService, WorkspaceRuntimeService } from '@xtein/runtime';
 import { SessionService } from '@xtein/session';
 import { XteinNotificationService } from '@xtein/ui';
 import { Cal001Component } from './cal-001.component';
+import { XteinCal001FotosComponent } from './components/xtein-cal001-fotos/xtein-cal001-fotos.component';
 import type { Cal001Borrador, Cal001Permisos, Cal001RegistroCompleto } from './models/cal-001.model';
 import { Cal001Service } from './services/cal-001.service';
 import { CausasPrueba, PartesPrueba, borradorProduccion, registroGuardado } from './testing/cal-001.fixtures';
@@ -45,7 +47,9 @@ describe('Cal001Component', () => {
     registro: vi.fn(async () => registroGuardado()),
     consulta: vi.fn(),
     guardar: vi.fn(),
-    agregar: vi.fn()
+    agregar: vi.fn(),
+    subirFoto: vi.fn(async () => 1),
+    retirarFoto: vi.fn(async () => undefined)
   };
 
   async function crear(permisos: Cal001Permisos, antes: () => void = () => undefined): Promise<void> {
@@ -54,6 +58,9 @@ describe('Cal001Component', () => {
     swal.fire.mockClear();
     servicio.guardar.mockReset();
     servicio.agregar.mockReset();
+    servicio.subirFoto.mockReset();
+    servicio.subirFoto.mockResolvedValue(1);
+    servicio.retirarFoto.mockClear();
     servicio.permisos.mockResolvedValue(permisos);
     estados = [];
     notificacion = { success: vi.fn(), info: vi.fn(), warning: vi.fn(), error: vi.fn() };
@@ -178,12 +185,21 @@ describe('Cal001Component', () => {
     component.nuevo();
     component.borrador.set({ ...borradorProduccion(), FECHA_EVENTO: hoyColombia() });
   };
+  /** Componente de fotos de la pantalla (para elegir fotos como lo haría el usuario). */
+  const componenteFotos = (): XteinCal001FotosComponent =>
+    fixture.debugElement.query(By.directive(XteinCal001FotosComponent)).componentInstance as XteinCal001FotosComponent;
+  const elegirFoto = (nombre = 'tapa.jpg'): void => {
+    fixture.detectChanges();
+    componenteFotos().encolar(nombre, 'QUJD');
+    fixture.detectChanges();
+  };
 
   it('guardar: un doble clic envía una sola vez', async () => {
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
     let responder: (v: unknown) => void = () => undefined;
     servicio.guardar.mockImplementation(() => new Promise(r => { responder = r; }));
     capturaValida();
+    elegirFoto();
     const primero = component.guardar();
     const segundo = component.guardar();
     await segundo;
@@ -195,7 +211,7 @@ describe('Cal001Component', () => {
   });
 
   it('guardar con E22: muestra el conflicto de versión con la opción de recargar y sigue en modificación', async () => {
-    servicio.registro.mockResolvedValueOnce(registroGuardado({ PUEDE_MODIFICAR: 1 }));
+    servicio.registro.mockResolvedValueOnce(conFoto({ PUEDE_MODIFICAR: 1 }));
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
     await component.abrirRegistro(7);
     component.modificar();
@@ -341,7 +357,8 @@ describe('Cal001Component', () => {
 
   it('modo Agregar: Guardar envía agregar, avisa "actualizado (versión N)", vuelve a consulta y recarga el registro', async () => {
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
-    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1 }), PartesPrueba);
+    // Con una foto activa no se exige otra (evidencia ya presente).
+    component.mostrarRegistro(conFoto({ PUEDE_AGREGAR: 1 }), PartesPrueba);
     component.agregar();
     fixture.detectChanges();
     const adicionales = panel().querySelector<HTMLInputElement>('[aria-label="Ocurrencias adicionales de Óscar Villa"]') as HTMLInputElement;
@@ -363,7 +380,7 @@ describe('Cal001Component', () => {
 
   it('modo Agregar con E22: ofrece recargar y, si sigue, conserva lo capturado', async () => {
     await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
-    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1 }), PartesPrueba);
+    component.mostrarRegistro(conFoto({ PUEDE_AGREGAR: 1 }), PartesPrueba);
     component.agregar();
     const parte = component.borrador()!.PARTES[0];
     component.cambiarParte({ ...parte, CAUSAS: parte.CAUSAS.map(c => ({ ...c, OPERARIOS: c.OPERARIOS.map(o => ({ ...o, ADICIONALES: 1 })) })) });
@@ -383,5 +400,142 @@ describe('Cal001Component', () => {
     expect(component.agregando()).toBe(false);
     expect(component.modo()).toBe('browsing');
     expect(component.enCaptura()).toBe(false);
+  });
+  /* ======================= Foto de evidencia obligatoria ======================= */
+
+  it('foto obligatoria: un registro nuevo sin foto no se envía y lo dice', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    capturaValida();
+    fixture.detectChanges();
+    await component.guardar();
+    expect(servicio.guardar).not.toHaveBeenCalled();
+    expect(component.errores()).toEqual(['Agregue al menos una foto de evidencia.']);
+    expect(notificacion.warning).toHaveBeenCalledWith('Agregue al menos una foto de evidencia.');
+    expect(component.creando()).toBe(true);
+  });
+
+  it('foto obligatoria: Modificar un registro antiguo sin fotos exige una antes de guardar', async () => {
+    servicio.registro.mockResolvedValueOnce(registroGuardado({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR_FOTOS: 1, PUEDE_RETIRAR_FOTOS: 1 }));
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    await component.abrirRegistro(7);
+    component.modificar();
+    component.borrador.update(b => b ? { ...b, FECHA_EVENTO: hoyColombia() } : b);
+    fixture.detectChanges();
+    await component.guardar();
+    expect(servicio.guardar).not.toHaveBeenCalled();
+    expect(component.errores()).toEqual(['El registro no tiene fotos: agregue al menos una foto de evidencia.']);
+    expect(component.modificando()).toBe(true);
+  });
+
+  it('foto obligatoria: si la única foto de un registro nuevo no se sube, avisa con el documento y deja Reintentar', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    capturaValida();
+    elegirFoto();
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 1 });
+    servicio.subirFoto.mockRejectedValue(new Cal001BackendError('Sin permiso para agregar fotos'));
+    await component.guardar();
+    fixture.detectChanges();
+    const mensaje = 'NC-0007 quedó guardado sin foto: la subida falló. Pulse «Reintentar subida» antes de salir.';
+    expect(component.errores()).toEqual([mensaje]);
+    expect(notificacion.error).toHaveBeenCalledWith(mensaje);
+    expect(componenteFotos().cola().map(f => [f.dueno, f.estado])).toEqual([[7, 'error']]);
+    expect(panel().textContent).toContain('Reintentar subida');
+  });
+
+  it('foto obligatoria: si se sube al menos una de varias, no se dice que quedó sin foto', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    capturaValida();
+    elegirFoto('a.jpg');
+    elegirFoto('b.jpg');
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 1 });
+    servicio.subirFoto.mockRejectedValueOnce(new Cal001BackendError('Sin permiso para agregar fotos')).mockResolvedValue(1);
+    await component.guardar();
+    expect(servicio.subirFoto).toHaveBeenCalledTimes(2);
+    expect(notificacion.error).not.toHaveBeenCalledWith(expect.stringContaining('sin foto'));
+  });
+
+  it('foto obligatoria: Agregar solo fotos a un registro sin fotos que no se suben avisa sin decir "guardado"', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    component.mostrarRegistro(registroGuardado({ PUEDE_AGREGAR: 1, PUEDE_AGREGAR_FOTOS: 1 }), PartesPrueba);
+    component.agregar();
+    elegirFoto();
+    servicio.subirFoto.mockRejectedValue(new Cal001BackendError('Sin permiso para agregar fotos'));
+    await component.guardar();
+    expect(servicio.agregar).not.toHaveBeenCalled();
+    expect(component.errores()[0]).toBe('Las fotos de NC-0007 no se subieron. Pulse «Reintentar subida» antes de salir.');
+  });
+
+  it('foto obligatoria: con fotos sin subir, abrir otro registro o Nuevo pregunta y al volver no se descartan', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    capturaValida();
+    elegirFoto();
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 1 });
+    servicio.subirFoto.mockRejectedValue(new Cal001BackendError('Sin permiso para agregar fotos'));
+    await component.guardar();
+    swal.fire.mockClear();
+    servicio.registro.mockClear();
+
+    await component.abrirRegistro(8);
+    expect(swal.fire).toHaveBeenCalledWith(expect.objectContaining({ title: 'Fotos sin subir', text: expect.stringContaining('1 foto sin subir de NC-0007') }));
+    expect(servicio.registro).not.toHaveBeenCalled();
+
+    component.nuevo();
+    await new Promise(r => setTimeout(r));
+    expect(swal.fire).toHaveBeenCalledTimes(2);
+    expect(component.creando()).toBe(false);
+    expect(componenteFotos().pendientes().length).toBe(1);
+  });
+
+  it('foto obligatoria: Cancelar la modificación con fotos en cola dice cuántas se descartan', async () => {
+    servicio.registro.mockResolvedValueOnce(conFoto({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR_FOTOS: 1, PUEDE_RETIRAR_FOTOS: 1 }));
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    await component.abrirRegistro(7);
+    component.modificar();
+    elegirFoto();
+    swal.fire.mockClear();
+    await component.cancelar();
+    expect(swal.fire).toHaveBeenCalledWith(expect.objectContaining({ text: '¿Cancelar la modificación sin guardar? Se descarta 1 foto sin subir.' }));
+  });
+  it('foto obligatoria: Modificar con foto nueva cuya subida falla en un registro sin fotos dice "sigue sin foto"', async () => {
+    servicio.registro.mockResolvedValue(registroGuardado({ PUEDE_MODIFICAR: 1, PUEDE_AGREGAR_FOTOS: 1, PUEDE_RETIRAR_FOTOS: 1 }));
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 1 });
+    await component.abrirRegistro(7);
+    component.modificar();
+    component.borrador.update(b => b ? { ...b, FECHA_EVENTO: hoyColombia() } : b);
+    elegirFoto();
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 2 });
+    servicio.subirFoto.mockRejectedValue(new Cal001BackendError('Sin permiso para agregar fotos'));
+    await component.guardar();
+    expect(component.errores()).toEqual(['NC-0007 sigue sin foto: la subida falló. Pulse «Reintentar subida» antes de salir.']);
+    servicio.registro.mockReset();
+    servicio.registro.mockImplementation(async () => registroGuardado());
+  });
+
+  it('foto obligatoria: al confirmar "Descartar y continuar" se abre el otro registro y las fotos sin subir se descartan', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    capturaValida();
+    elegirFoto();
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 1 });
+    servicio.subirFoto.mockRejectedValue(new Cal001BackendError('Sin permiso para agregar fotos'));
+    await component.guardar();
+    expect(componenteFotos().pendientes().length).toBe(1);
+    servicio.registro.mockClear();
+    swal.fire.mockResolvedValueOnce({ isConfirmed: true });
+    await component.abrirRegistro(8);
+    expect(servicio.registro).toHaveBeenCalledWith(8);
+    expect(componenteFotos().pendientes()).toEqual([]);
+  });
+
+  it('foto obligatoria: recargar el registro propio con su foto pendiente no pregunta', async () => {
+    await crear({ PUEDE_VER: 1, PUEDE_CREAR: 1, ES_GESTOR: 0 });
+    capturaValida();
+    elegirFoto();
+    servicio.guardar.mockResolvedValueOnce({ ID_REGISTRO_NC: 7, DOCUMENTO: 'NC-0007', VERSION: 1 });
+    servicio.subirFoto.mockRejectedValue(new Cal001BackendError('Sin permiso para agregar fotos'));
+    await component.guardar();
+    swal.fire.mockClear();
+    await component.recargarRegistro();
+    expect(swal.fire).not.toHaveBeenCalled();
+    expect(componenteFotos().pendientes().length).toBe(1);
   });
 });

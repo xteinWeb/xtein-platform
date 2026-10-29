@@ -23,6 +23,7 @@ import {
   createRecordToolbarState
 } from '@xtein/sdk';
 import {
+  XteinInputComponent,
   XteinLabelComponent,
   XteinLoadingComponent,
   XteinRecordFilterComponent,
@@ -34,12 +35,15 @@ import {
   Cal003FilterOperationField,
   Cal003FilterOperations,
   Cal003FilterTable,
+  Cal003Movimientos,
   Cal003RecordTabs,
   Cal003Tab,
   Cal003Tabs,
   Cal003ToolbarCapabilities
 } from './constants/cal-003.constants';
 import { Cal003Service } from './services/cal-003.service';
+import type { Cal003Cabecera, Cal003Consecutivo } from './models/cal-003.model';
+import { estadoBadge, fecha, hoy } from './utils/cal-003-formato';
 import { Cal003BarraVacia, Cal003ContextoService, Cal003Pestana } from './services/cal-003-contexto.service';
 import { XteinCal003EntradaComponent } from './components/xtein-cal003-entrada/xtein-cal003-entrada.component';
 import { XteinCal003TrasladoComponent } from './components/xtein-cal003-traslado/xtein-cal003-traslado.component';
@@ -50,9 +54,9 @@ import { XteinCal003ConsultasComponent } from './components/xtein-cal003-consult
 
 /**
  * CAL-003 Servicios técnicos: inventario de los productos que los clientes devuelven por garantía (SG)
- * o reparación (SR). El select Operación escoge el formulario (Entrada, Traslado, Salida · Entrega,
- * Salida · Ajuste, Precios ESPECIAL o Consultas) y solo se habilita con Nuevo; Buscar (aquí, uno solo)
- * lleva el campo Operación. El resto de la barra actúa sobre el formulario activo.
+ * o reparación (SR). La cabecera lleva Movimiento (ENTRADA, TRASLADO, SALIDA), Estado, Documento, Usuario y Fecha de
+ * registro; el Movimiento solo se habilita con Nuevo. Ajuste, Precios ESPECIAL y Consultas se abren con Buscar (aquí, uno
+ * solo), que lleva el campo Operación. El resto de la barra actúa sobre el formulario activo.
  * Pre-facturas y la factura de las SR son de otros módulos.
  */
 @Component({
@@ -61,6 +65,7 @@ import { XteinCal003ConsultasComponent } from './components/xtein-cal003-consult
   imports: [
     CommonModule,
     FormsModule,
+    XteinInputComponent,
     XteinLabelComponent,
     XteinLoadingComponent,
     XteinRecordFilterComponent,
@@ -80,7 +85,10 @@ import { XteinCal003ConsultasComponent } from './components/xtein-cal003-consult
 export class Cal003Component implements OnInit, OnDestroy {
   readonly applicationId = Cal003Application.Id;
   readonly tabs = Cal003Tabs;
+  readonly movimientos = Cal003Movimientos;
   readonly tab = Cal003Tab;
+  readonly badge = estadoBadge;
+  readonly fecha = fecha;
 
   readonly ctx = inject(Cal003ContextoService);
   private readonly toolbar = inject(ToolbarRuntimeService);
@@ -100,6 +108,23 @@ export class Cal003Component implements OnInit, OnDestroy {
 
   /** La operación activa está registrando algo nuevo: solo entonces se puede cambiar de operación. */
   readonly creando = computed(() => this.pestana()?.barra().mode === RecordToolbarMode.Creating);
+
+  /** Movimiento de la operación que se ve (ENTRADA, TRASLADO o SALIDA); vacío en Ajuste, Precios y Consultas. */
+  readonly movimiento = computed(() => this.movimientos.find(m => m.id === this.activa())?.label ?? '');
+  /** Ajuste, Precios y Consultas no son un movimiento del select: se nombran en él como texto de ayuda. */
+  readonly otraOperacion = computed(() => this.movimiento() ? '' : (this.tabs.find(t => t.id === this.activa())?.label ?? ''));
+
+  /** Documento que tendrá lo que se está registrando (acción 'consecutivo'). */
+  private readonly previa = signal<Cal003Consecutivo | null>(null);
+
+  /** Movimiento, estado, documento, usuario y fecha de registro: del registro abierto o, al crear, del próximo documento. */
+  readonly cabecera = computed<Cal003Cabecera>(() => {
+    if (this.creando() && this.movimiento()) {
+      const p = this.previa();
+      return { documento: p?.DOCUMENTO ?? '', estado: 'REGISTRADO', usuario: p?.USUARIO ?? '', fechaRegistro: hoy() };
+    }
+    return this.pestana()?.cabecera?.() ?? { documento: '', estado: '', usuario: '', fechaRegistro: null };
+  });
 
   readonly pestana = computed<Cal003Pestana | undefined>(() => {
     switch (this.activa()) {
@@ -148,6 +173,24 @@ export class Cal003Component implements OnInit, OnDestroy {
       });
       untracked(() => this.toolbar.setState(state));
     });
+
+    // Al empezar a registrar un movimiento se pide su próximo documento (SEN-1, STR-1, SSA-1).
+    effect(() => {
+      const movimiento = this.creando() ? this.movimiento() : '';
+      untracked(() => {
+        this.previa.set(null);
+        if (movimiento) void this.cargarPrevia(movimiento);
+      });
+    });
+  }
+
+  private async cargarPrevia(movimiento: string): Promise<void> {
+    try {
+      const p = await this.ctx.api.consecutivo(movimiento);
+      if (this.creando() && this.movimiento() === movimiento) this.previa.set(p);
+    } catch (err) {
+      this.ctx.advertir(`No se pudo traer el próximo documento: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 
   ngOnInit(): void {
@@ -210,7 +253,9 @@ export class Cal003Component implements OnInit, OnDestroy {
     this.filterVisible.set(false);
     const criterios = result?.ESTRUCTURA ?? [];
     const operacion = criterios.find(c => c.CAMPO === Cal003FilterOperationField)?.EXPRESION?.trim() ?? '';
-    const tab = operacion ? Cal003FilterOperations[operacion] : this.activa();
+    // El semáforo de la fecha de entrega solo existe en las entradas
+    const tab = operacion ? Cal003FilterOperations[operacion]
+      : criterios.some(c => c.CAMPO === 'ESTADO_ENTREGA') ? Cal003Tab.Entry : this.activa();
     if (!tab) {
       this.ctx.advertir(`Operación no válida: ${operacion}.`);
       return;

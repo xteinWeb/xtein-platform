@@ -13,7 +13,7 @@ import {
 } from '@xtein/ui';
 import { Cal003FilterTable, Cal003TransferStatus } from '../../constants/cal-003.constants';
 import { Cal003BodegaColumns, Cal003ServicioColumns, Cal003TrasladoViewColumns } from '../../constants/cal-003-ui.constants';
-import type { Cal003Servicio, Cal003ServicioCompleto, Cal003Traslado, Cal003Unidad } from '../../models/cal-003.model';
+import type { Cal003Cabecera, Cal003Servicio, Cal003ServicioCompleto, Cal003Traslado, Cal003Unidad } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
 import { estadoBadge } from '../../utils/cal-003-formato';
 
@@ -68,6 +68,12 @@ export class XteinCal003TrasladoComponent implements Cal003Pestana {
   readonly puedeEnviar = computed(() => this.ctx.puedeCrear() || this.ctx.misBodegas().length > 0);
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
   readonly abierto = computed(() => this.mode() === RecordToolbarMode.Browsing ? this.records()[this.currentIndex()] ?? null : null);
+
+  /** Cabecera común de la pantalla con el traslado abierto (documento STR y estado del documento). */
+  readonly cabecera = computed<Cal003Cabecera | null>(() => {
+    const t = this.abierto();
+    return t ? { documento: t.DOCUMENTO, estado: t.ESTADO_DOCUMENTO ?? '', usuario: t.USUARIO_ENVIA ?? '', fechaRegistro: t.FECHA_ENVIA ?? null } : null;
+  });
 
   readonly barra = computed<Cal003EstadoBarra>(() => ({
     mode: this.mode(),

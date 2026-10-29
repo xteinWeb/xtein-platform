@@ -3,10 +3,13 @@ import { firstValueFrom } from 'rxjs';
 import { XteinApiAccessMode, XteinApiClientService, XteinDataApiResponse } from '@xtein/api-client';
 import type { LogContext } from '@xtein/logging';
 import type { XteinRecordFilterCriterion } from '@xtein/ui';
-import { Cal003Action, Cal003Endpoint, Cal003Limits } from '../constants/cal-003.constants';
+import { Cal003Action, Cal003Application, Cal003Endpoint, Cal003Limits } from '../constants/cal-003.constants';
 import { createCal003Log } from '../constants/cal-003-logging.constants';
 import type {
   Cal003Ajuste,
+  Cal003Consecutivo,
+  Cal003NcCreada,
+  Cal003NcPermisos,
   Cal003ArbolProducto,
   Cal003Area,
   Cal003Aviso,
@@ -33,6 +36,8 @@ import type {
   Cal003Traslado
 } from '../models/cal-003.model';
 import { Cal003BackendError, decodificar } from '../utils/cal-003-errores';
+import { Cal001Endpoint } from '../../cal-001/constants/cal-001.constants';
+import type { Cal001Causa, Cal001ListasCliente, Cal001PartesProducto } from '../../cal-001/models/cal-001.model';
 
 /**
  * Llamadas de CAL-003, solo a /api/CAL003/* por XteinApiClientService.
@@ -66,6 +71,40 @@ export class Cal003Service {
     return fila;
   }
 
+  // ================= No conformidad (API de CAL-001, origen CLIENTE) =================
+
+  private ncConsultar<T>(action: string, data: unknown = {}): Promise<T[]> {
+    return this.ejecutar<T>(Cal001Endpoint.Query, action, data, this.log.Query);
+  }
+
+  async ncPermisos(): Promise<Cal003NcPermisos | null> {
+    return (await this.ncConsultar<Cal003NcPermisos>('permisos'))[0] ?? null;
+  }
+
+  ncCausas(): Promise<Cal001Causa[]> {
+    return this.ncConsultar<Cal001Causa>('causas');
+  }
+
+  async ncListasCliente(): Promise<Cal001ListasCliente> {
+    return (await this.ncConsultar<Cal001ListasCliente>('listas cliente'))[0] ?? { AREAS_DETECCION: [], FUENTES: [] };
+  }
+
+  async ncPartesProducto(producto: string): Promise<Cal001PartesProducto | null> {
+    return (await this.ncConsultar<Cal001PartesProducto>('partes producto', { PRODUCTO: producto }))[0] ?? null;
+  }
+
+  /** Crea la NC en CAL-001 (prmAccion 'new'); el payload sigue el contrato de CAL-001 §2.3. */
+  async ncCrear(payload: unknown): Promise<Cal003NcCreada> {
+    const [fila] = await this.ejecutar<Cal003NcCreada>(Cal001Endpoint.Save, 'new', payload, this.log.Save);
+    if (!fila) throw new Cal003BackendError('CAL-001 no devolvió la no conformidad creada.');
+    return fila;
+  }
+
+  /** Liga a la entrada la no conformidad recién creada. */
+  servicioNc(idServicio: number, idRegistroNc: number): Promise<Cal003Resultado> {
+    return this.guardar(Cal003Action.ServiceNc, { ID_SERVICIO: idServicio, ID_REGISTRO_NC: idRegistroNc });
+  }
+
   // ================= Listas de apoyo =================
 
   permisos(): Promise<Cal003Permisos> {
@@ -78,6 +117,12 @@ export class Cal003Service {
 
   bodegas(): Promise<Cal003Bodega[]> {
     return this.consultar<Cal003Bodega>(Cal003Action.Warehouses);
+  }
+
+  /** Documento que tendrá el próximo registro del movimiento (ENTRADA, TRASLADO o SALIDA). */
+  async consecutivo(movimiento: string): Promise<Cal003Consecutivo | null> {
+    const filas = await this.consultar<Cal003Consecutivo>(Cal003Action.NextDocument, { MOVIMIENTO: movimiento, ID_APLICACION: Cal003Application.Id });
+    return filas[0] ?? null;
   }
 
   areas(): Promise<Cal003Area[]> {
@@ -126,6 +171,11 @@ export class Cal003Service {
 
   entradaAnular(idServicio: number, version: string, observacion: string): Promise<Cal003Resultado> {
     return this.guardar(Cal003Action.EntryVoid, { ID_SERVICIO: idServicio, VERSION: version, OBSERVACION: observacion });
+  }
+
+  /** Cambia la fecha de entrega comprometida con el cliente; el motivo queda en el historial. */
+  entradaReprogramar(idServicio: number, version: string, fechaEntrega: string, motivo: string): Promise<Cal003Resultado> {
+    return this.guardar(Cal003Action.EntryReschedule, { ID_SERVICIO: idServicio, VERSION: version, FECHA_ENTREGA: fechaEntrega, MOTIVO: motivo });
   }
 
   // ================= Traslado =================

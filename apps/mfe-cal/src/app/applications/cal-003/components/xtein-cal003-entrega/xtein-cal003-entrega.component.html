@@ -3,13 +3,7 @@
     <div class="c3-grid">
       <div class="c3-col">
         <div class="c3-section-divider">
-          <xtein-group-label class="c3-section-title" label="Documento de entrega"></xtein-group-label>
-        </div>
-        <div class="c3-field">
-          <xtein-label class="c3-label">Consecutivo</xtein-label>
-          <div class="c3-control c3-control--shaded">
-            <xtein-input ariaLabel="Consecutivo" [placeholder]="creando() ? 'Se asigna al despachar' : (abierta()?.ENTREGA?.DOCUMENTO ?? '')" [readOnly]="true" />
-          </div>
+          <xtein-group-label class="c3-section-title" label="Documento de salida"></xtein-group-label>
         </div>
         <div class="c3-field">
           <xtein-label class="c3-label">Fecha</xtein-label>
@@ -173,8 +167,8 @@
     <table class="c3-table">
       <thead>
         <tr>
-          <th>Producto</th><th class="text-end">Cant.</th><th>Tipo depósito</th><th>Soporte</th><th>Bodega</th>
-          <th>Tipo entrada</th><th class="text-end">Saldo</th>
+          <th>Producto</th><th class="text-end">Cant.</th><th>Tipo depósito</th><th>Soporte</th><th>Nº servicio</th>
+          <th>Nº orden devolución</th><th>Fecha de entrega</th><th>Bodega</th><th>Tipo entrada</th><th class="text-end">Saldo</th>
         </tr>
       </thead>
       <tbody>
@@ -185,6 +179,9 @@
               <td class="text-end">{{ u.CANTIDAD }}</td>
               <td>{{ primera ? (l.ESTADO_SERVICIO || '—') : '' }}</td>
               <td class="nowrap">{{ primera ? l.DOCUMENTO : '' }}</td>
+              <td class="nowrap">{{ primera ? (l.N_SERVICIO_CLIENTE || '—') : '' }}</td>
+              <td class="nowrap">{{ primera ? (l.N_ORDEN_DEVOLUCION || '—') : '' }}</td>
+              <td class="nowrap">{{ primera ? (fecha(l.FECHA_ENTREGA) || '—') : '' }}</td>
               <td>{{ primera ? bodegaSalida() : '' }}</td>
               <td>{{ primera ? l.TIPO_SERVICIO : '' }}</td>
               <td class="text-end">{{ primera ? (saldo(l) ?? '—') : '' }}</td>

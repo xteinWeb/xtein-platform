@@ -5,7 +5,7 @@ Contrato entre el front (`apps/mfe-cal`, aplicación `CAL-003`), las rutas de ap
 Archivos en apiRest:
 - BD: `sql/ddl/50_cal003_servicios_tecnicos.sql` (tablas), `sql/seed/52_cal003_documentos.sql` (STS/STT/STD y áreas), `sql/seed/54_cal003_tipos_servicio.sql` (tipos de servicio), `sql/sp/51_spServicioTecnico.sql` (vistas `RS_ST_*` y SP), `sql/seed/53_menu_cal003.sql` (menú y permisos de XTEIN), `sql/seed/55_cal003_filtros.sql` (campos del buscador de la barra), `sql/rollback/91_rollback_cal003.sql`.
 - Rutas: `src/routes/CAL003.routes.js`, `src/controllers/CAL003/CAL003.controller.js`, `src/controllers/CAL003/soportes.js`, `src/tests/CAL003.test.js`. Variable `RUTA_ARCHIVOS_CAL003` (`.env.example`).
-- Orden de ejecución: **50 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58** (57 = `spAutorizaciones`, compartido; 58 = migra los estados de traslados ya creados).
+- Orden de ejecución: **50 → 60 → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58 → 59** (60 = columna de la no conformidad y dominio de bodegas; en una BD que ya tiene CAL-003: 60 y luego 51) (57 = `spAutorizaciones`, compartido; 58 = estados de traslados, servicios y ajustes ya creados; 59 = documentos SEN / STR / SSA para lo ya creado).
 
 Archivos en el front: `apps/mfe-cal/src/app/applications/cal-003/**` y su entrada en `cal-application.registry.ts`.
 
@@ -58,7 +58,7 @@ Acción fuera de la lista de su ruta → **400 sin llamar al SP**. `DATA_JSON` =
 
 | Ruta | Acciones |
 |---|---|
-| `POST /api/CAL003/consulta` | `permisos`, `clientes`, `bodegas`, `areas`, `tipos servicio`, `productos`, `producto arbol`, `servicios`, `servicio`, `servicios trasladables`, `traslados`, `servicios entregables`, `entregas`, `entrega`, `servicios ajustables`, `ajustes`, `precios especial`, `inventario bodega`, `servicios cliente`, `historial`, `avisos` |
+| `POST /api/CAL003/consulta` | `permisos`, `consecutivo`, `clientes`, `bodegas`, `areas servicio`, `tipos servicio`, `productos`, `producto arbol`, `servicios`, `servicio`, `servicios trasladables`, `traslados`, `servicios entregables`, `entregas`, `entrega`, `servicios ajustables`, `ajustes`, `precios especial`, `inventario bodega`, `servicios cliente`, `historial`, `avisos` |
 | `POST /api/CAL003/save` | `entrada nueva`, `entrada anular`, `traslado enviar`, `entrega despachar`, `entrega anular linea`, `ajuste proponer`, `precios guardar` (autorizar o rechazar traslados y ajustes solo en Autorizaciones, §2.6) |
 | `POST /api/CAL003/soporte-subir` | `soporte adjuntar` |
 | `POST /api/CAL003/soporte` | `soporte ver` |
@@ -74,7 +74,7 @@ Ninguna respuesta lleva `RUTA`.
 | `permisos` | — | `[{PUEDE_VER, PUEDE_CREAR, PUEDE_ANULAR_RECIBIDO, PUEDE_AUTORIZAR, PUEDE_PRECIO, VE_TODAS, BODEGAS:[ID_UN_BODEGA]}]` |
 | `clientes` | `TEXTO?`, `TOP?` (1–5000) | `[{ID_CLIENTE, NOMBRE}]` activos (`CLIENTES` + `R_CLIENTES_ID`) |
 | `bodegas` | — | `[{ID_UN_BODEGA, DESCRIPCION, PROPIA}]` activas de `BODEGAS` |
-| `areas` | — | `[{ID_AREA, DESCRIPCION}]` de `ITM_DOMINIOS` `CALIDAD/AREAS_SERVICIO_TECNICO` (`VALOR1`) |
+| `areas servicio` | — | `[{ID_AREA, DESCRIPCION}]` de `ITM_DOMINIOS` `CALIDAD/AREAS_SERVICIO_TECNICO` (`VALOR1`) |
 | `tipos servicio` | — | `[{TIPO_SERVICIO, DESCRIPCION}]` de `ITM_DOMINIOS` `CALIDAD/TIPOS_SERVICIO_TECNICO` (`VALOR1` = código, `VALOR2` = descripción). SG (sin cobro) y SR (genera pre-factura) conservan su significado en el despacho |
 | `producto arbol` | `CODIGO` (interno o `CODIGO_ASOCIADO`) | `[{CODIGO_BUSCADO, PRODUCTO_BUSCADO, RAIZ:{NIVEL, PRODUCTO, CODIGO_ASOCIADO, NOMBRE, CANTIDAD, HIJOS:[…]}}]`. Juego (`JU%`) → productos de `PRODUCTOS_KITS` → partes de `PRODUCTOS_PARTES` (cantidad de la parte × la del producto). Si el código es de un producto que pertenece a **un solo** juego, la raíz es ese juego y `PRODUCTO_BUSCADO` indica el producto que llegó |
 | `servicios` | `TEXTO?`, `FECHA_DESDE?` (90 días), `FECHA_HASTA?` (hoy), `FILTRO?` (§2.5; con él no hay rango por defecto) | Hasta 200 servicios (`Cal003Servicio`) |
@@ -96,7 +96,7 @@ Ninguna respuesta lleva `RUTA`.
 
 | Acción | Entrada | Reglas |
 |---|---|---|
-| `entrada nueva` | `ENTRADA:{FECHA, ID_CLIENTE, TIPO_SERVICIO (código del dominio), ID_UN_BODEGA, N_SERVICIO_CLIENTE?, N_ORDEN_DEVOLUCION?, ID_AREA?}`, `PRODUCTOS:[{PRODUCTO, UNIDADES:[{NIVEL PF/PA, PRODUCTO, PARTE, CANTIDAD}]}]` (**un solo producto**) | `CREAR`. Fecha ≤ hoy. El producto = un servicio `STS` `DEPOSITO`. Cada unidad debe pertenecer al producto recibido y no pasar la cantidad del catálogo; un producto llega completo (PF) **o** por sus partes (PA). `PARCIAL` y «(llegó una parte)» si es un juego del que no llegó todo. Devuelve `[{ID_SERVICIO, DOCUMENTO, NOMBRE}]` |
+| `entrada nueva` | `ENTRADA:{FECHA, FECHA_ENTREGA (§2.10), ID_CLIENTE, TIPO_SERVICIO (código del dominio), ID_UN_BODEGA, N_SERVICIO_CLIENTE?, N_ORDEN_DEVOLUCION?, ID_AREA?}`, `PRODUCTOS:[{PRODUCTO, UNIDADES:[{NIVEL PF/PA, PRODUCTO, PARTE, CANTIDAD}]}]` (**un solo producto**) | `CREAR`. Fecha ≤ hoy. El producto = un servicio `STS` `DEPOSITO`. Cada unidad debe pertenecer al producto recibido y no pasar la cantidad del catálogo; un producto llega completo (PF) **o** por sus partes (PA). `PARCIAL` y «(llegó una parte)» si es un juego del que no llegó todo. Devuelve `[{ID_SERVICIO, DOCUMENTO, NOMBRE}]` |
 | `entrada anular` | `ID_SERVICIO`, `VERSION`, `OBSERVACION` (obligatoria, ≤ 500) | Rechaza si ya tiene despacho o ajuste. Sin traslados autorizados: `CREAR` → `ANULADO` (anula sus traslados `REGISTRADO` y sus NAU, como al anular un consumo de PRO-039, y saca las unidades). Con traslados autorizados: `ELIMINAR` → `INACTIVO`; un `INACTIVO` con todas sus partes en una bodega y sin traslados pendientes → `ANULADO` (`ELIMINAR`) |
 | `traslado enviar` | `ID_SERVICIO`, `ID_UN_BODEGA_DESTINO`, `UNIDADES:[ID_UNIDAD]` | `CREAR`, o persona de planta desde sus bodegas. Unidades del servicio, en inventario, sin traslado pendiente y de **una sola** bodega origen ≠ destino. Crea `STT` `REGISTRADO`; las unidades siguen en el origen con `ID_TRASLADO_PENDIENTE`. Deja una NAU pendiente en Autorizaciones (§2.6) |
 | `traslado autorizar` / `traslado rechazar` | Solo desde Autorizaciones (callback `autorizacion`, §2.6); desde CAL-003 responden "Los traslados se autorizan o rechazan en Autorizaciones" | `APROBAR` en CAL-003 (`USUARIOS_AUTORIZACIONES`) y la bodega destino en `BODEGAS_USUARIOS`. Autorizar mueve las unidades al destino; rechazar las deja en el origen. Observación opcional, como en PRO-039 |
@@ -164,6 +164,35 @@ Mismo manejo que los consumos de PRO-039, para traslados y salidas por ajuste: e
 - Acción `CAL-003-001` de `spServicioTecnico`, para el servidor de reportes DevExpress (como `PRO-039-001`): se llama sin token, con `{"filtro":"{\"FILTRO\":\"(ID_ENTREGA=n)\"}"}` o `{"FILTRO":"ID_ENTREGA IN (n, …)"}`. No arma SQL con el filtro: solo acepta `ID_ENTREGA` con números.
 - Devuelve 3 conjuntos: empresa (`NOMBRE`, `NIT`, `DIR_EMP`, `TEL_EMP`); encabezados (`RS_ST_ENTREGAS`); líneas activas con `PRODUCTO`, `CANTIDAD`, `TIPO_DEPOSITO` (estado del servicio), `SOPORTE` (número S), `BODEGA`, `TIPO_ENTRADA` (SG / SR), `SALDO`, más `ITEM`, `N_SERVICIO_CLIENTE` y `CODIGO_ASOCIADO`.
 - **Pendiente:** el diseño `.repx` en el servidor de reportes y su fila en `REPORTES` (`ID_APLICACION = 'CAL-003'`, `ID_REPORTE = 'CAL-003-001'`, `ARCHIVO` = nombre del diseño). Mientras tanto la pantalla usa su vista de impresión con las mismas columnas.
+
+### 2.8 Cabecera, documentos por movimiento y validaciones de la entrada
+
+- **Cabecera de la pantalla:** Movimiento (ENTRADA, TRASLADO, SALIDA = entrega) · Estado · Documento · Usuario · Fecha de registro. El Movimiento solo se habilita con Nuevo; Ajuste, Precios ESPECIAL y Consultas se abren desde Buscar → Operación.
+- **Documentos:** uno por movimiento, sin ceros a la izquierda: `SEN-1` (entrada), `STR-1` (traslado), `SSA-1` (salida). Reemplazan a STS / STT / STD (seed 52; lo ya creado lo pasa el 59 y deja los viejos INACTIVO). Las ajustes siguen como `AJ-00001` en Autorizaciones.
+- **`consecutivo`** (consulta): `MOVIMIENTO` (ENTRADA / TRASLADO / SALIDA), `ID_APLICACION?` (`CAL-003`); el usuario sale del token. Devuelve `[{MOVIMIENTO, ID_DOCUMENTO, CONSECUTIVO, DOCUMENTO, USUARIO}]`, con la misma regla que al guardar (mayor entre `NC_DOCUMENTO` y el último usado, más uno). Es una vista previa: el número se asigna al guardar.
+- **Estado del documento** (`ESTADO_DOCUMENTO` en las vistas y consultas), solo REGISTRADO / ANULADO / AUTORIZADO:
+  - Entrada: REGISTRADO o ANULADO.
+  - Traslado: REGISTRADO, AUTORIZADO o ANULADO (rechazado o anulado).
+  - Salida: REGISTRADO al despachar, AUTORIZADO con el soporte firmado, ANULADO sin líneas activas.
+  El estado del servicio en inventario (DEPOSITO, DESPACHADO, AJUSTADO…) sigue aparte.
+- **`areas servicio`** (antes `areas`): lista del campo "Área que solicita".
+- **`entrada nueva`:** el Nº de servicio del cliente es solo numérico y no se repite para el mismo cliente (las entradas anuladas no cuentan; se valida con el bloqueo de la numeración). Las partes llegan en cantidad 0 por defecto; las que siguen en 0 no se guardan y si todas están en 0 se rechaza.
+
+### 2.9 Bodegas de servicio técnico y no conformidad obligatoria
+
+- **Bodegas:** CAL-003 solo trabaja con las del dominio `CALIDAD / BODEGAS_SERVICIO_TECNICO` (`VALOR1` = `ID_UN_BODEGA`; script 60 con PP 500 / 501 / 502 y PT 700 / 701 / 702). Se aplica a `bodegas`, a las bodegas del usuario (`permisos`, filtros de lo que ve) y a la bodega de `entrada nueva`, el destino de `traslado enviar` y la bodega de `entrega despachar`. Dominio vacío = sin restricción.
+- **No conformidad (CAL-001, origen CLIENTE) obligatoria por entrada:** el Nº de servicio del cliente pasa a ser obligatorio (lo pide la NC). Al guardar la entrada, la pantalla abre el formulario de la NC (producto PF, fechas del evento y del reclamo, área de detección, fuente, causa del cliente, partes afectadas con su causa o la pieza si el PF no tiene partes) y la crea con `POST /api/CAL001N/save` `new`; luego la liga con **`servicio nc`** (`ID_SERVICIO`, `ID_REGISTRO_NC`): la NC debe ser de origen CLIENTE, del mismo cliente y Nº de servicio, y no estar ligada a otra entrada. Queda en `SERVICIOS_TECNICOS.ID_REGISTRO_NC` (FK, índice único) y se ve como `NC_DOCUMENTO` en `servicios` / `servicio`. Mientras falte, `avisos` muestra "Entrada sin no conformidad" y la entrada abierta trae el botón para registrarla. Registrar la NC pide en CAL-001 los permisos Crear y OPC (gestor).
+- **Salida:** `servicios entregables`, `entrega` y el reporte `CAL-003-001` traen también `N_ORDEN_DEVOLUCION`; la vista de impresión muestra Nº servicio y Nº orden devolución.
+
+### 2.10 Fecha de entrega comprometida con el cliente
+
+- **Script 61:** `SERVICIOS_TECNICOS.FECHA_ENTREGA DATE` y dominio `CALIDAD / ST_DIAS_AVISO` (VALOR1 = días de aviso, se crea con 3). Las entradas que ya existían quedan con su fecha + 8 días hábiles (lunes a viernes). Orden: 50 → 60 → **61** → 52 → 54 → 51 → 53 → 55 → 56 → 57 → 58 → 59.
+- **`entrada nueva`:** `ENTRADA.FECHA_ENTREGA` (`yyyy-MM-dd`) obligatoria, no antes de `FECHA`. La escribe quien registra.
+- **`entrada reprogramar`** (`/save`): `ID_SERVICIO`, `VERSION`, `FECHA_ENTREGA`, `MOTIVO` (obligatorio, ≤ 500). `CREAR`. Solo con el servicio en `DEPOSITO`, fecha ≥ hoy y distinta de la actual. Sube `VERSION` y deja en el historial «Fecha de entrega: anterior → nueva · «motivo»». Devuelve `[{DOCUMENTO, FECHA_ENTREGA, MENSAJE}]`.
+- **Semáforo** (vista `RS_ST_SERVICIOS`, solo en `DEPOSITO`): `DIAS_PARA_ENTREGA` (negativo = atraso) y `ESTADO_ENTREGA` = `VENCIDO` (pasó la fecha), `POR VENCER` (faltan ≤ `ST_DIAS_AVISO` días) o `EN TIEMPO`; `null` cuando ya salió, se ajustó o se anuló. Lo traen `servicios`, `servicio`, `servicios cliente` y `servicios entregables`; `entrega` y `CAL-003-001` traen `FECHA_ENTREGA`.
+- **`avisos`** (quien gestiona garantías): «Servicio vencido: SEN-x» (más atrasados primero) y «Servicio por vencer: SEN-x», antes que los demás avisos.
+- **Buscar:** campo `ESTADO_ENTREGA` «Fecha de entrega (entradas)» con VENCIDO / POR VENCER / EN TIEMPO (seed 55); sin Operación abre Entradas.
+- **Pantalla:** campo obligatorio en la entrada, semáforo y botón Reprogramar con la entrada abierta, columna en Ver, en la consulta por cliente y en la impresión de la salida.
 
 ## 3. Pendiente por definir
 

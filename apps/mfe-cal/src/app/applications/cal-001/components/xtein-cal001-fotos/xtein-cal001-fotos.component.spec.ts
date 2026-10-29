@@ -1,16 +1,22 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import type { Cal001Foto } from '../../models/cal-001.model';
 import { Cal001Service } from '../../services/cal-001.service';
 import { Cal001BackendError } from '../../utils/cal-001-errores';
 import { XteinCal001FotosComponent } from './xtein-cal001-fotos.component';
+
+const swal = vi.hoisted(() => ({ fire: vi.fn(async () => ({ isConfirmed: true, value: '' })) }));
+vi.mock('sweetalert2', () => ({ default: swal }));
 
 describe('XteinCal001FotosComponent', () => {
   let fixture: ComponentFixture<XteinCal001FotosComponent>;
   let componente: XteinCal001FotosComponent;
   const subirFoto = vi.fn<(id: number, nombre: string, base64: string, idOperacion: string) => Promise<number>>();
+  const retirarFoto = vi.fn<(idFoto: number, motivo: string) => Promise<void>>();
 
   beforeEach(() => {
     subirFoto.mockReset();
-    TestBed.configureTestingModule({ imports: [XteinCal001FotosComponent], providers: [{ provide: Cal001Service, useValue: { subirFoto } }] });
+    retirarFoto.mockReset();
+    TestBed.configureTestingModule({ imports: [XteinCal001FotosComponent], providers: [{ provide: Cal001Service, useValue: { subirFoto, retirarFoto } }] });
     fixture = TestBed.createComponent(XteinCal001FotosComponent);
     componente = fixture.componentInstance;
   });
@@ -143,5 +149,35 @@ describe('XteinCal001FotosComponent', () => {
     fixture.detectChanges();
     expect(avisos).toContain(true);
     expect(avisos[avisos.length - 1]).toBe(false);
+  });
+  const foto = (id: number): Cal001Foto => ({ ID_FOTO_NC: id, NOMBRE_ORIGINAL: `f${id}.jpg`, MIME: 'image/jpeg', USUARIO_CREA: 'INSPECTOR', FECHA_CREA: '2026-10-20T09:20:00' });
+  const botonRetirar = (): HTMLButtonElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).filter(b => b.textContent?.trim() === 'Retirar');
+
+  it('foto obligatoria: la única foto activa no se puede retirar y se explica por qué', () => {
+    fixture.componentRef.setInput('fotos', [foto(1)]);
+    fixture.componentRef.setInput('puedeRetirar', true);
+    abrir(1);
+    const [boton] = botonRetirar();
+    expect(boton.disabled).toBe(true);
+    const aviso = fixture.nativeElement.querySelector('#' + boton.getAttribute('aria-describedby')) as HTMLElement;
+    expect(aviso.textContent).toContain('Es la única foto del registro; agregue y guarde otra antes de retirarla.');
+  });
+
+  it('foto obligatoria: con dos fotos se puede retirar; si el SP rechaza (E28) avisa y refresca la lista', async () => {
+    fixture.componentRef.setInput('fotos', [foto(1), foto(2)]);
+    fixture.componentRef.setInput('puedeRetirar', true);
+    abrir(1);
+    expect(botonRetirar().map(b => b.disabled)).toEqual([false, false]);
+    expect(fixture.nativeElement.textContent).not.toContain('Es la única foto');
+    const avisos: string[] = [];
+    let cambios = 0;
+    componente.aviso.subscribe(m => avisos.push(m));
+    componente.cambiaron.subscribe(() => cambios++);
+    retirarFoto.mockRejectedValueOnce(new Cal001BackendError('El registro debe conservar al menos una foto activa'));
+    await componente.retirar(foto(2));
+    expect(retirarFoto).toHaveBeenCalledWith(2, '');
+    expect(avisos).toEqual(['El registro debe conservar al menos una foto activa']);
+    expect(cambios).toBe(1);
   });
 });

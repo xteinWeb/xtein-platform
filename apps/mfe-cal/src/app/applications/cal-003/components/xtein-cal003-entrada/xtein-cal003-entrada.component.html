@@ -1,63 +1,45 @@
 <div class="c3-card" [formGroup]="form">
-  <!-- Cabecera de la entrada -->
+  <!-- La no conformidad es obligatoria: si la entrada abierta no la tiene, se avisa y se registra desde aquí -->
+  @if (faltaNc()) {
+    <div class="c3-msg c3-e-nc">
+      <span>Esta entrada no tiene su no conformidad. Es obligatoria.</span>
+      <button type="button" class="c3-e-nc__btn" (click)="registrarNc()">Registrar no conformidad</button>
+    </div>
+  }
+
+  <!-- Datos del servicio (documento, estado, usuario y fecha de registro van en la cabecera de la pantalla) -->
+  <div class="c3-section-divider">
+    <xtein-group-label class="c3-section-title" label="Datos del servicio"></xtein-group-label>
+  </div>
   <div class="c3-grid">
     <div class="c3-col">
-      <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-numero">Número S</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          @if (creando()) {
-            <xtein-input id="c3-e-numero" name="NUMERO" placeholder="Se asigna al guardar" [readOnly]="true" />
-          } @else {
-            <xtein-input id="c3-e-numero" name="NUMERO" formControlName="NUMERO" [readOnly]="true" />
-          }
-        </div>
-      </div>
       <div class="c3-field">
         <xtein-label class="c3-label" for="c3-e-fecha" [required]="true">Fecha</xtein-label>
         <div class="c3-control">
           <xtein-date id="c3-e-fecha" name="FECHA" placeholder="YYYY-MM-DD" formControlName="FECHA" [max]="form.controls.FECHA_REGISTRO.value" [required]="true" [readOnly]="!creando()" />
         </div>
       </div>
+      <!-- Fecha de entrega comprometida con el cliente: obligatoria; después solo se cambia con Reprogramar (con motivo) -->
       <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-freg">Fecha de registro</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          <xtein-date id="c3-e-freg" name="FECHA_REGISTRO" formControlName="FECHA_REGISTRO" [readOnly]="true" />
-        </div>
-      </div>
-    </div>
-
-    <div class="c3-col">
-      <div class="c3-field">
-        <xtein-label class="c3-label">Estado</xtein-label>
-        <div class="c3-control">
-          @if (creando()) {
-            <span class="c3-badge">Borrador</span>
-          } @else if (abierto(); as a) {
-            <span class="c3-badge" [ngClass]="badge(a.SERVICIO.ESTADO)">{{ a.SERVICIO.ESTADO }}</span>
+        <xtein-label class="c3-label" for="c3-e-entrega" [required]="true">Fecha de entrega</xtein-label>
+        <div class="c3-control c3-e-entrega">
+          <xtein-date id="c3-e-entrega" name="FECHA_ENTREGA" placeholder="Cuándo se entrega al cliente" formControlName="FECHA_ENTREGA"
+            [min]="form.controls.FECHA.value" [required]="true" [readOnly]="!creando()" />
+          @if (!creando() && abierto()?.SERVICIO; as s) {
+            @if (s.ESTADO_ENTREGA) {
+              <span class="c3-badge" [ngClass]="badge(s.ESTADO_ENTREGA)" [title]="diasEntrega(s.DIAS_PARA_ENTREGA)">{{ s.ESTADO_ENTREGA }}</span>
+            }
+            @if (puedeReprogramar()) {
+              <button type="button" class="c3-e-entrega__btn" (click)="abrirReprogramar()">Reprogramar</button>
+            }
           }
         </div>
+        @if (!creando() && abierto()?.SERVICIO?.ESTADO_ENTREGA) {
+          <span class="c3-e-entrega__dias" [class.c3-e-entrega__dias--vencido]="abierto()?.SERVICIO?.ESTADO_ENTREGA === 'VENCIDO'">
+            {{ diasEntrega(abierto()?.SERVICIO?.DIAS_PARA_ENTREGA) }}
+          </span>
+        }
       </div>
-      <div class="c3-field">
-        <xtein-label class="c3-label">Movimiento</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          <xtein-input name="MOVIMIENTO" ariaLabel="Movimiento" placeholder="ENTRADA" [readOnly]="true" />
-        </div>
-      </div>
-      <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-usuario">Usuario</xtein-label>
-        <div class="c3-control c3-control--shaded">
-          <xtein-input id="c3-e-usuario" name="USUARIO" formControlName="USUARIO" [readOnly]="true" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Datos del servicio -->
-  <div class="c3-section-divider">
-    <xtein-group-label class="c3-section-title" label="Datos del servicio"></xtein-group-label>
-  </div>
-  <div class="c3-grid">
-    <div class="c3-col">
       <div class="c3-field">
         <xtein-label class="c3-label" for="c3-e-cliente" [required]="true">Cliente</xtein-label>
         <div class="c3-control">
@@ -85,9 +67,9 @@
 
     <div class="c3-col">
       <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-sc">Nº servicio del cliente</xtein-label>
+        <xtein-label class="c3-label" for="c3-e-sc" [required]="true">Nº servicio del cliente</xtein-label>
         <div class="c3-control">
-          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Opcional: vacío si no viene" [maxLength]="limits.ClientServiceNumber"
+          <xtein-input id="c3-e-sc" name="N_SERVICIO_CLIENTE" placeholder="Solo números" [maxLength]="limits.ClientServiceNumber"
             formControlName="N_SERVICIO_CLIENTE" [readOnly]="!creando()" />
         </div>
       </div>
@@ -99,12 +81,18 @@
         </div>
       </div>
       <div class="c3-field">
-        <xtein-label class="c3-label" for="c3-e-area">Área que lo pide</xtein-label>
+        <xtein-label class="c3-label" for="c3-e-area">Área que solicita</xtein-label>
         <div class="c3-control">
-          <xtein-select id="c3-e-area" ariaLabel="Área que lo pide" placeholder="Sin área" [items]="ctx.areas()"
+          <xtein-select id="c3-e-area" ariaLabel="Área que solicita" placeholder="Sin área" [items]="ctx.areas()"
             valueExpr="ID_AREA" displayExpr="DESCRIPCION" [showClearButton]="true" formControlName="ID_AREA" [readOnly]="!creando()" />
         </div>
       </div>
+      @if (abierto()?.SERVICIO?.NC_DOCUMENTO; as nc) {
+        <div class="c3-field">
+          <xtein-label class="c3-label">No conformidad</xtein-label>
+          <div class="c3-control c3-control--shaded"><xtein-input ariaLabel="No conformidad" [placeholder]="nc" [readOnly]="true" /></div>
+        </div>
+      }
     </div>
   </div>
 
@@ -241,7 +229,7 @@
                   @if (fila.nivel === 'JU') {
                     1
                   } @else {
-                    <xtein-number class="cell-editor" [ariaLabel]="'Cantidad de ' + fila.nombre" [min]="1" [max]="fila.cantidadMax"
+                    <xtein-number class="cell-editor" [ariaLabel]="'Cantidad de ' + fila.nombre" [min]="fila.nivel === 'PA' ? 0 : 1" [max]="fila.cantidadMax"
                       [readOnly]="!fila.llega" [ngModel]="fila.cantidad" [ngModelOptions]="{ standalone: true }"
                       (ngModelChange)="cantidad(gi, fi, $event)" />
                   }
@@ -312,8 +300,37 @@
   title="Entradas"
   [visible]="viewVisible()"
   (visibleChange)="viewVisible.set($event)"
-  [records]="records()"
+  [records]="viewRecords()"
   [columns]="viewColumns"
   keyField="ID_SERVICIO"
   (selected)="verRegistro($event)"
 />
+
+<!-- Reprogramar la fecha de entrega: nueva fecha y motivo (queda en el historial) -->
+<xtein-popup [title]="'Reprogramar entrega de ' + (abierto()?.SERVICIO?.DOCUMENTO ?? '')" [visible]="reprogramarVisible()"
+  (visibleChange)="reprogramarVisible.set($event)" width="min(520px, 95vw)" height="auto">
+  <p class="c3-hint">
+    Fecha actual: <b>{{ fecha(abierto()?.SERVICIO?.FECHA_ENTREGA) || 'sin fecha' }}</b>. El cambio queda en el historial con el motivo.
+  </p>
+  <div class="c3-field">
+    <xtein-label class="c3-label" for="c3-e-nueva" [required]="true">Nueva fecha de entrega</xtein-label>
+    <div class="c3-control">
+      <xtein-date id="c3-e-nueva" name="NUEVA_FECHA_ENTREGA" placeholder="YYYY-MM-DD" [min]="hoy()" [required]="true"
+        [ngModel]="nuevaFechaEntrega()" (ngModelChange)="nuevaFechaEntrega.set($event)" [ngModelOptions]="{ standalone: true }" />
+    </div>
+  </div>
+  <div class="c3-field">
+    <xtein-label class="c3-label" for="c3-e-motivo" [required]="true">Motivo</xtein-label>
+    <div class="c3-control">
+      <xtein-input id="c3-e-motivo" name="MOTIVO" placeholder="Por qué cambia la fecha" [maxLength]="500"
+        [ngModel]="motivoReprogramar()" (ngModelChange)="motivoReprogramar.set($event ?? '')" [ngModelOptions]="{ standalone: true }" />
+    </div>
+  </div>
+  <div class="c3-actions c3-e-entrega__pie">
+    <xtein-button text="Cancelar" variant="secondary" [width]="'auto'" (clicked)="reprogramarVisible.set(false)" />
+    <xtein-button text="Reprogramar" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="reprogramar()" />
+  </div>
+</xtein-popup>
+
+<!-- No conformidad de cliente (CAL-001), obligatoria por entrada -->
+<xtein-cal003-nc [visible]="ncVisible()" [servicio]="abierto()" (registrada)="ncRegistrada()" (cerrado)="ncVisible.set(false)" />
