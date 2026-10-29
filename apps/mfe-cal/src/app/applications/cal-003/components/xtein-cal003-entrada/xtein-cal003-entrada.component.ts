@@ -15,7 +15,9 @@ import {
   XteinInputComponent,
   XteinLabelComponent,
   XteinLookupComponent,
+  XteinButtonComponent,
   XteinNumberComponent,
+  XteinPopupComponent,
   XteinRecordFilterCriterion,
   XteinRecordViewComponent,
   XteinSelectComponent
@@ -33,7 +35,7 @@ import {
   marcarLlega,
   unidadesEntrada
 } from '../../utils/cal-003-arbol';
-import { estadoBadge, fecha, hoy } from '../../utils/cal-003-formato';
+import { diasEntrega, estadoBadge, fecha, hoy, resumenEntrega } from '../../utils/cal-003-formato';
 import { XteinCal003NcComponent } from '../xtein-cal003-nc/xtein-cal003-nc.component';
 
 /**
@@ -56,7 +58,9 @@ import { XteinCal003NcComponent } from '../xtein-cal003-nc/xtein-cal003-nc.compo
     XteinInputComponent,
     XteinLabelComponent,
     XteinLookupComponent,
+    XteinButtonComponent,
     XteinNumberComponent,
+    XteinPopupComponent,
     XteinRecordViewComponent,
     XteinSelectComponent,
     XteinCal003NcComponent
@@ -75,6 +79,8 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   readonly limits = Cal003Limits;
   readonly fecha = fecha;
   readonly badge = estadoBadge;
+  readonly diasEntrega = diasEntrega;
+  readonly hoy = hoy;
 
   readonly mode = signal<RecordToolbarMode>(RecordToolbarMode.Initial);
   readonly records = signal<Cal003Servicio[]>([]);
@@ -101,6 +107,17 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   // Ver de la barra (Buscar lo maneja la pantalla: un solo buscador con el campo Operación)
   readonly viewColumns = Cal003EntradaViewColumns;
   readonly viewVisible = signal(false);
+  /** Lo que muestra Ver: cada entrada con su fecha de entrega y semáforo en texto. */
+  readonly viewRecords = computed(() => this.records().map(r => ({ ...r, ENTREGA: resumenEntrega(r) })));
+
+  /** Reprogramar la fecha de entrega: solo mientras el servicio espera en DEPOSITO. */
+  readonly puedeReprogramar = computed(() => {
+    const s = this.mode() === RecordToolbarMode.Browsing ? this.abierto()?.SERVICIO : null;
+    return !!s && s.ESTADO === Cal003ServiceStatus.Deposit && this.ctx.puedeCrear();
+  });
+  readonly reprogramarVisible = signal(false);
+  readonly nuevaFechaEntrega = signal<string | null>(null);
+  readonly motivoReprogramar = signal('');
 
   readonly creando = computed(() => this.mode() === RecordToolbarMode.Creating);
 
@@ -128,6 +145,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
   readonly form = new FormGroup({
     FECHA: new FormControl<string | null>(hoy()),
     FECHA_REGISTRO: new FormControl<string | null>(hoy()),
+    FECHA_ENTREGA: new FormControl<string | null>(null),
     ID_CLIENTE: new FormControl<string>(''),
     TIPO_SERVICIO: new FormControl<string>(''),
     ID_UN_BODEGA: new FormControl<string>(''),
@@ -324,12 +342,17 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     const vivos = this.grupos().filter(g => lleganDe(g).length > 0);
     const faltan: string[] = [];
     if (!v.FECHA) faltan.push('fecha');
+    if (!v.FECHA_ENTREGA) faltan.push('fecha de entrega');
     if (!v.ID_CLIENTE) faltan.push('cliente');
     if (!v.TIPO_SERVICIO) faltan.push('tipo de servicio (SG o SR)');
     if (!v.ID_UN_BODEGA) faltan.push('bodega');
     if (!vivos.length) faltan.push('al menos un producto con cantidad');
     if (faltan.length) {
       this.ctx.advertir(`Falta: ${faltan.join(', ')}.`);
+      return;
+    }
+    if (String(v.FECHA_ENTREGA).slice(0, 10) < String(v.FECHA).slice(0, 10)) {
+      this.ctx.advertir('La fecha de entrega no puede ser anterior a la fecha de la entrada.');
       return;
     }
     const numero = (v.N_SERVICIO_CLIENTE ?? '').trim();
@@ -349,6 +372,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
 
     const creados = await this.ctx.ejecutar(() => this.ctx.api.entradaNueva({
       FECHA: String(v.FECHA).slice(0, 10),
+      FECHA_ENTREGA: String(v.FECHA_ENTREGA).slice(0, 10),
       ID_CLIENTE: v.ID_CLIENTE ?? '',
       TIPO_SERVICIO: v.TIPO_SERVICIO ?? '',
       ID_UN_BODEGA: v.ID_UN_BODEGA ?? '',
@@ -376,6 +400,43 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
 
   async ncRegistrada(): Promise<void> {
     this.ncVisible.set(false);
+    await this.abrir(this.currentIndex());
+  }
+
+  // ================= Fecha de entrega =================
+
+  abrirReprogramar(): void {
+    const s = this.abierto()?.SERVICIO;
+    if (!s || !this.puedeReprogramar()) return;
+    this.nuevaFechaEntrega.set(s.FECHA_ENTREGA?.slice(0, 10) ?? null);
+    this.motivoReprogramar.set('');
+    this.reprogramarVisible.set(true);
+  }
+
+  async reprogramar(): Promise<void> {
+    const s = this.abierto()?.SERVICIO;
+    if (!s) return;
+    const nueva = this.nuevaFechaEntrega() ? String(this.nuevaFechaEntrega()).slice(0, 10) : '';
+    const motivo = this.motivoReprogramar().trim();
+    const faltan: string[] = [];
+    if (!nueva) faltan.push('nueva fecha de entrega');
+    if (!motivo) faltan.push('motivo');
+    if (faltan.length) {
+      this.ctx.advertir(`Falta: ${faltan.join(', ')}.`);
+      return;
+    }
+    if (nueva < hoy()) {
+      this.ctx.advertir('La nueva fecha de entrega no puede ser anterior a hoy.');
+      return;
+    }
+    if (nueva === s.FECHA_ENTREGA?.slice(0, 10)) {
+      this.ctx.advertir('La nueva fecha de entrega es la misma que ya tiene.');
+      return;
+    }
+    const resultado = await this.ctx.ejecutar(() => this.ctx.api.entradaReprogramar(s.ID_SERVICIO, s.VERSION, nueva, motivo));
+    if (!resultado) return;
+    this.reprogramarVisible.set(false);
+    this.ctx.exito(resultado.MENSAJE);
     await this.abrir(this.currentIndex());
   }
 
@@ -429,6 +490,7 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     this.form.reset({
       FECHA: s.FECHA?.slice(0, 10) ?? null,
       FECHA_REGISTRO: s.FECHA_REGISTRO?.slice(0, 10) ?? null,
+      FECHA_ENTREGA: s.FECHA_ENTREGA?.slice(0, 10) ?? null,
       ID_CLIENTE: s.ID_CLIENTE,
       TIPO_SERVICIO: s.TIPO_SERVICIO,
       ID_UN_BODEGA: s.ID_UN_BODEGA_ENTRADA,
@@ -475,6 +537,8 @@ export class XteinCal003EntradaComponent implements Cal003Pestana, OnInit, OnDes
     this.form.reset({
       FECHA: hoy(),
       FECHA_REGISTRO: hoy(),
+      // La escribe quien registra: es el compromiso con el cliente
+      FECHA_ENTREGA: null,
       ID_CLIENTE: '',
       TIPO_SERVICIO: '',
       ID_UN_BODEGA: bodegas.length === 1 ? bodegas[0].ID_UN_BODEGA : '',

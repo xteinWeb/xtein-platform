@@ -6,7 +6,7 @@ import { XteinLabelComponent, XteinLookupComponent, XteinSelectComponent } from 
 import { Cal003BodegaColumns, Cal003ClienteColumns, Cal003ConsultaOpciones, Cal003ServicioColumns } from '../../constants/cal-003-ui.constants';
 import type { Cal003Historial, Cal003InventarioFila, Cal003Servicio, Cal003ServicioCliente } from '../../models/cal-003.model';
 import { Cal003ContextoService, Cal003EstadoBarra, Cal003Pestana } from '../../services/cal-003-contexto.service';
-import { estadoBadge, fecha } from '../../utils/cal-003-formato';
+import { diasEntrega, estadoBadge, fecha } from '../../utils/cal-003-formato';
 
 type Cal003TipoConsulta = typeof Cal003ConsultaOpciones[number]['valor'];
 
@@ -27,6 +27,7 @@ export class XteinCal003ConsultasComponent implements Cal003Pestana {
   readonly servicioColumns = Cal003ServicioColumns;
   readonly fecha = fecha;
   readonly badge = estadoBadge;
+  readonly diasEntrega = diasEntrega;
 
   readonly tipo = signal<Cal003TipoConsulta>('bodega');
   readonly bodega = signal('');

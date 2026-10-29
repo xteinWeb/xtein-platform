@@ -19,6 +19,27 @@
           <xtein-date id="c3-e-fecha" name="FECHA" placeholder="YYYY-MM-DD" formControlName="FECHA" [max]="form.controls.FECHA_REGISTRO.value" [required]="true" [readOnly]="!creando()" />
         </div>
       </div>
+      <!-- Fecha de entrega comprometida con el cliente: obligatoria; después solo se cambia con Reprogramar (con motivo) -->
+      <div class="c3-field">
+        <xtein-label class="c3-label" for="c3-e-entrega" [required]="true">Fecha de entrega</xtein-label>
+        <div class="c3-control c3-e-entrega">
+          <xtein-date id="c3-e-entrega" name="FECHA_ENTREGA" placeholder="Cuándo se entrega al cliente" formControlName="FECHA_ENTREGA"
+            [min]="form.controls.FECHA.value" [required]="true" [readOnly]="!creando()" />
+          @if (!creando() && abierto()?.SERVICIO; as s) {
+            @if (s.ESTADO_ENTREGA) {
+              <span class="c3-badge" [ngClass]="badge(s.ESTADO_ENTREGA)" [title]="diasEntrega(s.DIAS_PARA_ENTREGA)">{{ s.ESTADO_ENTREGA }}</span>
+            }
+            @if (puedeReprogramar()) {
+              <button type="button" class="c3-e-entrega__btn" (click)="abrirReprogramar()">Reprogramar</button>
+            }
+          }
+        </div>
+        @if (!creando() && abierto()?.SERVICIO?.ESTADO_ENTREGA) {
+          <span class="c3-e-entrega__dias" [class.c3-e-entrega__dias--vencido]="abierto()?.SERVICIO?.ESTADO_ENTREGA === 'VENCIDO'">
+            {{ diasEntrega(abierto()?.SERVICIO?.DIAS_PARA_ENTREGA) }}
+          </span>
+        }
+      </div>
       <div class="c3-field">
         <xtein-label class="c3-label" for="c3-e-cliente" [required]="true">Cliente</xtein-label>
         <div class="c3-control">
@@ -279,11 +300,37 @@
   title="Entradas"
   [visible]="viewVisible()"
   (visibleChange)="viewVisible.set($event)"
-  [records]="records()"
+  [records]="viewRecords()"
   [columns]="viewColumns"
   keyField="ID_SERVICIO"
   (selected)="verRegistro($event)"
 />
+
+<!-- Reprogramar la fecha de entrega: nueva fecha y motivo (queda en el historial) -->
+<xtein-popup [title]="'Reprogramar entrega de ' + (abierto()?.SERVICIO?.DOCUMENTO ?? '')" [visible]="reprogramarVisible()"
+  (visibleChange)="reprogramarVisible.set($event)" width="min(520px, 95vw)" height="auto">
+  <p class="c3-hint">
+    Fecha actual: <b>{{ fecha(abierto()?.SERVICIO?.FECHA_ENTREGA) || 'sin fecha' }}</b>. El cambio queda en el historial con el motivo.
+  </p>
+  <div class="c3-field">
+    <xtein-label class="c3-label" for="c3-e-nueva" [required]="true">Nueva fecha de entrega</xtein-label>
+    <div class="c3-control">
+      <xtein-date id="c3-e-nueva" name="NUEVA_FECHA_ENTREGA" placeholder="YYYY-MM-DD" [min]="hoy()" [required]="true"
+        [ngModel]="nuevaFechaEntrega()" (ngModelChange)="nuevaFechaEntrega.set($event)" [ngModelOptions]="{ standalone: true }" />
+    </div>
+  </div>
+  <div class="c3-field">
+    <xtein-label class="c3-label" for="c3-e-motivo" [required]="true">Motivo</xtein-label>
+    <div class="c3-control">
+      <xtein-input id="c3-e-motivo" name="MOTIVO" placeholder="Por qué cambia la fecha" [maxLength]="500"
+        [ngModel]="motivoReprogramar()" (ngModelChange)="motivoReprogramar.set($event ?? '')" [ngModelOptions]="{ standalone: true }" />
+    </div>
+  </div>
+  <div class="c3-actions c3-e-entrega__pie">
+    <xtein-button text="Cancelar" variant="secondary" [width]="'auto'" (clicked)="reprogramarVisible.set(false)" />
+    <xtein-button text="Reprogramar" [width]="'auto'" [disabled]="ctx.busy()" (clicked)="reprogramar()" />
+  </div>
+</xtein-popup>
 
 <!-- No conformidad de cliente (CAL-001), obligatoria por entrada -->
 <xtein-cal003-nc [visible]="ncVisible()" [servicio]="abierto()" (registrada)="ncRegistrada()" (cerrado)="ncVisible.set(false)" />

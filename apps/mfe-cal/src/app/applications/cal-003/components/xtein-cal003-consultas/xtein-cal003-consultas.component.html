@@ -68,7 +68,7 @@
           </tbody>
         }
         @case ('cliente') {
-          <thead><tr><th>Número S</th><th>Producto</th><th>Tipo</th><th>Dónde está</th><th>Estado</th><th class="text-end">Días en inventario</th></tr></thead>
+          <thead><tr><th>Número S</th><th>Producto</th><th>Tipo</th><th>Dónde está</th><th>Estado</th><th>Fecha de entrega</th><th class="text-end">Días en inventario</th></tr></thead>
           <tbody>
             @for (s of porCliente(); track s.SERVICIO) {
               <tr>
@@ -77,10 +77,16 @@
                 <td>{{ s.TIPO_SERVICIO }}</td>
                 <td>{{ s.DONDE }}</td>
                 <td><span class="c3-badge" [ngClass]="badge(s.ESTADO)">{{ s.ESTADO }}</span></td>
+                <td class="nowrap">
+                  {{ fecha(s.FECHA_ENTREGA) || '—' }}
+                  @if (s.ESTADO_ENTREGA) {
+                    <span class="c3-badge" [ngClass]="badge(s.ESTADO_ENTREGA)" [title]="diasEntrega(s.DIAS_PARA_ENTREGA)">{{ s.ESTADO_ENTREGA }}</span>
+                  }
+                </td>
                 <td class="text-end">{{ s.DIAS_INVENTARIO ?? '—' }}</td>
               </tr>
             } @empty {
-              <tr><td colspan="6" class="empty-message">Sin datos</td></tr>
+              <tr><td colspan="7" class="empty-message">Sin datos</td></tr>
             }
           </tbody>
         }
