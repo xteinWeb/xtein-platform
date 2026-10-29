@@ -104,6 +104,8 @@ export interface Cal003ArbolProducto {
   RAIZ: Cal003NodoProducto;
 }
 
+export type Cal003EstadoEntrega = 'EN TIEMPO' | 'POR VENCER' | 'VENCIDO';
+
 /** Servicio técnico (una por producto recibido en una entrada). */
 export interface Cal003Servicio {
   ID_SERVICIO: number;
@@ -126,6 +128,12 @@ export interface Cal003Servicio {
   /** No conformidad de CAL-001 ligada (obligatoria): mientras sea null, la entrada la pide. */
   ID_REGISTRO_NC?: number | null;
   NC_DOCUMENTO?: string | null;
+  /** Fecha de entrega comprometida con el cliente (yyyy-MM-dd). */
+  FECHA_ENTREGA?: string | null;
+  /** Días que faltan para la fecha de entrega (negativo = atraso); solo mientras está en DEPOSITO. */
+  DIAS_PARA_ENTREGA?: number | null;
+  /** Semáforo de la fecha de entrega: EN TIEMPO, POR VENCER o VENCIDO (null si ya salió o se anuló). */
+  ESTADO_ENTREGA?: Cal003EstadoEntrega | null;
   ULTIMO_MOVIMIENTO: string;
   DETALLE_MOVIMIENTO: string;
   OBSERVACION_ANULA: string | null;
@@ -303,6 +311,9 @@ export interface Cal003ServicioCliente {
   DONDE: string;
   ESTADO: string;
   DIAS_INVENTARIO: number | null;
+  FECHA_ENTREGA: string | null;
+  DIAS_PARA_ENTREGA: number | null;
+  ESTADO_ENTREGA: Cal003EstadoEntrega | null;
 }
 
 export interface Cal003Historial {
@@ -327,6 +338,8 @@ export interface Cal003EntradaEncabezado {
   N_SERVICIO_CLIENTE: string;
   N_ORDEN_DEVOLUCION: string;
   ID_AREA: string;
+  /** Fecha de entrega comprometida con el cliente, obligatoria (yyyy-MM-dd). */
+  FECHA_ENTREGA: string;
 }
 
 /** Lo que llega de un producto: las unidades hoja marcadas (PF sin partes marcadas, o PA). */

@@ -181,3 +181,43 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+// Fecha de entrega: fecha, semáforo y Reprogramar en la misma línea
+.c3-e-entrega {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  xtein-date {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.c3-e-entrega__btn {
+  padding: 5px 12px;
+  border: 1px solid #1565c0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1565c0;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.c3-e-entrega__dias {
+  display: block;
+  margin-top: 4px;
+  color: #5f6b7a;
+  font-size: 12px;
+
+  &--vencido {
+    color: #c62828;
+    font-weight: 600;
+  }
+}
+
+.c3-e-entrega__pie {
+  justify-content: flex-end;
+  margin-top: 14px;
+}

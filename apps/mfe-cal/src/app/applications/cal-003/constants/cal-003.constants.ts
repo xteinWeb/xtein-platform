@@ -67,6 +67,7 @@ export const Cal003Action = {
   // /save
   EntryNew: 'entrada nueva',
   EntryVoid: 'entrada anular',
+  EntryReschedule: 'entrada reprogramar',
   TransferSend: 'traslado enviar',
   DeliveryDispatch: 'entrega despachar',
   DeliveryVoidLine: 'entrega anular linea',

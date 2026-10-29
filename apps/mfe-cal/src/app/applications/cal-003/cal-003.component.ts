@@ -253,7 +253,9 @@ export class Cal003Component implements OnInit, OnDestroy {
     this.filterVisible.set(false);
     const criterios = result?.ESTRUCTURA ?? [];
     const operacion = criterios.find(c => c.CAMPO === Cal003FilterOperationField)?.EXPRESION?.trim() ?? '';
-    const tab = operacion ? Cal003FilterOperations[operacion] : this.activa();
+    // El semáforo de la fecha de entrega solo existe en las entradas
+    const tab = operacion ? Cal003FilterOperations[operacion]
+      : criterios.some(c => c.CAMPO === 'ESTADO_ENTREGA') ? Cal003Tab.Entry : this.activa();
     if (!tab) {
       this.ctx.advertir(`Operación no válida: ${operacion}.`);
       return;

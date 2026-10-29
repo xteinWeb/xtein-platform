@@ -43,7 +43,9 @@ export const Cal003EntradaViewColumns: XteinRecordViewColumn[] = [
   { dataField: 'NOMBRE_CLIENTE', caption: 'Cliente' },
   { dataField: 'NOMBRE', caption: 'Producto' },
   { dataField: 'TIPO_SERVICIO', caption: 'Tipo' },
-  { dataField: 'ESTADO', caption: 'Estado' }
+  { dataField: 'ESTADO', caption: 'Estado' },
+  // Texto armado en la pantalla con el semáforo (resumenEntrega)
+  { dataField: 'ENTREGA', caption: 'Fecha de entrega' }
 ];
 
 export const Cal003TrasladoViewColumns: XteinRecordViewColumn[] = [

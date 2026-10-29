@@ -168,7 +168,7 @@
       <thead>
         <tr>
           <th>Producto</th><th class="text-end">Cant.</th><th>Tipo depósito</th><th>Soporte</th><th>Nº servicio</th>
-          <th>Nº orden devolución</th><th>Bodega</th><th>Tipo entrada</th><th class="text-end">Saldo</th>
+          <th>Nº orden devolución</th><th>Fecha de entrega</th><th>Bodega</th><th>Tipo entrada</th><th class="text-end">Saldo</th>
         </tr>
       </thead>
       <tbody>
@@ -181,6 +181,7 @@
               <td class="nowrap">{{ primera ? l.DOCUMENTO : '' }}</td>
               <td class="nowrap">{{ primera ? (l.N_SERVICIO_CLIENTE || '—') : '' }}</td>
               <td class="nowrap">{{ primera ? (l.N_ORDEN_DEVOLUCION || '—') : '' }}</td>
+              <td class="nowrap">{{ primera ? (fecha(l.FECHA_ENTREGA) || '—') : '' }}</td>
               <td>{{ primera ? bodegaSalida() : '' }}</td>
               <td>{{ primera ? l.TIPO_SERVICIO : '' }}</td>
               <td class="text-end">{{ primera ? (saldo(l) ?? '—') : '' }}</td>

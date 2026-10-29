@@ -173,6 +173,11 @@ export class Cal003Service {
     return this.guardar(Cal003Action.EntryVoid, { ID_SERVICIO: idServicio, VERSION: version, OBSERVACION: observacion });
   }
 
+  /** Cambia la fecha de entrega comprometida con el cliente; el motivo queda en el historial. */
+  entradaReprogramar(idServicio: number, version: string, fechaEntrega: string, motivo: string): Promise<Cal003Resultado> {
+    return this.guardar(Cal003Action.EntryReschedule, { ID_SERVICIO: idServicio, VERSION: version, FECHA_ENTREGA: fechaEntrega, MOTIVO: motivo });
+  }
+
   // ================= Traslado =================
 
   serviciosTrasladables(): Promise<Cal003ServicioCompleto[]> {

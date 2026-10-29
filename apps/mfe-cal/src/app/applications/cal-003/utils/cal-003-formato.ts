@@ -26,8 +26,25 @@ export function pesos(valor: number | null | undefined): string {
 /** Clase de la insignia según el estado (servicio, traslado, entrega o ajuste). */
 export function estadoBadge(estado: string | null | undefined): string {
   const e = String(estado ?? '').toUpperCase();
-  if (['ANULADO', 'ANULADA', 'RECHAZADO'].includes(e)) return 'c3-badge--danger';
-  if (['INACTIVO', 'REGISTRADO', 'PROPUESTO', 'AJUSTE PROPUESTO', 'DESPACHADO'].includes(e)) return 'c3-badge--warn';
-  if (['AUTORIZADO', 'ENTREGADO', 'CERRADO', 'AJUSTADO'].includes(e)) return 'c3-badge--ok';
+  if (['ANULADO', 'ANULADA', 'RECHAZADO', 'VENCIDO'].includes(e)) return 'c3-badge--danger';
+  if (['INACTIVO', 'REGISTRADO', 'PROPUESTO', 'AJUSTE PROPUESTO', 'DESPACHADO', 'POR VENCER'].includes(e)) return 'c3-badge--warn';
+  if (['AUTORIZADO', 'ENTREGADO', 'CERRADO', 'AJUSTADO', 'EN TIEMPO'].includes(e)) return 'c3-badge--ok';
   return '';
+}
+
+/** Días hasta la fecha de entrega en palabras: «vence hoy», «faltan 3 días», «2 días de atraso». */
+export function diasEntrega(dias: number | null | undefined): string {
+  if (dias === null || dias === undefined) return '';
+  if (dias === 0) return 'vence hoy';
+  if (dias === 1) return 'vence mañana';
+  if (dias > 0) return `faltan ${dias} días`;
+  return dias === -1 ? '1 día de atraso' : `${-dias} días de atraso`;
+}
+
+/** Semáforo de la fecha de entrega en texto (para listas sin color): `🔴 25/10/2026 · 4 días de atraso`. */
+export function resumenEntrega(s: { FECHA_ENTREGA?: string | null; DIAS_PARA_ENTREGA?: number | null; ESTADO_ENTREGA?: string | null }): string {
+  if (!s.FECHA_ENTREGA) return '';
+  if (!s.ESTADO_ENTREGA) return fecha(s.FECHA_ENTREGA);
+  const punto = s.ESTADO_ENTREGA === 'VENCIDO' ? '🔴' : s.ESTADO_ENTREGA === 'POR VENCER' ? '🟡' : '🟢';
+  return `${punto} ${fecha(s.FECHA_ENTREGA)} · ${diasEntrega(s.DIAS_PARA_ENTREGA)}`;
 }
