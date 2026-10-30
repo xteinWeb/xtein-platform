@@ -1,9 +1,0 @@
-
-::ng-deep .dx-diagram {
-  height: 700px !important;
-  min-height: 500px;
-}
-
-::ng-deep .dx-fieldset {
-  margin: 0 !important;
-}

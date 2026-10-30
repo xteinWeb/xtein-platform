@@ -1,3 +1,0 @@
-::ng-deep #GEspecCompo .dx-datagrid .dx-datagrid-content .dx-datagrid-table .dx-row > td:not(.dx-validation-pending):not(.dx-datagrid-select-all) {
-  white-space: break-spaces !important;
-}
