@@ -51,6 +51,29 @@ jobs:
       - if: steps.cambios.outputs.probar == 'true'
         run: npm run test:ci
 
+  # Análisis estático en el SonarQube de dev2026 (http://localhost:9000 desde el runner). La edición gratuita
+  # solo guarda una rama, así que se analiza al unir a developer, no en los PR. No bloquea el despliegue:
+  # si falla o no están los secretos, el resto sigue igual.
+  sonarqube:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/developer'
+    runs-on: [self-hosted, dev2026]
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Historial completo: SonarQube lo usa para saber qué código es nuevo
+          fetch-depth: 0
+      - name: Análisis SonarQube
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ] || [ -z "$SONAR_HOST_URL" ]; then
+            echo "Faltan los secretos SONAR_TOKEN o SONAR_HOST_URL: se omite el análisis."; exit 0
+          fi
+          npx --yes @sonar/scan
+
   desplegar:
     needs: pruebas
     # Solo desde developer (también al relanzarlo a mano desde otra rama, no despliega)
