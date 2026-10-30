@@ -1,5 +1,5 @@
 <section
-  class="mad-002">
+  class="mad-002 xt-page">
 
   <div
     class="mad-002__layout"
@@ -7,7 +7,7 @@
 
     <!-- Application tree -->
     <aside
-      class="mad-002__tree-panel"
+      class="mad-002__tree-panel xt-side-panel"
       [class.mad-002__tree-panel--collapsed]="treePanelCollapsed()">
 
       @if (
@@ -33,7 +33,7 @@
       }
 
 
-      <xtein-button class="mad-002__tree-toggle" variant="link" [text]="treePanelCollapsed() ? '›' : '‹'" [ariaLabel]="treePanelCollapsed() ? 'Mostrar árbol' : 'Ocultar árbol'" [pressed]="!treePanelCollapsed()" (clicked)="toggleTreePanel()" />
+      <xtein-button class="mad-002__tree-toggle xt-collapse-toggle" variant="link" [text]="treePanelCollapsed() ? '›' : '‹'" [ariaLabel]="treePanelCollapsed() ? 'Mostrar árbol' : 'Ocultar árbol'" [pressed]="!treePanelCollapsed()" (clicked)="toggleTreePanel()" />
 
     </aside>
 

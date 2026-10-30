@@ -24,6 +24,14 @@ import {
   PlatformToolbar
 } from '../../toolbar/platform-toolbar/platform-toolbar.component';
 
+import {
+  ThemeService
+} from '../../theme/theme.service';
+
+import {
+  XteinThemeId
+} from '../../theme/xtein-themes';
+
 
 @Component({
   selector:
@@ -77,6 +85,38 @@ export class Header {
     inject(
       Router
     );
+
+  private readonly themeService =
+    inject(
+      ThemeService
+    );
+
+
+  /**
+   * Themes offered in the user menu.
+   */
+  readonly themes =
+    this.themeService
+      .themes;
+
+
+  readonly currentTheme =
+    this.themeService
+      .current;
+
+
+  /**
+   * Applies and stores the chosen theme; the menu stays open
+   * so the user can compare.
+   */
+  selectTheme(
+    id: XteinThemeId
+  ): void {
+
+    this.themeService.select(
+      id
+    );
+  }
 
 
   /**

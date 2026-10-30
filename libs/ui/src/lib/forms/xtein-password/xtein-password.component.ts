@@ -268,6 +268,8 @@ export class XteinPasswordComponent
           ? 'Ocultar contraseña'
           : 'Mostrar contraseña',
       elementAttr: {
+        class:
+          'xtein-password__toggle',
         'aria-label':
           this.passwordVisible
             ? 'Ocultar contraseña'

@@ -18,7 +18,7 @@
 
   <!-- Editor de fila (draft) -->
   @if (draft(); as row) {
-    <div class="com201-items__editor" role="group" aria-label="Edición del ítem">
+    <div class="com201-items__editor xt-panel" role="group" aria-label="Edición del ítem">
       <div class="com201-items__field com201-items__field--product">
         <xtein-label for="com201-item-producto">Producto</xtein-label>
         @if (rule.product) {
@@ -37,13 +37,13 @@
             [disabled]="working() || busy"
           />
         } @else {
-          <span class="com201-items__value">{{ row.PRODUCTO }}</span>
+          <span class="xt-field__value">{{ row.PRODUCTO }}</span>
         }
       </div>
 
       <div class="com201-items__field com201-items__field--name">
         <xtein-label>Nombre</xtein-label>
-        <span class="com201-items__value">{{ row.NOMBRE }}</span>
+        <span class="xt-field__value">{{ row.NOMBRE }}</span>
       </div>
 
       @if (byAttribute) {
@@ -61,7 +61,7 @@
               [disabled]="working() || busy"
             />
           } @else {
-            <span class="com201-items__value">{{ row.ATRIBUTO }}</span>
+            <span class="xt-field__value">{{ row.ATRIBUTO }}</span>
           }
         </div>
       }
@@ -80,7 +80,7 @@
             [disabled]="working() || busy"
           />
         } @else {
-          <span class="com201-items__value">{{ row.UDM_PRES }}</span>
+          <span class="xt-field__value">{{ row.UDM_PRES }}</span>
         }
       </div>
 
@@ -110,7 +110,7 @@
 
       <div class="com201-items__field">
         <xtein-label>Precio Iva</xtein-label>
-        <span class="com201-items__value com201-items__value--number">{{ money(row.PRECIO_IVA) }}</span>
+        <span class="xt-field__value com201-items__value--number">{{ money(row.PRECIO_IVA) }}</span>
       </div>
 
       <div class="com201-items__editor-actions">
@@ -145,7 +145,7 @@
     <div class="com201-items__pager-nav">
       <xtein-button text="«" variant="secondary" ariaLabel="Primera página" [disabled]="!!draft() || busy || store.pageIndex() === 0" (clicked)="goTo(0)" />
       <xtein-button text="‹" variant="secondary" ariaLabel="Página anterior" [disabled]="!!draft() || busy || store.pageIndex() === 0" (clicked)="goTo(store.pageIndex() - 1)" />
-      <span class="com201-items__pager-info">
+      <span class="com201-items__pager-info xt-text-secondary">
         Página {{ store.pageIndex() + 1 }} de {{ store.pageCount() }} · {{ store.count() }} ítems
         @if (store.selectedKeys().size) { · {{ store.selectedKeys().size }} seleccionados }
       </span>

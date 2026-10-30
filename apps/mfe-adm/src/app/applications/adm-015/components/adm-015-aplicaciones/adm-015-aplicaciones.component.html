@@ -29,7 +29,7 @@
         displayExpr="ID_APLICACION" placeholder="Aplicación" ariaLabel="Aplicación a agregar"
         [ngModel]="draft.ID_APLICACION" (ngModelChange)="chooseApplication($event)" [disabled]="busy" />
     } @else if (!readOnly) {
-      <button type="button" class="xtein-adm015-apps__application-code" [disabled]="busy || !!draft"
+      <button type="button" class="xtein-adm015-apps__application-code xt-button xt-button--bare" [disabled]="busy || !!draft"
         [attr.aria-label]="'Editar aplicación ' + cell.value" (click)="beginEdit(cell.data)">{{ cell.value }}</button>
     } @else { {{ cell.value }} }
   } @else {

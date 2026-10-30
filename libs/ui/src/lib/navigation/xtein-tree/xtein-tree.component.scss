@@ -36,7 +36,7 @@
     0;
 
   background:
-    #ffffff;
+    var(--xt-surface);
 }
 
 
@@ -48,10 +48,10 @@
     10px;
 
   border-bottom:
-    1px solid #e4ebf3;
+    1px solid var(--xt-border);
 
   background:
-    #fbfdff;
+    var(--xt-surface-accent);
 }
 
 
@@ -108,7 +108,7 @@
     hidden;
 
   color:
-    #244d73;
+    var(--xt-heading);
 
   font-size:
     13px;
@@ -198,7 +198,7 @@
     border-box;
 
   color:
-    #7a8ea4;
+    var(--xt-text-muted);
 
   font-size:
     13px;

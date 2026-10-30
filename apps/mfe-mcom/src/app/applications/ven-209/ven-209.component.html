@@ -1,20 +1,20 @@
-<div class="ven-209" [class.ven-209--loading]="loading()">
+<div class="xt-page ven-209">
   <form [formGroup]="form" class="ven-209__form" autocomplete="off">
     <!-- ===== TARJETA SUPERIOR: Cabecera, Identificación y Detalle Cliente ===== -->
-    <div class="ven-209__card-main">
+    <div class="xt-card xt-card--outlined ven-209__card-main">
       <!-- Fila 1: Grupos Identificación y Fecha/Estado (2 columnas) -->
       <div class="ven-209__top-groups">
         <!-- Grupo 1: Identificación -->
-        <fieldset class="ven-209__fieldset">
-          <legend class="ven-209__legend">
+        <fieldset class="xt-fieldset ven-209__fieldset">
+          <legend class="xt-fieldset__legend ven-209__legend">
             <xtein-group-label label="Identificación"></xtein-group-label>
           </legend>
           <div class="ven-209__fieldset-content">
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-id-cliente" [required]="true">
+            <div class="xt-field xt-field--inline ven-209__field">
+              <xtein-label class="xt-field__label" for="ven-209-id-cliente" [required]="true">
                 Código
               </xtein-label>
-              <div class="ven-209__control-inline">
+              <div class="xt-field__control ven-209__control">
                 <xtein-input
                   id="ven-209-id-cliente"
                   formControlName="ID_CLIENTE"
@@ -28,11 +28,11 @@
               </div>
             </div>
 
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-id-legal" [required]="true">
+            <div class="xt-field xt-field--inline ven-209__field">
+              <xtein-label class="xt-field__label" for="ven-209-id-legal" [required]="true">
                 Id Legal
               </xtein-label>
-              <div class="ven-209__control-inline">
+              <div class="xt-field__control ven-209__control">
                 <xtein-select
                   #idLegalSelect
                   id="ven-209-id-legal"
@@ -56,16 +56,16 @@
         </fieldset>
 
         <!-- Grupo 2: Fecha de registro y estado -->
-        <fieldset class="ven-209__fieldset">
-          <legend class="ven-209__legend">
+        <fieldset class="xt-fieldset ven-209__fieldset">
+          <legend class="xt-fieldset__legend ven-209__legend">
             <xtein-group-label label="Fecha de registro y estado"></xtein-group-label>
           </legend>
           <div class="ven-209__fieldset-content">
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-estado">
+            <div class="xt-field xt-field--inline ven-209__field">
+              <xtein-label class="xt-field__label" for="ven-209-estado">
                 Estado
               </xtein-label>
-              <div class="ven-209__control-inline">
+              <div class="xt-field__control ven-209__control">
                 <xtein-select
                   id="ven-209-estado"
                   [items]="$any(estados)"
@@ -75,11 +75,11 @@
               </div>
             </div>
 
-            <div class="ven-209__field-inline">
-              <xtein-label class="ven-209__label-inline" for="ven-209-fecha-reg">
+            <div class="xt-field xt-field--inline ven-209__field">
+              <xtein-label class="xt-field__label" for="ven-209-fecha-reg">
                 Fecha de Registro
               </xtein-label>
-              <div class="ven-209__control-inline">
+              <div class="xt-field__control ven-209__control">
                 <xtein-date
                   id="ven-209-fecha-reg"
                   formControlName="FECHA_REGISTRO"
@@ -92,17 +92,17 @@
       </div>
 
       <!-- Fila 2: Grupo Detalle Cliente (Ancho Completo, 2 Columnas) -->
-      <fieldset class="ven-209__fieldset ven-209__fieldset--full">
-        <legend class="ven-209__legend">
+      <fieldset class="xt-fieldset ven-209__fieldset ven-209__fieldset--full">
+        <legend class="xt-fieldset__legend ven-209__legend">
           <xtein-group-label label="Detalle Cliente"></xtein-group-label>
         </legend>
         <div class="ven-209__detail-grid">
           <!-- 1. Primer Nombre (Fila 1, Columna 1) -->
-          <div class="ven-209__field-inline">
-            <xtein-label class="ven-209__label-inline" for="ven-209-nombre" [required]="true">
+          <div class="xt-field xt-field--inline ven-209__field">
+            <xtein-label class="xt-field__label" for="ven-209-nombre" [required]="true">
               Primer Nombre
             </xtein-label>
-            <div class="ven-209__control-inline">
+            <div class="xt-field__control ven-209__control">
               <xtein-input
                 id="ven-209-nombre"
                 formControlName="NOMBRE"
@@ -113,11 +113,11 @@
           </div>
 
           <!-- 2. Segundo Nombre (Fila 1, Columna 2) -->
-          <div class="ven-209__field-inline">
-            <xtein-label class="ven-209__label-inline" for="ven-209-nombre2">
+          <div class="xt-field xt-field--inline ven-209__field">
+            <xtein-label class="xt-field__label" for="ven-209-nombre2">
               Segundo Nombre
             </xtein-label>
-            <div class="ven-209__control-inline">
+            <div class="xt-field__control ven-209__control">
               <xtein-input
                 id="ven-209-nombre2"
                 formControlName="NOMBRE2"
@@ -128,11 +128,11 @@
           </div>
 
           <!-- 3. Primer Apellido (Fila 2, Columna 1) -->
-          <div class="ven-209__field-inline">
-            <xtein-label class="ven-209__label-inline" for="ven-209-apellido" [required]="true">
+          <div class="xt-field xt-field--inline ven-209__field">
+            <xtein-label class="xt-field__label" for="ven-209-apellido" [required]="true">
               Primer Apellido
             </xtein-label>
-            <div class="ven-209__control-inline">
+            <div class="xt-field__control ven-209__control">
               <xtein-input
                 id="ven-209-apellido"
                 formControlName="APELLIDO"
@@ -143,11 +143,11 @@
           </div>
 
           <!-- 4. Segundo Apellido (Fila 2, Columna 2) -->
-          <div class="ven-209__field-inline">
-            <xtein-label class="ven-209__label-inline" for="ven-209-apellido2">
+          <div class="xt-field xt-field--inline ven-209__field">
+            <xtein-label class="xt-field__label" for="ven-209-apellido2">
               Segundo Apellido
             </xtein-label>
-            <div class="ven-209__control-inline">
+            <div class="xt-field__control ven-209__control">
               <xtein-input
                 id="ven-209-apellido2"
                 formControlName="APELLIDO2"
@@ -158,11 +158,11 @@
           </div>
 
           <!-- 5. Tipo Identificación (Fila 3, Columna 1) -->
-          <div class="ven-209__field-inline">
-            <xtein-label class="ven-209__label-inline" for="ven-209-tipo-id" [required]="true">
+          <div class="xt-field xt-field--inline ven-209__field">
+            <xtein-label class="xt-field__label" for="ven-209-tipo-id" [required]="true">
               Tipo Identificación
             </xtein-label>
-            <div class="ven-209__control-inline">
+            <div class="xt-field__control ven-209__control">
               <xtein-select
                 id="ven-209-tipo-id"
                 [items]="$any(tiposId())"
@@ -173,11 +173,11 @@
           </div>
 
           <!-- 6. Nat/Jur (Fila 3, Columna 2) -->
-          <div class="ven-209__field-inline">
-            <xtein-label class="ven-209__label-inline" for="ven-209-persona" [required]="true">
+          <div class="xt-field xt-field--inline ven-209__field">
+            <xtein-label class="xt-field__label" for="ven-209-persona" [required]="true">
               Nat/Jur
             </xtein-label>
-            <div class="ven-209__control-inline">
+            <div class="xt-field__control ven-209__control">
               <xtein-select
                 id="ven-209-persona"
                 [items]="$any(personas())"
@@ -191,13 +191,13 @@
     </div>
 
     <!-- ===== TARJETA INFERIOR: Pestañas de Gestión (5 Pestañas) ===== -->
-    <div class="ven-209__card-tabs">
+    <div class="xt-card xt-card--outlined ven-209__card-tabs">
       <!-- Barra de Navegación de Pestañas -->
-      <div class="ven-209__tabs-header">
+      <div class="xt-tabs xt-tabs--underline ven-209__tabs-header">
         <button
           type="button"
-          class="ven-209__tab-btn"
-          [class.ven-209__tab-btn--active]="activeMainTab() === 'general'"
+          class="xt-tabs__tab ven-209__tab-btn"
+          [class.xt-tabs__tab--active]="activeMainTab() === 'general'"
           (click)="activeMainTab.set('general')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -211,8 +211,8 @@
 
         <button
           type="button"
-          class="ven-209__tab-btn"
-          [class.ven-209__tab-btn--active]="activeMainTab() === 'ubicaciones'"
+          class="xt-tabs__tab ven-209__tab-btn"
+          [class.xt-tabs__tab--active]="activeMainTab() === 'ubicaciones'"
           (click)="activeMainTab.set('ubicaciones')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -224,8 +224,8 @@
 
         <button
           type="button"
-          class="ven-209__tab-btn"
-          [class.ven-209__tab-btn--active]="activeMainTab() === 'financieros'"
+          class="xt-tabs__tab ven-209__tab-btn"
+          [class.xt-tabs__tab--active]="activeMainTab() === 'financieros'"
           (click)="activeMainTab.set('financieros')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -237,8 +237,8 @@
 
         <button
           type="button"
-          class="ven-209__tab-btn"
-          [class.ven-209__tab-btn--active]="activeMainTab() === 'ventas'"
+          class="xt-tabs__tab ven-209__tab-btn"
+          [class.xt-tabs__tab--active]="activeMainTab() === 'ventas'"
           (click)="activeMainTab.set('ventas')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -251,8 +251,8 @@
 
         <button
           type="button"
-          class="ven-209__tab-btn"
-          [class.ven-209__tab-btn--active]="activeMainTab() === 'historico'"
+          class="xt-tabs__tab ven-209__tab-btn"
+          [class.xt-tabs__tab--active]="activeMainTab() === 'historico'"
           (click)="activeMainTab.set('historico')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -267,14 +267,14 @@
       <div class="ven-209__tabs-body">
         <!-- Pestaña 1: General -->
         <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'general'">
-          <div class="ven-209__general-grid">
+          <div class="xt-section-divider ven-209__general-grid">
             <!-- Columna Izquierda: Grupo, Clase, Perfil Tributario -->
             <div class="ven-209__col">
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-grupo" [required]="true">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-grupo" [required]="true">
                   Grupo
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-lookup
                     id="ven-209-grupo"
                     placeholder="Seleccione Grupo"
@@ -289,11 +289,11 @@
                 </div>
               </div>
 
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-clase" [required]="true">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-clase" [required]="true">
                   Clase
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-select
                     id="ven-209-clase"
                     [items]="$any(clasesCliente())"
@@ -303,11 +303,11 @@
                 </div>
               </div>
 
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-perfil" [required]="true">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-perfil" [required]="true">
                   Perfil Tributario
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-perfil-tributario
                     id="ven-209-perfil"
                     formControlName="PERFIL_TRIBUTARIO"
@@ -325,11 +325,11 @@
 
             <!-- Columna Derecha: Rep. Tributaria, Contacto -->
             <div class="ven-209__col">
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-rt" [required]="true">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-rt" [required]="true">
                   Rep. Tributaria
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-tag-box
                     id="ven-209-rt"
                     [items]="rts()"
@@ -352,19 +352,19 @@
                   >
                     <ng-template #itemTemplate let-data>
                       <div class="ven-209__rt-item">
-                        <span class="ven-209__rt-code">{{ data.ID_RT }}</span>
-                        <span class="ven-209__rt-desc">{{ data.DESCRIPCION }}</span>
+                        <span class="xt-text-strong ven-209__rt-code">{{ data.ID_RT }}</span>
+                        <span class="xt-text-secondary ven-209__rt-desc">{{ data.DESCRIPCION }}</span>
                       </div>
                     </ng-template>
                   </xtein-tag-box>
                 </div>
               </div>
 
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-contacto">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-contacto">
                   Contacto
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-select
                     #contactoSelect
                     id="ven-209-contacto"
@@ -440,11 +440,11 @@
         <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'ventas'">
           <div class="ven-209__general-grid">
             <div class="ven-209__col">
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-zona">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-zona">
                   Zona
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-lookup
                     id="ven-209-zona"
                     placeholder="Seleccione Zona"
@@ -459,11 +459,11 @@
                 </div>
               </div>
 
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-adc">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-adc">
                   ADC
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-lookup
                     id="ven-209-adc"
                     placeholder="Seleccione Vendedor"
@@ -480,11 +480,11 @@
             </div>
 
             <div class="ven-209__col">
-              <div class="ven-209__field-inline">
-                <xtein-label class="ven-209__label-inline" for="ven-209-status">
+              <div class="xt-field xt-field--inline ven-209__field">
+                <xtein-label class="xt-field__label" for="ven-209-status">
                   Status
                 </xtein-label>
-                <div class="ven-209__control-inline">
+                <div class="xt-field__control ven-209__control">
                   <xtein-lookup
                     id="ven-209-status"
                     placeholder="Seleccione Status"
@@ -504,8 +504,8 @@
 
         <!-- Pestaña 5: Histórico -->
         <div class="ven-209__tab-pane" *ngIf="activeMainTab() === 'historico'">
-          <div class="ven-209__historico-placeholder">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9bb3c7" stroke-width="1.5">
+          <div class="xt-text-secondary ven-209__historico-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>

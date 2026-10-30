@@ -1,11 +1,11 @@
-<div class="adm-015">
+<div class="adm-015 xt-page">
   <div class="adm-015__container">
     <!-- Formulario Principal: Datos del Usuario -->
-    <div class="adm-015__card">
+    <div class="adm-015__card xt-card xt-card--outlined">
       <form [formGroup]="form" class="adm-015__form">
         <div class="adm-015__grid">
-          <div class="adm-015__field">
-            <xtein-label for="adm-015-usuario" [required]="true">Usuario</xtein-label>
+          <div class="adm-015__field xt-field xt-field--inline">
+            <xtein-label class="xt-field__label" for="adm-015-usuario" [required]="true">Usuario</xtein-label>
             <xtein-input
               id="adm-015-usuario"
               formControlName="USUARIO"
@@ -14,8 +14,8 @@
             ></xtein-input>
           </div>
 
-          <div class="adm-015__field">
-            <xtein-label for="adm-015-estado" [required]="true">Estado</xtein-label>
+          <div class="adm-015__field xt-field xt-field--inline">
+            <xtein-label class="xt-field__label" for="adm-015-estado" [required]="true">Estado</xtein-label>
             <xtein-select
               id="adm-015-estado"
               [items]="$any(estados)"
@@ -24,8 +24,8 @@
             ></xtein-select>
           </div>
 
-          <div class="adm-015__field">
-            <xtein-label for="adm-015-nombre" [required]="true">Nombre Completo</xtein-label>
+          <div class="adm-015__field xt-field xt-field--inline">
+            <xtein-label class="xt-field__label" for="adm-015-nombre" [required]="true">Nombre Completo</xtein-label>
             <xtein-input
               id="adm-015-nombre"
               formControlName="NOMBRE"
@@ -34,8 +34,8 @@
             ></xtein-input>
           </div>
 
-          <div class="adm-015__field">
-            <xtein-label for="adm-015-rol" [required]="true">Rol de Usuario</xtein-label>
+          <div class="adm-015__field xt-field xt-field--inline">
+            <xtein-label class="xt-field__label" for="adm-015-rol" [required]="true">Rol de Usuario</xtein-label>
             <xtein-select
               id="adm-015-rol"
               [items]="roles()"
@@ -47,8 +47,8 @@
             ></xtein-select>
           </div>
 
-          <div class="adm-015__field">
-            <xtein-label for="adm-015-email" [required]="true">Correo Electrónico</xtein-label>
+          <div class="adm-015__field xt-field xt-field--inline">
+            <xtein-label class="xt-field__label" for="adm-015-email" [required]="true">Correo Electrónico</xtein-label>
             <xtein-input
               id="adm-015-email"
               formControlName="EMAIL"
@@ -61,12 +61,13 @@
     </div>
 
     <!-- Pestañas de Detalle y Permisos -->
-    <div class="adm-015__card adm-015__card--tabs">
-      <div class="adm-015__tabs-nav">
+    <div class="adm-015__card adm-015__card--tabs xt-card xt-card--outlined">
+      <div class="adm-015__tabs-nav xt-tabs">
         <button
           type="button"
-          class="adm-015__tab-btn"
+          class="adm-015__tab-btn xt-tabs__tab"
           [class.adm-015__tab-btn--active]="activeTab() === 'contrasenas'"
+          [class.xt-tabs__tab--active]="activeTab() === 'contrasenas'"
           (click)="activeTab.set('contrasenas')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -78,8 +79,9 @@
 
         <button
           type="button"
-          class="adm-015__tab-btn"
+          class="adm-015__tab-btn xt-tabs__tab"
           [class.adm-015__tab-btn--active]="activeTab() === 'aplicaciones'"
+          [class.xt-tabs__tab--active]="activeTab() === 'aplicaciones'"
           (click)="activeTab.set('aplicaciones')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -93,8 +95,9 @@
 
         <button
           type="button"
-          class="adm-015__tab-btn"
+          class="adm-015__tab-btn xt-tabs__tab"
           [class.adm-015__tab-btn--active]="activeTab() === 'permisos'"
+          [class.xt-tabs__tab--active]="activeTab() === 'permisos'"
           (click)="activeTab.set('permisos')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -105,8 +108,9 @@
 
         <button
           type="button"
-          class="adm-015__tab-btn"
+          class="adm-015__tab-btn xt-tabs__tab"
           [class.adm-015__tab-btn--active]="activeTab() === 'un'"
+          [class.xt-tabs__tab--active]="activeTab() === 'un'"
           (click)="activeTab.set('un')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -118,8 +122,9 @@
 
         <button
           type="button"
-          class="adm-015__tab-btn"
+          class="adm-015__tab-btn xt-tabs__tab"
           [class.adm-015__tab-btn--active]="activeTab() === 'conexiones'"
+          [class.xt-tabs__tab--active]="activeTab() === 'conexiones'"
           (click)="activeTab.set('conexiones')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -132,8 +137,9 @@
 
         <button
           type="button"
-          class="adm-015__tab-btn"
+          class="adm-015__tab-btn xt-tabs__tab"
           [class.adm-015__tab-btn--active]="activeTab() === 'configuraciones'"
+          [class.xt-tabs__tab--active]="activeTab() === 'configuraciones'"
           (click)="activeTab.set('configuraciones')"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -150,8 +156,8 @@
           <div class="adm-015__tab-pane">
             <form [formGroup]="form" class="adm-015__passwords-form">
               <div class="adm-015__passwords-grid">
-                <div class="adm-015__field">
-                  <xtein-label>Forzar cambio de Contraseña</xtein-label>
+                <div class="adm-015__field xt-field">
+                  <xtein-label class="xt-field__label">Forzar cambio de Contraseña</xtein-label>
                   <xtein-switch
                     ariaLabel="Forzar cambio de contraseña"
                     formControlName="CAMBIAR_CLAVE"
@@ -159,8 +165,8 @@
                   ></xtein-switch>
                 </div>
 
-                <div class="adm-015__field">
-                  <xtein-label for="adm-015-expirar">Expiración de Contraseña</xtein-label>
+                <div class="adm-015__field xt-field">
+                  <xtein-label class="xt-field__label" for="adm-015-expirar">Expiración de Contraseña</xtein-label>
                   <xtein-radio-group
                     id="adm-015-expirar"
                     layout="horizontal"
@@ -172,8 +178,8 @@
                 </div>
 
                 @if (form.controls.EXPIRARstr.value === 'Expirar cada') {
-                  <div class="adm-015__field">
-                    <xtein-label for="adm-015-tiempo">Expira en</xtein-label>
+                  <div class="adm-015__field xt-field">
+                    <xtein-label class="xt-field__label" for="adm-015-tiempo">Expira en</xtein-label>
                     <xtein-number
                       id="adm-015-tiempo"
                       formControlName="TIEMPO_INTERVALO"
@@ -182,8 +188,8 @@
                     ></xtein-number>
                   </div>
 
-                  <div class="adm-015__field">
-                    <xtein-label for="adm-015-intervalo">Unidad de Tiempo</xtein-label>
+                  <div class="adm-015__field xt-field">
+                    <xtein-label class="xt-field__label" for="adm-015-intervalo">Unidad de Tiempo</xtein-label>
                     <xtein-select
                       id="adm-015-intervalo"
                       [items]="$any(intervalos)"
@@ -279,14 +285,14 @@
     (closed)="closePasswordModal()"
   >
     <div class="adm-015__modal-body">
-      <p class="adm-015__modal-desc">
+      <p class="adm-015__modal-desc xt-text-secondary">
         Ingrese y confirme la nueva contraseña para el usuario
         <b>{{ form.controls.USUARIO.value || currentRecord()?.USUARIO || 'seleccionado' }}</b>.
       </p>
 
       <form [formGroup]="passwordForm" class="adm-015__modal-form">
-        <div class="adm-015__field">
-          <xtein-label for="adm-015-new-pass" [required]="true">Nueva Contraseña</xtein-label>
+        <div class="adm-015__field xt-field">
+          <xtein-label class="xt-field__label" for="adm-015-new-pass" [required]="true">Nueva Contraseña</xtein-label>
           <xtein-password
             id="adm-015-new-pass"
             formControlName="NUEVA_CLAVE"
@@ -294,8 +300,8 @@
           ></xtein-password>
         </div>
 
-        <div class="adm-015__field">
-          <xtein-label for="adm-015-confirm-pass" [required]="true">Confirmar Contraseña</xtein-label>
+        <div class="adm-015__field xt-field">
+          <xtein-label class="xt-field__label" for="adm-015-confirm-pass" [required]="true">Confirmar Contraseña</xtein-label>
           <xtein-password
             id="adm-015-confirm-pass"
             formControlName="CONFIRMAR_CLAVE"

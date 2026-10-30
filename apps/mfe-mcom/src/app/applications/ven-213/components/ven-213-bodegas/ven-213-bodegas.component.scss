@@ -1,13 +1,10 @@
+/* Layout only: table, empty state and error text come from libs/ui (xtein-blocks.scss). */
 :host { display: contents; }
 .bodegas { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: .65rem; }
 .bodegas__summary { margin: 0; }
-.bodegas__mismatch { color: #b42318; }
 .bodegas__table { flex: 1; min-height: 0; overflow: auto; }
-.bodegas__table table { width: 100%; border-collapse: collapse; }
-.bodegas__table th, .bodegas__table td { padding: .35rem .5rem; border-bottom: 1px solid var(--xt-color-border, #e2e8f0); vertical-align: middle; }
-.bodegas__table th { font-weight: 600; text-align: left; white-space: nowrap; }
+.bodegas__table th, .bodegas__table td { padding: .35rem .5rem; vertical-align: middle; }
 .bodegas__table .text-end { text-align: right; }
-.bodegas__empty { text-align: center; color: var(--xt-color-text-secondary, #64748b); }
 footer { flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: .5rem; }
-[role=alert] { color: #b42318; margin: 0; }
+[role=alert] { margin: 0; }
 [role=status] { margin: 0; }

@@ -1,3 +1,11 @@
+/*======================================================================
+= VEN-209 LAYOUT
+=
+= Arrangement only. The page, cards, fieldsets, fields, tabs and text
+= styles come from the shared blocks of libs/ui (xtein-blocks.scss),
+= which carry the theme.
+======================================================================*/
+
 :host {
   display: block;
   width: 100%;
@@ -6,18 +14,8 @@
 }
 
 .ven-209 {
-  display: flex;
-  flex-direction: column;
   gap: 16px;
-  width: 100%;
   padding: 16px 20px;
-  box-sizing: border-box;
-  background-color: #f2f5f9;
-  min-height: 100%;
-
-  &--loading {
-    /* Loading overlay is handled natively by xtein-loading */
-  }
 
   &__form {
     display: flex;
@@ -27,35 +25,27 @@
     min-width: 0;
   }
 
-  /* Tarjeta Principal Superior */
+  /* Top card: identification, state and customer detail. */
   &__card-main {
-    background: #ffffff;
-    border: 1px solid #dfe6ef;
-    border-radius: 10px;
-    padding: 18px 22px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
     gap: 16px;
+    padding: 18px 22px;
   }
 
   &__top-groups {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
 
     @media (max-width: 860px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 
-  /* Fieldsets estilo Legacy / Xtein */
   &__fieldset {
-    border: 1px solid #dfe6ef;
-    border-radius: 8px;
-    padding: 16px 20px 20px;
-    background: #ffffff;
     margin: 0;
+    padding: 16px 20px 20px;
     min-width: 0;
 
     &--full {
@@ -65,13 +55,8 @@
   }
 
   &__legend {
-    color: rgba(10, 57, 96, 0.55);
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 0;
     margin: 0;
-    text-transform: none;
-    letter-spacing: normal;
+    padding: 0;
   }
 
   &__fieldset-content {
@@ -83,11 +68,11 @@
     box-sizing: border-box;
   }
 
-  /* Disposición en 2 columnas */
+  /* Two-column field grids. */
   &__detail-grid,
   &__general-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px 24px;
     width: 100%;
     padding-top: 14px;
@@ -95,7 +80,7 @@
     box-sizing: border-box;
 
     @media (max-width: 860px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 
@@ -106,28 +91,12 @@
     min-width: 0;
   }
 
-  /* Campos con etiqueta a la izquierda (Inline Fields) */
-  &__field-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 34px;
+  &__field {
     width: 100%;
+    min-height: 34px;
   }
 
-  &__label-inline {
-    flex: 0 0 140px;
-    margin: 0;
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__control-inline {
-    flex: 1 1 0;
-    min-width: 0;
-
+  &__control {
     xtein-input,
     xtein-select,
     xtein-date,
@@ -136,45 +105,9 @@
       display: block;
       width: 100%;
     }
-
-    &--with-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-
-      xtein-input {
-        flex: 1 1 0;
-        min-width: 0;
-      }
-    }
   }
 
-  &__perfil-arrow-btn {
-    flex: 0 0 32px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: #0f4c81;
-    color: #ffffff;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 1px 3px rgba(15, 76, 129, 0.3);
-    transition: all 0.15s ease-in-out;
-
-    &:hover {
-      background-color: #0a355c;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 5px rgba(15, 76, 129, 0.4);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
-
+  /* Tax responsibility option inside the tag box list. */
   &__rt-item {
     display: flex;
     align-items: center;
@@ -186,15 +119,10 @@
 
   &__rt-code {
     width: 25%;
-    font-weight: 600;
-    color: #1e293b;
-    font-size: 13px;
   }
 
   &__rt-desc {
     width: 75%;
-    color: #475569;
-    font-size: 12.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -206,26 +134,20 @@
     gap: 6px;
     margin-top: 14px;
     padding-top: 12px;
-    border-top: 1px solid #eef3f8;
   }
 
-  /* Tarjeta Inferior de Pestañas */
+  /* Bottom card with the management tabs. */
   &__card-tabs {
-    background: #ffffff;
-    border: 1px solid #dfe6ef;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
+    padding: 0;
     overflow: hidden;
   }
 
   &__tabs-header {
     display: flex;
-    background: #f8fafc;
-    border-bottom: 1px solid #dfe6ef;
-    padding: 0 12px;
     gap: 4px;
+    padding: 0 12px;
     overflow-x: auto;
   }
 
@@ -234,40 +156,20 @@
     align-items: center;
     gap: 8px;
     padding: 11px 18px;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: #64748b;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.15s ease-in-out;
     white-space: nowrap;
-
-    &:hover {
-      color: #1e293b;
-      background: rgba(0, 0, 0, 0.02);
-    }
-
-    &--active {
-      color: #0284c7;
-      border-bottom-color: #0284c7;
-      font-weight: 600;
-      background: #ffffff;
-    }
+    transition: all .15s ease-in-out;
   }
 
   &__tabs-body {
-    padding: 20px 24px;
     min-height: 280px;
+    padding: 20px 24px;
   }
 
   &__tab-pane {
-    animation: fadeInTab 0.15s ease-out;
     width: 100%;
+    animation: fade-in-tab .15s ease-out;
   }
 
-  /* Placeholder de Histórico */
   &__historico-placeholder {
     display: flex;
     flex-direction: column;
@@ -275,24 +177,24 @@
     justify-content: center;
     gap: 12px;
     padding: 48px 20px;
-    color: #8da4b8;
-    font-size: 14px;
     text-align: center;
   }
 }
 
-@keyframes fadeInTab {
+@keyframes fade-in-tab {
   from {
-    opacity: 0.85;
+    opacity: .85;
   }
+
   to {
     opacity: 1;
   }
 }
 
+/* Tag box: hide the native placeholder and show DevExtreme's only while empty. */
 ::ng-deep .dx-tagbox {
   .dx-texteditor-input::placeholder {
-    color: transparent !important;
+    opacity: 0;
   }
 
   &.dx-tagbox-empty .dx-placeholder,
@@ -302,11 +204,9 @@
     &::before {
       content: attr(data-dx_placeholder) !important;
       display: block !important;
-      color: #94a3b8 !important;
-      font-size: 13px !important;
       position: absolute !important;
-      left: 10px !important;
       top: 50% !important;
+      left: 10px !important;
       transform: translateY(-50%) !important;
       pointer-events: none !important;
       white-space: nowrap !important;
@@ -321,6 +221,3 @@
     }
   }
 }
-
-
-

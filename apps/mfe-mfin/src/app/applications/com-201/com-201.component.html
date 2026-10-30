@@ -1,13 +1,13 @@
-<section class="com-201">
-  <div class="com-201__card" [formGroup]="form">
-    <xtein-group-label class="com-201__section-title" label="Lista de precios"></xtein-group-label>
+<section class="xt-page">
+  <div class="xt-card" [formGroup]="form">
+    <xtein-group-label class="xt-section-title" label="Lista de precios"></xtein-group-label>
 
     <div class="com-201__header-grid">
       <!-- Columna 1 -->
       <div class="com-201__header-col">
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-id-lista" [required]="true">Id Lista</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-id-lista" [required]="true">Id Lista</xtein-label>
+          <div class="xt-field__control">
             <xtein-input
               id="com-201-id-lista"
               name="ID_LISTA"
@@ -20,9 +20,9 @@
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-descripcion" [required]="true">Descripción</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-descripcion" [required]="true">Descripción</xtein-label>
+          <div class="xt-field__control">
             <xtein-input
               id="com-201-descripcion"
               name="DESCRIPCION"
@@ -34,18 +34,18 @@
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-actualizacion">Actualización</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-actualizacion">Actualización</xtein-label>
+          <div class="xt-field__control">
             <xtein-select id="com-201-actualizacion" [items]="updateOptions" displayExpr="text" valueExpr="value"
               formControlName="ACTUALIZACION" [readOnly]="lockedField()" />
           </div>
         </div>
 
         @if (showBaseList()) {
-          <div class="com-201__field">
-            <xtein-label class="com-201__label" for="com-201-lista-base">Lista base</xtein-label>
-            <div class="com-201__control">
+          <div class="xt-field xt-field--inline com-201__field">
+            <xtein-label class="xt-field__label" for="com-201-lista-base">Lista base</xtein-label>
+            <div class="xt-field__control">
               <xtein-select id="com-201-lista-base" [items]="baseLists()" displayExpr="LISTA" valueExpr="ID_LISTA"
                 [searchEnabled]="true" formControlName="LISTA_BASE" [readOnly]="lockedField()" />
             </div>
@@ -53,9 +53,9 @@
         }
 
         @if (showProvider()) {
-          <div class="com-201__field">
-            <xtein-label class="com-201__label" for="com-201-proveedor">Proveedor</xtein-label>
-            <div class="com-201__control">
+          <div class="xt-field xt-field--inline com-201__field">
+            <xtein-label class="xt-field__label" for="com-201-proveedor">Proveedor</xtein-label>
+            <div class="xt-field__control">
               <xtein-lookup
                 id="com-201-proveedor"
                 ariaLabel="Proveedor"
@@ -73,24 +73,24 @@
           </div>
         }
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-margen">Margen</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-margen">Margen</xtein-label>
+          <div class="xt-field__control">
             <xtein-number id="com-201-margen" format="#,#0.00" formControlName="MARGEN" [readOnly]="!editableField()" />
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-fecha-final">Fecha Final</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-fecha-final">Fecha Final</xtein-label>
+          <div class="xt-field__control">
             <xtein-date id="com-201-fecha-final" name="FECHA_FINAL" formControlName="FECHA_FINAL"
               [min]="form.controls.FECHA_INICIO.value || null" [readOnly]="!editableField()" />
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-principal">Principal</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-principal">Principal</xtein-label>
+          <div class="xt-field__control">
             <xtein-switch id="com-201-principal" ariaLabel="Principal" formControlName="PRINCIPAL" [readOnly]="lockedField()" />
           </div>
         </div>
@@ -98,26 +98,26 @@
 
       <!-- Columna 2 -->
       <div class="com-201__header-col">
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-estado">Estado</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-estado">Estado</xtein-label>
+          <div class="xt-field__control">
             <xtein-select id="com-201-estado" [items]="statusOptions" displayExpr="text" valueExpr="value"
               formControlName="ESTADO" [readOnly]="!editableField()" />
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-tipo">Tipo</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-tipo">Tipo</xtein-label>
+          <div class="xt-field__control">
             <xtein-select id="com-201-tipo" [items]="typeOptions" displayExpr="text" valueExpr="value"
               formControlName="TIPO" [readOnly]="lockedField()" />
           </div>
         </div>
 
         @if (showBasePrice()) {
-          <div class="com-201__field">
-            <xtein-label class="com-201__label" for="com-201-base-precio">Base precio</xtein-label>
-            <div class="com-201__control">
+          <div class="xt-field xt-field--inline com-201__field">
+            <xtein-label class="xt-field__label" for="com-201-base-precio">Base precio</xtein-label>
+            <div class="xt-field__control">
               <xtein-select id="com-201-base-precio" [items]="basePriceOptions" displayExpr="text" valueExpr="value"
                 formControlName="BASE_PRECIO" [readOnly]="lockedField()" />
             </div>
@@ -125,39 +125,39 @@
         }
 
         @if (showProvider()) {
-          <div class="com-201__field">
-            <xtein-label class="com-201__label" for="com-201-nombre-proveedor">Nombre proveedor</xtein-label>
-            <div class="com-201__control com-201__control--shaded">
+          <div class="xt-field xt-field--inline com-201__field">
+            <xtein-label class="xt-field__label" for="com-201-nombre-proveedor">Nombre proveedor</xtein-label>
+            <div class="xt-field__control xt-field__control--muted">
               <xtein-input id="com-201-nombre-proveedor" name="NOMBRE_PROVEEDOR" formControlName="NOMBRE_PROVEEDOR" [readOnly]="true" />
             </div>
           </div>
         }
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-aplicacion">Aplicación precio</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-aplicacion">Aplicación precio</xtein-label>
+          <div class="xt-field__control">
             <xtein-select id="com-201-aplicacion" [items]="priceApplicationOptions" displayExpr="text" valueExpr="value"
               formControlName="APLICACION_PRECIO" [readOnly]="lockedField()" />
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-fecha-inicio">Fecha Inicio</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-fecha-inicio">Fecha Inicio</xtein-label>
+          <div class="xt-field__control">
             <xtein-date id="com-201-fecha-inicio" name="FECHA_INICIO" formControlName="FECHA_INICIO" [readOnly]="lockedField()" />
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-incluye-iva">Incluye Iva</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-incluye-iva">Incluye Iva</xtein-label>
+          <div class="xt-field__control">
             <xtein-switch id="com-201-incluye-iva" ariaLabel="Incluye Iva" formControlName="INCLUYE_IVA" [readOnly]="lockedField()" />
           </div>
         </div>
 
-        <div class="com-201__field">
-          <xtein-label class="com-201__label" for="com-201-aproximacion">Aproximación</xtein-label>
-          <div class="com-201__control">
+        <div class="xt-field xt-field--inline com-201__field">
+          <xtein-label class="xt-field__label" for="com-201-aproximacion">Aproximación</xtein-label>
+          <div class="xt-field__control">
             <xtein-select id="com-201-aproximacion" [items]="roundingOptions" displayExpr="text" valueExpr="value"
               formControlName="APROXIMACION" [readOnly]="!editableField()" />
           </div>
@@ -168,7 +168,7 @@
 
   <!-- Árbol de grupos | ítems de la lista -->
   <div class="com-201__panels">
-    <div class="com-201__card com-201__card--groups">
+    <div class="xt-card xt-card--fill">
       <com-201-groups
         [groups]="groups()"
         [selectedId]="selectedGroupId()"
@@ -177,7 +177,7 @@
       />
     </div>
 
-    <div class="com-201__card com-201__card--items">
+    <div class="xt-card xt-card--fill">
       <com-201-items
         [header]="header()"
         [editable]="!readOnly()"

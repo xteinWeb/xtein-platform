@@ -1,5 +1,5 @@
 <section
-  class="mad-001">
+  class="mad-001 xt-page">
 
   <div
     class="mad-001__layout"
@@ -8,7 +8,7 @@
     @if (showTree()) {
 
       <aside
-        class="mad-001__tree-panel"
+        class="mad-001__tree-panel xt-side-panel"
         [class.mad-001__tree-panel--collapsed]="treePanelCollapsed()">
 
         @if (!treePanelCollapsed()) {
@@ -32,7 +32,7 @@
         }
 
 
-        <xtein-button class="mad-001__tree-toggle" variant="link" [text]="treePanelCollapsed() ? '›' : '‹'" [ariaLabel]="treePanelCollapsed() ? 'Mostrar árbol' : 'Ocultar árbol'" [pressed]="!treePanelCollapsed()" (clicked)="toggleTreePanel()" />
+        <xtein-button class="mad-001__tree-toggle xt-collapse-toggle" variant="link" [text]="treePanelCollapsed() ? '›' : '‹'" [ariaLabel]="treePanelCollapsed() ? 'Mostrar árbol' : 'Ocultar árbol'" [pressed]="!treePanelCollapsed()" (clicked)="toggleTreePanel()" />
 
       </aside>
 
@@ -47,12 +47,13 @@
         [formGroup]="form">
 
         <!-- Tab Navigation -->
-        <div class="mad-001__tabs-nav" role="tablist">
+        <div class="mad-001__tabs-nav xt-tabs" role="tablist">
           <button
             type="button"
             role="tab"
-            class="mad-001__tab-btn"
+            class="mad-001__tab-btn xt-tabs__tab"
             [class.mad-001__tab-btn--active]="activeTab() === 'general'"
+            [class.xt-tabs__tab--active]="activeTab() === 'general'"
             [attr.aria-selected]="activeTab() === 'general'"
             (click)="activeTab.set('general')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -67,8 +68,9 @@
           <button
             type="button"
             role="tab"
-            class="mad-001__tab-btn"
+            class="mad-001__tab-btn xt-tabs__tab"
             [class.mad-001__tab-btn--active]="activeTab() === 'tecnica'"
+            [class.xt-tabs__tab--active]="activeTab() === 'tecnica'"
             [attr.aria-selected]="activeTab() === 'tecnica'"
             (click)="activeTab.set('tecnica')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -81,8 +83,9 @@
           <button
             type="button"
             role="tab"
-            class="mad-001__tab-btn"
+            class="mad-001__tab-btn xt-tabs__tab"
             [class.mad-001__tab-btn--active]="activeTab() === 'metricas'"
+            [class.xt-tabs__tab--active]="activeTab() === 'metricas'"
             [attr.aria-selected]="activeTab() === 'metricas'"
             (click)="activeTab.set('metricas')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -96,8 +99,9 @@
           <button
             type="button"
             role="tab"
-            class="mad-001__tab-btn"
+            class="mad-001__tab-btn xt-tabs__tab"
             [class.mad-001__tab-btn--active]="activeTab() === 'comentarios'"
+            [class.xt-tabs__tab--active]="activeTab() === 'comentarios'"
             [attr.aria-selected]="activeTab() === 'comentarios'"
             (click)="activeTab.set('comentarios')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -111,8 +115,8 @@
           <!-- Pestaña 1: General -->
           @if (activeTab() === 'general') {
             <div class="mad-001__tab-pane">
-              <fieldset class="mad-001__group xtein-fieldset">
-                <legend class="mad-001__group-title">
+              <fieldset class="mad-001__group xtein-fieldset xt-fieldset">
+                <legend class="mad-001__group-title xt-fieldset__legend">
                   <xtein-group-label label="Identificación y Clasificación"></xtein-group-label>
                 </legend>
 
@@ -198,28 +202,28 @@
               </fieldset>
 
               <!-- Comportamiento y Opciones -->
-              <fieldset class="mad-001__group xtein-fieldset">
-                <legend class="mad-001__group-title">
+              <fieldset class="mad-001__group xtein-fieldset xt-fieldset">
+                <legend class="mad-001__group-title xt-fieldset__legend">
                   <xtein-group-label label="Comportamiento y Opciones"></xtein-group-label>
                 </legend>
 
                 <div class="mad-001__grid mad-001__grid--switches">
-                  <div class="mad-001__switch-field">
+                  <div class="mad-001__switch-field xt-panel">
                     <xtein-switch
                       id="mad-001-defecto"
                       label="Abrir por Defecto"
                       formControlName="DEFECTO">
                     </xtein-switch>
-                    <span class="mad-001__field-hint">Abre automáticamente la aplicación al ingresar al sistema.</span>
+                    <span class="xt-hint">Abre automáticamente la aplicación al ingresar al sistema.</span>
                   </div>
 
-                  <div class="mad-001__switch-field">
+                  <div class="mad-001__switch-field xt-panel">
                     <xtein-switch
                       id="mad-001-genera"
                       label="Genera Proceso / Contabilidad"
                       formControlName="GENERA">
                     </xtein-switch>
-                    <span class="mad-001__field-hint">Indica si la aplicación genera contabilización o proceso masivo.</span>
+                    <span class="xt-hint">Indica si la aplicación genera contabilización o proceso masivo.</span>
                   </div>
                 </div>
               </fieldset>
@@ -229,8 +233,8 @@
           <!-- Pestaña 2: Técnica -->
           @if (activeTab() === 'tecnica') {
             <div class="mad-001__tab-pane">
-              <fieldset class="mad-001__group xtein-fieldset">
-                <legend class="mad-001__group-title">
+              <fieldset class="mad-001__group xtein-fieldset xt-fieldset">
+                <legend class="mad-001__group-title xt-fieldset__legend">
                   <xtein-group-label label="Ejecución y Enrutamiento"></xtein-group-label>
                 </legend>
 
@@ -301,8 +305,8 @@
           <!-- Pestaña 3: Métricas -->
           @if (activeTab() === 'metricas') {
             <div class="mad-001__tab-pane">
-              <fieldset class="mad-001__group xtein-fieldset">
-                <legend class="mad-001__group-title">
+              <fieldset class="mad-001__group xtein-fieldset xt-fieldset">
+                <legend class="mad-001__group-title xt-fieldset__legend">
                   <xtein-group-label label="Definición de Indicadores y Metas"></xtein-group-label>
                 </legend>
 
@@ -329,8 +333,8 @@
                     formControlName="UDM">
                   </xtein-select>
 
-                  <div class="mad-001__field">
-                    <xtein-label class="form-label" for="mad-001-min-target">
+                  <div class="mad-001__field xt-field">
+                    <xtein-label class="form-label xt-field__label" for="mad-001-min-target">
                       Meta Inferior
                     </xtein-label>
                     <xtein-number
@@ -343,8 +347,8 @@
                     </xtein-number>
                   </div>
 
-                  <div class="mad-001__field">
-                    <xtein-label class="form-label" for="mad-001-max-target">
+                  <div class="mad-001__field xt-field">
+                    <xtein-label class="form-label xt-field__label" for="mad-001-max-target">
                       Meta Superior
                     </xtein-label>
                     <xtein-number
@@ -363,8 +367,8 @@
           <!-- Pestaña 4: Comentarios -->
           @if (activeTab() === 'comentarios') {
             <div class="mad-001__tab-pane">
-              <fieldset class="mad-001__group xtein-fieldset">
-                <legend class="mad-001__group-title">
+              <fieldset class="mad-001__group xtein-fieldset xt-fieldset">
+                <legend class="mad-001__group-title xt-fieldset__legend">
                   <xtein-group-label label="Notas y Documentación"></xtein-group-label>
                 </legend>
 

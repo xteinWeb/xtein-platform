@@ -1,26 +1,26 @@
-<section class="ven-213">
+<section class="xt-page ven-213">
   <div class="ven-213__form" [formGroup]="form">
     <!-- ===== FILA SUPERIOR: Tarjeta Principal + Tarjeta Totales ===== -->
     <div class="ven-213__top-row">
       <!-- Tarjeta Principal -->
-      <div class="ven-213__card-main">
+      <div class="xt-card xt-card--outlined ven-213__card-main">
         <!-- Cabecera de Devolución -->
         <div class="ven-213__header-grid">
           <div class="ven-213__header-col">
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-documento">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-documento">
                 Devolución Número
               </xtein-label>
-              <div class="ven-213__control-inline">
+              <div class="xt-field__control">
                 <xtein-select id="ven-213-documento" [items]="documents()" displayExpr="DOCUMENTO" valueExpr="DOCUMENTO" [searchEnabled]="true" formControlName="DOCUMENTO" [readOnly]="readOnly() || sourceLocked() || itemPending()"  />
               </div>
             </div>
 
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-fecha">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-fecha">
                 Fecha
               </xtein-label>
-              <div class="ven-213__control-inline">
+              <div class="xt-field__control">
                 <xtein-date
                   id="ven-213-fecha"
                   name="FECHA"
@@ -33,13 +33,11 @@
               </div>
             </div>
 
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-fecha-registro">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-fecha-registro">
                 Fecha de Registro
               </xtein-label>
-              <div
-                class="ven-213__control-inline ven-213__control-inline--shaded"
-              >
+              <div class="xt-field__control xt-field__control--muted">
                 <xtein-date
                   id="ven-213-fecha-registro"
                   name="FECHA_REGISTRO"
@@ -52,20 +50,18 @@
           </div>
 
           <div class="ven-213__header-col">
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline"> Estado </xtein-label>
-              <div class="ven-213__control-inline">
-                <span class="ven-213__badge-status" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label"> Estado </xtein-label>
+              <div class="xt-field__control">
+                <span class="xt-badge xt-badge--lg xt-badge--caps xt-badge--success" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
               </div>
             </div>
 
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-usuario">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-usuario">
                 Usuario
               </xtein-label>
-              <div
-                class="ven-213__control-inline ven-213__control-inline--shaded"
-              >
+              <div class="xt-field__control xt-field__control--muted">
                 <xtein-input
                   id="ven-213-usuario"
                   name="USUARIO"
@@ -77,11 +73,11 @@
               </div>
             </div>
 
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-causa">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-causa">
                 Causa
               </xtein-label>
-              <div class="ven-213__control-inline">
+              <div class="xt-field__control">
                 <xtein-select id="ven-213-causa" [items]="causes()" displayExpr="LABEL" valueExpr="ID_CAUSA" [searchEnabled]="true" formControlName="ID_CAUSA" placeholder="Causa de la devolución" [readOnly]="readOnly() || itemPending()" />
               </div>
             </div>
@@ -89,17 +85,17 @@
         </div>
 
         <!-- Sección Cliente -->
-        <div class="ven-213__section-divider">
-          <xtein-group-label class="ven-213__section-title" label="Cliente"></xtein-group-label>
+        <div class="xt-section-divider ven-213__section-divider">
+          <xtein-group-label class="xt-section-heading" label="Cliente"></xtein-group-label>
         </div>
 
         <div class="ven-213__client-grid">
           <div class="ven-213__client-col">
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-id-cliente">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-id-cliente">
                 Documento del Cliente
               </xtein-label>
-              <div class="ven-213__control-inline">
+              <div class="xt-field__control">
                 <xtein-lookup
                   id="ven-213-id-cliente"
                   ariaLabel="Documento del Cliente"
@@ -116,24 +112,22 @@
               </div>
             </div>
 
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-direccion">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-direccion">
                 Dirección
               </xtein-label>
-              <div class="ven-213__control-inline">
+              <div class="xt-field__control">
                 <xtein-select id="ven-213-direccion" [items]="addresses()" displayExpr="DIRECCION" valueExpr="DIRECCION" [searchEnabled]="true" formControlName="DIRECCION" [readOnly]="readOnly() || sourceLocked() || itemPending()"  />
               </div>
             </div>
           </div>
 
           <div class="ven-213__client-col">
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-nombre-cliente">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-nombre-cliente">
                 Nombre de Cliente
               </xtein-label>
-              <div
-                class="ven-213__control-inline ven-213__control-inline--shaded"
-              >
+              <div class="xt-field__control xt-field__control--muted">
                 <xtein-input
                   id="ven-213-nombre-cliente"
                   name="NOMBRE_CLIENTE"
@@ -145,13 +139,11 @@
               </div>
             </div>
 
-            <div class="ven-213__field-inline">
-              <xtein-label class="ven-213__label-inline" for="ven-213-origen">
+            <div class="xt-field xt-field--inline ven-213__field">
+              <xtein-label class="xt-field__label" for="ven-213-origen">
                 Documento Origen
               </xtein-label>
-              <div
-                class="ven-213__control-inline ven-213__control-inline--shaded"
-              >
+              <div class="xt-field__control xt-field__control--muted">
                 <xtein-input
                   id="ven-213-origen"
                   name="ORIGEN_DOCUMENTO"
@@ -167,9 +159,9 @@
       </div>
 
       <!-- Tarjeta de Totales -->
-      <div class="ven-213__card-totals">
+      <div class="xt-totals ven-213__card-totals">
         <div class="ven-213__totals-header">
-          <button type="button" class="ven-213__totals-menu-btn" title="Configuración" aria-label="Configuración">
+          <button type="button" class="xt-totals__menu-button ven-213__totals-menu-btn" title="Configuración" aria-label="Configuración">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
               <line x1="4" y1="7" x2="20" y2="7"></line>
               <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -179,49 +171,49 @@
         </div>
 
         <div class="ven-213__totals-body">
-          <div class="ven-213__totals-row">
-            <span class="ven-213__totals-label">Subtotal</span>
-            <span class="ven-213__totals-value">
+          <div class="xt-totals__row ven-213__totals-row">
+            <span class="xt-totals__label">Subtotal</span>
+            <span class="xt-totals__value ven-213__totals-value">
               {{ money(form.get("SUB_TOTAL")?.value) }}
             </span>
           </div>
 
-          <div class="ven-213__totals-row">
-            <span class="ven-213__totals-label">Descuentos</span>
-            <span class="ven-213__totals-value">
+          <div class="xt-totals__row ven-213__totals-row">
+            <span class="xt-totals__label">Descuentos</span>
+            <span class="xt-totals__value ven-213__totals-value">
               {{ money(form.get("VALOR_DESCUENTO")?.value) }}
             </span>
           </div>
 
-          <div class="ven-213__totals-row">
-            <span class="ven-213__totals-label">Impuestos</span>
-            <span class="ven-213__totals-value">
+          <div class="xt-totals__row ven-213__totals-row">
+            <span class="xt-totals__label">Impuestos</span>
+            <span class="xt-totals__value ven-213__totals-value">
               {{ money(form.get("IMPUESTOS")?.value) }}
             </span>
           </div>
 
-          <div class="ven-213__totals-divider"></div>
+          <div class="xt-totals__divider ven-213__totals-divider"></div>
 
-          <div class="ven-213__totals-row ven-213__totals-row--grand">
-            <span class="ven-213__totals-label">TOTAL</span>
-            <span class="ven-213__totals-value">
+          <div class="xt-totals__row xt-totals__row--grand ven-213__totals-row ven-213__totals-row--grand">
+            <span class="xt-totals__label">TOTAL</span>
+            <span class="xt-totals__value ven-213__totals-value">
               {{ money(form.get("TOTAL")?.value) }}
             </span>
           </div>
 
           @if (readOnly() && currentRecord()) {
-            <div class="ven-213__totals-divider"></div>
+            <div class="xt-totals__divider ven-213__totals-divider"></div>
 
-            <div class="ven-213__totals-row">
-              <span class="ven-213__totals-label">Aplicado a cartera</span>
-              <span class="ven-213__totals-value">
+            <div class="xt-totals__row ven-213__totals-row">
+              <span class="xt-totals__label">Aplicado a cartera</span>
+              <span class="xt-totals__value ven-213__totals-value">
                 {{ money(form.get("VALOR_CARTERA")?.value) }}
               </span>
             </div>
 
-            <div class="ven-213__totals-row">
-              <span class="ven-213__totals-label">No aplicado a cartera</span>
-              <span class="ven-213__totals-value">
+            <div class="xt-totals__row ven-213__totals-row">
+              <span class="xt-totals__label">No aplicado a cartera</span>
+              <span class="xt-totals__value ven-213__totals-value">
                 {{ money(form.get("VALOR_NO_APLICADO")?.value) }}
               </span>
             </div>
@@ -232,37 +224,37 @@
 
     <!-- ===== FILA INFERIOR: Datos heredados + Items ===== -->
     <div class="ven-213__bottom-row">
-      <div class="ven-213__card-bottom">
+      <div class="xt-card xt-card--outlined ven-213__card-bottom">
         <!-- Datos comerciales heredados del documento origen (solo lectura) -->
         <div class="ven-213__params-row">
           <div class="ven-213__params-section">
-            <div class="ven-213__section-divider">
-              <xtein-group-label class="ven-213__section-title" label="Datos de la venta (documento origen)"></xtein-group-label>
+            <div class="xt-section-divider ven-213__section-divider">
+              <xtein-group-label class="xt-section-heading" label="Datos de la venta (documento origen)"></xtein-group-label>
             </div>
             <div class="ven-213__params-grid">
-              <div class="ven-213__field-inline">
-                <xtein-label class="ven-213__label-inline" for="ven-213-id-un">
+              <div class="xt-field xt-field--inline ven-213__field">
+                <xtein-label class="xt-field__label" for="ven-213-id-un">
                   Unidad de Negocio
                 </xtein-label>
-                <div class="ven-213__control-inline ven-213__control-inline--shaded">
+                <div class="xt-field__control xt-field__control--muted">
                   <xtein-input id="ven-213-id-un" name="ID_UN_ITEM" formControlName="ID_UN_ITEM" [readOnly]="true" />
                 </div>
               </div>
 
-              <div class="ven-213__field-inline">
-                <xtein-label class="ven-213__label-inline" for="ven-213-moneda">
+              <div class="xt-field xt-field--inline ven-213__field">
+                <xtein-label class="xt-field__label" for="ven-213-moneda">
                   Moneda
                 </xtein-label>
-                <div class="ven-213__control-inline ven-213__control-inline--shaded">
+                <div class="xt-field__control xt-field__control--muted">
                   <xtein-input id="ven-213-moneda" name="ID_MONEDA" formControlName="ID_MONEDA" [readOnly]="true" />
                 </div>
               </div>
 
-              <div class="ven-213__field-inline">
-                <xtein-label class="ven-213__label-inline" for="ven-213-id-adc">
+              <div class="xt-field xt-field--inline ven-213__field">
+                <xtein-label class="xt-field__label" for="ven-213-id-adc">
                   ADC / Vendedor
                 </xtein-label>
-                <div class="ven-213__control-inline ven-213__control-inline--shaded">
+                <div class="xt-field__control xt-field__control--muted">
                   <xtein-input id="ven-213-id-adc" name="ID_ADC" formControlName="ID_ADC" [readOnly]="true" />
                 </div>
               </div>
@@ -270,33 +262,33 @@
           </div>
 
           <div class="ven-213__params-section">
-            <div class="ven-213__section-divider">
-              <xtein-group-label class="ven-213__section-title" label="Liquidación (documento origen)"></xtein-group-label>
+            <div class="xt-section-divider ven-213__section-divider">
+              <xtein-group-label class="xt-section-heading" label="Liquidación (documento origen)"></xtein-group-label>
             </div>
             <div class="ven-213__params-grid">
-              <div class="ven-213__field-inline">
-                <xtein-label class="ven-213__label-inline" for="ven-213-tipo-venta">
+              <div class="xt-field xt-field--inline ven-213__field">
+                <xtein-label class="xt-field__label" for="ven-213-tipo-venta">
                   Tipo de Venta
                 </xtein-label>
-                <div class="ven-213__control-inline ven-213__control-inline--shaded">
+                <div class="xt-field__control xt-field__control--muted">
                   <xtein-input id="ven-213-tipo-venta" name="TIPO_VENTA" formControlName="TIPO_VENTA" [readOnly]="true" />
                 </div>
               </div>
 
-              <div class="ven-213__field-inline">
-                <xtein-label class="ven-213__label-inline" for="ven-213-condicion">
+              <div class="xt-field xt-field--inline ven-213__field">
+                <xtein-label class="xt-field__label" for="ven-213-condicion">
                   Condición / Lista
                 </xtein-label>
-                <div class="ven-213__control-inline ven-213__control-inline--shaded">
+                <div class="xt-field__control xt-field__control--muted">
                   <xtein-input id="ven-213-condicion" name="ID_CONDICION" formControlName="ID_CONDICION" [readOnly]="true" />
                 </div>
               </div>
 
-              <div class="ven-213__field-inline">
-                <xtein-label class="ven-213__label-inline" for="ven-213-plazo">
+              <div class="xt-field xt-field--inline ven-213__field">
+                <xtein-label class="xt-field__label" for="ven-213-plazo">
                   Plazo
                 </xtein-label>
-                <div class="ven-213__control-inline ven-213__control-inline--shaded">
+                <div class="xt-field__control xt-field__control--muted">
                   <xtein-number id="ven-213-plazo" formControlName="PLAZO" [readOnly]="true" />
                 </div>
               </div>
@@ -306,11 +298,11 @@
 
         <!-- Descripción hasta el final (ancho completo) -->
         <div class="ven-213__full-row">
-          <div class="ven-213__field-inline ven-213__field-inline--full">
-            <xtein-label class="ven-213__label-inline" for="ven-213-descripcion">
+          <div class="xt-field xt-field--inline ven-213__field">
+            <xtein-label class="xt-field__label" for="ven-213-descripcion">
               Descripción
             </xtein-label>
-            <div class="ven-213__control-inline">
+            <div class="xt-field__control">
               <xtein-input
                 id="ven-213-descripcion"
                 name="DESCRIPCION"
@@ -379,7 +371,7 @@
 <xtein-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
   <div class="ven-213__options">
     @if (settings().length === 0) {
-      <div style="padding: 1rem; text-align: center; color: var(--xt-color-text-secondary, #64748b);">
+      <div class="xt-text-secondary ven-213__options-empty">
         No hay opciones de configuración disponibles en el modo actual (cargar el documento origen solo al crear).
       </div>
     }

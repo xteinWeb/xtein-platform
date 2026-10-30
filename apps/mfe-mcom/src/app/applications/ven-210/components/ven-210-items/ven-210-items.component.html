@@ -1,7 +1,7 @@
 <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
-<div class="table-scroll">
-  <table class="items-grid-table">
+<div class="xt-table-frame">
+  <table class="items-grid-table xt-table xt-table--grid">
     <thead>
       <tr>
         <th class="col-select">
@@ -27,7 +27,7 @@
     <tbody>
       <!-- Fila editable en línea (cuando draft() está activo) -->
       @if (draft(); as row) {
-        <tr class="row-editing">
+        <tr class="xt-table__row--editing">
           <td class="col-select"></td>
           <td class="col-product">
             <div class="product-cell-box">
@@ -46,7 +46,7 @@
                   <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
                     <ng-template #productToolbarExtra>
                       @if (productsLoading) {
-                        <span class="product-loading-indicator" role="status">Cargando…</span>
+                        <span class="xt-hint xt-hint--italic" role="status">Cargando…</span>
                       }
                     </ng-template>
 
@@ -72,12 +72,12 @@
 
               <button
                 type="button"
-                class="btn-cell-cancel"
+                class="xt-icon-button xt-icon-button--sm xt-icon-button--danger"
                 title="Cancelar ítem"
                 [disabled]="working() || busy"
                 (click)="cancel()"
               >
-                <svg class="cell-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="xt-icon-button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 7v6h6"></path>
                   <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
                 </svg>
@@ -87,7 +87,7 @@
           <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
           <td class="col-qty">
             <xtein-number
-              class="cell-editor"
+              class="cell-editor xt-cell-editor"
               ariaLabel="Cantidad"
               [(ngModel)]="row.CANTIDAD"
               (ngModelChange)="onDraftQtyChange()"
@@ -99,7 +99,7 @@
           <td class="col-um">
             @if (row.PRESENTACION?.length) {
               <xtein-select
-                class="cell-editor"
+                class="cell-editor xt-cell-editor"
                 [items]="presentationOptions()"
                 displayExpr="UDM_VENTA"
                 valueExpr="UDM_VENTA"
@@ -113,7 +113,7 @@
           </td>
           <td class="col-price">
             <xtein-number
-              class="cell-editor"
+              class="cell-editor xt-cell-editor"
               ariaLabel="Valor unitario"
               [(ngModel)]="row.VALOR_UNITARIO"
               (ngModelChange)="onDraftQtyChange()"
@@ -128,14 +128,14 @@
           </td>
           <td class="col-date">
             <xtein-date
-              class="cell-editor"
+              class="cell-editor xt-cell-editor"
               [min]="minimumDeliveryDate"
               [(ngModel)]="row.FECHA_ENTREGA"
               [disabled]="working() || busy || orderLocked"
             />
           </td>
           <td class="col-status">
-            <span class="cell-badge">{{ row.ESTADO || 'ACTIVA' }}</span>
+            <span class="xt-badge xt-badge--success">{{ row.ESTADO || 'ACTIVA' }}</span>
           </td>
           <td class="col-bodegas"></td>
         </tr>
@@ -144,7 +144,7 @@
       <!-- Filas de datos existentes -->
       @for (row of items; track row.ITEM) {
         <tr
-          [class.row-selected]="selected().includes(row.ITEM)"
+          [class.xt-table__row--selected]="selected().includes(row.ITEM)"
           (dblclick)="!readOnly && !draft() && begin(row)"
         >
           <td class="col-select">
@@ -164,13 +164,14 @@
           <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
           <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
           <td class="col-status">
-            <span class="cell-badge">{{ row.ESTADO }}</span>
+            <span class="xt-badge xt-badge--success">{{ row.ESTADO }}</span>
           </td>
           <td class="col-bodegas">
             <button
               type="button"
-              class="btn-cell-bodegas"
-              [class.btn-cell-bodegas--pending]="row.SIN_REPARTO"
+              class="xt-button xt-button--sm"
+              [class.xt-button--secondary]="!row.SIN_REPARTO"
+              [class.xt-button--warning]="row.SIN_REPARTO"
               [title]="row.SIN_REPARTO ? 'Sin reparto por bodega' : 'Ver reparto por bodega'"
               [disabled]="busy || !!draft()"
               (click)="distribute.emit(row.ITEM)"
@@ -178,14 +179,14 @@
               Bodegas
             </button>
             @if (row.SIN_REPARTO) {
-              <span class="cell-warning" role="status">Sin reparto</span>
+              <span class="cell-warning xt-badge xt-badge--warning" role="status">Sin reparto</span>
             }
           </td>
         </tr>
       } @empty {
         @if (!draft()) {
           <tr>
-            <td colspan="11" class="empty-message">No hay productos asociados.</td>
+            <td colspan="11" class="xt-empty">No hay productos asociados.</td>
           </tr>
         }
       }
@@ -193,5 +194,5 @@
   </table>
 </div>
 @if (savedRecord && items.length) {
-  <p class="base-unit-note" role="note">Cantidad en unidad base.</p>
+  <p class="base-unit-note xt-hint" role="note">Cantidad en unidad base.</p>
 }

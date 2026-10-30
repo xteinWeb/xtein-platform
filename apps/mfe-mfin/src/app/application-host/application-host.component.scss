@@ -13,15 +13,3 @@
   min-height: 0;
   overflow: auto;
 }
-
-.xtein-mfin-application-host__state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-height: 100%;
-  padding: clamp(1rem, 3vw, 2rem);
-  color: var(--xt-control-text, #244d73);
-  text-align: center;
-  overflow-wrap: anywhere;
-}

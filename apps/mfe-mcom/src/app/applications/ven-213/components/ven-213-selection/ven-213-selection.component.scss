@@ -1,6 +1,7 @@
+/* Layout only: the error text comes from libs/ui (xtein-blocks.scss). */
 :host { display: contents; }
 .selection { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: .65rem; }
 .selection__grid { flex: 1; min-height: 0; overflow: hidden; }
 xtein-checkbox, footer { flex: 0 0 auto; }
 footer { display: flex; flex-wrap: wrap; gap: .5rem; }
-[role=alert] { color: #b42318; margin: 0; }
+[role=alert] { margin: 0; }

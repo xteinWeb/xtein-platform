@@ -1,0 +1,197 @@
+/*======================================================================
+= XTEIN - COLOR TOKENS
+=
+= Every theme defines the same custom properties; the styles use them
+= instead of fixed colors. The theme is selected with the data-xt-theme
+= attribute on <html>; without it the light blue theme applies.
+=
+= *-rgb tokens hold "r, g, b" so styles can add transparency:
+= rgba(var(--xt-primary-rgb), .1).
+======================================================================*/
+
+
+/* Light blue: the original XTEIN palette. */
+:root {
+  color-scheme: light;
+
+  --xt-primary: #0f4c81;
+  --xt-primary-alt: #2b6cb0;
+  --xt-primary-rgb: 10, 57, 96;
+  --xt-primary-base-rgb: 15, 76, 129;
+  --xt-accent-rgb: 18, 94, 220;
+  --xt-accent-2-rgb: 26, 115, 232;
+
+  --xt-heading: #244d73;
+  --xt-heading-soft: #33587b;
+  --xt-heading-strong: #174b75;
+
+  --xt-text: rgb(51, 51, 51);
+  --xt-text-2: #4c4c4c;
+  --xt-text-strong: #1e293b;
+  --xt-text-muted: #64748b;
+  --xt-text-subtle: #475569;
+  --xt-text-faint: #94a3b8;
+
+  --xt-app-bg: #f4f7fd;
+  --xt-app-bg-2: #f6f8fc;
+  --xt-surface: #ffffff;
+  --xt-surface-2: #f8fafc;
+  --xt-surface-3: #f1f5f9;
+  --xt-surface-4: #eef2f6;
+  --xt-surface-accent: #eef5fc;
+
+  --xt-border: #e2e8f0;
+  --xt-border-2: #dbe4ef;
+  --xt-border-3: #e6e9ef;
+  --xt-border-soft: #dfe6ef;
+  --xt-border-strong: #cbd5e1;
+  --xt-focus: #86b7fe;
+
+  /* Status colors: text/icon, soft background, border, strong (hover). */
+  --xt-success: #16a34a;
+  --xt-success-soft: #f0fdf4;
+  --xt-success-border: #bbf7d0;
+  --xt-success-strong: #15803d;
+  --xt-danger: #dc2626;
+  --xt-danger-soft: #fef2f2;
+  --xt-danger-border: #fecaca;
+  --xt-danger-strong: #b91c1c;
+  --xt-info: #2563eb;
+  --xt-info-soft: #eff6ff;
+  --xt-info-border: #93c5fd;
+  --xt-info-strong: #1d4ed8;
+  --xt-warning: #d97706;
+  --xt-warning-soft: #fffbeb;
+  --xt-warning-border: #fde68a;
+  --xt-neutral: #64748b;
+  --xt-on-status: #ffffff;
+}
+
+
+/* Dark: dark surfaces, light text, a lighter blue for contrast. */
+:root[data-xt-theme="oscuro"] {
+  color-scheme: dark;
+
+  --xt-primary: #5b9bd5;
+  --xt-primary-alt: #6aa6dc;
+  --xt-primary-rgb: 147, 190, 235;
+  --xt-primary-base-rgb: 91, 155, 213;
+  --xt-accent-rgb: 96, 165, 250;
+  --xt-accent-2-rgb: 96, 165, 250;
+
+  --xt-heading: #9cc3ea;
+  --xt-heading-soft: #a9c4df;
+  --xt-heading-strong: #b9d4ee;
+
+  --xt-text: #e4e7ec;
+  --xt-text-2: #d0d5dd;
+  --xt-text-strong: #f2f4f7;
+  --xt-text-muted: #98a2b3;
+  --xt-text-subtle: #a3adbd;
+  --xt-text-faint: #6b7686;
+
+  --xt-app-bg: #151922;
+  --xt-app-bg-2: #181d27;
+  --xt-surface: #1d222b;
+  --xt-surface-2: #222833;
+  --xt-surface-3: #252c38;
+  --xt-surface-4: #283040;
+  --xt-surface-accent: #233247;
+
+  --xt-border: #343c4a;
+  --xt-border-2: #3a4352;
+  --xt-border-3: #333b48;
+  --xt-border-soft: #2f3744;
+  --xt-border-strong: #4a5466;
+  --xt-focus: #5b9bd5;
+
+  --xt-success: #4ade80;
+  --xt-success-soft: rgba(74, 222, 128, .12);
+  --xt-success-border: rgba(74, 222, 128, .35);
+  --xt-success-strong: #22c55e;
+  --xt-danger: #f87171;
+  --xt-danger-soft: rgba(248, 113, 113, .12);
+  --xt-danger-border: rgba(248, 113, 113, .35);
+  --xt-danger-strong: #ef4444;
+  --xt-info: #60a5fa;
+  --xt-info-soft: rgba(96, 165, 250, .12);
+  --xt-info-border: rgba(96, 165, 250, .4);
+  --xt-info-strong: #3b82f6;
+  --xt-warning: #fbbf24;
+  --xt-warning-soft: rgba(251, 191, 36, .12);
+  --xt-warning-border: rgba(251, 191, 36, .35);
+  --xt-neutral: #94a3b8;
+  --xt-on-status: #0f172a;
+}
+
+
+/* Light green. */
+:root[data-xt-theme="claro-verde"] {
+  --xt-primary: #0f766e;
+  --xt-primary-alt: #0d9488;
+  --xt-primary-rgb: 13, 94, 84;
+  --xt-primary-base-rgb: 15, 118, 110;
+  --xt-accent-rgb: 20, 150, 130;
+  --xt-accent-2-rgb: 13, 148, 136;
+
+  --xt-heading: #1f5f58;
+  --xt-heading-soft: #2f6b64;
+  --xt-heading-strong: #145a52;
+
+  --xt-app-bg: #e6f2ee;
+  --xt-app-bg-2: #ecf5f2;
+  --xt-surface-2: #f1f8f6;
+  --xt-surface-3: #e8f3ef;
+  --xt-surface-4: #dcece7;
+  --xt-surface-accent: #e0f2ec;
+
+  --xt-border: #cfe3dc;
+  --xt-border-2: #c6ddd6;
+  --xt-border-3: #d5e7e1;
+  --xt-border-soft: #d9eae4;
+  --xt-border-strong: #a9cbc0;
+  --xt-focus: #5eead4;
+}
+
+
+/* Light purple. */
+:root[data-xt-theme="claro-morado"] {
+  --xt-primary: #5b2a86;
+  --xt-primary-alt: #7c3aed;
+  --xt-primary-rgb: 74, 35, 110;
+  --xt-primary-base-rgb: 91, 42, 134;
+  --xt-accent-rgb: 124, 58, 237;
+  --xt-accent-2-rgb: 139, 92, 246;
+
+  --xt-heading: #4b2a6e;
+  --xt-heading-soft: #5d3d80;
+  --xt-heading-strong: #3f1f63;
+
+  --xt-app-bg: #eee8f7;
+  --xt-app-bg-2: #f2edf9;
+  --xt-surface-2: #f6f2fb;
+  --xt-surface-3: #efe8f7;
+  --xt-surface-4: #e5dbf2;
+  --xt-surface-accent: #ebe2f8;
+
+  --xt-border: #ddd2ec;
+  --xt-border-2: #d6c9e8;
+  --xt-border-3: #e1d8ee;
+  --xt-border-soft: #e3dbf0;
+  --xt-border-strong: #c3b1dd;
+  --xt-focus: #c4b5fd;
+}
+
+
+html,
+body {
+  background-color: var(--xt-app-bg);
+  color: var(--xt-text);
+}
+
+
+/* The company logo is dark artwork; on the dark theme it is shown light. */
+:root[data-xt-theme="oscuro"] .xt-header__company-logo {
+  filter: brightness(0) invert(1);
+  opacity: .9;
+}

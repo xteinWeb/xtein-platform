@@ -1,7 +1,7 @@
 <xtein-popup [visible]="visible" (visibleChange)="visibleChange.emit($event)" [title]="config?.titulo || 'Seleccionar'"
   [width]="size('width')" [height]="size('height')" [showCloseButton]="!busy && !saving" [hideOnOutsideClick]="false">
   <div class="selection">
-    @if (error) { <p role="alert">{{error}}</p> }
+    @if (error) { <p class="xt-error-text" role="alert">{{error}}</p> }
     <xtein-checkbox label="Solo seleccionados" [checked]="onlySelected" [disabled]="busy || saving" (checkedChange)="filterSelected($event)" />
     <div class="selection__grid">
       <xtein-data-grid [dataSource]="rows" keyExpr="ITEM" [columns]="columns" height="100%"

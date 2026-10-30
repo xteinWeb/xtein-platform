@@ -1,6 +1,7 @@
 <div class="xtein-adm015-cfg">
   <dx-data-grid
     #gridSettings
+    class="xt-datagrid-soft"
     keyExpr="ITEM"
     [dataSource]="dataSource"
     [showBorders]="false"
@@ -43,8 +44,8 @@
 
     <div *dxTemplate="let grupoObj of 'nameAplicaciones'">
       <div class="xtein-adm015-cfg__group-cell">
-        <span class="xtein-adm015-cfg__group-label">APLICACIÓN:</span>
-        <span class="xtein-adm015-cfg__group-text">{{ getGroupTitle(grupoObj) }}</span>
+        <span class="xt-text-strong">APLICACIÓN:</span>
+        <span>{{ getGroupTitle(grupoObj) }}</span>
       </div>
     </div>
 

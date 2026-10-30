@@ -19,6 +19,13 @@ import {
   initFederation
 } from '@angular-architects/native-federation';
 
+import {
+  applyStoredTheme
+} from './app/theme/xtein-themes';
+
+// Before anything renders, so the page does not flash in the default theme.
+applyStoredTheme();
+
 
 /**
  * Initializes the XTEIN Native Federation runtime before

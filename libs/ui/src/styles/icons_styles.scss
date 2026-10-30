@@ -29,7 +29,7 @@
 .icon-acreedores .path1 {
   &:before {
     content: $icon-acreedores-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -37,7 +37,7 @@
   &:before {
     content: $icon-acreedores-path2;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -45,7 +45,7 @@
   &:before {
     content: $icon-acreedores-path3;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -53,13 +53,13 @@
   &:before {
     content: $icon-acreedores-path4;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-acreedores-ol .path1 {
   &:before {
     content: $icon-acreedores-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.2;
   }
 }
@@ -67,7 +67,7 @@
   &:before {
     content: $icon-acreedores-ol-path2;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.2;
   }
 }
@@ -75,7 +75,7 @@
   &:before {
     content: $icon-acreedores-ol-path3;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -83,13 +83,13 @@
   &:before {
     content: $icon-acreedores-ol-path4;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-atributos .path1 {
   &:before {
     content: $icon-atributos-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -97,20 +97,20 @@
   &:before {
     content: $icon-atributos-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-atributos .path3 {
   &:before {
     content: $icon-atributos-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-bases-del-costo .path1 {
   &:before {
     content: $icon-bases-del-costo-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -118,13 +118,13 @@
   &:before {
     content: $icon-bases-del-costo-path2;  
     margin-left: -1.2998046875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-configuracion-de-la-gestion .path1 {
   &:before {
     content: $icon-configuracion-de-la-gestion-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -132,7 +132,7 @@
   &:before {
     content: $icon-configuracion-de-la-gestion-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -140,27 +140,27 @@
   &:before {
     content: $icon-configuracion-de-la-gestion-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-configuracion-de-la-gestion .path4 {
   &:before {
     content: $icon-configuracion-de-la-gestion-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-empleados-secciones .path1 {
   &:before {
     content: $icon-empleados-secciones-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-empleados-secciones .path2 {
   &:before {
     content: $icon-empleados-secciones-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -168,7 +168,7 @@
   &:before {
     content: $icon-empleados-secciones-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -176,35 +176,35 @@
   &:before {
     content: $icon-empleados-secciones-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-entrada-ol .path1 {
   &:before {
     content: $icon-entrada-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-ol .path2 {
   &:before {
     content: $icon-entrada-ol-path2;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-ol .path3 {
   &:before {
     content: $icon-entrada-ol-path3;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-ol .path4 {
   &:before {
     content: $icon-entrada-ol-path4;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -212,7 +212,7 @@
   &:before {
     content: $icon-entrada-ol-path5;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -220,7 +220,7 @@
   &:before {
     content: $icon-entrada-ol-path6;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -228,14 +228,14 @@
   &:before {
     content: $icon-entrada-ol-path7;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-entrada-ol-alt .path1 {
   &:before {
     content: $icon-entrada-ol-alt-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -243,27 +243,27 @@
   &:before {
     content: $icon-entrada-ol-alt-path2;  
     margin-left: -1.3349609375em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-ol-alt .path3 {
   &:before {
     content: $icon-entrada-ol-alt-path3;  
     margin-left: -1.3349609375em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-ol-alt .path4 {
   &:before {
     content: $icon-entrada-ol-alt-path4;  
     margin-left: -1.3349609375em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-sl .path1 {
   &:before {
     content: $icon-entrada-sl-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -271,41 +271,41 @@
   &:before {
     content: $icon-entrada-sl-path2;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-sl .path3 {
   &:before {
     content: $icon-entrada-sl-path3;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-entrada-sl .path4 {
   &:before {
     content: $icon-entrada-sl-path4;  
     margin-left: -1.1953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-factura .path1 {
   &:before {
     content: $icon-factura-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-factura .path2 {
   &:before {
     content: $icon-factura-path2;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-factura-ol .path1 {
   &:before {
     content: $icon-factura-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -313,28 +313,28 @@
   &:before {
     content: $icon-factura-ol-path2;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-factura-ol .path3 {
   &:before {
     content: $icon-factura-ol-path3;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-factura-ol .path4 {
   &:before {
     content: $icon-factura-ol-path4;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-factura-ol .path5 {
   &:before {
     content: $icon-factura-ol-path5;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -342,7 +342,7 @@
   &:before {
     content: $icon-factura-ol-path6;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -350,27 +350,27 @@
   &:before {
     content: $icon-factura-ol-path7;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-factura-ol .path8 {
   &:before {
     content: $icon-factura-ol-path8;  
     margin-left: -1.03515625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-gespro .path1 {
   &:before {
     content: $icon-gespro-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-gespro .path2 {
   &:before {
     content: $icon-gespro-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -378,20 +378,20 @@
   &:before {
     content: $icon-gespro-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path1 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path2 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -399,55 +399,55 @@
   &:before {
     content: $icon-grafico-cr-alt-ol-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path4 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path5 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path5;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path6 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path6;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path7 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path7;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path8 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path8;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-ol .path9 {
   &:before {
     content: $icon-grafico-cr-alt-ol-path9;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-sl .path1 {
   &:before {
     content: $icon-grafico-cr-alt-sl-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -455,35 +455,35 @@
   &:before {
     content: $icon-grafico-cr-alt-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-alt-sl .path3 {
   &:before {
     content: $icon-grafico-cr-alt-sl-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-grafico-cr-ol .path1 {
   &:before {
     content: $icon-grafico-cr-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-grafico-cr-ol .path2 {
   &:before {
     content: $icon-grafico-cr-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-informes .path1 {
   &:before {
     content: $icon-informes-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -491,20 +491,20 @@
   &:before {
     content: $icon-informes-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-innovacionydesarrollo .path1 {
   &:before {
     content: $icon-innovacionydesarrollo-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-innovacionydesarrollo .path2 {
   &:before {
     content: $icon-innovacionydesarrollo-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -512,14 +512,14 @@
   &:before {
     content: $icon-innovacionydesarrollo-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-layout-planta .path1 {
   &:before {
     content: $icon-layout-planta-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -527,14 +527,14 @@
   &:before {
     content: $icon-layout-planta-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-layout-planta .path3 {
   &:before {
     content: $icon-layout-planta-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -542,14 +542,14 @@
   &:before {
     content: $icon-layout-planta-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-mano-de-obra .path1 {
   &:before {
     content: $icon-mano-de-obra-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -557,7 +557,7 @@
   &:before {
     content: $icon-mano-de-obra-path2;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -565,7 +565,7 @@
   &:before {
     content: $icon-mano-de-obra-path3;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -573,7 +573,7 @@
   &:before {
     content: $icon-mano-de-obra-path4;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -581,7 +581,7 @@
   &:before {
     content: $icon-mano-de-obra-path5;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -589,7 +589,7 @@
   &:before {
     content: $icon-mano-de-obra-path6;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -597,7 +597,7 @@
   &:before {
     content: $icon-mano-de-obra-path7;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -605,7 +605,7 @@
   &:before {
     content: $icon-mano-de-obra-path8;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -613,7 +613,7 @@
   &:before {
     content: $icon-mano-de-obra-path9;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -621,7 +621,7 @@
   &:before {
     content: $icon-mano-de-obra-path10;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -629,13 +629,13 @@
   &:before {
     content: $icon-mano-de-obra-path11;  
     margin-left: -1.26953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-matriz .path1 {
   &:before {
     content: $icon-matriz-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -643,20 +643,20 @@
   &:before {
     content: $icon-matriz-path2;  
     margin-left: -0.875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-matriz .path3 {
   &:before {
     content: $icon-matriz-path3;  
     margin-left: -0.875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-matriz-sl .path1 {
   &:before {
     content: $icon-matriz-sl-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -664,20 +664,20 @@
   &:before {
     content: $icon-matriz-sl-path2;  
     margin-left: -0.875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-matriz-sl .path3 {
   &:before {
     content: $icon-matriz-sl-path3;  
     margin-left: -0.875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-minimos-y-maximos .path1 {
   &:before {
     content: $icon-minimos-y-maximos-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -685,13 +685,13 @@
   &:before {
     content: $icon-minimos-y-maximos-path2;  
     margin-left: -1.4248046875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-operaciones-alt-ol .path1 {
   &:before {
     content: $icon-operaciones-alt-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -699,7 +699,7 @@
   &:before {
     content: $icon-operaciones-alt-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -707,7 +707,7 @@
   &:before {
     content: $icon-operaciones-alt-ol-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -715,7 +715,7 @@
   &:before {
     content: $icon-operaciones-alt-ol-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -723,27 +723,27 @@
   &:before {
     content: $icon-operaciones-alt-ol-path5;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-operaciones-alt-sl .path1 {
   &:before {
     content: $icon-operaciones-alt-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-operaciones-alt-sl .path2 {
   &:before {
     content: $icon-operaciones-alt-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-operaciones-ol .path1 {
   &:before {
     content: $icon-operaciones-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -751,7 +751,7 @@
   &:before {
     content: $icon-operaciones-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -759,7 +759,7 @@
   &:before {
     content: $icon-operaciones-ol-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -767,7 +767,7 @@
   &:before {
     content: $icon-operaciones-ol-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -775,13 +775,13 @@
   &:before {
     content: $icon-operaciones-ol-path5;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-operaciones-sl .path1 {
   &:before {
     content: $icon-operaciones-sl-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -789,62 +789,62 @@
   &:before {
     content: $icon-operaciones-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pedido-sl .path1 {
   &:before {
     content: $icon-pedido-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pedido-sl .path2 {
   &:before {
     content: $icon-pedido-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-pedido-sl-r .path1 {
   &:before {
     content: $icon-pedido-sl-r-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pedido-sl-r .path2 {
   &:before {
     content: $icon-pedido-sl-r-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pedido-sl-r .path3 {
   &:before {
     content: $icon-pedido-sl-r-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pedido-sl-r .path4 {
   &:before {
     content: $icon-pedido-sl-r-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pedido-sl-r .path5 {
   &:before {
     content: $icon-pedido-sl-r-path5;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-pintura .path1 {
   &:before {
     content: $icon-pintura-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -852,55 +852,55 @@
   &:before {
     content: $icon-pintura-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pintura .path3 {
   &:before {
     content: $icon-pintura-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pintura .path4 {
   &:before {
     content: $icon-pintura-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pintura .path5 {
   &:before {
     content: $icon-pintura-path5;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pintura .path6 {
   &:before {
     content: $icon-pintura-path6;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-pintura .path7 {
   &:before {
     content: $icon-pintura-path7;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-productos .path1 {
   &:before {
     content: $icon-productos-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-productos .path2 {
   &:before {
     content: $icon-productos-path2;  
     margin-left: -1.046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -908,7 +908,7 @@
   &:before {
     content: $icon-productos-path3;  
     margin-left: -1.046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -916,7 +916,7 @@
   &:before {
     content: $icon-productos-path4;  
     margin-left: -1.046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -924,7 +924,7 @@
   &:before {
     content: $icon-productos-path5;  
     margin-left: -1.046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -932,28 +932,28 @@
   &:before {
     content: $icon-productos-path6;  
     margin-left: -1.046875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-programacion-ol .path1 {
   &:before {
     content: $icon-programacion-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-programacion-ol .path2 {
   &:before {
     content: $icon-programacion-ol-path2;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-programacion-ol .path3 {
   &:before {
     content: $icon-programacion-ol-path3;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -961,7 +961,7 @@
   &:before {
     content: $icon-programacion-ol-path4;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -969,21 +969,21 @@
   &:before {
     content: $icon-programacion-ol-path5;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-programacion-sl .path1 {
   &:before {
     content: $icon-programacion-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-programacion-sl .path2 {
   &:before {
     content: $icon-programacion-sl-path2;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -991,7 +991,7 @@
   &:before {
     content: $icon-programacion-sl-path3;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -999,7 +999,7 @@
   &:before {
     content: $icon-programacion-sl-path4;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1007,34 +1007,34 @@
   &:before {
     content: $icon-programacion-sl-path5;  
     margin-left: -1.0400390625em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl .path1 {
   &:before {
     content: $icon-roles-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl .path2 {
   &:before {
     content: $icon-roles-sl-path2;  
     margin-left: -1.2001953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl .path3 {
   &:before {
     content: $icon-roles-sl-path3;  
     margin-left: -1.2001953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl .path4 {
   &:before {
     content: $icon-roles-sl-path4;  
     margin-left: -1.2001953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1042,35 +1042,35 @@
   &:before {
     content: $icon-roles-sl-path5;  
     margin-left: -1.2001953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-roles-sl-alt .path1 {
   &:before {
     content: $icon-roles-sl-alt-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl-alt .path2 {
   &:before {
     content: $icon-roles-sl-alt-path2;  
     margin-left: -1.1796875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl-alt .path3 {
   &:before {
     content: $icon-roles-sl-alt-path3;  
     margin-left: -1.1796875em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-roles-sl-alt .path4 {
   &:before {
     content: $icon-roles-sl-alt-path4;  
     margin-left: -1.1796875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1078,7 +1078,7 @@
   &:before {
     content: $icon-roles-sl-alt-path5;  
     margin-left: -1.1796875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1086,91 +1086,91 @@
   &:before {
     content: $icon-roles-sl-alt-path6;  
     margin-left: -1.1796875em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-ruta-de-producto-ol .path1 {
   &:before {
     content: $icon-ruta-de-producto-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-ruta-de-producto-ol .path2 {
   &:before {
     content: $icon-ruta-de-producto-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-ruta-de-producto-ol .path3 {
   &:before {
     content: $icon-ruta-de-producto-ol-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-ruta-de-producto-ol .path4 {
   &:before {
     content: $icon-ruta-de-producto-ol-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-rutas-de-partes-alt-ol .path1 {
   &:before {
     content: $icon-rutas-de-partes-alt-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-rutas-de-partes-alt-ol .path2 {
   &:before {
     content: $icon-rutas-de-partes-alt-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-rutas-de-partes-alt-ol .path3 {
   &:before {
     content: $icon-rutas-de-partes-alt-ol-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-rutas-de-partes-ol .path1 {
   &:before {
     content: $icon-rutas-de-partes-ol-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-rutas-de-partes-ol .path2 {
   &:before {
     content: $icon-rutas-de-partes-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-rutas-de-partes-ol .path3 {
   &:before {
     content: $icon-rutas-de-partes-ol-path3;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-rutas-de-partes-ol .path4 {
   &:before {
     content: $icon-rutas-de-partes-ol-path4;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-secciones-ol .path1 {
   &:before {
     content: $icon-secciones-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1178,27 +1178,27 @@
   &:before {
     content: $icon-secciones-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-secciones-sl .path1 {
   &:before {
     content: $icon-secciones-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-secciones-sl .path2 {
   &:before {
     content: $icon-secciones-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-tarea-ol .path1 {
   &:before {
     content: $icon-tarea-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1206,27 +1206,27 @@
   &:before {
     content: $icon-tarea-ol-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-tarea-sl .path1 {
   &:before {
     content: $icon-tarea-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-tarea-sl .path2 {
   &:before {
     content: $icon-tarea-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-turno-sl .path1 {
   &:before {
     content: $icon-turno-sl-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1234,13 +1234,13 @@
   &:before {
     content: $icon-turno-sl-path2;  
     margin-left: -1.1396484375em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuario .path1 {
   &:before {
     content: $icon-usuario-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1248,41 +1248,41 @@
   &:before {
     content: $icon-usuario-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuario-rd .path1 {
   &:before {
     content: $icon-usuario-rd-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuario-rd .path2 {
   &:before {
     content: $icon-usuario-rd-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-usuario-sl .path1 {
   &:before {
     content: $icon-usuario-sl-path1;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuario-sl .path2 {
   &:before {
     content: $icon-usuario-sl-path2;  
     margin-left: -1em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
 .icon-usuarios-ol .path1 {
   &:before {
     content: $icon-usuarios-ol-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1290,7 +1290,7 @@
   &:before {
     content: $icon-usuarios-ol-path2;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1298,7 +1298,7 @@
   &:before {
     content: $icon-usuarios-ol-path3;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1306,7 +1306,7 @@
   &:before {
     content: $icon-usuarios-ol-path4;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1314,20 +1314,20 @@
   &:before {
     content: $icon-usuarios-ol-path5;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuarios-ol .path6 {
   &:before {
     content: $icon-usuarios-ol-path6;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuarios-sl .path1 {
   &:before {
     content: $icon-usuarios-sl-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1335,7 +1335,7 @@
   &:before {
     content: $icon-usuarios-sl-path2;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1343,7 +1343,7 @@
   &:before {
     content: $icon-usuarios-sl-path3;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1351,7 +1351,7 @@
   &:before {
     content: $icon-usuarios-sl-path4;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1359,20 +1359,20 @@
   &:before {
     content: $icon-usuarios-sl-path5;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuarios-sl .path6 {
   &:before {
     content: $icon-usuarios-sl-path6;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuarios-sl-al .path1 {
   &:before {
     content: $icon-usuarios-sl-al-path1;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1380,7 +1380,7 @@
   &:before {
     content: $icon-usuarios-sl-al-path2;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1388,7 +1388,7 @@
   &:before {
     content: $icon-usuarios-sl-al-path3;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1396,7 +1396,7 @@
   &:before {
     content: $icon-usuarios-sl-al-path4;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);  
+    color: var(--xt-text);  
     opacity: 0.25;
   }
 }
@@ -1404,14 +1404,14 @@
   &:before {
     content: $icon-usuarios-sl-al-path5;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 .icon-usuarios-sl-al .path6 {
   &:before {
     content: $icon-usuarios-sl-al-path6;  
     margin-left: -1.0751953125em;  
-    color: rgb(51, 51, 51);
+    color: var(--xt-text);
   }
 }
 

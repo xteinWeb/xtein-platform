@@ -1,7 +1,7 @@
 <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
-<div class="table-scroll">
-  <table class="items-grid-table">
+<div class="xt-table-frame">
+  <table class="xt-table xt-table--grid items-grid-table">
     <thead>
       <tr>
         <th class="col-select">
@@ -30,7 +30,7 @@
       @for (row of items; track row.ITEM) {
         @if (draft()?.ITEM === row.ITEM) {
           @if (draft(); as edit) {
-            <tr class="row-editing">
+            <tr class="xt-table__row--editing">
               <td class="col-select"></td>
               <td class="col-product">{{ edit.PRODUCTO }}</td>
               <td class="col-name">{{ edit.NOMBRE_PRODUCTO }}</td>
@@ -39,7 +39,7 @@
               <td class="col-qty text-end">{{ quantity(edit.CANTIDAD_MAX) }}</td>
               <td class="col-qty">
                 <xtein-number
-                  class="cell-editor"
+                  class="xt-cell-editor cell-editor"
                   ariaLabel="Cantidad a devolver"
                   [(ngModel)]="edit.CANTIDAD"
                   (ngModelChange)="onDraftQtyChange()"
@@ -58,7 +58,7 @@
           }
         } @else {
           <tr
-            [class.row-selected]="selected().includes(row.ITEM)"
+            [class.xt-table__row--selected]="selected().includes(row.ITEM)"
             (dblclick)="!readOnly && !draft() && begin(row)"
           >
             <td class="col-select">
@@ -83,8 +83,9 @@
             <td class="col-bodegas">
               <button
                 type="button"
-                class="btn-cell-bodegas"
-                [class.btn-cell-bodegas--pending]="row.SIN_REPARTO && !row.SIN_INVENTARIO"
+                class="xt-button xt-button--sm"
+                [class.xt-button--secondary]="!(row.SIN_REPARTO && !row.SIN_INVENTARIO)"
+                [class.xt-button--warning]="row.SIN_REPARTO && !row.SIN_INVENTARIO"
                 [title]="row.SIN_INVENTARIO ? withoutInventoryMessage : row.SIN_REPARTO ? 'Sin reparto por bodega' : 'Ver reparto por bodega'"
                 [disabled]="busy || !!draft() || row.SIN_INVENTARIO"
                 (click)="distribute.emit(row.ITEM)"
@@ -92,21 +93,21 @@
                 Bodegas
               </button>
               @if (row.SIN_INVENTARIO) {
-                <span class="cell-note" role="note">{{ withoutInventoryMessage }}</span>
+                <span class="xt-hint cell-note" role="note">{{ withoutInventoryMessage }}</span>
               } @else if (row.SIN_REPARTO) {
-                <span class="cell-warning" role="status">Sin reparto</span>
+                <span class="xt-badge xt-badge--warning cell-warning" role="status">Sin reparto</span>
               }
             </td>
           </tr>
         }
       } @empty {
         <tr>
-          <td colspan="13" class="empty-message">No hay productos asociados. Cargue el documento origen desde Configurar.</td>
+          <td colspan="13" class="xt-empty">No hay productos asociados. Cargue el documento origen desde Configurar.</td>
         </tr>
       }
     </tbody>
   </table>
 </div>
 @if (!readOnly && items.length) {
-  <p class="base-unit-note" role="note">Doble clic en una línea para cambiar la cantidad a devolver. Valores e impuestos proporcionales al documento origen; el servidor los confirma al guardar.</p>
+  <p class="xt-hint base-unit-note" role="note">Doble clic en una línea para cambiar la cantidad a devolver. Valores e impuestos proporcionales al documento origen; el servidor los confirma al guardar.</p>
 }

@@ -3,8 +3,8 @@
   <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
   <!-- Tabla de Listas de Precios asociadas -->
-  <div class="table-scroll">
-    <table class="items-grid-table">
+  <div class="xt-table-frame">
+    <table class="xt-table">
       <thead>
         <tr>
           <th class="col-select">
@@ -22,7 +22,7 @@
       <tbody>
         <!-- Fila nueva en edición si isNewRow -->
         @if (isNewRow() && draft(); as newRow) {
-          <tr class="row-editing" (keydown.enter)="handleKeydownEnter($event)">
+          <tr class="xt-table__row--editing" (keydown.enter)="handleKeydownEnter($event)">
             <td class="col-select"></td>
             <td class="col-lista">
               <xtein-select
@@ -55,7 +55,7 @@
         @for (item of items; track item.ID_LISTA; let idx = $index) {
           @if (!isNewRow() && editingIndex() === idx && draft(); as editRow) {
             <!-- Fila en edición existente -->
-            <tr class="row-editing" (keydown.enter)="handleKeydownEnter($event)">
+            <tr class="xt-table__row--editing" (keydown.enter)="handleKeydownEnter($event)">
               <td class="col-select"></td>
               <td class="col-lista">
                 <xtein-select
@@ -85,7 +85,7 @@
           } @else {
             <!-- Fila estándar en modo vista -->
             <tr
-              [class.row-selected]="isRowSelected(item.ID_LISTA)"
+              [class.xt-table__row--selected]="isRowSelected(item.ID_LISTA)"
               (dblclick)="beginEdit(item, idx)"
             >
               <td class="col-select">
@@ -104,7 +104,7 @@
 
         @if (items.length === 0 && !draft()) {
           <tr>
-            <td colspan="3" class="text-center empty-message">
+            <td colspan="3" class="text-center xt-empty">
               No hay listas de precios asociadas a esta condición de negociación.
             </td>
           </tr>

@@ -1,6 +1,6 @@
 :host { display: inline-block; max-width: 100%; }
 label {
-  color: var(--xt-control-text, #33587b);
+  color: var(--xt-control-text, var(--xt-heading-soft));
   font-size: var(--xt-label-font-size, 13px);
   font-weight: var(--xt-label-font-weight, 500);
   line-height: 1.25;
@@ -9,5 +9,5 @@ label {
 }
 .xtein-label--disabled {
   /* Estandar Clientes (VEN-209): Las etiquetas de campos NUNCA deben verse atenuadas ni desactivadas */
-  color: var(--xt-control-text, #33587b) !important;
+  color: var(--xt-control-text, var(--xt-heading-soft)) !important;
 }

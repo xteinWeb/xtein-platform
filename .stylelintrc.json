@@ -1,0 +1,38 @@
+{
+  "customSyntax": "postcss-scss",
+  "ignoreFiles": [
+    "libs/**",
+    "apps/shell/**",
+    "apps/*/src/styles.scss",
+    "dist/**",
+    "node_modules/**"
+  ],
+  "rules": {
+    "color-no-hex": [true, {
+      "message": "Las pantallas no definen colores: use las piezas de libs/ui (xtein-blocks.scss)."
+    }],
+    "color-named": ["never", {
+      "message": "Las pantallas no definen colores: use las piezas de libs/ui (xtein-blocks.scss)."
+    }],
+    "function-disallowed-list": [["rgb", "rgba", "hsl", "hsla", "color-mix"], {
+      "message": "Las pantallas no definen colores: use las piezas de libs/ui (xtein-blocks.scss)."
+    }],
+    "property-disallowed-list": [[
+      "color",
+      "/^background/",
+      "/^border(-top|-right|-bottom|-left)?$/",
+      "/^border(-top|-right|-bottom|-left)?-(color|style)$/",
+      "/^border-.*radius$/",
+      "/^outline/",
+      "box-shadow",
+      "text-shadow",
+      "/^font/",
+      "text-transform",
+      "letter-spacing",
+      "fill",
+      "stroke"
+    ], {
+      "message": "Las pantallas solo distribuyen (grid, flex, espacios, tamaños). El aspecto va en libs/ui (xtein-blocks.scss)."
+    }]
+  }
+}

@@ -1,137 +1,99 @@
+/*======================================================================
+= VEN-209 FINANCIAL TAB LAYOUT
+=
+= Arrangement only. Accordion, fieldsets, fields and text styles come
+= from the shared blocks of libs/ui (xtein-blocks.scss).
+======================================================================*/
+
 .xtein-financieros {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
 
-  /* Acordeón idéntico al Legacy */
   .xtein-accordion-item {
     display: block;
     width: 100%;
-    border: 0;
-    border-radius: 0;
     margin-bottom: 2px;
-    background: transparent;
   }
 
   .xtein-accordion-header {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    height: 36px;
-    padding: 0 4px;
-    border-radius: 0;
-    font-size: 12px;
-    font-weight: 500;
-    border: 0;
     width: 100%;
     max-width: 100%;
+    height: 36px;
     box-sizing: border-box;
-    color: rgba(10, 57, 96, 0.75);
-    background: transparent;
-    background-image: linear-gradient(to right, rgba(18, 94, 220, 0.5) 20%, rgba(255, 255, 255, 0) 0%);
-    background-position: bottom;
-    background-size: 6px 1px;
-    background-repeat: repeat-x;
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.15s ease;
-
-    &:hover {
-      color: rgba(10, 57, 96, 1);
-    }
+    transition: color .15s ease;
   }
 
   .xtein-accordion-icon {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    color: rgba(18, 94, 220, 1);
-    margin-right: 14px;
     width: 14px;
     height: 14px;
-    flex-shrink: 0;
+    margin-right: 14px;
 
     svg {
+      display: block;
       width: 12px;
       height: 12px;
-      display: block;
-      stroke: currentColor;
     }
   }
 
-  .xtein-accordion-title {
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(10, 57, 96, 0.75);
-    letter-spacing: 0.1px;
-  }
-
-  .xtein-accordion-body {
-    padding: 14px 4px 16px 14px;
-    background: transparent;
-  }
-
-  /* Frecuencia / Días entrega */
+  /* Delivery frequency row. */
   &__top-row {
     margin-bottom: 12px;
   }
 
-  &__field-inline--frecuencia {
-    max-width: 280px;
+  &__field {
+    --xt-field-label-width: 110px;
+
+    width: 100%;
+    min-height: 34px;
+
+    &--frecuencia {
+      max-width: 280px;
+    }
   }
 
   &__control-frecuencia {
     display: flex;
+    flex: 1 1 0;
     align-items: center;
     gap: 8px;
-    flex: 1 1 0;
 
     xtein-number {
-      width: 90px;
       flex: 0 0 90px;
+      width: 90px;
     }
   }
 
-  &__suffix-text {
-    font-size: 13px;
-    color: #4a5d73;
-    font-weight: 500;
-  }
-
-  /* Cards Cupos (Global y Cuota) */
+  /* Credit limit cards (global and installment). */
   &__cards-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
-    max-width: 900px;
     width: 100%;
+    max-width: 900px;
     box-sizing: border-box;
 
     @media (max-width: 768px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 
   &__fieldset {
-    border: 1px solid #dfe6ef;
-    border-radius: 8px;
-    padding: 14px 18px 18px;
-    background: #ffffff;
     margin: 0;
     min-width: 0;
     box-sizing: border-box;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   }
 
   &__legend {
-    color: rgba(10, 57, 96, 0.7);
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 0 6px;
     margin: 0;
-    text-transform: none;
-    letter-spacing: normal;
   }
 
   &__fieldset-content {
@@ -142,168 +104,16 @@
     box-sizing: border-box;
   }
 
-  /* Formulario Cupo legacy fallback */
-  &__form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 24px;
-    max-width: 680px;
-
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  &__field-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 34px;
-    width: 100%;
-  }
-
-  &__label-inline {
-    flex: 0 0 110px;
-    margin: 0;
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__control-inline {
-    flex: 1 1 0;
-    min-width: 0;
-
+  &__control {
     xtein-input,
     xtein-number {
       display: block;
       width: 100%;
     }
 
-    ::ng-deep {
-      .dx-numberbox {
-        border-radius: 8px !important;
-        background-color: var(--xt-control-background, #ffffff);
-        border: 1px solid var(--xt-control-border, #c9d8ea) !important;
-
-        &.dx-state-disabled,
-        &.dx-state-readonly {
-          background-color: var(--xt-control-disabled-background, #f4f7fb) !important;
-          border-color: var(--xt-control-disabled-border, #d7e4f2) !important;
-          opacity: 1 !important;
-
-          .dx-texteditor-input {
-            color: var(--xt-control-disabled-text, #5e748c) !important;
-            -webkit-text-fill-color: var(--xt-control-disabled-text, #5e748c) !important;
-          }
-
-          .dx-clear-button-area {
-            display: none !important;
-          }
-        }
-      }
-    }
-  }
-}
-
-/* Modales */
-.xtein-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
-  backdrop-filter: blur(2px);
-}
-
-.xtein-modal-card {
-  background: #ffffff;
-  border-radius: 12px;
-  width: min(440px, 92vw);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.xtein-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.xtein-modal-title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.xtein-modal-close {
-  background: transparent;
-  border: none;
-  font-size: 22px;
-  color: #94a3b8;
-  cursor: pointer;
-  line-height: 1;
-
-  &:hover {
-    color: #0f172a;
-  }
-}
-
-.xtein-modal-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.xtein-modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.xtein-modal-footer {
-  padding: 14px 20px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.xtein-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
-
-  &--secondary {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    color: #475569;
-
-    &:hover {
-      background: #f1f5f9;
-    }
-  }
-
-  &--primary {
-    background: #0284c7;
-    color: #ffffff;
-
-    &:hover {
-      background: #0369a1;
+    ::ng-deep .dx-numberbox.dx-state-disabled .dx-clear-button-area,
+    ::ng-deep .dx-numberbox.dx-state-readonly .dx-clear-button-area {
+      display: none !important;
     }
   }
 }

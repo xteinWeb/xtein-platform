@@ -7,7 +7,7 @@
   &__code-btn {
     border: 0;
     background: transparent;
-    color: #0284c7;
+    color: var(--xt-primary-alt);
     font: inherit;
     font-size: 13px;
     padding: 0;
@@ -18,7 +18,7 @@
     transition: color 0.15s ease;
 
     &:hover:not(:disabled) {
-      color: #0369a1;
+      color: var(--xt-heading-strong);
     }
 
     &:disabled {
@@ -28,7 +28,7 @@
     }
 
     &:focus-visible {
-      outline: 1px solid #86b7fe;
+      outline: 1px solid var(--xt-focus);
       outline-offset: 2px;
     }
   }
@@ -37,42 +37,42 @@
 :host ::ng-deep {
   .xtein-correos__grid {
     .dx-datagrid-headers {
-      background-color: #eef2f6 !important;
-      border-color: #dbe4ef !important;
+      background-color: var(--xt-surface-4) !important;
+      border-color: var(--xt-border-2) !important;
 
       .dx-datagrid-table .dx-header-row > td {
-        background-color: #eef2f6 !important;
-        color: rgba(10, 57, 96, 0.95) !important;
+        background-color: var(--xt-surface-4) !important;
+        color: rgba(var(--xt-primary-rgb), 0.95) !important;
         font-weight: 500 !important;
         padding: 8px 10px;
-        border-color: #dbe4ef !important;
+        border-color: var(--xt-border-2) !important;
       }
     }
 
     .dx-datagrid-rowsview {
       .dx-row {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f1f5f9 !important;
+        background-color: var(--xt-surface) !important;
+        border-bottom: 1px solid var(--xt-surface-3) !important;
 
         & > td {
-          background-color: #ffffff !important;
+          background-color: var(--xt-surface) !important;
           padding: 6px 10px;
           vertical-align: middle;
         }
 
         &.dx-row-alt {
-          background-color: #ffffff !important;
+          background-color: var(--xt-surface) !important;
           & > td {
-            background-color: #ffffff !important;
+            background-color: var(--xt-surface) !important;
           }
         }
 
         &:hover > td {
-          background-color: #f8fafc !important;
+          background-color: var(--xt-surface-2) !important;
         }
 
         &.dx-selection > td {
-          background-color: #edf5ff !important;
+          background-color: var(--xt-surface-accent) !important;
         }
       }
     }

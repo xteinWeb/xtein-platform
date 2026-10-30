@@ -7,7 +7,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.25rem;
-  color: var(--xt-control-text, #1e293b);
+  color: var(--xt-control-text, var(--xt-text-strong));
 
   &__loading,
   &__empty,
@@ -24,20 +24,20 @@
   }
 
   &__loading {
-    color: var(--xt-color-text-secondary, #64748b);
+    color: var(--xt-color-text-secondary, var(--xt-text-muted));
   }
 
   &__spinner {
     width: 24px;
     height: 24px;
-    border: 2.5px solid var(--xt-color-brand-light, #cbd5e1);
-    border-top-color: var(--xt-color-brand, #0f4c81);
+    border: 2.5px solid var(--xt-color-brand-light, var(--xt-border-strong));
+    border-top-color: var(--xt-color-brand, var(--xt-primary));
     border-radius: 50%;
     animation: xt-spin 0.8s linear infinite;
   }
 
   &__empty {
-    color: var(--xt-color-text-secondary, #64748b);
+    color: var(--xt-color-text-secondary, var(--xt-text-muted));
 
     i {
       font-size: 2rem;
@@ -68,16 +68,16 @@
     gap: 0.875rem;
     padding: 0.75rem 1rem;
     border-radius: 8px;
-    border: 1px solid var(--xt-control-border, #e2e8f0);
-    background: var(--xt-control-background, #ffffff);
-    color: var(--xt-control-text, #1e293b);
+    border: 1px solid var(--xt-control-border, var(--xt-border));
+    background: var(--xt-control-background, var(--xt-surface));
+    color: var(--xt-control-text, var(--xt-text-strong));
     cursor: pointer;
     transition: all 0.15s ease-in-out;
     outline: none;
 
     &:hover {
-      background: var(--xt-control-hover-background, #f1f5f9);
-      border-color: var(--xt-color-brand-light, #94a3b8);
+      background: var(--xt-control-hover-background, var(--xt-surface-3));
+      border-color: var(--xt-color-brand-light, var(--xt-text-faint));
       transform: translateX(2px);
     }
 
@@ -87,7 +87,7 @@
 
     &-icon {
       font-size: 1.125rem;
-      color: var(--xt-color-brand, #0f4c81);
+      color: var(--xt-color-brand, var(--xt-primary));
       flex-shrink: 0;
     }
 
@@ -101,14 +101,14 @@
 
     &-arrow {
       font-size: 0.75rem;
-      color: var(--xt-color-text-secondary, #94a3b8);
+      color: var(--xt-color-text-secondary, var(--xt-text-faint));
       flex-shrink: 0;
       transition: transform 0.15s ease-in-out;
     }
 
     &:hover &-arrow {
       transform: translateX(2px);
-      color: var(--xt-color-brand, #0f4c81);
+      color: var(--xt-color-brand, var(--xt-primary));
     }
   }
 }

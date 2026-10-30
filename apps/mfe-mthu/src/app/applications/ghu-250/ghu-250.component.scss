@@ -1,3 +1,11 @@
+/*======================================================================
+= GHU-250 LAYOUT
+=
+= Arrangement only. The page, wizard steps, card, headings, hints, total,
+= report tabs and report frame come from the shared blocks of libs/ui
+= (xtein-blocks.scss), which carry the theme.
+======================================================================*/
+
 :host {
   display: block;
   width: 100%;
@@ -12,15 +20,8 @@
 ======================================================================*/
 
 .ghu-250 {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
-  width: 100%;
-  min-width: 0;
-  min-height: 100%;
   padding: 16px;
-  background: #ffffff;
-  box-sizing: border-box;
 }
 
 
@@ -42,11 +43,6 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid #dfe6ef;
-  border-radius: 10px;
-  background: #fbfdff;
-  color: #6b7c8f;
 }
 
 .ghu-250__step-number {
@@ -56,10 +52,6 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
-  background: #e6edf5;
-  color: #244d73;
-  font-weight: 600;
 }
 
 .ghu-250__step-text {
@@ -68,32 +60,10 @@
   min-width: 0;
 }
 
-.ghu-250__step-title {
-  color: #244d73;
-  font-size: 13px;
-  font-weight: 600;
-}
-
 .ghu-250__step-description {
   overflow: hidden;
-  font-size: 12px;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-.ghu-250__step--active {
-  border-color: #244d73;
-  background: #eef3f9;
-
-  .ghu-250__step-number {
-    background: #244d73;
-    color: #ffffff;
-  }
-}
-
-.ghu-250__step--done .ghu-250__step-number {
-  background: #2e7d4f;
-  color: #ffffff;
 }
 
 
@@ -107,12 +77,7 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  min-width: 0;
   padding: 18px 22px 22px;
-  border: 1px solid #dfe6ef;
-  border-radius: 10px;
-  background: #ffffff;
-  box-sizing: border-box;
 }
 
 
@@ -137,17 +102,6 @@
 
 .ghu-250__span-2 {
   grid-column: 1 / -1;
-}
-
-.ghu-250__error {
-  color: #c62828;
-  font-size: 12px;
-}
-
-.ghu-250__hint {
-  color: #6b7c8f;
-  font-size: 12px;
-  font-weight: 400;
 }
 
 .ghu-250__lookup {
@@ -176,34 +130,19 @@
   align-items: baseline;
   gap: 4px 12px;
   margin: 0;
-  color: #244d73;
-  font-size: 15px;
-  font-weight: 600;
 }
 
 .ghu-250__total {
   padding: 6px 12px;
-  border-radius: 8px;
-  background: #eef3f9;
-  color: #244d73;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
 
 .ghu-250__help {
   margin: 0;
-  color: #4a5b6d;
-  font-size: 12px;
 }
 
 .ghu-250__table {
   height: clamp(320px, calc(100dvh - 340px), 760px);
   min-width: 0;
-}
-
-:host ::ng-deep .ghu-250__total-cell {
-  background: #f6f9fc;
-  font-weight: 600;
 }
 
 
@@ -215,31 +154,6 @@
   display: inline-flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 3px;
-  border-radius: 9px;
-  background: #eef3f9;
-}
-
-.ghu-250__report-tab {
-  padding: 7px 14px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: #244d73;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid #244d73;
-    outline-offset: 1px;
-  }
-}
-
-.ghu-250__report-tab--active {
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(36, 77, 115, 0.18);
-  font-weight: 600;
 }
 
 .ghu-250__report-actions {
@@ -247,12 +161,11 @@
   gap: 8px;
 }
 
+/* The outlined card frames the preview without inner padding. */
 .ghu-250__report {
   width: 100%;
   height: clamp(360px, calc(100dvh - 330px), 820px);
-  border: 1px solid #dfe6ef;
-  border-radius: 8px;
-  background: #ffffff;
+  padding: 0;
 }
 
 
@@ -313,6 +226,5 @@
 
   .ghu-250__card {
     padding: 14px 12px 16px;
-    border-radius: 8px;
   }
 }

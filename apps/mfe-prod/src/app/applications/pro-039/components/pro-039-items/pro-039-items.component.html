@@ -1,7 +1,7 @@
 <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
-<div class="table-scroll">
-  <table class="items-grid-table">
+<div class="xt-table-frame">
+  <table class="items-grid-table xt-table xt-table--grid">
     <thead>
       <tr>
         <th class="col-select"></th>
@@ -20,7 +20,7 @@
     <tbody>
       <!-- Fila nueva: el producto se elige en la misma grilla -->
       @if (adding()) {
-        <tr class="row-editing">
+        <tr class="xt-table__row--editing">
           <td class="col-select"></td>
           <td class="col-product" colspan="2">
             <dx-drop-down-box
@@ -36,7 +36,7 @@
               <div *dxTemplate="let data of 'content'" class="product-dropdown-content">
                 <ng-template #productToolbarExtra>
                   @if (productsLoading) {
-                    <span class="product-loading-indicator" role="status">Cargando…</span>
+                    <span class="xt-hint xt-hint--italic" role="status">Cargando…</span>
                   }
                 </ng-template>
                 <xtein-data-grid
@@ -58,11 +58,11 @@
               </div>
             </dx-drop-down-box>
           </td>
-          <td colspan="8" class="new-row-hint">Elija el material; se agrega como Adicional y luego indica la cantidad.</td>
+          <td colspan="8" class="xt-hint xt-hint--italic">Elija el material; se agrega como Adicional y luego indica la cantidad.</td>
         </tr>
       }
       @for (row of items; track row.ITEM) {
-        <tr [class.row-selected]="selected().includes(row.ITEM)" [class.row-zero]="!(row.CANTIDAD > 0)">
+        <tr [class.xt-table__row--selected]="selected().includes(row.ITEM)" [class.xt-table__row--muted]="!(row.CANTIDAD > 0)">
           <td class="col-select">
             <xtein-checkbox
               ariaLabel="Seleccionar material"
@@ -77,7 +77,7 @@
           <td class="col-inv">{{ row.TIPO_INVENTARIO }}</td>
           <td class="col-um">{{ row.UDM_PRES || row.UDM }}</td>
           <td class="col-origin">
-            <span class="origin-badge" [class.origin-badge--matrix]="row.ES_MATRIZ">
+            <span class="xt-badge" [class.xt-badge--success]="row.ES_MATRIZ" [class.xt-badge--warning]="!row.ES_MATRIZ">
               {{ row.ES_MATRIZ ? 'Matriz' : 'Adicional' }}
             </span>
           </td>
@@ -89,7 +89,7 @@
               {{ quantity(row.CANTIDAD) }}
             } @else {
               <xtein-number
-                class="cell-editor"
+                class="cell-editor xt-cell-editor"
                 ariaLabel="Consumo modificado"
                 [min]="0"
                 [format]="quantityFormat"
@@ -101,7 +101,7 @@
         </tr>
       } @empty {
         <tr>
-          <td colspan="11" class="empty-message">
+          <td colspan="11" class="xt-empty">
             Seleccione producto y sección para cargar los materiales de la matriz, o agréguelos con el botón +.
           </td>
         </tr>

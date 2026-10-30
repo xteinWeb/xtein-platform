@@ -1,7 +1,7 @@
 <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
-<div class="table-scroll">
-  <table class="items-grid-table">
+<div class="xt-table-frame">
+  <table class="items-grid-table xt-table xt-table--grid">
     <thead>
       <tr>
         <th class="col-select">
@@ -28,7 +28,7 @@
     <tbody>
       <!-- Plantilla reutilizable de fila en edición -->
       <ng-template #editRowTemplate let-row>
-        <tr class="row-editing" (keydown.enter)="onRowEnter($event)">
+        <tr class="xt-table__row--editing" (keydown.enter)="onRowEnter($event)">
           <td class="col-select"></td>
           <td class="col-product">
             <div class="product-cell-box">
@@ -57,7 +57,7 @@
                         (checkedChange)="stockOnly.emit($event)"
                       />
                       @if (productsLoading) {
-                        <span class="product-loading-indicator" role="status">Cargando…</span>
+                        <span class="xt-hint xt-hint--italic" role="status">Cargando…</span>
                       }
                     </ng-template>
 
@@ -83,12 +83,12 @@
 
               <button
                 type="button"
-                class="btn-cell-cancel"
+                class="xt-icon-button xt-icon-button--sm xt-icon-button--danger"
                 title="Cancelar ítem"
                 [disabled]="working() || busy"
                 (click)="cancel()"
               >
-                <svg class="cell-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="xt-icon-button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 7v6h6"></path>
                   <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
                 </svg>
@@ -98,7 +98,7 @@
           <td class="col-name">{{ row.NOMBRE_PRODUCTO }}</td>
           <td class="col-qty">
             <xtein-number
-              class="cell-editor"
+              class="cell-editor xt-cell-editor"
               ariaLabel="Cantidad"
               [(ngModel)]="row.CANTIDAD"
               (ngModelChange)="onDraftQtyChange()"
@@ -111,7 +111,7 @@
           <td class="col-um">
             @if (presentationList.length) {
               <dx-select-box
-                class="cell-editor um-select-box"
+                class="cell-editor xt-cell-editor um-select-box"
                 [dataSource]="presentationList"
                 [(value)]="selectedUnitIndex"
                 valueExpr="INDEX"
@@ -125,11 +125,11 @@
                 [disabled]="working() || busy"
               >
                 <div *dxTemplate="let data of 'item'" class="um-dropdown-row">
-                  <div class="um-col um-col--udm">{{ data.UDM_VENTA }}</div>
+                  <div class="um-col um-col--udm xt-text-strong">{{ data.UDM_VENTA }}</div>
                   <div class="um-col um-col--num">{{ data.CANTIDAD_EQUIV }}</div>
-                  <div class="um-col um-col--equiv">Equiv: {{ data.UDM_EQUIV }}</div>
+                  <div class="um-col um-col--equiv xt-text-secondary">Equiv: {{ data.UDM_EQUIV }}</div>
                   <div class="um-col um-col--num">{{ data.CANTIDAD_PRES }}</div>
-                  <div class="um-col um-col--price">{{ money(data.PRECIO) }}</div>
+                  <div class="um-col um-col--price xt-text-strong">{{ money(data.PRECIO) }}</div>
                 </div>
               </dx-select-box>
             } @else {
@@ -138,7 +138,7 @@
           </td>
           <td class="col-price">
             <xtein-number
-              class="cell-editor"
+              class="cell-editor xt-cell-editor"
               ariaLabel="Valor unitario"
               [(ngModel)]="row.VALOR_UNITARIO"
               [format]="moneyFormat"
@@ -154,26 +154,26 @@
           </td>
           <td
             class="col-iva text-end"
-            [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
+            [class.xt-cell-link]="(row.IVAS?.length ?? 0) > 1"
             (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
             [title]="(row.IVAS?.length ?? 0) > 1 ? 'Haga clic para cambiar tarifa de IVA' : ''"
           >
-            <span class="cell-val-number">{{ money(row.VALOR_IVA) }}</span>
+            <span class="xt-cell-link__value">{{ money(row.VALOR_IVA) }}</span>
           </td>
           <td
             class="col-pct text-end"
-            [class.col-interactive]="(row.IVAS?.length ?? 0) > 1"
+            [class.xt-cell-link]="(row.IVAS?.length ?? 0) > 1"
             (click)="(row.IVAS?.length ?? 0) > 1 && openTaxModal()"
             [title]="(row.IVAS?.length ?? 0) > 1 ? 'Haga clic para cambiar tarifa de IVA' : ''"
           >
-            <span class="cell-val-number">{{ row.POR_IVA || 0 }}</span>
+            <span class="xt-cell-link__value">{{ row.POR_IVA || 0 }}</span>
           </td>
           <td class="col-total text-end">
             {{ money(row.TOTAL) }}
           </td>
           <td class="col-date">
             <xtein-date
-              class="cell-editor"
+              class="cell-editor xt-cell-editor"
               [required]="true"
               [min]="minimumDeliveryDate"
               [(ngModel)]="row.FECHA_ENTREGA"
@@ -181,7 +181,7 @@
             />
           </td>
           <td class="col-status">
-            <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
+            <span class="xt-badge xt-badge--success" [class.xt-badge--danger]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
           </td>
         </tr>
       </ng-template>
@@ -197,7 +197,7 @@
           <ng-container *ngTemplateOutlet="editRowTemplate; context: { $implicit: draft() }"></ng-container>
         } @else {
           <tr
-            [class.row-selected]="selected().includes(row.ITEM)"
+            [class.xt-table__row--selected]="selected().includes(row.ITEM)"
             (dblclick)="!readOnly && !draft() && begin(row)"
           >
             <td class="col-select">
@@ -219,14 +219,14 @@
             <td class="col-total text-end">{{ money(row.TOTAL) }}</td>
             <td class="col-date text-end">{{ row.FECHA_ENTREGA | date:'dd/MM/yyyy' }}</td>
             <td class="col-status">
-              <span class="cell-badge" [class.cell-badge--anulado]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
+              <span class="xt-badge xt-badge--success" [class.xt-badge--danger]="(row.ESTADO || '').toUpperCase() === 'ANULADO'">{{ row.ESTADO || 'REGISTRADO' }}</span>
             </td>
           </tr>
         }
       } @empty {
         @if (!draft()) {
           <tr>
-            <td colspan="12" class="empty-message">No hay productos asociados a la prefactura.</td>
+            <td colspan="12" class="xt-empty">No hay productos asociados a la prefactura.</td>
           </tr>
         }
       }
@@ -247,7 +247,7 @@
   [shading]="true"
 >
   <div *dxTemplate="let data of 'content'" class="tax-popup-container">
-    <div class="tax-popup-header">
+    <div class="tax-popup-header xt-option-list__header">
       <div class="tax-col-radio"></div>
       <div class="tax-col-id">Id Tasa</div>
       <div class="tax-col-desc">Descripción</div>
@@ -257,17 +257,17 @@
     <div class="tax-popup-body">
       @for (t of taxList(); track t.ID_TASA) {
         <div
-          class="tax-popup-row"
-          [class.tax-popup-row--selected]="isSelectedTax(t)"
+          class="tax-popup-row xt-option-list__row"
+          [class.xt-option-list__row--selected]="isSelectedTax(t)"
           (click)="selectTax(t)"
         >
           <div class="tax-col-radio">
-            <span class="tax-radio-circle" [class.tax-radio-circle--checked]="isSelectedTax(t)"></span>
+            <span class="xt-radio-dot" [class.xt-radio-dot--checked]="isSelectedTax(t)"></span>
           </div>
-          <div class="tax-col-id">{{ t.ID_TASA }}</div>
+          <div class="tax-col-id xt-text-strong">{{ t.ID_TASA }}</div>
           <div class="tax-col-desc">{{ t.DESCRIPCION }}</div>
-          <div class="tax-col-pct text-end">{{ t.PORCENTAJE }}</div>
-          <div class="tax-col-base text-end">{{ t.VALOR_BASE }}</div>
+          <div class="tax-col-pct text-end xt-text-strong">{{ t.PORCENTAJE }}</div>
+          <div class="tax-col-base text-end xt-text-strong">{{ t.VALOR_BASE }}</div>
         </div>
       }
     </div>

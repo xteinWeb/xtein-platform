@@ -3,8 +3,8 @@
   <xtein-grid-toolbar [actions]="toolbarActions" [visible]="!readOnly" />
 
   <!-- Tabla de Plazos / Ítems -->
-  <div class="table-scroll">
-    <table class="items-grid-table">
+  <div class="xt-table-frame">
+    <table class="xt-table">
       <thead>
         @if (tipoFrecuencia === 'Constante') {
           <tr>
@@ -50,7 +50,7 @@
       <tbody>
         <!-- Fila de nuevo ítem en edición si isNewRow -->
         @if (isNewRow() && draft(); as newRow) {
-          <tr class="row-editing">
+          <tr class="xt-table__row--editing">
             <td class="col-select"></td>
             @if (tipoFrecuencia === 'Constante') {
               <td class="col-tasa">
@@ -199,7 +199,7 @@
         @for (item of items; track item.ITEM; let idx = $index) {
           @if (!isNewRow() && editingItemIndex() === idx && draft(); as editRow) {
             <!-- Fila en edición existente -->
-            <tr class="row-editing">
+            <tr class="xt-table__row--editing">
               <td class="col-select"></td>
               @if (tipoFrecuencia === 'Constante') {
                 <td class="col-tasa">
@@ -345,7 +345,7 @@
           } @else {
             <!-- Fila estándar en modo vista -->
             <tr
-              [class.row-selected]="isRowSelected(item.ITEM)"
+              [class.xt-table__row--selected]="isRowSelected(item.ITEM)"
               (dblclick)="beginEdit(item, idx)"
             >
               <td class="col-select">
@@ -382,7 +382,7 @@
 
         @if (items.length === 0 && !draft()) {
           <tr>
-            <td [attr.colspan]="tipoFrecuencia === 'Constante' ? 13 : 6" class="text-center empty-message">
+            <td [attr.colspan]="tipoFrecuencia === 'Constante' ? 13 : 6" class="text-center xt-empty">
               No hay plazos o ítems de financiación configurados para este plan.
             </td>
           </tr>

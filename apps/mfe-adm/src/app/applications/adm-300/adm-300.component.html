@@ -4,7 +4,7 @@
  <div class="favorites-editor">
   <xtein-data-grid [dataSource]="available()" keyExpr="ID_APLICACION" [columns]="favoriteColumns" selectionMode="multiple"
    [selectedRowKeys]="selectedFavorites" (selectionChanged)="selectedFavorites=$event.selectedRowKeys" />
-  <small>La selección se conserva durante esta apertura del Tablero.</small>
+  <small class="xt-hint">La selección se conserva durante esta apertura del Tablero.</small>
   <xtein-button text="Aplicar" variant="success" (clicked)="applyFavorites()" />
  </div>
 </xtein-popup>
@@ -23,7 +23,7 @@
   </article>
 </section>
 @for (error of errors(); track $index) { <p class="load-error" hidden>{{ error }}</p> }
-<div class="ajuste-row-tables">
+<div class="ajuste-row-tables xt-page">
   <div class="row gx-3">
 
     <div class="col-md-6 col-xl-4 tables" [style.order]="cardOrder()[0]" (dragover)="$event.preventDefault()" (drop)="dropCard(0, $event)">
@@ -146,28 +146,28 @@
       
       <div class="cards-home-body">
         <div class="list-group list-group-flush oscroll-of">
-          <span class="list-group-item list-group-item-action flex-column align-items-start active">
+          <span class="list-group-item border-0 list-group-item-action flex-column align-items-start active">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-0 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de CEO (ceo@xtein.com)'}}</h5>
               <small class="col-5 col-md-6 col-xl-3 p-0 text-end">Hace 1 minuto</small>
             </div>
             <p class="p-0 mb-0 xt-text-m col-12 text-truncate">Informe mensual de ingresos - Por favor realizar correcciones al informe...</p>
           </span>
-          <span class="list-group-item list-group-item-action flex-column align-items-start">
+          <span class="list-group-item border-0 list-group-item-action flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de Compras (compras@...)'}}</h5>
               <small class="col-5 col-md-6 col-xl-3 p-0 text-end text-muted">Hace 1 día</small>
             </div>
             <p class="p-0 mb-0 xt-text-m col-12 text-truncate">PAPELERIA MES DE AGOSTO - Buenos días. Como es habitual se envía...</p>
           </span>
-          <span class="list-group-item list-group-item-action flex-column align-items-start">
+          <span class="list-group-item border-0 list-group-item-action flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de Gestión humana (gestion@...)'}}</h5>
               <small class="col-5 col-md-6 col-xl-3 p-0 text-end text-muted">Hace 1 día</small>
             </div>
             <p class="p-0 mb-0 xt-text-m col-12 text-truncate">Comunicado importante - Por favor no tocar la puerta del baño</p>
           </span>
-          <span class="list-group-item list-group-item-action flex-column align-items-start">
+          <span class="list-group-item border-0 list-group-item-action flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1 col-7 col-md-6 col-xl-9 p-0 text-truncate">{{'Correo de Gestión humana (gestion@...)'}}</h5>
               <small class="col-5 col-md-6 col-xl-3 p-0 text-end text-muted">Hace 1 día</small>
@@ -199,8 +199,8 @@
       
       
       <div class="cards-home-body">
-        <table class="table table-responsive-sm table-hover mb-0">
-          <thead class="bg-primary">
+        <table class="table table-responsive-sm table-hover mb-0 small">
+          <thead>
             <tr>
               <th class="text-center column1">Producto</th>
               <th class="text-center column2">UM</th>

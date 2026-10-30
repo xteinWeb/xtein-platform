@@ -1,14 +1,14 @@
-<section class="fin-221">
+<section class="xt-page">
   <!-- Tarjeta de Encabezado -->
-  <div class="fin-221__card" [formGroup]="form">
-    <xtein-group-label class="fin-221__section-title" label="Planes de Financiación"></xtein-group-label>
+  <div class="xt-card" [formGroup]="form">
+    <xtein-group-label class="xt-section-title" label="Planes de Financiación"></xtein-group-label>
 
     <div class="fin-221__header-grid">
       <!-- Columna 1: Código y Estado -->
       <div class="fin-221__header-col">
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-id-plan" [required]="true">Id Plan</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-id-plan" [required]="true">Id Plan</xtein-label>
+          <div class="xt-field__control">
             <xtein-input
               id="fin-221-id-plan"
               name="ID_PLAN"
@@ -20,9 +20,9 @@
           </div>
         </div>
 
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-estado">Estado</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-estado">Estado</xtein-label>
+          <div class="xt-field__control">
             <xtein-select
               id="fin-221-estado"
               [items]="statusOptions"
@@ -37,9 +37,9 @@
 
       <!-- Columna 2: Descripción y Frecuencia -->
       <div class="fin-221__header-col">
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-descripcion" [required]="true">Descripción</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-descripcion" [required]="true">Descripción</xtein-label>
+          <div class="xt-field__control">
             <xtein-input
               id="fin-221-descripcion"
               name="DESCRIPCION"
@@ -51,9 +51,9 @@
           </div>
         </div>
 
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-frecuencia">Frecuencia</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-frecuencia">Frecuencia</xtein-label>
+          <div class="xt-field__control">
             <xtein-select
               id="fin-221-frecuencia"
               [items]="frecuenciaOptions"
@@ -69,9 +69,9 @@
       <!-- Columna 3: Días o Frecuencia numérica y Días 1ra Cuota -->
       <div class="fin-221__header-col">
         @if (form.controls.TIPO_FRECUENCIA.value === 'Constante') {
-          <div class="fin-221__field">
-            <xtein-label class="fin-221__label" for="fin-221-dias-frecuencia">Nº Días</xtein-label>
-            <div class="fin-221__control">
+          <div class="xt-field">
+            <xtein-label class="xt-field__label" for="fin-221-dias-frecuencia">Nº Días</xtein-label>
+            <div class="xt-field__control">
               <xtein-number
                 id="fin-221-dias-frecuencia"
                 placeholder="Nº Días"
@@ -83,9 +83,9 @@
           </div>
         }
 
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-dias-primera-cuota">Días 1ra Cuota</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-dias-primera-cuota">Días 1ra Cuota</xtein-label>
+          <div class="xt-field__control">
             <xtein-number
               id="fin-221-dias-primera-cuota"
               placeholder="Días 1ra Cuota"
@@ -99,9 +99,9 @@
 
       <!-- Columna 4: Financiar Gravamen y Número de Pagos -->
       <div class="fin-221__header-col">
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-financiar-grav">Financiar Grav</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-financiar-grav">Financiar Grav</xtein-label>
+          <div class="xt-field__control">
             <xtein-select
               id="fin-221-financiar-grav"
               [items]="financiarGravOptions"
@@ -113,9 +113,9 @@
           </div>
         </div>
 
-        <div class="fin-221__field">
-          <xtein-label class="fin-221__label" for="fin-221-numero-pagos" [required]="true">Número de Pagos</xtein-label>
-          <div class="fin-221__control">
+        <div class="xt-field">
+          <xtein-label class="xt-field__label" for="fin-221-numero-pagos" [required]="true">Número de Pagos</xtein-label>
+          <div class="xt-field__control">
             <xtein-number
               id="fin-221-numero-pagos"
               placeholder="Número de Pagos"
@@ -130,8 +130,8 @@
   </div>
 
   <!-- Tarjeta de Plazos e Ítems -->
-  <div class="fin-221__card fin-221__card--items">
-    <xtein-group-label class="fin-221__section-title" label="Plazos / Configuración de Cuotas"></xtein-group-label>
+  <div class="xt-card fin-221__items">
+    <xtein-group-label class="xt-section-title" label="Plazos / Configuración de Cuotas"></xtein-group-label>
 
     <fin-221-items
       [items]="items()"

@@ -1,22 +1,16 @@
+/*======================================================================
+= VEN-229 LAYOUT
+=
+= Arrangement only. The page, cards, section headings, totals panel and
+= badges come from the shared blocks of libs/ui (xtein-blocks.scss).
+======================================================================*/
+
 :host {
   display: block;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-}
-
-/*======================================================================
-= VEN-229 PAGE
-======================================================================*/
-
-.ven-229 {
-  width: 100%;
-  min-width: 0;
-  min-height: 100%;
-  padding: 20px;
-  background: #f2f5f9;
-  box-sizing: border-box;
 }
 
 /*======================================================================
@@ -45,12 +39,7 @@
 
 .ven-229__card-main {
   flex: 1 1 0;
-  min-width: 0;
   padding: 20px 24px 24px;
-  border: 1px solid #dfe6ef;
-  border-radius: 10px;
-  background: #ffffff;
-  box-sizing: border-box;
 }
 
 .ven-229__card-totals {
@@ -59,16 +48,11 @@
   display: flex;
   flex-direction: column;
   padding: 0;
-  border: 1px solid #d1e5ec;
-  border-radius: 10px;
-  background: #f0fdfa;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 /*======================================================================
-= HEADER GRID (Cabecera Pedido)
+= HEADER GRID
 ======================================================================*/
 
 .ven-229__header-grid {
@@ -92,19 +76,11 @@
 .ven-229__section-divider {
   margin-top: 18px;
   margin-bottom: 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #e8eef5;
 }
 
 .ven-229__section-title {
   margin: 0;
   padding: 0;
-  color: rgba(10, 57, 96, 0.55);
-  font-size: 0.95rem;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: normal;
-  text-transform: none;
 }
 
 /*======================================================================
@@ -129,10 +105,6 @@
 .ven-229__control-inline {
   flex: 1 1 0;
   min-width: 0;
-
-  &--shaded {
-    opacity: 0.85;
-  }
 }
 
 .ven-229__full-row {
@@ -143,19 +115,8 @@
 
 .ven-229__field-inline--full {
   width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  .ven-229__label-inline {
-    flex: 0 0 140px;
-    margin: 0;
-    white-space: nowrap;
-  }
 
   .ven-229__control-inline {
-    flex: 1 1 0;
-    min-width: 0;
     width: 100%;
 
     xtein-input {
@@ -195,15 +156,6 @@
   justify-content: flex-start;
   align-items: center;
   padding: 10px 16px 6px;
-  border-bottom: 1px solid #d1e5ec;
-}
-
-.ven-229__totals-card-title {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #1b506f;
 }
 
 .ven-229__totals-body {
@@ -219,40 +171,18 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 13px;
-  color: #2b4c63;
-}
-
-.ven-229__totals-label {
-  font-weight: 500;
 }
 
 .ven-229__totals-value {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
 .ven-229__totals-divider {
-  height: 1px;
   margin: 6px 0;
-  background: #cbe2ea;
 }
 
 .ven-229__totals-row--grand {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1b506f;
   margin-top: 2px;
-
-  .ven-229__totals-label {
-    font-weight: 700;
-  }
-
-  .ven-229__totals-value {
-    font-weight: 700;
-    font-size: 18px;
-  }
 }
 
 /*======================================================================
@@ -266,12 +196,7 @@
 
 .ven-229__card-bottom {
   width: 100%;
-  min-width: 0;
   padding: 20px 24px 24px;
-  border: 1px solid #dfe6ef;
-  border-radius: 10px;
-  background: #ffffff;
-  box-sizing: border-box;
 }
 
 /*======================================================================
@@ -302,33 +227,17 @@
 }
 
 /*======================================================================
-= BADGES
+= OPTIONS POPUP
 ======================================================================*/
 
-.ven-229__badge-status {
-  display: inline-block;
-  padding: 4px 14px;
-  border-radius: 12px;
-  background: #e8f5e9;
-  color: #2e7d32;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1.4;
-  text-transform: uppercase;
-  white-space: nowrap;
+.ven-229__options {
+  display: grid;
+  gap: 0.5rem;
+}
 
-  &--anulado {
-    background: #fee2e2 !important;
-    color: #dc2626 !important;
-    border: 1px solid #fca5a5;
-  }
-
-  &--registrado {
-    background: #e8f5e9 !important;
-    color: #2e7d32 !important;
-    border: 1px solid #c8e6c9;
-  }
+.ven-229__options-empty {
+  padding: 1rem;
+  text-align: center;
 }
 
 /*======================================================================
@@ -376,9 +285,4 @@
   .ven-229__label-inline {
     flex: none;
   }
-}
-
-.ven-229__options {
-  display: grid;
-  gap: 0.5rem;
 }

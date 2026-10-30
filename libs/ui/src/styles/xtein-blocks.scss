@@ -1,0 +1,1126 @@
+/*======================================================================
+= XTEIN - SHARED SCREEN BLOCKS
+=
+= The look of the pieces every screen is built from: page, card,
+= section title, field with its label and control, data table and
+= empty state. Colors come from the theme tokens, so screens never
+= declare colors, shadows or typography; their own stylesheets only
+= arrange these blocks (grid columns, gaps, widths, breakpoints).
+======================================================================*/
+
+
+/*======================================================================
+= 1. PAGE AND CARD
+======================================================================*/
+
+/* Page body of an application: its background and the space around the cards. */
+.xt-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 1.25rem;
+  background: var(--xt-surface-2);
+  box-sizing: border-box;
+}
+
+.xt-card {
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: var(--xt-surface);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+  box-sizing: border-box;
+}
+
+/* A card that stretches its content vertically (lists, trees, item grids). */
+.xt-card--fill {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.xt-card--fill > * {
+  flex: 1 1 auto;
+}
+
+/* Inset panel inside a card, such as an inline editor. */
+.xt-panel {
+  padding: 12px;
+  border: 1px solid var(--xt-border);
+  border-radius: 8px;
+  background: var(--xt-surface-2);
+}
+
+.xt-section-title {
+  display: block;
+  margin-bottom: .875rem;
+}
+
+
+/*======================================================================
+= 2. FIELDS
+======================================================================*/
+
+/* Label above the control. */
+.xt-field {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  min-width: 0;
+}
+
+/* Label beside the control; screens may set --xt-field-label-width. */
+.xt-field--inline {
+  display: grid;
+  grid-template-columns: var(--xt-field-label-width, 140px) minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem;
+}
+
+.xt-field__label {
+  font-size: .8125rem;
+  font-weight: 500;
+  color: var(--xt-text-subtle);
+}
+
+.xt-field--inline .xt-field__label {
+  white-space: nowrap;
+}
+
+.xt-field__label label,
+.xt-field__label .form-label {
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.xt-field__control {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Read-only value shown in place of a control. */
+.xt-field__value {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: .8125rem;
+  color: var(--xt-text);
+}
+
+/* Secondary text, such as the current selection of a list. */
+.xt-text-secondary {
+  font-size: .8125rem;
+  color: var(--xt-text-muted);
+}
+
+@media (max-width: 500px) {
+  .xt-field--inline {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .25rem;
+  }
+}
+
+
+/*======================================================================
+= 3. DATA TABLE
+======================================================================*/
+
+/* Scrollable frame around a table. */
+.xt-table-frame {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--xt-border);
+  border-radius: 8px;
+  background: var(--xt-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+}
+
+.xt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .825rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.xt-table thead {
+  background: var(--xt-surface-2);
+  border-bottom: 2px solid var(--xt-border);
+}
+
+.xt-table th {
+  padding: .625rem .75rem;
+  font-weight: 600;
+  color: var(--xt-text-subtle);
+  user-select: none;
+}
+
+.xt-table tbody tr {
+  border-bottom: 1px solid var(--xt-surface-3);
+  transition: background-color .15s ease;
+}
+
+.xt-table tbody tr:hover:not(.xt-table__row--editing) {
+  background-color: var(--xt-surface-2);
+}
+
+.xt-table tbody tr.xt-table__row--selected {
+  background-color: rgba(var(--xt-primary-base-rgb), .06);
+}
+
+.xt-table tbody tr.xt-table__row--editing {
+  background-color: var(--xt-surface-accent);
+}
+
+.xt-table td {
+  padding: .5rem .75rem;
+  color: var(--xt-text-strong);
+  vertical-align: middle;
+}
+
+/* Message shown when a list or table has no rows (also as a table cell). */
+.xt-empty,
+.xt-table td.xt-empty {
+  padding: 2.5rem 1rem !important;
+  color: var(--xt-text-faint);
+  font-style: italic;
+  text-align: center;
+}
+
+
+/*======================================================================
+= 4. APPLICATION STATE
+======================================================================*/
+
+/* Loading or error message that fills an application while it starts. */
+.xt-app-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: clamp(1rem, 3vw, 2rem);
+  color: var(--xt-control-text, var(--xt-heading));
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Control shown dimmed because its value is derived, not typed. */
+.xt-field__control--muted {
+  opacity: .85;
+}
+
+
+/*======================================================================
+= 5. CARD VARIANTS, SECTIONS AND TEXT
+======================================================================*/
+
+/* Card with a thin border instead of a shadow. */
+.xt-card--outlined {
+  border: 1px solid var(--xt-border-soft);
+  box-shadow: none;
+}
+
+/* Tinted side panel with a divider on its right, such as a navigation tree. */
+.xt-side-panel {
+  background: var(--xt-surface-accent);
+  border-right: 1px solid var(--xt-border);
+}
+
+/* Line under a section heading inside a card. */
+.xt-section-divider {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--xt-border);
+}
+
+/* Heading of a group of fields inside a card. */
+.xt-section-heading {
+  color: rgba(var(--xt-primary-rgb), .7);
+  font-size: .95rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* Help text under or beside a field. */
+.xt-hint {
+  color: var(--xt-text-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.xt-hint--italic {
+  font-style: italic;
+}
+
+/* Validation or operation error text. */
+.xt-error-text {
+  color: var(--xt-danger);
+  font-size: 12px;
+}
+
+/* Value that stands out, such as a running total. */
+.xt-highlight {
+  border-radius: 8px;
+  background: var(--xt-surface-accent);
+  color: var(--xt-heading);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Strong text, such as a code or key column. */
+.xt-text-strong {
+  color: var(--xt-heading-strong);
+  font-weight: 600;
+}
+
+/* Small uppercase title of a card or panel, such as a totals summary. */
+.xt-card-title {
+  color: var(--xt-heading-strong);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* Error or alert text that keeps the surrounding font size. */
+.xt-text-danger {
+  color: var(--xt-danger);
+  font-weight: 600;
+}
+
+/* Line above a section, such as comments under a form. */
+.xt-section-divider--top {
+  padding-top: 6px;
+  padding-bottom: 0;
+  border-top: 1px solid var(--xt-border);
+  border-bottom: none;
+}
+
+/* Numbers aligned in columns. */
+.xt-text-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+
+/*======================================================================
+= 6. BUTTONS
+======================================================================*/
+
+/* Text button for custom dialogs and toolbars (DevExtreme buttons theme themselves). */
+.xt-button {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.xt-button--primary {
+  background: var(--xt-primary);
+  color: #ffffff;
+}
+
+.xt-button--primary:hover {
+  background: var(--xt-heading-strong);
+}
+
+.xt-button--secondary {
+  background: var(--xt-surface);
+  border-color: var(--xt-border-strong);
+  color: var(--xt-text-subtle);
+}
+
+.xt-button--secondary:hover {
+  background: var(--xt-surface-3);
+}
+
+/* Compact size for buttons inside table cells. */
+.xt-button--sm {
+  padding: .2rem .55rem;
+  font-size: .75rem;
+}
+
+/* Outlined warning look, such as an action still pending. */
+.xt-button--warning {
+  background: var(--xt-surface);
+  border-color: var(--xt-warning);
+  color: var(--xt-warning);
+  font-weight: 600;
+}
+
+.xt-button--warning:hover {
+  background: var(--xt-warning-soft);
+}
+
+.xt-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* Button that looks like the text around it, such as a clickable code in a grid. */
+.xt-button--bare {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.xt-button--bare:hover:not(:disabled) {
+  color: var(--xt-primary);
+  text-decoration: underline;
+}
+
+.xt-button--bare:focus-visible {
+  outline: 2px solid var(--xt-focus);
+  outline-offset: 2px;
+}
+
+/* Square icon button for table toolbars: add, save, cancel, delete. */
+.xt-icon-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all .18s ease-in-out;
+}
+
+.xt-icon-button__icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  transition: transform .15s ease;
+}
+
+.xt-icon-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.xt-icon-button:hover:not(:disabled) .xt-icon-button__icon {
+  transform: scale(1.08);
+}
+
+.xt-icon-button:active:not(:disabled) {
+  transform: translateY(0) scale(.96);
+}
+
+.xt-icon-button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.xt-icon-button--sm {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.xt-icon-button--primary {
+  color: var(--xt-info);
+  background: var(--xt-surface-accent);
+  border-color: var(--xt-border);
+}
+
+.xt-icon-button--primary:hover:not(:disabled) {
+  background: var(--xt-info);
+  color: var(--xt-on-status);
+  border-color: var(--xt-info-strong);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, .25);
+}
+
+.xt-icon-button--success {
+  color: var(--xt-success);
+  background: var(--xt-success-soft);
+  border-color: var(--xt-success-border);
+}
+
+.xt-icon-button--success:hover:not(:disabled) {
+  background: var(--xt-success);
+  color: var(--xt-on-status);
+  border-color: var(--xt-success-strong);
+  box-shadow: 0 2px 6px rgba(22, 163, 74, .25);
+}
+
+.xt-icon-button--cancel {
+  color: var(--xt-text-muted);
+  background: var(--xt-surface-2);
+  border-color: var(--xt-border-strong);
+}
+
+.xt-icon-button--cancel:hover:not(:disabled) {
+  background: var(--xt-neutral);
+  color: var(--xt-on-status);
+  border-color: var(--xt-text-subtle);
+  box-shadow: 0 2px 6px rgba(100, 116, 139, .25);
+}
+
+.xt-icon-button--danger {
+  color: var(--xt-danger);
+  background: var(--xt-danger-soft);
+  border-color: var(--xt-danger-border);
+}
+
+.xt-icon-button--danger:hover:not(:disabled) {
+  background: var(--xt-danger);
+  color: var(--xt-on-status);
+  border-color: var(--xt-danger-strong);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, .25);
+}
+
+/* Small round button on the edge of a collapsible panel. */
+.xt-collapse-toggle {
+  padding: 0;
+  border: 1px solid var(--xt-border);
+  border-radius: 11px;
+  background: var(--xt-surface);
+  color: var(--xt-heading);
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(var(--xt-primary-rgb), .12);
+}
+
+.xt-collapse-toggle:hover {
+  background: var(--xt-surface-accent);
+}
+
+
+/*======================================================================
+= 7. TABLE VARIANTS AND CELLS
+======================================================================*/
+
+/* Spreadsheet-like table: bordered cells and striped rows (document items). */
+.xt-table--grid {
+  font-size: 13px;
+  color: var(--xt-text-strong);
+}
+
+.xt-table--grid thead,
+.xt-table--grid thead tr {
+  background-color: var(--xt-surface-3);
+  border-bottom: 2px solid var(--xt-border-strong);
+}
+
+.xt-table--grid th {
+  padding: 8px 10px;
+  color: var(--xt-text-strong);
+  border-right: 1px solid var(--xt-border);
+}
+
+.xt-table--grid td {
+  padding: 6px 10px;
+  border-right: 1px solid var(--xt-border);
+}
+
+.xt-table--grid th:last-child,
+.xt-table--grid td:last-child {
+  border-right: none;
+}
+
+.xt-table--grid tbody tr {
+  border-bottom: 1px solid var(--xt-border);
+}
+
+.xt-table--grid tbody tr:nth-child(even) {
+  background-color: var(--xt-surface-2);
+}
+
+.xt-table--grid tbody tr:hover {
+  background-color: var(--xt-surface-3);
+}
+
+.xt-table--grid tbody tr.xt-table__row--selected,
+.xt-table--grid tbody tr.xt-table__row--editing {
+  background-color: var(--xt-surface-accent) !important;
+}
+
+.xt-table--grid tbody tr.xt-table__row--editing {
+  outline: 1px solid var(--xt-info-border);
+}
+
+/* Row shown dimmed, such as a line with zero quantity. */
+.xt-table tbody tr.xt-table__row--muted td {
+  color: var(--xt-text-faint);
+}
+
+/* Light table without cell borders (summaries inside cards). */
+.xt-table--plain {
+  font-size: 12.5px;
+  color: var(--xt-text-muted);
+}
+
+.xt-table--plain thead {
+  background: var(--xt-surface-2);
+  border-bottom: 1px solid var(--xt-border-soft);
+}
+
+.xt-table--plain th {
+  padding: 10px 12px;
+  color: var(--xt-heading);
+}
+
+.xt-table--plain tbody tr:last-child {
+  border-bottom: none;
+}
+
+.xt-table--plain tbody tr:hover {
+  background: var(--xt-surface-accent);
+}
+
+/* Compact DevExtreme editor inside a table cell. */
+.xt-cell-editor .dx-texteditor {
+  height: 28px !important;
+  border-radius: 4px;
+}
+
+.xt-cell-editor .dx-texteditor-input {
+  min-height: 28px !important;
+  padding: 4px 6px !important;
+  font-size: 13px !important;
+}
+
+/* Cell that opens a picker when clicked; its value is underlined. */
+.xt-cell-link {
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+
+.xt-cell-link:hover {
+  background-color: var(--xt-surface-3);
+}
+
+.xt-cell-link__value {
+  display: inline-block;
+  padding: 1px 4px;
+  border-bottom: 1px dashed var(--xt-text-faint);
+}
+
+/* Boxed message for an empty list inside a card. */
+.xt-empty--boxed,
+.xt-table td.xt-empty--boxed {
+  padding: 20px !important;
+  color: var(--xt-text-muted);
+  font-size: 13px;
+  font-style: normal;
+  background: var(--xt-surface-accent);
+  border: 1px dashed var(--xt-border-soft);
+  border-radius: 8px;
+}
+
+
+/*======================================================================
+= 8. BADGES, OPTION LISTS AND RADIO DOTS
+======================================================================*/
+
+.xt-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--xt-surface-2);
+  color: var(--xt-text-muted);
+}
+
+.xt-badge--lg {
+  padding: 4px 14px;
+  font-size: 12px;
+}
+
+/* Status pill: uppercase with wider spacing. */
+.xt-badge--caps {
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.xt-badge--success {
+  background: var(--xt-success-soft);
+  color: var(--xt-success-strong);
+}
+
+.xt-badge--danger {
+  background: var(--xt-danger-soft);
+  color: var(--xt-danger);
+}
+
+.xt-badge--info {
+  background: var(--xt-info-soft);
+  color: var(--xt-info-strong);
+}
+
+.xt-badge--warning {
+  background: var(--xt-warning-soft);
+  color: var(--xt-warning);
+}
+
+/* Selectable list inside a popup (taxes, units). */
+.xt-option-list__header {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  color: var(--xt-heading-strong);
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--xt-border);
+}
+
+.xt-option-list__row {
+  padding: 8px 12px;
+  color: var(--xt-text-strong);
+  font-size: 13px;
+  border: 1px solid var(--xt-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.xt-option-list__row:hover {
+  background-color: var(--xt-surface-2);
+  border-color: var(--xt-border-strong);
+}
+
+.xt-option-list__row--selected {
+  background-color: var(--xt-surface-accent);
+  border-color: var(--xt-info-border);
+}
+
+.xt-radio-dot {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 2px solid var(--xt-text-faint);
+  border-radius: 50%;
+  transition: all .15s ease;
+}
+
+.xt-radio-dot--checked {
+  border-color: var(--xt-info);
+}
+
+.xt-radio-dot--checked::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--xt-info);
+}
+
+
+/*======================================================================
+= 9. ACCORDION, FIELDSET AND TOTALS
+======================================================================*/
+
+.xt-accordion__header {
+  padding: 0 4px;
+  color: rgba(var(--xt-primary-rgb), .75);
+  font-size: 12px;
+  font-weight: 500;
+  background-color: transparent;
+  background-image: linear-gradient(to right, rgba(var(--xt-accent-rgb), .5) 20%, transparent 0%);
+  background-position: bottom;
+  background-size: 6px 1px;
+  background-repeat: repeat-x;
+  cursor: pointer;
+  user-select: none;
+}
+
+.xt-accordion__header:hover {
+  color: rgb(var(--xt-primary-rgb));
+}
+
+.xt-accordion__icon {
+  color: rgb(var(--xt-accent-rgb));
+}
+
+.xt-accordion__icon svg {
+  stroke: currentColor;
+}
+
+.xt-accordion__body {
+  padding: 14px 4px 16px 14px;
+}
+
+/* Bordered group of fields with a legend. */
+.xt-fieldset {
+  padding: 14px 18px 18px;
+  border: 1px solid var(--xt-border-soft);
+  border-radius: 8px;
+  background: var(--xt-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .02);
+}
+
+.xt-fieldset__legend {
+  width: auto;
+  padding: 0 6px;
+  color: rgba(var(--xt-primary-rgb), .7);
+  font-size: .95rem;
+  font-weight: 500;
+}
+
+/* Document totals panel. */
+.xt-totals {
+  border: 1px solid var(--xt-border);
+  border-radius: 10px;
+  background: var(--xt-surface-accent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+  overflow: hidden;
+}
+
+.xt-totals__row {
+  color: var(--xt-heading-strong);
+  font-size: 13px;
+}
+
+.xt-totals__label {
+  font-weight: 500;
+}
+
+.xt-totals__value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.xt-totals__divider {
+  height: 1px;
+  background: var(--xt-border-2);
+}
+
+.xt-totals__row--grand {
+  font-size: 17px;
+}
+
+.xt-totals__row--grand .xt-totals__label {
+  font-weight: 700;
+}
+
+.xt-totals__row--grand .xt-totals__value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.xt-totals__menu-button {
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--xt-text-muted);
+  line-height: 1;
+  cursor: pointer;
+  transition: color .15s, background-color .15s;
+}
+
+.xt-totals__menu-button:hover {
+  color: var(--xt-heading-strong);
+  background-color: rgba(var(--xt-primary-rgb), .06);
+}
+
+
+/*======================================================================
+= 10. TABS AND STEPS
+======================================================================*/
+
+/* Tabs drawn as buttons over a bottom line. */
+.xt-tabs {
+  border-bottom: 2px solid var(--xt-border);
+}
+
+.xt-tabs__tab {
+  padding: 10px 18px;
+  color: var(--xt-text-muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+}
+
+.xt-tabs__tab:hover {
+  color: var(--xt-primary);
+  background: var(--xt-surface-3);
+}
+
+.xt-tabs__tab--active {
+  color: var(--xt-primary);
+  font-weight: 600;
+  background: var(--xt-surface);
+  border-color: var(--xt-border);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, .03);
+}
+
+/* Flat tabs: no boxes, the active tab is underlined in the primary color. */
+.xt-tabs--underline {
+  border-bottom-width: 1px;
+}
+
+.xt-tabs--underline .xt-tabs__tab {
+  margin-bottom: -1px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+}
+
+.xt-tabs--underline .xt-tabs__tab--active {
+  background: transparent;
+  border-bottom-color: var(--xt-primary);
+  box-shadow: none;
+}
+
+/* Segmented control: options inside a rounded track. */
+.xt-segmented {
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--xt-surface-accent);
+}
+
+.xt-segmented__option {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--xt-heading);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.xt-segmented__option:focus-visible {
+  outline: 2px solid var(--xt-heading);
+  outline-offset: 1px;
+}
+
+.xt-segmented__option--active {
+  background: var(--xt-surface);
+  box-shadow: 0 1px 2px rgba(var(--xt-primary-rgb), .18);
+  font-weight: 600;
+}
+
+/* Steps of a wizard. */
+.xt-step {
+  padding: 10px 12px;
+  border: 1px solid var(--xt-border-soft);
+  border-radius: 10px;
+  background: var(--xt-surface-accent);
+  color: var(--xt-text-muted);
+}
+
+.xt-step__number {
+  border-radius: 50%;
+  background: var(--xt-surface-2);
+  color: var(--xt-heading);
+  font-weight: 600;
+}
+
+.xt-step__title {
+  color: var(--xt-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.xt-step__description {
+  font-size: 12px;
+}
+
+.xt-step--active {
+  border-color: var(--xt-heading);
+}
+
+.xt-step--active .xt-step__number {
+  background: var(--xt-heading);
+  color: var(--xt-surface);
+}
+
+.xt-step--done .xt-step__number {
+  background: var(--xt-success-strong);
+  color: var(--xt-on-status);
+}
+
+
+/*======================================================================
+= 11. DIALOG
+======================================================================*/
+
+.xt-modal__backdrop {
+  background: rgba(15, 23, 42, .45);
+  backdrop-filter: blur(2px);
+}
+
+.xt-modal__card {
+  border-radius: 12px;
+  background: var(--xt-surface);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, .1), 0 10px 10px -5px rgba(0, 0, 0, .04);
+}
+
+.xt-modal__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--xt-border);
+}
+
+.xt-modal__title {
+  color: var(--xt-text-strong);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.xt-modal__close {
+  border: none;
+  background: transparent;
+  color: var(--xt-text-faint);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.xt-modal__close:hover {
+  color: var(--xt-heading-strong);
+}
+
+.xt-modal__body {
+  padding: 20px;
+}
+
+.xt-modal__footer {
+  padding: 14px 20px;
+  background: var(--xt-surface-2);
+  border-top: 1px solid var(--xt-border);
+}
+
+
+/*======================================================================
+= 12. APPLICATION STATE DETAILS
+======================================================================*/
+
+.xt-app-state__spinner {
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+  border: 3px solid var(--xt-border);
+  border-top-color: var(--xt-heading-strong);
+  border-radius: 50%;
+  animation: xt-spin .75s linear infinite;
+}
+
+.xt-app-state__error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--xt-danger-soft);
+  color: var(--xt-danger);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.xt-app-state__title {
+  color: var(--xt-heading);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.xt-app-state__message {
+  color: var(--xt-text-muted);
+  font-size: 13px;
+}
+
+@keyframes xt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/*======================================================================
+= 13. DEVEXTREME DATA GRID: SOFT VARIANT
+=
+= Add class "xt-datagrid-soft" to a dx-data-grid for the light look of
+= the permission screens: tinted header and group rows, borderless data
+= rows and square checkboxes.
+======================================================================*/
+
+.xt-datagrid-soft .dx-datagrid {
+  background-color: transparent;
+}
+
+.xt-datagrid-soft .dx-datagrid-headers,
+.xt-datagrid-soft .dx-datagrid-headers .dx-datagrid-table .dx-header-row > td {
+  background-color: var(--xt-surface-4) !important;
+  border-color: var(--xt-border-2) !important;
+  color: rgba(var(--xt-primary-rgb), .95) !important;
+}
+
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-group-row {
+  background-color: var(--xt-surface-accent) !important;
+  color: rgba(var(--xt-primary-rgb), .95) !important;
+  border-top: 1px solid var(--xt-border) !important;
+  border-bottom: 1px solid var(--xt-border) !important;
+}
+
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-group-row > td {
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+.xt-datagrid-soft .dx-datagrid-group-opened,
+.xt-datagrid-soft .dx-datagrid-group-closed {
+  color: rgba(var(--xt-primary-rgb), .8) !important;
+}
+
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-data-row,
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-data-row > td,
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-data-row.dx-row-alt > td {
+  background-color: var(--xt-surface) !important;
+  border-color: transparent !important;
+}
+
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-data-row:hover > td {
+  background-color: var(--xt-surface-2) !important;
+}
+
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-data-row.dx-selection > td,
+.xt-datagrid-soft .dx-datagrid-rowsview .dx-data-row.dx-row-focused > td {
+  background-color: var(--xt-surface-accent) !important;
+  color: inherit !important;
+}
+
+.xt-datagrid-soft .dx-checkbox-icon {
+  border: 1px solid var(--xt-border-strong) !important;
+  border-radius: 4px !important;
+  background-color: var(--xt-surface);
+  box-shadow: none !important;
+}
+
+.xt-datagrid-soft .dx-checkbox-checked .dx-checkbox-icon {
+  background-color: var(--xt-primary-alt) !important;
+  border-color: var(--xt-primary-alt) !important;
+  color: #ffffff !important;
+}
+
+.xt-datagrid-soft .dx-checkbox.dx-state-hover .dx-checkbox-icon {
+  border-color: var(--xt-text-faint) !important;
+}

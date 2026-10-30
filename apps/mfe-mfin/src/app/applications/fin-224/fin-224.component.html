@@ -1,12 +1,12 @@
-<section class="fin-224">
+<section class="xt-page">
   <!-- Tarjeta de Encabezado -->
-  <div class="fin-224__card" [formGroup]="form">
+  <div class="xt-card" [formGroup]="form">
     <div class="fin-224__header-grid">
       <!-- Columna 1: Código, Descripción, Tipo -->
       <div class="fin-224__header-col">
-        <div class="fin-224__field">
-          <xtein-label class="fin-224__label" for="fin-224-id-condicion" [required]="true">Código</xtein-label>
-          <div class="fin-224__control">
+        <div class="xt-field xt-field--inline">
+          <xtein-label class="xt-field__label" for="fin-224-id-condicion" [required]="true">Código</xtein-label>
+          <div class="xt-field__control">
             <xtein-input
               id="fin-224-id-condicion"
               name="ID_CONDICION"
@@ -19,9 +19,9 @@
           </div>
         </div>
 
-        <div class="fin-224__field">
-          <xtein-label class="fin-224__label" for="fin-224-descripcion" [required]="true">Descripción</xtein-label>
-          <div class="fin-224__control">
+        <div class="xt-field xt-field--inline">
+          <xtein-label class="xt-field__label" for="fin-224-descripcion" [required]="true">Descripción</xtein-label>
+          <div class="xt-field__control">
             <xtein-input
               id="fin-224-descripcion"
               name="DESCRIPCION"
@@ -33,9 +33,9 @@
           </div>
         </div>
 
-        <div class="fin-224__field">
-          <xtein-label class="fin-224__label" for="fin-224-tipo">Tipo</xtein-label>
-          <div class="fin-224__control">
+        <div class="xt-field xt-field--inline">
+          <xtein-label class="xt-field__label" for="fin-224-tipo">Tipo</xtein-label>
+          <div class="xt-field__control">
             <xtein-select
               id="fin-224-tipo"
               placeholder="Seleccionar..."
@@ -51,9 +51,9 @@
 
       <!-- Columna 2: Estado, Plan de Financiación -->
       <div class="fin-224__header-col">
-        <div class="fin-224__field">
-          <xtein-label class="fin-224__label" for="fin-224-estado">Estado</xtein-label>
-          <div class="fin-224__control">
+        <div class="xt-field xt-field--inline">
+          <xtein-label class="xt-field__label" for="fin-224-estado">Estado</xtein-label>
+          <div class="xt-field__control">
             <xtein-select
               id="fin-224-estado"
               placeholder="Seleccionar..."
@@ -66,9 +66,9 @@
           </div>
         </div>
 
-        <div class="fin-224__field">
-          <xtein-label class="fin-224__label" for="fin-224-plan">Plan de Financiación</xtein-label>
-          <div class="fin-224__control">
+        <div class="xt-field xt-field--inline">
+          <xtein-label class="xt-field__label" for="fin-224-plan">Plan de Financiación</xtein-label>
+          <div class="xt-field__control">
             <xtein-select
               id="fin-224-plan"
               placeholder="Seleccionar..."
@@ -89,7 +89,7 @@
   </div>
 
   <!-- Tarjeta de Listas de Precios asociadas -->
-  <div class="fin-224__card fin-224__card--items">
+  <div class="xt-card fin-224__items">
     <fin-224-items
       [items]="items()"
       [listasPrecios]="listasPrecios()"

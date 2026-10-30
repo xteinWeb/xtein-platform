@@ -11,6 +11,8 @@
 
 /* ============================================================
    APPLICATION HOST
+   Layout only: the loading and error states take their look
+   from the shared xt-app-state block of libs/ui.
    ============================================================ */
 
 .mad-application-host {
@@ -21,9 +23,6 @@
 
   min-width: 0;
   min-height: 0;
-
-  background:
-    #ffffff;
 
   overflow: auto;
 }
@@ -38,116 +37,23 @@
 
   inset: 0;
 
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
 
   width: 100%;
   height: 100%;
 
   padding: 20px;
 
-  background:
-    #ffffff;
-
-  text-align:
-    center;
-
-  z-index:
-    2;
+  z-index: 2;
 }
 
 
-/* ============================================================
-   LOADING
-   ============================================================ */
-
-.mad-application-host__loading {
-  width: 28px;
-  height: 28px;
-
-  margin-bottom:
-    12px;
-
-  border:
-    3px solid #dbe7f2;
-
-  border-top-color:
-    #174b75;
-
-  border-radius:
-    50%;
-
-  animation:
-    mad-application-host-spin
-    .75s
-    linear
-    infinite;
-}
-
-
-@keyframes mad-application-host-spin {
-
-  to {
-    transform:
-      rotate(360deg);
-  }
-
-}
-
-
-/* ============================================================
-   ERROR
-   ============================================================ */
-
+.mad-application-host__loading,
 .mad-application-host__error-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 38px;
-  height: 38px;
-
-  margin-bottom:
-    12px;
-
-  border-radius:
-    50%;
-
-  background:
-    #f7e8e8;
-
-  color:
-    #a44343;
-
-  font-size:
-    20px;
-
-  font-weight:
-    700;
-}
-
-
-.mad-application-host__state-title {
-  color:
-    #244d73;
-
-  font-size:
-    15px;
-
-  font-weight:
-    600;
+  margin-bottom: 12px;
 }
 
 
 .mad-application-host__state-message {
-  margin-top:
-    6px;
-
-  color:
-    #7b8c9d;
-
-  font-size:
-    13px;
+  margin-top: 6px;
 }

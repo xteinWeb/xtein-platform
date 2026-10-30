@@ -9,15 +9,15 @@
   @if (loading()) {
 
     <div
-      class="mad-application-host__state">
+      class="mad-application-host__state xt-app-state">
 
       <div
-        class="mad-application-host__loading"
+        class="mad-application-host__loading xt-app-state__spinner"
         aria-hidden="true">
       </div>
 
       <div
-        class="mad-application-host__state-title">
+        class="xt-app-state__title">
 
         Cargando aplicación
 
@@ -31,11 +31,11 @@
   @if (errorMessage()) {
 
     <div
-      class="mad-application-host__state
-             mad-application-host__state--error">
+      class="mad-application-host__state xt-app-state"
+      role="alert">
 
       <div
-        class="mad-application-host__error-icon"
+        class="mad-application-host__error-icon xt-app-state__error-icon"
         aria-hidden="true">
 
         !
@@ -43,14 +43,14 @@
       </div>
 
       <div
-        class="mad-application-host__state-title">
+        class="xt-app-state__title">
 
         Aplicación no disponible
 
       </div>
 
       <div
-        class="mad-application-host__state-message">
+        class="mad-application-host__state-message xt-app-state__message">
 
         {{ errorMessage() }}
 

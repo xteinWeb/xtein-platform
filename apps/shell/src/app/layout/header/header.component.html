@@ -195,6 +195,63 @@
           </div>
 
 
+          <!-- Theme selector -->
+          <div
+            class="xt-header__theme"
+            role="group"
+            aria-label="Tema">
+
+            <span
+              class="xt-header__theme-title">
+              Tema
+            </span>
+
+            @for (
+              theme of themes;
+              track theme.id
+            ) {
+
+              <button
+                type="button"
+                class="xt-header__user-menu-item xt-header__theme-option"
+                role="menuitemradio"
+                [class.xt-header__theme-option--active]="theme.id === currentTheme()"
+                [attr.aria-checked]="theme.id === currentTheme()"
+                (click)="selectTheme(theme.id)">
+
+                <span
+                  class="xt-header__theme-swatch"
+                  aria-hidden="true"
+                  [style.background]="theme.swatch">
+                </span>
+
+                <span>
+                  {{ theme.name }}
+                </span>
+
+                @if (
+                  theme.id === currentTheme()
+                ) {
+
+                  <i
+                    class="dx-icon dx-icon-check xt-header__theme-check"
+                    aria-hidden="true">
+                  </i>
+
+                }
+
+              </button>
+
+            }
+
+          </div>
+
+
+          <div
+            class="xt-header__user-menu-separator">
+          </div>
+
+
           <button
             type="button"
             class="xt-header__user-menu-item"

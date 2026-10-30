@@ -1,13 +1,13 @@
-<section class="pro-039">
+<section class="pro-039 xt-page">
   <div class="pro-039__form" [formGroup]="form">
     <!-- ===== FILA SUPERIOR: Tarjeta Principal ===== -->
     <div class="pro-039__top-row">
-      <div class="pro-039__card-main">
+      <div class="pro-039__card-main xt-card xt-card--outlined">
         <!-- Cabecera del consumo -->
         <div class="pro-039__header-grid">
           <div class="pro-039__header-col">
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-documento">Consumo Número</xtein-label>
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-documento">Consumo Número</xtein-label>
               <div class="pro-039__control-inline">
                 <xtein-lookup
                   id="pro-039-documento"
@@ -24,7 +24,7 @@
             </div>
 
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-fecha">Fecha</xtein-label>
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-fecha">Fecha</xtein-label>
               <div class="pro-039__control-inline">
                 <xtein-date
                   id="pro-039-fecha"
@@ -38,8 +38,8 @@
             </div>
 
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-fecha-registro">Fecha de Registro</xtein-label>
-              <div class="pro-039__control-inline pro-039__control-inline--shaded">
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-fecha-registro">Fecha de Registro</xtein-label>
+              <div class="pro-039__control-inline xt-field__control--muted">
                 <xtein-date id="pro-039-fecha-registro" name="FECHA_REGISTRO" formControlName="FECHA_REGISTRO" [readOnly]="true" />
               </div>
             </div>
@@ -47,22 +47,27 @@
 
           <div class="pro-039__header-col">
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline">Estado</xtein-label>
+              <xtein-label class="pro-039__label-inline xt-field__label">Estado</xtein-label>
               <div class="pro-039__control-inline">
-                <span class="pro-039__badge-status" [attr.data-estado]="form.controls.ESTADO.value">{{ form.controls.ESTADO.value }}</span>
+                <span
+                  class="xt-badge xt-badge--lg xt-badge--caps"
+                  [class.xt-badge--success]="form.controls.ESTADO.value !== 'ANULADO' && form.controls.ESTADO.value !== 'AUTORIZADO'"
+                  [class.xt-badge--danger]="form.controls.ESTADO.value === 'ANULADO'"
+                  [class.xt-badge--info]="form.controls.ESTADO.value === 'AUTORIZADO'"
+                >{{ form.controls.ESTADO.value }}</span>
               </div>
             </div>
 
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-movimiento">Movimiento</xtein-label>
-              <div class="pro-039__control-inline pro-039__control-inline--shaded">
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-movimiento">Movimiento</xtein-label>
+              <div class="pro-039__control-inline xt-field__control--muted">
                 <xtein-input id="pro-039-movimiento" name="MOVIMIENTO" formControlName="MOVIMIENTO" [readOnly]="true" />
               </div>
             </div>
 
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-usuario">Usuario</xtein-label>
-              <div class="pro-039__control-inline pro-039__control-inline--shaded">
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-usuario">Usuario</xtein-label>
+              <div class="pro-039__control-inline xt-field__control--muted">
                 <xtein-input id="pro-039-usuario" name="USUARIO" placeholder="Usuario" formControlName="USUARIO" [readOnly]="true" />
               </div>
             </div>
@@ -70,14 +75,14 @@
         </div>
 
         <!-- Sección Consumo de producción -->
-        <div class="pro-039__section-divider">
-          <xtein-group-label class="pro-039__section-title" label="Consumo de producción"></xtein-group-label>
+        <div class="pro-039__section-divider xt-section-divider">
+          <xtein-group-label class="pro-039__section-title xt-section-heading" label="Consumo de producción"></xtein-group-label>
         </div>
 
         <div class="pro-039__client-grid">
           <div class="pro-039__client-col">
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-producto">Producto</xtein-label>
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-producto">Producto</xtein-label>
               <div class="pro-039__control-inline">
                 <xtein-lookup
                   id="pro-039-producto"
@@ -98,7 +103,7 @@
 
             @if (isJuego()) {
               <div class="pro-039__field-inline">
-                <xtein-label class="pro-039__label-inline" for="pro-039-componente">Componente</xtein-label>
+                <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-componente">Componente</xtein-label>
                 <div class="pro-039__control-inline">
                   <xtein-lookup
                     id="pro-039-componente"
@@ -120,7 +125,7 @@
 
           <div class="pro-039__client-col">
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-seccion">Sección</xtein-label>
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-seccion">Sección</xtein-label>
               <div class="pro-039__control-inline">
                 <xtein-lookup
                   id="pro-039-seccion"
@@ -139,7 +144,7 @@
             </div>
 
             <div class="pro-039__field-inline">
-              <xtein-label class="pro-039__label-inline" for="pro-039-lote">Cantidad lote</xtein-label>
+              <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-lote">Cantidad lote</xtein-label>
               <div class="pro-039__control-inline">
                 <xtein-number
                   id="pro-039-lote"
@@ -157,15 +162,15 @@
 
     <!-- ===== FILA INFERIOR: Origen / Destino + Materiales ===== -->
     <div class="pro-039__bottom-row">
-      <div class="pro-039__card-bottom">
+      <div class="pro-039__card-bottom xt-card xt-card--outlined">
         <div class="pro-039__params-row">
           <div class="pro-039__params-section">
-            <div class="pro-039__section-divider">
-              <xtein-group-label class="pro-039__section-title" label="Origen / Destino"></xtein-group-label>
+            <div class="pro-039__section-divider xt-section-divider">
+              <xtein-group-label class="pro-039__section-title xt-section-heading" label="Origen / Destino"></xtein-group-label>
             </div>
             <div class="pro-039__params-grid">
               <div class="pro-039__field-inline">
-                <xtein-label class="pro-039__label-inline" for="pro-039-origen">Bodega Origen</xtein-label>
+                <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-origen">Bodega Origen</xtein-label>
                 <div class="pro-039__control-inline">
                   <xtein-lookup
                     id="pro-039-origen"
@@ -185,7 +190,7 @@
               </div>
 
               <div class="pro-039__field-inline">
-                <xtein-label class="pro-039__label-inline" for="pro-039-destino">Destino</xtein-label>
+                <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-destino">Destino</xtein-label>
                 <div class="pro-039__control-inline">
                   <xtein-lookup
                     id="pro-039-destino"
@@ -210,7 +215,7 @@
         <!-- Observación (ancho completo) -->
         <div class="pro-039__full-row">
           <div class="pro-039__field-inline pro-039__field-inline--full">
-            <xtein-label class="pro-039__label-inline" for="pro-039-detalle">Observación</xtein-label>
+            <xtein-label class="pro-039__label-inline xt-field__label" for="pro-039-detalle">Observación</xtein-label>
             <div class="pro-039__control-inline">
               <xtein-input id="pro-039-detalle" name="DETALLE" placeholder="Descripción / observación del consumo..." formControlName="DETALLE" [readOnly]="readOnly()" />
             </div>

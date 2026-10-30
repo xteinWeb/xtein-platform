@@ -22,7 +22,7 @@
   min-width: 0;
   min-height: 0;
 
-  background: #ffffff;
+  background: var(--xt-surface);
 
   overflow: auto;
 }
@@ -47,9 +47,9 @@
 
   padding: 24px;
 
-  background: #ffffff;
+  background: var(--xt-surface);
 
-  color: #7b8c9d;
+  color: var(--xt-text-muted);
 
   text-align: center;
 
@@ -68,7 +68,7 @@
   margin-bottom: 14px;
 
   border:
-    3px solid #dbe7f2;
+    3px solid var(--xt-border);
 
   border-top-color:
     #174b75;
@@ -100,7 +100,7 @@
 
 .xt-workspace-tab-host__state--error {
   background:
-    #ffffff;
+    var(--xt-surface);
 }
 
 
@@ -137,7 +137,7 @@
 
 .xt-workspace-tab-host__state-title {
   color:
-    #244d73;
+    var(--xt-heading);
 
   font-size:
     15px;
@@ -152,7 +152,7 @@
     5px;
 
   color:
-    #7b8c9d;
+    var(--xt-text-muted);
 
   font-size:
     13px;
@@ -164,7 +164,7 @@
     8px;
 
   color:
-    #9aa8b6;
+    var(--xt-text-muted);
 
   font-size:
     11px;

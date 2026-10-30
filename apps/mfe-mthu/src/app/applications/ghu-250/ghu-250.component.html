@@ -1,5 +1,5 @@
 <section
-  class="ghu-250">
+  class="ghu-250 xt-page">
 
   <!-- Wizard steps -->
   <ol
@@ -9,16 +9,16 @@
     @for (item of steps; track item.step) {
 
       <li
-        class="ghu-250__step"
-        [class.ghu-250__step--active]="step() === item.step"
-        [class.ghu-250__step--done]="step() > item.step"
+        class="ghu-250__step xt-step"
+        [class.xt-step--active]="step() === item.step"
+        [class.xt-step--done]="step() > item.step"
         [attr.aria-current]="step() === item.step ? 'step' : null">
 
-        <span class="ghu-250__step-number">{{ item.step }}</span>
+        <span class="ghu-250__step-number xt-step__number">{{ item.step }}</span>
 
         <span class="ghu-250__step-text">
-          <span class="ghu-250__step-title">{{ item.title }}</span>
-          <span class="ghu-250__step-description">{{ item.description }}</span>
+          <span class="xt-step__title">{{ item.title }}</span>
+          <span class="ghu-250__step-description xt-step__description">{{ item.description }}</span>
         </span>
 
       </li>
@@ -28,7 +28,7 @@
 
 
   <div
-    class="ghu-250__card">
+    class="ghu-250__card xt-card xt-card--outlined">
 
     @switch (step()) {
 
@@ -72,7 +72,7 @@
             </xtein-date>
 
             @if (isInvalid('FECHA_RETIRO')) {
-              <span class="ghu-250__error" role="alert">Fecha de terminación es requerida</span>
+              <span class="xt-error-text" role="alert">Fecha de terminación es requerida</span>
             }
 
           </div>
@@ -134,7 +134,7 @@
 
             <xtein-label for="ghu-250-employees">
               Empleados
-              <span class="ghu-250__hint">
+              <span class="xt-hint">
                 ({{ lookupSelectedIds().length ? lookupSelectedIds().length + ' seleccionados' : 'todos los que cumplan el filtro' }})
               </span>
             </xtein-label>
@@ -185,8 +185,8 @@
       @case (Step.Employees) {
 
         <header class="ghu-250__section-header">
-          <h2 class="ghu-250__section-title">Empleados a liquidar</h2>
-          <span class="ghu-250__hint">{{ preparedSelectedIds().length }} de {{ preparedEmployees().length }} seleccionados</span>
+          <h2 class="ghu-250__section-title xt-section-heading">Empleados a liquidar</h2>
+          <span class="xt-hint">{{ preparedSelectedIds().length }} de {{ preparedEmployees().length }} seleccionados</span>
         </header>
 
         <div class="ghu-250__table">
@@ -211,16 +211,16 @@
       @case (Step.Liquidation) {
 
         <header class="ghu-250__section-header">
-          <h2 class="ghu-250__section-title">
+          <h2 class="ghu-250__section-title xt-section-heading">
             Liquidación generada
             @if (liquidation(); as result) {
-              <span class="ghu-250__hint">Consecutivo {{ result.CONSECUTIVO }} · Retiro {{ result.FECHA_RETIRO }}</span>
+              <span class="xt-hint">Consecutivo {{ result.CONSECUTIVO }} · Retiro {{ result.FECHA_RETIRO }}</span>
             }
           </h2>
-          <span class="ghu-250__total">Total a pagar: $ {{ liquidationTotal() | number: '1.0-0' }}</span>
+          <span class="ghu-250__total xt-highlight">Total a pagar: $ {{ liquidationTotal() | number: '1.0-0' }}</span>
         </header>
 
-        <p class="ghu-250__help">
+        <p class="ghu-250__help xt-hint">
           Puede modificar los valores de devengados y deducidos; los totales de la fila se recalculan automáticamente.
         </p>
 
@@ -246,13 +246,13 @@
 
         <header class="ghu-250__section-header">
 
-          <div class="ghu-250__report-tabs" role="tablist" aria-label="Reportes generados">
+          <div class="ghu-250__report-tabs xt-segmented" role="tablist" aria-label="Reportes generados">
 
             <button
               type="button"
               role="tab"
-              class="ghu-250__report-tab"
-              [class.ghu-250__report-tab--active]="activeReport() === 'general'"
+              class="xt-segmented__option"
+              [class.xt-segmented__option--active]="activeReport() === 'general'"
               [attr.aria-selected]="activeReport() === 'general'"
               (click)="selectReport('general')">
               Informe de liquidación general
@@ -261,8 +261,8 @@
             <button
               type="button"
               role="tab"
-              class="ghu-250__report-tab"
-              [class.ghu-250__report-tab--active]="activeReport() === 'slips'"
+              class="xt-segmented__option"
+              [class.xt-segmented__option--active]="activeReport() === 'slips'"
               [attr.aria-selected]="activeReport() === 'slips'"
               (click)="selectReport('slips')">
               Tirillas de pago individuales
@@ -294,7 +294,7 @@
 
         <iframe
           #reportFrame
-          class="ghu-250__report"
+          class="ghu-250__report xt-card xt-card--outlined"
           title="Vista previa del reporte"
           [srcdoc]="reportDocument()">
         </iframe>

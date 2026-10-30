@@ -1,7 +1,7 @@
 <div class="xtein-adm015-un">
   <xtein-data-grid
     #unGrid
-    class="xtein-adm015-un__grid"
+    class="xtein-adm015-un__grid xt-datagrid-soft"
     [dataSource]="rows"
     keyExpr="ID_UN_ASOCIADA"
     [columns]="columns"
@@ -60,7 +60,7 @@
     } @else if (!readOnly) {
       <button
         type="button"
-        class="xtein-adm015-un__code-btn"
+        class="xtein-adm015-un__code-btn xt-button xt-button--bare"
         [disabled]="busy || !!draft"
         [attr.aria-label]="'Editar unidad ' + cell.value"
         (click)="beginEdit(cell.data)"

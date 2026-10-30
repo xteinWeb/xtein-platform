@@ -4,14 +4,14 @@
     @if (item; as current) {
       <p class="bodegas__summary">
         Cantidad del ítem: <strong>{{ quantity(current.CANTIDAD) }} {{ unitLabel }}</strong>
-        · Repartido: <strong [class.bodegas__mismatch]="pendingQuantity !== 0">{{ quantity(total) }} {{ unitLabel }}</strong>
-        @if (pendingQuantity !== 0) { · Pendiente: <strong class="bodegas__mismatch">{{ quantity(pendingQuantity) }}</strong> }
+        · Repartido: <strong [class.xt-error-text]="pendingQuantity !== 0">{{ quantity(total) }} {{ unitLabel }}</strong>
+        @if (pendingQuantity !== 0) { · Pendiente: <strong class="xt-error-text">{{ quantity(pendingQuantity) }}</strong> }
       </p>
     }
     @if (loading()) { <p role="status" aria-live="polite">Consultando existencias…</p> }
-    @if (error()) { <p role="alert">{{ error() }}</p> }
+    @if (error()) { <p class="xt-error-text" role="alert">{{ error() }}</p> }
     <div class="bodegas__table">
-      <table>
+      <table class="xt-table">
         <thead>
           <tr>
             <th>Bodega</th>
@@ -46,7 +46,7 @@
               }
             </tr>
           } @empty {
-            <tr><td [attr.colspan]="readOnly ? 4 : 5" class="bodegas__empty">Sin reparto por bodega.</td></tr>
+            <tr><td [attr.colspan]="readOnly ? 4 : 5" class="xt-empty">Sin reparto por bodega.</td></tr>
           }
         </tbody>
       </table>

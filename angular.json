@@ -99,6 +99,21 @@
               "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "node_modules/devextreme/dist/css/dx.common.css",
               "node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
+              {
+                "input": "node_modules/devextreme/dist/css/dx.material.blue.dark.compact.css",
+                "bundleName": "dx-theme-oscuro",
+                "inject": false
+              },
+              {
+                "input": "node_modules/devextreme/dist/css/dx.material.teal.light.compact.css",
+                "bundleName": "dx-theme-claro-verde",
+                "inject": false
+              },
+              {
+                "input": "node_modules/devextreme/dist/css/dx.material.purple.light.compact.css",
+                "bundleName": "dx-theme-claro-morado",
+                "inject": false
+              },
               "node_modules/@devexpress/analytics-core/dist/css/dx-analytics.common.css",
               "node_modules/@devexpress/analytics-core/dist/css/dx-analytics.light.css",
               "node_modules/devexpress-reporting/dist/css/dx-webdocumentviewer.css",

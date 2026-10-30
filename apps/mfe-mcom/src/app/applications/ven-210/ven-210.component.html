@@ -1,9 +1,9 @@
-<section class="ven-210">
+<section class="ven-210 xt-page">
   <div class="ven-210__form" [formGroup]="form">
     <!-- ===== FILA SUPERIOR: Tarjeta Principal + Tarjeta Totales ===== -->
     <div class="ven-210__top-row">
       <!-- Tarjeta Principal -->
-      <div class="ven-210__card-main">
+      <div class="ven-210__card-main xt-card xt-card--outlined">
         <!-- Cabecera de Remisión -->
         <div class="ven-210__header-grid">
           <div class="ven-210__header-col">
@@ -38,7 +38,7 @@
                 Fecha de Registro
               </xtein-label>
               <div
-                class="ven-210__control-inline ven-210__control-inline--shaded"
+                class="ven-210__control-inline xt-field__control--muted"
               >
                 <xtein-date
                   id="ven-210-fecha-registro"
@@ -55,7 +55,7 @@
             <div class="ven-210__field-inline">
               <xtein-label class="ven-210__label-inline"> Estado </xtein-label>
               <div class="ven-210__control-inline">
-                <span class="ven-210__badge-status" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
+                <span class="xt-badge xt-badge--lg xt-badge--caps xt-badge--success" [ngStyle]="stateStyle()">{{ form.controls.ESTADO.value }}</span>
               </div>
             </div>
 
@@ -64,7 +64,7 @@
                 Usuario
               </xtein-label>
               <div
-                class="ven-210__control-inline ven-210__control-inline--shaded"
+                class="ven-210__control-inline xt-field__control--muted"
               >
                 <xtein-input
                   id="ven-210-usuario"
@@ -80,8 +80,8 @@
         </div>
 
         <!-- Sección Cliente -->
-        <div class="ven-210__section-divider">
-          <xtein-group-label class="ven-210__section-title" label="Cliente"></xtein-group-label>
+        <div class="ven-210__section-divider xt-section-divider">
+          <xtein-group-label class="ven-210__section-title xt-section-heading" label="Cliente"></xtein-group-label>
         </div>
 
         <div class="ven-210__client-grid">
@@ -138,7 +138,7 @@
                 Nombre de Cliente
               </xtein-label>
               <div
-                class="ven-210__control-inline ven-210__control-inline--shaded"
+                class="ven-210__control-inline xt-field__control--muted"
               >
                 <xtein-input
                   id="ven-210-nombre-cliente"
@@ -171,9 +171,9 @@
       </div>
 
       <!-- Tarjeta de Totales -->
-      <div class="ven-210__card-totals">
-        <div class="ven-210__totals-header">
-          <button type="button" class="ven-210__totals-menu-btn" title="Configuración" aria-label="Configuración">
+      <div class="ven-210__card-totals xt-totals">
+        <div class="ven-210__totals-header xt-section-divider">
+          <button type="button" class="ven-210__totals-menu-btn xt-totals__menu-button" title="Configuración" aria-label="Configuración">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
               <line x1="4" y1="7" x2="20" y2="7"></line>
               <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -183,32 +183,32 @@
         </div>
 
         <div class="ven-210__totals-body">
-          <div class="ven-210__totals-row">
-            <span class="ven-210__totals-label">Subtotal</span>
-            <span class="ven-210__totals-value">
+          <div class="ven-210__totals-row xt-totals__row">
+            <span class="xt-totals__label">Subtotal</span>
+            <span class="ven-210__totals-value xt-totals__value">
               {{ money(form.get("SUB_TOTAL")?.value) }}
             </span>
           </div>
 
-          <div class="ven-210__totals-row">
-            <span class="ven-210__totals-label">Descuentos</span>
-            <span class="ven-210__totals-value">
+          <div class="ven-210__totals-row xt-totals__row">
+            <span class="xt-totals__label">Descuentos</span>
+            <span class="ven-210__totals-value xt-totals__value">
               {{ money(form.get("VALOR_DESCUENTO")?.value) }}
             </span>
           </div>
 
-          <div class="ven-210__totals-row">
-            <span class="ven-210__totals-label">Anticipos</span>
-            <span class="ven-210__totals-value">
+          <div class="ven-210__totals-row xt-totals__row">
+            <span class="xt-totals__label">Anticipos</span>
+            <span class="ven-210__totals-value xt-totals__value">
               {{ money(advances()) }}
             </span>
           </div>
 
-          <div class="ven-210__totals-divider"></div>
+          <div class="ven-210__totals-divider xt-totals__divider"></div>
 
-          <div class="ven-210__totals-row ven-210__totals-row--grand">
-            <span class="ven-210__totals-label">TOTAL</span>
-            <span class="ven-210__totals-value">
+          <div class="ven-210__totals-row ven-210__totals-row--grand xt-totals__row xt-totals__row--grand">
+            <span class="xt-totals__label">TOTAL</span>
+            <span class="ven-210__totals-value xt-totals__value">
               {{ money(form.get("TOTAL")?.value) }}
             </span>
           </div>
@@ -218,13 +218,13 @@
 
     <!-- ===== FILA INFERIOR: Parámetros + Items ===== -->
     <div class="ven-210__bottom-row">
-      <div class="ven-210__card-bottom">
+      <div class="ven-210__card-bottom xt-card xt-card--outlined">
         <!-- Secciones de parámetros comerciales -->
         <div class="ven-210__params-row">
           <!-- Datos de la Venta -->
           <div class="ven-210__params-section">
-            <div class="ven-210__section-divider">
-              <xtein-group-label class="ven-210__section-title" label="Datos de la venta"></xtein-group-label>
+            <div class="ven-210__section-divider xt-section-divider">
+              <xtein-group-label class="ven-210__section-title xt-section-heading" label="Datos de la venta"></xtein-group-label>
             </div>
             <div class="ven-210__params-grid">
               <div class="ven-210__field-inline">
@@ -318,8 +318,8 @@
 
           <!-- Liquidación -->
           <div class="ven-210__params-section">
-            <div class="ven-210__section-divider">
-              <xtein-group-label class="ven-210__section-title" label="Liquidación"></xtein-group-label>
+            <div class="ven-210__section-divider xt-section-divider">
+              <xtein-group-label class="ven-210__section-title xt-section-heading" label="Liquidación"></xtein-group-label>
             </div>
             <div class="ven-210__params-grid">
               <div class="ven-210__field-inline">
@@ -465,7 +465,7 @@
 <xtein-popup [visible]="settingsVisible()" (visibleChange)="settingsVisible.set($event)" title="Opciones de la aplicación" width="min(480px, 95vw)" height="auto" [showCloseButton]="true">
   <div class="ven-210__options">
     @if (settings().length === 0) {
-      <div style="padding: 1rem; text-align: center; color: var(--xt-color-text-secondary, #64748b);">
+      <div class="ven-210__options-empty xt-text-secondary">
         No hay opciones de configuración disponibles para esta aplicación.
       </div>
     }

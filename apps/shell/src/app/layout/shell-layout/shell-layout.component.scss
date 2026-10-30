@@ -107,6 +107,10 @@
   visibility:
     hidden;
 
+  /* Rounded on the side that faces the workspace. */
+  border-radius:
+    0 18px 18px 0;
+
   transform:
     translateX(-100%);
 

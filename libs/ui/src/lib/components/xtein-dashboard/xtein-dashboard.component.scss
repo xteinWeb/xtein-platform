@@ -33,7 +33,7 @@
     hidden;
 
   background:
-    #ffffff;
+    var(--xt-surface);
 }
 
 
@@ -105,7 +105,7 @@
     border-box;
 
   color:
-    #6c8297;
+    var(--xt-text-muted);
 
   text-align:
     center;
@@ -135,10 +135,10 @@
     12px;
 
   background:
-    #edf5fc;
+    var(--xt-surface-accent);
 
   color:
-    #174b75;
+    var(--xt-heading-strong);
 }
 
 
@@ -150,7 +150,7 @@
 
 .xt-dashboard__empty-title {
   color:
-    #244d73;
+    var(--xt-heading);
 
   font-size:
     16px;
@@ -165,7 +165,7 @@
     6px;
 
   color:
-    #7a8ea4;
+    var(--xt-text-muted);
 
   font-size:
     13px;

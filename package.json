@@ -10,6 +10,7 @@
         "build": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng build",
         "build-prod": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng build --configuration production",
         "watch": "node --max-old-space-size=14336 ./node_modules/@angular/cli/bin/ng build --watch --configuration development",
+        "lint:styles": "stylelint \"apps/mfe-*/src/app/**/*.scss\"",
         "test": "ng test",
         "test:ci": "npx ng test sdk --watch=false && npx ng test runtime --watch=false && npx ng test ui --watch=false",
         "proxy": "ng serve --port 4800 --proxy-config proxy.conf.json",
@@ -89,6 +90,8 @@
         "karma-jasmine": "~5.1.0",
         "karma-jasmine-html-reporter": "~2.0.0",
         "ng-packagr": "^21.2.0",
+        "postcss-scss": "^4.0.9",
+        "stylelint": "^17.16.0",
         "typescript": "~5.9.3",
         "vitest": "^4.0.8"
     }

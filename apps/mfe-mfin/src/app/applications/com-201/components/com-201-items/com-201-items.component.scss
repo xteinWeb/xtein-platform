@@ -28,10 +28,6 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 10px 14px;
-  padding: 12px;
-  border: 1px solid #d7e0ea;
-  border-radius: 8px;
-  background: #f8fafc;
 }
 
 .com201-items__field {
@@ -50,14 +46,7 @@
   flex: 1 1 220px;
 }
 
-.com201-items__value {
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-}
-
-.com201-items__value--number {
+.xt-field__value.com201-items__value--number {
   justify-content: flex-end;
 }
 
@@ -88,7 +77,5 @@
 }
 
 .com201-items__pager-info {
-  font-size: 13px;
-  color: var(--xt-color-text-secondary, #64748b);
   padding: 0 6px;
 }

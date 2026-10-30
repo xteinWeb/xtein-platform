@@ -1,8 +1,8 @@
 <div class="xtein-ubicaciones">
   <!-- Acordeón 1: Contacto -->
   <div class="xtein-accordion-item">
-    <div class="xtein-accordion-header" (click)="toggleSection('contacto')">
-      <div class="xtein-accordion-icon">
+    <div class="xt-accordion__header xtein-accordion-header" (click)="toggleSection('contacto')">
+      <div class="xt-accordion__icon xtein-accordion-icon">
         <svg *ngIf="expanded.contacto()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -10,13 +10,13 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Contacto</span>
+      <span>Contacto</span>
     </div>
-    <div class="xtein-accordion-body" *ngIf="expanded.contacto()">
+    <div class="xt-accordion__body xtein-accordion-body" *ngIf="expanded.contacto()">
       <div class="xtein-ubicaciones__form-grid">
-        <div class="xtein-ubicaciones__field-inline">
-          <xtein-label class="xtein-ubicaciones__label-inline" for="cli-url">Url/Website</xtein-label>
-          <div class="xtein-ubicaciones__control-inline">
+        <div class="xt-field xt-field--inline xtein-ubicaciones__field">
+          <xtein-label class="xt-field__label" for="cli-url">Url/Website</xtein-label>
+          <div class="xt-field__control xtein-ubicaciones__control">
             <xtein-input
               id="cli-url"
               [(ngModel)]="contactoAdicional.URL"
@@ -27,9 +27,9 @@
           </div>
         </div>
 
-        <div class="xtein-ubicaciones__field-inline">
-          <xtein-label class="xtein-ubicaciones__label-inline" for="cli-ciiu">Actividad económica</xtein-label>
-          <div class="xtein-ubicaciones__control-inline">
+        <div class="xt-field xt-field--inline xtein-ubicaciones__field">
+          <xtein-label class="xt-field__label" for="cli-ciiu">Actividad económica</xtein-label>
+          <div class="xt-field__control xtein-ubicaciones__control">
             <xtein-input
               id="cli-ciiu"
               [(ngModel)]="contactoAdicional.CIIU"
@@ -45,8 +45,8 @@
 
   <!-- Acordeón 2: Correos -->
   <div class="xtein-accordion-item">
-    <div class="xtein-accordion-header" (click)="toggleSection('correos')">
-      <div class="xtein-accordion-icon">
+    <div class="xt-accordion__header xtein-accordion-header" (click)="toggleSection('correos')">
+      <div class="xt-accordion__icon xtein-accordion-icon">
         <svg *ngIf="expanded.correos()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -54,17 +54,17 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Correos</span>
+      <span>Correos</span>
     </div>
-    <div class="xtein-accordion-body" *ngIf="expanded.correos()">
+    <div class="xt-accordion__body xtein-accordion-body" *ngIf="expanded.correos()">
       <xtein-correos [emails]="emails" [readOnly]="readOnly" (emailsChange)="emailsChange.emit($event)" (pendingChange)="pendingChange.emit()" />
     </div>
   </div>
 
   <!-- Acordeón 3: Direcciones -->
   <div class="xtein-accordion-item">
-    <div class="xtein-accordion-header" (click)="toggleSection('direcciones')">
-      <div class="xtein-accordion-icon">
+    <div class="xt-accordion__header xtein-accordion-header" (click)="toggleSection('direcciones')">
+      <div class="xt-accordion__icon xtein-accordion-icon">
         <svg *ngIf="expanded.direcciones()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -72,17 +72,17 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Direcciones</span>
+      <span>Direcciones</span>
     </div>
-    <div class="xtein-accordion-body" [hidden]="!expanded.direcciones()">
+    <div class="xt-accordion__body xtein-accordion-body" [hidden]="!expanded.direcciones()">
       <xtein-direcciones [direcciones]="direcciones" [readOnly]="readOnly" (direccionesChange)="direccionesChange.emit($event)" (pendingChange)="pendingChange.emit()" />
     </div>
   </div>
 
   <!-- Acordeón 4: Teléfonos -->
   <div class="xtein-accordion-item">
-    <div class="xtein-accordion-header" (click)="toggleSection('telefonos')">
-      <div class="xtein-accordion-icon">
+    <div class="xt-accordion__header xtein-accordion-header" (click)="toggleSection('telefonos')">
+      <div class="xt-accordion__icon xtein-accordion-icon">
         <svg *ngIf="expanded.telefonos()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -90,9 +90,9 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
-      <span class="xtein-accordion-title">Teléfonos</span>
+      <span>Teléfonos</span>
     </div>
-    <div class="xtein-accordion-body" [hidden]="!expanded.telefonos()">
+    <div class="xt-accordion__body xtein-accordion-body" [hidden]="!expanded.telefonos()">
       <xtein-telefonos [telefonos]="telefonos" [readOnly]="readOnly" (telefonosChange)="telefonosChange.emit($event)" (pendingChange)="pendingChange.emit()" />
     </div>
   </div>
