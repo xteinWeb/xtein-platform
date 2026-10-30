@@ -2,6 +2,13 @@
   display:
     block;
 
+  /* Breakpoints follow the width the Shell gives the app, not the viewport. */
+  container-type:
+    inline-size;
+
+  container-name:
+    ven-230;
+
   width:
     100%;
 
@@ -870,10 +877,7 @@
 = RESPONSIVE: TABLET / MOBILE
 ======================================================================*/
 
-@media (
-  max-width:
-    767.98px
-) {
+@container ven-230 (max-width: 620px) {
 
   .ven-230 {
     padding:
@@ -931,10 +935,7 @@
 = RESPONSIVE: SMALL MOBILE
 ======================================================================*/
 
-@media (
-  max-width:
-    479.98px
-) {
+@container ven-230 (max-width: 420px) {
 
   .ven-230 {
     padding:
@@ -969,3 +970,16 @@
 .ven-230__electronic-summary img { flex: 0 0 auto; }
 .ven-230__no-qr { padding: 1rem; color: #667085; }
 @media (max-width: 480px) { .ven-230__electronic-summary { flex-wrap: wrap; } }
+
+/* Fila de ancho completo (Descripción): al apilarse, la etiqueta no debe conservar su base de 140px como alto */
+@container ven-230 (max-width: 620px) {
+  .ven-230__field-inline--full {
+    align-items: stretch;
+    gap: 4px;
+
+    .ven-230__label-inline {
+      flex: none;
+      width: 100%;
+    }
+  }
+}

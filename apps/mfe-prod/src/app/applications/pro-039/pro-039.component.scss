@@ -375,3 +375,16 @@
   background: #e3f2fd;
   color: #1565c0;
 }
+
+/* Fila de ancho completo (Descripción): al apilarse, la etiqueta no debe conservar su base de 140px como alto */
+@media (max-width: 768px) {
+  .pro-039__field-inline--full {
+    align-items: stretch;
+    gap: 4px;
+
+    .pro-039__label-inline {
+      flex: none;
+      width: 100%;
+    }
+  }
+}

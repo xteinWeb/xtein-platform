@@ -472,6 +472,36 @@
 
 
 /* ============================================================
+   COMPACT LAYOUT, COLLAPSED (phones and portrait tablets)
+   Only the hamburger remains, over the header's top-left corner.
+   ============================================================ */
+
+:host-context(.xt-shell--compact)
+.xt-sidebar--collapsed {
+  background: transparent;
+
+  border-right: 0;
+
+  box-shadow: none;
+}
+
+:host-context(.xt-shell--compact)
+.xt-sidebar--collapsed
+.xt-sidebar__header {
+  flex: 1 1 auto;
+}
+
+:host-context(.xt-shell--compact)
+.xt-sidebar--collapsed
+.xt-sidebar__loading,
+:host-context(.xt-shell--compact)
+.xt-sidebar--collapsed
+.xt-sidebar__navigation {
+  display: none;
+}
+
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 

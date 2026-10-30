@@ -72,7 +72,7 @@
       @if (adding()) {
         <tr class="row-editing">
           <td class="col-select"></td>
-          <td class="col-product" colspan="2">
+          <td data-label="Producto" class="col-product" colspan="2">
             <dx-drop-down-box
               class="add-product"
               valueExpr="PRODUCTO"
@@ -121,20 +121,20 @@
               (checkedChange)="toggle(row, $event)"
             />
           </td>
-          <td class="col-product">{{ row.PRODUCTO }}</td>
-          <td class="col-name" [title]="row.NOMBRE_PRODUCTO">{{ row.NOMBRE_PRODUCTO }}</td>
-          <td class="col-attr">{{ row.ATRIBUTO }}</td>
-          <td class="col-inv">{{ row.TIPO_INVENTARIO }}</td>
-          <td class="col-um">{{ row.UDM_PRES || row.UDM }}</td>
-          <td class="col-origin">
+          <td data-label="Producto" class="col-product">{{ row.PRODUCTO }}</td>
+          <td data-label="Nombre" class="col-name" [title]="row.NOMBRE_PRODUCTO">{{ row.NOMBRE_PRODUCTO }}</td>
+          <td data-label="Atr" class="col-attr">{{ row.ATRIBUTO }}</td>
+          <td data-label="Tipo inv." class="col-inv">{{ row.TIPO_INVENTARIO }}</td>
+          <td data-label="UM" class="col-um">{{ row.UDM_PRES || row.UDM }}</td>
+          <td data-label="Origen" class="col-origin">
             <span class="origin-badge" [class.origin-badge--matrix]="row.ES_MATRIZ">
               {{ row.ES_MATRIZ ? 'Matriz' : 'Adicional' }}
             </span>
           </td>
-          <td class="col-qty text-end">{{ row.ES_MATRIZ ? quantity(row.CONSUMO_BASE) : '' }}</td>
-          <td class="col-lot text-end">{{ row.ES_MATRIZ ? quantity(lot) : '' }}</td>
-          <td class="col-qty text-end">{{ row.ES_MATRIZ ? quantity(row.CONSUMO_BASE * lot) : '' }}</td>
-          <td class="col-qty-edit text-end">
+          <td data-label="Consumo unit." class="col-qty text-end">{{ row.ES_MATRIZ ? quantity(row.CONSUMO_BASE) : '' }}</td>
+          <td data-label="Lote" class="col-lot text-end">{{ row.ES_MATRIZ ? quantity(lot) : '' }}</td>
+          <td data-label="Total" class="col-qty text-end">{{ row.ES_MATRIZ ? quantity(row.CONSUMO_BASE * lot) : '' }}</td>
+          <td data-label="Consumo modificado" class="col-qty-edit text-end">
             @if (readOnly) {
               {{ quantity(row.CANTIDAD) }}
             } @else {

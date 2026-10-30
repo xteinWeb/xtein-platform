@@ -27,7 +27,7 @@
         <tbody>
           @for (row of rows(); track $index) {
             <tr>
-              <td>
+              <td data-label="Bodega">
                 @if (readOnly) {
                   {{ row.ID_UN_BODEGA }} {{ row.DESCRIPCION ? '· ' + row.DESCRIPCION : '' }}
                 } @else {
@@ -35,7 +35,7 @@
                     [ngModel]="row.ID_UN_BODEGA" (ngModelChange)="selectWarehouse(row, $event)" [disabled]="loading()" />
                 }
               </td>
-              <td class="text-end">
+              <td [attr.data-label]="'Cantidad (' + (unitLabel || 'unidad') + ')'" class="text-end">
                 @if (readOnly) {
                   {{ quantity(row.CANTIDAD) }}
                 } @else {
@@ -43,10 +43,10 @@
                 }
               </td>
               @if (readOnly) {
-                <td class="text-end">{{ money(row.COSTO) }}</td>
-                <td>{{ row.ORIGEN_COSTO }}</td>
+                <td data-label="Costo" class="text-end">{{ money(row.COSTO) }}</td>
+                <td data-label="Origen del costo">{{ row.ORIGEN_COSTO }}</td>
               } @else {
-                <td><xtein-button text="Quitar" variant="secondary" [disabled]="loading()" (clicked)="removeRow($index)" /></td>
+                <td class="bodegas__action"><xtein-button text="Quitar" variant="secondary" [disabled]="loading()" (clicked)="removeRow($index)" /></td>
               }
             </tr>
           } @empty {
