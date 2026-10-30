@@ -1,4 +1,4 @@
-<aside class="xt-sidebar" [class.xt-sidebar--collapsed]="collapsed">
+<aside class="xt-sidebar">
   <!-- ======================================================
        HEADER
        ====================================================== -->
@@ -9,20 +9,18 @@
       icon="menu"
       stylingMode="text"
       type="normal"
-      [hint]="collapsed ? 'Expandir menú' : 'Contraer menú'"
-      (onClick)="toggleSidebar()"
+      hint="Cerrar menú"
+      (onClick)="closeRequested.emit()"
     >
     </dx-button>
 
-    @if (!collapsed) {
-      <div class="xt-sidebar__brand">
-        <img
-          class="xt-sidebar__logo"
-          src="/assets/img/logo/xtein.svg"
-          alt="XTEIN"
-        />
-      </div>
-    }
+    <div class="xt-sidebar__brand">
+      <img
+        class="xt-sidebar__logo"
+        src="/assets/img/logo/xtein.svg"
+        alt="XTEIN"
+      />
+    </div>
   </div>
 
   <!-- ======================================================
@@ -39,7 +37,7 @@
        NAVIGATION LOAD ERROR
        ====================================================== -->
 
-  @if (!loading && error && !collapsed) {
+  @if (!loading && error) {
     <div class="xt-sidebar__error">
       {{ error }}
     </div>
@@ -49,7 +47,7 @@
        APPLICATION OPEN ERROR
        ====================================================== -->
 
-  @if (!loading && launchError && !collapsed) {
+  @if (!loading && launchError) {
     <div class="xt-sidebar__error">
       {{ launchError }}
     </div>
@@ -73,7 +71,7 @@
         searchMode="contains"
         noDataText="No se encontraron aplicaciones"
         [items]="navigationItems"
-        [searchEnabled]="!collapsed"
+        [searchEnabled]="true"
         [searchEditorOptions]="searchEditorOptions"
         [selectByClick]="true"
         [focusStateEnabled]="true"
@@ -83,8 +81,6 @@
         <div
           *dxTemplate="let item of 'item'"
           class="xt-navigation-item"
-          [class.xt-navigation-item--collapsed]="collapsed"
-          [id]="getItemElementId(item)"
         >
           <i
             class="xt-navigation-item__icon"
@@ -93,24 +89,9 @@
           >
           </i>
 
-          @if (!collapsed) {
-            <span class="xt-navigation-item__text">
-              {{ item.name }}
-            </span>
-          }
-
-          @if (collapsed) {
-            <dx-tooltip
-              [target]="getTooltipTarget(item)"
-              showEvent="mouseenter"
-              hideEvent="mouseleave"
-              position="right"
-            >
-              <div *dxTemplate="let data of 'content'">
-                {{ item.name }}
-              </div>
-            </dx-tooltip>
-          }
+          <span class="xt-navigation-item__text">
+            {{ item.name }}
+          </span>
         </div>
       </dx-tree-view>
     </div>

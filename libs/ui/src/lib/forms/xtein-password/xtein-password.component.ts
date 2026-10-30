@@ -25,6 +25,9 @@ import type {
 /**
  * Standard XTEIN password input based on DevExtreme TextBox.
  *
+ * An eye button inside the field shows or hides the typed
+ * password, so the user can check it before submitting.
+ *
  * Visual appearance is provided exclusively by the global
  * XTEIN theme.
  */
@@ -101,6 +104,18 @@ export class XteinPasswordComponent
     new EventEmitter<void>();
 
   value = '';
+
+  /**
+   * Whether the password is shown as plain text.
+   */
+  passwordVisible = false;
+
+  /**
+   * Options of the eye button. Rebuilt on each toggle so
+   * DevExtreme refreshes its icon and accessible label.
+   */
+  toggleButtonOptions =
+    this.buildToggleButtonOptions();
 
   private formDisabled = false;
 
@@ -221,5 +236,45 @@ export class XteinPasswordComponent
 
     this.onTouched();
     this.blurred.emit();
+  }
+
+  private togglePasswordVisibility():
+    void {
+
+    this.passwordVisible =
+      !this.passwordVisible;
+
+    this.toggleButtonOptions =
+      this.buildToggleButtonOptions();
+
+    this.changeDetector
+      .markForCheck();
+  }
+
+  private buildToggleButtonOptions():
+    Record<string, unknown> {
+
+    return {
+      icon:
+        this.passwordVisible
+          ? 'eyeclose'
+          : 'eyeopen',
+      stylingMode:
+        'text',
+      focusStateEnabled:
+        false,
+      hint:
+        this.passwordVisible
+          ? 'Ocultar contraseña'
+          : 'Mostrar contraseña',
+      elementAttr: {
+        'aria-label':
+          this.passwordVisible
+            ? 'Ocultar contraseña'
+            : 'Mostrar contraseña'
+      },
+      onClick: () =>
+        this.togglePasswordVisibility()
+    };
   }
 }

@@ -1,6 +1,23 @@
 <div
   class="xt-header">
 
+  <!-- Applications menu -->
+  <button
+    type="button"
+    class="xt-header__icon-button xt-header__menu-button"
+    aria-controls="xt-shell-navigation"
+    [attr.aria-expanded]="menuOpen"
+    [title]="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
+    [attr.aria-label]="menuOpen ? 'Cerrar menú de aplicaciones' : 'Abrir menú de aplicaciones'"
+    (click)="menuToggle.emit()">
+
+    <i
+      class="icon-menu">
+    </i>
+
+  </button>
+
+
   <!-- Company brand -->
   <div
     class="xt-header__brand">

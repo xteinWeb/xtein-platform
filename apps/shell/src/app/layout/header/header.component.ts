@@ -1,7 +1,10 @@
 import {
   Component,
-  computed,
+  EventEmitter,
   HostListener,
+  Input,
+  Output,
+  computed,
   inject
 } from '@angular/core';
 
@@ -40,6 +43,23 @@ import {
     './header.component.scss'
 })
 export class Header {
+
+  /**
+   * Whether the floating applications menu is open.
+   */
+  @Input()
+  menuOpen =
+    false;
+
+
+  /**
+   * Asks the Shell layout to open or close the
+   * applications menu.
+   */
+  @Output()
+  readonly menuToggle =
+    new EventEmitter<void>();
+
 
   private readonly authService =
     inject(

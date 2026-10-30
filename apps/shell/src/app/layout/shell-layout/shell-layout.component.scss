@@ -25,7 +25,6 @@
     grid;
 
   grid-template-columns:
-    var(--xt-sidebar-width)
     minmax(0, 1fr);
 
   grid-template-rows:
@@ -33,8 +32,8 @@
     minmax(0, 1fr);
 
   grid-template-areas:
-    "sidebar header"
-    "sidebar main";
+    "header"
+    "main";
 
   width:
     100%;
@@ -44,19 +43,6 @@
 
   overflow:
     hidden;
-
-  transition:
-    grid-template-columns .2s ease;
-}
-
-
-/* ============================================================
-   COLLAPSED SIDEBAR
-   ============================================================ */
-
-.xt-shell--sidebar-collapsed {
-  --xt-sidebar-width:
-    72px;
 }
 
 
@@ -86,21 +72,95 @@
 
 
 /* ============================================================
-   SIDEBAR
+   FLOATING SIDEBAR
    ============================================================ */
 
+/*
+ * The navigation floats over the header and the workspace, so
+ * opening it never resizes the open applications.
+ */
 .xt-shell__sidebar {
-  grid-area:
-    sidebar;
+  position:
+    fixed;
 
-  min-width:
+  top:
     0;
 
-  min-height:
+  left:
     0;
+
+  z-index:
+    1100;
+
+  width:
+    var(--xt-sidebar-width);
+
+  max-width:
+    calc(100vw - 48px);
+
+  height:
+    100vh;
 
   overflow:
     hidden;
+
+  visibility:
+    hidden;
+
+  transform:
+    translateX(-100%);
+
+  box-shadow:
+    none;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    visibility 0s linear .2s;
+}
+
+
+.xt-shell--sidebar-open
+.xt-shell__sidebar {
+  visibility:
+    visible;
+
+  transform:
+    translateX(0);
+
+  box-shadow:
+    8px 0 24px rgba(15, 35, 64, .18);
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    visibility 0s;
+}
+
+
+.xt-shell__backdrop {
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  z-index:
+    1050;
+
+  background:
+    rgba(15, 35, 64, .28);
+
+  animation:
+    xt-shell-backdrop-in .2s ease;
+}
+
+
+@keyframes xt-shell-backdrop-in {
+  from {
+    opacity:
+      0;
+  }
 }
 
 
@@ -160,12 +220,6 @@
   .xt-shell {
     --xt-sidebar-width:
       280px;
-  }
-
-
-  .xt-shell--sidebar-collapsed {
-    --xt-sidebar-width:
-      72px;
   }
 }
 

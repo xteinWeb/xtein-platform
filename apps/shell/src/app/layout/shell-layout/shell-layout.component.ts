@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  HostListener,
   signal
 } from '@angular/core';
 
@@ -28,8 +29,10 @@ import {
 /**
  * Main authenticated layout of the XTEIN Shell.
  *
- * The Shell owns global layout state because sidebar changes
- * affect the header and workspace dimensions.
+ * The Shell owns the navigation state: the application sidebar
+ * floats over the workspace, opens from the header menu button
+ * and closes when an application is opened, on a click outside
+ * it or with Escape.
  *
  * The Shell is also responsible for initializing global runtime
  * configuration consumed by shared platform libraries.
@@ -59,10 +62,10 @@ import {
 export class ShellLayout {
 
   /**
-   * Indicates whether the main navigation sidebar
-   * is collapsed.
+   * Indicates whether the floating navigation sidebar
+   * is open.
    */
-  readonly sidebarCollapsed =
+  readonly sidebarOpen =
     signal(
       false
     );
@@ -78,18 +81,39 @@ export class ShellLayout {
 
 
   /**
-   * Updates the sidebar layout state.
-   *
-   * @param collapsed New collapsed state.
+   * Opens or closes the floating navigation sidebar.
    */
-  setSidebarCollapsed(
-    collapsed:
-      boolean
-  ): void {
+  toggleSidebar(): void {
 
-    this.sidebarCollapsed.set(
-      collapsed
+    this.sidebarOpen.update(
+      open => !open
     );
+  }
+
+
+  /**
+   * Closes the floating navigation sidebar.
+   */
+  closeSidebar(): void {
+
+    this.sidebarOpen.set(
+      false
+    );
+  }
+
+
+  /**
+   * Escape closes the floating navigation sidebar.
+   */
+  @HostListener(
+    'document:keydown.escape'
+  )
+  onEscape(): void {
+
+    if (this.sidebarOpen()) {
+
+      this.closeSidebar();
+    }
   }
 
 

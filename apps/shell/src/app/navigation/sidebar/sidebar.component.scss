@@ -419,59 +419,6 @@
 
 
 /* ============================================================
-   COLLAPSED STATE
-   ============================================================ */
-
-.xt-sidebar--collapsed
-.xt-sidebar__header {
-  padding-right: 8px;
-  padding-left: 8px;
-}
-
-.xt-sidebar--collapsed
-.xt-sidebar__toggle {
-  position: static;
-
-  margin: 0;
-
-  transform: none;
-}
-
-.xt-sidebar--collapsed
-.xt-sidebar__brand,
-.xt-sidebar--collapsed
-.xt-sidebar__search-container,
-.xt-sidebar--collapsed
-.xt-sidebar__label {
-  display: none;
-}
-
-.xt-sidebar--collapsed
-.xt-sidebar__menu {
-  padding-right: 8px;
-  padding-left: 8px;
-}
-
-.xt-sidebar--collapsed
-.xt-sidebar__submenu {
-  padding-left: 0;
-}
-
-.xt-sidebar--collapsed
-.xt-sidebar__group {
-  justify-content: center;
-
-  padding-right: 0;
-  padding-left: 0;
-}
-
-.xt-sidebar--collapsed
-.xt-sidebar__group-chevron {
-  margin: 0;
-}
-
-
-/* ============================================================
    RESPONSIVE
    ============================================================ */
 
@@ -637,25 +584,5 @@
   /* Selected */
   .dx-treeview-node.dx-state-selected > .dx-treeview-item .xt-navigation-item__icon {
     color: #0f4c81;
-  }
-}
-
-/* Collapsed sidebar */
-.xt-sidebar--collapsed {
-  .xt-navigation-item {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .xt-navigation-item__icon,
-  .xt-icon-module,
-  .xt-icon-application {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    min-height: 20px;
-    max-width: 20px;
-    max-height: 20px;
-    flex-basis: 20px;
   }
 }

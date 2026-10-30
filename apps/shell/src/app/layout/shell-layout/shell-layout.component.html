@@ -1,24 +1,41 @@
 <div
   class="xt-shell"
-  [class.xt-shell--sidebar-collapsed]="sidebarCollapsed()">
+  [class.xt-shell--sidebar-open]="sidebarOpen()">
 
   <!-- Header -->
   <header
     class="xt-shell__header">
 
-    <app-header>
+    <app-header
+      [menuOpen]="sidebarOpen()"
+      (menuToggle)="toggleSidebar()">
     </app-header>
 
   </header>
 
 
-  <!-- Main navigation -->
+  <!-- Backdrop: a click outside the floating navigation closes it -->
+  @if (sidebarOpen()) {
+
+    <div
+      class="xt-shell__backdrop"
+      aria-hidden="true"
+      (click)="closeSidebar()">
+    </div>
+
+  }
+
+
+  <!-- Main navigation, floating over the workspace -->
   <aside
-    class="xt-shell__sidebar">
+    id="xt-shell-navigation"
+    class="xt-shell__sidebar"
+    [attr.aria-hidden]="!sidebarOpen()"
+    [attr.inert]="sidebarOpen() ? null : ''">
 
     <app-sidebar
-      [collapsed]="sidebarCollapsed()"
-      (collapsedChange)="setSidebarCollapsed($event)">
+      (closeRequested)="closeSidebar()"
+      (applicationOpened)="closeSidebar()">
     </app-sidebar>
 
   </aside>

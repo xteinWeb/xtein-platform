@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
   OnInit,
   Output,
 } from '@angular/core';
@@ -10,7 +9,6 @@ import {
 import {
   DxButtonModule,
   DxLoadIndicatorModule,
-  DxTooltipModule,
   DxTreeViewModule,
 } from 'devextreme-angular';
 
@@ -36,7 +34,8 @@ interface NavigationItemClickEvent {
  *
  * The component presents the authenticated application tree
  * and requests the workspace to open application nodes selected
- * by the user.
+ * by the user. It floats over the workspace; the Shell layout
+ * decides when it is shown.
  *
  * Backend communication and application-tree state remain
  * delegated to the platform navigation services.
@@ -49,7 +48,6 @@ interface NavigationItemClickEvent {
   imports: [
     DxButtonModule,
     DxLoadIndicatorModule,
-    DxTooltipModule,
     DxTreeViewModule,
   ],
 
@@ -78,16 +76,17 @@ export class Sidebar implements OnInit {
   private readonly defaultApplicationIcon = 'xt-icon-application';
 
   /**
-   * Indicates whether the sidebar is currently collapsed.
-   */
-  @Input()
-  collapsed = false;
-
-  /**
-   * Requests the Shell layout to change the sidebar state.
+   * Requests the Shell layout to close the sidebar.
    */
   @Output()
-  readonly collapsedChange = new EventEmitter<boolean>();
+  readonly closeRequested = new EventEmitter<void>();
+
+  /**
+   * Reports that an application was opened, so the Shell
+   * layout can close the sidebar.
+   */
+  @Output()
+  readonly applicationOpened = new EventEmitter<void>();
 
   /**
    * Error generated while attempting to open an application.
@@ -147,13 +146,6 @@ export class Sidebar implements OnInit {
   }
 
   /**
-   * Toggles the sidebar state.
-   */
-  toggleSidebar(): void {
-    this.collapsedChange.emit(!this.collapsed);
-  }
-
-  /**
    * Processes a navigation-tree item click.
    *
    * Module nodes remain navigation containers and are not
@@ -191,6 +183,8 @@ export class Sidebar implements OnInit {
 
         icon: item.icon,
       });
+
+      this.applicationOpened.emit();
     } catch (error) {
       this.launchError = this.resolveLaunchErrorMessage(error, item);
 
@@ -235,34 +229,6 @@ export class Sidebar implements OnInit {
    */
   isModule(item: ApplicationTreeNode): boolean {
     return item.type.trim().toLowerCase() === 'modulo';
-  }
-
-  /**
-   * Creates a stable DOM identifier for the navigation item.
-   *
-   * This identifier is used by DevExtreme Tooltip when the
-   * sidebar is collapsed.
-   *
-   * @param item Application-tree node.
-   * @returns Safe DOM element identifier.
-   */
-  getItemElementId(item: ApplicationTreeNode): string {
-    const normalizedId = item.applicationId
-      .trim()
-      .replace(/[^a-zA-Z0-9_-]/g, '-');
-
-    return `xt-navigation-${normalizedId}`;
-  }
-
-  /**
-   * Returns the DevExtreme Tooltip target selector
-   * associated with a navigation item.
-   *
-   * @param item Application-tree node.
-   * @returns CSS selector.
-   */
-  getTooltipTarget(item: ApplicationTreeNode): string {
-    return `#${this.getItemElementId(item)}`;
   }
 
   /**
