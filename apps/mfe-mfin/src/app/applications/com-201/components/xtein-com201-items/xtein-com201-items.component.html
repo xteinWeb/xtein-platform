@@ -1,0 +1,168 @@
+<div class="com201-items">
+  <!-- Buscador propio: actúa sobre el SP (servidor) o sobre la lista completa (cliente) -->
+  <div class="com201-items__search">
+    <div class="com201-items__search-box">
+      <xtein-input
+        ariaLabel="Buscar producto"
+        placeholder="Buscar producto o nombre…"
+        [(ngModel)]="searchText"
+        [disabled]="!!draft() || busy"
+        (enterKey)="applySearch()"
+      />
+    </div>
+    <xtein-button text="Buscar" variant="secondary" [disabled]="!!draft() || busy" (clicked)="applySearch()" />
+    @if (store.search()) {
+      <xtein-button text="Limpiar" variant="link" [disabled]="!!draft() || busy" (clicked)="clearSearch()" />
+    }
+  </div>
+
+  <!-- Editor de fila (draft) -->
+  @if (draft(); as row) {
+    <div class="com201-items__editor" role="group" aria-label="Edición del ítem">
+      <div class="com201-items__field com201-items__field--product">
+        <xtein-label for="com201-item-producto">Producto</xtein-label>
+        @if (rule.product) {
+          <xtein-lookup
+            id="com201-item-producto"
+            ariaLabel="Producto"
+            placeholder="Producto"
+            searchPlaceholder="Buscar…"
+            [items]="$any(products)"
+            valueExpr="PRODUCTO"
+            displayExpr="PRODUCTO"
+            [columns]="productColumns"
+            dropDownWidth="min(600px, 95vw)"
+            [ngModel]="row.PRODUCTO"
+            (ngModelChange)="product($event)"
+            [disabled]="working() || busy"
+          />
+        } @else {
+          <span class="com201-items__value">{{ row.PRODUCTO }}</span>
+        }
+      </div>
+
+      <div class="com201-items__field com201-items__field--name">
+        <xtein-label>Nombre</xtein-label>
+        <span class="com201-items__value">{{ row.NOMBRE }}</span>
+      </div>
+
+      @if (byAttribute) {
+        <div class="com201-items__field">
+          <xtein-label for="com201-item-atributo">Atributo</xtein-label>
+          @if (rule.product) {
+            <xtein-select
+              id="com201-item-atributo"
+              [items]="attributes()"
+              displayExpr="VALOR"
+              valueExpr="VALOR"
+              [searchEnabled]="true"
+              [ngModel]="row.ATRIBUTO"
+              (ngModelChange)="attribute($event)"
+              [disabled]="working() || busy"
+            />
+          } @else {
+            <span class="com201-items__value">{{ row.ATRIBUTO }}</span>
+          }
+        </div>
+      }
+
+      <div class="com201-items__field">
+        <xtein-label for="com201-item-udm">{{ costs ? 'UN Equi' : 'UM. Pres' }}</xtein-label>
+        @if (rule.product) {
+          <xtein-select
+            id="com201-item-udm"
+            [items]="units()"
+            [displayExpr]="unitValueExpr()"
+            [valueExpr]="unitValueExpr()"
+            [searchEnabled]="true"
+            [ngModel]="row.UDM_PRES"
+            (ngModelChange)="unit($event)"
+            [disabled]="working() || busy"
+          />
+        } @else {
+          <span class="com201-items__value">{{ row.UDM_PRES }}</span>
+        }
+      </div>
+
+      <div class="com201-items__field">
+        <xtein-label for="com201-item-precio-base">Precio Base</xtein-label>
+        <xtein-number
+          id="com201-item-precio-base"
+          ariaLabel="Precio Base"
+          [format]="'#,##0.00'"
+          [ngModel]="row.PRECIO_BASE"
+          (ngModelChange)="price('PRECIO_BASE', $event)"
+          [readOnly]="!rule.precioBase || working() || busy"
+        />
+      </div>
+
+      <div class="com201-items__field">
+        <xtein-label for="com201-item-precio">Precio lista</xtein-label>
+        <xtein-number
+          id="com201-item-precio"
+          ariaLabel="Precio lista"
+          [format]="'#,##0.00'"
+          [ngModel]="row.PRECIO"
+          (ngModelChange)="price('PRECIO', $event)"
+          [readOnly]="!rule.precio || working() || busy"
+        />
+      </div>
+
+      <div class="com201-items__field">
+        <xtein-label>Precio Iva</xtein-label>
+        <span class="com201-items__value com201-items__value--number">{{ money(row.PRECIO_IVA) }}</span>
+      </div>
+
+      <div class="com201-items__editor-actions">
+        <xtein-button text="Aplicar" variant="success" [disabled]="working() || busy" (clicked)="commit()" />
+        <xtein-button text="Cancelar" variant="secondary" [disabled]="working()" (clicked)="cancel()" />
+      </div>
+    </div>
+  }
+
+  <div class="com201-items__grid">
+    <xtein-data-grid
+      [dataSource]="store.visible()"
+      keyExpr="ITEM"
+      [columns]="columns"
+      height="100%"
+      [pageSize]="store.pageSize()"
+      [showPager]="false"
+      [searchEnabled]="false"
+      [filterEnabled]="false"
+      [selectionMode]="gridBarVisible && rule.remove ? 'multiple' : 'none'"
+      showCheckBoxesMode="always"
+      [selectedRowKeys]="selectedVisibleKeys()"
+      [toolbarActions]="toolbarActions()"
+      [disabled]="busy"
+      (selectionChanged)="onSelection($event)"
+      (rowClick)="onRowClick($event)"
+    />
+  </div>
+
+  <!-- Paginador propio (servidor o cliente) -->
+  <div class="com201-items__pager">
+    <div class="com201-items__pager-nav">
+      <xtein-button text="«" variant="secondary" ariaLabel="Primera página" [disabled]="!!draft() || busy || store.pageIndex() === 0" (clicked)="goTo(0)" />
+      <xtein-button text="‹" variant="secondary" ariaLabel="Página anterior" [disabled]="!!draft() || busy || store.pageIndex() === 0" (clicked)="goTo(store.pageIndex() - 1)" />
+      <span class="com201-items__pager-info">
+        Página {{ store.pageIndex() + 1 }} de {{ store.pageCount() }} · {{ store.count() }} ítems
+        @if (store.selectedKeys().size) { · {{ store.selectedKeys().size }} seleccionados }
+      </span>
+      <xtein-button text="›" variant="secondary" ariaLabel="Página siguiente" [disabled]="!!draft() || busy || store.pageIndex() >= store.pageCount() - 1" (clicked)="goTo(store.pageIndex() + 1)" />
+      <xtein-button text="»" variant="secondary" ariaLabel="Última página" [disabled]="!!draft() || busy || store.pageIndex() >= store.pageCount() - 1" (clicked)="goTo(store.pageCount() - 1)" />
+    </div>
+    <div class="com201-items__pager-size">
+      <xtein-label for="com201-page-size">Por página</xtein-label>
+      <xtein-select
+        id="com201-page-size"
+        [items]="pageSizes"
+        displayExpr="text"
+        valueExpr="value"
+        [ngModel]="store.pageSize()"
+        (ngModelChange)="changePageSize($event)"
+        [disabled]="!!draft() || busy"
+      />
+    </div>
+  </div>
+</div>
