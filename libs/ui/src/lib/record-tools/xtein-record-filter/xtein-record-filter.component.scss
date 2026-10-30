@@ -161,26 +161,16 @@
 
 .xtein-record-filter__status {
   background:
-    rgba(
-      36,
-      77,
-      115,
-      0.06
-    );
+    rgba(var(--xt-primary-rgb), .06);
 }
 
 
 .xtein-record-filter__error {
   background:
-    rgba(
-      190,
-      45,
-      45,
-      0.08
-    );
+    var(--xt-danger-soft);
 
   color:
-    #8b1e1e;
+    var(--xt-danger);
 }
 
 

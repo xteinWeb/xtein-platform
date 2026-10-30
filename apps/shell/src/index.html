@@ -27,6 +27,28 @@
     }
   </script>
 
+  <script>
+    /*
+     * Paints the signed-in user's theme before the loader shows, so it
+     * does not flash in the default colors. Mirrors applyStoredTheme in
+     * src/app/theme/xtein-themes.ts; nobody signed in keeps the default.
+     */
+    (function () {
+      try {
+        var userId = sessionStorage.getItem('usuario');
+        if (!userId || !userId.trim()) {
+          return;
+        }
+        var theme = localStorage.getItem('xtein.theme.user.' + userId.trim().toUpperCase());
+        if (theme === 'oscuro' || theme === 'claro-verde' || theme === 'claro-morado') {
+          document.documentElement.setAttribute('data-xt-theme', theme);
+        }
+      } catch (e) {
+        // Without storage the default theme applies.
+      }
+    })();
+  </script>
+
 
   <style>
 
@@ -59,6 +81,34 @@
 
       --xt-bootstrap-text:
         #5f7182;
+    }
+
+    /* Loader colors for each theme, matching xtein-tokens.scss. */
+    :root[data-xt-theme="oscuro"] {
+      --xt-bootstrap-background: #151922;
+      --xt-bootstrap-secondary: #60a5fa;
+      --xt-bootstrap-track: rgba(255, 255, 255, 0.14);
+      --xt-bootstrap-text: #98a2b3;
+    }
+
+    :root[data-xt-theme="claro-verde"] {
+      --xt-bootstrap-background: #e6f2ee;
+      --xt-bootstrap-secondary: #0d9488;
+      --xt-bootstrap-track: rgba(15, 118, 110, 0.16);
+      --xt-bootstrap-text: #556070;
+    }
+
+    :root[data-xt-theme="claro-morado"] {
+      --xt-bootstrap-background: #eee8f7;
+      --xt-bootstrap-secondary: #7c3aed;
+      --xt-bootstrap-track: rgba(91, 42, 134, 0.16);
+      --xt-bootstrap-text: #556070;
+    }
+
+    /* The logo is dark artwork; on the dark theme it is shown light. */
+    :root[data-xt-theme="oscuro"] .xt-bootstrap-loading__logo {
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
     }
 
 

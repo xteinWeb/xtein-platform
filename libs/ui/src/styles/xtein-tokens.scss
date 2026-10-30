@@ -135,6 +135,8 @@
   --xt-accent-2-rgb: 13, 148, 136;
 
   --xt-heading: #1f5f58;
+  /* Darker than the base slate so it stays readable on the tinted surfaces. */
+  --xt-text-muted: #556070;
   --xt-heading-soft: #2f6b64;
   --xt-heading-strong: #145a52;
 
@@ -164,6 +166,8 @@
   --xt-accent-2-rgb: 139, 92, 246;
 
   --xt-heading: #4b2a6e;
+  /* Darker than the base slate so it stays readable on the tinted surfaces. */
+  --xt-text-muted: #556070;
   --xt-heading-soft: #5d3d80;
   --xt-heading-strong: #3f1f63;
 

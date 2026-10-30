@@ -6797,7 +6797,8 @@ svg.dxdi-canvas.dxdi-touch-action {
    CHAT, MENSAJES Y CONVERSACIONES · BLOQUE 2
    ========================================================================== */
 
-.dx-loadpanel-message {
+/* More specific than the theme bundles, which hide the message in the Material load panel. */
+.dx-loadpanel-content .dx-loadpanel-message {
   display: block;
 }
 

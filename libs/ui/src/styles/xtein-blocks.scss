@@ -1048,6 +1048,11 @@
   font-size: 13px;
 }
 
+/* State shown over the application content, hiding it while it loads or fails. */
+.xt-app-state--overlay {
+  background: var(--xt-surface);
+}
+
 @keyframes xt-spin {
   to {
     transform: rotate(360deg);

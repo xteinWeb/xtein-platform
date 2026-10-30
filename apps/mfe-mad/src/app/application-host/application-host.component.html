@@ -9,7 +9,7 @@
   @if (loading()) {
 
     <div
-      class="mad-application-host__state xt-app-state">
+      class="mad-application-host__state xt-app-state xt-app-state--overlay">
 
       <div
         class="mad-application-host__loading xt-app-state__spinner"
@@ -31,7 +31,7 @@
   @if (errorMessage()) {
 
     <div
-      class="mad-application-host__state xt-app-state"
+      class="mad-application-host__state xt-app-state xt-app-state--overlay"
       role="alert">
 
       <div
